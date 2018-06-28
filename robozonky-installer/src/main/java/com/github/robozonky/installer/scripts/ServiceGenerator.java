@@ -42,7 +42,7 @@ public enum ServiceGenerator implements Function<File, File> {
         try {
             final File root = execScript.getParentFile();
             final String result = TemplateProcessor.INSTANCE.process(filename + ".ftl",
-                                                                     new HashMap() {{
+                                                                     new HashMap<String, Object>() {{
                                                                          this.put("uid", ID);
                                                                          this.put("gid", ID);
                                                                          this.put("pwd", root.getAbsolutePath());

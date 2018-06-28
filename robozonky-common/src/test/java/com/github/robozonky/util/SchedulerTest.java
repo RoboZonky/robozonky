@@ -25,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SchedulerTest {
 
@@ -38,7 +38,7 @@ class SchedulerTest {
             final ScheduledFuture<?> f = s.submit(REFRESHABLE);
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(Scheduler.inBackground()).isNotNull();
-                softly.assertThat((Future) f).isNotNull();
+                softly.assertThat((Future<?>) f).isNotNull();
                 softly.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
             });
         }
@@ -49,7 +49,7 @@ class SchedulerTest {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
             final Future<?> f = s.run(REFRESHABLE);
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat((Future) f).isNotNull();
+                softly.assertThat((Future<?>) f).isNotNull();
                 softly.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
             });
             f.get(1, TimeUnit.MINUTES); // make sure it was executed

@@ -16,23 +16,31 @@
 
 package com.github.robozonky.common.remote;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class PaginatedApiImplTest {
+class PaginatedApiImplTest<S, T> {
 
     @Test
     void checkFilter() {
-        final Function f = o -> null;
+        final Function<T, S> f = o -> null;
         final Select sel = mock(Select.class);
         final RoboZonkyFilter filter = new RoboZonkyFilter();
-        final PaginatedApi p = spy(new PaginatedApi(null, null, null, null));
+        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, null));
         doReturn(null).when(p).execute(eq(f), eq(filter));
         p.execute(f, sel, filter);
         verify(sel).accept(filter);
@@ -41,15 +49,15 @@ class PaginatedApiImplTest {
 
     @Test
     void checkPagination() {
-        final PaginatedApi p = spy(new PaginatedApi(null, null, null, mock(ResteasyClient.class)));
+        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, mock(ResteasyClient.class)));
         doReturn(null).when(p).execute(any(), any(), any());
-        final Function f = o -> null;
+        final Function<T, List<S>> f = o -> Collections.emptyList();
         final Select sel = mock(Select.class);
         final int total = 1000;
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         when(filter.getLastResponseHeader(eq("X-Total")))
                 .thenReturn(Optional.of("" + total));
-        final PaginatedResult result = p.execute(f, sel, 1, 10, filter);
+        final PaginatedResult<S> result = p.execute(f, sel, 1, 10, filter);
         assertThat(result.getTotalResultCount()).isEqualTo(total);
         verify(filter).setRequestHeader(eq("X-Size"), eq("10"));
         verify(filter).setRequestHeader(eq("X-Page"), eq("1"));

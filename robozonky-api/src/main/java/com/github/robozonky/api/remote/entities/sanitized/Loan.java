@@ -36,6 +36,7 @@ public interface Loan extends MarketplaceLoan {
         return new MutableLoanImpl(original);
     }
 
+    @SuppressWarnings("unchecked")
     static void updateFromMarketplace(final Loan loan, final MarketplaceLoan marketplaceLoan) {
         if (loan instanceof MutableLoan) {
             final MutableLoan<LoanBuilder> l = (MutableLoan<LoanBuilder>) loan;

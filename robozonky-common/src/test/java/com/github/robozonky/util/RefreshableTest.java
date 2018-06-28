@@ -20,15 +20,24 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class RefreshableTest {
 
     private static String transform(final String original) {
         return "Transformed " + original;
     }
+
+    @Mock
+    private Refreshable.RefreshListener<String> l;
 
     @Test
     void immutable() {
@@ -65,7 +74,6 @@ class RefreshableTest {
         final String s = UUID.randomUUID().toString();
         final Refreshable<String> r = Refreshable.createImmutable(s);
         r.run();
-        final Refreshable.RefreshListener<String> l = mock(Refreshable.RefreshListener.class);
         assertThat(r.registerListener(l)).isTrue();
         verify(l).valueSet(eq(s));
         assertThat(r.registerListener(l)).isFalse(); // repeat registration
@@ -82,7 +90,6 @@ class RefreshableTest {
     void checkListeners() {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
-        final Refreshable.RefreshListener<String> l = mock(Refreshable.RefreshListener.class);
         r.registerListener(l);
         r.setLatestSource(initial);
         r.run();

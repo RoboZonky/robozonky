@@ -75,6 +75,7 @@ public class ApiProvider implements AutoCloseable {
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
      * @param token Supplier of a valid Zonky API token, always representing the active user.
+     * @param <S> API return type.
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
@@ -92,6 +93,7 @@ public class ApiProvider implements AutoCloseable {
     /**
      * Retrieve Zonky's OAuth endpoint.
      * @param operation Operation to execute over the endpoint.
+     * @param <T> Operation return type.
      * @return Return value of the operation.
      */
     public <T> T oauth(final Function<OAuth, T> operation) {

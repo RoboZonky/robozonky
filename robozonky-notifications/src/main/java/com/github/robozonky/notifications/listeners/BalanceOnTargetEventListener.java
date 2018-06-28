@@ -47,7 +47,7 @@ public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStar
 
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
-        return new HashMap(super.getData(event)) {{
+        return new HashMap<String, Object>(super.getData(event)) {{
             put("targetBalance", targetBalance);
         }};
     }

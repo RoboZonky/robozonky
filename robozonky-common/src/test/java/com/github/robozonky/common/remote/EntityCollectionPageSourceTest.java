@@ -24,11 +24,17 @@ import java.util.stream.IntStream;
 
 import com.github.rutledgepaulv.pagingstreams.PageSource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class EntityCollectionPageSourceTest {
 
     private static final Select SELECT = new Select();
@@ -37,11 +43,13 @@ class EntityCollectionPageSourceTest {
             .collect(Collectors.toList());
     private static final int PAGE_SIZE = 100;
 
+    @Mock
+    private PaginatedApi<Integer, Object> api;
+
     @Test
     void firstPage() {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(0, PAGE_SIZE);
-        final PaginatedApi<Integer, Object> api = mock(PaginatedApi.class);
         when(api.execute(eq(FUNCTION), eq(SELECT), eq(0), eq(PAGE_SIZE)))
                 .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
         final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);
@@ -55,7 +63,6 @@ class EntityCollectionPageSourceTest {
     void secondPage() {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(PAGE_SIZE, 2 * PAGE_SIZE);
-        final PaginatedApi<Integer, Object> api = mock(PaginatedApi.class);
         when(api.execute(eq(FUNCTION), eq(SELECT), eq(1), eq(PAGE_SIZE)))
                 .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
         final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);

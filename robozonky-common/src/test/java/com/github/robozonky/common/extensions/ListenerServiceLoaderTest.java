@@ -28,18 +28,24 @@ import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 class ListenerServiceLoaderTest {
+
+    @Mock
+    private EventListener<RoboZonkyStartingEvent> l;
 
     @Test
     void correctLoading() {
         final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
-        final EventListener<RoboZonkyStartingEvent> l = mock(EventListener.class);
         final ListenerService s1 = mock(ListenerService.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> returned = () -> Optional.of(l);
         doAnswer(i -> Stream.of(returned)).when(s1).findListeners(eq(e.getClass()));

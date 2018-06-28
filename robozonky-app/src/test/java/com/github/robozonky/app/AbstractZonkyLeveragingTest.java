@@ -57,16 +57,17 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
                                                                false),
             SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
 
+    @SuppressWarnings("unchecked")
     protected static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
         final ApiProvider api = mock(ApiProvider.class);
-        when(api.oauth(any(Function.class))).then(i -> {
-            final Function f = i.getArgument(0);
+        when(api.oauth(any())).then(i -> {
+            final Function<OAuth, ?> f = i.getArgument(0);
             return f.apply(oauth);
         });
         when(api.authenticated(any(), any(Function.class))).then(i -> {
             final Supplier<ZonkyApiToken> s = i.getArgument(0);
             s.get();
-            final Function f = i.getArgument(1);
+            final Function<Zonky, ?> f = i.getArgument(1);
             return f.apply(z);
         });
         return api;
@@ -80,7 +81,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return mockMyInvestment(OffsetDateTime.now());
     }
 
-    protected static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
+    private static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
         final MyInvestment m = mock(MyInvestment.class);
         when(m.getId()).thenReturn(RANDOM.nextInt());
         when(m.getTimeCreated()).thenReturn(creationDate);

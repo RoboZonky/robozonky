@@ -30,9 +30,13 @@ import com.github.robozonky.internal.api.Defaults;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class RoboZonkyFilterTest {
 
@@ -45,7 +49,7 @@ class RoboZonkyFilterTest {
 
     @Test
     void request() throws URISyntaxException {
-        final MultivaluedMap<String, Object> map = mock(MultivaluedMap.class);
+        final MultivaluedMap<String, Object> map = spy(new MultivaluedMapImpl<>());
         final ClientRequestContext ctx = mock(ClientRequestContext.class);
         when(ctx.getHeaders()).thenReturn(map);
         when(ctx.getUri()).thenReturn(new URI("http://localhost"));

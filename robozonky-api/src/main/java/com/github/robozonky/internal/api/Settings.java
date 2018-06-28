@@ -201,12 +201,6 @@ public enum Settings {
         return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 50);
     }
 
-    @Deprecated
-    public File getStateFile() {
-        return get(Settings.Key.STATE_FILE_LOCATION, File::new,
-                   new File(System.getProperty("user.dir"), "robozonky.state"));
-    }
-
     public enum Key {
 
         DEBUG_ENABLE_EVENT_STORAGE("robozonky.debug.enable_event_storage"),

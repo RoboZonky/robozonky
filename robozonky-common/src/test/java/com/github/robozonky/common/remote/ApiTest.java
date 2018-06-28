@@ -22,11 +22,21 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.remote.LoanApi;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class ApiTest {
+
+    @Mock
+    private Consumer<LoanApi> procedure;
 
     @Test
     void executeFunction() {
@@ -42,7 +52,6 @@ class ApiTest {
     void executeProcedure() {
         final LoanApi mock = mock(LoanApi.class);
         final Api<LoanApi> api = new Api<>(mock);
-        final Consumer<LoanApi> procedure = mock(Consumer.class);
         api.execute(procedure);
         verify(procedure, times(1)).accept(eq(mock));
     }

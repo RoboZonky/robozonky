@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    protected final BalanceTracker balanceTracker;
-    protected final DelinquencyTracker delinquencyTracker;
+    final BalanceTracker balanceTracker;
+    final DelinquencyTracker delinquencyTracker;
     private final AbstractTargetHandler handler;
     private final SupportedListener listener;
 
@@ -96,10 +96,10 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     }
 
     final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
-        return Collections.unmodifiableMap(new HashMap(this.getData(event)) {{
+        return Collections.unmodifiableMap(new HashMap<String, Object>(this.getData(event)) {{
             // ratings here need to have a stable iteration order, as it will be used to list them in notifications
             put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
-            put("session", new HashMap() {{
+            put("session", new HashMap<String, Object>() {{
                 put("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername()));
                 put("userAgent", Defaults.ROBOZONKY_USER_AGENT);
                 put("isDryRun", sessionInfo.isDryRun());

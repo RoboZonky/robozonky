@@ -51,7 +51,6 @@ import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterConditi
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
 public class SimpleStrategyService implements StrategyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStrategyService.class);

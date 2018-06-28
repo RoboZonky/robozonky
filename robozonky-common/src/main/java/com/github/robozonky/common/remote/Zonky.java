@@ -223,6 +223,7 @@ public class Zonky {
 
     /**
      * Retrieve loan collections information via {@link CollectionsApi}.
+     * @param loan Loan in question.
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Development> getDevelopments(final Loan loan) {

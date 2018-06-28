@@ -17,7 +17,7 @@
 package com.github.robozonky.notifications;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -58,7 +58,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
 
     @Override
     public void valueSet(final ConfigStorage newValue) {
-        final Map<Target, EventListener<T>> result = new HashMap<>(0);
+        final Map<Target, EventListener<T>> result = new EnumMap<>(Target.class);
         for (final Target target : Target.values()) {
             final AbstractTargetHandler handler = getTargetHandler(newValue, target);
             if (!handler.isEnabled()) {
@@ -71,6 +71,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
         value.set(result);
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<EventListener<T>> findListener(final AbstractTargetHandler handler) {
         final EventListener<T> result = Stream.of(SupportedListener.values())
                 .filter(l -> Objects.equals(eventType, l.getEventType()))

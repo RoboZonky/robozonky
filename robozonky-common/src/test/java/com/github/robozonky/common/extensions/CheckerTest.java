@@ -31,6 +31,9 @@ import com.github.robozonky.common.state.TenantState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
@@ -41,9 +44,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CheckerTest {
 
     private static final char[] SECRET = new char[0];
+    @Mock
+    private EventListener<RoboZonkyTestingEvent> l;
 
     private static ApiProvider mockApiThatReturnsOneLoan() {
         final RawLoan l = mock(RawLoan.class);
@@ -115,7 +121,6 @@ class CheckerTest {
 
     @Test
     void notificationsProper() {
-        final EventListener<RoboZonkyTestingEvent> l = mock(EventListener.class);
         final EventListenerSupplier<RoboZonkyTestingEvent> r = () -> Optional.of(l);
         assertThat(Checker.notifications("", Collections.singletonList(r))).isTrue();
         verify(l).handle(any(RoboZonkyTestingEvent.class), any());

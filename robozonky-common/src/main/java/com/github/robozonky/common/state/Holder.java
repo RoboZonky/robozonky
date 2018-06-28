@@ -16,7 +16,6 @@
 
 package com.github.robozonky.common.state;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,11 +25,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.api.Settings;
 
 final class Holder {
 
-    private static final File TARGET = Settings.INSTANCE.getStateFile();
     private static volatile Map<String, TenantState> TENANT_STATE_MAP = new HashMap<>(0);
 
     private Holder() {
@@ -58,6 +55,5 @@ final class Holder {
     public static synchronized void destroy() {
         TENANT_STATE_MAP.forEach((id, state) -> state.destroy());
         TENANT_STATE_MAP = new HashMap<>(0);
-        TARGET.delete();
     }
 }

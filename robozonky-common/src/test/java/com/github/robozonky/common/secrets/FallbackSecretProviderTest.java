@@ -16,24 +16,14 @@
 
 package com.github.robozonky.common.secrets;
 
-import java.io.File;
-
-import com.github.robozonky.internal.api.Settings;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class FallbackSecretProviderTest {
 
     private static final String USR = "username";
     private static final String PWD = "password";
-
-    @AfterEach
-    void deleteState() {
-        final File f = Settings.INSTANCE.getStateFile();
-        f.delete();
-    }
 
     @Test
     void setUsernameAndPassword() {

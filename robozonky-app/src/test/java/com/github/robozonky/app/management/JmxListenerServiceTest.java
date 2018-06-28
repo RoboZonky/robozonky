@@ -90,6 +90,7 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         return Stream.of(getParametersForExecutionCompleted());
     }
 
+    @SuppressWarnings("unchecked")
     private <T extends Event> void handleEvent(final T event) {
         final JmxListenerService service = new JmxListenerService();
         final EventListenerSupplier<T> r = service.findListeners((Class<T>) event.getClass())

@@ -26,11 +26,27 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 class DaemonOperationTest extends AbstractZonkyLeveragingTest {
+
+    @Mock
+    private BiConsumer<Portfolio, Tenant> operation;
+    @Mock
+    private Consumer<Throwable> shutdown;
 
     @Test
     void exceptional() {
@@ -44,7 +60,6 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
     @Test
     void standard() {
         final Tenant a = mock(Tenant.class);
-        final BiConsumer<Portfolio, Tenant> operation = mock(BiConsumer.class);
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
         verify(operation).accept(any(), eq(a));
@@ -57,7 +72,6 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         final BiConsumer<Portfolio, Tenant> operation = (p, api) -> {
             throw new Error();
         };
-        final Consumer<Throwable> shutdown = mock(Consumer.class);
         final DaemonOperation d = new CustomOperation(a, operation, shutdown);
         d.run();
         verify(shutdown).accept(any());

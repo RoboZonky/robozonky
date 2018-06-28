@@ -13,13 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.github.robozonky.api.remote.entities.sanitized;
-
-interface Builder<T> {
-
-    @SuppressWarnings("unchecked")
-    default T build() {
-        return (T) this;
-    }
-}
+@Deprecated
+package com.github.robozonky.strategy.simple;

@@ -34,6 +34,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.api.ToStringBuilder;
 
+@SuppressWarnings("unchecked")
 abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> implements MutableMarketplaceLoan<T> {
 
     private static final Random RANDOM = new Random(0);
@@ -370,7 +371,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
 
     @Override
     public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
-        return insuranceHistory;
+        return Collections.unmodifiableCollection(insuranceHistory);
     }
 
     @Override

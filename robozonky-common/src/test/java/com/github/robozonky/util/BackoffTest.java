@@ -20,24 +20,31 @@ import java.time.Duration;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.time.Duration.ofMillis;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class BackoffTest {
 
     private static final int DURATION = 1000;
+
+    @Mock
+    private Backoff.Operation<String> operation;
 
     @Test
     void exponentialAlwaysFailing() {
         final Duration maxDuration = ofMillis(DURATION);
         final long now = System.nanoTime();
         // never succeed
-        final Backoff.Operation<String> o = mock(Backoff.Operation.class);
         final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
-                                                () -> Backoff.exponential(o, ofMillis(1), maxDuration));
+                                                () -> Backoff.exponential(operation, ofMillis(1), maxDuration));
         final Optional<String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure result was not successful
@@ -45,7 +52,7 @@ class BackoffTest {
         // make sure the operation took at least the expected duration
         assertThat(took).isGreaterThan(maxDuration);
         // make sure the operation was tried the expected number of times, the sum of n^2 for n=[0, ...)
-        verify(o, times(11)).get();
+        verify(operation, times(11)).get();
     }
 
     @Test

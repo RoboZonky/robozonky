@@ -24,11 +24,15 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class StreamUtilTest {
 
     @Test
@@ -38,12 +42,14 @@ class StreamUtilTest {
         assertThat(s.isParallel()).isFalse();
     }
 
+    @Mock
+    private Consumer<String> consumer;
+
     @Test
     void toFunction() {
         final String tested = UUID.randomUUID().toString();
-        final Consumer<String> c = mock(Consumer.class);
-        final Function<String, String> f = StreamUtil.toFunction(c);
+        final Function<String, String> f = StreamUtil.toFunction(consumer);
         assertThat(f.apply(tested)).isEqualTo(tested);
-        verify(c).accept(eq(tested));
+        verify(consumer).accept(eq(tested));
     }
 }

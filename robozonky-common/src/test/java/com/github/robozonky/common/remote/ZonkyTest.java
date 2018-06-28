@@ -18,7 +18,6 @@ package com.github.robozonky.common.remote;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.function.Function;
 
 import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
@@ -39,20 +38,27 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ZonkyTest {
 
-    private <T, S> PaginatedApi<T, S> mockApi() {
+    @SuppressWarnings("unchecked")
+    private static <T, S> PaginatedApi<T, S> mockApi() {
         final PaginatedApi<T, S> api = mock(PaginatedApi.class);
         final PaginatedResult<T> apiReturn = new PaginatedResult<>(Collections.emptyList(), 0);
         when(api.execute(any(), any(), anyInt(), anyInt())).thenReturn(apiReturn);
         return api;
     }
 
-    private <T> Api<T> mockApi(final T apiMock) {
+    private static <T> Api<T> mockApi(final T apiMock) {
         return new Api<>(apiMock);
     }
 
@@ -107,7 +113,7 @@ class ZonkyTest {
         when(loan.getId()).thenReturn(loanId);
         when(loan.getAmount()).thenReturn(200.0);
         when(loan.getRemainingInvestment()).thenReturn(200.0);
-        when(la.execute((Function<LoanApi, RawLoan>) any())).thenReturn(loan);
+        when(la.execute(any())).thenReturn(loan);
         final PaginatedApi<Transaction, TransactionApi> ta = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
@@ -141,7 +147,7 @@ class ZonkyTest {
         when(loan.getId()).thenReturn(loanId);
         when(loan.getAmount()).thenReturn(200.0);
         when(loan.getRemainingInvestment()).thenReturn(200.0);
-        when(la.execute((Function<LoanApi, RawLoan>) any())).thenReturn(loan);
+        when(la.execute(any())).thenReturn(loan);
         final PaginatedApi<Transaction, TransactionApi> ta = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
@@ -163,8 +169,7 @@ class ZonkyTest {
         final PaginatedApi<RawLoan, LoanApi> la = mockApi();
         final PaginatedApi<Transaction, TransactionApi> ta = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
-        when(wa.execute((Function<WalletApi, Wallet>) any()))
-                .thenReturn(mock(Wallet.class));
+        when(wa.execute(any())).thenReturn(mock(Wallet.class));
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
         final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();

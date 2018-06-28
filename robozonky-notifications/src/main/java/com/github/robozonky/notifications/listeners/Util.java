@@ -60,7 +60,7 @@ class Util {
     }
 
     public static Map<String, Object> getLoanData(final Loan loan) {
-        return new HashMap() {{
+        return new HashMap<String, Object>() {{
             put("loanId", loan.getId());
             put("loanAmount", loan.getAmount());
             put("loanRating", loan.getRating().getCode());
@@ -79,7 +79,7 @@ class Util {
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
-        return Collections.unmodifiableMap(new HashMap() {{
+        return Collections.unmodifiableMap(new HashMap<String, Object>() {{
             put("absoluteShare", perRating(portfolioOverview::getCzkInvested));
             put("relativeShare", perRating(portfolioOverview::getShareOnInvestment));
             put("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk));

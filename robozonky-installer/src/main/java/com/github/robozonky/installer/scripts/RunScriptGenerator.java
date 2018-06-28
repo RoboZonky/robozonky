@@ -66,7 +66,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
     protected File process(final CommandLinePart commandLine, final String templateName,
                            final Function<String, String> finisher) {
         try {
-            final String result = TemplateProcessor.INSTANCE.process(templateName, new HashMap() {{
+            final String result = TemplateProcessor.INSTANCE.process(templateName, new HashMap<String, Object>() {{
                 this.put("root", distributionDirectory.getAbsolutePath());
                 this.put("options", configFile.getAbsolutePath());
                 this.put("javaOpts", assembleJavaOpts(commandLine));

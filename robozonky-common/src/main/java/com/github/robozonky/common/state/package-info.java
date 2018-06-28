@@ -32,11 +32,5 @@
  * ({@link com.github.robozonky.common.state.FileBackedStateStorage}, implementing the INI file format.) Every tenant
  * gets a single file, every instance then is a section in this file. Each such section is a fairly standard property
  * file.
- * <p>
- * For backwards compatibility reasons, the classes also use
- * {@link com.github.robozonky.internal.api.Settings#getStateFile()} as an underlying read-only state storage. If a key
- * cannot be looked up in a main storage, it will be looked up in this backup storage. All write operations go
- * directly to the main storage. This is done so that RoboZonky gracefully reads old state information that was not
- * tenant-specific, but gradually replaces it as new stores are made. This is deprecated and will eventually be removed.
  */
 package com.github.robozonky.common.state;

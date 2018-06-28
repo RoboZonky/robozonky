@@ -50,7 +50,7 @@ public enum TemplateProcessor {
 
     public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
-        final Map<String, Object> data = new HashMap() {{
+        final Map<String, Object> data = new HashMap<String, Object>() {{
             put("timestamp", Date.from(Instant.now()));
             put("robozonkyUrl", Defaults.ROBOZONKY_URL);
             put("embed", embeddedTemplate);

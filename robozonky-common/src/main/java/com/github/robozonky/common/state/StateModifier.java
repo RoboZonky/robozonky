@@ -34,7 +34,7 @@ public interface StateModifier<T> {
      * a single ";" character. Such values can then be read back with {@link StateReader#getValues(String)}.
      * @param key Key to look up the value with.
      * @param values Values to associate with the key, overwriting anything previously set there.
-     * @return
+     * @return This.
      */
     default StateModifier<T> put(final String key, final Stream<String> values) {
         return put(key, values, StateReader.DEFAULT_VALUE_SEPARATOR);
@@ -46,7 +46,7 @@ public interface StateModifier<T> {
      * @param key Key to look up the value with.
      * @param values Values to associate with the key, overwriting anything previously set there.
      * @param separator Used to merge the values into one string that will be associated with the key.
-     * @return
+     * @return This.
      */
     default StateModifier<T> put(final String key, final Stream<String> values, final char separator) {
         return put(key, values.collect(Collectors.joining(Character.toString(separator))));

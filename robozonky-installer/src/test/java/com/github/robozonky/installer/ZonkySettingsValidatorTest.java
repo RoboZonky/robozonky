@@ -31,30 +31,36 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ZonkySettingsValidatorTest {
 
     private static final String USERNAME = "someone@somewhere.cz", PASSWORD = UUID.randomUUID().toString();
 
+    @SuppressWarnings("unchecked")
     private static ApiProvider mockApiProvider(final OAuth oauth, final ZonkyApiToken token, final Zonky zonky) {
         final ApiProvider api = mock(ApiProvider.class);
         when(api.oauth(any(Function.class))).then(i -> {
-            final Function f = i.getArgument(0);
+            final Function<OAuth, ?> f = i.getArgument(0);
             return f.apply(oauth);
         });
         doAnswer(i -> {
-            final Supplier t = i.getArgument(0);
+            final Supplier<ZonkyApiToken> t = i.getArgument(0);
             assertThat(t.get()).isEqualTo(token);
-            final Function f = i.getArgument(1);
+            final Function<Zonky, ?> f = i.getArgument(1);
             return f.apply(zonky);
         }).when(api).authenticated(any(), any(Function.class));
         doAnswer(i -> {
-            final Supplier t = i.getArgument(0);
+            final Supplier<ZonkyApiToken> t = i.getArgument(0);
             assertThat(t.get()).isEqualTo(token);
-            final Consumer f = i.getArgument(1);
+            final Consumer<Zonky> f = i.getArgument(1);
             f.accept(zonky);
             return null;
         }).when(api).authenticated(any(), any(Consumer.class));

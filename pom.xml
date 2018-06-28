@@ -428,7 +428,10 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.7.0</version>
           <configuration>
-            <compilerArgument>-Werror</compilerArgument>
+            <compilerArgs>
+              <arg>-Xlint:all</arg>
+              <arg>-Werror</arg>
+            </compilerArgs>
             <compilerVersion>${java.version}</compilerVersion>
             <fork>true</fork>
             <source>${java.version}</source>

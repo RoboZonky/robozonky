@@ -159,6 +159,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         verify(h, times(1)).actuallySend(notNull(), notNull(), notNull());
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends Event> DynamicContainer forListener(final SupportedListener listener,
                                                                   final T e) throws IOException {
         final AbstractTargetHandler p = getHandler();

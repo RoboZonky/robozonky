@@ -26,19 +26,27 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.notNull;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
+
+    @Mock
+    private Consumer<Throwable> t;
 
     @Test
     void creation() {
-        final PortfolioUpdater instance = PortfolioUpdater.create((t) -> {
-        }, mockTenant(), Optional::empty);
+        final PortfolioUpdater instance = PortfolioUpdater.create(t, mockTenant(), Optional::empty);
         assertSoftly(softly -> {
             softly.assertThat(instance.isUpdating()).isTrue(); // by default it's true
             softly.assertThat(instance.getRegisteredDependants()).hasSize(4); // expected contents
@@ -63,7 +71,6 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final Consumer<Throwable> t = mock(Consumer.class);
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, mockBalance(z), Duration.ofSeconds(2));
         instance.registerDependant(tp -> { // fire event
             tp.fire(new RoboZonkyTestingEvent());

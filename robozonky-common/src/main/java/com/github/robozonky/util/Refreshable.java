@@ -50,10 +50,12 @@ public abstract class Refreshable<T> implements Runnable,
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
     private final Collection<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
+    @SafeVarargs
     protected Refreshable(final Refreshable.RefreshListener<T>... listeners) {
         this(UUID.randomUUID().toString(), listeners);
     }
 
+    @SafeVarargs
     protected Refreshable(final String id, final Refreshable.RefreshListener<T>... listeners) {
         this.id = id;
         this.registerListener(new UpdateNotification());

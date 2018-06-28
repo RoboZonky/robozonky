@@ -22,19 +22,24 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class EventsTest extends AbstractEventLeveragingTest {
+
+    @Mock
+    private EventListener<RoboZonkyStartingEvent> listener;
 
     @Test
     void firingAndFailing() {
-        final EventListener<RoboZonkyStartingEvent> listener = mock(EventListener.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> r = () -> Optional.of(listener);
         doThrow(RuntimeException.class).when(listener).handle(any(), any());
         final Events.EventSpecific<RoboZonkyStartingEvent> event =
@@ -45,5 +50,4 @@ class EventsTest extends AbstractEventLeveragingTest {
         assertThat(Events.getFired()).contains(e);
         verify(listener).handle(eq(e), any());
     }
-
 }
