@@ -27,8 +27,8 @@ jdk:
 stages: # order the stages we'll use during this build
   - precache
   - test
-  - preview
   - sonar
+  - preview
 matrix:
   include:
   - stage: precache # independent stage for Maven to build and download all dependencies
