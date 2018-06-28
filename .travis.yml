@@ -34,8 +34,6 @@ matrix:
   include:
   - stage: precache # independent stage for Maven to download all dependencies
     jdk: openjdk8
-    script:
-      - mvn dependency:go-offline
   - stage: sonar # independent build stage for Sonar code analysis
     jdk: openjdk8
     addons:
@@ -51,5 +49,7 @@ matrix:
 cache:
   directories:
   - $HOME/.m2
+install:
+  - mvn dependency:go-offline
 script:
   - mvn --batch-mode -pl $MODULE install -Dgpg.skip
