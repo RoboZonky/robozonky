@@ -3,19 +3,19 @@ env:
   global:
     - JAVA_OPTS=-Xmx2g
     - MAVEN_OPTS=$JAVA_OPTS
-env:
-  # execution per-module so that PITest doesn't timeout the build
-  # mandatory modules first
-  - MODULE=robozonky-api
-  - MODULE=robozonky-common
-  - MODULE=robozonky-notifications
-  - MODULE=robozonky-app
-  - MODULE=robozonky-installer
-  # then plugin modules
-  - MODULE=robozonky-strategy-natural
-  - MODULE=robozonky-integration-zonkoid
-  # finally distributions
-  - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
+  matrix:
+    # execution per-module so that PITest doesn't timeout the build
+    # mandatory modules first
+    - MODULE=robozonky-api
+    - MODULE=robozonky-common
+    - MODULE=robozonky-notifications
+    - MODULE=robozonky-app
+    - MODULE=robozonky-installer
+    # then plugin modules
+    - MODULE=robozonky-strategy-natural
+    - MODULE=robozonky-integration-zonkoid
+    # finally distributions
+    - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
 os:
   - linux
 jdk:
@@ -24,25 +24,30 @@ jdk:
   - oraclejdk8
   - oraclejdk10
   - openjdk-ea
+stages: # order the stages we'll use during this build
+  - precache
+  - test
+  - sonar
 matrix:
-  fast_finish: true # fail all if one fails
   include:
-  - jdk: openjdk8
-    env: # no effect, just visual
-      - MODULE=robozonky-distribution
+  - stage: precache # independent stage for Maven to download all dependencies
+    jdk: openjdk8
+    script:
+      - mvn dependency:go-offline
+  - stage: sonar # independent build stage for Sonar code analysis
+    jdk: openjdk8
     addons:
       sonarcloud:
         organization: "robozonky"
         token:
           secure: $SONAR_TOKEN
-    script: # use "test" here so that PITest is not executed, speeding up the build
+    script: # use "test" phase instead of "install" here so that PITest is not executed, speeding up the build
       - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
-  allow_failures:
+  allow_failures: # early adopters version of Java may fail and we're OK with that
   - jdk: openjdk-ea
+  fast_finish: true # fail all if one fails
 cache:
   directories:
   - $HOME/.m2
-install: # no tests, just build
-  - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
-script: # all tests, no assembly
-  - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
+script:
+  - mvn --batch-mode -pl $MODULE install -Dgpg.skip
