@@ -1,21 +1,23 @@
 language: java
+git: # makes Git blame work in Sonar
+  depth: 999999
 env:
   global:
     - JAVA_OPTS=-Xmx2g
     - MAVEN_OPTS=$JAVA_OPTS
-  matrix:
+#  matrix:
     # execution per-module so that PITest doesn't timeout the build
     # mandatory modules first
-    - MODULE=robozonky-api
-    - MODULE=robozonky-common
-    - MODULE=robozonky-notifications
-    - MODULE=robozonky-app
-    - MODULE=robozonky-installer
+#    - MODULE=robozonky-api
+#    - MODULE=robozonky-common
+#    - MODULE=robozonky-notifications
+#    - MODULE=robozonky-app
+#    - MODULE=robozonky-installer
     # then plugin modules
-    - MODULE=robozonky-strategy-natural
-    - MODULE=robozonky-integration-zonkoid
+#    - MODULE=robozonky-strategy-natural
+#    - MODULE=robozonky-integration-zonkoid
     # finally distributions
-    - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
+#    - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
 os:
   - linux
 jdk:
