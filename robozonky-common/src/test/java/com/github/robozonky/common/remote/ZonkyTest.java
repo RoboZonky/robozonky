@@ -17,7 +17,11 @@
 package com.github.robozonky.common.remote;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
@@ -36,6 +40,8 @@ import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,16 +50,21 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ZonkyTest {
 
-    @SuppressWarnings("unchecked")
     private static <T, S> PaginatedApi<T, S> mockApi() {
+        return mockApi(Collections.emptyList());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T, S> PaginatedApi<T, S> mockApi(final List<T> toReturn) {
         final PaginatedApi<T, S> api = mock(PaginatedApi.class);
-        final PaginatedResult<T> apiReturn = new PaginatedResult<>(Collections.emptyList(), 0);
+        final PaginatedResult<T> apiReturn = new PaginatedResult<T>(toReturn, toReturn.size());
         when(api.execute(any(), any(), anyInt(), anyInt())).thenReturn(apiReturn);
         return api;
     }
@@ -67,6 +78,16 @@ class ZonkyTest {
         final PaginatedApi<Transaction, TransactionApi> ta = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
+        final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        return new Zonky(ca, la, sa, pa, wa, ta, caa);
+    }
+
+    private Zonky mockZonky(final PaginatedApi<RawInvestment, PortfolioApi> pa,
+                            final PaginatedApi<Transaction, TransactionApi> ta) {
+        final Api<ControlApi> ca = mockApi(mock(ControlApi.class));
+        final PaginatedApi<RawLoan, LoanApi> la = mockApi();
+        final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
         final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
         return new Zonky(ca, la, sa, pa, wa, ta, caa);
@@ -202,6 +223,31 @@ class ZonkyTest {
                 .build();
         z.sell(p);
         verify(control).offer(any());
+    }
+
+    @Test
+    void correctlyGuessesInvestmentDateFromTransactionHistory() {
+        final Loan loan = Loan.custom()
+                .setId(1)
+                .build();
+        final Investment i = Investment.fresh(loan, 200)
+                .build();
+        final RawInvestment r = spy(new RawInvestment(i));
+        when(r.getInvestmentDate()).thenReturn(null); // enforce so that the date-guessing code has a chance to trigger
+        final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi(Collections.singletonList(r));
+        final Transaction irrelevant1 =
+                new Transaction(i, BigDecimal.ZERO, TransactionCategory.SMP_BUY, TransactionOrientation.OUT);
+        final Transaction irrelevant2 =
+                new Transaction(i, BigDecimal.ZERO, TransactionCategory.SMP_SELL, TransactionOrientation.IN);
+        final Transaction relevant =
+                new Transaction(i, BigDecimal.ZERO, TransactionCategory.PAYMENT, TransactionOrientation.IN);
+        final PaginatedApi<Transaction, TransactionApi> ta = mockApi(Arrays.asList(irrelevant1, relevant, irrelevant2));
+        final Zonky z = mockZonky(pa, ta);
+        final Optional<Investment> result = z.getInvestment(loan);
+        assertThat(result).isPresent();
+        final Investment actual = result.get();
+        final OffsetDateTime investmentDate = actual.getInvestmentDate();
+        assertThat(investmentDate).isEqualTo(relevant.getTransactionDate().minusMonths(1));
     }
 
     @Test
