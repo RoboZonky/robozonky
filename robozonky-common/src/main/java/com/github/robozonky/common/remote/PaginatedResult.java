@@ -21,16 +21,16 @@ import java.util.List;
 
 final class PaginatedResult<S> {
 
-    private final List<S> result;
+    private final List<S> page;
     private final int totalSize;
 
     public PaginatedResult(final List<S> result, final int totalSize) {
-        this.result = result;
+        this.page = (result == null) ? Collections.emptyList() : Collections.unmodifiableList(result);
         this.totalSize = totalSize;
     }
 
     public List<S> getPage() {
-        return Collections.unmodifiableList(result);
+        return page;
     }
 
     public int getTotalResultCount() {
