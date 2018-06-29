@@ -59,9 +59,10 @@ final class Counter {
     }
 
     private void store(final SessionInfo sessionInfo, final String id, final Set<OffsetDateTime> timestamps) {
-        final Stream<String> result = filterValidTimestamps(timestamps).map(OffsetDateTime::toString);
         LOGGER.trace("Storing timestamps: {}.", timestamps);
-        TenantState.of(sessionInfo).in(Counter.class).reset(b -> b.put(id, result));
+        TenantState.of(sessionInfo)
+                .in(Counter.class)
+                .reset(b -> b.put(id, filterValidTimestamps(timestamps).map(OffsetDateTime::toString)));
     }
 
     private Set<OffsetDateTime> getTimestamps(final SessionInfo sessionInfo) {

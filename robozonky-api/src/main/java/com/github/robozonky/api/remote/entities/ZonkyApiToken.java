@@ -42,9 +42,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ZonkyApiToken extends BaseEntity {
 
+    private static final String REFRESH_TOKEN_STRING = "refresh_token",
+            SCOPE_APP_WEB_STRING = "SCOPE_APP_WEB";
+
     @XmlElement(name = "access_token")
     private char[] accessToken;
-    @XmlElement(name = "refresh_token")
+    @XmlElement(name = REFRESH_TOKEN_STRING)
     private char[] refreshToken;
     @XmlElement(name = "token_type")
     private String type;
@@ -63,16 +66,16 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final OffsetDateTime obtainedOn) {
-        this(accessToken, refreshToken, 299, obtainedOn, "refresh_token", "SCOPE_APP_WEB");
+        this(accessToken, refreshToken, 299, obtainedOn, REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn) {
-        this(accessToken, refreshToken, expiresIn, OffsetDateTime.now(), "refresh_token", "SCOPE_APP_WEB");
+        this(accessToken, refreshToken, expiresIn, OffsetDateTime.now(), REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
                          final OffsetDateTime obtainedOn) {
-        this(accessToken, refreshToken, expiresIn, obtainedOn, "refresh_token", "SCOPE_APP_WEB");
+        this(accessToken, refreshToken, expiresIn, obtainedOn, REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,

@@ -41,8 +41,6 @@ import javax.xml.xpath.XPathFactory;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.Refreshable;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -54,7 +52,6 @@ import org.xml.sax.SAXException;
  */
 public class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateMonitor.class);
     private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
     private static final Pattern PATTERN_STABLE_VERSION = Pattern.compile("\\A[1-9][0-9]*\\.[0-9]+\\.[0-9]+\\z");
@@ -157,7 +154,7 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
         try (final InputStream s = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
             return Optional.of(UpdateMonitor.parseVersionString(s));
         } catch (final Exception ex) {
-            UpdateMonitor.LOGGER.debug("Failed parsing source.", ex);
+            LOGGER.debug("Failed parsing source.", ex);
             return Optional.empty();
         }
     }

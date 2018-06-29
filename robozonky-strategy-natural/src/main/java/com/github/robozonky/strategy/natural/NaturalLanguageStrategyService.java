@@ -74,7 +74,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
             if (isSupported(s)) {
                 return Optional.ofNullable(constructor.apply(s));
             }
-            LOGGER.warn("Strategy only supports RoboZonky {} or later. Please upgrade.", s.getMinimumVersion().get());
+            LOGGER.warn("Strategy does not support your version of RoboZonky. Please upgrade.");
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, may try others. Reason: {}.",
                                                         ex.getMessage());

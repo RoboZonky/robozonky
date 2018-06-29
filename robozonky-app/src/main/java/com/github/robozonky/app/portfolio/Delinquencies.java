@@ -77,30 +77,30 @@ public class Delinquencies {
     }
 
     private static void processNoLongerDelinquent(final TransactionalPortfolio transactionalPortfolio,
-                                                  final int investmentId) {
-        final Optional<Investment> inv = transactionalPortfolio.getTenant().call(z -> z.getInvestment(investmentId));
-        if (!inv.isPresent()) {
-            LOGGER.warn("Investment not found while it really should have been: #{}.", investmentId);
-            return;
-        }
-        final Investment investment = inv.get();
-        if (!investment.getPaymentStatus().isPresent()) {
-            LOGGER.warn("Payment status for investment not found while it really should have been: #{}.", investmentId);
-            return;
-        }
+                                                  final Investment investment, final PaymentStatus status) {
         final Loan loan = transactionalPortfolio.getTenant()
                 .call(z -> LoanCache.INSTANCE.getLoan(investment.getLoanId(), z));
-        switch (investment.getPaymentStatus().get()) {
+        switch (status) {
             case WRITTEN_OFF: // investment is lost for good
                 transactionalPortfolio.fire(new LoanLostEvent(investment, loan));
                 return;
             case PAID:
-                LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.", investmentId);
+                LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.",
+                             investment.getId());
                 return;
             default:
                 transactionalPortfolio.fire(new LoanNoLongerDelinquentEvent(investment, loan));
                 return;
         }
+    }
+
+    private static void processNoLongerDelinquent(final TransactionalPortfolio transactionalPortfolio,
+                                                  final int investmentId) {
+        transactionalPortfolio.getTenant()
+                .call(z -> z.getInvestment(investmentId))
+                .ifPresent(investment -> investment.getPaymentStatus().ifPresent(status -> {
+                    processNoLongerDelinquent(transactionalPortfolio, investment, status);
+                }));
     }
 
     private static void processNoLongerDelinquent(final TransactionalPortfolio transactionalPortfolio,

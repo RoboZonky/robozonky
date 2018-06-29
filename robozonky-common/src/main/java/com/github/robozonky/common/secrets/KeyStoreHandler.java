@@ -53,7 +53,7 @@ public class KeyStoreHandler {
         try {
             return SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
         } catch (final NoSuchAlgorithmException ex) {
-            throw new IllegalStateException("Should not happen.", ex);
+            throw new IllegalStateException(ex);
         }
     }
 
@@ -77,7 +77,7 @@ public class KeyStoreHandler {
         try {
             ks.load(null, password);
         } catch (final Exception ex) {
-            throw new IllegalStateException("Should not happen.", ex);
+            throw new IllegalStateException(ex);
         }
         // store the newly created key store
         final SecretKeyFactory skf = KeyStoreHandler.getSecretKeyFactory();
@@ -107,7 +107,7 @@ public class KeyStoreHandler {
             ks.load(fis, password);
             return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(), false);
         } catch (final CertificateException | NoSuchAlgorithmException ex) {
-            throw new IllegalStateException("Should not happen.", ex);
+            throw new IllegalStateException(ex);
         }
     }
 
@@ -175,7 +175,7 @@ public class KeyStoreHandler {
                                                                                PBEKeySpec.class);
             return Optional.of(keySpec.getPassword());
         } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException ex) {
-            throw new IllegalStateException("Should not happen.", ex);
+            throw new IllegalStateException(ex);
         } catch (final UnrecoverableEntryException ex) {
             KeyStoreHandler.LOGGER.debug("Unrecoverable entry '{}'.", alias, ex);
             return Optional.empty();
@@ -217,7 +217,7 @@ public class KeyStoreHandler {
                 this.keyStore.store(os, this.password);
                 this.dirty.set(false);
             } catch (final KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
-                throw new IllegalStateException("Should not happen.", ex);
+                throw new IllegalStateException(ex);
             }
         }
     }

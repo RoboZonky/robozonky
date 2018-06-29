@@ -81,7 +81,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         // run investing and purchasing daemons
         IntStream.range(0, daemons.length).forEach(daemonId -> {
             final DaemonOperation d = daemons[daemonId];
-            final long initialDelay = daemonId * 250; // quarter second apart
+            final long initialDelay = daemonId * 250L; // quarter second apart
             final Runnable task = new Skippable(d, portfolioUpdater::isUpdating);
             executor.submit(task, d.getRefreshInterval(), Duration.ofMillis(initialDelay));
         });

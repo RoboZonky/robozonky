@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.state.InstanceState;
@@ -84,8 +83,7 @@ public final class SessionState<T> {
     }
 
     private void write(final Collection<Integer> items) {
-        final Stream<String> result = items.stream().map(String::valueOf);
-        state.update(b -> b.put(key, result));
+        state.update(b -> b.put(key, items.stream().map(String::valueOf)));
         SessionState.LOGGER.trace("'{}' wrote '{}'.", key, state.getValue(key).orElse("nothing"));
     }
 

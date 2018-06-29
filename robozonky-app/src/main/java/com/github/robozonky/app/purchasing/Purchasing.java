@@ -32,12 +32,8 @@ import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
 import com.github.robozonky.util.NumberUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
     private final Tenant auth;
     private final AtomicReference<int[]> lastChecked = new AtomicReference<>(new int[0]);

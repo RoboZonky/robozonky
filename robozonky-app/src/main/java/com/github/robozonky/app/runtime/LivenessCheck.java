@@ -41,12 +41,12 @@ import org.apache.commons.io.IOUtils;
  */
 class LivenessCheck extends Refreshable<ApiVersion> {
 
-    private static final String URL = ApiProvider.ZONKY_URL + "/version";
+    private static final String ZONKY_VERSION_URL = ApiProvider.ZONKY_URL + "/version";
 
     private final String url;
 
     private LivenessCheck() {
-        this(URL);
+        this(ZONKY_VERSION_URL);
     }
 
     LivenessCheck(final String url) {
