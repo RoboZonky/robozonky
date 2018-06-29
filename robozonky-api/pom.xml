@@ -245,6 +245,28 @@
                     "fieldName": "ME",
                     "elementKind": "field",
                     "justification": "Was never supposed to be part of the API."
+                  }, {
+                    "code": "java.method.returnTypeChangedCovariantly",
+                    "old": "method java.lang.Object com.github.robozonky.api.remote.entities.RawDevelopment::getMetadata()",
+                    "new": "method java.lang.String com.github.robozonky.api.remote.entities.RawDevelopment::getMetadata()",
+                    "oldType": "java.lang.Object",
+                    "newType": "java.lang.String",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "RawDevelopment",
+                    "methodName": "getMetadata",
+                    "elementKind": "method",
+                    "justification": "We now know this is assorted JSON data that will not be parsed."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method java.lang.String com.github.robozonky.api.remote.entities.RawInvestment::getInsuranceStatus()",
+                    "new": "method com.github.robozonky.api.remote.enums.InsuranceStatus com.github.robozonky.api.remote.entities.RawInvestment::getInsuranceStatus()",
+                    "oldType": "java.lang.String",
+                    "newType": "com.github.robozonky.api.remote.enums.InsuranceStatus",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "RawInvestment",
+                    "methodName": "getInsuranceStatus",
+                    "elementKind": "method",
+                    "justification": "Insurance status enum was implemented."
                   }
                 ]
               }

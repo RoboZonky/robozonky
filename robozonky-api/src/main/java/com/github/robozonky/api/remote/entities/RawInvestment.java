@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.InsuranceStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
@@ -38,7 +39,8 @@ public class RawInvestment extends BaseInvestment {
     private boolean smpRelated, onSmp, canBeOffered, inWithdrawal, hasCollectionHistory, insuranceActive,
             instalmentPostponement;
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
-    private String loanName, nickname, firstName, surname, insuranceStatus;
+    private String loanName, nickname, firstName, surname;
+    private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
     private OffsetDateTime investmentDate = OffsetDateTime.now(), nextPaymentDate = investmentDate.plusMonths(1),
             activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
@@ -82,6 +84,8 @@ public class RawInvestment extends BaseInvestment {
         this.paidPenalty = investment.getPaidPenalty();
         this.rating = investment.getRating();
         this.hasCollectionHistory = false;
+        this.insuranceStatus =
+                investment.isInsuranceActive() ? InsuranceStatus.CURRENTLY_INSURED : InsuranceStatus.NOT_INSURED;
         this.insuranceActive = investment.isInsuranceActive();
         this.instalmentPostponement = investment.areInstalmentsPostponed();
         this.insuranceHistory = investment.getInsuranceHistory();
@@ -268,7 +272,7 @@ public class RawInvestment extends BaseInvestment {
     }
 
     @XmlElement
-    public String getInsuranceStatus() { // TODO figure out details and implement
+    public InsuranceStatus getInsuranceStatus() {
         return insuranceStatus;
     }
 

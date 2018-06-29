@@ -96,7 +96,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.investmentDateSupplier = () -> investmentDateSupplier.apply(this);
     }
 
-    // TODO should calculate expected interest somehow
     MutableInvestmentImpl(final MarketplaceLoan loan, final BigDecimal originalPrincipal) {
         loan.getMyInvestment().ifPresent(i -> {
             this.id = i.getId();
