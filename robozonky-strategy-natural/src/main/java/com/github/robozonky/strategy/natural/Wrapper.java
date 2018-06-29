@@ -35,9 +35,14 @@ public class Wrapper {
     private final BigDecimal remainingAmount;
     private final boolean insuranceActive;
 
+    private static String identify(final int loanId, final String suffix) {
+        final String prefix = "Loan #" + loanId;
+        return suffix == null ? prefix : prefix + " (" + suffix + ")";
+    }
+
     public Wrapper(final Loan loan) {
         this.loan = loan;
-        this.identifier = "Loan #" + loan.getId();
+        this.identifier = identify(loan.getId(), null);
         this.remainingTermInMonths = loan.getTermInMonths();
         this.originalTermInMonths = loan.getTermInMonths();
         this.remainingAmount = null;
@@ -46,7 +51,7 @@ public class Wrapper {
 
     public Wrapper(final Participation participation, final Loan loan) {
         this.loan = loan;
-        this.identifier = "Loan #" + participation.getLoanId() + " (participation #" + participation.getId() + ")";
+        this.identifier = identify(loan.getId(), "participation #" + participation.getId());
         this.remainingTermInMonths = participation.getRemainingInstalmentCount();
         this.originalTermInMonths = participation.getOriginalInstalmentCount();
         this.remainingAmount = participation.getRemainingPrincipal();
@@ -55,7 +60,7 @@ public class Wrapper {
 
     public Wrapper(final Investment investment, final Loan loan) {
         this.loan = loan;
-        this.identifier = "Loan #" + investment.getLoanId() + " (investment #" + investment.getId() + ")";
+        this.identifier = identify(loan.getId(), "investment #" + investment.getId());
         this.remainingTermInMonths = investment.getRemainingMonths();
         this.originalTermInMonths = investment.getOriginalTerm();
         this.remainingAmount = investment.getRemainingPrincipal();

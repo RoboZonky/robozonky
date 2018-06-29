@@ -37,19 +37,19 @@ public interface StateModifier<T> {
      * @return This.
      */
     default StateModifier<T> put(final String key, final Stream<String> values) {
-        return put(key, values, StateReader.DEFAULT_VALUE_SEPARATOR);
+        return put(key, values, Constants.VALUE_SEPARATOR.getValue());
     }
 
     /**
      * Associate a value with a key in the underlying {@link StateStorage}, first joining all the strings to one using
-     * a given delimiter. Such values can then be read with {@link StateReader#getValues(String, char)}.
+     * a given delimiter. Such values can then be read with {@link StateReader#getValues(String, String)}.
      * @param key Key to look up the value with.
      * @param values Values to associate with the key, overwriting anything previously set there.
      * @param separator Used to merge the values into one string that will be associated with the key.
      * @return This.
      */
-    default StateModifier<T> put(final String key, final Stream<String> values, final char separator) {
-        return put(key, values.collect(Collectors.joining(Character.toString(separator))));
+    default StateModifier<T> put(final String key, final Stream<String> values, final String separator) {
+        return put(key, values.collect(Collectors.joining(separator)));
     }
 
     /**

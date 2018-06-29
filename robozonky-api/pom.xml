@@ -212,6 +212,39 @@
                     "methodName": "sanitized",
                     "elementKind": "method",
                     "justification": "Investment date no longer optional."
+                  }, {
+                    "code": "java.class.noLongerImplementsInterface",
+                    "old": "interface com.github.robozonky.api.notifications.EventListener<E extends com.github.robozonky.api.notifications.Event>",
+                    "new": "interface com.github.robozonky.api.notifications.EventListener<E extends com.github.robozonky.api.notifications.Event>",
+                    "interface": "java.util.EventListener",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "EventListener",
+                    "elementKind": "interface",
+                    "justification": "Has no practical effect."
+                  }, {
+                    "code": "java.field.removedWithConstant",
+                    "old": "field com.github.robozonky.api.remote.ControlApi.INVESTOR_ME",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "ControlApi",
+                    "fieldName": "INVESTOR_ME",
+                    "elementKind": "field",
+                    "justification": "Was never supposed to be part of the API."
+                  }, {
+                    "code": "java.field.removed",
+                    "old": "field com.github.robozonky.api.remote.ControlApi.LOGGER",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "ControlApi",
+                    "fieldName": "LOGGER",
+                    "elementKind": "field",
+                    "justification": "Makes no sense for this to be part of an API."
+                  }, {
+                    "code": "java.field.removedWithConstant",
+                    "old": "field com.github.robozonky.api.remote.ControlApi.ME",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "ControlApi",
+                    "fieldName": "ME",
+                    "elementKind": "field",
+                    "justification": "Was never supposed to be part of the API."
                   }
                 ]
               }

@@ -24,7 +24,7 @@ import com.github.robozonky.api.SessionInfo;
  * them must be maintained by the listeners themselves.
  * @param <E> Event type to handle.
  */
-public interface EventListener<E extends Event> extends java.util.EventListener {
+public interface EventListener<E extends Event> {
 
     /**
      * Implementation must be thread-safe. Never include any time-consuming logic, since RoboZonky core will block

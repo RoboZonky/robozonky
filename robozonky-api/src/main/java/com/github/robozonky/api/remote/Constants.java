@@ -16,20 +16,8 @@
 
 package com.github.robozonky.api.remote;
 
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+final class Constants {
 
-import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.internal.api.Defaults;
-
-@Produces(Defaults.MEDIA_TYPE)
-@Consumes(Defaults.MEDIA_TYPE)
-public interface TransactionApi extends EntityCollectionApi<Transaction> {
-
-    @GET
-    @Path(Constants.ME + "/wallet/transactions")
-    List<Transaction> items();
+    public static final String ME = "/users/me";
+    public static final String INVESTOR_ME = "/investors/me";
 }

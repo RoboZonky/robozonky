@@ -67,6 +67,7 @@ import com.github.robozonky.notifications.listeners.RoboZonkyUpdateDetectedEvent
 import com.github.robozonky.notifications.listeners.SaleOfferedEventListener;
 import org.apache.commons.lang3.StringUtils;
 
+@SuppressWarnings("rawtypes")
 public enum SupportedListener {
 
     INVESTMENT_MADE {
@@ -76,7 +77,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentMadeEventListener(this, targetHandler);
         }
     },
@@ -87,7 +88,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentSoldEventListener(this, targetHandler);
         }
     },
@@ -98,7 +99,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentSkippedEventListener(this, targetHandler);
         }
     },
@@ -109,7 +110,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentDelegatedEventListener(this, targetHandler);
         }
     },
@@ -120,7 +121,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentRejectedEventListener(this, targetHandler);
         }
     },
@@ -131,7 +132,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentPurchasedEventListener(this, targetHandler);
         }
     },
@@ -142,13 +143,13 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new SaleOfferedEventListener(this, targetHandler);
         }
     },
     LOAN_NOW_DELINQUENT {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanDelinquentEventListener(this, targetHandler);
         }
 
@@ -159,7 +160,7 @@ public enum SupportedListener {
     },
     LOAN_DELINQUENT_10_PLUS {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanDelinquentEventListener(this, targetHandler);
         }
 
@@ -170,7 +171,7 @@ public enum SupportedListener {
     },
     LOAN_DELINQUENT_30_PLUS {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanDelinquentEventListener(this, targetHandler);
         }
 
@@ -181,7 +182,7 @@ public enum SupportedListener {
     },
     LOAN_DELINQUENT_60_PLUS {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanDelinquentEventListener(this, targetHandler);
         }
 
@@ -192,7 +193,7 @@ public enum SupportedListener {
     },
     LOAN_DELINQUENT_90_PLUS {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanDelinquentEventListener(this, targetHandler);
         }
 
@@ -203,7 +204,7 @@ public enum SupportedListener {
     },
     LOAN_NO_LONGER_DELINQUENT {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanNoLongerDelinquentEventListener(this, targetHandler);
         }
 
@@ -214,7 +215,7 @@ public enum SupportedListener {
     },
     LOAN_DEFAULTED {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanDefaultedEventListener(this, targetHandler);
         }
 
@@ -225,7 +226,7 @@ public enum SupportedListener {
     },
     LOAN_LOST {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanLostEventListener(this, targetHandler);
         }
 
@@ -236,7 +237,7 @@ public enum SupportedListener {
     },
     LOAN_REPAID {
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new LoanRepaidEventListener(this, targetHandler);
         }
 
@@ -257,7 +258,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new BalanceOnTargetEventListener(this, targetHandler);
         }
     },
@@ -273,7 +274,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new BalanceUnderMinimumEventListener(this, targetHandler);
         }
     },
@@ -289,7 +290,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyCrashedEventListener(this, targetHandler);
         }
     },
@@ -300,7 +301,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyDaemonFailedEventListener(this, targetHandler);
         }
     },
@@ -311,7 +312,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RemoteOperationFailedEventListener(this, targetHandler);
         }
     },
@@ -327,7 +328,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyInitializedEventListener(this, targetHandler);
         }
     },
@@ -343,7 +344,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyEndingEventListener(this, targetHandler);
         }
     },
@@ -354,7 +355,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyTestingEventListener(this, targetHandler);
         }
     },
@@ -370,7 +371,7 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyUpdateDetectedEventListener(this, targetHandler);
         }
     },
@@ -381,12 +382,12 @@ public enum SupportedListener {
         }
 
         @Override
-        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyExperimentalUpdateDetectedEventListener(this, targetHandler);
         }
     };
 
-    public abstract EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler);
+    public abstract EventListener getListener(final AbstractTargetHandler targetHandler);
 
     /**
      * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.

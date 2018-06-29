@@ -79,7 +79,7 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
     public Stream<String> getKeys() {
         parent.assertNotDestroyed();
         return current.getKeys(sectionName)
-                .filter(s -> !Objects.equals(s, StateReader.LAST_UPDATED_KEY));
+                .filter(s -> !Objects.equals(s, Constants.LAST_UPDATED_KEY.getValue()));
     }
 
     @Override

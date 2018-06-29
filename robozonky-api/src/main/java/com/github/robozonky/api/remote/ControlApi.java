@@ -28,25 +28,18 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.internal.api.Defaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Path("/")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
 public interface ControlApi {
 
-    Logger LOGGER = LoggerFactory.getLogger(ControlApi.class);
-
-    String ME = "/users/me";
-    String INVESTOR_ME = "/investors/me";
-
     @GET
-    @Path(ControlApi.ME + "/logout")
+    @Path(Constants.ME + "/logout")
     void logout();
 
     @GET
-    @Path(ControlApi.INVESTOR_ME + "/restrictions")
+    @Path(Constants.INVESTOR_ME + "/restrictions")
     Restrictions restrictions();
 
     @POST
@@ -54,7 +47,7 @@ public interface ControlApi {
     void invest(RawInvestment investment);
 
     @POST
-    @Path(ControlApi.ME + "/traded-investments")
+    @Path(Constants.ME + "/traded-investments")
     void offer(SellRequest sellRequest);
 
     @POST

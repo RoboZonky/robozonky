@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote;
+package com.github.robozonky.common.state;
 
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+enum Constants {
 
-import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.internal.api.Defaults;
+    VALUE_SEPARATOR(";"),
+    LAST_UPDATED_KEY("lastUpdate");
 
-@Produces(Defaults.MEDIA_TYPE)
-@Consumes(Defaults.MEDIA_TYPE)
-public interface TransactionApi extends EntityCollectionApi<Transaction> {
+    private final String value;
 
-    @GET
-    @Path(Constants.ME + "/wallet/transactions")
-    List<Transaction> items();
+    Constants(final String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

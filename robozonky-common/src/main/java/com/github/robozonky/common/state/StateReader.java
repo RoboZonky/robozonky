@@ -22,15 +22,12 @@ import java.util.stream.Stream;
 
 interface StateReader {
 
-    char DEFAULT_VALUE_SEPARATOR = ';';
-    String LAST_UPDATED_KEY = "lastUpdate";
-
     /**
      * Retrieve a timestamp of when this reader was last updated with content.
      * @return If present, the timestamp of last update. If missing, this is a brand new reader.
      */
     default Optional<OffsetDateTime> getLastUpdated() {
-        return getValue(LAST_UPDATED_KEY).map(OffsetDateTime::parse);
+        return getValue(Constants.LAST_UPDATED_KEY.getValue()).map(OffsetDateTime::parse);
     }
 
     /**
@@ -48,17 +45,17 @@ interface StateReader {
      * @return A (possibly empty) stream of values if the key is present, empty otherwise.
      */
     default Optional<Stream<String>> getValues(final String key) {
-        return getValues(key, DEFAULT_VALUE_SEPARATOR);
+        return getValues(key, Constants.VALUE_SEPARATOR.getValue());
     }
 
     /**
      * Retrieve a value from this state storage using {@link #getValue(String)} and then apply
      * {@link String#split(String)} with a given delimiter on the result, converting that to a {@link Stream}.
      * @param key Key under which the value was previously stored.
-     * @param separator Character to split the string by.
+     * @param separator What to split the string by.
      * @return A (possibly empty) stream of values if the key is present, empty otherwise.
      */
-    default Optional<Stream<String>> getValues(final String key, final char separator) {
+    default Optional<Stream<String>> getValues(final String key, final String separator) {
         return getValue(key).map(value -> Stream.of(value.split("\\Q" + separator + "\\E")));
     }
 

@@ -30,7 +30,7 @@ import com.github.robozonky.internal.api.Defaults;
 @Consumes(Defaults.MEDIA_TYPE)
 public interface PortfolioApi extends EntityCollectionApi<RawInvestment> {
 
-    @Path(ControlApi.ME + "/investments")
+    @Path(Constants.ME + "/investments")
     @GET
     @Override
     List<RawInvestment> items();

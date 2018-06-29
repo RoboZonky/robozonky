@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.internal.api.Defaults;
 
-@Path(ControlApi.ME + "/wallet")
+@Path(Constants.ME + "/wallet")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
 public interface WalletApi extends EntityCollectionApi<BlockedAmount> {

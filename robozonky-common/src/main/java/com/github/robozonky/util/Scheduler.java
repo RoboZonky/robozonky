@@ -29,6 +29,7 @@ import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("rawtypes")
 public class Scheduler implements AutoCloseable {
 
     /*
@@ -59,16 +60,16 @@ public class Scheduler implements AutoCloseable {
         return BACKGROUND_SCHEDULER;
     }
 
-    public ScheduledFuture<?> submit(final Runnable toSchedule) {
+    public ScheduledFuture submit(final Runnable toSchedule) {
         return this.submit(toSchedule, Scheduler.REFRESH);
     }
 
-    public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween) {
+    public ScheduledFuture submit(final Runnable toSchedule, final Duration delayInBetween) {
         return submit(toSchedule, delayInBetween, Duration.ZERO);
     }
 
-    public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween,
-                                     final Duration firstDelay) {
+    public ScheduledFuture submit(final Runnable toSchedule, final Duration delayInBetween,
+                                  final Duration firstDelay) {
         Scheduler.LOGGER.debug("Scheduling {} every {} ms, starting in {} ms.", toSchedule, delayInBetween.toMillis(),
                                firstDelay.toMillis());
         /*
@@ -76,13 +77,13 @@ public class Scheduler implements AutoCloseable {
          * executor would result in tasks queuing up. and since we use this class to schedule tasks as frequently as
          * every second, such behavior is not acceptable.
          */
-        final ScheduledFuture<?> f = executor.scheduleWithFixedDelay(toSchedule, firstDelay.toNanos(),
-                                                                     delayInBetween.toNanos(), TimeUnit.NANOSECONDS);
+        final ScheduledFuture f = executor.scheduleWithFixedDelay(toSchedule, firstDelay.toNanos(),
+                                                                  delayInBetween.toNanos(), TimeUnit.NANOSECONDS);
         this.submitted.add(toSchedule);
         return f;
     }
 
-    public Future<?> run(final Runnable toRun) {
+    public Future run(final Runnable toRun) {
         Scheduler.LOGGER.debug("Submitting {} immediately.", toRun);
         return executor.submit(toRun);
     }
