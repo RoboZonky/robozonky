@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.enums;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,6 +110,13 @@ public enum DevelopmentType implements BaseEnum {
         this.source = source;
         this.code = code;
         this.ids = Collections.unmodifiableSet(Stream.of(internalId).collect(Collectors.toSet()));
+    }
+
+    public static DevelopmentType findByCode(final String code) {
+        return Stream.of(DevelopmentType.values())
+                .filter(t -> Objects.equals(t.code, code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown development type: " + code));
     }
 
     public CollectionActionSource getSource() {

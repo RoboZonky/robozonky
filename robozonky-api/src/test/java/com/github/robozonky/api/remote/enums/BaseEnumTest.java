@@ -23,7 +23,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class BaseEnumTest {
@@ -56,6 +57,9 @@ class BaseEnumTest {
                                                         MainIncomeType::findByCode);
         final Stream<DynamicTest> rating = code(Rating.class, Rating.values(), Rating::findByCode);
         final Stream<DynamicTest> region = code(Region.class, Region.values(), Region::findByCode);
-        return Stream.of(purpose, mainIncomeType, rating, region).flatMap(s -> s);
+        final Stream<DynamicTest> developmentType = code(DevelopmentType.class, Stream.of(DevelopmentType.values())
+                .filter(v -> v != DevelopmentType.PAYMENT_PAIRED) // multiple codes evaluate to one type
+                .toArray(DevelopmentType[]::new), DevelopmentType::findByCode);
+        return Stream.of(purpose, mainIncomeType, rating, region, developmentType).flatMap(s -> s);
     }
 }

@@ -281,6 +281,17 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <configuration>
+          <excludedClasses>
+            <!-- Mostly getters; messing up stats. -->
+            <param>com.github.robozonky.api.remote.entities.*</param>
+            <param>com.github.robozonky.api.notifications.*</param>
+          </excludedClasses>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

@@ -24,8 +24,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class InvestmentDescriptorTest {
 
@@ -40,7 +40,7 @@ class InvestmentDescriptorTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor id = new InvestmentDescriptor(i);
-        final Optional<RecommendedInvestment> r = id.recommend(remainingPrincipal);
+        final Optional<RecommendedInvestment> r = id.recommend();
         assertThat(r).isPresent();
         assertSoftly(softly -> {
             softly.assertThat(r.get().amount()).isEqualTo(remainingPrincipal);
@@ -72,8 +72,6 @@ class InvestmentDescriptorTest {
             softly.assertThat(id2).isEqualTo(id);
         });
         final InvestmentDescriptor id3 = new InvestmentDescriptor(mockInvestment(BigDecimal.ONE));
-        assertSoftly(softly -> {
-            softly.assertThat(id).isNotEqualTo(id3);
-        });
+        assertThat(id).isNotEqualTo(id3);
     }
 }

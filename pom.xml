@@ -411,6 +411,7 @@
           <configuration>
             <skip>${skipTests}</skip>
             <timestampedReports>false</timestampedReports>
+            <coverageThreshold>85</coverageThreshold>
             <mutationThreshold>85</mutationThreshold>
             <targetClasses>
               <param>com.github.robozonky.*</param>
@@ -419,14 +420,6 @@
               <param>hashCode</param>
               <param>toString</param>
             </excludedMethods>
-            <excludedClasses>
-              <!-- Mostly getters; messing up stats. -->
-              <param>com.github.robozonky.api.remote.entities.*</param>
-              <param>com.github.robozonky.api.notifications.*</param>
-              <!-- Generated code; out of our control. -->
-              <param>com.github.robozonky.strategy.natural.*Lexer*</param>
-              <param>com.github.robozonky.strategy.natural.*Parser*</param>
-            </excludedClasses>
           </configuration>
         </plugin>
         <plugin>

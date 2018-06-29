@@ -36,6 +36,7 @@ class PortfolioOverviewTest {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance.intValue());
             softly.assertThat(po.getCzkInvested()).isEqualTo(0);
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(0);
+            softly.assertThat(po.getShareAtRisk()).isEqualTo(BigDecimal.ZERO);
             for (final Rating r : Rating.values()) {
                 softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(0);
                 softly.assertThat(po.getCzkAtRisk(r)).as(r + " at risk").isEqualTo(0);
@@ -58,6 +59,8 @@ class PortfolioOverviewTest {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(0);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj.intValue());
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(adj.intValue());
+            final BigDecimal share = BigDecimal.valueOf(po.getCzkAtRisk() / po.getCzkInvested());
+            softly.assertThat(po.getShareAtRisk()).isEqualTo(share);
             for (final Rating r : Rating.values()) {
                 final int expectedAbsolute = r == Rating.D ? adj.intValue() : 0;
                 final BigDecimal expectedRelative = r == Rating.D ? BigDecimal.ONE : BigDecimal.ZERO;
