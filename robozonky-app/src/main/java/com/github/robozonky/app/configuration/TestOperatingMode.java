@@ -19,7 +19,7 @@ package com.github.robozonky.app.configuration;
 import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
-import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;

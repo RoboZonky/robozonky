@@ -24,7 +24,6 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
-import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
@@ -74,28 +73,12 @@ public interface Investment {
         return new MutableInvestmentImpl(loan, investedAmount);
     }
 
-    static InvestmentBuilder fresh(final Loan loan, final int investedAmount) {
-        return fresh(loan, BigDecimal.valueOf(investedAmount));
-    }
-
-    static InvestmentBuilder fresh(final Loan loan, final BigDecimal investedAmount) {
-        return new MutableInvestmentImpl(loan, investedAmount);
-    }
-
     static Investment fresh(final Participation participation, final Loan loan, final BigDecimal amount) {
         return Investment.fresh(loan, amount)
                 .setId(participation.getInvestmentId())
                 .setRemainingMonths(participation.getRemainingInstalmentCount())
+                .setInvestmentDate(OffsetDateTime.now())
                 .build();
-    }
-
-    static void fillFrom(final Investment investment, final Loan loan) {
-        if (investment instanceof MutableInvestment) {
-            final MutableInvestment i = (MutableInvestment) investment;
-            i.setInvestmentDate(loan.getMyInvestment().map(MyInvestment::getTimeCreated).orElse(null));
-        } else {
-            throw new IllegalArgumentException("Invalid investment " + investment);
-        }
     }
 
     int getLoanId();

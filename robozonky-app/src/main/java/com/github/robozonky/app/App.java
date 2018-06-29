@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 
-import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.CommandLine;

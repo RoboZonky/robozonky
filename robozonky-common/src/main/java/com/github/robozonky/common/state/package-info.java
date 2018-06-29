@@ -16,7 +16,7 @@
 
 /**
  * Provides means to persistently store information. Use
- * {@link com.github.robozonky.common.state.TenantState#of(com.github.robozonky.api.SessionInfo)} as primary entry
+ * {@link com.github.robozonky.common.state.TenantState#of(SessionInfo)} as primary entry
  * point.
  * <p>
  * This class uses two main concepts:
@@ -34,3 +34,5 @@
  * file.
  */
 package com.github.robozonky.common.state;
+
+import com.github.robozonky.api.SessionInfo;

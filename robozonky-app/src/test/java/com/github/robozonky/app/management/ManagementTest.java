@@ -21,13 +21,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import javax.management.MBeanServer;
 
-import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.runtime.Lifecycle;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class ManagementTest {
 

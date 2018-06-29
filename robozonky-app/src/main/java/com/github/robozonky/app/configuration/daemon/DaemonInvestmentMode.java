@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;

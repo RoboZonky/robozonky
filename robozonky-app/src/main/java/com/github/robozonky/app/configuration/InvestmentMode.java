@@ -18,7 +18,7 @@ package com.github.robozonky.app.configuration;
 
 import java.util.function.Function;
 
-import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 
 @FunctionalInterface

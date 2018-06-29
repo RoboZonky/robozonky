@@ -26,7 +26,6 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -256,7 +255,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
                             new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(0))),
                 forListener(SupportedListener.CRASHED,
-                            new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException())),
+                            new RoboZonkyCrashedEvent(new RuntimeException())),
                 forListener(SupportedListener.REMOTE_OPERATION_FAILED,
                             new RemoteOperationFailedEvent(new RuntimeException())),
                 forListener(SupportedListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException())),

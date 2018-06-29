@@ -18,7 +18,6 @@ package com.github.robozonky.app;
 
 import java.util.List;
 
-import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;

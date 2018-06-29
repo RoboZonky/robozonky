@@ -18,12 +18,13 @@ package com.github.robozonky.app.runtime;
 
 import java.time.Duration;
 
-import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class DaemonShutdownHookTest {
 

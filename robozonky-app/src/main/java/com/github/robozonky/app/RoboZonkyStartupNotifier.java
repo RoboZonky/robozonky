@@ -19,7 +19,6 @@ package com.github.robozonky.app;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -50,7 +49,7 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
             if (result.getReturnCode() == ReturnCode.OK) {
                 Events.fire(new RoboZonkyEndingEvent());
             } else {
-                Events.fire(new RoboZonkyCrashedEvent(result.getReturnCode(), result.getCause()));
+                Events.fire(new RoboZonkyCrashedEvent(result.getCause()));
             }
             RoboZonkyStartupNotifier.LOGGER.info("===== {} out. =====", name);
         });

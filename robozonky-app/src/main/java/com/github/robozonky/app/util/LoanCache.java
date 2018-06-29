@@ -103,13 +103,7 @@ public class LoanCache {
     }
 
     public Loan getLoan(final Investment investment, final Zonky api) {
-        final Loan loan = getLoan(investment.getLoanId(), api);
-        /*
-         * investment may have been created without access to the loan. now that we have the loan, we can update the
-         * investment, filling any missing information.
-         */
-        Investment.fillFrom(investment, loan);
-        return loan;
+        return getLoan(investment.getLoanId(), api);
     }
 
     public void clean() {

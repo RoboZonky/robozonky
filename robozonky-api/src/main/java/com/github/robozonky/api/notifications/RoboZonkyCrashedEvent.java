@@ -18,23 +18,15 @@ package com.github.robozonky.api.notifications;
 
 import java.util.Optional;
 
-import com.github.robozonky.api.ReturnCode;
-
 /**
  * Fired before the application forcibly terminates due to an error.
  */
 public final class RoboZonkyCrashedEvent extends Event {
 
-    private final ReturnCode returnCode;
     private final Throwable cause;
 
-    public RoboZonkyCrashedEvent(final ReturnCode returnCode, final Throwable cause) {
-        this.returnCode = returnCode;
+    public RoboZonkyCrashedEvent(final Throwable cause) {
         this.cause = cause;
-    }
-
-    public ReturnCode getReturnCode() {
-        return this.returnCode;
     }
 
     public Optional<Throwable> getCause() {

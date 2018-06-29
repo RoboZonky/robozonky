@@ -21,13 +21,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
