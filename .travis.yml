@@ -30,11 +30,11 @@ stages: # order the stages we'll use during this build
 matrix:
   include:
   - stage: precache # independent stage for Maven to build and download all dependencies
+    env: # empty
     install:
       - mvn --batch-mode install -DskipTests -Dgpg.skip
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
-    env: # empty
   - stage: sonar # independent build stage for Sonar code analysis
     env: # empty
     addons:
@@ -42,17 +42,22 @@ matrix:
         organization: "robozonky"
         token:
           secure: $SONAR_TOKEN
+    install: # do nothing
+      - mvn clean
     script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
       - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
   - stage: preview # test early adopters JDK as well, but relax requirements
     env: #empty
     jdk: openjdk-ea
     allow_failures: true
-    script: mvn --batch-mode test -Dassembly.skipAssembly -Dgpg.skip
+    install: # do nothing
+      - mvn clean
+    script:
+      - mvn --batch-mode test -Dassembly.skipAssembly -Dgpg.skip
 cache:
   directories:
   - $HOME/.m2
-install: # don't do anything
-  - mvn clean
+install: # freshly build all required modules
+  - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
 script: # by default, run all tests incl. PITest, skipping all assemblies
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
