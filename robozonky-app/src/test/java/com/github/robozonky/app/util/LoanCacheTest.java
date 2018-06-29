@@ -53,7 +53,6 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
                 .setLoanId(loanId)
                 .build();
         assertThat(c.getLoan(i, z)).isEqualTo(loan);
-        assertThat(i.getInvestmentDate()).isEqualTo(d);
     }
 
     @Test
