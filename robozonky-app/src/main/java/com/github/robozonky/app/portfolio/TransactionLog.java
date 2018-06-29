@@ -118,12 +118,12 @@ class TransactionLog {
     private boolean processTransaction(final Tenant tenant, final Transaction t) {
         final boolean isInward = t.getOrientation() == TransactionOrientation.IN;
         final Collection<Transaction> transactions = isInward ? transactionsIn : transactionsOut;
-        final Collection<Synthetic> synthetics = isInward ? Collections.emptyList() : this.synthetics;
+        final Collection<Synthetic> syntheticTransactions = isInward ? Collections.emptyList() : this.synthetics;
         final boolean unseenTransaction = transactions.add(t);
         if (!unseenTransaction) { // already processed this; don't do anything
             return false;
         }
-        final boolean hadCorrespondingSynthetic = synthetics.removeIf(s -> Synthetic.equals(s, t));
+        final boolean hadCorrespondingSynthetic = syntheticTransactions.removeIf(s -> Synthetic.equals(s, t));
         if (hadCorrespondingSynthetic) {  // transaction added, synthetic removed, no change overall
             return false;
         }

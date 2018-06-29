@@ -18,6 +18,7 @@ package com.github.robozonky.common.state;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -38,8 +39,13 @@ class FileBackedStateStorage implements StateStorage {
     }
 
     synchronized void destroy() {
-        stateLocation.delete();
-        state.set(null);
+        try {
+            Files.deleteIfExists(stateLocation.toPath());
+        } catch (final IOException ex) {
+            LOGGER.debug("Failed deleting state file.", ex);
+        } finally {
+            state.set(null);
+        }
     }
 
     private synchronized Ini getState() {
@@ -78,9 +84,9 @@ class FileBackedStateStorage implements StateStorage {
 
     @Override
     public Stream<String> getKeys(final String section) {
-        final Ini state = getState();
-        if (state.containsKey(section)) {
-            return state.get(section).keySet().stream();
+        final Ini internalState = getState();
+        if (internalState.containsKey(section)) {
+            return internalState.get(section).keySet().stream();
         } else {
             return Stream.empty();
         }

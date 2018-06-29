@@ -26,10 +26,10 @@ final class StateModifierImpl<T> implements StateModifier<T>,
                                             Callable<Boolean> {
 
     private final Collection<BiConsumer<StateStorage, String>> actions = new ArrayList<>(0);
-    private final InstanceStateImpl<T> state;
+    private final InstanceStateImpl<T> instanceState;
 
-    public StateModifierImpl(final InstanceStateImpl<T> state, final boolean fresh) {
-        this.state = state;
+    public StateModifierImpl(final InstanceStateImpl<T> instanceState, final boolean fresh) {
+        this.instanceState = instanceState;
         if (fresh) { // first action is to reset the class-specific state
             actions.add(StateStorage::unsetValues);
         }
@@ -50,8 +50,8 @@ final class StateModifierImpl<T> implements StateModifier<T>,
 
     @Override
     public Boolean call() {
-        final String sectionName = state.getSectionName();
-        final StateStorage backend = state.getStorage();
+        final String sectionName = instanceState.getSectionName();
+        final StateStorage backend = instanceState.getStorage();
         actions.forEach(a -> a.accept(backend, sectionName));
         backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), OffsetDateTime.now().toString());
         return backend.store();

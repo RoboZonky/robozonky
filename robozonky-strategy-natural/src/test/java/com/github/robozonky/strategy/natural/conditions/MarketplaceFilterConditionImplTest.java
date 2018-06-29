@@ -20,7 +20,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MarketplaceFilterConditionImplTest {
 
@@ -33,9 +33,9 @@ class MarketplaceFilterConditionImplTest {
 
     @Test
     void doubleNegation() {
-        final MarketplaceFilterCondition negated = CONDITION.negate();
+        final MarketplaceFilterCondition negated = CONDITION.invert();
         assertThat(negated.test(new Wrapper(Loan.custom().build()))).isFalse();
-        final MarketplaceFilterCondition doubleNegated = negated.negate();
+        final MarketplaceFilterCondition doubleNegated = negated.invert();
         assertThat(doubleNegated).isSameAs(CONDITION);
     }
 }

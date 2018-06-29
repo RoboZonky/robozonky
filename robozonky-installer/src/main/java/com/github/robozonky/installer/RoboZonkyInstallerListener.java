@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -133,7 +134,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final String username = Variables.ZONKY_USERNAME.getValue(DATA);
         final char[] password = Variables.ZONKY_PASSWORD.getValue(DATA).toCharArray();
         try {
-            KEYSTORE_FILE.delete();
+            Files.deleteIfExists(KEYSTORE_FILE.toPath());
             final KeyStoreHandler keystore = KeyStoreHandler.create(KEYSTORE_FILE, keystorePassword);
             return SecretProvider.keyStoreBased(keystore, username, password);
         } catch (final Exception ex) {
@@ -243,7 +244,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     void prepareLinuxServices(final File runScript) {
         for (final ServiceGenerator serviceGenerator : ServiceGenerator.values()) {
             final File result = serviceGenerator.apply(runScript);
-            LOGGER.info("Generated " + result + " as a " + serviceGenerator + " service.");
+            LOGGER.info(() -> "Generated " + result + " as a " + serviceGenerator + " service.");
         }
     }
 

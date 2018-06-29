@@ -22,12 +22,8 @@ import java.util.Optional;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationCommandLineFragment.class);
 
     @Parameter(names = {"-u", "--username"},
             description = "Used to connect to the Zonky server.")
@@ -47,10 +43,6 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
     }
 
     AuthenticationCommandLineFragment(final String username, final File keystore) {
-        this(username, keystore, false);
-    }
-
-    AuthenticationCommandLineFragment(final String username, final File keystore, final boolean refreshTokenEnabled) {
         this.username = username;
         this.keystore = keystore;
     }

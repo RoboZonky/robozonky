@@ -22,7 +22,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public class InsuranceCondition extends MarketplaceFilterConditionImpl {
 
-    public static final MarketplaceFilterCondition ACTIVE = new InsuranceCondition(true), INACTIVE = ACTIVE.negate();
+    public static final MarketplaceFilterCondition ACTIVE = new InsuranceCondition(true), INACTIVE = ACTIVE.invert();
 
     private final boolean expected;
 

@@ -75,9 +75,9 @@ final class Counter {
     }
 
     public void increase(final SessionInfo sessionInfo) {
-        final Set<OffsetDateTime> timestamps = getTimestamps(sessionInfo);
-        getTimestamps(sessionInfo).add(OffsetDateTime.now());
-        store(sessionInfo, id, timestamps);
+        final Set<OffsetDateTime> stamps = getTimestamps(sessionInfo);
+        stamps.add(OffsetDateTime.now());
+        store(sessionInfo, id, stamps);
     }
 
     public boolean allow(final SessionInfo sessionInfo) {

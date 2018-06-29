@@ -42,5 +42,5 @@ public interface MarketplaceFilterCondition extends Predicate<Wrapper> {
 
     boolean test(final Wrapper item);
 
-    MarketplaceFilterCondition negate();
+    MarketplaceFilterCondition invert();
 }

@@ -36,7 +36,7 @@ enum AlwaysAcceptingCondition implements MarketplaceFilterCondition {
     }
 
     @Override
-    public MarketplaceFilterCondition negate() {
+    public MarketplaceFilterCondition invert() {
         return NeverAceptingCondition.INSTANCE;
     }
 }

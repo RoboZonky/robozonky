@@ -58,7 +58,7 @@ public class JmxListenerService implements ListenerService {
         if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
             return (event, sessionInfo) -> {
                 final ExecutionCompletedEvent evt = (ExecutionCompletedEvent) event;
-                callOnRuntime(bean -> bean.handle(evt, sessionInfo));
+                callOnRuntime(bean -> bean.handle(evt));
             };
         } else {
             return null;

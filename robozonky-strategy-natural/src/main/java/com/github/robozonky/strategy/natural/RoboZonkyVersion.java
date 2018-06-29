@@ -42,7 +42,7 @@ class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
         if (version == null) { // this means we're on a SNAPSHOT, which is assumed to be the latest version
             return new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
         }
-        final int dashIndex = version.indexOf("-");
+        final int dashIndex = version.indexOf('-');
         final String regular = dashIndex > 0 ? version.substring(0, dashIndex) : version;
         return Arrays.stream(regular.split("\\Q.\\E"))
                 .mapToInt(Integer::parseInt)

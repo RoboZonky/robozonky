@@ -82,7 +82,6 @@ enum StrategyFileProperty {
     }
 
     public <T> T getValue(final Rating r, final Function<String, Optional<T>> supplier) {
-        final String key = this.key;
         final String propertyName = StrategyFileProperty.join(key, r.name());
         return StrategyFileProperty.getValue(propertyName, supplier).orElseGet(() -> {
             final String fallbackPropertyName = StrategyFileProperty.join(key, "default");

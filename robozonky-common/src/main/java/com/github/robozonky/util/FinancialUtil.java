@@ -93,7 +93,6 @@ class FinancialUtil {
         // account for payments at beginning of period versus end.
         // since we are going in reverse, we multiply by 1 plus interest rate.
         final BigDecimal c2 = (type == 1) ? times(c, plus(1, r)) : c;
-        // fv = -(((1 + r)^N - 1) / r * c + pv * (1 + r)^N);
         final BigDecimal tmp = plus(1, r).pow(nper);
         return plus(
                 times(

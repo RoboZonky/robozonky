@@ -112,10 +112,9 @@ class RoboZonkyFilter implements ClientRequestFilter,
                           clientRequestContext.getUri(), clientResponseContext.getStatus(),
                           clientResponseContext.getStatusInfo().getReasonPhrase());
         final String responseEntity = getResponseEntity(clientResponseContext);
-        if (clientResponseContext.getStatus() == 400) {
-            if (responseEntity.contains("invalid_token")) { // Zonky is dumb and throws 400 when it should throw 401
-                clientResponseContext.setStatus(401);
-            }
+        if (clientResponseContext.getStatus() == 400 && responseEntity.contains("invalid_token")) {
+            // Zonky is dumb and throws 400 when it should throw 401
+            clientResponseContext.setStatus(401);
         }
         responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
                 .filter(e -> e.getValue().size() > 0)

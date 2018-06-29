@@ -18,7 +18,6 @@ package com.github.robozonky.app.management;
 
 import java.time.OffsetDateTime;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.api.Defaults;
@@ -42,7 +41,7 @@ class Runtime implements RuntimeMBean {
         return lifecycle.getZonkyApiVersion().orElse("N/A");
     }
 
-    void handle(final ExecutionCompletedEvent event, final SessionInfo sessionInfo) {
+    void handle(final ExecutionCompletedEvent event) {
         this.lastUpdatedDateTime = event.getCreatedOn();
     }
 

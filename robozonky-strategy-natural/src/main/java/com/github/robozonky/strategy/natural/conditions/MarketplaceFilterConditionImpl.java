@@ -38,7 +38,7 @@ abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondit
     }
 
     @Override
-    public MarketplaceFilterCondition negate() {
+    public MarketplaceFilterCondition invert() {
         if (this instanceof NegatingCondition) {
             return ((NegatingCondition) this).getToNegate();
         } else {

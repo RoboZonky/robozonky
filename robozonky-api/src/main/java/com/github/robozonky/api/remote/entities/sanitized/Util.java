@@ -24,15 +24,12 @@ import java.util.WeakHashMap;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.RawLoan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class Util {
 
     private static final Map<String, BigDecimal> BIGDECIMAL_CACHE = new WeakHashMap<>(0);
     private static final Function<Integer, String> LOAN_URL_SUPPLIER =
             (id) -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
-    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     private static URL toUrl(final String url) {
         try {

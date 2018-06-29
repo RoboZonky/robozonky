@@ -30,11 +30,11 @@ public enum Schedulers {
 
     private final Logger LOGGER = LoggerFactory.getLogger(Schedulers.class);
 
-    private final Collection<Scheduler> schedulers = new CopyOnWriteArraySet<>();
+    private final Collection<Scheduler> items = new CopyOnWriteArraySet<>();
 
     public Scheduler create(final Integer parallelism, final ThreadFactory threadFactory) {
         final Scheduler scheduler = new Scheduler(parallelism, threadFactory);
-        schedulers.add(scheduler);
+        items.add(scheduler);
         LOGGER.trace("Created {}.", scheduler);
         return scheduler;
     }
@@ -49,15 +49,15 @@ public enum Schedulers {
 
     boolean destroy(final Scheduler scheduler) {
         LOGGER.trace("Destroyed {}.", scheduler);
-        return schedulers.remove(scheduler);
+        return items.remove(scheduler);
     }
 
     public void pause() {
-        schedulers.forEach(Scheduler::pause);
+        items.forEach(Scheduler::pause);
     }
 
     public void resume() {
-        schedulers.forEach(Scheduler::resume);
+        items.forEach(Scheduler::resume);
     }
 
 }

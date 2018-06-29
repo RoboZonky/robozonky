@@ -108,9 +108,9 @@ class PortfolioUpdater implements Runnable,
                         CompletableFuture::thenApply,
                         (s1, s2) -> s1.thenCombine(s2, (p1, p2) -> p2));
         try {
-            final TransactionalPortfolio portfolio = combined.get();
-            portfolio.run(); // persist stored information
-            return portfolio.getPortfolio();
+            final TransactionalPortfolio p = combined.get();
+            p.run(); // persist stored information
+            return p.getPortfolio();
         } catch (final Throwable t) {
             throw new IllegalStateException("Portfolio update failed.", t);
         }

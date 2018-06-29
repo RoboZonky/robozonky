@@ -16,8 +16,9 @@
 
 package com.github.robozonky.app;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Optional;
-import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class ShutdownHook {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownHook.class);
-    private final Stack<Consumer<ShutdownHook.Result>> stack = new Stack<>();
+    private final Deque<Consumer<Result>> stack = new ArrayDeque<>(0);
 
     /**
      * Register a handler to call arbitrary code during call.

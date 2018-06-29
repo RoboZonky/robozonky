@@ -18,13 +18,13 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class AlwaysAcceptingConditionTest {
 
     @Test
     void negate() {
-        final MarketplaceFilterCondition negated = AlwaysAcceptingCondition.INSTANCE.negate();
+        final MarketplaceFilterCondition negated = AlwaysAcceptingCondition.INSTANCE.invert();
         assertThat(negated).isEqualTo(NeverAceptingCondition.INSTANCE);
     }
 }

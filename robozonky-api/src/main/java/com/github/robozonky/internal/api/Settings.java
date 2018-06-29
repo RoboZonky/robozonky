@@ -92,14 +92,14 @@ public enum Settings {
     }
 
     public <T> T get(final String key, final Function<String, T> adapter) {
-        final Properties properties = this.properties.updateAndGet(p -> { // lazy initialization to allow for reinit
+        final Properties props = this.properties.updateAndGet(p -> { // lazy initialization to allow for reinit
             if (p == null) {
                 return this.getProperties();
             } else {
                 return p;
             }
         });
-        final String val = properties.containsKey(key) ? properties.getProperty(key) : System.getProperty(key);
+        final String val = props.containsKey(key) ? props.getProperty(key) : System.getProperty(key);
         return adapter.apply(val);
     }
 
