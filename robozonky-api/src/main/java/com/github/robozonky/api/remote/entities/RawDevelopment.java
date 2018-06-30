@@ -31,7 +31,7 @@ public class RawDevelopment extends BaseEntity {
 
     private DevelopmentType businessCode;
     private String publicNote;
-    private String metadata;
+    private Object metadata;
     private DateDescriptor dateFrom, dateTo;
 
     @XmlElement
@@ -46,7 +46,7 @@ public class RawDevelopment extends BaseEntity {
 
 
     @XmlElement
-    public String getMetadata() {
+    public Object getMetadata() {
         // various data at various times, mostly empty; we don't need this.
         return metadata;
     }
