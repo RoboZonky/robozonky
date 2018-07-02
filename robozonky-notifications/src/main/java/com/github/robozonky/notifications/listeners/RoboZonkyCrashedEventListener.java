@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,10 +42,9 @@ public class RoboZonkyCrashedEventListener extends AbstractListener<RoboZonkyCra
 
     @Override
     protected Map<String, Object> getData(final RoboZonkyCrashedEvent event) {
-        final Map<String, Object> result = new HashMap<String, Object>() {{
-            put("isCauseKnown", event.getCause().isPresent());
-        }};
+        final Map<String, Object> result = new HashMap<>(1);
+        result.put("isCauseKnown", event.getCause().isPresent());
         event.getCause().ifPresent(cause -> result.put("cause", Util.stackTraceToString(cause)));
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 }

@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,11 +39,18 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.Maps;
 
-class Util {
+import static com.github.robozonky.internal.util.Maps.entry;
+
+final class Util {
 
     private static final String AT = "@";
     private static final Pattern COMPILE = Pattern.compile("\\Q" + AT + "\\E");
+
+    private Util() {
+        // no instances
+    }
 
     private static Date toDate(final LocalDate localDate) {
         return toDate(localDate.atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime());
@@ -60,18 +66,18 @@ class Util {
     }
 
     public static Map<String, Object> getLoanData(final Loan loan) {
-        return new HashMap<String, Object>() {{
-            put("loanId", loan.getId());
-            put("loanAmount", loan.getAmount());
-            put("loanRating", loan.getRating().getCode());
-            put("loanTerm", loan.getTermInMonths());
-            put("loanUrl", loan.getUrl());
-            put("loanRegion", loan.getRegion());
-            put("loanMainIncomeType", loan.getMainIncomeType());
-            put("loanPurpose", loan.getPurpose());
-            put("loanName", loan.getName());
-            put("insurance", loan.isInsuranceActive());
-        }};
+        return Maps.ofEntries(
+                entry("loanId", loan.getId()),
+                entry("loanAmount", loan.getAmount()),
+                entry("loanRating", loan.getRating().getCode()),
+                entry("loanTerm", loan.getTermInMonths()),
+                entry("loanUrl", loan.getUrl()),
+                entry("loanRegion", loan.getRegion()),
+                entry("loanMainIncomeType", loan.getMainIncomeType()),
+                entry("loanPurpose", loan.getPurpose()),
+                entry("loanName", loan.getName()),
+                entry("insurance", loan.isInsuranceActive())
+        );
     }
 
     private static Map<String, Object> perRating(final Function<Rating, Number> provider) {
@@ -79,16 +85,16 @@ class Util {
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
-        return Collections.unmodifiableMap(new HashMap<String, Object>() {{
-            put("absoluteShare", perRating(portfolioOverview::getCzkInvested));
-            put("relativeShare", perRating(portfolioOverview::getShareOnInvestment));
-            put("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk));
-            put("relativeRisk", perRating(portfolioOverview::getAtRiskShareOnInvestment));
-            put("total", portfolioOverview.getCzkInvested());
-            put("totalRisk", portfolioOverview.getCzkAtRisk());
-            put("totalShare", portfolioOverview.getShareAtRisk());
-            put("balance", portfolioOverview.getCzkAvailable());
-        }});
+        return Maps.ofEntries(
+                entry("absoluteShare", perRating(portfolioOverview::getCzkInvested)),
+                entry("relativeShare", perRating(portfolioOverview::getShareOnInvestment)),
+                entry("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk)),
+                entry("relativeRisk", perRating(portfolioOverview::getAtRiskShareOnInvestment)),
+                entry("total", portfolioOverview.getCzkInvested()),
+                entry("totalRisk", portfolioOverview.getCzkAtRisk()),
+                entry("totalShare", portfolioOverview.getShareAtRisk()),
+                entry("balance", portfolioOverview.getCzkAvailable())
+        );
     }
 
     private static BigDecimal getTotalPaid(final Investment i) {
@@ -100,7 +106,7 @@ class Util {
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
-        final Map<String, Object> loanData = getLoanData(l);
+        final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal());
         loanData.put("amountHeld", i.getOriginalPrincipal());
@@ -113,17 +119,17 @@ class Util {
     public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan,
                                                         final Collection<Development> collections,
                                                         final LocalDate date) {
-        final Map<String, Object> result = getLoanData(i, loan);
+        final Map<String, Object> result = new HashMap<>(getLoanData(i, loan));
         result.put("since", Util.toDate(date));
         result.put("collections", collections.stream()
                 .sorted(Comparator.comparing(Development::getDateFrom).reversed())
                 .limit(5)
-                .map(action -> new HashMap<String, Object>() {{
-                    put("code", action.getType().getCode());
-                    put("note", action.getPublicNote().orElse("Bez dalšího vysvětlení."));
-                    put("startDate", Util.toDate(action.getDateFrom()));
-                    put("endDate", action.getDateTo().map(Util::toDate).orElse(null));
-                }}).collect(Collectors.toList()));
+                .map(action -> Maps.ofEntries(
+                        entry("code", action.getType().getCode()),
+                        entry("note", action.getPublicNote().orElse("Bez dalšího vysvětlení.")),
+                        entry("startDate", Util.toDate(action.getDateFrom())),
+                        entry("endDate", action.getDateTo().map(Util::toDate).orElse(null))
+                )).collect(Collectors.toList()));
         return result;
     }
 

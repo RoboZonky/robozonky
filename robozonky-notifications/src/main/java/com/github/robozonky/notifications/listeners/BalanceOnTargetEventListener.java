@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
@@ -47,9 +48,9 @@ public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStar
 
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
-        return new HashMap<String, Object>(super.getData(event)) {{
-            put("targetBalance", targetBalance);
-        }};
+        final Map<String, Object> result = new HashMap<>(super.getData(event));
+        result.put("targetBalance", targetBalance);
+        return Collections.unmodifiableMap(result);
     }
 
     @Override

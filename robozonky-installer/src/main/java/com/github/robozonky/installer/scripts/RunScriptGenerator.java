@@ -19,7 +19,6 @@ package com.github.robozonky.installer.scripts;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,7 +26,10 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.installer.CommandLinePart;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.Maps;
 import freemarker.template.TemplateException;
+
+import static com.github.robozonky.internal.util.Maps.entry;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
@@ -66,12 +68,12 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
     protected File process(final CommandLinePart commandLine, final String templateName,
                            final Function<String, String> finisher) {
         try {
-            final String result = TemplateProcessor.INSTANCE.process(templateName, new HashMap<String, Object>() {{
-                this.put("root", distributionDirectory.getAbsolutePath());
-                this.put("options", configFile.getAbsolutePath());
-                this.put("javaOpts", assembleJavaOpts(commandLine));
-                this.put("envVars", commandLine.getEnvironmentVariables());
-            }});
+            final String result = TemplateProcessor.INSTANCE.process(templateName, Maps.ofEntries(
+                    entry("root", distributionDirectory.getAbsolutePath()),
+                    entry("options", configFile.getAbsolutePath()),
+                    entry("javaOpts", assembleJavaOpts(commandLine)),
+                    entry("envVars", commandLine.getEnvironmentVariables())
+            ));
             final File target = this.getRunScript();
             Files.write(target.toPath(), finisher.apply(result).getBytes(Defaults.CHARSET));
             LOGGER.info("Generated run script: " + target.getAbsolutePath());

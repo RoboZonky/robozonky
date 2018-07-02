@@ -21,15 +21,17 @@ import java.io.StringWriter;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
 import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+
+import static com.github.robozonky.internal.util.Maps.entry;
 
 public enum TemplateProcessor {
 
@@ -50,12 +52,11 @@ public enum TemplateProcessor {
 
     public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
-        final Map<String, Object> data = new HashMap<String, Object>() {{
-            put("timestamp", Date.from(Instant.now()));
-            put("robozonkyUrl", Defaults.ROBOZONKY_URL);
-            put("embed", embeddedTemplate);
-            put("data", embeddedData);
-        }};
+        final Map<String, Object> data = Maps.ofEntries(
+                entry("timestamp", Date.from(Instant.now())),
+                entry("robozonkyUrl", Defaults.ROBOZONKY_URL),
+                entry("embed", embeddedTemplate),
+                entry("data", embeddedData));
         final Template template = this.config.getTemplate("core.ftl");
         final StringWriter sw = new StringWriter();
         template.process(data, sw);

@@ -31,11 +31,14 @@ import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.internal.util.Maps.entry;
 
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
@@ -96,15 +99,15 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     }
 
     final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
-        return Collections.unmodifiableMap(new HashMap<String, Object>(this.getData(event)) {{
-            // ratings here need to have a stable iteration order, as it will be used to list them in notifications
-            put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
-            put("session", new HashMap<String, Object>() {{
-                put("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername()));
-                put("userAgent", Defaults.ROBOZONKY_USER_AGENT);
-                put("isDryRun", sessionInfo.isDryRun());
-            }});
-        }});
+        final Map<String, Object> result = new HashMap<>(this.getData(event));
+        // ratings here need to have a stable iteration order, as they will be used to list them in notifications
+        result.put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
+        result.put("session", Maps.ofEntries(
+                entry("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername())),
+                entry("userAgent", Defaults.ROBOZONKY_USER_AGENT),
+                entry("isDryRun", sessionInfo.isDryRun())
+        ));
+        return Collections.unmodifiableMap(result);
     }
 
     @Override

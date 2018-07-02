@@ -19,11 +19,13 @@ package com.github.robozonky.installer.scripts;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.function.Function;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.Maps;
 import freemarker.template.TemplateException;
+
+import static com.github.robozonky.internal.util.Maps.entry;
 
 public enum ServiceGenerator implements Function<File, File> {
 
@@ -42,12 +44,12 @@ public enum ServiceGenerator implements Function<File, File> {
         try {
             final File root = execScript.getParentFile();
             final String result = TemplateProcessor.INSTANCE.process(filename + ".ftl",
-                                                                     new HashMap<String, Object>() {{
-                                                                         this.put("uid", ID);
-                                                                         this.put("gid", ID);
-                                                                         this.put("pwd", root.getAbsolutePath());
-                                                                         this.put("script", execScript);
-                                                                     }});
+                                                                     Maps.ofEntries(
+                                                                             entry("uid", ID),
+                                                                             entry("gid", ID),
+                                                                             entry("pwd", root.getAbsolutePath()),
+                                                                             entry("script", execScript)
+                                                                     ));
             final File target = new File(root, filename);
             Files.write(target.toPath(), result.getBytes(Defaults.CHARSET));
             return target.getAbsoluteFile();

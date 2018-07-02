@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -30,16 +29,22 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.github.robozonky.internal.util.Maps.entry;
 import static com.github.robozonky.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.util.BigDecimalCalculator.minus;
 import static com.github.robozonky.util.BigDecimalCalculator.plus;
 import static com.github.robozonky.util.BigDecimalCalculator.times;
 import static com.github.robozonky.util.BigDecimalCalculator.toScale;
 
-public class FinancialCalculator {
+public final class FinancialCalculator {
+
+    private FinancialCalculator() {
+        // no instances
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FinancialCalculator.class);
 
@@ -48,22 +53,23 @@ public class FinancialCalculator {
     private static final BigDecimal ONE_PERCENT = new BigDecimal("0.01"), FIVE_PERCENT = new BigDecimal("0.05"),
             TEN_PERCENT = new BigDecimal("0.1"), FIFTEEN_PERCENT = new BigDecimal("0.15"),
             TWENTY_PERCENT = new BigDecimal("0.2");
-    private static final EnumMap<Rating, BigDecimal> FEES = new EnumMap<Rating, BigDecimal>(Rating.class) {{
-        put(Rating.AAAAA, new BigDecimal("0.002"));
-        put(Rating.AAAA, new BigDecimal("0.005"));
-        put(Rating.AAA, ONE_PERCENT);
-        put(Rating.AA, new BigDecimal("0.025"));
-        put(Rating.A, new BigDecimal("0.03"));
-        put(Rating.B, new BigDecimal("0.035"));
-        put(Rating.C, new BigDecimal("0.04"));
-        put(Rating.D, FIVE_PERCENT);
-    }};
-    private static final SortedMap<Integer, BigDecimal> FEE_DISCOUNTS = new TreeMap<Integer, BigDecimal>() {{
-        put(150_000, FIVE_PERCENT);
-        put(200_000, TEN_PERCENT);
-        put(500_000, FIFTEEN_PERCENT);
-        put(1_000_000, TWENTY_PERCENT);
-    }};
+    private static final EnumMap<Rating, BigDecimal> FEES = new EnumMap<Rating, BigDecimal>(Rating.class);
+    private static final SortedMap<Integer, BigDecimal> FEE_DISCOUNTS = Maps.ofEntriesSorted(
+            entry(150_000, FIVE_PERCENT),
+            entry(200_000, TEN_PERCENT),
+            entry(500_000, FIFTEEN_PERCENT),
+            entry(1_000_000, TWENTY_PERCENT));
+
+    static {
+        FEES.put(Rating.AAAAA, new BigDecimal("0.002"));
+        FEES.put(Rating.AAAA, new BigDecimal("0.005"));
+        FEES.put(Rating.AAA, ONE_PERCENT);
+        FEES.put(Rating.AA, new BigDecimal("0.025"));
+        FEES.put(Rating.A, new BigDecimal("0.03"));
+        FEES.put(Rating.B, new BigDecimal("0.035"));
+        FEES.put(Rating.C, new BigDecimal("0.04"));
+        FEES.put(Rating.D, FIVE_PERCENT);
+    }
 
     private static BigDecimal baseFee(final Investment investment) {
         final OffsetDateTime investmentDate = investment.getInvestmentDate();
