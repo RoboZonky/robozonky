@@ -56,7 +56,6 @@ import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -86,28 +85,19 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.notNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
-    private static final PortfolioOverview MAX_PORTFOLIO = mockPortfolio(Integer.MAX_VALUE);
+    private static final PortfolioOverview MAX_PORTFOLIO = createPortfolio(Integer.MAX_VALUE);
     private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
 
-    private static PortfolioOverview mockPortfolio(final int balance) {
-        final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
-        when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
-        when(portfolioOverview.getCzkAtRisk()).thenReturn(0);
-        when(portfolioOverview.getShareAtRisk()).thenReturn(BigDecimal.ZERO);
-        when(portfolioOverview.getCzkAtRisk(any())).thenReturn(0);
-        when(portfolioOverview.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        when(portfolioOverview.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        return portfolioOverview;
+    private static PortfolioOverview createPortfolio(final int balance) {
+        return PortfolioOverview.calculate(BigDecimal.valueOf(balance), Collections.emptyMap());
     }
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,
@@ -217,7 +207,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .build();
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
-        final Investment i = Investment.fresh((MarketplaceLoan) loan, 1000)
+        final Investment i = Investment.fresh(loan, 1000)
                 .setInvestmentDate(OffsetDateTime.now())
                 .build();
         // create events for listeners
@@ -250,7 +240,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.BALANCE_ON_TARGET,
                             new ExecutionStartedEvent(Collections.emptyList(), MAX_PORTFOLIO)),
                 forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
-                            new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(0))),
+                            new ExecutionStartedEvent(Collections.emptyList(), createPortfolio(0))),
                 forListener(SupportedListener.CRASHED, new RoboZonkyCrashedEvent(new RuntimeException())),
                 forListener(SupportedListener.REMOTE_OPERATION_FAILED,
                             new RemoteOperationFailedEvent(new RuntimeException())),

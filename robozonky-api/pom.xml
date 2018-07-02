@@ -304,6 +304,61 @@
                     "methodName": "fresh",
                     "elementKind": "method",
                     "justification": "Removing unnecessary method."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method int com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk()",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk()",
+                    "oldType": "int",
+                    "newType": "java.math.BigDecimal",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkAtRisk",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview no longer loses precision."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method int com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk(com.github.robozonky.api.remote.enums.Rating)",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk(com.github.robozonky.api.remote.enums.Rating)",
+                    "oldType": "int",
+                    "newType": "java.math.BigDecimal",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkAtRisk",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview no longer loses precision."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method int com.github.robozonky.api.strategies.PortfolioOverview::getCzkAvailable()",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAvailable()",
+                    "oldType": "int",
+                    "newType": "java.math.BigDecimal",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkAvailable",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview no longer loses precision."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method int com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested()",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested()",
+                    "oldType": "int",
+                    "newType": "java.math.BigDecimal",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkInvested",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview no longer loses precision."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method int com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested(com.github.robozonky.api.remote.enums.Rating)",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested(com.github.robozonky.api.remote.enums.Rating)",
+                    "oldType": "int",
+                    "newType": "java.math.BigDecimal",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkInvested",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview no longer loses precision."
                   }
                 ]
               }

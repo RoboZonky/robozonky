@@ -78,7 +78,7 @@ final class Session {
                                                 final RestrictedInvestmentStrategy strategy) {
         final Session session = new Session(portfolio, loans, investor, auth);
         final PortfolioOverview portfolioOverview = session.portfolioOverview;
-        final int balance = portfolioOverview.getCzkAvailable();
+        final int balance = portfolioOverview.getCzkAvailable().intValue();
         Events.fire(new ExecutionStartedEvent(loans, portfolioOverview));
         if (balance >= auth.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
             session.invest(strategy);
@@ -124,7 +124,7 @@ final class Session {
     boolean invest(final RecommendedLoan recommendation) {
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
-        if (portfolioOverview.getCzkAvailable() < recommendation.amount().intValue()) {
+        if (portfolioOverview.getCzkAvailable().compareTo(recommendation.amount()) < 0) {
             // should not be allowed by the calling code
             return false;
         }

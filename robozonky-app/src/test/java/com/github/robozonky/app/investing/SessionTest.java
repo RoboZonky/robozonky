@@ -48,9 +48,16 @@ import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 class SessionTest extends AbstractZonkyLeveragingTest {
 
@@ -302,6 +309,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         });
         // validate event contents
         final InvestmentMadeEvent e = (InvestmentMadeEvent) newEvents.get(1);
-        assertThat(e.getPortfolioOverview().getCzkAvailable()).isEqualTo(oldBalance - amountToInvest);
+        assertThat(e.getPortfolioOverview().getCzkAvailable())
+                .isEqualTo(BigDecimal.valueOf(oldBalance - amountToInvest));
     }
 }

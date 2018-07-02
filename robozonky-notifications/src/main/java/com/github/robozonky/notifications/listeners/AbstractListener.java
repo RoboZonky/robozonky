@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +64,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
      */
     protected void finish(final T event, final SessionInfo sessionInfo) {
         if (event instanceof Financial) { // register balance
-            final int balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
+            final BigDecimal balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
             balanceTracker.setLastKnownBalance(sessionInfo, balance);
         }
     }

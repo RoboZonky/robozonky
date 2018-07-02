@@ -54,7 +54,7 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         return new int[]{minimumInvestment, maximumInvestment};
     }
 
-    boolean sizeMatchesStrategy(final Participation participation, final int balance) {
+    boolean sizeMatchesStrategy(final Participation participation, final BigDecimal balance) {
         final int id = participation.getLoanId();
         final int participationId = participation.getId();
         final int[] recommended = getRecommendationBoundaries(participation);
@@ -64,7 +64,7 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                                                 participationId, minimumRecommendation, maximumRecommendation));
         // round to nearest lower increment
         final double price = participation.getRemainingPrincipal().doubleValue();
-        if (balance < price) {
+        if (balance.doubleValue() < price) {
             Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; over balance.",
                                                     id, participationId));
             return false;

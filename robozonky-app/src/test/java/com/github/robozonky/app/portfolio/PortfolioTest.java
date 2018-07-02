@@ -80,10 +80,10 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         // the test starts here
         final PortfolioOverview o = p.calculateOverview();
         assertSoftly(softly -> { // initial portfolio is empty
-            softly.assertThat(o.getCzkAvailable()).isEqualTo(10_000);
-            softly.assertThat(o.getCzkInvested(Rating.C)).isEqualTo(0);
-            softly.assertThat(o.getCzkInvested(Rating.B)).isEqualTo(0);
-            softly.assertThat(o.getCzkInvested(Rating.A)).isEqualTo(0);
+            softly.assertThat(o.getCzkAvailable()).isEqualTo(BigDecimal.valueOf(10_000));
+            softly.assertThat(o.getCzkInvested(Rating.C)).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(o.getCzkInvested(Rating.B)).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(o.getCzkInvested(Rating.A)).isEqualTo(BigDecimal.ZERO);
         });
         p.simulateInvestment(t, l3.getId(), investmentSize);
         p.simulatePurchase(t, l1.getId(), investmentSize);
@@ -91,14 +91,14 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final PortfolioOverview o2 = p.calculateOverview();
         assertSoftly(softly -> {
             // balance minus two investments; sales are not tracked here, it will come in with RemoteBalance
-            softly.assertThat(o2.getCzkAvailable()).isEqualTo(9980);
+            softly.assertThat(o2.getCzkAvailable()).isEqualTo(BigDecimal.valueOf(9980));
             // check ratings for expenses
-            softly.assertThat(o2.getCzkInvested(Rating.C)).isEqualTo(investmentSize.intValue());
-            softly.assertThat(o2.getCzkInvested(Rating.A)).isEqualTo(investmentSize.intValue());
+            softly.assertThat(o2.getCzkInvested(Rating.C)).isEqualTo(investmentSize);
+            softly.assertThat(o2.getCzkInvested(Rating.A)).isEqualTo(investmentSize);
             // and the rating for incomes
-            softly.assertThat(o2.getCzkInvested(Rating.B)).isEqualTo(investmentSize.negate().intValue());
+            softly.assertThat(o2.getCzkInvested(Rating.B)).isEqualTo(investmentSize.negate());
         });
-        List<Event> events = this.getNewEvents();
+        final List<Event> events = this.getNewEvents();
         assertThat(events).first().isInstanceOf(InvestmentSoldEvent.class);
     }
 }

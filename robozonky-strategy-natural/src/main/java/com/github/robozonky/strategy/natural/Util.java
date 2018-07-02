@@ -29,7 +29,11 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-public class Util {
+public final class Util {
+
+    private Util() {
+        // no instances
+    }
 
     private static final BigDecimal ONE_HUNDRED = BigDecimal.TEN.pow(2);
 
@@ -66,12 +70,12 @@ public class Util {
     }
 
     public static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
-        final int balance = portfolio.getCzkAvailable();
+        final int balance = portfolio.getCzkAvailable().intValue();
         if (balance < strategy.getMinimumBalance()) {
             Decisions.report(logger -> logger.debug("Not recommending any loans due to balance under minimum."));
             return false;
         }
-        final int invested = portfolio.getCzkInvested();
+        final int invested = portfolio.getCzkInvested().intValue();
         final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
         if (invested >= investmentCeiling) {
             Decisions.report(logger -> logger.debug("Not recommending any loans due to reaching the ceiling."));

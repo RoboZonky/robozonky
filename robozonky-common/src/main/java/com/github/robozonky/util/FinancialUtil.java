@@ -18,10 +18,10 @@ package com.github.robozonky.util;
 
 import java.math.BigDecimal;
 
-import static com.github.robozonky.util.BigDecimalCalculator.divide;
-import static com.github.robozonky.util.BigDecimalCalculator.minus;
-import static com.github.robozonky.util.BigDecimalCalculator.plus;
-import static com.github.robozonky.util.BigDecimalCalculator.times;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 /**
  * Cleaned up and adapted from here:

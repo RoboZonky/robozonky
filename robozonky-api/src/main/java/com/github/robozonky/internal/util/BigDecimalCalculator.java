@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.internal.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class BigDecimalCalculator {
+public final class BigDecimalCalculator {
+
+    private BigDecimalCalculator() {
+        // no instances
+    }
 
     static final int DEFAULT_SCALE = 8;
 

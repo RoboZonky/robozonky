@@ -17,7 +17,6 @@
 package com.github.robozonky.api.strategies;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -28,32 +27,41 @@ import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+
 /**
  * Class with some aggregate statistics about user's portfolio. Used primarily as the main input into
  * {@link InvestmentStrategy}.
  */
 public class PortfolioOverview {
 
-    private final int czkAvailable, czkInvested, czkAtRisk;
-    private final Map<Rating, BigDecimal> czkInvestedPerRating, czkAtRiskPerRating;
+    private final BigDecimal czkAvailable;
+    private final BigDecimal czkInvested;
+    private final BigDecimal czkAtRisk;
+    private final Map<Rating, BigDecimal> czkInvestedPerRating;
+    private final Map<Rating, BigDecimal> czkAtRiskPerRating;
 
     private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
                               final Map<Rating, BigDecimal> czkAtRiskPerRating) {
-        this.czkAvailable = czkAvailable.intValue();
+        this.czkAvailable = czkAvailable;
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
-        if (this.czkInvested == 0) {
+        if (isZero(this.czkInvested)) {
             this.czkInvestedPerRating = Collections.emptyMap();
             this.czkAtRiskPerRating = Collections.emptyMap();
-            this.czkAtRisk = 0;
+            this.czkAtRisk = BigDecimal.ZERO;
         } else {
             this.czkInvestedPerRating = czkInvestedPerRating;
             this.czkAtRisk = PortfolioOverview.sum(czkAtRiskPerRating.values());
-            this.czkAtRiskPerRating = czkAtRisk == 0 ? Collections.emptyMap() : czkAtRiskPerRating;
+            this.czkAtRiskPerRating = isZero(czkAtRisk) ? Collections.emptyMap() : czkAtRiskPerRating;
         }
     }
 
-    private static int sum(final Collection<BigDecimal> vals) {
-        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add).intValue();
+    private static boolean isZero(final BigDecimal bigDecimal) {
+        return bigDecimal.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    private static BigDecimal sum(final Collection<BigDecimal> vals) {
+        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static BigDecimal sum(final RiskPortfolio portfolio) {
@@ -80,23 +88,11 @@ public class PortfolioOverview {
         return new PortfolioOverview(balance, amounts, atRiskAmounts);
     }
 
-    private static BigDecimal divide(final BigDecimal a, final BigDecimal b) {
-        return a.divide(b, 4, RoundingMode.HALF_EVEN).stripTrailingZeros();
-    }
-
-    private static BigDecimal divide(final BigDecimal a, final int b) {
-        return divide(a, BigDecimal.valueOf(b));
-    }
-
-    private static BigDecimal divide(final int a, final int b) {
-        return divide(BigDecimal.valueOf(a), b);
-    }
-
     /**
      * Available balance in the wallet.
      * @return Amount in CZK.
      */
-    public int getCzkAvailable() {
+    public BigDecimal getCzkAvailable() {
         return this.czkAvailable;
     }
 
@@ -104,7 +100,7 @@ public class PortfolioOverview {
      * Sum total of all amounts yet unpaid.
      * @return Amount in CZK.
      */
-    public int getCzkInvested() {
+    public BigDecimal getCzkInvested() {
         return this.czkInvested;
     }
 
@@ -113,15 +109,15 @@ public class PortfolioOverview {
      * @param r Rating in question.
      * @return Amount in CZK.
      */
-    public int getCzkInvested(final Rating r) {
-        return this.czkInvestedPerRating.getOrDefault(r, BigDecimal.ZERO).intValue();
+    public BigDecimal getCzkInvested(final Rating r) {
+        return this.czkInvestedPerRating.getOrDefault(r, BigDecimal.ZERO);
     }
 
     /**
      * Sum total of all remaining principal where loans are currently overdue.
      * @return Amount in CZK.
      */
-    public int getCzkAtRisk() {
+    public BigDecimal getCzkAtRisk() {
         return this.czkAtRisk;
     }
 
@@ -130,7 +126,7 @@ public class PortfolioOverview {
      * @return Percentage.
      */
     public BigDecimal getShareAtRisk() {
-        if (czkInvested == 0) { // protected against division by zero
+        if (isZero(czkInvested)) { // protected against division by zero
             return BigDecimal.ZERO;
         }
         return divide(czkAtRisk, czkInvested);
@@ -141,8 +137,8 @@ public class PortfolioOverview {
      * @param r Rating in question.
      * @return Amount in CZK.
      */
-    public int getCzkAtRisk(final Rating r) {
-        return this.czkAtRiskPerRating.getOrDefault(r, BigDecimal.ZERO).intValue();
+    public BigDecimal getCzkAtRisk(final Rating r) {
+        return this.czkAtRiskPerRating.getOrDefault(r, BigDecimal.ZERO);
     }
 
     /**
@@ -151,10 +147,10 @@ public class PortfolioOverview {
      * @return Share of the given rating on overall investments.
      */
     public BigDecimal getShareOnInvestment(final Rating r) {
-        if (czkInvested == 0) { // protected against division by zero
+        if (isZero(czkInvested)) { // protected against division by zero
             return BigDecimal.ZERO;
         }
-        final int investedPerRating = this.getCzkInvested(r);
+        final BigDecimal investedPerRating = this.getCzkInvested(r);
         return divide(investedPerRating, czkInvested);
     }
 
@@ -164,8 +160,8 @@ public class PortfolioOverview {
      * @return Share of the given rating on overall investments.
      */
     public BigDecimal getAtRiskShareOnInvestment(final Rating r) {
-        final int investedPerRating = this.getCzkInvested(r);
-        if (investedPerRating == 0) { // protected against division by zero
+        final BigDecimal investedPerRating = this.getCzkInvested(r);
+        if (isZero(investedPerRating)) { // protected against division by zero
             return BigDecimal.ZERO;
         }
         return divide(getCzkAtRisk(r), investedPerRating);

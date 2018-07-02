@@ -35,9 +35,13 @@ import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 class NaturalLanguagePurchaseStrategyTest {
 
@@ -62,7 +66,8 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(0);
+        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.ZERO);
+        when(portfolio.getCzkInvested()).thenReturn(BigDecimal.ZERO);
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         assertThat(result).isEmpty();
@@ -75,8 +80,8 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(10_000);
-        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
+        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
+        when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk()));
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         assertThat(result).isEmpty();
@@ -90,8 +95,8 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), w);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(10_000);
-        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
+        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
+        when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         assertThat(result).isEmpty();
@@ -102,8 +107,8 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(10_000);
-        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
+        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
+        when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         final Participation l = mockParticipation();
         doReturn(Rating.A).when(l).getRating();
@@ -115,23 +120,24 @@ class NaturalLanguagePurchaseStrategyTest {
     @Test
     void recommendationIsMade() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
-        final ParsedStrategy ps = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
-                                                     new FilterSupplier(v, null, Collections.emptySet()));
-        final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(ps);
+        final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
+                                                    new FilterSupplier(v, null, Collections.emptySet()));
+        final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(10_000);
-        when(portfolio.getCzkInvested()).thenReturn(ps.getMaximumInvestmentSizeInCzk() - 1);
+        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
+        when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        final Participation p = spy(mockParticipation());
-        doReturn(BigDecimal.valueOf(100000)).when(p).getRemainingPrincipal();  // not recommended due to balance
-        doReturn(Rating.A).when(p).getRating();
+        final Participation participation = spy(mockParticipation());
+        doReturn(BigDecimal.valueOf(100000)).when(
+                participation).getRemainingPrincipal();  // not recommended due to balance
+        doReturn(Rating.A).when(participation).getRating();
         final Participation p2 = spy(mockParticipation());
         final int amount = 199; // check amounts under Zonky investment minimum
         doReturn(BigDecimal.valueOf(amount)).when(p2).getRemainingPrincipal();
         doReturn(Rating.A).when(p2).getRating();
         final ParticipationDescriptor pd = mockDescriptor(p2);
         final List<RecommendedParticipation> result =
-                s.recommend(Arrays.asList(mockDescriptor(p), pd), portfolio, new Restrictions())
+                s.recommend(Arrays.asList(mockDescriptor(participation), pd), portfolio, new Restrictions())
                         .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedParticipation r = result.get(0);

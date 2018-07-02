@@ -29,16 +29,17 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.internal.util.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.toScale;
 import static com.github.robozonky.internal.util.Maps.entry;
-import static com.github.robozonky.util.BigDecimalCalculator.divide;
-import static com.github.robozonky.util.BigDecimalCalculator.minus;
-import static com.github.robozonky.util.BigDecimalCalculator.plus;
-import static com.github.robozonky.util.BigDecimalCalculator.times;
-import static com.github.robozonky.util.BigDecimalCalculator.toScale;
 
 public final class FinancialCalculator {
 
@@ -85,7 +86,7 @@ public final class FinancialCalculator {
      * @see "https://zonky.cz/zonky-vyhody/"
      */
     private static BigDecimal feeDiscount(final PortfolioOverview portfolioOverview) {
-        final int totalInvested = portfolioOverview.getCzkInvested();
+        final int totalInvested = portfolioOverview.getCzkInvested().intValue();
         final SortedMap<Integer, BigDecimal> applicableDiscounts = FEE_DISCOUNTS.headMap(totalInvested + 1);
         if (applicableDiscounts.isEmpty()) {
             return BigDecimal.ZERO;

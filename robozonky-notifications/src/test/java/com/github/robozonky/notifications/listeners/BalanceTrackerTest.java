@@ -16,12 +16,14 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BalanceTrackerTest extends AbstractRoboZonkyTest {
 
@@ -32,11 +34,11 @@ class BalanceTrackerTest extends AbstractRoboZonkyTest {
         final BalanceTracker b = new BalanceTracker(Target.EMAIL);
         assertThat(b.getLastKnownBalance(SESSION)).isEmpty();
         // store new value
-        final int newBalance = 200;
+        final BigDecimal newBalance = BigDecimal.valueOf(200);
         b.setLastKnownBalance(SESSION, newBalance);
         assertThat(b.getLastKnownBalance(SESSION)).isPresent().hasValue(newBalance);
         // overwrite value
-        final int newerBalance = 100;
+        final BigDecimal newerBalance = BigDecimal.valueOf(100);
         b.setLastKnownBalance(SESSION, newerBalance);
         assertThat(b.getLastKnownBalance(SESSION)).isPresent().hasValue(newerBalance);
     }

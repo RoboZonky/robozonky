@@ -16,7 +16,8 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.OptionalInt;
+import java.math.BigDecimal;
+import java.util.Optional;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.state.TenantState;
@@ -30,15 +31,14 @@ class BalanceTracker {
         this.target = target;
     }
 
-    public OptionalInt getLastKnownBalance(final SessionInfo sessionInfo) {
+    public Optional<BigDecimal> getLastKnownBalance(final SessionInfo sessionInfo) {
         return TenantState.of(sessionInfo)
                 .in(BalanceTracker.class)
                 .getValue(target.getId())
-                .map(b -> OptionalInt.of(Integer.parseInt(b)))
-                .orElse(OptionalInt.empty());
+                .map(BigDecimal::new);
     }
 
-    public void setLastKnownBalance(final SessionInfo sessionInfo, final int newBalance) {
+    public void setLastKnownBalance(final SessionInfo sessionInfo, final BigDecimal newBalance) {
         TenantState.of(sessionInfo)
                 .in(BalanceTracker.class)
                 .reset(b -> b.put(target.getId(), String.valueOf(newBalance)));

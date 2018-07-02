@@ -40,7 +40,7 @@ import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.util.BigDecimalCalculator;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

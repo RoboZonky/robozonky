@@ -19,11 +19,12 @@ package com.github.robozonky.util;
 import java.math.BigDecimal;
 import java.util.stream.IntStream;
 
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class FinancialUtilTest {
 

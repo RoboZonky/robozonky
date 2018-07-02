@@ -86,7 +86,7 @@ final class Session {
         boolean invested;
         do {
             invested = strategy.apply(getAvailable(), portfolioOverview)
-                    .filter(r -> portfolioOverview.getCzkAvailable() >= r.amount().intValue())
+                    .filter(r -> portfolioOverview.getCzkAvailable().compareTo(r.amount()) >= 0)
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);

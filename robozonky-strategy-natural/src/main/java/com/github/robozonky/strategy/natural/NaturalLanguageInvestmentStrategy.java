@@ -63,13 +63,13 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         final Map<Rating, BigDecimal> relevantPortfolio = splitByRating.keySet().stream()
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
         // and now return recommendations in the order in which investment should be attempted
-        final int balance = portfolio.getCzkAvailable();
+        final BigDecimal balance = portfolio.getCzkAvailable();
         final InvestmentSizeRecommender recommender = new InvestmentSizeRecommender(strategy, restrictions);
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
                 .map(l -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = recommender.apply(l.item(), balance);
+                    final int recommendedAmount = recommender.apply(l.item(), balance.intValue());
                     if (recommendedAmount > 0) {
                         return l.recommend(recommendedAmount, needsConfirmation(l));
                     } else {

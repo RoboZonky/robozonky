@@ -16,10 +16,11 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.OptionalInt;
+import java.util.Optional;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
@@ -55,12 +56,13 @@ public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStar
 
     @Override
     boolean shouldNotify(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
-        final OptionalInt lastKnownBalance = balanceTracker.getLastKnownBalance(sessionInfo);
-        final int newBalance = event.getPortfolioOverview().getCzkAvailable();
-        LOGGER.debug("Last known balance: {}, target: {}, new: {}.", lastKnownBalance, targetBalance, newBalance);
-        final boolean balanceNowExceeded = newBalance > targetBalance;
-        final boolean wasFineLastTime = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() < targetBalance;
+        final Optional<BigDecimal> lastKnownBalance = balanceTracker.getLastKnownBalance(sessionInfo);
+        final BigDecimal newBalance = event.getPortfolioOverview().getCzkAvailable();
+        final BigDecimal expectedBalance = BigDecimal.valueOf(targetBalance);
+        LOGGER.debug("Last known balance: {}, target: {}, new: {}.", lastKnownBalance, expectedBalance, newBalance);
+        final boolean balanceNowExceeded = newBalance.compareTo(expectedBalance) > 0;
+        final boolean wasFineLastTime =
+                !lastKnownBalance.isPresent() || lastKnownBalance.get().compareTo(expectedBalance) < 0;
         return (balanceNowExceeded && wasFineLastTime);
     }
-
 }
