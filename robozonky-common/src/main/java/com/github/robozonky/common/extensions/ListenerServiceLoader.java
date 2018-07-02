@@ -39,6 +39,10 @@ public final class ListenerServiceLoader {
     private static final ServiceLoader<ListenerService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
 
+    private ListenerServiceLoader() {
+        // no instances
+    }
+
     /**
      * Retrieve the location configuration previously stored through
      * {@link #registerNotificationConfiguration(SessionInfo, URL)}.

@@ -36,13 +36,17 @@ import com.github.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Checker {
+public final class Checker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Checker.class);
     private static final Comparator<RawLoan> SUBCOMPARATOR =
             Comparator.comparing(RawLoan::getRemainingInvestment).reversed();
     private static final Comparator<RawLoan> COMPARATOR =
             Comparator.comparing(RawLoan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
+
+    private Checker() {
+        // no instances
+    }
 
     static Optional<RawLoan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
         try {

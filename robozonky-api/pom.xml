@@ -359,6 +359,13 @@
                     "methodName": "getCzkInvested",
                     "elementKind": "method",
                     "justification": "PortfolioOverview no longer loses precision."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.robozonky.api.remote.enums.Ratings",
+                    "package": "com.github.robozonky.api.remote.enums",
+                    "classSimpleName": "Ratings",
+                    "elementKind": "class",
+                    "justification": "No longer used anywhere."
                   }
                 ]
               }

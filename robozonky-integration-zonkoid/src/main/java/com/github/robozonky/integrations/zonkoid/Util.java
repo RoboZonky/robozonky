@@ -22,7 +22,11 @@ import java.io.IOException;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
 
-class Util {
+final class Util {
+
+    private Util() {
+        // no instances
+    }
 
     public static String readEntity(final HttpEntity entity) {
         final ByteArrayOutputStream outstream = new ByteArrayOutputStream(); // no need to close this one

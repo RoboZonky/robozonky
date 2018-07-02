@@ -43,12 +43,7 @@ import static com.github.robozonky.internal.util.Maps.entry;
 
 public final class FinancialCalculator {
 
-    private FinancialCalculator() {
-        // no instances
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FinancialCalculator.class);
-
     private static final Instant MIDNIGHT_2017_09_01 =
             LocalDate.of(2017, 9, 1).atStartOfDay(Defaults.ZONE_ID).toInstant();
     private static final BigDecimal ONE_PERCENT = new BigDecimal("0.01"), FIVE_PERCENT = new BigDecimal("0.05"),
@@ -70,6 +65,10 @@ public final class FinancialCalculator {
         FEES.put(Rating.B, new BigDecimal("0.035"));
         FEES.put(Rating.C, new BigDecimal("0.04"));
         FEES.put(Rating.D, FIVE_PERCENT);
+    }
+
+    private FinancialCalculator() {
+        // no instances
     }
 
     private static BigDecimal baseFee(final Investment investment) {

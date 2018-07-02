@@ -20,4 +20,8 @@ final class Constants {
 
     public static final String ME = "/users/me";
     public static final String INVESTOR_ME = "/investors/me";
+
+    private Constants() {
+        // no instances
+    }
 }

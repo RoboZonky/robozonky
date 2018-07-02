@@ -26,7 +26,11 @@ import java.util.Properties;
 import com.github.robozonky.internal.api.Defaults;
 import com.izforge.izpack.api.data.InstallData;
 
-class Util {
+final class Util {
+
+    private Util() {
+        // no instances
+    }
 
     private static final String toBoolean(final String string) {
         return Boolean.valueOf(string).toString();

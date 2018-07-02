@@ -27,9 +27,12 @@ import java.util.ServiceLoader;
  */
 public final class SystemExitServiceLoader {
 
+    static final SystemExitService REAL = () -> System::exit;
     private static final ServiceLoader<SystemExitService> LOADER = ServiceLoader.load(SystemExitService.class);
 
-    static final SystemExitService REAL = () -> System::exit;
+    private SystemExitServiceLoader() {
+        // no instances
+    }
 
     public static SystemExitService load() {
         return StreamUtil.toStream(LOADER).findAny().orElse(REAL);

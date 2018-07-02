@@ -38,4 +38,8 @@ public final class Defaults {
     public static final String ROBOZONKY_URL = "http://www.robozonky.cz";
     public static final String ROBOZONKY_USER_AGENT =
             "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" + Defaults.ROBOZONKY_URL + ")";
+
+    private Defaults() {
+        // no instances
+    }
 }

@@ -25,11 +25,15 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.RawLoan;
 
-class Util {
+final class Util {
 
     private static final Map<String, BigDecimal> BIGDECIMAL_CACHE = new HashMap<>(0);
     private static final Function<Integer, String> LOAN_URL_SUPPLIER =
             (id) -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
+
+    private Util() {
+        // no instances
+    }
 
     private static URL toUrl(final String url) {
         try {

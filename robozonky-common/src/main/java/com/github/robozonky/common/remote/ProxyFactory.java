@@ -28,6 +28,10 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 final class ProxyFactory {
 
+    private ProxyFactory() {
+        // no instances
+    }
+
     public static ResteasyClient newResteasyClient() {
         /*
          * Supply the provider factory singleton, as otherwise RESTEasy would create a new instance every time.

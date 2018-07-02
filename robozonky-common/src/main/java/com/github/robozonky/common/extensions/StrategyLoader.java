@@ -38,6 +38,10 @@ public final class StrategyLoader {
     private static final ServiceLoader<StrategyService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(StrategyService.class);
 
+    private StrategyLoader() {
+        // no instances
+    }
+
     static <T> Optional<T> processStrategyService(final StrategyService service, final String strategy,
                                                   final BiFunction<StrategyService, String, Optional<T>> getter) {
         StrategyLoader.LOGGER.debug("Reading strategy.");

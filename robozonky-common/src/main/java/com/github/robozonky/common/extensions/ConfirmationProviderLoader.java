@@ -32,6 +32,10 @@ public final class ConfirmationProviderLoader {
     private static final ServiceLoader<ConfirmationProviderService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ConfirmationProviderService.class);
 
+    private ConfirmationProviderLoader() {
+        // no instances
+    }
+
     static Optional<ConfirmationProvider> load(final String providerId,
                                                final Iterable<ConfirmationProviderService> loader) {
         ConfirmationProviderLoader.LOGGER.debug("Looking up confirmation provider '{}'.", providerId);

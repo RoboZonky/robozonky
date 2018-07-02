@@ -25,9 +25,13 @@ import org.slf4j.LoggerFactory;
  * The purpose of this class is so that all possible reasons for a strategy to reject/accept a loan are properly logged
  * using the same logger. This will help find these messages in the usually very long logs.
  */
-class Decisions {
+final class Decisions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Decisions.class);
+
+    private Decisions() {
+        // no instances
+    }
 
     public static void report(final Consumer<Logger> log) {
         log.accept(LOGGER);

@@ -22,7 +22,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 
-public class IoTestUtil {
+public final class IoTestUtil {
+
+    private IoTestUtil() {
+        // no instances
+    }
 
     public static File streamToFile(final InputStream s) throws IOException {
         return IoTestUtil.streamToFile(s, ".tmp");

@@ -46,6 +46,10 @@ final class SideEffectFreeParser {
         }
     };
 
+    private SideEffectFreeParser() {
+        // no instances
+    }
+
     /**
      * Will disable any writes to {@link System#out} for the given recognizer.
      * @param instance

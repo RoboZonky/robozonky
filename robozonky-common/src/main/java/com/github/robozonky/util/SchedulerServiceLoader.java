@@ -30,8 +30,11 @@ import java.util.concurrent.ThreadFactory;
 final class SchedulerServiceLoader {
 
     private static final ServiceLoader<SchedulerService> LOADER = ServiceLoader.load(SchedulerService.class);
-
     private static final SchedulerService REAL_SCHEDULER = PausableScheduledThreadPoolExecutor::new;
+
+    private SchedulerServiceLoader() {
+        // no instances
+    }
 
     public static SchedulerService load() {
         return StreamUtil.toStream(LOADER).findAny().orElse(REAL_SCHEDULER);

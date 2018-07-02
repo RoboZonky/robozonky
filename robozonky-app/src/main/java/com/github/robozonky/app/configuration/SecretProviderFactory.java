@@ -29,6 +29,10 @@ final class SecretProviderFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretProviderFactory.class);
 
+    private SecretProviderFactory() {
+        // no instances
+    }
+
     /**
      * Obtain keystore-based secret provider if possible.
      * @param cli Command line interface coming from the application.
@@ -46,5 +50,4 @@ final class SecretProviderFactory {
             }
         }).orElseGet(() -> Optional.of(SecretProvider.fallback(cli.getUsername().get(), password)));
     }
-
 }
