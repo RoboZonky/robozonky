@@ -118,9 +118,14 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
                 LOGGER.debug("Will not notify.");
             } else {
                 LOGGER.debug("Notifying {}.", event);
-                final String message = TemplateProcessor.INSTANCE.process(this.getTemplateFileName(),
-                                                                          this.getData(event, sessionInfo));
-                handler.send(listener, sessionInfo, getSubject(event), message);
+                final String subject = getSubject(event);
+                final Map<String, Object> data = new HashMap<>(this.getData(event, sessionInfo));
+                data.put("subject", subject);
+                final Map<String, Object> result = Collections.unmodifiableMap(data);
+                final String message = TemplateProcessor.INSTANCE.processHtml(this.getTemplateFileName(), result);
+                final String fallbackMessage = TemplateProcessor.INSTANCE.processPlainText(this.getTemplateFileName(),
+                                                                                           result);
+                handler.send(listener, sessionInfo, subject, message, fallbackMessage);
             }
         } catch (final Exception ex) {
             throw new IllegalStateException("Event processing failed.", ex);

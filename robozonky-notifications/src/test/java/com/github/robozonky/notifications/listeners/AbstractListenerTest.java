@@ -116,10 +116,17 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .isNotEmpty();
     }
 
-    private static <T extends Event> void testProcessing(final AbstractListener<T> listener,
-                                                         final T event) throws IOException, TemplateException {
-        final String s = TemplateProcessor.INSTANCE.process(listener.getTemplateFileName(),
-                                                            listener.getData(event, SESSION_INFO));
+    private static <T extends Event> void testPlainTextProcessing(final AbstractListener<T> listener,
+                                                                  final T event) throws IOException, TemplateException {
+        final String s = TemplateProcessor.INSTANCE.processPlainText(listener.getTemplateFileName(),
+                                                                     listener.getData(event, SESSION_INFO));
+        assertThat(s).contains(Defaults.ROBOZONKY_URL);
+    }
+
+    private static <T extends Event> void testHtmlProcessing(final AbstractListener<T> listener,
+                                                             final T event) throws IOException, TemplateException {
+        final String s = TemplateProcessor.INSTANCE.processHtml(listener.getTemplateFileName(),
+                                                                listener.getData(event, SESSION_INFO));
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 
@@ -145,7 +152,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                                                         final T event) throws Exception {
         BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
-        verify(h, times(1)).actuallySend(notNull(), notNull(), notNull());
+        verify(h, times(1)).actuallySend(notNull(), notNull(), notNull(), notNull());
     }
 
     @SuppressWarnings("unchecked")
@@ -155,7 +162,8 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final AbstractListener<T> l = (AbstractListener<T>) getListener(listener, p);
         return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
                 dynamicTest("is formally correct", () -> testFormal(l, e, listener)),
-                dynamicTest("is processed correctly", () -> testProcessing(l, e)),
+                dynamicTest("is processed as plain text", () -> testPlainTextProcessing(l, e)),
+                dynamicTest("is processed as HTML", () -> testHtmlProcessing(l, e)),
                 dynamicTest("triggers the sending code", () -> testTriggered(p, l, e)),
                 dynamicTest("has listener enabled", () -> testListenerEnabled(e))
         ));
@@ -175,10 +183,10 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final AbstractTargetHandler p = getHandler(cs);
         final TestingEmailingListener l = new TestingEmailingListener(p);
         l.handle(EVENT, SESSION_INFO);
-        verify(p, times(1)).actuallySend(notNull(), notNull(), notNull());
+        verify(p, times(1)).actuallySend(notNull(), notNull(), notNull(), notNull());
         l.handle(EVENT, SESSION_INFO);
         // e-mail not re-sent, finisher not called again
-        verify(p, times(1)).actuallySend(notNull(), notNull(), notNull());
+        verify(p, times(1)).actuallySend(notNull(), notNull(), notNull(), notNull());
     }
 
     @BeforeEach
@@ -264,7 +272,8 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         }
 
         @Override
-        public void actuallySend(final SessionInfo sessionInfo, final String subject, final String message) {
+        public void actuallySend(final SessionInfo sessionInfo, final String subject, final String message,
+                                 final String fallbackMessage) {
 
         }
     }

@@ -18,9 +18,8 @@ package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.api.Defaults;
-import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
+import org.apache.commons.mail.HtmlEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +67,8 @@ final class EmailHandler extends AbstractTargetHandler {
         return config.readInt(target, "smtp.port", 25);
     }
 
-    private Email createNewEmail(final SessionInfo session) throws EmailException {
-        final Email email = new SimpleEmail();
+    private HtmlEmail createNewEmail(final SessionInfo session) throws EmailException {
+        final HtmlEmail email = new HtmlEmail();
         email.setCharset(Defaults.CHARSET.displayName());
         email.setHostName(getSmtpHostname());
         email.setSmtpPort(getSmtpPort());
@@ -90,10 +89,11 @@ final class EmailHandler extends AbstractTargetHandler {
 
     @Override
     public void actuallySend(final SessionInfo sessionInfo, final String subject,
-                             final String message) throws Exception {
-        final Email email = createNewEmail(sessionInfo);
+                             final String message, final String fallbackMessage) throws Exception {
+        final HtmlEmail email = createNewEmail(sessionInfo);
         email.setSubject(subject);
-        email.setMsg(message);
+        email.setHtmlMsg(message);
+        email.setTextMsg(fallbackMessage);
         LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.", email.getSubject(),
                      email.getFromAddress(), email.getToAddresses(), email.getHostName(), email.getSmtpPort(),
                      getSmtpUsername());

@@ -95,16 +95,16 @@ public abstract class AbstractTargetHandler {
     }
 
     public void send(final SupportedListener listener, final SessionInfo sessionInfo, final String subject,
-                     final String message) throws Exception {
+                     final String message, final String fallbackMessage) throws Exception {
         if (!shouldNotify(listener, sessionInfo)) {
             LOGGER.debug("Will not notify.");
             return;
         }
-        actuallySend(sessionInfo, subject, message);
+        actuallySend(sessionInfo, subject, message, fallbackMessage);
         getSpecificCounter(listener).increase(sessionInfo);
         notifications.increase(sessionInfo);
     }
 
     public abstract void actuallySend(final SessionInfo sessionInfo, final String subject,
-                                      final String message) throws Exception;
+                                      final String message, final String fallbackMessage) throws Exception;
 }

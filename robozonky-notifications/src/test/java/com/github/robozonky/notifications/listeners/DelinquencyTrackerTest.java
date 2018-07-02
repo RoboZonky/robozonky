@@ -49,15 +49,6 @@ import static org.mockito.Mockito.verify;
 
 class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
-    public static URL getSomeUrl() {
-        try {
-            return new URL("http://localhost");
-        } catch (final MalformedURLException ex) {
-            Assertions.fail("Shouldn't have happened.", ex);
-            return null;
-        }
-    }
-
     private static final Loan LOAN = Loan.custom()
             .setId(1)
             .setAmount(200)
@@ -72,6 +63,15 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setInvestmentDate(OffsetDateTime.now())
             .build();
     private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+
+    public static URL getSomeUrl() {
+        try {
+            return new URL("http://localhost");
+        } catch (final MalformedURLException ex) {
+            Assertions.fail("Shouldn't have happened.", ex);
+            return null;
+        }
+    }
 
     @Test
     void standard() {
@@ -92,14 +92,13 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
                 new LoanNoLongerDelinquentEventListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, h);
         final LoanNoLongerDelinquentEvent evt = new LoanNoLongerDelinquentEvent(INVESTMENT, LOAN);
         l2.handle(evt, SESSION);
-        verify(h, never()).actuallySend(any(), any(), any()); // not delinquent before, not sending
+        verify(h, never()).actuallySend(any(), any(), any(), any()); // not delinquent before, not sending
         l.handle(new LoanDelinquent10DaysOrMoreEvent(INVESTMENT, LOAN, LocalDate.now(), Collections.emptyList()),
                  SESSION);
-        verify(h).actuallySend(eq(SESSION), any(), any());
+        verify(h).actuallySend(eq(SESSION), any(), any(), any());
         l2.handle(evt, SESSION);
-        verify(h, times(2)).actuallySend(eq(SESSION), any(), any()); // delinquency now registered, send
+        verify(h, times(2)).actuallySend(eq(SESSION), any(), any(), any()); // delinquency now registered, send
         l2.handle(evt, SESSION);
-        verify(h, times(2)).actuallySend(eq(SESSION), any(), any()); // already unregistered, no send
+        verify(h, times(2)).actuallySend(eq(SESSION), any(), any(), any()); // already unregistered, no send
     }
-
 }
