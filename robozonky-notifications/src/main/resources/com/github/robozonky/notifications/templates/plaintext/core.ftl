@@ -1,11 +1,11 @@
 <#setting locale="cs_CZ">
 <#if data.session.isDryRun>
 POZOR: RoboZonky běží ve zkušebním režimu. Následující informace slouží jen
-pro demonstraci nastavení strategie a nejsou platné!
+pro demonstraci nastavení a nemusí být platné ani úplné!
 ===============================================================================
 </#if>
 
-RoboZonky pro Zonky účet ${data.session.userName} Vás tímto informuje o následující operaci:
+RoboZonky pro Zonky účet ${data.session.userName} Vás tímto informuje o následující skutečnosti:
 
 <#include embed>
 
