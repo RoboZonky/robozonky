@@ -157,7 +157,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                                                         final T event) throws Exception {
         BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
-        verify(h, times(1)).actuallySend(notNull(), notNull(), notNull(), notNull());
+        verify(h, times(1)).send(notNull(), notNull(), notNull(), notNull());
     }
 
     @SuppressWarnings("unchecked")
@@ -188,10 +188,10 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final AbstractTargetHandler p = getHandler(cs);
         final TestingEmailingListener l = new TestingEmailingListener(p);
         l.handle(EVENT, SESSION_INFO);
-        verify(p, times(1)).actuallySend(notNull(), notNull(), notNull(), notNull());
+        verify(p, times(1)).send(notNull(), notNull(), notNull(), notNull());
         l.handle(EVENT, SESSION_INFO);
         // e-mail not re-sent, finisher not called again
-        verify(p, times(1)).actuallySend(notNull(), notNull(), notNull(), notNull());
+        verify(p, times(1)).send(notNull(), notNull(), notNull(), notNull());
     }
 
     @BeforeEach
@@ -277,8 +277,8 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         }
 
         @Override
-        public void actuallySend(final SessionInfo sessionInfo, final String subject, final String message,
-                                 final String fallbackMessage) {
+        public void send(final SessionInfo sessionInfo, final String subject, final String message,
+                         final String fallbackMessage) {
 
         }
     }

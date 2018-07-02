@@ -88,8 +88,8 @@ final class EmailHandler extends AbstractTargetHandler {
     }
 
     @Override
-    public void actuallySend(final SessionInfo sessionInfo, final String subject,
-                             final String message, final String fallbackMessage) throws Exception {
+    public void send(final SessionInfo sessionInfo, final String subject,
+                     final String message, final String fallbackMessage) throws Exception {
         final HtmlEmail email = createNewEmail(sessionInfo);
         email.setSubject(subject);
         email.setHtmlMsg(message);

@@ -92,13 +92,13 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
                 new LoanNoLongerDelinquentEventListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, h);
         final LoanNoLongerDelinquentEvent evt = new LoanNoLongerDelinquentEvent(INVESTMENT, LOAN);
         l2.handle(evt, SESSION);
-        verify(h, never()).actuallySend(any(), any(), any(), any()); // not delinquent before, not sending
+        verify(h, never()).send(any(), any(), any(), any()); // not delinquent before, not sending
         l.handle(new LoanDelinquent10DaysOrMoreEvent(INVESTMENT, LOAN, LocalDate.now(), Collections.emptyList()),
                  SESSION);
-        verify(h).actuallySend(eq(SESSION), any(), any(), any());
+        verify(h).send(eq(SESSION), any(), any(), any());
         l2.handle(evt, SESSION);
-        verify(h, times(2)).actuallySend(eq(SESSION), any(), any(), any()); // delinquency now registered, send
+        verify(h, times(2)).send(eq(SESSION), any(), any(), any()); // delinquency now registered, send
         l2.handle(evt, SESSION);
-        verify(h, times(2)).actuallySend(eq(SESSION), any(), any(), any()); // already unregistered, no send
+        verify(h, times(2)).send(eq(SESSION), any(), any(), any()); // already unregistered, no send
     }
 }

@@ -16,6 +16,8 @@
 
 package com.github.robozonky.notifications;
 
+import java.util.Collections;
+import java.util.Map;
 import javax.mail.internet.MimeMessage;
 
 import com.github.robozonky.api.SessionInfo;
@@ -50,7 +52,37 @@ class EmailHandlerTest {
                                                               .getResourceAsStream("notifications-enabled.cfg"));
         final EmailHandler h = new EmailHandler(cs);
         final String subject = "A", body = "B";
-        h.send(SupportedListener.TESTING, new SessionInfo("someone@somewhere.cz"), subject, body, body);
+        h.offer(new Submission() {
+            @Override
+            public SessionInfo getSessionInfo() {
+                return new SessionInfo("someone@somewhere.cz");
+            }
+
+            @Override
+            public SupportedListener getSupportedListener() {
+                return SupportedListener.TESTING;
+            }
+
+            @Override
+            public Map<String, Object> getData() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public String getSubject() {
+                return subject;
+            }
+
+            @Override
+            public String getMessage(final Map<String, Object> data) {
+                return body;
+            }
+
+            @Override
+            public String getFallbackMessage(final Map<String, Object> data) {
+                return body;
+            }
+        });
         assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
         assertThat(m.getSubject()).isNotNull().isEqualTo(subject);

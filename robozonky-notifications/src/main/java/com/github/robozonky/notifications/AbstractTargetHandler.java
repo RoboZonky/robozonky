@@ -94,17 +94,19 @@ public abstract class AbstractTargetHandler {
         }
     }
 
-    public void send(final SupportedListener listener, final SessionInfo sessionInfo, final String subject,
-                     final String message, final String fallbackMessage) throws Exception {
-        if (!shouldNotify(listener, sessionInfo)) {
+    public void offer(final Submission s) throws Exception {
+        final SupportedListener listener = s.getSupportedListener();
+        final SessionInfo session = s.getSessionInfo();
+        if (!shouldNotify(listener, session)) {
             LOGGER.debug("Will not notify.");
             return;
         }
-        actuallySend(sessionInfo, subject, message, fallbackMessage);
-        getSpecificCounter(listener).increase(sessionInfo);
-        notifications.increase(sessionInfo);
+        final Map<String, Object> data = s.getData();
+        send(session, s.getSubject(), s.getMessage(data), s.getFallbackMessage(data));
+        getSpecificCounter(listener).increase(session);
+        notifications.increase(session);
     }
 
-    public abstract void actuallySend(final SessionInfo sessionInfo, final String subject,
-                                      final String message, final String fallbackMessage) throws Exception;
+    public abstract void send(final SessionInfo sessionInfo, final String subject,
+                              final String message, final String fallbackMessage) throws Exception;
 }
