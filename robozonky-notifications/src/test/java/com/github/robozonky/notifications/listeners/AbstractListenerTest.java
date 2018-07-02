@@ -24,6 +24,9 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -125,8 +128,10 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static <T extends Event> void testHtmlProcessing(final AbstractListener<T> listener,
                                                              final T event) throws IOException, TemplateException {
+        final Map<String, Object> data = new HashMap<>(listener.getData(event, SESSION_INFO));
+        data.put("subject", UUID.randomUUID().toString());
         final String s = TemplateProcessor.INSTANCE.processHtml(listener.getTemplateFileName(),
-                                                                listener.getData(event, SESSION_INFO));
+                                                                Collections.unmodifiableMap(data));
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 
