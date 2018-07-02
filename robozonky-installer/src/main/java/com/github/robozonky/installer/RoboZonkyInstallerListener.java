@@ -259,8 +259,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final File runScript = generator.apply(commandLine);
         final File distRunScript = generator.getChildRunScript();
         Stream.of(runScript, distRunScript).forEach(script -> {
-            LOGGER.info("Making executable: " + script);
-            script.setExecutable(true);
+            final boolean success = script.setExecutable(true);
+            LOGGER.info(() -> "Made '" + script + "' executable: " + success + ".");
         });
         if (operatingSystem == OS.LINUX) {
             prepareLinuxServices(runScript);

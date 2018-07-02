@@ -52,8 +52,8 @@ class FileBackedStateStorage implements StateStorage {
         if (state.get() == null) {
             try {
                 if (!stateLocation.exists()) {
-                    LOGGER.debug("Creating state: '{}'.", stateLocation);
-                    stateLocation.createNewFile();
+                    final boolean created = stateLocation.createNewFile();
+                    LOGGER.debug("Created state file '{}': {}.", stateLocation, created);
                 }
                 LOGGER.trace("Reading state: '{}'.", stateLocation);
                 state.set(new Ini(stateLocation));
