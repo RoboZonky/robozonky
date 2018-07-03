@@ -1,0 +1,23 @@
+<p>Participace s následujícími parametry byla právě vystavena na sekundární trh:</p>
+
+<table>
+  <caption><a href="${data.loanUrl}">#${data.loanId?c} ${data.loanName?cap_first}</a></caption>
+  <tr>
+    <th>Rating:</th>
+    <td>${data.loanRating}</td>
+  </tr>
+  <tr>
+    <th>Zbývá splátek:</th>
+    <td>${data.loanTermRemaining?c}</td>
+  </tr>
+  <tr>
+    <th>Zbývající jistina:</th>
+    <td>${data.amountRemaining?string.currency}</td>
+  </tr>
+  <tr>
+    <th>Záchranná vesta:</th>
+    <td><#if data.insurance>Ano<#else>Ne</#if>.</td>
+  </tr>
+</table>
+
+<#include "additional-loan-info.ftl">

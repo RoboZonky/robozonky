@@ -16,10 +16,11 @@
 
 package com.github.robozonky.notifications;
 
+import java.util.Collections;
+import java.util.Map;
 import javax.mail.internet.MimeMessage;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -30,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class EmailHandlerTest {
 
@@ -51,10 +52,39 @@ class EmailHandlerTest {
                                                               .getResourceAsStream("notifications-enabled.cfg"));
         final EmailHandler h = new EmailHandler(cs);
         final String subject = "A", body = "B";
-        h.send(SupportedListener.TESTING, new SessionInfo("someone@somewhere.cz"), subject, body);
+        h.offer(new Submission() {
+            @Override
+            public SessionInfo getSessionInfo() {
+                return new SessionInfo("someone@somewhere.cz");
+            }
+
+            @Override
+            public SupportedListener getSupportedListener() {
+                return SupportedListener.TESTING;
+            }
+
+            @Override
+            public Map<String, Object> getData() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public String getSubject() {
+                return subject;
+            }
+
+            @Override
+            public String getMessage(final Map<String, Object> data) {
+                return body;
+            }
+
+            @Override
+            public String getFallbackMessage(final Map<String, Object> data) {
+                return body;
+            }
+        });
         assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
-        assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
         assertThat(m.getSubject()).isNotNull().isEqualTo(subject);
         assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
     }

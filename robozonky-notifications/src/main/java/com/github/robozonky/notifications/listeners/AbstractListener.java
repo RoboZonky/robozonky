@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,8 +35,10 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.AbstractTargetHandler;
+import com.github.robozonky.notifications.Submission;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
+import freemarker.template.TemplateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,16 +114,56 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         return Collections.unmodifiableMap(result);
     }
 
+    private Submission createSubmission(final T event, final SessionInfo sessionInfo) {
+        final String s = this.getSubject(event);
+        final String t = this.getTemplateFileName();
+        return new Submission() {
+
+            @Override
+            public SessionInfo getSessionInfo() {
+                return sessionInfo;
+            }
+
+            @Override
+            public SupportedListener getSupportedListener() {
+                return listener;
+            }
+
+            @Override
+            public Map<String, Object> getData() {
+                final Map<String, Object> data =
+                        new HashMap<>(AbstractListener.this.getData(event, sessionInfo));
+                data.put("subject", getSubject());
+                return Collections.unmodifiableMap(data);
+            }
+
+            @Override
+            public String getSubject() {
+                return s;
+            }
+
+            @Override
+            public String getMessage(final Map<String, Object> data) throws IOException, TemplateException {
+                return TemplateProcessor.INSTANCE.processHtml(t, data);
+            }
+
+            @Override
+            public String getFallbackMessage(final Map<String, Object> data) throws IOException,
+                    TemplateException {
+                return TemplateProcessor.INSTANCE.processPlainText(t, data);
+            }
+        };
+    }
+
     @Override
     final public void handle(final T event, final SessionInfo sessionInfo) {
         try {
             if (!this.shouldNotify(event, sessionInfo)) {
                 LOGGER.debug("Will not notify.");
             } else {
+                // only do the heavy lifting in the handler, after the final send/no-send decision was made
                 LOGGER.debug("Notifying {}.", event);
-                final String message = TemplateProcessor.INSTANCE.process(this.getTemplateFileName(),
-                                                                          this.getData(event, sessionInfo));
-                handler.send(listener, sessionInfo, getSubject(event), message);
+                handler.offer(createSubmission(event, sessionInfo));
             }
         } catch (final Exception ex) {
             throw new IllegalStateException("Event processing failed.", ex);

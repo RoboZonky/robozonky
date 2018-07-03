@@ -25,6 +25,7 @@ import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.Maps;
+import com.github.robozonky.notifications.templates.html.HtmlTemplate;
 import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
 import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.template.Configuration;
@@ -37,30 +38,42 @@ public enum TemplateProcessor {
 
     INSTANCE;
 
-    private final Configuration config = TemplateProcessor.getFreemarkerConfiguration();
+    private final Configuration config = TemplateProcessor.getFreemarkerConfiguration(PlainTextTemplate.class);
+    private final Configuration htmlConfig = TemplateProcessor.getFreemarkerConfiguration(HtmlTemplate.class);
 
-    static Configuration getFreemarkerConfiguration() {
+    static Configuration getFreemarkerConfiguration(final Class<?> templateRoot) {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
         final Map<String, TemplateNumberFormatFactory> customNumberFormats =
                 Collections.singletonMap("interest", InterestNumberFormatFactory.INSTANCE);
         cfg.setCustomNumberFormats(customNumberFormats);
-        cfg.setClassForTemplateLoading(PlainTextTemplate.class, "");
+        cfg.setClassForTemplateLoading(templateRoot, "");
         cfg.setLogTemplateExceptions(false);
         cfg.setDefaultEncoding(Defaults.CHARSET.displayName());
         return cfg;
     }
 
-    public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
+    private String process(final Configuration configuration, final String embeddedTemplate,
+                           final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
         final Map<String, Object> data = Maps.ofEntries(
                 entry("timestamp", Date.from(Instant.now())),
                 entry("robozonkyUrl", Defaults.ROBOZONKY_URL),
                 entry("embed", embeddedTemplate),
                 entry("data", embeddedData));
-        final Template template = this.config.getTemplate("core.ftl");
+        final Template template = configuration.getTemplate("core.ftl");
         final StringWriter sw = new StringWriter();
         template.process(data, sw);
         return sw.toString().trim();
+    }
+
+    public String processPlainText(final String embeddedTemplate, final Map<String, Object> embeddedData)
+            throws IOException, TemplateException {
+        return process(config, embeddedTemplate, embeddedData);
+    }
+
+    public String processHtml(final String embeddedTemplate, final Map<String, Object> embeddedData)
+            throws IOException, TemplateException {
+        return process(htmlConfig, embeddedTemplate, embeddedData);
     }
 
 }
