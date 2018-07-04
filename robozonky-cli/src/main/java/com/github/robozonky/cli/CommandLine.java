@@ -47,6 +47,7 @@ final class CommandLine {
                 .addCommand(new ZonkoidPasswordFeature())
                 .addCommand(new MasterPasswordFeature())
                 .addCommand(new StrategyValidationFeature())
+                .addCommand(new NotificationTestingFeature())
                 .addObject(cli);
         final JCommander jc = builder.build();
         jc.parse(args);

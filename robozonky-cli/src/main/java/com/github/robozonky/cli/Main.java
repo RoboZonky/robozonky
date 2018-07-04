@@ -27,7 +27,7 @@ public final class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(final String... args) throws IOException {
-        LOGGER.info("Welcome to the RoboZonky command-line configuration tool.");
+        LOGGER.info("Welcome to the RoboZonky command-line configuration and validation tool.");
         LOGGER.warn("This is a tool for the brave. Create a backup copy of RoboZonky or " +
                             "use RoboZonky installer instead.");
         final Optional<Feature> featureOptional = CommandLine.parse(args);

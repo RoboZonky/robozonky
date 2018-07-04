@@ -37,7 +37,7 @@ public final class StrategyValidationFeature implements Feature {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyValidationFeature.class);
 
-    @Parameter(names = {"-u", "--url"}, description = "URL leading to the strategy.", required = true)
+    @Parameter(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
     private URL location;
     private String text;
 
@@ -49,7 +49,7 @@ public final class StrategyValidationFeature implements Feature {
         this(location.toURI().toURL());
     }
 
-    private StrategyValidationFeature() {
+    StrategyValidationFeature() {
         // for JCommander
     }
 

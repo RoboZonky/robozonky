@@ -27,7 +27,7 @@
 
   <artifactId>robozonky-cli</artifactId>
 
-  <name>RoboZonky: Command-line configuration utility</name>
+  <name>RoboZonky: Command-line configuration and validation utility</name>
 
   <dependencies>
     <dependency>
