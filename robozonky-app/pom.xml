@@ -24,7 +24,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>robozonky-app</artifactId>
-  <name>RoboZonky: Command-line application</name>
+  <name>RoboZonky: Main daemon</name>
 
   <properties>
     <mainClass>com.github.robozonky.app.App</mainClass>
