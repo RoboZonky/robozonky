@@ -23,6 +23,14 @@
     <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>src/main/assembly/resources</directory>
+      <lineEnding>dos</lineEnding>
+      <filtered>false</filtered>
+      <outputDirectory/>
+    </fileSet>
+  </fileSets>
   <containerDescriptorHandlers> <!-- Merge all service providers into the resulting JAR. -->
     <containerDescriptorHandler>
       <handlerName>metaInf-services</handlerName>
