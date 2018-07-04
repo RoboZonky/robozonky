@@ -26,7 +26,7 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 
 @Parameters(commandNames = "zonky-credentials", commandDescription = ZonkyPasswordFeature.DESCRIPTION)
-public class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
+public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Set credentials to access Zonky servers.";
     @Parameter(order = 2, names = {"-u", "--username"},

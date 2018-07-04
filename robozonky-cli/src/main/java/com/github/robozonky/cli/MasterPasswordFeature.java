@@ -23,9 +23,9 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 @Parameters(commandNames = "master-password", commandDescription = MasterPasswordFeature.DESCRIPTION)
-public class MasterPasswordFeature extends KeyStoreLeveragingFeature {
+public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
 
-    static final String DESCRIPTION = "Change master secret to the RoboZonky keystore.";
+    static final String DESCRIPTION = "Change password of the master keystore.";
     @Parameter(order = 3, names = {"-n", "--new-secret"}, converter = PasswordConverter.class,
             description = "Username to use to authenticate with Zonky servers.", required = true)
     private char[] newSecret = null;

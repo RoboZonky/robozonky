@@ -27,7 +27,7 @@ import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.secrets.SecretProvider;
 
 @Parameters(commandNames = "zonkoid-credentials", commandDescription = ZonkoidPasswordFeature.DESCRIPTION)
-public class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
+public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Set credentials to access Zonkoid.";
     private static final String ZONKOID_ID = "zonkoid";

@@ -51,7 +51,7 @@ final class CommandLine {
         jc.parse(args);
         if (cli.help) { // don't validate since the CLI is likely to be invalid
             jc.usage();
-            return Optional.empty();
+            return Optional.of(new HelpFeature());
         }
         return Optional.of(findFeature(jc));
     }
