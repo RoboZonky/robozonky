@@ -21,4 +21,8 @@ public class TestFailedException extends Exception {
     TestFailedException(final Exception cause) {
         super(cause);
     }
+
+    TestFailedException(final String message) {
+        super(message);
+    }
 }

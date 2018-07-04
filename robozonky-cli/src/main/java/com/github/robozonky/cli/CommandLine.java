@@ -35,7 +35,7 @@ final class CommandLine {
         try {
             return CommandLine.parseUnsafe(args);
         } catch (final ParameterException ex) {
-            CommandLine.LOGGER.warn("Command line parsing failed: {}.", ex.getMessage());
+            CommandLine.LOGGER.warn("Command line parsing failed: {}", ex.getMessage());
             return Optional.empty();
         }
     }
@@ -44,6 +44,8 @@ final class CommandLine {
         final CommandLine cli = new CommandLine();
         final JCommander.Builder builder = new JCommander.Builder()
                 .addCommand(new ZonkyPasswordFeature())
+                .addCommand(new ZonkoidPasswordFeature())
+                .addCommand(new MasterPasswordFeature())
                 .addObject(cli);
         final JCommander jc = builder.build();
         jc.parse(args);

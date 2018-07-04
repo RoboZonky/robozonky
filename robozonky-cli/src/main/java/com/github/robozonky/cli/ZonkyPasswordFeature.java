@@ -43,7 +43,8 @@ public class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
         this.password = password.clone();
     }
 
-    ZonkyPasswordFeature() { // for JCommander
+    ZonkyPasswordFeature() {
+        // for JCommander
     }
 
     public static void attemptLogin(final ApiProvider api, final String username,

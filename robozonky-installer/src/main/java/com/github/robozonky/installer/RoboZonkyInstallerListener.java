@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -29,8 +28,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import com.github.robozonky.common.secrets.KeyStoreHandler;
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.cli.Feature;
+import com.github.robozonky.cli.SetupFailedException;
+import com.github.robozonky.cli.ZonkoidPasswordFeature;
+import com.github.robozonky.cli.ZonkyPasswordFeature;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
 import com.github.robozonky.internal.api.Settings;
@@ -98,7 +99,49 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         LOGBACK_CONFIG_FILE = null;
     }
 
-    CommandLinePart prepareStrategy() {
+    private static void primeKeyStore(final char... keystorePassword) throws SetupFailedException {
+        final String username = Variables.ZONKY_USERNAME.getValue(DATA);
+        final char[] password = Variables.ZONKY_PASSWORD.getValue(DATA).toCharArray();
+        final Feature f = new ZonkyPasswordFeature(KEYSTORE_FILE, keystorePassword, username, password);
+        f.setup();
+    }
+
+    private static void prepareZonkoid(final char... keystorePassword) throws SetupFailedException {
+        final Feature f = new ZonkoidPasswordFeature(KEYSTORE_FILE, keystorePassword,
+                                                     Variables.ZONKOID_TOKEN.getValue(DATA).toCharArray());
+        f.setup();
+    }
+
+    static CommandLinePart prepareCore(final char... keystorePassword) throws SetupFailedException {
+        final String zonkoidId = "zonkoid";
+        final CommandLinePart cli = new CommandLinePart()
+                .setOption("-p", String.valueOf(keystorePassword));
+        cli.setOption("-g", KEYSTORE_FILE.getAbsolutePath());
+        if (Boolean.valueOf(Variables.IS_DRY_RUN.getValue(DATA))) {
+            cli.setOption("-d");
+        }
+        primeKeyStore(keystorePassword);
+        final boolean isZonkoidEnabled = Boolean.valueOf(Variables.IS_ZONKOID_ENABLED.getValue(DATA));
+        if (isZonkoidEnabled) {
+            prepareZonkoid(keystorePassword);
+            cli.setOption("-x", zonkoidId);
+        }
+        return cli;
+    }
+
+    private static File assembleCliFile(final CommandLinePart credentials,
+                                        final CommandLinePart strategy) throws IOException {
+        // assemble the CLI
+        final CommandLinePart cli = new CommandLinePart();
+        Util.copyOptions(credentials, cli);
+        cli.setOption("daemon");
+        Util.copyOptions(strategy, cli);
+        // store it to a file
+        cli.storeOptions(CLI_CONFIG_FILE);
+        return CLI_CONFIG_FILE.getAbsoluteFile();
+    }
+
+    static CommandLinePart prepareStrategy() {
         final String content = Variables.STRATEGY_SOURCE.getValue(DATA);
         if (Objects.equals(Variables.STRATEGY_TYPE.getValue(DATA), "file")) {
             final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
@@ -117,7 +160,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    CommandLinePart prepareEmailConfiguration() {
+    static CommandLinePart prepareEmailConfiguration() {
         if (!Boolean.valueOf(Variables.IS_EMAIL_ENABLED.getValue(DATA))) {
             return new CommandLinePart();
         }
@@ -130,20 +173,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    private SecretProvider getSecretProvider(final char[] keystorePassword) {
-        final String username = Variables.ZONKY_USERNAME.getValue(DATA);
-        final char[] password = Variables.ZONKY_PASSWORD.getValue(DATA).toCharArray();
-        try {
-            Files.deleteIfExists(KEYSTORE_FILE.toPath());
-            final KeyStoreHandler keystore = KeyStoreHandler.create(KEYSTORE_FILE, keystorePassword);
-            return SecretProvider.keyStoreBased(keystore, username, password);
-        } catch (final Exception ex) {
-            RoboZonkyInstallerListener.LOGGER.log(Level.INFO, "Not creating guarded storage.", ex);
-            return SecretProvider.fallback(username, password);
-        }
-    }
-
-    CommandLinePart prepareJmx() {
+    static CommandLinePart prepareJmx() {
         final boolean isJmxEnabled = Boolean.valueOf(Variables.IS_JMX_ENABLED.getValue(DATA));
         final CommandLinePart clp = new CommandLinePart()
                 .setProperty("com.sun.management.jmxremote", isJmxEnabled ? "true" : "false")
@@ -170,48 +200,14 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                 .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
     }
 
-    CommandLinePart prepareCore() {
+    static CommandLinePart prepareCore() throws SetupFailedException {
         return prepareCore(KEYSTORE_PASSWORD);
     }
 
-    CommandLinePart prepareCore(final char[] keystorePassword) {
-        final SecretProvider secrets = getSecretProvider(keystorePassword);
-        final String zonkoidId = "zonkoid";
-        final CommandLinePart cli = new CommandLinePart()
-                .setOption("-p", String.valueOf(secrets.isPersistent() ? KEYSTORE_PASSWORD : secrets.getPassword()));
-        if (Boolean.valueOf(Variables.IS_DRY_RUN.getValue(DATA))) {
-            cli.setOption("-d");
-        }
-        final boolean isZonkoidEnabled = Boolean.valueOf(Variables.IS_ZONKOID_ENABLED.getValue(DATA));
-        if (secrets.isPersistent() && KEYSTORE_FILE.canRead()) {
-            cli.setOption("-g", KEYSTORE_FILE.getAbsolutePath());
-            if (isZonkoidEnabled) {
-                cli.setOption("-x", zonkoidId);
-                secrets.setSecret(zonkoidId, Variables.ZONKOID_TOKEN.getValue(DATA).toCharArray());
-            }
-        } else {
-            cli.setOption("-u", secrets.getUsername());
-            if (isZonkoidEnabled) {
-                cli.setOption("-x", zonkoidId + ":" + Variables.ZONKOID_TOKEN.getValue(DATA));
-            }
-        }
-        return cli;
-    }
-
-    private File assembleCliFile(final CommandLinePart credentials, final CommandLinePart strategy) throws IOException {
-        // assemble the CLI
-        final CommandLinePart cli = new CommandLinePart();
-        Util.copyOptions(credentials, cli);
-        cli.setOption("daemon");
-        Util.copyOptions(strategy, cli);
-        // store it to a file
-        cli.storeOptions(CLI_CONFIG_FILE);
-        return CLI_CONFIG_FILE.getAbsoluteFile();
-    }
-
-    CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
-                                       final CommandLinePart jmxConfig, final CommandLinePart credentials,
-                                       final CommandLinePart logging) {
+    private static CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
+                                                      final CommandLinePart jmxConfig,
+                                                      final CommandLinePart credentials,
+                                                      final CommandLinePart logging) {
         try {
             final File cliConfigFile = assembleCliFile(credentials, strategy);
             // have the CLI file loaded during RoboZonky startup
@@ -241,14 +237,14 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    void prepareLinuxServices(final File runScript) {
+    private static void prepareLinuxServices(final File runScript) {
         for (final ServiceGenerator serviceGenerator : ServiceGenerator.values()) {
             final File result = serviceGenerator.apply(runScript);
             LOGGER.info(() -> "Generated " + result + " as a " + serviceGenerator + " service.");
         }
     }
 
-    void prepareRunScript(final CommandLinePart commandLine) {
+    private void prepareRunScript(final CommandLinePart commandLine) {
         if (System.getProperty("java.version").startsWith("1.8")) { // use G1GC on Java 8
             commandLine.setJvmArgument("XX:+UseG1GC");
         }
@@ -267,7 +263,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    CommandLinePart prepareLogging() {
+    private CommandLinePart prepareLogging() {
         try {
             Util.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
             return new CommandLinePart()

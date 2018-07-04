@@ -46,10 +46,6 @@
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-integration-zonkoid</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-notifications</artifactId>
     </dependency>
     <dependency>

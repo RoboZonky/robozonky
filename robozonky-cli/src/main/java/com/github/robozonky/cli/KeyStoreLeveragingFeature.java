@@ -57,12 +57,16 @@ abstract class KeyStoreLeveragingFeature implements Feature {
         }
     }
 
-    @Override
-    public void test() throws TestFailedException {
+    protected void test(final char... pwd) throws TestFailedException {
         try {
-            KeyStoreHandler.open(keystore, secret);
+            KeyStoreHandler.open(keystore, pwd);
         } catch (final Exception ex) {
             throw new TestFailedException(ex);
         }
+    }
+
+    @Override
+    public void test() throws TestFailedException {
+        test(secret);
     }
 }

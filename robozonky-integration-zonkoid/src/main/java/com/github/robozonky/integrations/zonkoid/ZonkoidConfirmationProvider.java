@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ZonkoidConfirmationProvider implements ConfirmationProvider {
 
+    static final String PATH = "/zonkycommander/rest/notifications";
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkoidConfirmationProvider.class);
     private static final String PROTOCOL_MAIN = "https", PROTOCOL_FALLBACK = "http", CLIENT_APP = "ROBOZONKY";
-    static final String PATH = "/zonkycommander/rest/notifications";
 
     static String md5(final String secret) throws NoSuchAlgorithmException {
         final MessageDigest mdEnc = MessageDigest.getInstance("MD5");
@@ -97,7 +97,7 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
                 return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, domain,
                                                                        ZonkoidConfirmationProvider.PROTOCOL_FALLBACK);
             case ZonkoidConfirmationProvider.PROTOCOL_FALLBACK:
-                ZonkoidConfirmationProvider.LOGGER.error("Communication with Zonkoid failed.", ex);
+                ZonkoidConfirmationProvider.LOGGER.info("Communication with Zonkoid failed.", ex);
                 return false;
             default:
                 throw new IllegalStateException("Can not happen.");
@@ -115,9 +115,9 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
                     ZonkoidConfirmationProvider.LOGGER.debug("Response: '{}'", response.getStatusLine());
                     return true;
                 } else {
-                    ZonkoidConfirmationProvider.LOGGER.error("Unknown response: '{}' (Body: '{}')",
-                                                             response.getStatusLine(),
-                                                             Util.readEntity(response.getEntity()));
+                    ZonkoidConfirmationProvider.LOGGER.info("Unknown response: '{}' (Body: '{}')",
+                                                            response.getStatusLine(),
+                                                            Util.readEntity(response.getEntity()));
                     return false;
                 }
             });

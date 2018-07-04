@@ -16,6 +16,7 @@
 
 package com.github.robozonky.cli;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -23,23 +24,26 @@ import org.slf4j.LoggerFactory;
 
 public final class Main {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    public static void main(final String... args) {
+    public static void main(final String... args) throws IOException {
         final Optional<Feature> featureOptional = CommandLine.parse(args);
         if (featureOptional.isPresent()) {
             final Feature feature = featureOptional.get();
             try {
-                LOGGER.info("Will execute: '{}'", feature.describe());
+                LOGGER.warn("This is a tool for the brave. Create a backup copy of RoboZonky or " +
+                                    "use RoboZonky installer instead.");
+                LOGGER.info("--- Press any key to run: '{}'", feature.describe());
+                System.in.read();
                 feature.setup();
-                LOGGER.info("Executed, running test.");
+                LOGGER.info("--- Executed, running test of the new setup.");
                 feature.test();
-                LOGGER.info("Success.");
+                LOGGER.info("--- Success.");
             } catch (final SetupFailedException e) {
-                LOGGER.warn("Could not perform setup.", e);
+                LOGGER.warn("!!! Could not perform setup, configuration may have been corrupted.", e);
                 System.exit(2);
             } catch (final TestFailedException e) {
-                LOGGER.warn("Could not test setup.", e);
+                LOGGER.warn("!!! Could not test setup, configuration may have been corrupted.", e);
                 System.exit(3);
             }
         } else { // call the thing again, requesting help message
