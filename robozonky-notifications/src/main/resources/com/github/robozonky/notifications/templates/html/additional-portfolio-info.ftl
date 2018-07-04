@@ -1,7 +1,5 @@
-<p>Nový zůstatek na Zonky účtu je ${data.portfolio.balance?string.currency}.</p>
-
 <table>
-  <caption>Aktuální struktura portfolia</caption>
+  <caption>Aktuální situace na <@zonky /> účtu</caption>
   <thead>
     <tr>
         <th>Rating</th>
@@ -10,10 +8,16 @@
     </tr>
   </thead>
   <tfoot>
-    <th>Celkem</th>
-    <th colspan="2">${data.portfolio.total?string.currency}</th>
-    <th>${data.portfolio.totalRisk?string.currency}</th>
-    <th>${data.portfolio.totalShare?string.@interest}</th>
+    <tr>
+      <th>Celkem</th>
+      <th colspan="2" style="text-align: right;">${data.portfolio.total?string.currency}</th>
+      <th style="text-align: right;">${data.portfolio.totalRisk?string.currency}</th>
+      <th style="text-align: right;">(${data.portfolio.totalShare?string.@interest})</th>
+    </tr>
+    <tr>
+      <th>Disponibilní zůstatek</th>
+      <td colspan="4" style="text-align: right;">{data.portfolio.balance?string.currency}</td>
+    </tr>
   </tfoot>
   <tbody>
     <#list data.ratings as rating>
@@ -23,11 +27,11 @@
         <#assign rel = data.portfolio.relativeShare[code]>
         <#assign absRisk = data.portfolio.absoluteRisk[code]>
         <#assign relRisk = data.portfolio.relativeRisk[code]>
-        <td>${code}</td>
-        <td>${abs?string.currency}</td>
-        <td>(${rel?string.@interest})</td>
-        <td>${absRisk?string.currency}</td>
-        <td>(${relRisk?string.@interest})</td>
+        <td style="text-align: center;"><@idRating id=code /></td>
+        <td style="text-align: right;">${abs?string.currency}</td>
+        <td style="text-align: right;">(${rel?string.@interest})</td>
+        <td style="text-align: right;">${absRisk?string.currency}</td>
+        <td style="text-align: right;">(${relRisk?string.@interest})</td>
       </tr>
     </#list>
   </tbody>

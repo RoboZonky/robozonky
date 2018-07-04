@@ -112,6 +112,7 @@ final class Util {
         loanData.put("amountHeld", i.getOriginalPrincipal());
         loanData.put("amountPaid", getTotalPaid(i));
         loanData.put("monthsElapsed", getMonthsElapsed(i));
+        loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
         loanData.put("postponed", i.areInstalmentsPostponed());
         return loanData;
     }

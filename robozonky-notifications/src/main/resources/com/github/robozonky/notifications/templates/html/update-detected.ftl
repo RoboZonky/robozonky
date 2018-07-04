@@ -1,6 +1,6 @@
-<p><em>RoboZonky</em> komunita právě vydala aktualizovanou verzi
-    <em><a href="http://www.robozonky.cz/">RoboZonky ${data.newVersion}</a></em>!</p>
+<p><@robozonky /> komunita právě vydala aktualizovanou verzi
+<a href="http://www.robozonky.cz/"><@robozonky /> ${data.newVersion}</a>!</p>
 
 <p>Nové verze obvykle přináší opravy chyb nebo nové funkce - proto doporučujeme aktualizaci nainstalovat hned, jak to
 bude možné. Ve výjimečných případech může být urychlený přechod na novou verzi dokonce nezbytný, neboť mohlo dojít k
-úpravám na serveru <em>Zonky</em>, se kterými si stávající verze <em>RoboZonky</em> neumí poradit.</p>
+úpravám na serveru <@zonky />, se kterými si stávající verze <@robozonky /> neumí poradit.</p>

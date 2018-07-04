@@ -1,25 +1,12 @@
-<p>Půjčka s následujícími parametry byla předána k investování jiným nástrojem:</p>
+<p>Půjčka <@idLoan data=data /> byla předána jinému nástroji.</p>
 
 <table>
-  <caption><a href="${data.loanUrl}">#${data.loanId?c} ${data.loanName?cap_first}</a></caption>
   <tr>
-    <th>Rating:</th>
-    <td>${data.loanRating}</td>
-  </tr>
-  <tr>
-    <th>Délka splácení:</th>
-    <td>${data.loanTerm?c} měsíců</td>
-  </tr>
-  <tr>
-    <th>Požadovaná částka:</th>
-    <td>${data.loanAmount?string.currency}</td>
-  </tr>
-  <tr>
-    <th>Navržená výše investice:</th>
+    <th style="text-align: right;">Navržená výše investice:</th>
     <td>${data.loanRecommendation?string.currency}</td>
   </tr>
   <tr>
-    <th>Cílový nástroj:</th>
+    <th style="text-align: right;">Cílový nástroj:</th>
     <td>${data.confirmationProviderId}</td>
   </tr>
 </table>

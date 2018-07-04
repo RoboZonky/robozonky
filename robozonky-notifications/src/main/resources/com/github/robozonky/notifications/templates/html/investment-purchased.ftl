@@ -1,26 +1,17 @@
-<p>Na sekundárním trhu byla právě zakoupena následující participace:</p>
+<p>Na sekundárním trhu byla zakoupena participace k půjčce <@idLoan data=data />.</p>
 
 <table>
-  <caption><a href="${data.loanUrl}">#${data.loanId?c} ${data.loanName?cap_first}</a></caption>
   <tr>
-    <th>Rating:</th>
-    <td>${data.loanRating}</td>
+    <th style="text-align: right;">Zbývá splátek:</th>
+    <td>${data.loanTermRemaining?c}</td>
   </tr>
   <tr>
-    <th>Zbývá splátek:</th>
-    <td>${data.loanTermRemaining?c} z ${data.loanTerm?c}</td>
-  </tr>
-  <tr>
-    <th>Zbývající jistina:</th>
+    <th style="text-align: right;">Zbývající jistina:</th>
     <td>${data.amountHeld?string.currency}</td>
   </tr>
   <tr>
-    <th>Dosažitelný výnos:</th>
+    <th style="text-align: right;">Dosažitelný výnos:</th>
     <td>${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)</td>
-  </tr>
-  <tr>
-    <th>Záchranná vesta:</th>
-    <td><#if data.insurance>Ano<#else>Ne</#if>.</td>
   </tr>
 </table>
 

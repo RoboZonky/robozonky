@@ -1,26 +1,17 @@
-<p>Participace s následujícími parametry byla úspěšně prodána:</p>
+<p>Participace v půjčce <@idLoan data=data /> byla prodána.</p>
 
 <table>
-  <caption><a href="${data.loanUrl}">#${data.loanId?c} ${data.loanName?cap_first}</a></caption>
   <tr>
-    <th>Rating:</th>
-    <td>${data.loanRating}</td>
-  </tr>
-  <tr>
-    <th>Doba držení:</th>
+    <th style="text-align: right;">Doba držení:</th>
     <td>${data.monthsElapsed?c} měsíců</td>
   </tr>
   <tr>
-    <th>Zbývající jistina:</th>
+    <th style="text-align: right;">Zbývající jistina:</th>
     <td>${data.amountRemaining?string.currency}</td>
   </tr>
   <tr>
-    <th>Dosažený výnos:</th>
+    <th style="text-align: right;">Dosažený výnos:</th>
     <td>${data.yield?string.currency}</td>
-  </tr>
-  <tr>
-    <th>Záchranná vesta:</th>
-    <td><#if data.insurance>Ano<#else>Ne</#if>.</td>
   </tr>
 </table>
 

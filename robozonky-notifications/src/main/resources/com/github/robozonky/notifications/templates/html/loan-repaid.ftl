@@ -1,21 +1,16 @@
-Půjčka s následujícími parametry byla zcela splacena:
+<p>Půjčka <@idLoan data=data /> byla zcela splacena.</p>
 
 <table>
-  <caption><a href="${data.loanUrl}">#${data.loanId?c} ${data.loanName?cap_first}</a></caption>
   <tr>
-    <th>Rating:</th>
-    <td>${data.loanRating}</td>
-  </tr>
-  <tr>
-    <th>Doba držení:</th>
+    <th style="text-align: right;">Doba držení:</th>
     <td>${data.monthsElapsed?c} měsíců</td>
   </tr>
   <tr>
-    <th>Zaplaceno:</th>
+    <th style="text-align: right;">Zaplaceno:</th>
     <td>${data.amountPaid?string.currency} za půjčených ${data.amountHeld?string.currency}</td>
   </tr>
   <tr>
-    <th>Dosažený výnos:</th>
+    <th style="text-align: right;">Dosažený výnos:</th>
     <td>${data.yield?string.currency}</td>
   </tr>
 </table>

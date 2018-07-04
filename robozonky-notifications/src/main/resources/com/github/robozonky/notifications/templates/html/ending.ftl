@@ -1,1 +1,1 @@
-<p><em>RoboZonky</em> byl korektně ukončen a nebude nadále investovat.</p>
+<p><@robozonky /> byl korektně ukončen a nebude nadále investovat.</p>
