@@ -28,6 +28,9 @@ stages: # order the stages we'll use during this build
   - sonar
   - preview
 matrix:
+  allow_failures:
+  - jdk: openjdk-ea
+  - stage: preview
   include:
   - stage: precache # independent stage for Maven to build and download all dependencies
     env: # empty
@@ -49,7 +52,6 @@ matrix:
   - stage: preview # test early adopters JDK as well, but relax requirements
     env: #empty
     jdk: openjdk-ea
-    allow_failures: true
     install: # do nothing
       - mvn clean
     script:
