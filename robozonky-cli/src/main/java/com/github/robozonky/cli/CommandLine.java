@@ -22,6 +22,7 @@ import java.util.Optional;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +41,14 @@ final class CommandLine {
         }
     }
 
+    private static String getProgramName() {
+        return "java -jar robozonky-distribution-cli-" + Defaults.ROBOZONKY_VERSION + "-full.jar";
+    }
+
     private static Optional<Feature> parseUnsafe(final String... args) throws ParameterException {
         final CommandLine cli = new CommandLine();
         final JCommander.Builder builder = new JCommander.Builder()
+                .programName(getProgramName())
                 .addCommand(new ZonkyPasswordFeature())
                 .addCommand(new ZonkoidPasswordFeature())
                 .addCommand(new MasterPasswordFeature())
