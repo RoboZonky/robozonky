@@ -44,7 +44,6 @@ public final class StrategyLoader {
 
     static <T> Optional<T> processStrategyService(final StrategyService service, final String strategy,
                                                   final BiFunction<StrategyService, String, Optional<T>> getter) {
-        StrategyLoader.LOGGER.debug("Reading strategy.");
         try {
             return getter.apply(service, strategy);
         } catch (final Exception ex) {
@@ -62,14 +61,17 @@ public final class StrategyLoader {
     }
 
     public static Optional<InvestmentStrategy> toInvest(final String strategy) {
+        StrategyLoader.LOGGER.debug("Reading investment strategy.");
         return StrategyLoader.load(strategy, StrategyLoader.LOADER, StrategyService::toInvest);
     }
 
     public static Optional<SellStrategy> toSell(final String strategy) {
+        StrategyLoader.LOGGER.debug("Reading selling strategy.");
         return StrategyLoader.load(strategy, StrategyLoader.LOADER, StrategyService::toSell);
     }
 
     public static Optional<PurchaseStrategy> toPurchase(final String strategy) {
+        StrategyLoader.LOGGER.debug("Reading purchasing strategy.");
         return StrategyLoader.load(strategy, StrategyLoader.LOADER, StrategyService::toPurchase);
     }
 }

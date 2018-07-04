@@ -34,10 +34,20 @@
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-common</artifactId>
     </dependency>
+    <!-- these are normally runtime dependencies, but we need them present in order to validate their settings -->
     <dependency>
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-integration-zonkoid</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-notifications</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-strategy-natural</artifactId>
+    </dependency>
+    <!-- other dependencies -->
     <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>

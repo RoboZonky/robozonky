@@ -45,10 +45,6 @@
       <artifactId>robozonky-cli</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-notifications</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.izpack</groupId>
       <artifactId>izpack-api</artifactId>
     </dependency>
