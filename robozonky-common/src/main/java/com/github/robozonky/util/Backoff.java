@@ -32,6 +32,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
     private final Operation<T> operation;
     private final BackoffTimeCalculator<T> backoffTimeCalculator;
     private final Duration cancelAfter;
+    private Exception lastException = null;
 
     public Backoff(final Operation<T> operation, final BackoffTimeCalculator<T> backoffTimeCalculator,
                    final Duration cancelAfter) {
@@ -67,7 +68,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
     }
 
     private static void wait(final Duration duration) {
-        LOGGER.trace("Will wait for {} milliseconds.", duration.toMillis());
+        LOGGER.debug("Will wait for {} milliseconds.", duration.toMillis());
         try {
             Thread.sleep(duration.toMillis());
         } catch (final InterruptedException ex) {
@@ -75,14 +76,21 @@ public class Backoff<T> implements Supplier<Optional<T>> {
         }
     }
 
-    private static <O> Optional<O> execute(final Supplier<O> operation) {
+    private synchronized <O> Optional<O> execute(final Supplier<O> operation) {
         LOGGER.trace("Will execute {}.", operation);
         try {
-            return Optional.ofNullable(operation.get());
+            final Optional<O> result = Optional.ofNullable(operation.get());
+            this.lastException = null;
+            return result;
         } catch (final Exception ex) {
             LOGGER.debug("Operation failed.", ex);
+            this.lastException = ex;
             return Optional.empty();
         }
+    }
+
+    public synchronized Optional<Exception> getLastException() {
+        return Optional.ofNullable(lastException);
     }
 
     @Override

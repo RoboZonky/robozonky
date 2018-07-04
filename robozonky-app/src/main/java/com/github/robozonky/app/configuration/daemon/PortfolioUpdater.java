@@ -128,7 +128,8 @@ class PortfolioUpdater implements Runnable,
             updating.set(false);
             LOGGER.info("RoboZonky resumed.");
         } else {
-            shutdownCall.accept(new IllegalStateException("Portfolio initialization failed."));
+            shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.",
+                                                          backoff.getLastException().orElse(null)));
         }
     }
 

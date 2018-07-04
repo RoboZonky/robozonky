@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BackoffTest {
@@ -43,12 +44,14 @@ class BackoffTest {
         final Duration maxDuration = ofMillis(DURATION);
         final long now = System.nanoTime();
         // never succeed
+        when(operation.get()).thenThrow(new IllegalStateException());
         final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
                                                 () -> Backoff.exponential(operation, ofMillis(1), maxDuration));
         final Optional<String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure result was not successful
         assertThat(result).isEmpty();
+        assertThat(b.getLastException()).containsInstanceOf(IllegalStateException.class);
         // make sure the operation took at least the expected duration
         assertThat(took).isGreaterThan(maxDuration);
         // make sure the operation was tried the expected number of times, the sum of n^2 for n=[0, ...)
@@ -67,6 +70,7 @@ class BackoffTest {
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure we get the propert result
         assertThat(result).contains(resulting);
+        assertThat(b.getLastException()).isEmpty();
         // make sure the operation took less than the max duration
         assertThat(took).isLessThan(maxDuration);
     }
