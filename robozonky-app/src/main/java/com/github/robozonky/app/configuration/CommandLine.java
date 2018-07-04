@@ -19,7 +19,6 @@ package com.github.robozonky.app.configuration;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -40,6 +39,12 @@ import org.slf4j.LoggerFactory;
 public class CommandLine {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
+    private final Consumer<Throwable> shutdownCall;
+    @ParametersDelegate
+    private MarketplaceCommandLineFragment marketplace = new MarketplaceCommandLineFragment();
+    @Parameter(names = {"-s", "--strategy"}, required = true,
+            description = "Points to a resource holding the investment strategy configuration.")
+    String strategyLocation = "";
     @ParametersDelegate
     private AuthenticationCommandLineFragment authenticationFragment = new AuthenticationCommandLineFragment();
     @ParametersDelegate
@@ -52,6 +57,18 @@ public class CommandLine {
     private String notificationConfigLocation;
     @Parameter(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
     private String name;
+
+    public CommandLine(final Consumer<Throwable> shutdownCall) {
+        this.shutdownCall = shutdownCall;
+    }
+
+    MarketplaceCommandLineFragment getMarketplace() {
+        return marketplace;
+    }
+
+    String getStrategyLocation() {
+        return strategyLocation;
+    }
 
     private static void terminate(final ParameterException ex) {
         System.out.println(ex.getMessage()); // error will be shown to users on stdout
@@ -83,11 +100,9 @@ public class CommandLine {
 
     private static Optional<InvestmentMode> parseUnsafe(final Consumer<Throwable> shutdownCall,
                                                         final String... args) throws ParameterException {
-        final CommandLine cli = new CommandLine();
+        final CommandLine cli = new CommandLine(shutdownCall);
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(CommandLine.getScriptIdentifier())
-                .addCommand(new DaemonOperatingMode(shutdownCall))
-                .addCommand(new TestOperatingMode())
                 .addObject(cli);
         final JCommander jc = builder.build();
         jc.parse(args);
@@ -104,15 +119,7 @@ public class CommandLine {
     }
 
     private OperatingMode determineOperatingMode(final JCommander jc) throws ParameterException {
-        final String parsedCommand = jc.getParsedCommand();
-        if (parsedCommand == null) {
-            final ParameterException ex = new ParameterException("You must specify one mode of operation. See usage.");
-            ex.setJCommander(jc);
-            throw ex;
-        }
-        final JCommander command = jc.getCommands().get(parsedCommand);
-        final List<Object> objects = command.getObjects();
-        final OperatingMode mode = (OperatingMode) objects.get(0);
+        final OperatingMode mode = new OperatingMode(shutdownCall);
         Stream.of(authenticationFragment, confirmationFragment, tweaksFragment, mode)
                 .forEach(commandLineFragment -> commandLineFragment.validate(jc));
         return mode;

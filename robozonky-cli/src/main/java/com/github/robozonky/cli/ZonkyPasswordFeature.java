@@ -33,7 +33,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
             description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
     @Parameter(order = 3, names = {"-p", "--password"}, converter = PasswordConverter.class,
-            description = "Username to use to authenticate with Zonky servers.", required = true)
+            description = "Username to use to authenticate with Zonky servers.", required = true, password = true)
     private char[] password = null;
 
     public ZonkyPasswordFeature(final File keystore, final char[] keystoreSecret, final String username,

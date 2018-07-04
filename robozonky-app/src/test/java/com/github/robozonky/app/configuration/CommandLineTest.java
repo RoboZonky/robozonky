@@ -42,7 +42,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
                                                                }, "-u", username, "-p", "password",
-                                                               "-i", "somewhere.txt", "daemon", "-s", "somewhere");
+                                                               "-i", "somewhere.txt", "-s", "somewhere");
         assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
         assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }

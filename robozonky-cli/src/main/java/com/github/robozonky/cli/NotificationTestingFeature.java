@@ -20,7 +20,6 @@ import java.net.URL;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.github.robozonky.common.extensions.Checker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

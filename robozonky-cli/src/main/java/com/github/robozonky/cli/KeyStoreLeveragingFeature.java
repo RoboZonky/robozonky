@@ -27,7 +27,7 @@ abstract class KeyStoreLeveragingFeature implements Feature {
             required = true)
     private File keystore = new File("robozonky.keystore");
     @Parameter(order = 1, names = {"-s", "--secret"}, description = "Secret to use to access the keystore.",
-            converter = PasswordConverter.class, required = true)
+            converter = PasswordConverter.class, required = true, password = true)
     private char[] secret = null;
     private KeyStoreHandler storage;
 

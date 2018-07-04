@@ -27,7 +27,7 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Change password of the master keystore.";
     @Parameter(order = 3, names = {"-n", "--new-secret"}, converter = PasswordConverter.class,
-            description = "Username to use to authenticate with Zonky servers.", required = true)
+            description = "Username to use to authenticate with Zonky servers.", required = true, password = true)
     private char[] newSecret = null;
 
     public MasterPasswordFeature(final File keystore, final char[] keystoreSecret, final char... newSecret) {

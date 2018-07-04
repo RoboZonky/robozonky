@@ -73,13 +73,16 @@ public final class StrategyValidationFeature implements Feature {
     }
 
     @Override
-    public void test() {
+    public void test() throws TestFailedException {
         final LongAdder adder = new LongAdder();
         StrategyLoader.toInvest(text).ifPresent(s -> report(adder, "Investing"));
         StrategyLoader.toPurchase(text).ifPresent(s -> report(adder, "Purchasing"));
         StrategyLoader.toSell(text).ifPresent(s -> report(adder, "Selling"));
+        if (adder.intValue() == 0) {
+            throw new TestFailedException("No strategies found. Check log for possible parser errors.");
+        }
         if (adder.intValue() < 3) {
-            LOGGER.warn("One or more strategies are missing. Check log for possible parser errors.");
+            LOGGER.warn("One or more strategies are missing. Check log for possible parser errors just in case.");
         }
     }
 }

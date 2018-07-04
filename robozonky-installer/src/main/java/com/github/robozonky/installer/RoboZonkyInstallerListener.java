@@ -112,7 +112,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         f.setup();
     }
 
-    static CommandLinePart prepareCore(final char... keystorePassword) throws SetupFailedException {
+    private static CommandLinePart prepareCore(final char... keystorePassword) throws SetupFailedException {
         final String zonkoidId = "zonkoid";
         final CommandLinePart cli = new CommandLinePart()
                 .setOption("-p", String.valueOf(keystorePassword));
@@ -134,7 +134,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         // assemble the CLI
         final CommandLinePart cli = new CommandLinePart();
         Util.copyOptions(credentials, cli);
-        cli.setOption("daemon");
         Util.copyOptions(strategy, cli);
         // store it to a file
         cli.storeOptions(CLI_CONFIG_FILE);

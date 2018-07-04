@@ -22,7 +22,6 @@ import java.util.Optional;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.common.extensions.Checker;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.secrets.SecretProvider;
 
@@ -32,7 +31,7 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
     static final String DESCRIPTION = "Set credentials to access Zonkoid.";
     private static final String ZONKOID_ID = "zonkoid";
     @Parameter(order = 2, names = {"-p", "--password"}, converter = PasswordConverter.class,
-            description = "Code generated in the Zonkoid mobile application.", required = true)
+            description = "Code generated in the Zonkoid mobile application.", required = true, password = true)
     private char[] password = null;
 
     public ZonkoidPasswordFeature(final File keystore, final char[] keystoreSecret, final char... password) {

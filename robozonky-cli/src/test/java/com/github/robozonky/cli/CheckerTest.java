@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.extensions;
+package com.github.robozonky.cli;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,17 +32,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CheckerTest {
@@ -52,53 +47,53 @@ class CheckerTest {
     private EventListener<RoboZonkyTestingEvent> l;
 
     private static ApiProvider mockApiThatReturnsOneLoan() {
-        final RawLoan l = mock(RawLoan.class);
-        final ApiProvider provider = mock(ApiProvider.class);
-        doReturn(Collections.singletonList(l)).when(provider).marketplace();
+        final RawLoan l = Mockito.mock(RawLoan.class);
+        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        Mockito.doReturn(Collections.singletonList(l)).when(provider).marketplace();
         return provider;
     }
 
     @Test
     void confirmationsMarketplaceFail() {
-        final ApiProvider provider = mock(ApiProvider.class);
-        doThrow(new IllegalStateException("Testing")).when(provider).marketplace();
+        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        Mockito.doThrow(new IllegalStateException("Testing")).when(provider).marketplace();
         final boolean result =
-                Checker.confirmations(mock(ConfirmationProvider.class), "", SECRET, () -> provider);
+                Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", SECRET, () -> provider);
         assertThat(result).isFalse();
     }
 
     @Test
     void confirmationsMarketplaceWithoutLoans() {
-        final ApiProvider provider = mock(ApiProvider.class);
-        when(provider.marketplace()).thenReturn(Collections.emptyList());
+        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        Mockito.when(provider.marketplace()).thenReturn(Collections.emptyList());
         final boolean result =
-                Checker.confirmations(mock(ConfirmationProvider.class), "", SECRET, () -> provider);
+                Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", SECRET, () -> provider);
         assertThat(result).isFalse();
     }
 
     @Test
     void confirmationsNotConfirming() {
-        final ConfirmationProvider cp = mock(ConfirmationProvider.class);
-        when(cp.requestConfirmation(any(), anyInt(),
-                                    anyInt())).thenReturn(false);
+        final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
+        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
+                                            ArgumentMatchers.anyInt())).thenReturn(false);
         final boolean result = Checker.confirmations(cp, "", SECRET, CheckerTest::mockApiThatReturnsOneLoan);
         assertThat(result).isFalse();
     }
 
     @Test
     void confirmationsRejecting() {
-        final ConfirmationProvider cp = mock(ConfirmationProvider.class);
-        when(cp.requestConfirmation(any(), anyInt(),
-                                    anyInt())).thenReturn(false);
+        final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
+        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
+                                            ArgumentMatchers.anyInt())).thenReturn(false);
         final boolean result = Checker.confirmations(cp, "", SECRET, CheckerTest::mockApiThatReturnsOneLoan);
         assertThat(result).isFalse();
     }
 
     @Test
     void confirmationsProper() {
-        final ConfirmationProvider cp = mock(ConfirmationProvider.class);
-        when(cp.requestConfirmation(any(), anyInt(),
-                                    anyInt())).thenReturn(false);
+        final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
+        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
+                                            ArgumentMatchers.anyInt())).thenReturn(false);
         final boolean result = Checker.confirmations(cp, "", SECRET, CheckerTest::mockApiThatReturnsOneLoan);
         assertThat(result).isFalse();
     }
@@ -123,7 +118,7 @@ class CheckerTest {
     void notificationsProper() {
         final EventListenerSupplier<RoboZonkyTestingEvent> r = () -> Optional.of(l);
         assertThat(Checker.notifications("", Collections.singletonList(r))).isTrue();
-        verify(l).handle(any(RoboZonkyTestingEvent.class), any());
+        Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
     }
 }
 
