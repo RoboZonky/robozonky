@@ -17,7 +17,6 @@
 package com.github.robozonky.installer;
 
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import javax.ws.rs.ServerErrorException;
 
 import com.github.robozonky.cli.TestFailedException;
@@ -54,10 +53,10 @@ public class ZonkySettingsValidator extends AbstractValidator {
             return DataValidator.Status.OK;
         } catch (final TestFailedException t) {
             if (t.getCause() instanceof ServerErrorException) {
-                LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t.getCause());
+                LOGGER.error("Failed accessing Zonky.", t.getCause());
                 return DataValidator.Status.ERROR;
             } else {
-                LOGGER.log(Level.WARNING, "Failed logging in.", t);
+                LOGGER.warn("Failed logging in.", t);
                 return DataValidator.Status.WARNING;
             }
         }

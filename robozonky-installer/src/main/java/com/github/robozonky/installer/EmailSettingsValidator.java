@@ -18,7 +18,6 @@ package com.github.robozonky.installer;
 
 import java.io.File;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import com.github.robozonky.cli.Feature;
 import com.github.robozonky.cli.NotificationTestingFeature;
@@ -39,7 +38,7 @@ public class EmailSettingsValidator extends AbstractValidator {
             f.test();
             return DataValidator.Status.OK;
         } catch (final Exception ex) {
-            LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
+            LOGGER.warn("Failed sending e-mail.", ex);
             return DataValidator.Status.WARNING;
         }
     }

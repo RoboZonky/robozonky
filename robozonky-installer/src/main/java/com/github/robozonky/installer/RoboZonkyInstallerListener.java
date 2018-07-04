@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.github.robozonky.cli.Feature;
@@ -40,11 +38,13 @@ import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
-    private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoboZonkyInstallerListener.class);
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
             CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
     private static InstallData DATA;
@@ -239,7 +239,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static void prepareLinuxServices(final File runScript) {
         for (final ServiceGenerator serviceGenerator : ServiceGenerator.values()) {
             final File result = serviceGenerator.apply(runScript);
-            LOGGER.info(() -> "Generated " + result + " as a " + serviceGenerator + " service.");
+            LOGGER.info("Generated {} as a {} service.", result, serviceGenerator);
         }
     }
 
@@ -255,7 +255,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final File distRunScript = generator.getChildRunScript();
         Stream.of(runScript, distRunScript).forEach(script -> {
             final boolean success = script.setExecutable(true);
-            LOGGER.info(() -> "Made '" + script + "' executable: " + success + ".");
+            LOGGER.info("Made '{}' executable: {}.", script, success);
         });
         if (operatingSystem == OS.LINUX) {
             prepareLinuxServices(runScript);
@@ -292,7 +292,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             prepareRunScript(result);
             progressListener.stopAction();
         } catch (final Exception ex) {
-            LOGGER.log(Level.SEVERE, "Uncaught exception.", ex);
+            LOGGER.error("Uncaught exception.", ex);
             throw new IllegalStateException("Uncaught exception.", ex);
         }
     }

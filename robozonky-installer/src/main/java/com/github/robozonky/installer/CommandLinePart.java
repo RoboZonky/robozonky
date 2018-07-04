@@ -32,10 +32,10 @@ import com.github.robozonky.internal.api.Defaults;
 
 public class CommandLinePart {
 
-    private final Map<String, Collection<String>> options = new LinkedHashMap<>();
-    private final Map<String, String> properties = new LinkedHashMap<>();
-    private final Map<String, String> environmentVariables = new LinkedHashMap<>();
-    private final Map<String, Optional<String>> jvmArguments = new LinkedHashMap<>();
+    private final Map<String, Collection<String>> options = new LinkedHashMap<>(0);
+    private final Map<String, String> properties = new LinkedHashMap<>(0);
+    private final Map<String, String> environmentVariables = new LinkedHashMap<>(0);
+    private final Map<String, Optional<String>> jvmArguments = new LinkedHashMap<>(0);
 
     public CommandLinePart setOption(final String key, final String... value) {
         this.options.put(key, Collections.unmodifiableCollection(Arrays.asList(value)));

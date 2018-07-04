@@ -19,7 +19,6 @@ package com.github.robozonky.installer;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Level;
 
 import com.github.robozonky.cli.Feature;
 import com.github.robozonky.cli.StrategyValidationFeature;
@@ -50,7 +49,7 @@ public class StrategySettingsValidator extends AbstractValidator {
             f.test();
             return DataValidator.Status.OK;
         } catch (final Exception ex) {
-            LOGGER.log(Level.WARNING, "Strategy invalid: {0}.", strategySource);
+            LOGGER.warn("Strategy invalid: {}.", strategySource);
             return DataValidator.Status.WARNING;
         }
     }
