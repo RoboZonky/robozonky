@@ -16,9 +16,35 @@
 
 package com.github.robozonky.cli;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class Main {
 
-    public static void main(final String... args) {
+    private static Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
+    public static void main(final String... args) {
+        final Optional<Feature> featureOptional = CommandLine.parse(args);
+        if (featureOptional.isPresent()) {
+            final Feature feature = featureOptional.get();
+            try {
+                LOGGER.info("Will execute: '{}'", feature.describe());
+                feature.setup();
+                LOGGER.info("Executed, running test.");
+                feature.test();
+                LOGGER.info("Success.");
+            } catch (final SetupFailedException e) {
+                LOGGER.warn("Could not perform setup.", e);
+                System.exit(2);
+            } catch (final TestFailedException e) {
+                LOGGER.warn("Could not test setup.", e);
+                System.exit(3);
+            }
+        } else { // call the thing again, requesting help message
+            CommandLine.parse("-h");
+            System.exit(1);
+        }
     }
 }
