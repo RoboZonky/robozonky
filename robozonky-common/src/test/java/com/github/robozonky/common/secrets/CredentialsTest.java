@@ -18,12 +18,12 @@ package com.github.robozonky.common.secrets;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class CredentialsTest {
 
-    private static final SecretProvider SECRETS = SecretProvider.fallback("");
+    private static final SecretProvider SECRETS = SecretProvider.inMemory("");
 
     @Test
     void tokenLess() {

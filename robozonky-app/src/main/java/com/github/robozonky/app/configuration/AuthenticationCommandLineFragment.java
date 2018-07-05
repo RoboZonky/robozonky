@@ -19,15 +19,9 @@ package com.github.robozonky.app.configuration;
 import java.io.File;
 import java.util.Optional;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 
 class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
-
-    @Parameter(names = {"-u", "--username"},
-            description = "Used to connect to the Zonky server.")
-    private String username = null;
 
     @Parameter(names = {"-p", "--password"}, password = true, required = true,
             description = "Enter Zonky account password or secure storage password.",
@@ -35,44 +29,22 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
     private char[] password = null;
 
     @Parameter(names = {"-g", "--guarded"},
-            description = "Path to secure file that contains username, password etc.")
+            description = "Path to secure file that contains username, password etc.", required = true)
     private File keystore = null;
 
     public AuthenticationCommandLineFragment() {
         // do nothing
     }
 
-    AuthenticationCommandLineFragment(final String username, final File keystore) {
-        this.username = username;
+    AuthenticationCommandLineFragment(final File keystore) {
         this.keystore = keystore;
     }
 
-    public Optional<String> getUsername() {
-        return Optional.ofNullable(username);
-    }
-
     public char[] getPassword() {
-        return password;
+        return password.clone();
     }
 
     public Optional<File> getKeystore() {
         return Optional.ofNullable(keystore);
-    }
-
-    private Optional<ParameterException> actuallyValidate() {
-        if (!this.getKeystore().isPresent() && !this.getUsername().isPresent()) {
-            return Optional.of(new ParameterException("Either --username or --guarded parameter must be used."));
-        } else if (this.getKeystore().isPresent() && this.getUsername().isPresent()) {
-            return Optional.of(new ParameterException("Only one of --username or --guarded parameters may be used."));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public void validate(final JCommander args) throws ParameterException {
-        actuallyValidate().ifPresent(ex -> {
-            ex.setJCommander(args);
-            throw ex;
-        });
     }
 }

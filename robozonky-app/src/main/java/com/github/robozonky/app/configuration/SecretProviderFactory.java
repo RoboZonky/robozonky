@@ -48,6 +48,6 @@ final class SecretProviderFactory {
                 SecretProviderFactory.LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.<SecretProvider>empty();
             }
-        }).orElseGet(() -> Optional.of(SecretProvider.fallback(cli.getUsername().get(), password)));
+        }).orElseThrow(() -> new IllegalStateException("Could not find keystore."));
     }
 }

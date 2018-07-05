@@ -16,11 +16,15 @@
 
 package com.github.robozonky.app.configuration;
 
+import java.io.File;
+import java.io.IOException;
+import java.security.KeyStoreException;
 import java.util.Optional;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
+import com.github.robozonky.common.secrets.KeyStoreHandler;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
@@ -37,13 +41,20 @@ class CommandLineTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void validDaemonCli() {
+    void validDaemonCli() throws IOException, KeyStoreException {
+        // prepare keystore
+        final String keyStorePassword = "password";
+        final File keystore = File.createTempFile("robozonky-", ".keystore");
+        keystore.delete();
+        final KeyStoreHandler ksh = KeyStoreHandler.create(keystore, keyStorePassword.toCharArray());
         final String username = "someone@somewhere.cz";
-        // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
+        SecretProvider.keyStoreBased(ksh, username, "something".toCharArray());
+        // run the app
         final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
-                                                               }, "-u", username, "-p", "password",
-                                                               "-i", "somewhere.txt", "-s", "somewhere");
-        assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
+                                                               }, "-g", keystore.getAbsolutePath(), "-p",
+                                                               keyStorePassword, "-i", "somewhere.txt", "-s",
+                                                               "somewhere");
+        assertThat(cfg).isPresent();
         assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }
 

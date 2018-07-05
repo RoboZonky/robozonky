@@ -23,7 +23,7 @@ import java.util.Optional;
  * Implementations provide various ways of storing sensitive information, such as passwords or access tokens.
  * <p>
  * Users shall not be given access to these children - instead, they should get them by calling static methods on this
- * class, such as {@link #keyStoreBased(KeyStoreHandler)} or {@link #fallback(String, char[])}.
+ * class, such as {@link #keyStoreBased(KeyStoreHandler)}.
  */
 public interface SecretProvider {
 
@@ -51,13 +51,12 @@ public interface SecretProvider {
     }
 
     /**
-     * For cases where there is no KeyStore support available in JDK, this secret provider stores all secrets in plain
-     * text. This is also very useful for testing, as it has no extra dependencies such as keystore files etc.
+     * Very useful for testing, as it has no extra dependencies such as keystore files etc.
      * @param username Zonky username.
      * @param password Zonky password.
      * @return The provider.
      */
-    static SecretProvider fallback(final String username, final char... password) {
+    static SecretProvider inMemory(final String username, final char... password) {
         return new FallbackSecretProvider(username, password);
     }
 

@@ -18,7 +18,7 @@ package com.github.robozonky.app.configuration;
 
 import com.github.robozonky.internal.api.ToStringBuilder;
 
-abstract class AbstractCommandLineFragment implements CommandLineFragment {
+abstract class AbstractCommandLineFragment {
 
     @Override
     public final String toString() {

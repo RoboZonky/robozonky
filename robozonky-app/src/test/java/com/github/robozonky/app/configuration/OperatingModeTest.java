@@ -41,7 +41,7 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
         when(cli.getTweaksFragment()).thenReturn(f);
         when(cli.getStrategyLocation()).thenReturn("");
         when(cli.getMarketplace()).thenReturn(new MarketplaceCommandLineFragment());
-        final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE + ":" + SERVICE_TOKEN;
         when(cli.getConfirmationFragment()).thenReturn(fragment);
@@ -58,7 +58,7 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
     void withConfirmationAndUnknownId() {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
-        final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = UUID.randomUUID().toString();
         when(cli.getConfirmationFragment()).thenReturn(fragment);
@@ -73,7 +73,7 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
     void withConfirmationAndNoSecret() {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
-        final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE;
         when(cli.getConfirmationFragment()).thenReturn(fragment);
@@ -91,7 +91,7 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
         when(cli.getStrategyLocation()).thenReturn("");
         when(cli.getMarketplace()).thenReturn(new MarketplaceCommandLineFragment());
         when(cli.getConfirmationFragment()).thenReturn(mock(ConfirmationCommandLineFragment.class));
-        final SecretProvider secretProvider = SecretProvider.fallback("user", new char[0]);
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", new char[0]);
         final OperatingMode mode = new OperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);

@@ -18,56 +18,23 @@ package com.github.robozonky.app.configuration;
 
 import java.io.File;
 
-import com.beust.jcommander.ParameterException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class AuthenticationCommandLineFragmentTest {
 
     @Test
     void defaults() {
         final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment();
-        assertSoftly(softly -> {
-            assertThat(fragment.getUsername()).isEmpty();
-            assertThat(fragment.getKeystore()).isEmpty();
-        });
-        assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
-    }
-
-    @Test
-    void bothSet() {
-        final String username = "usr";
-        final File keystore = new File("");
-        final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment(username, keystore);
-        assertSoftly(softly -> {
-            assertThat(fragment.getUsername()).hasValue(username);
-            assertThat(fragment.getKeystore()).hasValue(keystore);
-        });
-        assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
-    }
-
-    @Test
-    void userSet() {
-        final String username = "usr";
-        final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment(username, null);
-        assertSoftly(softly -> {
-            assertThat(fragment.getUsername()).hasValue(username);
-            assertThat(fragment.getKeystore()).isEmpty();
-        });
-        fragment.validate(null);
+        assertThat(fragment.getKeystore()).isEmpty();
     }
 
     @Test
     void keystoreSet() {
         final File keystore = new File("");
-        final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment(null, keystore);
-        assertSoftly(softly -> {
-            assertThat(fragment.getUsername()).isEmpty();
-            assertThat(fragment.getKeystore()).hasValue(keystore);
-        });
-        fragment.validate(null);
+        final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment(keystore);
+        assertThat(fragment.getKeystore()).hasValue(keystore);
     }
 
 }

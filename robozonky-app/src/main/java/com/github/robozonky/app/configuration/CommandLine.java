@@ -21,7 +21,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -40,11 +39,11 @@ public class CommandLine {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
     private final Consumer<Throwable> shutdownCall;
-    @ParametersDelegate
-    private MarketplaceCommandLineFragment marketplace = new MarketplaceCommandLineFragment();
     @Parameter(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")
     String strategyLocation = "";
+    @ParametersDelegate
+    private MarketplaceCommandLineFragment marketplace = new MarketplaceCommandLineFragment();
     @ParametersDelegate
     private AuthenticationCommandLineFragment authenticationFragment = new AuthenticationCommandLineFragment();
     @ParametersDelegate
@@ -60,14 +59,6 @@ public class CommandLine {
 
     public CommandLine(final Consumer<Throwable> shutdownCall) {
         this.shutdownCall = shutdownCall;
-    }
-
-    MarketplaceCommandLineFragment getMarketplace() {
-        return marketplace;
-    }
-
-    String getStrategyLocation() {
-        return strategyLocation;
     }
 
     private static void terminate(final ParameterException ex) {
@@ -110,22 +101,23 @@ public class CommandLine {
             CommandLine.terminate(jc);
             return Optional.empty();
         }
-        final OperatingMode mode = cli.determineOperatingMode(jc);
-        return cli.newApplicationConfiguration(mode);
+        return cli.newApplicationConfiguration();
     }
 
     static String getScriptIdentifier() {
         return System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
     }
 
-    private OperatingMode determineOperatingMode(final JCommander jc) throws ParameterException {
-        final OperatingMode mode = new OperatingMode(shutdownCall);
-        Stream.of(authenticationFragment, confirmationFragment, tweaksFragment, mode)
-                .forEach(commandLineFragment -> commandLineFragment.validate(jc));
-        return mode;
+    MarketplaceCommandLineFragment getMarketplace() {
+        return marketplace;
     }
 
-    private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
+    String getStrategyLocation() {
+        return strategyLocation;
+    }
+
+    private Optional<InvestmentMode> newApplicationConfiguration() {
+        final OperatingMode mode = new OperatingMode(shutdownCall);
         return SecretProviderFactory.getSecretProvider(authenticationFragment)
                 .flatMap(secrets -> mode.configure(this, secrets));
     }

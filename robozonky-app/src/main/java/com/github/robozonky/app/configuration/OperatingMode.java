@@ -35,7 +35,7 @@ import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class OperatingMode implements CommandLineFragment {
+final class OperatingMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperatingMode.class);
 
@@ -57,8 +57,8 @@ final class OperatingMode implements CommandLineFragment {
                 .build(duration);
     }
 
-    private static Optional<Investor> getZonkyProxyBuilder(final Tenant tenant, final Credentials credentials,
-                                                           final ConfirmationProvider provider) {
+    private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials,
+                                                  final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
         LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
         return credentials.getToken()
@@ -69,10 +69,10 @@ final class OperatingMode implements CommandLineFragment {
                 });
     }
 
-    private static Optional<Investor> getZonkyProxyBuilder(final Tenant tenant, final Credentials credentials) {
+    private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials) {
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
-                .map(provider -> OperatingMode.getZonkyProxyBuilder(tenant, credentials, provider))
+                .map(provider -> OperatingMode.getInvestor(tenant, credentials, provider))
                 .orElseGet(() -> {
                     LOGGER.error("Confirmation provider '{}' not found, yet it is required.", svcId);
                     return Optional.empty();
@@ -98,7 +98,7 @@ final class OperatingMode implements CommandLineFragment {
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))
-                .map(c -> OperatingMode.getZonkyProxyBuilder(tenant, c))
+                .map(c -> OperatingMode.getInvestor(tenant, c))
                 .orElse(Optional.of(Investor.build(tenant)))
                 .flatMap(i -> this.getInvestmentMode(cli, tenant, i));
     }

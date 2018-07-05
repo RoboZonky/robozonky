@@ -31,12 +31,17 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ZonkyApiTokenSupplierTest {
 
-    private static final SecretProvider SECRETS = SecretProvider.fallback("someone", "password".toCharArray());
+    private static final SecretProvider SECRETS = SecretProvider.inMemory("someone", "password".toCharArray());
 
     private static ZonkyApiToken getStaleToken() {
         return new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
