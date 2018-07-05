@@ -64,8 +64,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return threadGroup;
     }
 
-    static Duration getUntilNext4am() {
-        final ZonedDateTime now = Instant.now().atZone(Defaults.ZONE_ID);
+    private static Duration getUntilNext4am() {
+        return getUntilNext4am(Instant.now().atZone(Defaults.ZONE_ID));
+    }
+
+    static Duration getUntilNext4am(final ZonedDateTime now) {
         final ZonedDateTime fourAm = now.withHour(4).withMinute(0).withSecond(0).withNano(0);
         final ZonedDateTime nextFourAm = fourAm.isBefore(now) ? fourAm.plusDays(1) : fourAm;
         return Duration.between(now, nextFourAm).abs();

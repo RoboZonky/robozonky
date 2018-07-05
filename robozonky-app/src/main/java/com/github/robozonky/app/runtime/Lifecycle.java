@@ -48,10 +48,18 @@ public class Lifecycle {
     }
 
     Lifecycle(final CountDownLatch circuitBreaker) {
+        this(new MainControl(), circuitBreaker);
+    }
+
+    Lifecycle(final MainControl mc) {
+        this(mc, null);
+    }
+
+    Lifecycle(final MainControl mc, final CountDownLatch circuitBreaker) {
         this.circuitBreaker = circuitBreaker;
         this.shutdownEnabler = new ShutdownEnabler();
         this.shutdownHook = new DaemonShutdownHook(this, shutdownEnabler);
-        this.livenessCheck = new MainControl();
+        this.livenessCheck = mc;
         this.cleanup = LivenessCheck.setup(livenessCheck);
     }
 

@@ -30,8 +30,10 @@ import com.github.robozonky.app.ShutdownHook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 class LifecycleTest {
 
@@ -63,17 +65,14 @@ class LifecycleTest {
     }
 
     @Test
-    void waitUntilOnlineInterrupted() {
+    void waitUntilOnlineInterrupted() throws InterruptedException {
         final ExecutorService e = Executors.newCachedThreadPool();
         try {
-            final MainControl c = new MainControl();
-            final Future<Boolean> f = e.submit(() -> {
-                final boolean result = Lifecycle.waitUntilOnline(c);
-                assertThat(result).isFalse();
-                return result;
-            });
-            Assertions.assertThrows(TimeoutException.class, () -> f.get(1, TimeUnit.SECONDS)); // we are blocked
-            f.cancel(true); // finish the runnable, checking the included assertion
+            final MainControl mc = mock(MainControl.class);
+            doThrow(InterruptedException.class).when(mc).waitUntilTriggered();
+            final Lifecycle c = new Lifecycle(mc);
+            final boolean result = c.waitUntilOnline();
+            assertThat(result).isFalse();
         } finally {
             e.shutdownNow();
         }
