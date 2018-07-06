@@ -65,11 +65,17 @@ final class Session {
             final Tenant tenant) {
         this.authenticated = tenant;
         this.investor = investor;
-        this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedLoans");
-        this.seen = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "seenLoans");
+        this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
+        this.seen = newSessionState(tenant, marketplace, "seenLoans");
         this.loansStillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
+    }
+
+    private static SessionState<LoanDescriptor> newSessionState(final Tenant tenant,
+                                                                final Collection<LoanDescriptor> marketplace,
+                                                                final String key) {
+        return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
     }
 
     public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,

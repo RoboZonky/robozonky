@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -36,8 +37,15 @@ import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class InvestingTest extends AbstractZonkyLeveragingTest {
 
@@ -92,6 +100,33 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
+    }
+
+    @Test
+    void rejected() {
+        final Loan loan = Loan.custom()
+                .setAmount(100_000)
+                .setRating(Rating.D)
+                .setRemainingInvestment(100_000)
+                .setMyInvestment(mockMyInvestment())
+                .setDatePublished(OffsetDateTime.now())
+                .build();
+        final LoanDescriptor ld = new LoanDescriptor(loan);
+        final Zonky z = harmlessZonky(9000);
+        final Tenant auth = mockTenant(z);
+        final Investor investor = mock(Investor.class);
+        when(investor.getConfirmationProvider()).thenReturn(Optional.of(mock(ConfirmationProvider.class)));
+        when(investor.invest(any(), anyBoolean())).thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
+        final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
+        when(z.getLoan(eq(loan.getId()))).thenReturn(loan);
+        final Investing exec = new Investing(investor, ALL_ACCEPTING, auth);
+        assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
+        verify(investor, times(1)).invest(any(), anyBoolean()); // call to invest
+        verify(z, never()).invest(any()); // does not propagate to Zonky
+        // now try again, the same loan should now be discarded and therefore not even attempted
+        final Investing exec2 = new Investing(investor, ALL_ACCEPTING, auth);
+        assertThat(exec2.apply(portfolio, Collections.singleton(ld))).isEmpty();
+        verify(investor, times(1)).invest(any(), anyBoolean()); // call to invest
     }
 
     @Test

@@ -17,7 +17,6 @@
 package com.github.robozonky.app.investing;
 
 import java.time.OffsetDateTime;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -77,10 +76,6 @@ public class Investor {
         }
     }
 
-    public Optional<RequestId> getRequestId() {
-        return Optional.ofNullable(requestId);
-    }
-
     public Optional<ConfirmationProvider> getConfirmationProvider() {
         return Optional.ofNullable(provider);
     }
@@ -133,10 +128,6 @@ public class Investor {
         }
         Investor.LOGGER.warn("CAPTCHA protected, no support for delegation. Not investing: {}.", r);
         return new ZonkyResponse(ZonkyResponseType.REJECTED);
-    }
-
-    public boolean isDryRun() {
-        return Objects.equals(investOperation, DRY_RUN);
     }
 
     private ZonkyResponse delegateOrReject(final RecommendedLoan r) {

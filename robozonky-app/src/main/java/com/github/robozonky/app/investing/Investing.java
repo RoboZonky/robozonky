@@ -43,6 +43,13 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
         this.investor = investor;
     }
 
+    private static boolean isActionable(final LoanDescriptor loanDescriptor) {
+        final OffsetDateTime now = OffsetDateTime.now();
+        return loanDescriptor.getLoanCaptchaProtectionEndDateTime()
+                .map(d -> d.isBefore(now))
+                .orElse(true);
+    }
+
     @Override
     protected boolean isBalanceUnderMinimum(final int current) {
         return current < auth.getRestrictions().getMinimumInvestmentAmount();
@@ -50,12 +57,10 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
 
     @Override
     protected boolean hasMarketplaceUpdates(final Collection<LoanDescriptor> marketplace) {
-        final OffsetDateTime now = OffsetDateTime.now();
         final int[] actionableLoansNow = marketplace.stream()
-                .filter(l -> l.getLoanCaptchaProtectionEndDateTime()
-                        .map(d -> d.isBefore(now))
-                        .orElse(true)
-                ).mapToInt(l -> l.item().getId()).toArray();
+                .filter(Investing::isActionable)
+                .mapToInt(l -> l.item().getId())
+                .toArray();
         final int[] lastCheckedActionableLoans = actionableWhenLastChecked.getAndSet(actionableLoansNow);
         return NumberUtil.hasAdditions(lastCheckedActionableLoans, actionableLoansNow);
     }
