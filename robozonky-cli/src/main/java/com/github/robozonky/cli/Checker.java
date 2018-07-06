@@ -93,12 +93,12 @@ public final class Checker {
                 .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
         if (listeners.isEmpty()) {
+            return false;
+        } else {
             final SessionInfo sessionInfo = new SessionInfo(username);
             final RoboZonkyTestingEvent evt = new RoboZonkyTestingEvent();
             listeners.forEach(l -> l.handle(evt, sessionInfo));
             return true;
-        } else {
-            return false;
         }
     }
 }
