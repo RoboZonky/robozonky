@@ -28,7 +28,7 @@
   <artifactId>robozonky-distribution-cli</artifactId>
   <packaging>pom</packaging>
 
-  <name>RoboZonky Distribution: Command-line configuration utility</name>
+  <name>RoboZonky Distribution: Command-line configuration and validation utility</name>
 
   <properties> <!-- Main class from robozonky-cli to use to start the app. -->
     <com.github.robozonky.cli.mainClass>com.github.robozonky.cli.Main</com.github.robozonky.cli.mainClass>

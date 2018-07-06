@@ -29,9 +29,23 @@
   <packaging>pom</packaging>
 
   <name>RoboZonky Distribution: User-facing deliverables</name>
-  <modules>
+  <modules> <!-- other components are only enabled conditionally -->
     <module>robozonky-distribution-full</module>
-    <module>robozonky-distribution-cli</module>
   </modules>
+
+  <profiles>
+    <profile> <!-- Utilities won't be built in Docker, where it is not needed and takes a lot of time. -->
+      <id>build-utility-distribution</id>
+      <activation>
+        <property>
+          <name>!docker</name>
+        </property>
+      </activation>
+      <modules>
+        <module>robozonky-distribution-installer</module>
+        <module>robozonky-distribution-cli</module>
+      </modules>
+    </profile>
+  </profiles>
 
 </project>

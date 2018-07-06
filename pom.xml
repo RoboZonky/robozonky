@@ -30,7 +30,6 @@
     <module>robozonky-strategy-natural</module>
     <module>robozonky-test</module>
     <module>robozonky-distribution</module>
-    <module>robozonky-cli</module>
   </modules>
   <packaging>pom</packaging>
   <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -444,8 +443,9 @@
       </plugins>
     </pluginManagement>
   </build>
+
   <profiles>
-    <profile> <!-- Utilities won't be built in Docker, where it is not needed and takes a lot of time -->
+    <profile> <!-- Utilities won't be built in Docker, where it is not needed and takes a lot of time. -->
       <id>build-utilities</id>
       <activation>
         <property>
@@ -455,11 +455,9 @@
       <modules>
         <module>robozonky-cli</module>
         <module>robozonky-installer</module>
-        <module>robozonky-distribution/robozonky-distribution-installer</module>
       </modules>
     </profile>
   </profiles>
-
 
   <scm>
     <url>git@github.com:RoboZonky/robozonky.git</url>
