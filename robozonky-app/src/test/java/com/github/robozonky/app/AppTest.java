@@ -16,12 +16,6 @@
 
 package com.github.robozonky.app;
 
-import java.util.List;
-
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.test.exit.TestingSystemExit;
 import com.github.robozonky.test.exit.TestingSystemExitService;
 import org.junit.jupiter.api.AfterEach;
@@ -29,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class AppTest extends AbstractEventLeveragingTest {
 
@@ -53,19 +46,5 @@ class AppTest extends AbstractEventLeveragingTest {
         assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
     }
 
-    @Test
-    void proper() {
-        App.main("-u", "someone", "-p", "password", "test");
-        final List<Event> events = getNewEvents();
-        assertSoftly(softly -> {
-            softly.assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
-            softly.assertThat(events).hasSize(3);
-        });
-        assertSoftly(softly -> {
-            softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
-            softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
-            softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
-        });
-    }
 }
 

@@ -21,15 +21,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract class AbstractValidator implements DataValidator {
 
-    protected final Logger LOGGER = Logger.getLogger(this.getClass().getCanonicalName());
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     protected abstract DataValidator.Status validateDataPossiblyThrowingException(InstallData installData);
 
@@ -37,16 +37,16 @@ abstract class AbstractValidator implements DataValidator {
     public DataValidator.Status validateData(final InstallData installData) {
         final ExecutorService e = Executors.newCachedThreadPool();
         try {
-            LOGGER.log(Level.INFO, "Starting validation.");
+            LOGGER.info("Starting validation.");
             final Callable<DataValidator.Status> c = () -> this.validateDataPossiblyThrowingException(installData);
             final Future<DataValidator.Status> f = e.submit(c);
             return f.get(15, TimeUnit.SECONDS); // don't wait for result indefinitely
         } catch (final Exception ex) { // the installer must never ever throw an exception (= neverending spinner)
-            LOGGER.log(Level.SEVERE, "Uncaught exception.", ex);
+            LOGGER.error("Uncaught exception.", ex);
             return DataValidator.Status.ERROR;
         } finally {
             e.shutdownNow();
-            LOGGER.log(Level.INFO, "Finished validation.");
+            LOGGER.info("Finished validation.");
         }
     }
 

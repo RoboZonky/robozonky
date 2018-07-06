@@ -17,6 +17,9 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -29,12 +32,14 @@ import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
@@ -46,15 +51,36 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         try {
+            final StrategyProvider p = mock(StrategyProvider.class);
             final DaemonInvestmentMode d = new DaemonInvestmentMode(t -> {
-            }, a, b, mock(StrategyProvider.class), Duration.ofSeconds(1), Duration.ofSeconds(1));
+            }, a, b, p, Duration.ofSeconds(1), Duration.ofSeconds(1));
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
+            verify(p).getToInvest();
+            verify(p).getToPurchase();
         } finally {
             e.shutdownNow();
         }
+    }
+
+    @Test
+    void next4amTomorrow() {
+        final ZonedDateTime after4am = ZonedDateTime.of(LocalDate.now(), LocalTime.of(4, 0, 1), Defaults.ZONE_ID);
+        final Duration next = DaemonInvestmentMode.getUntilNext4am(after4am);
+        final ZonedDateTime next4am = after4am.plus(next);
+        assertThat(next4am)
+                .isEqualTo(ZonedDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(4, 0, 0), Defaults.ZONE_ID));
+    }
+
+    @Test
+    void next4amToday() {
+        final ZonedDateTime after4am = ZonedDateTime.of(LocalDate.now(), LocalTime.of(3, 59, 59), Defaults.ZONE_ID);
+        final Duration next = DaemonInvestmentMode.getUntilNext4am(after4am);
+        final ZonedDateTime next4am = after4am.plus(next);
+        assertThat(next4am)
+                .isEqualTo(ZonedDateTime.of(LocalDate.now(), LocalTime.of(4, 0, 0), Defaults.ZONE_ID));
     }
 
     @AfterEach

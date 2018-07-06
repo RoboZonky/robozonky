@@ -42,11 +42,7 @@
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-integration-zonkoid</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-notifications</artifactId>
+      <artifactId>robozonky-cli</artifactId>
     </dependency>
     <dependency>
       <groupId>org.codehaus.izpack</groupId>

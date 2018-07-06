@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.extensions;
+package com.github.robozonky.cli;
 
 import java.net.URL;
 import java.util.Collection;
@@ -32,6 +32,7 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public final class Checker {
         // no instances
     }
 
-    static Optional<RawLoan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
+    private static Optional<RawLoan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
         try {
             final ApiProvider p = apiProviderSupplier.get();
             final Collection<RawLoan> loans = p.marketplace();
@@ -63,14 +64,14 @@ public final class Checker {
         }
     }
 
-    static boolean notifyProvider(final RawLoan loan, final ConfirmationProvider zonkoid, final String username,
-                                  final char[] secret) {
+    private static boolean notifyProvider(final RawLoan loan, final ConfirmationProvider zonkoid, final String username,
+                                          final char... secret) {
         final RequestId id = new RequestId(username, secret);
         return zonkoid.requestConfirmation(id, loan.getId(), 200);
     }
 
     public static boolean confirmations(final ConfirmationProvider provider, final String username,
-                                        final char[] secret) {
+                                        final char... secret) {
         return Checker.confirmations(provider, username, secret, ApiProvider::new);
     }
 
@@ -81,23 +82,23 @@ public final class Checker {
                 .orElse(false);
     }
 
-    public static boolean notifications(final String username, final URL configurationLocation) {
+    static boolean notifications(final String username, final URL configurationLocation) {
         ListenerServiceLoader.registerNotificationConfiguration(username, configurationLocation);
         return Checker.notifications(username, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
 
-    public static boolean notifications(final String username,
-                                        final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
+    static boolean notifications(final String username,
+                                 final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
                 .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        if (listeners.size() > 0) {
+        if (listeners.isEmpty()) {
+            return false;
+        } else {
             final SessionInfo sessionInfo = new SessionInfo(username);
             final RoboZonkyTestingEvent evt = new RoboZonkyTestingEvent();
             listeners.forEach(l -> l.handle(evt, sessionInfo));
             return true;
-        } else {
-            return false;
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.cli;
 
-import com.beust.jcommander.Parameter;
+import java.util.stream.Stream;
 
-class StrategyCommandLineFragment extends AbstractCommandLineFragment {
+import org.junit.jupiter.api.Test;
 
-    @Parameter(names = {"-s", "--strategy"}, required = true,
-            description = "Points to a resource holding the investment strategy configuration.")
-    String strategyLocation = "";
+import static org.assertj.core.api.Assertions.assertThat;
 
-    public String getStrategyLocation() {
-        return strategyLocation;
+class FeatureTest {
+
+    @Test
+    void describe() {
+        Stream.concat(CommandLine.listFeatures(), Stream.of(new HelpFeature())).forEach(FeatureTest::describe);
+    }
+
+    static void describe(final Feature feature) {
+        assertThat(feature.describe()).as("Non-null description for " + feature).isNotNull();
     }
 }

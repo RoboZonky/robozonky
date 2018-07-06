@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.cli;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
+public class TestFailedException extends Exception {
 
-interface CommandLineFragment {
-
-    default void validate(final JCommander args) throws ParameterException {
-        // do nothing
+    TestFailedException(final Exception cause) {
+        super(cause);
     }
 
-    @Override
-    String toString();
+    TestFailedException(final String message) {
+        super(message);
+    }
 }

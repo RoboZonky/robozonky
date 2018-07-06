@@ -17,41 +17,40 @@
 package com.github.robozonky.installer;
 
 import java.io.File;
-import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Objects;
-import java.util.logging.Level;
 
+import com.github.robozonky.cli.Feature;
+import com.github.robozonky.cli.StrategyValidationFeature;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
 public class StrategySettingsValidator extends AbstractValidator {
+
+    private Feature getFeature(final String type, final String location) throws MalformedURLException {
+        switch (type) {
+            case "file":
+                return new StrategyValidationFeature(new File(location));
+            case "url":
+                return new StrategyValidationFeature(new URL(location));
+            default:
+                throw new IllegalStateException("Impossible.");
+        }
+    }
 
     @Override
     public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
         RoboZonkyInstallerListener.setInstallData(installData);
         final String type = Variables.STRATEGY_TYPE.getValue(installData);
         final String strategySource = Variables.STRATEGY_SOURCE.getValue(installData);
-        if (Objects.equals(type, "file")) {
-            final File f = new File(strategySource);
-            if (f.canRead()) {
-                return DataValidator.Status.OK;
-            } else {
-                return DataValidator.Status.WARNING;
-            }
-        } else if (Objects.equals(type, "url")) {
-            try (final InputStream is = new URL(strategySource).openStream()) {
-                if (is.available() > 0) {
-                    return DataValidator.Status.OK;
-                } else {
-                    return DataValidator.Status.WARNING;
-                }
-            } catch (final Exception ex) {
-                LOGGER.log(Level.WARNING, "Cannot read URL.", ex);
-                return DataValidator.Status.WARNING;
-            }
-        } else {
-            return DataValidator.Status.ERROR;
+        try {
+            final Feature f = getFeature(type, strategySource);
+            f.setup();
+            f.test();
+            return DataValidator.Status.OK;
+        } catch (final Exception ex) {
+            LOGGER.warn("Strategy invalid: {}.", strategySource);
+            return DataValidator.Status.WARNING;
         }
     }
 

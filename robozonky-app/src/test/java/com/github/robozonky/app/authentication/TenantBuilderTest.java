@@ -24,10 +24,12 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class TenantBuilderTest extends AbstractZonkyLeveragingTest {
 
@@ -36,7 +38,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
         final OAuth o = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider a = mockApiProvider(o, z);
-        final SecretProvider s = SecretProvider.fallback("user", "pwd".toCharArray());
+        final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
         final Tenant t = new TenantBuilder()
                 .withApi(a)
                 .withSecrets(s)
@@ -48,7 +50,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void filledSessionInfo() {
-        final SecretProvider s = SecretProvider.fallback("user", "pwd".toCharArray());
+        final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
         final Tenant t = new TenantBuilder()
                 .withSecrets(s)
                 .named("name")
@@ -64,7 +66,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void emptySessionInfo() {
-        final SecretProvider s = SecretProvider.fallback("user", "pwd".toCharArray());
+        final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
         final Tenant t = new TenantBuilder()
                 .withSecrets(s)
                 .build();

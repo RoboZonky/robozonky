@@ -17,9 +17,10 @@
 package com.github.robozonky.installer;
 
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import javax.ws.rs.ServerErrorException;
 
+import com.github.robozonky.cli.TestFailedException;
+import com.github.robozonky.cli.ZonkyPasswordFeature;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
@@ -47,25 +48,18 @@ public class ZonkySettingsValidator extends AbstractValidator {
     public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
         final String username = Variables.ZONKY_USERNAME.getValue(installData);
         final String password = Variables.ZONKY_PASSWORD.getValue(installData);
-        final ApiProvider p = apiSupplier.get();
-        return p.oauth((oauth) -> {
-            try {
-                p.authenticated(() -> {
-                    LOGGER.info("Logging in.");
-                    return oauth.login(username, password.toCharArray());
-                }, zonky -> {
-                    LOGGER.info("Logging out.");
-                    zonky.logout();
-                });
-                return DataValidator.Status.OK;
-            } catch (final ServerErrorException t) {
-                LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
+        try {
+            ZonkyPasswordFeature.attemptLogin(apiSupplier.get(), username, password.toCharArray());
+            return DataValidator.Status.OK;
+        } catch (final TestFailedException t) {
+            if (t.getCause() instanceof ServerErrorException) {
+                LOGGER.error("Failed accessing Zonky.", t.getCause());
                 return DataValidator.Status.ERROR;
-            } catch (final Exception t) {
-                LOGGER.log(Level.WARNING, "Failed logging in.", t);
+            } else {
+                LOGGER.warn("Failed logging in.", t);
                 return DataValidator.Status.WARNING;
             }
-        });
+        }
     }
 
     @Override

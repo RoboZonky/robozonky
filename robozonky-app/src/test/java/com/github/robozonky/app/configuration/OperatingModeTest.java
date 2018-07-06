@@ -24,9 +24,10 @@ import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class OperatingModeTest extends AbstractZonkyLeveragingTest {
 
@@ -38,11 +39,13 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
         when(f.isDryRunEnabled()).thenReturn(true);
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(f);
-        final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
+        when(cli.getStrategyLocation()).thenReturn("");
+        when(cli.getMarketplace()).thenReturn(new MarketplaceCommandLineFragment());
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE + ":" + SERVICE_TOKEN;
         when(cli.getConfirmationFragment()).thenReturn(fragment);
-        final OperatingMode mode = new DaemonOperatingMode(t -> {
+        final OperatingMode mode = new OperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertSoftly(softly -> {
@@ -55,11 +58,11 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
     void withConfirmationAndUnknownId() {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
-        final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = UUID.randomUUID().toString();
         when(cli.getConfirmationFragment()).thenReturn(fragment);
-        final OperatingMode mode = new DaemonOperatingMode(t -> {
+        final OperatingMode mode = new OperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertThat(config).isEmpty();
@@ -70,11 +73,11 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
     void withConfirmationAndNoSecret() {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
-        final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE;
         when(cli.getConfirmationFragment()).thenReturn(fragment);
-        final OperatingMode mode = new DaemonOperatingMode(t -> {
+        final OperatingMode mode = new OperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertThat(config).isEmpty();
@@ -85,9 +88,11 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
     void withoutConfirmation() {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
+        when(cli.getStrategyLocation()).thenReturn("");
+        when(cli.getMarketplace()).thenReturn(new MarketplaceCommandLineFragment());
         when(cli.getConfirmationFragment()).thenReturn(mock(ConfirmationCommandLineFragment.class));
-        final SecretProvider secretProvider = SecretProvider.fallback("user", new char[0]);
-        final OperatingMode mode = new DaemonOperatingMode(t -> {
+        final SecretProvider secretProvider = SecretProvider.inMemory("user", new char[0]);
+        final OperatingMode mode = new OperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertThat(config).isPresent();

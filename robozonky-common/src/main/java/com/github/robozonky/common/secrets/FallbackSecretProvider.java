@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Plain-text secret storage. Should only be used as fallback in case the JDK does not support KeyStores. This is
- * unlikely, but we've seen that happen. (See https://github.com/triceo/robozonky/issues/52.)
+ * Plain-text in-memory ephemeral secret storage. Should only ever be used for testing purposes.
  */
 final class FallbackSecretProvider implements SecretProvider {
 

@@ -21,16 +21,15 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class SecretProviderFactoryTest {
 
-    private static AuthenticationCommandLineFragment mockCli(final String username, final File file,
-                                                             final char... password) {
+    private static AuthenticationCommandLineFragment mockCli(final File file, final char... password) {
         final AuthenticationCommandLineFragment delegate = mock(AuthenticationCommandLineFragment.class);
-        when(delegate.getUsername()).thenReturn(Optional.ofNullable(username));
         when(delegate.getKeystore()).thenReturn(Optional.ofNullable(file));
         when(delegate.getPassword()).thenReturn(password);
         return delegate;
@@ -40,7 +39,7 @@ class SecretProviderFactoryTest {
     void nonexistentKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
         tmp.delete();
-        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(null, tmp,
+        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(tmp,
                                                                                         "password".toCharArray());
         assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
     }
@@ -48,21 +47,17 @@ class SecretProviderFactoryTest {
     @Test
     void wrongFormatKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore"); // empty key store
-        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(null, tmp,
+        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(tmp,
                                                                                         "password".toCharArray());
         assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
     }
 
     @Test
-    void fallbackSuccess() {
-        final String username = "user", password = "pass";
-        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(username, null,
+    void noFallback() {
+        final String password = "pass";
+        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(null,
                                                                                         password.toCharArray());
-        assertThat(SecretProviderFactory.getSecretProvider(cli))
-                .hasValueSatisfying(secret -> assertSoftly(softly -> {
-                    softly.assertThat(secret.getUsername()).isEqualTo(username);
-                    softly.assertThat(secret.getPassword()).containsExactly(password.toCharArray());
-                    softly.assertThat(secret.isPersistent()).isFalse();
-                }));
+        assertThatThrownBy(() -> SecretProviderFactory.getSecretProvider(cli))
+                .isInstanceOf(IllegalStateException.class);
     }
 }

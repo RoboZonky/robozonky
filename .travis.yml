@@ -11,6 +11,7 @@ env:
     - MODULE=robozonky-common
     - MODULE=robozonky-notifications
     - MODULE=robozonky-app
+    - MODULE=robozonky-cli
     - MODULE=robozonky-installer
     # then plugin modules
     - MODULE=robozonky-strategy-natural

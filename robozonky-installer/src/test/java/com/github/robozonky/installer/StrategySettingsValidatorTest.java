@@ -19,37 +19,20 @@ package com.github.robozonky.installer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.util.Collections;
 
-import com.github.robozonky.internal.api.Defaults;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class StrategySettingsValidatorTest {
-
-    @AfterEach
-    void resetDataTransfer() {
-        RoboZonkyInstallerListener.resetInstallData();
-    }
-
-    @Test
-    void messages() {
-        final DataValidator validator = new StrategySettingsValidator();
-        assertSoftly(softly -> {
-            softly.assertThat(validator.getDefaultAnswer()).isFalse();
-            softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
-        });
-    }
 
     private static InstallData mockInstallData() {
         final InstallData data = mock(InstallData.class);
@@ -74,23 +57,27 @@ class StrategySettingsValidatorTest {
         return data;
     }
 
+    @AfterEach
+    void resetDataTransfer() {
+        RoboZonkyInstallerListener.resetInstallData();
+    }
+
+    @Test
+    void messages() {
+        final DataValidator validator = new StrategySettingsValidator();
+        assertSoftly(softly -> {
+            softly.assertThat(validator.getDefaultAnswer()).isFalse();
+            softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
+        });
+    }
+
     @Test
     void wrongData() {
         final DataValidator validator = new StrategySettingsValidator();
         assertThat(validator.validateData(StrategySettingsValidatorTest.mockInstallData()))
-                .isEqualTo(DataValidator.Status.ERROR);
-    }
-
-    @Test
-    void fileOk() throws IOException {
-        final File f = File.createTempFile("robozonky-", ".cfg");
-        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f);
-        // execute sut
-        final DataValidator validator = new StrategySettingsValidator();
-        final DataValidator.Status result = validator.validateData(d);
-        // execute test
-        assertThat(result).isEqualTo(DataValidator.Status.OK);
-        assertThat(RoboZonkyInstallerListener.INSTALL_PATH).isNotNull();
+                .isEqualTo(DataValidator.Status.WARNING);
     }
 
     @Test
@@ -103,18 +90,6 @@ class StrategySettingsValidatorTest {
         final DataValidator.Status result = validator.validateData(d);
         // execute test
         assertThat(result).isEqualTo(DataValidator.Status.WARNING);
-    }
-
-    @Test
-    void urlOk() throws IOException {
-        final File f = File.createTempFile("robozonky-", ".cfg");
-        Files.write(f.toPath(), Collections.singleton("Content"), Defaults.CHARSET);
-        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI().toURL());
-        // execute sut
-        final DataValidator validator = new StrategySettingsValidator();
-        final DataValidator.Status result = validator.validateData(d);
-        // execute test
-        assertThat(result).isEqualTo(DataValidator.Status.OK);
     }
 
     @Test

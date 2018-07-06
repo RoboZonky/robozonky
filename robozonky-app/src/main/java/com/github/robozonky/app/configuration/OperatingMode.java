@@ -18,26 +18,34 @@ package com.github.robozonky.app.configuration;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.authentication.TenantBuilder;
+import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
+import com.github.robozonky.app.configuration.daemon.StrategyProvider;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.internal.api.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class OperatingMode implements CommandLineFragment {
+final class OperatingMode {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperatingMode.class);
 
-    private Tenant getAuthenticated(final CommandLine cli, final SecretProvider secrets) {
+    private final Consumer<Throwable> shutdownCall;
+
+    OperatingMode(final Consumer<Throwable> shutdownCall) {
+        this.shutdownCall = shutdownCall;
+    }
+
+    private static Tenant getAuthenticated(final CommandLine cli, final SecretProvider secrets) {
         final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
         final TenantBuilder b = new TenantBuilder();
         if (cli.getTweaksFragment().isDryRunEnabled()) {
@@ -49,8 +57,8 @@ abstract class OperatingMode implements CommandLineFragment {
                 .build(duration);
     }
 
-    Optional<Investor> getZonkyProxyBuilder(final Tenant tenant, final Credentials credentials,
-                                            final ConfirmationProvider provider) {
+    private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials,
+                                                  final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
         LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
         return credentials.getToken()
@@ -61,18 +69,24 @@ abstract class OperatingMode implements CommandLineFragment {
                 });
     }
 
-    Optional<Investor> getZonkyProxyBuilder(final Tenant tenant, final Credentials credentials) {
+    private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials) {
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
-                .map(provider -> this.getZonkyProxyBuilder(tenant, credentials, provider))
+                .map(provider -> OperatingMode.getInvestor(tenant, credentials, provider))
                 .orElseGet(() -> {
                     LOGGER.error("Confirmation provider '{}' not found, yet it is required.", svcId);
                     return Optional.empty();
                 });
     }
 
-    protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
-                                                                  final Investor investor);
+    private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
+                                                       final Investor investor) {
+        final StrategyProvider sp = StrategyProvider.createFor(cli.getStrategyLocation());
+        final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, investor, sp,
+                                                          cli.getMarketplace().getPrimaryMarketplaceCheckDelay(),
+                                                          cli.getMarketplace().getSecondaryMarketplaceCheckDelay());
+        return Optional.of(m);
+    }
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
         final Tenant tenant = getAuthenticated(cli, secrets);
@@ -84,13 +98,8 @@ abstract class OperatingMode implements CommandLineFragment {
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))
-                .map(c -> this.getZonkyProxyBuilder(tenant, c))
+                .map(c -> OperatingMode.getInvestor(tenant, c))
                 .orElse(Optional.of(Investor.build(tenant)))
-                .map(i -> this.getInvestmentMode(cli, tenant, i))
-                .orElse(Optional.empty());
-    }
-
-    public String toString() {
-        return new ToStringBuilder(this).toString();
+                .flatMap(i -> this.getInvestmentMode(cli, tenant, i));
     }
 }

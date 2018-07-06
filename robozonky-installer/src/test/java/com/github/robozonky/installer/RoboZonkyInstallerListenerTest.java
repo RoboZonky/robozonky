@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.UUID;
 
+import com.github.robozonky.cli.SetupFailedException;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.izforge.izpack.api.data.InstallData;
@@ -159,31 +160,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void coreWithoutKeyStore() {
-        // prepare
-        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        when(localData.getVariable(Variables.IS_ZONKOID_ENABLED.getKey())).thenReturn("true");
-        when(localData.getVariable(Variables.ZONKOID_TOKEN.getKey())).thenReturn("123456");
-        RoboZonkyInstallerListener.setInstallData(localData);
-        // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareCore(null);
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                    .doesNotContainKey("-d")
-                    .doesNotContainKey("-r")
-                    .doesNotContainKey("-g");
-            softly.assertThat(clp.getOptions().get("-u"))
-                    .containsOnly(localData.getVariable(Variables.ZONKY_USERNAME.getKey()));
-            softly.assertThat(clp.getOptions().get("-x"))
-                    .containsOnly("zonkoid:" + localData.getVariable(Variables.ZONKOID_TOKEN.getKey()));
-            softly.assertThat(clp.getOptions().get("-p"))
-                    .containsOnly(data.getVariable(Variables.ZONKY_PASSWORD.getKey()));
-        });
-    }
-
-    @Test
-    void coreWithoutTweaks() {
+    void coreWithoutTweaks() throws SetupFailedException {
         // prepare
         RoboZonkyInstallerListener.setInstallData(data);
         // execute SUT
@@ -200,7 +177,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void coreWithTweaks() {
+    void coreWithTweaks() throws SetupFailedException {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
         when(localData.getVariable(Variables.IS_DRY_RUN.getKey())).thenReturn("true");

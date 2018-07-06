@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.common.extensions.Checker;
+import com.github.robozonky.cli.Checker;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;

@@ -48,6 +48,34 @@ public class KeyStoreHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreHandler.class);
     private static final String KEYSTORE_TYPE = "JCEKS";
     private static final String KEY_TYPE = "PBE";
+    private final AtomicBoolean dirty;
+    private char[] password;
+    private final File keyStoreFile;
+    private final KeyStore keyStore;
+    private final KeyStore.ProtectionParameter protectionParameter;
+    private final SecretKeyFactory keyFactory;
+
+    /**
+     * Create a new instance, where {@link #isDirty()} will be false.
+     * @param keyStore KeyStore to use as the backend.
+     * @param password Password to protect the keys.
+     * @param keyStoreFile File that will represent the keystore.
+     * @param keyFactory Factory to create the keys.
+     */
+    private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
+                            final SecretKeyFactory keyFactory) {
+        this(keyStore, password, keyStoreFile, keyFactory, true);
+    }
+
+    private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
+                            final SecretKeyFactory keyFactory, final boolean isDirty) {
+        this.keyStore = keyStore;
+        this.password = password.clone();
+        this.protectionParameter = new KeyStore.PasswordProtection("NO_PASSWORD".toCharArray()); // FIXME is this safe?
+        this.keyStoreFile = keyStoreFile;
+        this.keyFactory = keyFactory;
+        this.dirty = new AtomicBoolean(isDirty);
+    }
 
     private static SecretKeyFactory getSecretKeyFactory() {
         try {
@@ -109,35 +137,6 @@ public class KeyStoreHandler {
         } catch (final CertificateException | NoSuchAlgorithmException ex) {
             throw new IllegalStateException(ex);
         }
-    }
-
-    private final AtomicBoolean dirty;
-    private final char[] password;
-    private final File keyStoreFile;
-    private final KeyStore keyStore;
-    private final KeyStore.ProtectionParameter protectionParameter;
-    private final SecretKeyFactory keyFactory;
-
-    /**
-     * Create a new instance, where {@link #isDirty()} will be false.
-     * @param keyStore KeyStore to use as the backend.
-     * @param password Password to protect the keys.
-     * @param keyStoreFile File that will represent the keystore.
-     * @param keyFactory Factory to create the keys.
-     */
-    private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
-                            final SecretKeyFactory keyFactory) {
-        this(keyStore, password, keyStoreFile, keyFactory, true);
-    }
-
-    private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
-                            final SecretKeyFactory keyFactory, final boolean isDirty) {
-        this.keyStore = keyStore;
-        this.password = password;
-        this.protectionParameter = new KeyStore.PasswordProtection("NO_PASSWORD".toCharArray()); // FIXME is this safe?
-        this.keyStoreFile = keyStoreFile;
-        this.keyFactory = keyFactory;
-        this.dirty = new AtomicBoolean(isDirty);
     }
 
     /**
@@ -212,9 +211,20 @@ public class KeyStoreHandler {
      * @throws IOException If saving the key store failed.
      */
     public void save() throws IOException {
+        save(this.password);
+    }
+
+    /**
+     * Persist whatever operations that have been made using this API. Unless this method is called, no other methods
+     * have effect.
+     * @param secret Password to persist the changes with.
+     * @throws IOException If saving the key store failed.
+     */
+    public void save(final char... secret) throws IOException {
+        this.password = secret.clone();
         try (final OutputStream os = new BufferedOutputStream(new FileOutputStream(this.keyStoreFile))) {
             try {
-                this.keyStore.store(os, this.password);
+                this.keyStore.store(os, secret);
                 this.dirty.set(false);
             } catch (final KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
                 throw new IllegalStateException(ex);

@@ -18,9 +18,9 @@ package com.github.robozonky.installer;
 
 import java.io.File;
 import java.util.Properties;
-import java.util.logging.Level;
 
-import com.github.robozonky.common.extensions.Checker;
+import com.github.robozonky.cli.Feature;
+import com.github.robozonky.cli.NotificationTestingFeature;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
@@ -28,16 +28,17 @@ public class EmailSettingsValidator extends AbstractValidator {
 
     @Override
     protected DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
-        try {
-            // configure e-mail notification properties
+        try { // configure e-mail notification properties
             final Properties emailConfig = Util.configureEmailNotifications(installData);
             final File emailConfigTarget = File.createTempFile("robozonky-", ".cfg");
             Util.writeOutProperties(emailConfig, emailConfigTarget);
-            return Checker.notifications(Variables.ZONKY_USERNAME.getValue(installData),
-                                         emailConfigTarget.toURI().toURL())
-                    ? DataValidator.Status.OK : DataValidator.Status.ERROR;
+            final Feature f = new NotificationTestingFeature(Variables.ZONKY_USERNAME.getValue(installData),
+                                                             emailConfigTarget.toURI().toURL());
+            f.setup();
+            f.test();
+            return DataValidator.Status.OK;
         } catch (final Exception ex) {
-            LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
+            LOGGER.warn("Failed sending e-mail.", ex);
             return DataValidator.Status.WARNING;
         }
     }

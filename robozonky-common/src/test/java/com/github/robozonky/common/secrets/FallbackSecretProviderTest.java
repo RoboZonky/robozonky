@@ -27,7 +27,7 @@ class FallbackSecretProviderTest {
 
     @Test
     void setUsernameAndPassword() {
-        final SecretProvider p = SecretProvider.fallback(FallbackSecretProviderTest.USR,
+        final SecretProvider p = SecretProvider.inMemory(FallbackSecretProviderTest.USR,
                                                          FallbackSecretProviderTest.PWD.toCharArray());
         // make sure original values were set
         assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
