@@ -50,6 +50,7 @@
     </header>
 
     <main>
+        <h1>${data.subject}</h1>
         <#include embed>
     </main>
 

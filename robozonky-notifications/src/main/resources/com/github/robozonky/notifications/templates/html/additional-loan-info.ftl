@@ -1,5 +1,5 @@
+<h2>Parametry půjčky</h2>
 <table>
-  <caption>Parametry půjčky</caption>
   <tbody>
     <tr>
       <th style="text-align: right;">Rating:</th>
@@ -18,22 +18,12 @@
       <td>${data.loanPurpose.getCode()?cap_first}</td>
     </tr>
     <tr>
+      <th style="text-align: right;">Klient:</th>
+      <td>${data.loanMainIncomeType.getCode()?cap_first}, ${data.loanRegion.getCode()?cap_first}</td>
+    </tr>
+    <tr>
       <th style="text-align: right;">Pojištěno:</th>
       <td><#if data.insurance>Ano<#else>Ne</#if>.</td>
-    </tr>
-  </tbody>
-</table>
-
-<table>
-  <caption>Informace o klientovi</caption>
-  <tbody>
-    <tr>
-      <th style="text-align: right;">Kraj:</th>
-      <td>${data.loanRegion.getCode()?cap_first}</td>
-    </tr>
-    <tr>
-      <th style="text-align: right;">Zdroj příjmů:</th>
-      <td>${data.loanMainIncomeType.getCode()?cap_first}</td>
     </tr>
   </tbody>
 </table>
