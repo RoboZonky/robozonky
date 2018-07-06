@@ -16,20 +16,17 @@
 
 package com.github.robozonky.cli;
 
-final class HelpFeature implements Feature {
+import org.junit.jupiter.api.Test;
 
-    @Override
-    public String describe() {
-        return "Won't actually be used.";
-    }
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Override
-    public void setup() {
-        // this is a no-op
-    }
+class PasswordConverterTest {
 
-    @Override
-    public void test() {
-        // this is a no-op
+    @Test
+    void converts() {
+        final PasswordConverter c = new PasswordConverter();
+        final String in = "Something";
+        final char[] out = in.toCharArray();
+        assertThat(c.convert("Something")).isEqualTo(out);
     }
 }

@@ -40,6 +40,7 @@ public final class StrategyValidationFeature implements Feature {
     @Parameter(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
     private URL location;
     private String text;
+    private LongAdder adder = new LongAdder();
 
     public StrategyValidationFeature(final URL location) {
         this.location = location;
@@ -49,8 +50,14 @@ public final class StrategyValidationFeature implements Feature {
         this(location.toURI().toURL());
     }
 
+    StrategyValidationFeature(final File location, final LongAdder adder) throws MalformedURLException {
+        this(location);
+        this.adder = adder;
+    }
+
     StrategyValidationFeature() {
         // for JCommander
+        this.adder = new LongAdder();
     }
 
     @Override
@@ -74,15 +81,12 @@ public final class StrategyValidationFeature implements Feature {
 
     @Override
     public void test() throws TestFailedException {
-        final LongAdder adder = new LongAdder();
+        adder.reset();
         StrategyLoader.toInvest(text).ifPresent(s -> report(adder, "Investing"));
         StrategyLoader.toPurchase(text).ifPresent(s -> report(adder, "Purchasing"));
         StrategyLoader.toSell(text).ifPresent(s -> report(adder, "Selling"));
-        if (adder.intValue() == 0) {
+        if (adder.sum() == 0) {
             throw new TestFailedException("No strategies found. Check log for possible parser errors.");
-        }
-        if (adder.intValue() < 3) {
-            LOGGER.warn("One or more strategies are missing. Check log for possible parser errors just in case.");
         }
     }
 }

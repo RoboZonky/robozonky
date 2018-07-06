@@ -18,6 +18,7 @@ package com.github.robozonky.cli;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -41,20 +42,21 @@ final class CommandLine {
         }
     }
 
-    private static String getProgramName() {
+    static String getProgramName() {
         return "java -jar robozonky-distribution-cli-" + Defaults.ROBOZONKY_VERSION + "-full.jar";
+    }
+
+    static Stream<Feature> listFeatures() {
+        return Stream.of(new ZonkyPasswordFeature(), new ZonkoidPasswordFeature(), new MasterPasswordFeature(),
+                         new StrategyValidationFeature(), new NotificationTestingFeature());
     }
 
     private static Optional<Feature> parseUnsafe(final String... args) throws ParameterException {
         final CommandLine cli = new CommandLine();
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(getProgramName())
-                .addCommand(new ZonkyPasswordFeature())
-                .addCommand(new ZonkoidPasswordFeature())
-                .addCommand(new MasterPasswordFeature())
-                .addCommand(new StrategyValidationFeature())
-                .addCommand(new NotificationTestingFeature())
                 .addObject(cli);
+        listFeatures().forEach(builder::addCommand);
         final JCommander jc = builder.build();
         jc.parse(args);
         if (cli.help) { // don't validate since the CLI is likely to be invalid
@@ -67,9 +69,7 @@ final class CommandLine {
     private static Feature findFeature(final JCommander jc) throws ParameterException {
         final String parsedCommand = jc.getParsedCommand();
         if (parsedCommand == null) {
-            final ParameterException ex = new ParameterException("You must specify a command. See usage.");
-            ex.setJCommander(jc);
-            throw ex;
+            throw new ParameterException("You must specify a command. See usage.");
         }
         final JCommander command = jc.getCommands().get(parsedCommand);
         final List<Object> objects = command.getObjects();

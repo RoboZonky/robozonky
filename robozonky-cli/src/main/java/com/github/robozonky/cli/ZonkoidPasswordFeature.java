@@ -29,17 +29,24 @@ import com.github.robozonky.common.secrets.SecretProvider;
 public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Set credentials to access Zonkoid.";
-    private static final String ZONKOID_ID = "zonkoid";
+    static final String ZONKOID_ID = "zonkoid";
+    private final String id;
     @Parameter(order = 2, names = {"-p", "--password"}, converter = PasswordConverter.class,
             description = "Code generated in the Zonkoid mobile application.", required = true, password = true)
     private char[] password = null;
 
     public ZonkoidPasswordFeature(final File keystore, final char[] keystoreSecret, final char... password) {
+        this(ZONKOID_ID, keystore, keystoreSecret, password);
+    }
+
+    ZonkoidPasswordFeature(final String id, final File keystore, final char[] keystoreSecret, final char... password) {
         super(keystore, keystoreSecret);
+        this.id = id;
         this.password = password.clone();
     }
 
     ZonkoidPasswordFeature() { // for JCommander
+        this.id = ZONKOID_ID;
     }
 
     @Override
@@ -53,7 +60,7 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
         final SecretProvider s = SecretProvider.keyStoreBased(this.getStorage());
         try {
             s.getUsername(); // ensure we have Zonky username prepared
-            s.setSecret(ZONKOID_ID, password);
+            s.setSecret(id, password);
         } catch (final Exception ex) {
             throw new SetupFailedException(ex);
         }
@@ -63,9 +70,9 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
     public void test() throws TestFailedException {
         super.test();
         final SecretProvider s = SecretProvider.keyStoreBased(this.getStorage());
-        final Optional<ConfirmationProvider> zonkoid = ConfirmationProviderLoader.load(ZONKOID_ID);
+        final Optional<ConfirmationProvider> zonkoid = ConfirmationProviderLoader.load(id);
         if (zonkoid.isPresent()) {
-            if (!Checker.confirmations(zonkoid.get(), s.getUsername(), s.getSecret(ZONKOID_ID).get())) {
+            if (!Checker.confirmations(zonkoid.get(), s.getUsername(), s.getSecret(id).get())) {
                 throw new TestFailedException("Could not connect to Zonkoid, check log for details.");
             }
         } else {

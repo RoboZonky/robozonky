@@ -16,20 +16,20 @@
 
 package com.github.robozonky.cli;
 
-final class HelpFeature implements Feature {
+import java.util.stream.Stream;
 
-    @Override
-    public String describe() {
-        return "Won't actually be used.";
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class FeatureTest {
+
+    @Test
+    void describe() {
+        Stream.concat(CommandLine.listFeatures(), Stream.of(new HelpFeature())).forEach(FeatureTest::describe);
     }
 
-    @Override
-    public void setup() {
-        // this is a no-op
-    }
-
-    @Override
-    public void test() {
-        // this is a no-op
+    static void describe(final Feature feature) {
+        assertThat(feature.describe()).as("Non-null description for " + feature).isNotNull();
     }
 }

@@ -29,6 +29,7 @@ import com.github.robozonky.common.secrets.SecretProvider;
 public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Set credentials to access Zonky servers.";
+    private final ApiProvider api;
     @Parameter(order = 2, names = {"-u", "--username"},
             description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
@@ -38,13 +39,19 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
 
     public ZonkyPasswordFeature(final File keystore, final char[] keystoreSecret, final String username,
                                 final char... password) {
+        this(new ApiProvider(), keystore, keystoreSecret, username, password);
+    }
+
+    ZonkyPasswordFeature(final ApiProvider apiProvider, final File keystore, final char[] keystoreSecret,
+                         final String username, final char... password) {
         super(keystore, keystoreSecret);
+        this.api = apiProvider;
         this.username = username;
         this.password = password.clone();
     }
 
     ZonkyPasswordFeature() {
-        // for JCommander
+        this.api = new ApiProvider();
     }
 
     public static void attemptLogin(final ApiProvider api, final String username,
@@ -77,8 +84,6 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
     public void test() throws TestFailedException {
         super.test();
         final SecretProvider s = SecretProvider.keyStoreBased(this.getStorage());
-        try (final ApiProvider api = new ApiProvider()) {
-            attemptLogin(api, s.getUsername(), s.getPassword());
-        }
+        attemptLogin(api, s.getUsername(), s.getPassword());
     }
 }
