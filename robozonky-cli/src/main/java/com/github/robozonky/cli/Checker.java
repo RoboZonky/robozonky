@@ -92,7 +92,7 @@ public final class Checker {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
                 .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        if (listeners.size() > 0) {
+        if (listeners.isEmpty()) {
             final SessionInfo sessionInfo = new SessionInfo(username);
             final RoboZonkyTestingEvent evt = new RoboZonkyTestingEvent();
             listeners.forEach(l -> l.handle(evt, sessionInfo));

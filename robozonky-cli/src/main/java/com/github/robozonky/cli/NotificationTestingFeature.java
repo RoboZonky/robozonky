@@ -34,7 +34,6 @@ public final class NotificationTestingFeature implements Feature {
     private String username = null;
     @Parameter(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
     private URL location;
-    private String text;
 
     public NotificationTestingFeature(final String username, final URL location) {
         this.username = username;

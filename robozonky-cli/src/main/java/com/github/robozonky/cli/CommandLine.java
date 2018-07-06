@@ -51,7 +51,7 @@ final class CommandLine {
                          new StrategyValidationFeature(), new NotificationTestingFeature());
     }
 
-    private static Optional<Feature> parseUnsafe(final String... args) throws ParameterException {
+    private static Optional<Feature> parseUnsafe(final String... args) {
         final CommandLine cli = new CommandLine();
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(getProgramName())
@@ -66,7 +66,7 @@ final class CommandLine {
         return Optional.of(findFeature(jc));
     }
 
-    private static Feature findFeature(final JCommander jc) throws ParameterException {
+    private static Feature findFeature(final JCommander jc) {
         final String parsedCommand = jc.getParsedCommand();
         if (parsedCommand == null) {
             throw new ParameterException("You must specify a command. See usage.");

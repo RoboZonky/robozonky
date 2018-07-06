@@ -56,7 +56,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
 
     public static void attemptLogin(final ApiProvider api, final String username,
                                     final char... password) throws TestFailedException {
-        final Optional<Exception> thrown = api.oauth((oauth) -> {
+        final Optional<Exception> thrown = api.oauth(oauth -> {
             try {
                 api.authenticated(() -> oauth.login(username, password), Zonky::logout);
                 return Optional.empty();

@@ -32,7 +32,7 @@ final class Main implements Function<Feature, Integer> {
         LOGGER.warn("This is a tool for the brave. Create a backup copy of RoboZonky or " +
                             "use RoboZonky installer instead.");
         final Optional<Feature> featureOptional = CommandLine.parse(args);
-        featureOptional.ifPresent((feature) -> {
+        featureOptional.ifPresent(feature -> {
             final int exitCode = new Main().apply(feature);
             System.exit(exitCode);
         });
@@ -47,18 +47,15 @@ final class Main implements Function<Feature, Integer> {
             return 1;
         } else {
             try {
-                LOGGER.info("--- Press any key to run: '{}'", feature.describe());
-                try {
-                    System.in.read();
-                } catch (final IOException ex) {
-                    throw new SetupFailedException("Exception while waiting for keypress.", ex);
-                }
+                final String description = feature.describe();
+                LOGGER.info("--- Press any key to run: '{}'", description);
+                System.in.read();
                 feature.setup();
                 LOGGER.info("--- Executed, running test of the new setup.");
                 feature.test();
                 LOGGER.info("--- Success.");
                 return 0;
-            } catch (final SetupFailedException e) {
+            } catch (final SetupFailedException | IOException e) {
                 LOGGER.warn("!!! Could not perform setup, configuration may have been corrupted.", e);
                 return 2;
             } catch (final TestFailedException e) {
