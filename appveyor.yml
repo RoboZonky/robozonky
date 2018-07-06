@@ -12,8 +12,6 @@ environment:
       # then plugin modules
       - MODULE: robozonky-strategy-natural
       - MODULE: robozonky-integration-zonkoid
-      # finally distributions
-      - MODULE: robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
 matrix:
   fast_finish: true
 branches:
