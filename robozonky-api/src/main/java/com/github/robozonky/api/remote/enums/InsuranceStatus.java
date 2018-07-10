@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.enums;
 public enum InsuranceStatus {
 
     NOT_INSURED,
-    CURRENTLY_INSURED;
+    CURRENTLY_INSURED,
+    FORMERLY_INSURED
 
 }
