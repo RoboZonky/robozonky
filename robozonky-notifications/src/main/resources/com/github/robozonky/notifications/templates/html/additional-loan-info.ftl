@@ -19,7 +19,7 @@
     </tr>
     <tr>
       <th style="text-align: right;">Klient:</th>
-      <td>${data.loanMainIncomeType.getCode()?cap_first}, ${data.loanRegion.getCode()?cap_first}</td>
+      <td>${data.loanMainIncomeType.getCode()?cap_first}, ${data.loanRegion.getRichCode()?cap_first}</td>
     </tr>
     <tr>
       <th style="text-align: right;">Pojištěno:</th>
