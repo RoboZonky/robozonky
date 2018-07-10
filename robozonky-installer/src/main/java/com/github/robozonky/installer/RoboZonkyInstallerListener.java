@@ -129,12 +129,10 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         return cli;
     }
 
-    private static File assembleCliFile(final CommandLinePart credentials,
-                                        final CommandLinePart strategy) throws IOException {
+    private static File assembleCliFile(final CommandLinePart... source) throws IOException {
         // assemble the CLI
         final CommandLinePart cli = new CommandLinePart();
-        Util.copyOptions(credentials, cli);
-        Util.copyOptions(strategy, cli);
+        Stream.of(source).forEach(c -> Util.copyOptions(c, cli));
         // store it to a file
         cli.storeOptions(CLI_CONFIG_FILE);
         return CLI_CONFIG_FILE.getAbsoluteFile();
@@ -208,7 +206,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                                                       final CommandLinePart credentials,
                                                       final CommandLinePart logging) {
         try {
-            final File cliConfigFile = assembleCliFile(credentials, strategy);
+            final File cliConfigFile = assembleCliFile(credentials, strategy, emailConfig);
             // have the CLI file loaded during RoboZonky startup
             final CommandLinePart commandLine = new CommandLinePart()
                     .setOption("@" + cliConfigFile.getAbsolutePath())
@@ -216,7 +214,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                     .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
-            Stream.of(strategy, emailConfig, jmxConfig, credentials, logging)
+            Stream.of(strategy, jmxConfig, credentials, logging)
                     .map(CommandLinePart::getProperties)
                     .flatMap(p -> p.entrySet().stream())
                     .forEach(e -> {
