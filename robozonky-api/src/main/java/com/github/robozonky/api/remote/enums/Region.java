@@ -27,12 +27,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
- * its integer ID after all other values already got one.
+ * its integer ID after all other values already got one. Never change the value of {@link #getCode()}, as that will be
+ * used throughout the strategies etc.
  */
 @JsonDeserialize(using = Region.RegionDeserializer.class)
 public enum Region implements BaseEnum {
 
-    PRAHA("Praha"),
+    PRAHA("Praha", "Hlavní město Praha"),
     STREDOCESKY("Středočeský"),
     JIHOCESKY("Jihočeský"),
     PLZENSKY("Plzeňský"),
@@ -41,7 +42,7 @@ public enum Region implements BaseEnum {
     LIBERECKY("Liberecký"),
     KRALOVEHRADECKY("Královéhradecký"),
     PARDUBICKY("Pardubický"),
-    VYSOCINA("Vysočina"),
+    VYSOCINA("Vysočina", "Kraj Vysočina"),
     JIHOMORAVSKY("Jihomoravský"),
     OLOMOUCKY("Olomoucký"),
     MORAVSKOSLEZSKY("Moravskoslezský"),
@@ -67,9 +68,15 @@ public enum Region implements BaseEnum {
     }
 
     private final String code;
+    private final String richCode;
 
     Region(final String code) {
+        this(code, code + " kraj");
+    }
+
+    Region(final String code, final String richCode) {
         this.code = code;
+        this.richCode = richCode;
     }
 
     @Override
@@ -77,4 +84,11 @@ public enum Region implements BaseEnum {
         return code;
     }
 
+    /**
+     * Purely for display purposes.
+     * @return
+     */
+    public String getRichCode() {
+        return richCode;
+    }
 }
