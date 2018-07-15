@@ -25,6 +25,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>com.github.robozonky.distribution</groupId>
   <artifactId>robozonky-distribution-cli</artifactId>
   <packaging>pom</packaging>
 
