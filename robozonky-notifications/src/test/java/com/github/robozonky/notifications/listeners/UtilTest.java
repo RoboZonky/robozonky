@@ -16,9 +16,18 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+
+import com.github.robozonky.api.remote.entities.sanitized.Development;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.DevelopmentType;
+import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class UtilTest {
 
@@ -34,5 +43,18 @@ class UtilTest {
     void stackTrace() {
         final String result = Util.stackTraceToString(new IllegalStateException());
         assertThat(result).contains("IllegalStateException");
+    }
+
+    @Test
+    void missingToDateInCollectionHistory() { // https://github.com/RoboZonky/robozonky/issues/278
+        final Development d = Development.custom()
+                .setDateFrom(OffsetDateTime.now())
+                .setType(DevelopmentType.OTHER)
+                .build();
+        final Loan l = Loan.custom()
+                .setRating(Rating.D)
+                .build();
+        final Investment i = Investment.fresh(l, 200).build();
+        Util.getDelinquentData(i, l, Collections.singleton(d), LocalDate.now());
     }
 }
