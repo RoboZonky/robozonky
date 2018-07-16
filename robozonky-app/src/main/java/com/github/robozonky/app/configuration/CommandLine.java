@@ -124,7 +124,7 @@ public class CommandLine {
 
     Optional<URL> getNotificationConfigLocation() {
         if (notificationConfigLocation == null) {
-            LOGGER.debug("No notification configuration for tenant.");
+            LOGGER.info("Notifications are not set up.");
             return Optional.empty();
         }
         try {

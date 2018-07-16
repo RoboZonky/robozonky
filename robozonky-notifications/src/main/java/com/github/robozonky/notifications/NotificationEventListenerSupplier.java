@@ -62,7 +62,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
         for (final Target target : Target.values()) {
             final AbstractTargetHandler handler = getTargetHandler(newValue, target);
             if (!handler.isEnabled()) {
-                LOGGER.debug("Notifications for {} disabled in settings.", target);
+                LOGGER.debug("Notifications are disabled: {}.", target.getId());
                 continue;
             }
             final Optional<EventListener<T>> maybe = findListener(handler);
@@ -77,7 +77,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
                 .filter(l -> Objects.equals(eventType, l.getEventType()))
                 .peek(l -> LOGGER.trace("Found listener: {}.", l))
                 .filter(handler::isEnabled)
-                .peek(l -> LOGGER.trace("Will call listener: {}.", l))
+                .peek(l -> LOGGER.debug("{} notification enabled for '{}'.", l, handler.getTarget()))
                 .findFirst()
                 .map(l -> (EventListener<T>) l.getListener(handler))
                 .orElse(null);
