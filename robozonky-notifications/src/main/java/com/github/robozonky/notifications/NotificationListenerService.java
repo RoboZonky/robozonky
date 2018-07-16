@@ -40,7 +40,7 @@ public final class NotificationListenerService implements ListenerService {
 
     private final Map<String, RefreshableConfigStorage> CONFIGURATIONS = new HashMap<>(0);
 
-    Optional<RefreshableConfigStorage> readConfig(final String configLocation) {
+    private static Optional<RefreshableConfigStorage> readConfig(final String configLocation) {
         try {
             final URL config = new URL(configLocation);
             return Optional.of(new RefreshableConfigStorage(config));
@@ -50,27 +50,29 @@ public final class NotificationListenerService implements ListenerService {
         }
     }
 
-    synchronized Optional<RefreshableConfigStorage> getTenantConfigurations(final SessionInfo sessionInfo) {
+    private synchronized Optional<RefreshableConfigStorage> getTenantConfigurations(final SessionInfo sessionInfo) {
         final String username = sessionInfo.getUsername();
         if (!CONFIGURATIONS.containsKey(username)) { // already initialized
             final Optional<String> value = ListenerServiceLoader.getNotificationConfiguration(sessionInfo);
             if (!value.isPresent()) {
-                LOGGER.debug("Not enabling notifications for tenant '{}'.", username);
+                LOGGER.debug("Notifications disabled for '{}'.", username);
                 return Optional.empty();
             }
             final String config = value.get();
-            LOGGER.debug("Initializing notifications for tenant '{}' from {}.", username, config);
-            readConfig(config).ifPresent(props -> CONFIGURATIONS.put(username, props));
+            readConfig(config).ifPresent(props -> {
+                LOGGER.debug("Initializing notifications for '{}' from {}.", username, config);
+                Scheduler.inBackground().submit(props, Settings.INSTANCE.getRemoteResourceRefreshInterval());
+                CONFIGURATIONS.put(username, props);
+            });
         }
         return Optional.ofNullable(CONFIGURATIONS.get(username));
     }
 
-    Stream<RefreshableConfigStorage> getTenantConfigurations() {
+    private Stream<RefreshableConfigStorage> getTenantConfigurations() {
         return TenantState.getKnownTenants().stream()
                 .map(SessionInfo::new)
                 .map(this::getTenantConfigurations)
-                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
-                .peek(c -> Scheduler.inBackground().submit(c, Settings.INSTANCE.getRemoteResourceRefreshInterval()));
+                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
     }
 
     @Override
