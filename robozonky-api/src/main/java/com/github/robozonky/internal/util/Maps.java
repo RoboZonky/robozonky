@@ -22,11 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableSortedMap;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * May be replaced by Map.* when we upgrade to JDK 11.
@@ -43,15 +40,17 @@ public final class Maps {
 
     @SafeVarargs
     public static <K, V> Map<K, V> ofEntries(final Map.Entry<? extends K, ? extends V>... entries) {
-        return Stream.of(entries).collect(
-                collectingAndThen(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, LinkedHashMap::new),
-                                  Collections::unmodifiableMap));
+        // not implemented as a stream with Collectors.toMap(), since that will throw NPE on null values
+        final Map<K, V> result = new LinkedHashMap<>(entries.length);
+        for (final Map.Entry<? extends K, ? extends V> entry : entries) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return Collections.unmodifiableMap(result);
     }
 
     @SafeVarargs
     public static <K, V> SortedMap<K, V> ofEntriesSorted(final Map.Entry<? extends K, ? extends V>... entries) {
-        final SortedMap<K, V> sorted = Stream.of(entries)
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, TreeMap::new));
+        final SortedMap<K, V> sorted = new TreeMap<>(ofEntries(entries));
         return unmodifiableSortedMap(sorted);
     }
 }
