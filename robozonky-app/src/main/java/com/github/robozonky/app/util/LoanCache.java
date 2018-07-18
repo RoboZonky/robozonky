@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
@@ -100,6 +101,10 @@ public class LoanCache {
             addLoan(loanId, l);
             return l;
         });
+    }
+
+    public Loan getLoan(final Investment investment, final Tenant tenant) {
+        return tenant.call(api -> getLoan(investment.getLoanId(), api));
     }
 
     public Loan getLoan(final Investment investment, final Zonky api) {
