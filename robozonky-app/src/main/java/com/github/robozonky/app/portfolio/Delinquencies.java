@@ -92,14 +92,8 @@ public class Delinquencies {
         }
     }
 
-    private static void processNonDefaultDelinquents(final TransactionalPortfolio transactionalPortfolio,
-                                                     final Collection<Investment> investments) {
-        Stream.of(DelinquencyCategory.values())
-                .forEach(c -> c.update(transactionalPortfolio, investments));
-    }
-
     private static Loan getLoan(final TransactionalPortfolio portfolio, final Investment investment) {
-        return portfolio.getTenant().call(z -> LoanCache.INSTANCE.getLoan(investment, z));
+        return LoanCache.INSTANCE.getLoan(investment, portfolio.getTenant());
     }
 
     static void update(final TransactionalPortfolio transactionalPortfolio, final Collection<Investment> nowDelinquent,
@@ -117,7 +111,8 @@ public class Delinquencies {
         final Collection<Investment> stillDelinquent = nowDelinquent.stream()
                 .filter(i -> !isDefaulted(i))
                 .collect(toList());
-        processNonDefaultDelinquents(transactionalPortfolio, stillDelinquent);
+        Stream.of(DelinquencyCategory.values())
+                .forEach(c -> c.update(transactionalPortfolio, stillDelinquent));
         // process investments that are no longer delinquent
         knownDelinquents.stream()
                 .filter(d -> nowDelinquent.stream().noneMatch(i -> i.getId() == d))
@@ -141,6 +136,7 @@ public class Delinquencies {
         final Tenant tenant = transactionalPortfolio.getTenant();
         final Collection<Investment> delinquentInvestments =
                 tenant.call(z -> z.getInvestments(new Select()
+                                                          .in("loan.status", "ACTIVE", "PAID_OFF")
                                                           .equals("loan.unpaidLastInst", "true")
                                                           .equals("status", "ACTIVE")))
                         .collect(toList());

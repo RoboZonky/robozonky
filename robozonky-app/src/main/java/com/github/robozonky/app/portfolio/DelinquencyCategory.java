@@ -111,7 +111,7 @@ enum DelinquencyCategory {
 
     private static LocalDate getPaymentMissedDate(final Investment i) {
         return i.getNextPaymentDate()
-                .orElseThrow(() -> new IllegalStateException("Unexpected missing date: " + i.getId()))
+                .orElseThrow(() -> new IllegalStateException("Unexpected missing date: " + i))
                 .toLocalDate();
     }
 
