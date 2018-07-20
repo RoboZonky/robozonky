@@ -89,6 +89,17 @@ public final class ListenerServiceLoader {
                 .update(state -> state.put(CONFIG_LOCATION_PROPERTY, configurationLocation));
     }
 
+    /**
+     * Make sure the location for notifications configuration is not stored for a given tenant.
+     * @param session Tenant in question.
+     */
+    public static void unregisterNotificationConfiguration(final SessionInfo session) {
+        TenantState.of(session)
+                .in(ListenerService.class)
+                .update(state -> state.remove(CONFIG_LOCATION_PROPERTY));
+        LOGGER.debug("Tenant '{}' notification configuration deleted.", session.getUsername());
+    }
+
     static <T extends Event> List<EventListenerSupplier<T>> load(final Class<T> eventType,
                                                                  final Iterable<ListenerService> loader) {
         return StreamUtil.toStream(loader)
