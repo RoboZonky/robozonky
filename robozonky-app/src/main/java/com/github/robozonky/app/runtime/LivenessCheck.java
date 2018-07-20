@@ -39,7 +39,7 @@ import org.apache.commons.io.IOUtils;
  * {@link SchedulerControl} to call either {@link Schedulers#pause()} or {@link Schedulers#resume()}, therefore
  * controlling the entire daemon runtime.
  */
-class LivenessCheck extends Refreshable<ApiVersion> {
+class LivenessCheck extends Refreshable<String> {
 
     private static final String ZONKY_VERSION_URL = ApiProvider.ZONKY_URL + "/version";
 
@@ -60,8 +60,8 @@ class LivenessCheck extends Refreshable<ApiVersion> {
     }
 
     public static ShutdownHook.Handler setup(final MainControl livenessTrigger) {
-        final Refreshable<ApiVersion> liveness = new LivenessCheck();
-        final Refreshable.RefreshListener<ApiVersion> listener = new SchedulerControl();
+        final Refreshable<String> liveness = new LivenessCheck();
+        final Refreshable.RefreshListener<String> listener = new SchedulerControl();
         liveness.registerListener(listener);
         liveness.registerListener(livenessTrigger);
         // independent of the other schedulers; it controls whether or not the others are even allowed to run
@@ -73,22 +73,21 @@ class LivenessCheck extends Refreshable<ApiVersion> {
     @Override
     protected String getLatestSource() {
         try (final InputStream s = new URL(url).openStream()) {
-            return IOUtils.readLines(s, Defaults.CHARSET).stream().collect(Collectors.joining(System.lineSeparator()));
+            final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
+                    .collect(Collectors.joining(System.lineSeparator()));
+            LOGGER.debug("API info coming from Zonky: {}.", source);
+            final ApiVersion version = ApiVersion.read(source);
+            // need to send parsed version, since the object itself changes every time due to currentApiTime field
+            return version.getBuildVersion();
         } catch (final Exception ex) {
             // don't propagate this exception as it is likely to happen and the calling code would WARN about it
             LOGGER.debug("Zonky servers are likely unavailable.", ex);
-            return ""; // will fail during transform()
+            return null; // will fail during transform()
         }
     }
 
     @Override
-    protected Optional<ApiVersion> transform(final String source) {
-        try {
-            final ApiVersion version = ApiVersion.read(source);
-            return Optional.of(version);
-        } catch (final Exception ex) {
-            LOGGER.warn("Failed parsing Zonky version info.", ex);
-            return Optional.empty();
-        }
+    protected Optional<String> transform(final String source) {
+        return Optional.ofNullable(source);
     }
 }

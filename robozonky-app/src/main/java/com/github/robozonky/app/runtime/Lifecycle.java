@@ -64,7 +64,7 @@ public class Lifecycle {
     }
 
     public Optional<String> getZonkyApiVersion() {
-        return livenessCheck.getApiVersion().map(ApiVersion::getBuildVersion);
+        return livenessCheck.getApiVersion();
     }
 
     /**

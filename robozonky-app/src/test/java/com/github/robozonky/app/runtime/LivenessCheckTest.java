@@ -31,13 +31,6 @@ import static org.mockserver.model.HttpResponse.response;
 
 class LivenessCheckTest {
 
-    private static final String SAMPLE = "{\"branch\":\"origin/master\"," +
-            "\"commitId\":\"e51d4fcb9eac1a9599a64c93c181325a2c38e779\"," +
-            "\"commitIdAbbrev\":\"e51d4fc\"," +
-            "\"buildTime\":\"2018-01-18T20:16:08+0100\"," +
-            "\"buildVersion\":\"0.77.0\"," +
-            "\"tags\":[\"0.77.0\"]}";
-
     private ClientAndServer server;
     private String serverUrl;
 
@@ -63,11 +56,11 @@ class LivenessCheckTest {
                 .when(request())
                 .respond(response()
                                  .withStatusCode(200)
-                                 .withBody(SAMPLE));
+                                 .withBody(ApiVersionTest.SAMPLE));
         final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
         assertThat(l.get()).isPresent();
-        assertThat(l.get().get().getBuildVersion()).isEqualTo("0.77.0");
+        assertThat(l.get().get()).isEqualTo("0.77.0");
         // now make the server fail and re-check that the instance was updated
         server
                 .reset()

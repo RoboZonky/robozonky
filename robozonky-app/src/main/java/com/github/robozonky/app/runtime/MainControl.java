@@ -27,11 +27,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements {@link Lifecycle#waitUntilOnline()} by listening to {@link LivenessCheck} updates.
  */
-class MainControl implements Refreshable.RefreshListener<ApiVersion> {
+class MainControl implements Refreshable.RefreshListener<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainControl.class);
     private final AtomicReference<CountDownLatch> trigger = new AtomicReference<>(new CountDownLatch(1));
-    private final AtomicReference<ApiVersion> version = new AtomicReference<>();
+    private final AtomicReference<String> version = new AtomicReference<>();
 
     public void waitUntilTriggered() throws InterruptedException {
         LOGGER.trace("Waiting on {}.", this);
@@ -39,19 +39,19 @@ class MainControl implements Refreshable.RefreshListener<ApiVersion> {
         LOGGER.trace("Wait over on {}.", this);
     }
 
-    public Optional<ApiVersion> getApiVersion() {
+    public Optional<String> getApiVersion() {
         return Optional.ofNullable(version.get());
     }
 
     @Override
-    public void valueSet(final ApiVersion newValue) { // becomes online, release
-        version.set(newValue);
+    public void valueSet(final String newApiVersion) { // becomes online, release
+        version.set(newApiVersion);
         trigger.get().countDown();
         LOGGER.trace("Counted down on {}.", this);
     }
 
     @Override
-    public void valueUnset(final ApiVersion oldValue) { // becomes offline, block
+    public void valueUnset(final String oldApiVersion) { // becomes offline, block
         version.set(null);
         trigger.updateAndGet(currentTrigger -> {
             if (currentTrigger.getCount() == 0) { // already triggered, can set new trigger
