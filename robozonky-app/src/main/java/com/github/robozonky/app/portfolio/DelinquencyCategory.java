@@ -144,7 +144,7 @@ enum DelinquencyCategory {
                 .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
                 .peek(d -> {
                     final int loanId = d.getLoanId();
-                    final Loan l = tenant.call(z -> LoanCache.INSTANCE.getLoan(loanId, z));
+                    final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
                     final LocalDate since = getPaymentMissedDate(d);
                     final Event e = getEvent(since, d, l, thresholdInDays, getDevelopments(tenant, l, since));
                     transactionalPortfolio.fire(e);

@@ -83,7 +83,7 @@ class TransactionLog {
     }
 
     private static Rating getLoanRating(final Tenant tenant, final int loanId) {
-        return tenant.call(z -> LoanCache.INSTANCE.getLoan(loanId, z)).getRating();
+        return LoanCache.INSTANCE.getLoan(loanId, tenant).getRating();
     }
 
     public Collection<Synthetic> getSynthetics() {

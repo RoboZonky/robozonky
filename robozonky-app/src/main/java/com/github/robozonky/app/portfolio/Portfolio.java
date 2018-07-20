@@ -111,7 +111,7 @@ public class Portfolio {
         final Collection<Integer> idsOfNewlySoldLoans = transactions.update(statistics, tenant);
         final PortfolioOverview po = calculateOverview();
         for (final int loanId : idsOfNewlySoldLoans) { // notify of loans that were just detected as sold
-            final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+            final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
             final Investment i = lookupOrFail(l, tenant);
             Events.fire(new InvestmentSoldEvent(i, l, po));
         }

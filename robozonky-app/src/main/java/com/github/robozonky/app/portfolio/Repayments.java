@@ -63,7 +63,7 @@ public final class Repayments implements PortfolioDependant {
                     .flatMap(i -> i.map(Stream::of).orElse(Stream.empty()))
                     .filter(i -> i.getPaymentStatus().map(s -> s == PaymentStatus.PAID).orElse(false))
                     .map(i -> {
-                        final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky));
+                        final Loan l = LoanCache.INSTANCE.getLoan(i, tenant);
                         return new LoanRepaidEvent(i, l, portfolioOverview);
                     })
                     .forEach(transactionalPortfolio::fire);

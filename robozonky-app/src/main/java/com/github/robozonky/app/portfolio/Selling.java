@@ -59,12 +59,13 @@ public class Selling implements PortfolioDependant {
         this.strategy = strategy;
     }
 
-    private InvestmentDescriptor getDescriptor(final Investment i, final Tenant auth) {
-        return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, zonky)));
+    private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant auth) {
+        return new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, auth));
     }
 
-    private Optional<Investment> processSale(final TransactionalPortfolio transactionalPortfolio,
-                                             final RecommendedInvestment r, final SessionState<Investment> sold) {
+    private static Optional<Investment> processSale(final TransactionalPortfolio transactionalPortfolio,
+                                                    final RecommendedInvestment r,
+                                                    final SessionState<Investment> sold) {
         final Tenant tenant = transactionalPortfolio.getTenant();
         transactionalPortfolio.fire(new SaleRequestedEvent(r));
         final Investment i = r.descriptor().item();
@@ -80,7 +81,7 @@ public class Selling implements PortfolioDependant {
         return Optional.of(i);
     }
 
-    private void sell(final TransactionalPortfolio transactionalPortfolio, final SellStrategy strategy) {
+    private static void sell(final TransactionalPortfolio transactionalPortfolio, final SellStrategy strategy) {
         final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this

@@ -71,7 +71,7 @@ class InvestingDaemon extends DaemonOperation {
                      * Loan is first retrieved from the authenticated API. This way, we get all available
                      * information, such as borrower nicknames from other loans made by the same person.
                      */
-                    final Loan complete = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(l.getId(), zonky));
+                    final Loan complete = LoanCache.INSTANCE.getLoan(l.getId(), authenticated);
                     /*
                      * We update the loan within the cache with latest information from the marketplace. This is
                      * done so that we don't cache stale loan information, such as how much of the loan is remaining

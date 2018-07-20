@@ -22,6 +22,7 @@ import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -47,12 +48,13 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
                 .setMyInvestment(mi)
                 .build();
         final Zonky z = harmlessZonky(10_000);
+        final Tenant t = mockTenant(z);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
-        assertThat(c.getLoan(loanId, z)).isEqualTo(loan); // return the freshly retrieved loan
+        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // return the freshly retrieved loan
         final Investment i = Investment.custom()
                 .setLoanId(loanId)
                 .build();
-        assertThat(c.getLoan(i, z)).isEqualTo(loan);
+        assertThat(c.getLoan(i, t)).isEqualTo(loan);
     }
 
     @Test
@@ -64,9 +66,10 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
-        assertThat(c.getLoan(loanId, z)).isEqualTo(loan); // return the freshly retrieved loan
+        final Tenant t = mockTenant(z);
+        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // return the freshly retrieved loan
         verify(z).getLoan(eq(loanId));
-        assertThat(c.getLoan(loanId, z)).isEqualTo(loan); // this time from the cache
+        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // this time from the cache
         verify(z, times(1)).getLoan(eq(loanId));
     }
 }
