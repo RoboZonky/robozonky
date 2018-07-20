@@ -53,7 +53,9 @@ class PurchasingDaemon extends DaemonOperation {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, 0);
             return;
         }
-        final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
+        final Select s = new Select()
+                .lessThanOrEquals("remainingPrincipal", balance)
+                .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
         final Collection<Participation> p =
                 authenticated.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
         purchasing.apply(portfolio, p);
