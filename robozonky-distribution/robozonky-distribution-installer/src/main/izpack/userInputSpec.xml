@@ -199,7 +199,7 @@
            txt="Strategii si můžete vytvořit na následující webové adrese:"
            id="strategy.generator.url.1"/>
     <field type="staticText" align="left" bold="true"
-           txt="https://robozonky.github.io/robozonky/konfigurace-strategie/"
+           txt="https://robozonky.github.io/konfigurace-strategie/"
            id="strategy.generator.url.2"/>
   </panel>
 </izpack:userinput>
