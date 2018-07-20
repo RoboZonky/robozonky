@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
@@ -90,11 +91,15 @@ final class OperatingMode {
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
         final Tenant tenant = getAuthenticated(cli, secrets);
-        cli.getNotificationConfigLocation()
-                .ifPresent(location -> ListenerServiceLoader.registerNotificationConfiguration(tenant.getSessionInfo(),
-                                                                                               location));
+        final SessionInfo sessionInfo = tenant.getSessionInfo();
+        if (cli.getNotificationConfigLocation().isPresent()) {
+            ListenerServiceLoader.registerNotificationConfiguration(sessionInfo,
+                                                                    cli.getNotificationConfigLocation().get());
+        } else {
+            ListenerServiceLoader.unregisterNotificationConfiguration(sessionInfo);
+        }
         // initialize SessionInfo before the robot potentially sends the first notification
-        Events.initialize(tenant.getSessionInfo());
+        Events.initialize(sessionInfo);
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))
