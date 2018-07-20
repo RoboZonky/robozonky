@@ -25,18 +25,18 @@ import org.slf4j.LoggerFactory;
  * Will pause and/or resume all background tasks, effectively pausing the application, based on the availability of
  * Zonky servers as notified by {@link LivenessCheck}.
  */
-class SchedulerControl implements Refreshable.RefreshListener<ApiVersion> {
+class SchedulerControl implements Refreshable.RefreshListener<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerControl.class);
 
     @Override
-    public void valueSet(final ApiVersion newValue) {
+    public void valueSet(final String newValue) {
         Schedulers.INSTANCE.resume();
-        LOGGER.info("Zonky servers are available, API version {} detected.", newValue.getBuildVersion());
+        LOGGER.info("Zonky servers are available, API version {} detected.", newValue);
     }
 
     @Override
-    public void valueUnset(final ApiVersion oldValue) {
+    public void valueUnset(final String oldValue) {
         LOGGER.info("Pausing RoboZonky on account of Zonky servers not being available.");
         Schedulers.INSTANCE.pause();
     }

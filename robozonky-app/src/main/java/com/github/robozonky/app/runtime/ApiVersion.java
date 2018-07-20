@@ -40,14 +40,16 @@ class ApiVersion {
                                                                                    Defaults.LOCALE);
     private final String branch, commitId, commitIdAbbrev, buildVersion;
     private final OffsetDateTime buildTime;
+    private final OffsetDateTime currentApiTime;
     private final Collection<String> tags;
 
     ApiVersion(final String branch, final String commitId, final String commitIdAbbrev, final OffsetDateTime buildTime,
-               final String buildVersion, final String... tags) {
+               final String buildVersion, final OffsetDateTime apiTime, final String... tags) {
         this.branch = branch;
         this.commitId = commitId;
         this.commitIdAbbrev = commitIdAbbrev;
         this.buildTime = buildTime;
+        this.currentApiTime = apiTime;
         this.buildVersion = buildVersion;
         this.tags = Stream.of(tags).collect(Collectors.toSet());
     }
@@ -59,11 +61,12 @@ class ApiVersion {
         final String commitIdAbbrev = actualObj.get("commitIdAbbrev").asText();
         final String buildVersion = actualObj.get("buildVersion").asText();
         final OffsetDateTime buildTime = OffsetDateTime.parse(actualObj.get("buildTime").asText(), FORMATTER);
+        final OffsetDateTime apiTime = OffsetDateTime.parse(actualObj.get("currentApiTime").asText()); // ISO8601 format
         final Iterable<JsonNode> n = actualObj.withArray("tags");
         final String[] tags = StreamSupport.stream(n.spliterator(), false)
                 .map(JsonNode::asText)
                 .toArray(String[]::new);
-        return new ApiVersion(branch, commitId, commitIdAbbrev, buildTime, buildVersion, tags);
+        return new ApiVersion(branch, commitId, commitIdAbbrev, buildTime, buildVersion, apiTime, tags);
     }
 
     public String getBranch() {
@@ -84,6 +87,10 @@ class ApiVersion {
 
     public String getBuildVersion() {
         return buildVersion;
+    }
+
+    public OffsetDateTime getCurrentApiTime() {
+        return currentApiTime;
     }
 
     public Collection<String> getTags() {

@@ -21,15 +21,16 @@ import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class ApiVersionTest {
 
-    private static final String SAMPLE = "{\"branch\":\"origin/master\"," +
+    static final String SAMPLE = "{\"branch\":\"origin/master\"," +
             "\"commitId\":\"e51d4fcb9eac1a9599a64c93c181325a2c38e779\"," +
             "\"commitIdAbbrev\":\"e51d4fc\"," +
             "\"buildTime\":\"2018-01-18T20:16:08+0100\"," +
             "\"buildVersion\":\"0.77.0\"," +
+            "\"currentApiTime\":\"2018-01-18T20:16:08.123+01:00\"," +
             "\"tags\":[\"0.77.0\"]}";
 
     @Test

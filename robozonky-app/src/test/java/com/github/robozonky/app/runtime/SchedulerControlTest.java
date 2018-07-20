@@ -16,26 +16,21 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SchedulerControlTest {
 
     @Test
     void check() {
-        final ApiVersion v = new ApiVersion("master", UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                                            OffsetDateTime.now(), "1.0.0");
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
             final SchedulerControl rc = new SchedulerControl();
             rc.valueUnset(null);
             assertThat(s.isPaused()).isTrue();
-            rc.valueSet(v);
+            rc.valueSet("1.0.0");
             assertThat(s.isPaused()).isFalse();
         }
     }

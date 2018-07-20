@@ -25,10 +25,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MainControlTest {
 
@@ -45,7 +46,7 @@ class MainControlTest {
                 throw new IllegalStateException(e1);
             }
         });
-        org.junit.jupiter.api.Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
+        Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
             while (!started.get()) {
                 Thread.sleep(1);
             }
@@ -53,9 +54,8 @@ class MainControlTest {
         mainControl.valueUnset(null);
         assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                 .isInstanceOf(TimeoutException.class);  // nothing will happen
-        final ApiVersion v = mock(ApiVersion.class);
-        mainControl.valueSet(v);
+        mainControl.valueSet("1.0.0");
         f.get(); // make sure task finished
-        assertThat(mainControl.getApiVersion()).contains(v);
+        assertThat(mainControl.getApiVersion()).contains("1.0.0");
     }
 }

@@ -17,7 +17,6 @@
 package com.github.robozonky.app.runtime;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -56,7 +55,7 @@ class LifecycleTest {
             final MainControl c = new MainControl();
             final Future<Boolean> f = e.submit(() -> Lifecycle.waitUntilOnline(c));
             Assertions.assertThrows(TimeoutException.class, () -> f.get(1, TimeUnit.SECONDS)); // we are blocked
-            c.valueSet(new ApiVersion("", "", "", OffsetDateTime.now(), "", ""));
+            c.valueSet("");
             assertThat(f.get(1, TimeUnit.SECONDS)).isTrue(); // this will return now
             assertThat(f).isDone();
         } finally {
