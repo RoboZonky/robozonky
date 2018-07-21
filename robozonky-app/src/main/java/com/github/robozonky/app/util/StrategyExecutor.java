@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,9 +109,6 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
     public Collection<Investment> apply(final Portfolio portfolio, final Collection<T> marketplace) {
         return strategyProvider.get()
                 .map(strategy -> invest(portfolio, strategy, marketplace))
-                .orElseGet(() -> {
-                    LOGGER.info("Marketplace is disabled by the strategy.");
-                    return Collections.emptyList();
-                });
+                .orElseGet(Collections::emptyList);
     }
 }
