@@ -31,6 +31,7 @@ public class Statistics extends BaseEntity {
     private SuperInvestorOverview superInvestorOverview;
     private List<RiskPortfolio> riskPortfolio;
     private List<Instalment> cashFlow;
+    private List<ExpectedPayment> expectedPayments;
     private OffsetDateTime timestamp;
 
     private Statistics() {
@@ -43,6 +44,7 @@ public class Statistics extends BaseEntity {
         s.expectedProfitability = BigDecimal.ZERO;
         s.cashFlow = Collections.emptyList();
         s.riskPortfolio = Collections.emptyList();
+        s.expectedPayments = Collections.emptyList();
         s.currentOverview = new CurrentOverview();
         s.overallOverview = new OverallOverview();
         s.overallPortfolio = new OverallPortfolio();
@@ -93,6 +95,11 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public List<Instalment> getCashFlow() {
         return unmodifiableOrEmpty(cashFlow);
+    }
+
+    @XmlElement
+    public List<ExpectedPayment> getExpectedPayments() {
+        return unmodifiableOrEmpty(expectedPayments);
     }
 
     @XmlElement
