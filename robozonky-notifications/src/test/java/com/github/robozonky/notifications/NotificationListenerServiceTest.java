@@ -35,7 +35,7 @@ class NotificationListenerServiceTest extends AbstractRoboZonkyTest {
 
     @Test
     void noValidConfigs() {
-        ListenerServiceLoader.registerNotificationConfiguration(new SessionInfo("a@b.c"), "invalid-url");
+        ListenerServiceLoader.registerConfiguration(new SessionInfo("a@b.c"), "invalid-url");
         final ListenerService s = new NotificationListenerService();
         assertThat(s.findListeners(RoboZonkyTestingEvent.class)).isEmpty();
     }

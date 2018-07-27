@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,15 @@ final class OperatingMode {
                 });
     }
 
+    private static void configureNotifications(final CommandLine cli, final SessionInfo session) {
+        // unregister if registered
+        ListenerServiceLoader.unregisterConfiguration(session);
+        // register if needed
+        cli.getNotificationConfigLocation().ifPresent(cfg -> ListenerServiceLoader.registerConfiguration(session, cfg));
+        // initialize SessionInfo before the robot potentially sends the first notification
+        Events.initialize(session);
+    }
+
     private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
                                                        final Investor investor) {
         final StrategyProvider sp = StrategyProvider.createFor(cli.getStrategyLocation());
@@ -91,15 +100,7 @@ final class OperatingMode {
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
         final Tenant tenant = getAuthenticated(cli, secrets);
-        final SessionInfo sessionInfo = tenant.getSessionInfo();
-        if (cli.getNotificationConfigLocation().isPresent()) {
-            ListenerServiceLoader.registerNotificationConfiguration(sessionInfo,
-                                                                    cli.getNotificationConfigLocation().get());
-        } else {
-            ListenerServiceLoader.unregisterNotificationConfiguration(sessionInfo);
-        }
-        // initialize SessionInfo before the robot potentially sends the first notification
-        Events.initialize(sessionInfo);
+        configureNotifications(cli, tenant.getSessionInfo());
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))

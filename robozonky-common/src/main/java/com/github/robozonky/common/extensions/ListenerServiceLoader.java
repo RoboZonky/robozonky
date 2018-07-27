@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public final class ListenerServiceLoader {
 
     /**
      * Retrieve the location configuration previously stored through
-     * {@link #registerNotificationConfiguration(SessionInfo, URL)}.
+     * {@link #registerConfiguration(SessionInfo, URL)}.
      * @param session The tenant for which the information should be retrieved.
      * @return Empty if not registered.
      */
@@ -61,8 +61,8 @@ public final class ListenerServiceLoader {
      * @param username Tenant in question.
      * @param configurationLocation Location of notification configuration.
      */
-    public static void registerNotificationConfiguration(final String username, final URL configurationLocation) {
-        registerNotificationConfiguration(new SessionInfo(username), configurationLocation);
+    public static void registerConfiguration(final String username, final URL configurationLocation) {
+        registerConfiguration(new SessionInfo(username), configurationLocation);
     }
 
     /**
@@ -71,8 +71,8 @@ public final class ListenerServiceLoader {
      * @param session Tenant in question.
      * @param configurationLocation Location of notification configuration.
      */
-    public static void registerNotificationConfiguration(final SessionInfo session, final URL configurationLocation) {
-        registerNotificationConfiguration(session, configurationLocation.toExternalForm());
+    public static void registerConfiguration(final SessionInfo session, final URL configurationLocation) {
+        registerConfiguration(session, configurationLocation.toExternalForm());
     }
 
     /**
@@ -81,8 +81,8 @@ public final class ListenerServiceLoader {
      * @param session Tenant in question.
      * @param configurationLocation Location of notification configuration.
      */
-    public static void registerNotificationConfiguration(final SessionInfo session,
-                                                         final String configurationLocation) {
+    public static void registerConfiguration(final SessionInfo session,
+                                             final String configurationLocation) {
         LOGGER.debug("Tenant '{}' notification configuration: '{}'.", session.getUsername(), configurationLocation);
         TenantState.of(session)
                 .in(ListenerService.class)
@@ -93,7 +93,7 @@ public final class ListenerServiceLoader {
      * Make sure the location for notifications configuration is not stored for a given tenant.
      * @param session Tenant in question.
      */
-    public static void unregisterNotificationConfiguration(final SessionInfo session) {
+    public static void unregisterConfiguration(final SessionInfo session) {
         TenantState.of(session)
                 .in(ListenerService.class)
                 .update(state -> state.remove(CONFIG_LOCATION_PROPERTY));

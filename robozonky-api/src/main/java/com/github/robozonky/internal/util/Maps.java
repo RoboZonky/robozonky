@@ -49,6 +49,7 @@ public final class Maps {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <K, V> SortedMap<K, V> ofEntriesSorted(final Map.Entry<? extends K, ? extends V>... entries) {
         final SortedMap<K, V> sorted = new TreeMap<>(ofEntries(entries));
         return unmodifiableSortedMap(sorted);

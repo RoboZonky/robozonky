@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,28 +109,28 @@ public class Zonky {
 
     public void invest(final Investment investment) {
         LOGGER.info("Investing into loan #{}.", investment.getLoanId());
-        controlApi.execute(api -> {
+        controlApi.run(api -> {
             api.invest(new RawInvestment(investment));
         });
     }
 
     public void cancel(final Investment investment) {
         LOGGER.info("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
-        controlApi.execute(api -> {
+        controlApi.run(api -> {
             api.cancel(investment.getId());
         });
     }
 
     public void purchase(final Participation participation) {
         LOGGER.info("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
-        controlApi.execute(api -> {
+        controlApi.run(api -> {
             api.purchase(participation.getId(), new PurchaseRequest(participation));
         });
     }
 
     public void sell(final Investment investment) {
         LOGGER.info("Offering to sell investment in loan #{}.", investment.getLoanId());
-        controlApi.execute(api -> {
+        controlApi.run(api -> {
             api.offer(new SellRequest(new RawInvestment(investment)));
         });
     }
@@ -240,7 +240,7 @@ public class Zonky {
     }
 
     public Restrictions getRestrictions() {
-        return controlApi.execute(ControlApi::restrictions);
+        return controlApi.call(ControlApi::restrictions);
     }
 
     public Statistics getStatistics() {
@@ -248,6 +248,6 @@ public class Zonky {
     }
 
     public void logout() {
-        controlApi.execute(ControlApi::logout);
+        controlApi.run(ControlApi::logout);
     }
 }

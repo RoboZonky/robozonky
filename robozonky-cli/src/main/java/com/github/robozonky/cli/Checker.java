@@ -83,7 +83,7 @@ public final class Checker {
     }
 
     static boolean notifications(final String username, final URL configurationLocation) {
-        ListenerServiceLoader.registerNotificationConfiguration(username, configurationLocation);
+        ListenerServiceLoader.registerConfiguration(username, configurationLocation);
         return Checker.notifications(username, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
 

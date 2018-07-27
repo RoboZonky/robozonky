@@ -122,7 +122,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(data.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("false");
         RoboZonkyInstallerListener.setInstallData(data);
         // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareEmailConfiguration();
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getProperties()).isEmpty();
@@ -137,7 +137,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(localData.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
         RoboZonkyInstallerListener.setInstallData(localData);
         // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareEmailConfiguration();
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getOptions()).containsOnlyKeys("-i");
@@ -150,7 +150,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         // prepare
         RoboZonkyInstallerListener.setInstallData(data);
         // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareStrategy();
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareStrategy();
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getOptions()).containsKey("-s");
@@ -164,7 +164,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         // prepare
         RoboZonkyInstallerListener.setInstallData(data);
         // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareCore();
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareCore();
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getOptions())
@@ -185,7 +185,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(localData.getVariable(Variables.ZONKOID_TOKEN.getKey())).thenReturn("123456");
         RoboZonkyInstallerListener.setInstallData(localData);
         // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareCore();
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareCore();
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getOptions())
@@ -205,7 +205,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(data.getVariable(Variables.JMX_PORT.getKey())).thenReturn("1234");
         when(data.getVariable(Variables.JMX_HOSTNAME.getKey())).thenReturn("somewhere");
         // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareJmx();
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareJmx();
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getProperties().get("com.sun.management.jmxremote"))
@@ -224,7 +224,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(localData.getVariable(Variables.STRATEGY_SOURCE.getKey())).thenReturn("http://www.robozonky.cz");
         RoboZonkyInstallerListener.setInstallData(localData);
         // execute SUT
-        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareStrategy();
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareStrategy();
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getOptions()).containsKey("-s");

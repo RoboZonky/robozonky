@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class ApiTest {
         final Api<LoanApi> api = new Api<>(mock);
         final String expected = UUID.randomUUID().toString();
         final Function<LoanApi, String> function = (a) -> expected;
-        final String result = api.execute(function);
+        final String result = api.call(function);
         assertThat(result).isSameAs(expected);
     }
 
@@ -52,7 +52,7 @@ class ApiTest {
     void executeProcedure() {
         final LoanApi mock = mock(LoanApi.class);
         final Api<LoanApi> api = new Api<>(mock);
-        api.execute(procedure);
+        api.run(procedure);
         verify(procedure, times(1)).accept(eq(mock));
     }
 }

@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * kept for eternity.
  * @param <T> Type of elements to store.
  */
+@SuppressWarnings("rawtypes")
 public final class SessionState<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);

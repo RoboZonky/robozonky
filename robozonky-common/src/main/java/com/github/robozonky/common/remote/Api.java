@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@ class Api<T> {
         this.proxy = proxy;
     }
 
-    <S> S execute(final Function<T, S> function) {
+    <S> S call(final Function<T, S> function) {
         return function.apply(proxy);
     }
 
-    void execute(final Consumer<T> consumer) {
+    void run(final Consumer<T> consumer) {
         final Function<T, Void> wrapper = t -> {
             consumer.accept(t);
             return null;
         };
-        execute(wrapper);
+        call(wrapper);
     }
 }

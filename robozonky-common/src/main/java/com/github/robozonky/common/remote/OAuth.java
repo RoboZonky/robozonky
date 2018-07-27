@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ public class OAuth {
     }
 
     public ZonkyApiToken login(final String username, final char[] password) {
-        return api.execute(a -> {
+        return api.call(a -> {
             return a.login(username, String.valueOf(password), "password", "SCOPE_APP_WEB");
         });
     }
 
     public ZonkyApiToken refresh(final ZonkyApiToken token) {
-        return api.execute(a -> {
+        return api.call(a -> {
             return a.refresh(String.valueOf(token.getRefreshToken()), "refresh_token", token.getScope());
         });
     }

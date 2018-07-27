@@ -18,6 +18,8 @@ package com.github.robozonky.cli;
 
 public class TestFailedException extends Exception {
 
+    private static final long serialVersionUID = 42L;
+
     TestFailedException(final Exception cause) {
         super(cause);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ class TokenBasedTenant implements Tenant {
 
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
-        return apis.authenticated(tokenSupplier, operation);
+        return apis.call(operation, tokenSupplier);
     }
 
     @Override

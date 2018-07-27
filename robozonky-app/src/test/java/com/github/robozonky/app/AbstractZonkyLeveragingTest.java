@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
             final Function<OAuth, ?> f = i.getArgument(0);
             return f.apply(oauth);
         });
-        when(api.authenticated(any(), any(Function.class))).then(i -> {
+        when(api.call(any(Function.class), any())).then(i -> {
             final Supplier<ZonkyApiToken> s = i.getArgument(0);
             s.get();
             final Function<Zonky, ?> f = i.getArgument(1);

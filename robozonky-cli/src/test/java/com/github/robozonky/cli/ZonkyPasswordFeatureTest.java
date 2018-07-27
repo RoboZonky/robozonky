@@ -83,7 +83,7 @@ class ZonkyPasswordFeatureTest {
             final Consumer f = i.getArgument(1);
             f.accept(z);
             return null;
-        }).when(api).authenticated(any(), any(Consumer.class));
+        }).when(api).run(any(Consumer.class), any());
         return api;
     }
 
@@ -103,7 +103,7 @@ class ZonkyPasswordFeatureTest {
             final Consumer f = i.getArgument(1);
             f.accept(z);
             return null;
-        }).when(api).authenticated(any(), any(Consumer.class));
+        }).when(api).run(any(Consumer.class), any());
         doThrow(IllegalStateException.class).when(z).logout(); // last call will fail
         return api;
     }
@@ -120,7 +120,7 @@ class ZonkyPasswordFeatureTest {
         feature.setup();
         feature.test();
         verify(api).oauth(any());
-        verify(api).authenticated(any(), any(Consumer.class));
+        verify(api).run(any(Consumer.class), any());
     }
 
     @Test

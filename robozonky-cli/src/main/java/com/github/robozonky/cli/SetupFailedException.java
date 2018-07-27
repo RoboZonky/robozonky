@@ -18,6 +18,8 @@ package com.github.robozonky.cli;
 
 public class SetupFailedException extends Exception {
 
+    private static final long serialVersionUID = 42L;
+
     SetupFailedException(final Exception cause) {
         super(cause);
     }

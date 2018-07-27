@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,9 +103,7 @@ public class ApiProvider implements AutoCloseable {
     protected <T> Collection<T> marketplace(final Class<? extends EntityCollectionApi<T>> target, final String url) {
         final EntityCollectionApi<T> proxy = ProxyFactory.newProxy(client, target, url);
         final Api<? extends EntityCollectionApi<T>> api = new Api<>(proxy);
-        return api.execute(a -> {
-            return a.items();
-        });
+        return api.call(EntityCollectionApi::items);
     }
 
     /**
@@ -124,11 +122,11 @@ public class ApiProvider implements AutoCloseable {
         });
     }
 
-    public void authenticated(final Supplier<ZonkyApiToken> token, final Consumer<Zonky> operation) {
-        authenticated(token, StreamUtil.toFunction(operation));
+    public void run(final Consumer<Zonky> operation, final Supplier<ZonkyApiToken> token) {
+        call(StreamUtil.toFunction(operation), token);
     }
 
-    public <T> T authenticated(final Supplier<ZonkyApiToken> token, final Function<Zonky, T> operation) {
+    public <T> T call(final Function<Zonky, T> operation, final Supplier<ZonkyApiToken> token) {
         return operation.apply(authenticated(token));
     }
 

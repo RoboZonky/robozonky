@@ -58,7 +58,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
                                     final char... password) throws TestFailedException {
         final Optional<Exception> thrown = api.oauth(oauth -> {
             try {
-                api.authenticated(() -> oauth.login(username, password), Zonky::logout);
+                api.run(Zonky::logout, () -> oauth.login(username, password));
                 return Optional.empty();
             } catch (final Exception ex) {
                 return Optional.of(ex);

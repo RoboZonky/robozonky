@@ -176,8 +176,8 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     @BeforeEach
     void configureNotifications() throws URISyntaxException, MalformedURLException {
-        ListenerServiceLoader.registerNotificationConfiguration(SESSION_INFO,
-                                                                AbstractListenerTest.class.getResource(
+        ListenerServiceLoader.registerConfiguration(SESSION_INFO,
+                                                    AbstractListenerTest.class.getResource(
                                                                         "notifications-enabled.cfg").toURI().toURL());
     }
 

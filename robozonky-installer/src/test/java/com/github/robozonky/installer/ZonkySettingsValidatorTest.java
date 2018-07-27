@@ -56,14 +56,14 @@ class ZonkySettingsValidatorTest {
             assertThat(t.get()).isEqualTo(token);
             final Function<Zonky, ?> f = i.getArgument(1);
             return f.apply(zonky);
-        }).when(api).authenticated(any(), any(Function.class));
+        }).when(api).call(any(Function.class), any());
         doAnswer(i -> {
             final Supplier<ZonkyApiToken> t = i.getArgument(0);
             assertThat(t.get()).isEqualTo(token);
             final Consumer<Zonky> f = i.getArgument(1);
             f.accept(zonky);
             return null;
-        }).when(api).authenticated(any(), any(Consumer.class));
+        }).when(api).run(any(Consumer.class), any());
         return api;
     }
 
