@@ -80,7 +80,7 @@ class ZonkyPasswordFeatureTest {
         }).when(api).oauth(any());
         final Zonky z = mock(Zonky.class);
         doAnswer(i -> {
-            final Consumer f = i.getArgument(1);
+            final Consumer f = i.getArgument(0);
             f.accept(z);
             return null;
         }).when(api).run(any(Consumer.class), any());
@@ -100,7 +100,7 @@ class ZonkyPasswordFeatureTest {
         }).when(api).oauth(any());
         final Zonky z = mock(Zonky.class);
         doAnswer(i -> {
-            final Consumer f = i.getArgument(1);
+            final Consumer f = i.getArgument(0);
             f.accept(z);
             return null;
         }).when(api).run(any(Consumer.class), any());

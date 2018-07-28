@@ -65,9 +65,9 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
             return f.apply(oauth);
         });
         when(api.call(any(Function.class), any())).then(i -> {
-            final Supplier<ZonkyApiToken> s = i.getArgument(0);
+            final Supplier<ZonkyApiToken> s = i.getArgument(1);
             s.get();
-            final Function<Zonky, ?> f = i.getArgument(1);
+            final Function<Zonky, ?> f = i.getArgument(0);
             return f.apply(z);
         });
         return api;
