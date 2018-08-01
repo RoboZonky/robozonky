@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -39,6 +40,7 @@ public enum Settings {
     INSTANCE; // cheap thread-safe singleton
 
     public static final String FILE_LOCATION_PROPERTY = "robozonky.properties.file";
+    private static final int HTTPS_DEFAULT_PORT = 443;
     private final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     private final AtomicReference<Properties> properties = new AtomicReference<>();
 
@@ -180,7 +182,21 @@ public enum Settings {
     }
 
     public Duration getCaptchaDelay(final Rating r) {
-        return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Integer.parseInt(delay)), getCaptchaDelay());
+        return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Long.parseLong(delay)), getCaptchaDelay());
+    }
+
+    public Optional<String> getHttpsProxyHostname() {
+        return Optional.ofNullable(get(Key.HTTPS_PROXY_HOSTNAME, (String) null));
+    }
+
+    public int getHttpsProxyPort() {
+        return get(Key.HTTPS_PROXY_PORT, s -> {
+            try {
+                return Integer.parseInt(s);
+            } catch (final Exception ex) {
+                return HTTPS_DEFAULT_PORT;
+            }
+        }, HTTPS_DEFAULT_PORT);
     }
 
     /**
@@ -220,7 +236,9 @@ public enum Settings {
         CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
         CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds"),
         DRY_RUN_BALANCE_MINIMUM("robozonky.dry_run_balance_minimum"),
-        STATE_FILE_LOCATION("robozonky.state_file");
+        STATE_FILE_LOCATION("robozonky.state_file"),
+        HTTPS_PROXY_HOSTNAME("https.proxyHost"),
+        HTTPS_PROXY_PORT("https.proxyPort");
 
         private final String name;
 
