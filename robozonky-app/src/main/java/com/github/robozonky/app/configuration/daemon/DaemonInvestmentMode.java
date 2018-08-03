@@ -19,6 +19,7 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -64,20 +65,20 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return threadGroup;
     }
 
-    private static Duration getUntilNext4am() {
-        return getUntilNext4am(Instant.now().atZone(Defaults.ZONE_ID));
+    private static Duration getUntilNextEvenHour() {
+        return getUntilNextEvenHour(Instant.now().atZone(Defaults.ZONE_ID));
     }
 
-    static Duration getUntilNext4am(final ZonedDateTime now) {
-        final ZonedDateTime fourAm = now.withHour(4).withMinute(0).withSecond(0).withNano(0);
-        final ZonedDateTime nextFourAm = fourAm.isBefore(now) ? fourAm.plusDays(1) : fourAm;
-        return Duration.between(now, nextFourAm).abs();
+    static Duration getUntilNextEvenHour(final ZonedDateTime now) {
+        final int hourDifference = 2 - (now.getHour() % 2); // 1 hour if odd, 2 hours if even
+        final ZonedDateTime nextEvenHour = now.plusHours(hourDifference).truncatedTo(ChronoUnit.HOURS);
+        return Duration.between(now, nextEvenHour).abs();
     }
 
     private void executeDaemons(final Scheduler executor) {
         executor.run(portfolioUpdater); // first run the update
         // then schedule a refresh once per day, after the Zonky refresh
-        executor.submit(portfolioUpdater, Duration.ofDays(1), getUntilNext4am());
+        executor.submit(portfolioUpdater, Duration.ofHours(2), getUntilNextEvenHour());
         // also run transactions update every now and then to detect changes made outside of the robot
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(transactionsUpdate, oneHour, oneHour);

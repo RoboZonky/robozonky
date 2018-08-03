@@ -66,21 +66,23 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void next4amTomorrow() {
-        final ZonedDateTime after4am = ZonedDateTime.of(LocalDate.now(), LocalTime.of(4, 0, 1), Defaults.ZONE_ID);
-        final Duration next = DaemonInvestmentMode.getUntilNext4am(after4am);
-        final ZonedDateTime next4am = after4am.plus(next);
-        assertThat(next4am)
-                .isEqualTo(ZonedDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(4, 0, 0), Defaults.ZONE_ID));
+    void nextEvenHourTomorrow() {
+        final LocalDate now = LocalDate.now();
+        final ZonedDateTime nearlyTomorrow = ZonedDateTime.of(now, LocalTime.of(23, 59, 59), Defaults.ZONE_ID);
+        final Duration next = DaemonInvestmentMode.getUntilNextEvenHour(nearlyTomorrow);
+        final ZonedDateTime nextEvenHour = nearlyTomorrow.plus(next);
+        assertThat(nextEvenHour)
+                .isEqualTo(ZonedDateTime.of(now.plusDays(1), LocalTime.of(0, 0, 0), Defaults.ZONE_ID));
     }
 
     @Test
-    void next4amToday() {
-        final ZonedDateTime after4am = ZonedDateTime.of(LocalDate.now(), LocalTime.of(3, 59, 59), Defaults.ZONE_ID);
-        final Duration next = DaemonInvestmentMode.getUntilNext4am(after4am);
-        final ZonedDateTime next4am = after4am.plus(next);
-        assertThat(next4am)
-                .isEqualTo(ZonedDateTime.of(LocalDate.now(), LocalTime.of(4, 0, 0), Defaults.ZONE_ID));
+    void nextEvenHourToday() {
+        final LocalDate now = LocalDate.now();
+        final ZonedDateTime evenHour = ZonedDateTime.of(now, LocalTime.of(0, 59, 59), Defaults.ZONE_ID);
+        final Duration next = DaemonInvestmentMode.getUntilNextEvenHour(evenHour);
+        final ZonedDateTime nextEvenHour = evenHour.plus(next);
+        assertThat(nextEvenHour)
+                .isEqualTo(ZonedDateTime.of(now, LocalTime.of(2, 0, 0), Defaults.ZONE_ID));
     }
 
     @AfterEach
