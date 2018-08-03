@@ -16,6 +16,7 @@
 
 package com.github.robozonky.common.remote;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -153,7 +154,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Investment> getInvestments(final Select select) {
-        final Function<Investment, OffsetDateTime> investmentDateSupplier = (i) -> {
+        final Function<Investment, LocalDate> investmentDateSupplier = (i) -> {
             /*
              * Zonky makes it very difficult to figure out when any particular investment was made. this code attempts
              * to figure it out.
@@ -163,15 +164,15 @@ public class Zonky {
              *
              * we subtract a month from that value to find out the approximate date when this loan was created.
              */
-            final Supplier<OffsetDateTime> expectedPayment =
-                    () -> i.getNextPaymentDate().orElse(OffsetDateTime.now());
-            final OffsetDateTime lastPayment = getTransactions(i)
+            final Supplier<LocalDate> expectedPayment =
+                    () -> i.getNextPaymentDate().orElse(OffsetDateTime.now()).toLocalDate();
+            final LocalDate lastPayment = getTransactions(i)
                     .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
                     .map(Transaction::getTransactionDate)
                     .sorted()
                     .findFirst()
                     .orElseGet(expectedPayment);
-            final OffsetDateTime d = lastPayment.minusMonths(1);
+            final LocalDate d = lastPayment.minusMonths(1);
             LOGGER.debug("Date for investment #{} (loan #{}) was determined to be {}.", i.getId(), i.getLoanId(), d);
             return d;
         };

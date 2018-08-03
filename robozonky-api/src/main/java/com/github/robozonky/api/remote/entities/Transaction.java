@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
@@ -31,6 +32,7 @@ public class Transaction extends BaseEntity {
     private BigDecimal amount, discount;
     private TransactionCategory category;
     private TransactionOrientation orientation;
+    @XmlElement
     private OffsetDateTime transactionDate;
     private String customMessage;
     private int id, loanId, investmentId;
@@ -96,9 +98,8 @@ public class Transaction extends BaseEntity {
         return orientation;
     }
 
-    @XmlElement
-    public OffsetDateTime getTransactionDate() {
-        return transactionDate;
+    public LocalDate getTransactionDate() { // every transaction is placed at 00:00:00.
+        return transactionDate.toLocalDate();
     }
 
     @XmlElement
