@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.portfolio;
 
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
@@ -32,8 +31,8 @@ class TransactionsTest {
         final Tenant tenant = new TenantBuilder().withSecrets(secrets).build();
         final Portfolio portfolio = Portfolio.create(tenant, RemoteBalance.create(tenant));
         final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
-        final Carrier c = Carrier.create(transactionalPortfolio);
-        final PortfolioOverview overview = c.getPortfolioOverview(tenant, portfolio.getRemoteBalance().get(),
-                                                                  portfolio.getStatistics());
+//        final Carrier c = Carrier.create(transactionalPortfolio);
+//        final PortfolioOverview overview = c.getPortfolioOverview(tenant, portfolio.getRemoteBalance().get(),
+//                                                                  portfolio.getStatistics());
     }
 }
