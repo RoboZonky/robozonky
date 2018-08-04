@@ -66,23 +66,33 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void nextEvenHourTomorrow() {
+    void nextOddHourTomorrow() {
         final LocalDate now = LocalDate.now();
         final ZonedDateTime nearlyTomorrow = ZonedDateTime.of(now, LocalTime.of(23, 59, 59), Defaults.ZONE_ID);
-        final Duration next = DaemonInvestmentMode.getUntilNextEvenHour(nearlyTomorrow);
+        final Duration next = DaemonInvestmentMode.getUntilNextOddHour(nearlyTomorrow);
         final ZonedDateTime nextEvenHour = nearlyTomorrow.plus(next);
         assertThat(nextEvenHour)
-                .isEqualTo(ZonedDateTime.of(now.plusDays(1), LocalTime.of(0, 0, 0), Defaults.ZONE_ID));
+                .isEqualTo(ZonedDateTime.of(now.plusDays(1), LocalTime.of(1, 0, 0), Defaults.ZONE_ID));
     }
 
     @Test
-    void nextEvenHourToday() {
+    void lastNextOddHourToday() {
+        final LocalDate now = LocalDate.now();
+        final ZonedDateTime nearlyTomorrow = ZonedDateTime.of(now, LocalTime.of(22, 59, 59), Defaults.ZONE_ID);
+        final Duration next = DaemonInvestmentMode.getUntilNextOddHour(nearlyTomorrow);
+        final ZonedDateTime nextEvenHour = nearlyTomorrow.plus(next);
+        assertThat(nextEvenHour)
+                .isEqualTo(ZonedDateTime.of(now, LocalTime.of(23, 0, 0), Defaults.ZONE_ID));
+    }
+
+    @Test
+    void nextOddHourToday() {
         final LocalDate now = LocalDate.now();
         final ZonedDateTime evenHour = ZonedDateTime.of(now, LocalTime.of(0, 59, 59), Defaults.ZONE_ID);
-        final Duration next = DaemonInvestmentMode.getUntilNextEvenHour(evenHour);
+        final Duration next = DaemonInvestmentMode.getUntilNextOddHour(evenHour);
         final ZonedDateTime nextEvenHour = evenHour.plus(next);
         assertThat(nextEvenHour)
-                .isEqualTo(ZonedDateTime.of(now, LocalTime.of(2, 0, 0), Defaults.ZONE_ID));
+                .isEqualTo(ZonedDateTime.of(now, LocalTime.of(1, 0, 0), Defaults.ZONE_ID));
     }
 
     @AfterEach

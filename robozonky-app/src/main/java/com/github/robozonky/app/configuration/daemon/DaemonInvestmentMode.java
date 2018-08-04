@@ -65,20 +65,20 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return threadGroup;
     }
 
-    private static Duration getUntilNextEvenHour() {
-        return getUntilNextEvenHour(Instant.now().atZone(Defaults.ZONE_ID));
+    private static Duration getUntilNextOddHour() {
+        return getUntilNextOddHour(Instant.now().atZone(Defaults.ZONE_ID));
     }
 
-    static Duration getUntilNextEvenHour(final ZonedDateTime now) {
-        final int hourDifference = 2 - (now.getHour() % 2); // 1 hour if odd, 2 hours if even
-        final ZonedDateTime nextEvenHour = now.plusHours(hourDifference).truncatedTo(ChronoUnit.HOURS);
-        return Duration.between(now, nextEvenHour).abs();
+    static Duration getUntilNextOddHour(final ZonedDateTime now) {
+        final int hourDifference = (now.getHour() % 2) + 1; // 2 hours if odd, 1 hour if even
+        final ZonedDateTime nextOddHour = now.plusHours(hourDifference).truncatedTo(ChronoUnit.HOURS);
+        return Duration.between(now, nextOddHour).abs();
     }
 
     private void executeDaemons(final Scheduler executor) {
         executor.run(portfolioUpdater); // first run the update
         // then schedule a refresh once per day, after the Zonky refresh
-        executor.submit(portfolioUpdater, Duration.ofHours(2), getUntilNextEvenHour());
+        executor.submit(portfolioUpdater, Duration.ofHours(2), getUntilNextOddHour());
         // also run transactions update every now and then to detect changes made outside of the robot
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(transactionsUpdate, oneHour, oneHour);
