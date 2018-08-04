@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.portfolio.RemoteBalance;
-import com.github.robozonky.app.portfolio.Repayments;
 import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
@@ -72,8 +71,6 @@ class PortfolioUpdater implements Runnable,
         updater.registerDependant(Delinquencies::update);
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
-        // update loans repaid
-        updater.registerDependant(new Repayments());
         // update portfolio with unprocessed transactions coming from Zonky
         updater.registerDependant(p -> p.getPortfolio().updateTransactions(p.getTenant()));
         return updater;
