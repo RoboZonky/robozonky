@@ -23,6 +23,9 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
@@ -30,11 +33,14 @@ import org.slf4j.LoggerFactory;
 
 abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTransfer>, Transactional> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     private static final String STATE_KEY = "seen";
-
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     private final BinaryOperator<SourceAgnosticTransfer> deduplicator = (a, b) -> a;
+
+    protected static Investment lookupOrFail(final Loan loan, final Tenant auth) {
+        return auth.call(zonky -> zonky.getInvestment(loan))
+                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
+    }
 
     abstract boolean filter(final SourceAgnosticTransfer transaction);
 
@@ -52,14 +58,12 @@ abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTran
         logger.debug("Processed before: {}.", alreadyProcessed);
         final Set<Integer> newlyProcessed = new HashSet<>(0);
         transfers.filter(this::filter) // user-provided filter
-                .filter(t -> !alreadyProcessed.contains(t.getLoanId())) // ignore those we've already processed
+                .peek(t -> newlyProcessed.add(t.getLoanId())) // in the future, ignore present transfers
+                .filter(t -> !alreadyProcessed.contains(t.getLoanId())) // ignore transfers we've processed before
                 .peek(t -> logger.debug("Applicable: {}.", t))
                 .collect(Collectors.toMap(SourceAgnosticTransfer::getLoanId, t -> t, deduplicator)) // de-duplicate
                 .values()
-                .forEach(t -> {
-                    process(t, transactional);
-                    newlyProcessed.add(t.getLoanId());
-                });
+                .forEach(t -> process(t, transactional));
         state.update(m -> m.put(STATE_KEY, newlyProcessed.stream().map(String::valueOf)));
         logger.debug("Over.");
     }

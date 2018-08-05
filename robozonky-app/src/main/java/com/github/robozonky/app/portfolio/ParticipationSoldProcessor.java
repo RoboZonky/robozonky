@@ -33,14 +33,9 @@ class ParticipationSoldProcessor extends TransferProcessor {
         // singleton
     }
 
-    private static Investment lookupOrFail(final Loan loan, final Tenant auth) {
-        return auth.call(zonky -> zonky.getInvestment(loan))
-                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
-    }
-
     @Override
     boolean filter(final SourceAgnosticTransfer transfer) {
-        return transfer.getCategory() == TransactionCategory.SMP_SELL;
+        return transfer.getSource() == TransferSource.REAL && transfer.getCategory() == TransactionCategory.SMP_SELL;
     }
 
     @Override

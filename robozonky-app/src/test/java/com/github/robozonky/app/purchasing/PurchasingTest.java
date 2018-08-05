@@ -61,20 +61,10 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
     private static final Supplier<Optional<PurchaseStrategy>> ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY),
             NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
-    private static Zonky mockApi() {
-        final Zonky zonky = harmlessZonky(9_000);
-        when(zonky.getLoan(anyInt()))
-                .thenAnswer(invocation -> {
-                    final int id = invocation.getArgument(0);
-                    return Loan.custom().setId(id).setAmount(200).build();
-                });
-        return zonky;
-    }
-
     @Test
     void noStrategy() {
         final Participation mock = mock(Participation.class);
-        final Purchasing exec = new Purchasing(Optional::empty, null);
+        final Purchasing exec = new Purchasing(Optional::empty, mockTenant());
         final Portfolio portfolio = mock(Portfolio.class);
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         // check events
@@ -84,11 +74,16 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noneAccepted() {
-        final Zonky zonky = mockApi();
+        final Zonky zonky = harmlessZonky(9_000);
+        when(zonky.getLoan(anyInt()))
+                .thenAnswer(invocation -> {
+                    final int id = invocation.getArgument(0);
+                    return Loan.custom().setId(id).setAmount(200).build();
+                });
         final Participation mock = mock(Participation.class);
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
-        final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockTenant(zonky));
         final Tenant auth = mockTenant(zonky);
+        final Purchasing exec = new Purchasing(NONE_ACCEPTING, auth);
         final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
@@ -110,7 +105,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
                 .setMyInvestment(mockMyInvestment())
                 .setDatePublished(OffsetDateTime.now())
                 .build();
-        final Zonky zonky = mockApi();
+        final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Participation mock = mock(Participation.class);
         when(mock.getId()).thenReturn(1);
@@ -147,7 +142,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
                 .setMyInvestment(mockMyInvestment())
                 .setDatePublished(OffsetDateTime.now())
                 .build();
-        final Zonky zonky = mockApi();
+        final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         doThrow(BadRequestException.class).when(zonky).purchase(any());
         final Participation mock = mock(Participation.class);
@@ -172,7 +167,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noItems() {
-        final Zonky zonky = mockApi();
+        final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
         final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));

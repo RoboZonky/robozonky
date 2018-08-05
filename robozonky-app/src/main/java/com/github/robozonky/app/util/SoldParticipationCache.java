@@ -26,6 +26,7 @@ import java.util.WeakHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Select;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public final class SoldParticipationCache {
 
-    private static final Map<Tenant, SoldParticipationCache> INSTANCES = new WeakHashMap<>(0);
+    private static final Map<SessionInfo, SoldParticipationCache> INSTANCES = new WeakHashMap<>(0);
     private static final Logger LOGGER = LoggerFactory.getLogger(SoldParticipationCache.class);
 
     private final Supplier<Set<Integer>> refresher;
@@ -59,7 +60,7 @@ public final class SoldParticipationCache {
     }
 
     public static SoldParticipationCache forTenant(final Tenant tenant) {
-        return INSTANCES.computeIfAbsent(tenant, key -> newCache(tenant));
+        return INSTANCES.computeIfAbsent(tenant.getSessionInfo(), key -> newCache(tenant));
     }
 
     public synchronized void markAsSold(final int loanId) {
