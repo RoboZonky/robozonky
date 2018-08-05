@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,6 @@ final class Session {
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final Collection<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
-    private final Tenant authenticated;
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
     private final Portfolio portfolio;
@@ -63,7 +62,6 @@ final class Session {
 
     Session(final Portfolio portfolio, final Collection<LoanDescriptor> marketplace, final Investor investor,
             final Tenant tenant) {
-        this.authenticated = tenant;
         this.investor = investor;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
         this.seen = newSessionState(tenant, marketplace, "seenLoans");
@@ -182,7 +180,7 @@ final class Session {
 
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.simulateInvestment(authenticated, i.getLoanId(), i.getOriginalPrincipal());
+        portfolio.simulateInvestment(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
         portfolioOverview = portfolio.calculateOverview();
     }
 

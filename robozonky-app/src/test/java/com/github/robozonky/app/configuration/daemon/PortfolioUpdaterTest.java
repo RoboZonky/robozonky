@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
+import com.github.robozonky.app.portfolio.TransactionMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,7 @@ import org.mockito.quality.Strictness;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.notNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +50,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         final PortfolioUpdater instance = PortfolioUpdater.create(t, mockTenant(), Optional::empty);
         assertSoftly(softly -> {
             softly.assertThat(instance.isUpdating()).isTrue(); // by default it's true
-            softly.assertThat(instance.getRegisteredDependants()).hasSize(4); // expected contents
+            softly.assertThat(instance.getRegisteredDependants()).hasSize(3); // expected contents
         });
     }
 
@@ -58,8 +59,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
         final PortfolioDependant dependant = tp -> tp.fire(new RoboZonkyTestingEvent());
-        final PortfolioUpdater instance = new PortfolioUpdater((t) -> {
-        }, a, mockBalance(z));
+        final PortfolioUpdater instance = new PortfolioUpdater(a, TransactionMonitor.createLazy(a));
         instance.registerDependant(dependant);
         instance.run();
         // make sure that the dependants were called with the proper value of Portfolio
@@ -71,7 +71,8 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final PortfolioUpdater instance = new PortfolioUpdater(t, a, mockBalance(z), Duration.ofSeconds(2));
+        final PortfolioUpdater instance = new PortfolioUpdater(t, a, TransactionMonitor.createLazy(a),
+                                                               Duration.ofSeconds(2));
         instance.registerDependant(tp -> { // fire event
             tp.fire(new RoboZonkyTestingEvent());
         });

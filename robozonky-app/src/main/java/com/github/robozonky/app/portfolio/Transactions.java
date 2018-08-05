@@ -23,11 +23,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Transaction;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import org.slf4j.Logger;
@@ -60,8 +62,8 @@ class Transactions {
                 }, LinkedHashMap::new));
     }
 
-    boolean fromZonky(final Transaction transaction) {
-        return addReal(SourceAgnosticTransaction.real(transaction));
+    boolean fromZonky(final Transaction transaction, final Supplier<Rating> ratingSupplier) {
+        return addReal(SourceAgnosticTransaction.real(transaction, ratingSupplier));
     }
 
     private boolean addReal(final SourceAgnosticTransaction transaction) {
@@ -78,8 +80,8 @@ class Transactions {
         }
     }
 
-    boolean fromZonky(final BlockedAmount blockedAmount) {
-        return addReal(SourceAgnosticTransaction.blockation(blockedAmount));
+    boolean fromZonky(final BlockedAmount blockedAmount, final Supplier<Rating> ratingSupplier) {
+        return addReal(SourceAgnosticTransaction.blockation(blockedAmount, ratingSupplier));
     }
 
     public Stream<SourceAgnosticTransaction> getUnprocessed() {
@@ -94,10 +96,11 @@ class Transactions {
                 .map(Map.Entry::getKey);
     }
 
-    boolean fromInvestment(final int loanId, final BigDecimal amount) {
+    boolean fromInvestment(final int loanId, final Rating rating, final BigDecimal amount) {
         final SourceAgnosticTransaction t = SourceAgnosticTransaction.synthetic(OffsetDateTime.now(), loanId,
                                                                                 TransactionOrientation.OUT,
-                                                                                TransactionCategory.INVESTMENT, amount);
+                                                                                TransactionCategory.INVESTMENT, amount,
+                                                                                rating);
         return addSynthetic(t);
     }
 
@@ -119,10 +122,11 @@ class Transactions {
         return minimalEpoch;
     }
 
-    boolean fromPurchase(final int loanId, final BigDecimal amount) {
+    boolean fromPurchase(final int loanId, final Rating rating, final BigDecimal amount) {
         final SourceAgnosticTransaction t = SourceAgnosticTransaction.synthetic(OffsetDateTime.now(), loanId,
                                                                                 TransactionOrientation.OUT,
-                                                                                TransactionCategory.SMP_BUY, amount);
+                                                                                TransactionCategory.SMP_BUY, amount,
+                                                                                rating);
         return addSynthetic(t);
     }
 

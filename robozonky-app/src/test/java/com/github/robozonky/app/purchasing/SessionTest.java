@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,19 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.TransactionMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SessionTest extends AbstractZonkyLeveragingTest {
 
@@ -48,7 +54,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     void empty() {
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
     }
@@ -69,7 +75,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()));
         assertSoftly(softly -> {
@@ -105,7 +111,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(100_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Tenant auth = mockTenant(z, false);
-        final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
+        final Portfolio portfolio = spy(Portfolio.create(auth, TransactionMonitor.createLazy(auth)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()));

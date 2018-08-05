@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ final class Session {
 
     private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.simulatePurchase(authenticated, i.getLoanId(), i.getRemainingPrincipal());
+        portfolio.simulatePurchase(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
         portfolioOverview = portfolio.calculateOverview();
     }
 }

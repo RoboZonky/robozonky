@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,18 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.TransactionMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
 
@@ -52,7 +59,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         when(z.getAvailableLoans(notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(a, TransactionMonitor.createLazy(a));
         final InvestmentStrategy is = mock(InvestmentStrategy.class);
         final Supplier<Optional<InvestmentStrategy>> s = () -> Optional.of(is);
         final InvestingDaemon d = new InvestingDaemon(t -> {
@@ -68,7 +75,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
     void underBalance() {
         final Zonky z = harmlessZonky(199);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(a, TransactionMonitor.createLazy(a));
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(t -> {
         }, a, Investor.build(a), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));

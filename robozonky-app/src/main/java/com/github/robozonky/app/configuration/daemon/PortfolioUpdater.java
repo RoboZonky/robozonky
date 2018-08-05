@@ -33,8 +33,8 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
-import com.github.robozonky.app.portfolio.RemoteBalance;
 import com.github.robozonky.app.portfolio.Selling;
+import com.github.robozonky.app.portfolio.TransactionMonitor;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,31 +48,37 @@ class PortfolioUpdater implements Runnable,
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
+    private final Supplier<TransactionMonitor> transactions;
     private final Duration retryFor;
-    private final RemoteBalance balance;
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant, final RemoteBalance balance,
-                     final Duration retryFor) {
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
+                     final Supplier<TransactionMonitor> transactions, final Duration retryFor) {
         this.shutdownCall = shutdownCall;
         this.tenant = tenant;
-        this.balance = balance;
+        this.transactions = transactions;
         this.retryFor = retryFor;
     }
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant, final RemoteBalance balance) {
-        this(shutdownCall, tenant, balance, Duration.ofHours(1));
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
+                     final Supplier<TransactionMonitor> transactions) {
+        this(shutdownCall, tenant, transactions, Duration.ofHours(1));
+    }
+
+    PortfolioUpdater(final Tenant tenant, final Supplier<TransactionMonitor> transactions) {
+        this(t -> {
+        }, tenant, transactions, Duration.ofHours(1));
     }
 
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth,
                                           final Supplier<Optional<SellStrategy>> sp) {
-        final RemoteBalance balance = RemoteBalance.create(auth);
-        final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
+        final Supplier<TransactionMonitor> transactions = TransactionMonitor.createLazy(auth);
+        final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, transactions);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
         updater.registerDependant(Delinquencies::update);
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
-        // update portfolio with unprocessed transactions coming from Zonky
-        updater.registerDependant(p -> p.getPortfolio().updateTransactions(p.getTenant()));
+        // update portfolio with transactions coming from Zonky
+        updater.registerDependant(po -> transactions.get().accept(po));
         return updater;
     }
 
@@ -92,7 +98,7 @@ class PortfolioUpdater implements Runnable,
     }
 
     private Portfolio runIt(final Portfolio old) {
-        final Portfolio result = old == null ? Portfolio.create(tenant, balance) : old.reloadFromZonky(tenant, balance);
+        final Portfolio result = old == null ? Portfolio.create(tenant, transactions) : old;
         final TransactionalPortfolio transactional = new TransactionalPortfolio(result, tenant);
         final CompletableFuture<TransactionalPortfolio> combined = dependants.stream()
                 .map(d -> (Function<TransactionalPortfolio, TransactionalPortfolio>) folio -> {

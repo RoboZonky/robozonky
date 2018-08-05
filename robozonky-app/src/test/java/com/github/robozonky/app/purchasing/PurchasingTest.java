@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,21 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.TransactionMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class PurchasingTest extends AbstractZonkyLeveragingTest {
 
@@ -79,7 +88,8 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Participation mock = mock(Participation.class);
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockTenant(zonky));
-        final Portfolio portfolio = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
+        final Tenant auth = mockTenant(zonky);
+        final Portfolio portfolio = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(2);
@@ -109,10 +119,10 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRating()).thenReturn(loan.getRating());
         final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
-        final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(zonky)));
+        final Portfolio portfolio = spy(Portfolio.create(auth, TransactionMonitor.createLazy(auth)));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
         verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
-        verify(portfolio).simulatePurchase(auth, loanId, mock.getRemainingPrincipal());
+        verify(portfolio).simulatePurchase(loanId, loan.getRating(), mock.getRemainingPrincipal());
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {
@@ -147,7 +157,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRating()).thenReturn(loan.getRating());
         final Tenant auth = mockTenant(zonky, false);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
-        final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
+        final Portfolio portfolio = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         verify(zonky).purchase(eq(mock)); // make sure purchase was called
         final List<Event> e = this.getNewEvents();
@@ -165,7 +175,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = mockApi();
         final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
-        final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
+        final Portfolio portfolio = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
         assertThat(e).isEmpty();

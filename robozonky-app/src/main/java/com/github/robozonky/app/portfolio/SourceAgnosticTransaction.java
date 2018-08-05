@@ -19,16 +19,18 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Transaction;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class SourceAgnosticTransaction {
+final class SourceAgnosticTransaction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceAgnosticTransaction.class);
 
@@ -36,22 +38,25 @@ class SourceAgnosticTransaction {
     private final TransactionCategory category;
     private final BigDecimal amount;
     private final OffsetDateTime dateTime;
+    private final Supplier<Rating> ratingSupplier;
     private TransactionSource source;
 
     private SourceAgnosticTransaction(final TransactionSource source, final OffsetDateTime dateTime,
                                       final int loanId,
                                       final TransactionOrientation orientation, final TransactionCategory category,
-                                      final BigDecimal amount) {
-        this(source, dateTime, loanId, category, normalizeAmount(orientation, amount));
+                                      final BigDecimal amount, final Supplier<Rating> ratingSupplier) {
+        this(source, dateTime, loanId, category, normalizeAmount(orientation, amount), ratingSupplier);
     }
 
     private SourceAgnosticTransaction(final TransactionSource source, final OffsetDateTime dateTime,
-                                      final int loanId, final TransactionCategory category, final BigDecimal amount) {
+                                      final int loanId, final TransactionCategory category, final BigDecimal amount,
+                                      final Supplier<Rating> ratingSupplier) {
         this.source = source;
         this.dateTime = dateTime;
         this.loanId = loanId;
         this.category = category;
         this.amount = amount;
+        this.ratingSupplier = ratingSupplier;
     }
 
     private static BigDecimal normalizeAmount(final TransactionOrientation orientation, final BigDecimal amount) {
@@ -60,23 +65,25 @@ class SourceAgnosticTransaction {
 
     public static SourceAgnosticTransaction synthetic(final OffsetDateTime dateTime, final int loanId,
                                                       final TransactionOrientation orientation,
-                                                      final TransactionCategory category, final BigDecimal amount) {
+                                                      final TransactionCategory category, final BigDecimal amount,
+                                                      final Rating rating) {
         return new SourceAgnosticTransaction(TransactionSource.SYNTHETIC, dateTime, loanId, orientation,
-                                             category, amount);
+                                             category, amount, () -> rating);
     }
 
-    public static SourceAgnosticTransaction real(final Transaction transaction) {
+    public static SourceAgnosticTransaction real(final Transaction transaction, final Supplier<Rating> ratingSupplier) {
         final OffsetDateTime date = transaction.getTransactionDate().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
         return new SourceAgnosticTransaction(TransactionSource.REAL, date, transaction.getLoanId(),
                                              transaction.getOrientation(),
-                                             transaction.getCategory(), transaction.getAmount());
+                                             transaction.getCategory(), transaction.getAmount(), ratingSupplier);
     }
 
-    public static SourceAgnosticTransaction blockation(final BlockedAmount blockedAmount) {
+    public static SourceAgnosticTransaction blockation(final BlockedAmount blockedAmount,
+                                                       final Supplier<Rating> ratingSupplier) {
         return new SourceAgnosticTransaction(TransactionSource.BLOCKED_AMOUNT,
                                              blockedAmount.getDateStart(),
                                              blockedAmount.getLoanId(), TransactionOrientation.OUT,
-                                             blockedAmount.getCategory(), blockedAmount.getAmount());
+                                             blockedAmount.getCategory(), blockedAmount.getAmount(), ratingSupplier);
     }
 
     public TransactionSource getSource() {
@@ -93,6 +100,10 @@ class SourceAgnosticTransaction {
 
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public Rating getRating() {
+        return ratingSupplier.get();
     }
 
     public OffsetDateTime getDateTime() {

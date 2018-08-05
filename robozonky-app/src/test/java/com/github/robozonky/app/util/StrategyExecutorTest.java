@@ -28,17 +28,16 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.TransactionMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,53 +50,35 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     private static final Supplier<Optional<InvestmentStrategy>> ALL_ACCEPTING =
             () -> Optional.of(ALL_ACCEPTING_STRATEGY);
 
-    @SuppressWarnings("unchecked")
-    @Test
-    void rechecksMarketplaceIfFirstCheckFailed() {
-        final Zonky zonky = harmlessZonky(10_000);
-        final Portfolio p = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
-        final Loan loan = Loan.custom().build();
-        final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
-        // prepare the executor, have it fail when executing the investment operation
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new AlwaysFreshNeverInvesting();
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> mocked = spy(e);
-        doThrow(new IllegalStateException()).when(mocked).execute(any(), any(), any());
-        assertThatThrownBy(() -> mocked.apply(p, marketplace)).isInstanceOf(IllegalStateException.class);
-        reset(mocked); // now the method won't throw, but must be executed again
-        assertThat(mocked.apply(p, marketplace)).isEmpty();
-        verify(mocked).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
-        // marketplace stays the same + balance stays the same+  previous update passed = no update should be triggered
-        reset(mocked);
-        when(mocked.hasMarketplaceUpdates(eq(marketplace))).thenReturn(false);
-        assertThat(mocked.apply(p, marketplace)).isEmpty();
-        verify(mocked, never()).execute(any(), any(), any());
-    }
-
     @Test
     void rechecksMarketplaceIfBalanceIncreased() {
         final Zonky zonky = harmlessZonky(10_000);
-        final Portfolio p = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
+        final Tenant auth = mockTenant(zonky);
+        final Portfolio p = Portfolio.create(auth, TransactionMonitor.createLazy(auth), mockBalance(zonky));
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
         // prepare the executor, have it fail when executing the investment operation
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new AlwaysFreshNeverInvesting();
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> mocked = spy(e);
-        when(mocked.hasMarketplaceUpdates(any())).thenReturn(false); // marketplace never has any updates
-        assertThat(mocked.apply(p, marketplace)).isEmpty(); // fresh balance, check marketplace
-        verify(mocked).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
-        assertThat(mocked.apply(p, marketplace)).isEmpty(); // nothing changed, still only ran once
-        verify(mocked, times(1)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> spied = spy(e);
+        when(spied.hasMarketplaceUpdates(any())).thenReturn(false); // marketplace never has any updates
+        assertThat(spied.apply(p, marketplace)).isEmpty(); // fresh balance, check marketplace
+        System.out.println("A");
+        verify(spied).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(p, marketplace)).isEmpty(); // nothing changed, still only ran once
+        System.out.println("B");
+        verify(spied, times(1)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(100_000))); // increase remote balance
-        assertThat(mocked.apply(p, marketplace)).isEmpty(); // should have checked marketplace
-        verify(mocked, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(p, marketplace)).isEmpty(); // should have checked marketplace
+        System.out.println("C");
+        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
     }
 
     @Test
     void doesNotInvestOnEmptyMarketplace() {
         final Zonky zonky = harmlessZonky(10_000);
-        final Portfolio p = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
+        final Tenant auth = mockTenant(zonky);
+        final Portfolio p = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting());
         assertThat(e.apply(p, Collections.emptyList())).isEmpty();
         verify(e, never()).execute(any(), any(), any());
