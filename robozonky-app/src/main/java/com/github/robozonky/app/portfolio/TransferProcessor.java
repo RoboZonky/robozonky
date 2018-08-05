@@ -25,8 +25,12 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.common.state.InstanceState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTransfer>, Transactional> {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String STATE_KEY = "seen";
 
@@ -38,12 +42,14 @@ abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTran
 
     @Override
     public void accept(final Stream<SourceAgnosticTransfer> transfers, final Transactional transactional) {
+        logger.debug("Processing {}.", this);
         final InstanceState<? extends TransferProcessor> state = transactional.getTenant().getState(this.getClass());
         final Set<Integer> alreadyProcessed = state
                 .getValues(STATE_KEY)
                 .orElse(Stream.empty())
                 .map(Integer::parseInt)
                 .collect(Collectors.toSet());
+        logger.debug("Processed before: {}.", alreadyProcessed);
         final Set<Integer> newlyProcessed = new HashSet<>(0);
         transfers.filter(this::filter) // user-provided filter
                 .filter(t -> !alreadyProcessed.contains(t.getLoanId())) // ignore those we've already processed
@@ -54,5 +60,6 @@ abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTran
                     newlyProcessed.add(t.getLoanId());
                 });
         state.update(m -> m.put(STATE_KEY, newlyProcessed.stream().map(String::valueOf)));
+        logger.debug("Over.");
     }
 }
