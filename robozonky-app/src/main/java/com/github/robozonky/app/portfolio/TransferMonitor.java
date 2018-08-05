@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -52,19 +53,27 @@ public class TransferMonitor implements PortfolioDependant {
         return LoanCache.INSTANCE.getLoan(loanId, tenant).getRating();
     }
 
+    private static <T> boolean updateSingle(final Tenant tenant, final Function<Zonky, Stream<T>> api,
+                                            final Function<T, Boolean> mapping) {
+        return tenant.call(api)
+                .map(mapping)
+                .reduce(false, (a, b) -> a || b);
+    }
+
     private static boolean updateFromZonky(final Tenant tenant, final Transfers transfers) {
         // load all transactions
-        final Select fromBeginning = new Select()
-                .greaterThanOrEquals("transaction.transactionDate", transfers.getMinimalEpoch());
-        final boolean updated = tenant.call(z -> z.getTransactions(fromBeginning))
-                .filter(t -> t.getLoanId() > 0)
-                .map(t -> transfers.fromZonky(t, () -> getRating(tenant, t.getLoanId())))
-                .reduce(false, (a, b) -> a || b);
+        final boolean updated = updateSingle(tenant,
+                                             z -> {
+                                                 final Select fromBeginning =
+                                                         new Select().greaterThanOrEquals("transaction.transactionDate",
+                                                                                          transfers.getMinimalEpoch());
+                                                 return z.getTransactions(fromBeginning);
+                                             },
+                                             t -> transfers.fromZonky(t, () -> getRating(tenant, t.getLoanId())));
         // load all blocked amounts
-        final boolean updated2 = tenant.call(Zonky::getBlockedAmounts)
-                .filter(t -> t.getLoanId() > 0)
-                .map(ba -> transfers.fromZonky(ba, () -> getRating(tenant, ba.getLoanId())))
-                .reduce(false, (a, b) -> a || b);
+        final boolean updated2 = updateSingle(tenant,
+                                              Zonky::getBlockedAmounts,
+                                              ba -> transfers.fromZonky(ba, () -> getRating(tenant, ba.getLoanId())));
         return (updated || updated2);
     }
 

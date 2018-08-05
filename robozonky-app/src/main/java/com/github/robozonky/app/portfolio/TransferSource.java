@@ -37,7 +37,7 @@ enum TransferSource {
 
     boolean canBePromotedTo(final TransferSource target) {
         if (this == target) {
-            LOGGER.debug("Promoting {} to itself may point to a bug in the code, but may also be harmless.", this);
+            LOGGER.trace("Promoting {} to itself may point to a bug in the code, but may also be harmless.", this);
             return true;
         }
         return promotions.contains(target);
