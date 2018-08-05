@@ -42,6 +42,10 @@ abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTran
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
 
+    protected static int getLoanId(final SourceAgnosticTransfer transfer) {
+        return transfer.getLoanData().map(SourceAgnosticTransfer.LoanData::getId).orElse(0);
+    }
+
     abstract boolean filter(final SourceAgnosticTransfer transaction);
 
     abstract void process(final SourceAgnosticTransfer transaction, final Transactional portfolio);
@@ -58,10 +62,11 @@ abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTran
         logger.debug("Processed before: {}.", alreadyProcessed);
         final Set<Integer> newlyProcessed = new HashSet<>(0);
         transfers.filter(this::filter) // user-provided filter
-                .peek(t -> newlyProcessed.add(t.getLoanId())) // in the future, ignore present transfers
-                .filter(t -> !alreadyProcessed.contains(t.getLoanId())) // ignore transfers we've processed before
+                .filter(t -> t.getLoanData().isPresent()) // filter out all fees etc., we only care about loan-related
+                .peek(t -> newlyProcessed.add(getLoanId(t))) // in the future, ignore present transfers
+                .filter(t -> !alreadyProcessed.contains(getLoanId(t))) // ignore transfers we've processed before
                 .peek(t -> logger.debug("Applicable: {}.", t))
-                .collect(Collectors.toMap(SourceAgnosticTransfer::getLoanId, t -> t, deduplicator)) // de-duplicate
+                .collect(Collectors.toMap(TransferProcessor::getLoanId, t -> t, deduplicator)) // de-duplicate
                 .values()
                 .forEach(t -> process(t, transactional));
         state.update(m -> m.put(STATE_KEY, newlyProcessed.stream().map(String::valueOf)));

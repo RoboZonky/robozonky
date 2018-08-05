@@ -40,7 +40,7 @@ class ParticipationSoldProcessor extends TransferProcessor {
 
     @Override
     void process(final SourceAgnosticTransfer transfer, final Transactional transactional) {
-        final int loanId = transfer.getLoanId();
+        final int loanId = getLoanId(transfer);
         final Tenant tenant = transactional.getTenant();
         final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
         final Investment i = lookupOrFail(l, tenant);

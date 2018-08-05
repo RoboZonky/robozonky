@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -97,11 +98,14 @@ public class TransferMonitor implements PortfolioDependant {
     }
 
     private Map<Rating, BigDecimal> calculateAdjustments() {
+        final Function<SourceAgnosticTransfer, Rating> ratingExtractor =
+                t -> t.getLoanData().map(SourceAgnosticTransfer.LoanData::getRating).orElse(null);
+        // null return by above function is ok, since the stream below will filter out non-loan transfers
         final Map<Rating, BigDecimal> result = transfers.getUnprocessed()
-                .collect(Collectors.groupingBy(SourceAgnosticTransfer::getRating,
-                                               Collectors.reducing(BigDecimal.ZERO,
-                                                                   SourceAgnosticTransfer::getAmount,
-                                                                   BigDecimal::subtract)));
+                .filter(t -> t.getLoanData().isPresent()) // this prevents the NPE; we don't care about fees etc. here
+                .collect(Collectors.groupingBy(ratingExtractor, Collectors.reducing(BigDecimal.ZERO,
+                                                                                    SourceAgnosticTransfer::getAmount,
+                                                                                    BigDecimal::subtract)));
         LOGGER.debug("New adjustments: {}", result);
         return result;
     }

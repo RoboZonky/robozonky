@@ -40,7 +40,7 @@ class LoanRepaidProcessor extends TransferProcessor {
 
     @Override
     void process(final SourceAgnosticTransfer transfer, final Transactional transactional) {
-        final Loan l = LoanCache.INSTANCE.getLoan(transfer.getLoanId(), transactional.getTenant());
+        final Loan l = LoanCache.INSTANCE.getLoan(getLoanId(transfer), transactional.getTenant());
         final Investment investment = lookupOrFail(l, transactional.getTenant());
         final boolean paidInFull = investment.getPaymentStatus()
                 .map(s -> s == PaymentStatus.PAID)

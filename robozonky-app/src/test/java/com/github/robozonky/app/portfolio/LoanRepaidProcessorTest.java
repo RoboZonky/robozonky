@@ -101,11 +101,11 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentNotYetRepaid() {
         final SourceAgnosticTransfer transfer = filteredTransfer(TransferSource.REAL, TransactionCategory.PAYMENT);
-        final int loanId = transfer.getLoanId();
-        final Rating rating = transfer.getRating();
+        final int loanId = transfer.getLoanData().get().getId();
+        final Rating rating = transfer.getLoanData().get().getRating();
         final Loan loan = Loan.custom().setId(loanId).setRating(rating).build();
         final Zonky zonky = harmlessZonky(10_000);
-        when(zonky.getLoan(eq(transfer.getLoanId()))).thenReturn(loan);
+        when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
                 .setPaymentStatus(PaymentStatus.OK)
                 .build();
@@ -122,11 +122,11 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentRepaid() {
         final SourceAgnosticTransfer transfer = filteredTransfer(TransferSource.REAL, TransactionCategory.PAYMENT);
-        final int loanId = transfer.getLoanId();
-        final Rating rating = transfer.getRating();
+        final int loanId = transfer.getLoanData().get().getId();
+        final Rating rating = transfer.getLoanData().get().getRating();
         final Loan loan = Loan.custom().setId(loanId).setRating(rating).build();
         final Zonky zonky = harmlessZonky(10_000);
-        when(zonky.getLoan(eq(transfer.getLoanId()))).thenReturn(loan);
+        when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
                 .setPaymentStatus(PaymentStatus.PAID)
                 .build();

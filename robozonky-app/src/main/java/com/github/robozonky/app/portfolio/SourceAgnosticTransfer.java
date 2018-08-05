@@ -19,6 +19,7 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
@@ -33,30 +34,26 @@ import org.slf4j.LoggerFactory;
 final class SourceAgnosticTransfer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceAgnosticTransfer.class);
-
-    private final int loanId;
+    private final SourceAgnosticTransfer.LoanData loanData;
     private final TransactionCategory category;
     private final BigDecimal amount;
     private final OffsetDateTime dateTime;
-    private final Supplier<Rating> ratingSupplier;
     private TransferSource source;
 
     private SourceAgnosticTransfer(final TransferSource source, final OffsetDateTime dateTime,
-                                   final int loanId,
                                    final TransactionOrientation orientation, final TransactionCategory category,
-                                   final BigDecimal amount, final Supplier<Rating> ratingSupplier) {
-        this(source, dateTime, loanId, category, normalizeAmount(orientation, amount), ratingSupplier);
+                                   final BigDecimal amount, final SourceAgnosticTransfer.LoanData loanData) {
+        this(source, dateTime, category, normalizeAmount(orientation, amount), loanData);
     }
 
     private SourceAgnosticTransfer(final TransferSource source, final OffsetDateTime dateTime,
-                                   final int loanId, final TransactionCategory category, final BigDecimal amount,
-                                   final Supplier<Rating> ratingSupplier) {
+                                   final TransactionCategory category, final BigDecimal amount,
+                                   final SourceAgnosticTransfer.LoanData loanData) {
         this.source = source;
         this.dateTime = dateTime;
-        this.loanId = loanId;
         this.category = category;
         this.amount = amount;
-        this.ratingSupplier = ratingSupplier;
+        this.loanData = loanData;
     }
 
     private static BigDecimal normalizeAmount(final TransactionOrientation orientation, final BigDecimal amount) {
@@ -67,31 +64,29 @@ final class SourceAgnosticTransfer {
                                                    final TransactionOrientation orientation,
                                                    final TransactionCategory category, final BigDecimal amount,
                                                    final Rating rating) {
-        return new SourceAgnosticTransfer(TransferSource.SYNTHETIC, dateTime, loanId, orientation,
-                                          category, amount, () -> rating);
+        return new SourceAgnosticTransfer(TransferSource.SYNTHETIC, dateTime, orientation, category, amount,
+                                          new SourceAgnosticTransfer.LoanData(loanId, () -> rating));
     }
 
     public static SourceAgnosticTransfer real(final Transaction transaction, final Supplier<Rating> ratingSupplier) {
+        final int loanId = transaction.getLoanId();
+        final LoanData loanData = loanId == 0 ? null : new LoanData(loanId, ratingSupplier);
         final OffsetDateTime date = transaction.getTransactionDate().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
-        return new SourceAgnosticTransfer(TransferSource.REAL, date, transaction.getLoanId(),
-                                          transaction.getOrientation(),
-                                          transaction.getCategory(), transaction.getAmount(), ratingSupplier);
+        return new SourceAgnosticTransfer(TransferSource.REAL, date, transaction.getOrientation(),
+                                          transaction.getCategory(), transaction.getAmount(), loanData);
     }
 
     public static SourceAgnosticTransfer blockation(final BlockedAmount blockedAmount,
                                                     final Supplier<Rating> ratingSupplier) {
-        return new SourceAgnosticTransfer(TransferSource.BLOCKED_AMOUNT,
-                                          blockedAmount.getDateStart(),
-                                          blockedAmount.getLoanId(), TransactionOrientation.OUT,
-                                          blockedAmount.getCategory(), blockedAmount.getAmount(), ratingSupplier);
+        final int loanId = blockedAmount.getLoanId();
+        final LoanData loanData = loanId == 0 ? null : new LoanData(loanId, ratingSupplier);
+        return new SourceAgnosticTransfer(TransferSource.BLOCKED_AMOUNT, blockedAmount.getDateStart(),
+                                          TransactionOrientation.OUT, blockedAmount.getCategory(),
+                                          blockedAmount.getAmount(), loanData);
     }
 
     public TransferSource getSource() {
         return source;
-    }
-
-    public int getLoanId() {
-        return loanId;
     }
 
     public TransactionCategory getCategory() {
@@ -102,8 +97,12 @@ final class SourceAgnosticTransfer {
         return amount;
     }
 
-    public Rating getRating() {
-        return ratingSupplier.get();
+    public Optional<LoanData> getLoanData() {
+        return Optional.ofNullable(loanData);
+    }
+
+    private int getLoanId() {
+        return (loanData == null ? 0 : loanData.getId());
     }
 
     public OffsetDateTime getDateTime() {
@@ -125,7 +124,7 @@ final class SourceAgnosticTransfer {
                 "amount=" + amount +
                 ", category=" + category +
                 ", dateTime=" + dateTime +
-                ", loanId=" + loanId +
+                ", loanId=" + getLoanId() +
                 ", source=" + source +
                 '}';
     }
@@ -139,13 +138,32 @@ final class SourceAgnosticTransfer {
             return false;
         }
         final SourceAgnosticTransfer that = (SourceAgnosticTransfer) o;
-        return loanId == that.loanId &&
+        return getLoanId() == that.getLoanId() &&
                 category == that.category &&
                 Objects.equals(amount, that.amount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(loanId, category, amount);
+        return Objects.hash(getLoanId(), category, amount);
+    }
+
+    public static final class LoanData {
+
+        private final int id;
+        private final Supplier<Rating> rating;
+
+        private LoanData(final int loanId, final Supplier<Rating> rating) {
+            this.id = loanId;
+            this.rating = rating;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public Rating getRating() {
+            return rating.get();
+        }
     }
 }
