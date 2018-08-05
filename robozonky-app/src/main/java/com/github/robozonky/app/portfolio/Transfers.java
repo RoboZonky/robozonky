@@ -67,10 +67,11 @@ class Transfers {
                 .filter(e -> Objects.equals(e, transfer))
                 .findFirst();
         if (original.isPresent()) {
+            LOGGER.debug("Transfer already present in epoch '{}': {}.", currentEpoch, transfer);
             original.get().promote(transfer.getSource());
             return false;
         } else {
-            LOGGER.debug("Adding real transfer into currentEpoch '{}': {}.", currentEpoch, transfer);
+            LOGGER.debug("Adding real transfer into current epoch '{}': {}.", currentEpoch, transfer);
             transferDetectionTimestamps.put(transfer, currentEpoch.plusSeconds(1));
             return true;
         }
@@ -105,7 +106,7 @@ class Transfers {
             LOGGER.debug("Duplicate synthetic transfer: {}.", transfer);
             return false;
         }
-        LOGGER.debug("Adding synthetic transfer into currentEpoch '{}': {}.", currentEpoch, transfer);
+        LOGGER.debug("Adding synthetic transfer into current epoch '{}': {}.", currentEpoch, transfer);
         transferDetectionTimestamps.put(transfer, OffsetDateTime.now());
         return true;
     }
@@ -127,7 +128,7 @@ class Transfers {
     }
 
     Transfers rebase(final OffsetDateTime zonkyUpdatedOn) {
-        LOGGER.debug("Rebasing transfers to currentEpoch '{}'.", zonkyUpdatedOn);
+        LOGGER.debug("Rebasing transfers to current epoch '{}'.", zonkyUpdatedOn);
         return new Transfers(zonkyUpdatedOn, transferDetectionTimestamps);
     }
 }

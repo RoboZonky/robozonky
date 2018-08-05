@@ -19,7 +19,6 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -28,7 +27,6 @@ import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
@@ -48,20 +46,16 @@ import static org.mockito.Mockito.when;
 
 class PortfolioTest extends AbstractZonkyLeveragingTest {
 
-    private static final Random RANDOM = new Random();
-
     @Test
     void calculateOverview() {
         final BigDecimal investmentSize = BigDecimal.TEN;
-        final LoanBuilder l1 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.C);
-        final LoanBuilder l2 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.B);
-        final LoanBuilder l3 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.A);
-        final Transaction sold = new Transaction(l2, investmentSize, TransactionCategory.SMP_SELL,
-                                                 TransactionOrientation.IN);
+        final Loan l1 = Loan.custom().setRating(Rating.C).build();
+        final Loan l2 = Loan.custom().setRating(Rating.B).build();
+        final Loan l3 = Loan.custom().setRating(Rating.A).build();
         final Zonky z = harmlessZonky(10_000);
         Stream.of(l1, l2, l3).forEach(l -> {
             final Investment i = Investment.fresh(l, investmentSize).build();
-            when(z.getLoan(eq(l.getId()))).thenReturn(l.build());
+            when(z.getLoan(eq(l.getId()))).thenReturn(l);
             when(z.getInvestment(eq(l))).thenReturn(Optional.of(i));
         });
         final Tenant t = mockTenant(z);
@@ -78,12 +72,13 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         p.simulateInvestment(l3.getId(), l3.getRating(), investmentSize);
         p.simulatePurchase(l1.getId(), l1.getRating(), investmentSize);
         // update transactions remotely and recalculate portfolio
+        final Transaction sold = new Transaction(l2, investmentSize, TransactionCategory.SMP_SELL,
+                                                 TransactionOrientation.IN);
         when(z.getTransactions((Select) any())).thenAnswer(i -> Stream.of(sold));
         final Transactional transactional = new Transactional(p, t);
         m.get().accept(transactional);
         transactional.run();
         final PortfolioOverview o2 = p.calculateOverview();
-        System.out.println(o2);
         assertSoftly(softly -> {
             // balance minus two investments; sales are not tracked here, it will come in with RemoteBalance
             softly.assertThat(o2.getCzkAvailable()).isEqualTo(BigDecimal.valueOf(9980));

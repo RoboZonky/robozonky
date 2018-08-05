@@ -53,6 +53,7 @@ abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTran
         final Set<Integer> newlyProcessed = new HashSet<>(0);
         transfers.filter(this::filter) // user-provided filter
                 .filter(t -> !alreadyProcessed.contains(t.getLoanId())) // ignore those we've already processed
+                .peek(t -> logger.debug("Applicable: {}.", t))
                 .collect(Collectors.toMap(SourceAgnosticTransfer::getLoanId, t -> t, deduplicator)) // de-duplicate
                 .values()
                 .forEach(t -> {

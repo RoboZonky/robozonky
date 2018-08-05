@@ -54,7 +54,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
 
     AbstractMutableLoanImpl() {
-        this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
+        this.id = Math.abs(RANDOM.nextInt()); // simplifies tests which do not have to generate random IDs themselves
     }
 
     AbstractMutableLoanImpl(final RawLoan original) {

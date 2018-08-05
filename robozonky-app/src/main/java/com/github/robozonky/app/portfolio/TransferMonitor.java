@@ -126,15 +126,19 @@ public class TransferMonitor implements PortfolioDependant {
 
     @Override
     public void accept(final Transactional transactional) {
+        LOGGER.debug("Updating.");
         final Portfolio folio = transactional.getPortfolio();
         final Statistics statistics = folio.getStatistics();
         transfers = transfers.rebase(statistics.getTimestamp());
         final Tenant tenant = transactional.getTenant();
         final boolean updated = updateFromZonky(tenant, transfers);
         if (updated) {
+            LOGGER.debug("Have new transactions.");
             adjustments.reset();
         }
+        LOGGER.debug("Running transaction processors.");
         LoanRepaidProcessor.INSTANCE.accept(transfers.getUnprocessed(), transactional);
         ParticipationSoldProcessor.INSTANCE.accept(transfers.getUnprocessed(), transactional);
+        LOGGER.debug("Over.");
     }
 }
