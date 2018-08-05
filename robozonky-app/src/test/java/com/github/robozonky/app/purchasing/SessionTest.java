@@ -34,7 +34,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.TransactionMonitor;
+import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     void empty() {
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
     }
@@ -75,7 +75,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(auth, TransactionMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()));
         assertSoftly(softly -> {
@@ -111,7 +111,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(100_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Tenant auth = mockTenant(z, false);
-        final Portfolio portfolio = spy(Portfolio.create(auth, TransactionMonitor.createLazy(auth)));
+        final Portfolio portfolio = spy(Portfolio.create(auth, TransferMonitor.createLazy(auth)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()));

@@ -21,11 +21,11 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SoldParticipationCache;
 
-class ParticipationSoldProcessor extends TransactionProcessor {
+class ParticipationSoldProcessor extends TransferProcessor {
 
     public static final ParticipationSoldProcessor INSTANCE = new ParticipationSoldProcessor();
 
@@ -39,17 +39,17 @@ class ParticipationSoldProcessor extends TransactionProcessor {
     }
 
     @Override
-    boolean filter(final SourceAgnosticTransaction transaction) {
-        return transaction.getCategory() == TransactionCategory.SMP_SELL;
+    boolean filter(final SourceAgnosticTransfer transfer) {
+        return transfer.getCategory() == TransactionCategory.SMP_SELL;
     }
 
     @Override
-    void process(final SourceAgnosticTransaction transaction, final TransactionalPortfolio portfolio) {
-        final int loanId = transaction.getLoanId();
-        final Tenant tenant = portfolio.getTenant();
+    void process(final SourceAgnosticTransfer transfer, final Transactional transactional) {
+        final int loanId = transfer.getLoanId();
+        final Tenant tenant = transactional.getTenant();
         final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
         final Investment i = lookupOrFail(l, tenant);
-        portfolio.fire(new InvestmentSoldEvent(i, l, portfolio.getPortfolio().calculateOverview()));
+        transactional.fire(new InvestmentSoldEvent(i, l, transactional.getPortfolio().calculateOverview()));
         SoldParticipationCache.forTenant(tenant).markAsSold(loanId);
     }
 }

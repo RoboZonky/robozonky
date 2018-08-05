@@ -39,16 +39,16 @@ import org.slf4j.LoggerFactory;
  * Updates to state, which happen through {@link #getTenant()}, are postponed until {@link #run()} is called. Likewise
  * for events fired through {@link #fire(Event)}.
  */
-public final class TransactionalPortfolio implements Runnable {
+public final class Transactional implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalPortfolio.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Transactional.class);
 
     private final Portfolio portfolio;
     private final Tenant tenant;
     private final Queue<Event> eventsToFire = new LinkedList<>();
     private final Queue<Runnable> stateUpdates = new LinkedList<>();
 
-    public TransactionalPortfolio(final Portfolio portfolio, final Tenant tenant) {
+    public Transactional(final Portfolio portfolio, final Tenant tenant) {
         this.portfolio = portfolio;
         this.tenant = new TransactionalTenant(tenant);
     }

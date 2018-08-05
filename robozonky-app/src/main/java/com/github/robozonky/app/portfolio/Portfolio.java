@@ -29,11 +29,10 @@ public class Portfolio {
 
     private final Statistics statistics;
     private final RemoteBalance balance;
-    private final Supplier<TransactionMonitor> transactions;
+    private final Supplier<TransferMonitor> transfers;
 
-    Portfolio(final Supplier<TransactionMonitor> transactions, final Statistics statistics,
-              final RemoteBalance balance) {
-        this.transactions = transactions;
+    Portfolio(final Supplier<TransferMonitor> transfers, final Statistics statistics, final RemoteBalance balance) {
+        this.transfers = transfers;
         this.statistics = statistics;
         this.balance = balance;
     }
@@ -42,25 +41,25 @@ public class Portfolio {
      * Return a new instance of the class, loading information about all investments present and past from the Zonky
      * interface. This operation may take a while, as there may easily be hundreds or thousands of such investments.
      * @param tenant The API to be used to retrieve the data from Zonky.
-     * @param transactions This will be initialized lazily as otherwise black-box system integration tests which test
+     * @param transfers This will be initialized lazily as otherwise black-box system integration tests which test
      * the CLI would always end up calling Zonky and thus failing due to lack of authentication.
      * @return Empty in case there was a remote error.
      */
-    public static Portfolio create(final Tenant tenant, final Supplier<TransactionMonitor> transactions) {
-        return new Portfolio(transactions, tenant.call(Zonky::getStatistics), RemoteBalance.create(tenant));
+    public static Portfolio create(final Tenant tenant, final Supplier<TransferMonitor> transfers) {
+        return new Portfolio(transfers, tenant.call(Zonky::getStatistics), RemoteBalance.create(tenant));
     }
 
-    public static Portfolio create(final Tenant tenant, final Supplier<TransactionMonitor> transactions,
+    public static Portfolio create(final Tenant tenant, final Supplier<TransferMonitor> transfers,
                                    final RemoteBalance balance) {
-        return new Portfolio(transactions, tenant.call(Zonky::getStatistics), balance);
+        return new Portfolio(transfers, tenant.call(Zonky::getStatistics), balance);
     }
 
     public void simulateInvestment(final int loanId, final Rating rating, final BigDecimal amount) {
-        transactions.get().simulateInvestment(loanId, rating, amount);
+        transfers.get().simulateInvestment(loanId, rating, amount);
     }
 
     public void simulatePurchase(final int loanId, final Rating rating, final BigDecimal amount) {
-        transactions.get().simulatePurchase(loanId, rating, amount);
+        transfers.get().simulatePurchase(loanId, rating, amount);
     }
 
     Statistics getStatistics() {
@@ -72,8 +71,8 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        final BigDecimal actualBalance = balance.get().subtract(transactions.get().getUndetectedBlockedBalance());
-        return PortfolioOverview.calculate(actualBalance, statistics, transactions.get().getAdjustments(),
+        final BigDecimal actualBalance = balance.get().subtract(transfers.get().getUndetectedBlockedBalance());
+        return PortfolioOverview.calculate(actualBalance, statistics, transfers.get().getAdjustments(),
                                            Delinquencies.getAmountsAtRisk());
     }
 }

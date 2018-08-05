@@ -19,20 +19,25 @@ package com.github.robozonky.app.portfolio;
 import java.util.Arrays;
 import java.util.List;
 
-enum TransactionSource {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+enum TransferSource {
 
     REAL(),
     BLOCKED_AMOUNT(REAL),
     SYNTHETIC(REAL, BLOCKED_AMOUNT);
 
-    private final List<TransactionSource> promotions;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransferSource.class);
+    private final List<TransferSource> promotions;
 
-    TransactionSource(final TransactionSource... possiblePromotions) {
+    TransferSource(final TransferSource... possiblePromotions) {
         this.promotions = Arrays.asList(possiblePromotions);
     }
 
-    boolean canBePromotedTo(final TransactionSource target) {
-        if (this == target) { // FIXME is this the correct behavior?
+    boolean canBePromotedTo(final TransferSource target) {
+        if (this == target) {
+            LOGGER.debug("Promoting {} to itself may point to a bug in the code, but may also be harmless.", this);
             return true;
         }
         return promotions.contains(target);

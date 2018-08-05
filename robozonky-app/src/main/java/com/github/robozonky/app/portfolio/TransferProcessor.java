@@ -23,34 +23,34 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.common.state.InstanceState;
 
-abstract class TransactionProcessor implements BiConsumer<Stream<SourceAgnosticTransaction>, TransactionalPortfolio> {
+abstract class TransferProcessor implements BiConsumer<Stream<SourceAgnosticTransfer>, Transactional> {
 
     private static final String STATE_KEY = "seen";
 
-    private final BinaryOperator<SourceAgnosticTransaction> deduplicator = (a, b) -> a;
+    private final BinaryOperator<SourceAgnosticTransfer> deduplicator = (a, b) -> a;
 
-    abstract boolean filter(final SourceAgnosticTransaction transaction);
+    abstract boolean filter(final SourceAgnosticTransfer transaction);
 
-    abstract void process(final SourceAgnosticTransaction transaction, final TransactionalPortfolio portfolio);
+    abstract void process(final SourceAgnosticTransfer transaction, final Transactional portfolio);
 
     @Override
-    public void accept(final Stream<SourceAgnosticTransaction> transactions, final TransactionalPortfolio portfolio) {
-        final InstanceState<? extends TransactionProcessor> state = portfolio.getTenant().getState(this.getClass());
+    public void accept(final Stream<SourceAgnosticTransfer> transfers, final Transactional transactional) {
+        final InstanceState<? extends TransferProcessor> state = transactional.getTenant().getState(this.getClass());
         final Set<Integer> alreadyProcessed = state
                 .getValues(STATE_KEY)
                 .orElse(Stream.empty())
                 .map(Integer::parseInt)
                 .collect(Collectors.toSet());
         final Set<Integer> newlyProcessed = new HashSet<>(0);
-        transactions.filter(this::filter) // user-provided filter
+        transfers.filter(this::filter) // user-provided filter
                 .filter(t -> !alreadyProcessed.contains(t.getLoanId())) // ignore those we've already processed
-                .collect(Collectors.toMap(SourceAgnosticTransaction::getLoanId, t -> t, deduplicator)) // de-duplicate
+                .collect(Collectors.toMap(SourceAgnosticTransfer::getLoanId, t -> t, deduplicator)) // de-duplicate
                 .values()
                 .forEach(t -> {
-                    process(t, portfolio);
+                    process(t, transactional);
                     newlyProcessed.add(t.getLoanId());
                 });
         state.update(m -> m.put(STATE_KEY, newlyProcessed.stream().map(String::valueOf)));

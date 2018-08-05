@@ -35,27 +35,23 @@ import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class Transactions {
+class Transfers {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Transaction.class);
 
     private final OffsetDateTime currentEpoch;
     private final OffsetDateTime minimalEpoch;
-    private final Map<SourceAgnosticTransaction, OffsetDateTime> transactionDetectionTimestamps;
+    private final Map<SourceAgnosticTransfer, OffsetDateTime> transferDetectionTimestamps;
 
-    Transactions() {
-        this(OffsetDateTime.now());
-    }
-
-    Transactions(final OffsetDateTime lastZonkyUpdate) {
+    Transfers(final OffsetDateTime lastZonkyUpdate) {
         this(lastZonkyUpdate, Collections.emptyMap());
     }
 
-    private Transactions(final OffsetDateTime newLastZonkyUpdate,
-                         final Map<SourceAgnosticTransaction, OffsetDateTime> oldTransactions) {
+    private Transfers(final OffsetDateTime newLastZonkyUpdate,
+                      final Map<SourceAgnosticTransfer, OffsetDateTime> oldTransfers) {
         this.currentEpoch = newLastZonkyUpdate;
         this.minimalEpoch = currentEpoch.minusDays(7); // lazy payers are back-dated, we would like to catch them
-        this.transactionDetectionTimestamps = oldTransactions.entrySet().stream()
+        this.transferDetectionTimestamps = oldTransfers.entrySet().stream()
                 .filter(e -> e.getValue().isAfter(minimalEpoch))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> {
                     throw new IllegalStateException("Merging " + a + " and " + b + " should not be necessary.");
@@ -63,54 +59,54 @@ class Transactions {
     }
 
     boolean fromZonky(final Transaction transaction, final Supplier<Rating> ratingSupplier) {
-        return addReal(SourceAgnosticTransaction.real(transaction, ratingSupplier));
+        return addReal(SourceAgnosticTransfer.real(transaction, ratingSupplier));
     }
 
-    private boolean addReal(final SourceAgnosticTransaction transaction) {
-        final Optional<SourceAgnosticTransaction> original = transactionDetectionTimestamps.keySet().stream()
-                .filter(e -> Objects.equals(e, transaction))
+    private boolean addReal(final SourceAgnosticTransfer transfer) {
+        final Optional<SourceAgnosticTransfer> original = transferDetectionTimestamps.keySet().stream()
+                .filter(e -> Objects.equals(e, transfer))
                 .findFirst();
         if (original.isPresent()) {
-            original.get().promote(transaction.getSource());
+            original.get().promote(transfer.getSource());
             return false;
         } else {
-            LOGGER.debug("Adding real transaction into currentEpoch '{}': {}.", currentEpoch, transaction);
-            transactionDetectionTimestamps.put(transaction, currentEpoch.plusSeconds(1));
+            LOGGER.debug("Adding real transfer into currentEpoch '{}': {}.", currentEpoch, transfer);
+            transferDetectionTimestamps.put(transfer, currentEpoch.plusSeconds(1));
             return true;
         }
     }
 
     boolean fromZonky(final BlockedAmount blockedAmount, final Supplier<Rating> ratingSupplier) {
-        return addReal(SourceAgnosticTransaction.blockation(blockedAmount, ratingSupplier));
+        return addReal(SourceAgnosticTransfer.blockation(blockedAmount, ratingSupplier));
     }
 
-    public Stream<SourceAgnosticTransaction> getUnprocessed() {
+    public Stream<SourceAgnosticTransfer> getUnprocessed() {
         return getUnprocessed(currentEpoch);
     }
 
-    public Stream<SourceAgnosticTransaction> getUnprocessed(final OffsetDateTime zonkyUpdatedOn) {
-        return transactionDetectionTimestamps.entrySet().stream()
-                .filter(e -> e.getKey().getSource() == TransactionSource.SYNTHETIC ||
-                        e.getKey().getSource() == TransactionSource.BLOCKED_AMOUNT ||
+    public Stream<SourceAgnosticTransfer> getUnprocessed(final OffsetDateTime zonkyUpdatedOn) {
+        return transferDetectionTimestamps.entrySet().stream()
+                .filter(e -> e.getKey().getSource() == TransferSource.SYNTHETIC ||
+                        e.getKey().getSource() == TransferSource.BLOCKED_AMOUNT ||
                         e.getValue().isAfter(zonkyUpdatedOn))
                 .map(Map.Entry::getKey);
     }
 
     boolean fromInvestment(final int loanId, final Rating rating, final BigDecimal amount) {
-        final SourceAgnosticTransaction t = SourceAgnosticTransaction.synthetic(OffsetDateTime.now(), loanId,
-                                                                                TransactionOrientation.OUT,
-                                                                                TransactionCategory.INVESTMENT, amount,
-                                                                                rating);
+        final SourceAgnosticTransfer t = SourceAgnosticTransfer.synthetic(OffsetDateTime.now(), loanId,
+                                                                          TransactionOrientation.OUT,
+                                                                          TransactionCategory.INVESTMENT, amount,
+                                                                          rating);
         return addSynthetic(t);
     }
 
-    private boolean addSynthetic(final SourceAgnosticTransaction synthetic) {
-        if (transactionDetectionTimestamps.containsKey(synthetic)) {
-            LOGGER.debug("Duplicate synthetic transaction: {}.", synthetic);
+    private boolean addSynthetic(final SourceAgnosticTransfer transfer) {
+        if (transferDetectionTimestamps.containsKey(transfer)) {
+            LOGGER.debug("Duplicate synthetic transfer: {}.", transfer);
             return false;
         }
-        LOGGER.debug("Adding synthetic transaction into currentEpoch '{}': {}.", currentEpoch, synthetic);
-        transactionDetectionTimestamps.put(synthetic, OffsetDateTime.now());
+        LOGGER.debug("Adding synthetic transfer into currentEpoch '{}': {}.", currentEpoch, transfer);
+        transferDetectionTimestamps.put(transfer, OffsetDateTime.now());
         return true;
     }
 
@@ -123,15 +119,15 @@ class Transactions {
     }
 
     boolean fromPurchase(final int loanId, final Rating rating, final BigDecimal amount) {
-        final SourceAgnosticTransaction t = SourceAgnosticTransaction.synthetic(OffsetDateTime.now(), loanId,
-                                                                                TransactionOrientation.OUT,
-                                                                                TransactionCategory.SMP_BUY, amount,
-                                                                                rating);
+        final SourceAgnosticTransfer t = SourceAgnosticTransfer.synthetic(OffsetDateTime.now(), loanId,
+                                                                          TransactionOrientation.OUT,
+                                                                          TransactionCategory.SMP_BUY, amount,
+                                                                          rating);
         return addSynthetic(t);
     }
 
-    Transactions rebase(final OffsetDateTime zonkyUpdatedOn) {
-        LOGGER.debug("Rebasing transactions to currentEpoch '{}'.", zonkyUpdatedOn);
-        return new Transactions(zonkyUpdatedOn, transactionDetectionTimestamps);
+    Transfers rebase(final OffsetDateTime zonkyUpdatedOn) {
+        LOGGER.debug("Rebasing transfers to currentEpoch '{}'.", zonkyUpdatedOn);
+        return new Transfers(zonkyUpdatedOn, transferDetectionTimestamps);
     }
 }

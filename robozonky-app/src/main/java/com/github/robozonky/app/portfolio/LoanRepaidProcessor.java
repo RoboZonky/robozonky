@@ -20,10 +20,10 @@ import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 
-class LoanRepaidProcessor extends TransactionProcessor {
+class LoanRepaidProcessor extends TransferProcessor {
 
     public static final LoanRepaidProcessor INSTANCE = new LoanRepaidProcessor();
 
@@ -32,22 +32,22 @@ class LoanRepaidProcessor extends TransactionProcessor {
     }
 
     @Override
-    boolean filter(final SourceAgnosticTransaction transaction) {
-        return transaction.getSource() == TransactionSource.REAL &&
+    boolean filter(final SourceAgnosticTransfer transaction) {
+        return transaction.getSource() == TransferSource.REAL &&
                 transaction.getCategory() == TransactionCategory.PAYMENT;
     }
 
     @Override
-    void process(final SourceAgnosticTransaction transaction, final TransactionalPortfolio portfolio) {
-        final Loan l = LoanCache.INSTANCE.getLoan(transaction.getLoanId(), portfolio.getTenant());
-        portfolio.getTenant().call(z -> z.getInvestment(l)).ifPresent(investment -> {
+    void process(final SourceAgnosticTransfer transfer, final Transactional transactional) {
+        final Loan l = LoanCache.INSTANCE.getLoan(transfer.getLoanId(), transactional.getTenant());
+        transactional.getTenant().call(z -> z.getInvestment(l)).ifPresent(investment -> {
             final boolean paidInFull = investment.getPaymentStatus()
                     .map(s -> s == PaymentStatus.PAID)
                     .orElse(false);
             if (!paidInFull) {
                 return;
             }
-            portfolio.fire(new LoanRepaidEvent(investment, l, portfolio.getPortfolio().calculateOverview()));
+            transactional.fire(new LoanRepaidEvent(investment, l, transactional.getPortfolio().calculateOverview()));
         });
     }
 }

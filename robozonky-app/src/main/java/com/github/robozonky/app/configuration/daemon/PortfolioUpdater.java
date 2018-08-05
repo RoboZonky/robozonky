@@ -34,7 +34,7 @@ import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.portfolio.Selling;
-import com.github.robozonky.app.portfolio.TransactionMonitor;
+import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +48,11 @@ class PortfolioUpdater implements Runnable,
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
-    private final Supplier<TransactionMonitor> transactions;
+    private final Supplier<TransferMonitor> transactions;
     private final Duration retryFor;
 
     PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                     final Supplier<TransactionMonitor> transactions, final Duration retryFor) {
+                     final Supplier<TransferMonitor> transactions, final Duration retryFor) {
         this.shutdownCall = shutdownCall;
         this.tenant = tenant;
         this.transactions = transactions;
@@ -60,18 +60,18 @@ class PortfolioUpdater implements Runnable,
     }
 
     PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                     final Supplier<TransactionMonitor> transactions) {
+                     final Supplier<TransferMonitor> transactions) {
         this(shutdownCall, tenant, transactions, Duration.ofHours(1));
     }
 
-    PortfolioUpdater(final Tenant tenant, final Supplier<TransactionMonitor> transactions) {
+    PortfolioUpdater(final Tenant tenant, final Supplier<TransferMonitor> transactions) {
         this(t -> {
         }, tenant, transactions, Duration.ofHours(1));
     }
 
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth,
                                           final Supplier<Optional<SellStrategy>> sp) {
-        final Supplier<TransactionMonitor> transactions = TransactionMonitor.createLazy(auth);
+        final Supplier<TransferMonitor> transactions = TransferMonitor.createLazy(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, transactions);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
         updater.registerDependant(Delinquencies::update);
@@ -99,9 +99,9 @@ class PortfolioUpdater implements Runnable,
 
     private Portfolio runIt(final Portfolio old) {
         final Portfolio result = old == null ? Portfolio.create(tenant, transactions) : old;
-        final TransactionalPortfolio transactional = new TransactionalPortfolio(result, tenant);
-        final CompletableFuture<TransactionalPortfolio> combined = dependants.stream()
-                .map(d -> (Function<TransactionalPortfolio, TransactionalPortfolio>) folio -> {
+        final Transactional transactional = new Transactional(result, tenant);
+        final CompletableFuture<Transactional> combined = dependants.stream()
+                .map(d -> (Function<Transactional, Transactional>) folio -> {
                     LOGGER.trace("Running {}.", d);
                     d.accept(folio);
                     LOGGER.trace("Finished {}.", d);
@@ -111,7 +111,7 @@ class PortfolioUpdater implements Runnable,
                         CompletableFuture::thenApply,
                         (s1, s2) -> s1.thenCombine(s2, (p1, p2) -> p2));
         try {
-            final TransactionalPortfolio p = combined.get();
+            final Transactional p = combined.get();
             p.run(); // persist stored information
             return p.getPortfolio();
         } catch (final Throwable t) {

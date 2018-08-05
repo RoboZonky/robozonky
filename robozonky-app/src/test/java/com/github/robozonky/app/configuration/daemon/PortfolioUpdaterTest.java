@@ -24,7 +24,7 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
-import com.github.robozonky.app.portfolio.TransactionMonitor;
+import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +59,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
         final PortfolioDependant dependant = tp -> tp.fire(new RoboZonkyTestingEvent());
-        final PortfolioUpdater instance = new PortfolioUpdater(a, TransactionMonitor.createLazy(a));
+        final PortfolioUpdater instance = new PortfolioUpdater(a, TransferMonitor.createLazy(a));
         instance.registerDependant(dependant);
         instance.run();
         // make sure that the dependants were called with the proper value of Portfolio
@@ -71,7 +71,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final PortfolioUpdater instance = new PortfolioUpdater(t, a, TransactionMonitor.createLazy(a),
+        final PortfolioUpdater instance = new PortfolioUpdater(t, a, TransferMonitor.createLazy(a),
                                                                Duration.ofSeconds(2));
         instance.registerDependant(tp -> { // fire event
             tp.fire(new RoboZonkyTestingEvent());

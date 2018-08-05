@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.portfolio;
 
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 
 final class TransactionalPortfolioDependant implements PortfolioDependant {
 
@@ -27,7 +27,7 @@ final class TransactionalPortfolioDependant implements PortfolioDependant {
     }
 
     @Override
-    public void accept(final TransactionalPortfolio transactionalPortfolio) {
+    public void accept(final Transactional transactionalPortfolio) {
         parent.accept(transactionalPortfolio);
         transactionalPortfolio.run();
     }

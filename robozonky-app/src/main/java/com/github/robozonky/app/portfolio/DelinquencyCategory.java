@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.internal.api.Defaults;
@@ -124,13 +124,13 @@ enum DelinquencyCategory {
 
     /**
      * Update internal state trackers and send events if necessary.
-     * @param transactionalPortfolio Portfolio to update.
+     * @param transactional Portfolio to update.
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
      * @return IDs of loans that are being tracked in this category.
      */
-    public int[] update(final TransactionalPortfolio transactionalPortfolio, final Collection<Investment> active) {
+    public int[] update(final Transactional transactional, final Collection<Investment> active) {
         LOGGER.trace("Updating {}.", this);
-        final Tenant tenant = transactionalPortfolio.getTenant();
+        final Tenant tenant = transactional.getTenant();
         final InstanceState<DelinquencyCategory> transactionalState = tenant.getState(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
         final int[] keepThese = transactionalState.getValues(fieldName)
@@ -147,7 +147,7 @@ enum DelinquencyCategory {
                     final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
                     final LocalDate since = getPaymentMissedDate(d);
                     final Event e = getEvent(since, d, l, thresholdInDays, getDevelopments(tenant, l, since));
-                    transactionalPortfolio.fire(e);
+                    transactional.fire(e);
                 })
                 .mapToInt(Investment::getLoanId);
         final int[] storeThese = IntStream.concat(IntStream.of(keepThese), addThese).distinct().sorted().toArray();

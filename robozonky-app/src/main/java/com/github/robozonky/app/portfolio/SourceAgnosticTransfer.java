@@ -30,27 +30,27 @@ import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class SourceAgnosticTransaction {
+final class SourceAgnosticTransfer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SourceAgnosticTransaction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SourceAgnosticTransfer.class);
 
     private final int loanId;
     private final TransactionCategory category;
     private final BigDecimal amount;
     private final OffsetDateTime dateTime;
     private final Supplier<Rating> ratingSupplier;
-    private TransactionSource source;
+    private TransferSource source;
 
-    private SourceAgnosticTransaction(final TransactionSource source, final OffsetDateTime dateTime,
-                                      final int loanId,
-                                      final TransactionOrientation orientation, final TransactionCategory category,
-                                      final BigDecimal amount, final Supplier<Rating> ratingSupplier) {
+    private SourceAgnosticTransfer(final TransferSource source, final OffsetDateTime dateTime,
+                                   final int loanId,
+                                   final TransactionOrientation orientation, final TransactionCategory category,
+                                   final BigDecimal amount, final Supplier<Rating> ratingSupplier) {
         this(source, dateTime, loanId, category, normalizeAmount(orientation, amount), ratingSupplier);
     }
 
-    private SourceAgnosticTransaction(final TransactionSource source, final OffsetDateTime dateTime,
-                                      final int loanId, final TransactionCategory category, final BigDecimal amount,
-                                      final Supplier<Rating> ratingSupplier) {
+    private SourceAgnosticTransfer(final TransferSource source, final OffsetDateTime dateTime,
+                                   final int loanId, final TransactionCategory category, final BigDecimal amount,
+                                   final Supplier<Rating> ratingSupplier) {
         this.source = source;
         this.dateTime = dateTime;
         this.loanId = loanId;
@@ -63,30 +63,30 @@ final class SourceAgnosticTransaction {
         return (orientation == TransactionOrientation.IN) ? amount.abs() : amount.abs().negate();
     }
 
-    public static SourceAgnosticTransaction synthetic(final OffsetDateTime dateTime, final int loanId,
-                                                      final TransactionOrientation orientation,
-                                                      final TransactionCategory category, final BigDecimal amount,
-                                                      final Rating rating) {
-        return new SourceAgnosticTransaction(TransactionSource.SYNTHETIC, dateTime, loanId, orientation,
-                                             category, amount, () -> rating);
+    public static SourceAgnosticTransfer synthetic(final OffsetDateTime dateTime, final int loanId,
+                                                   final TransactionOrientation orientation,
+                                                   final TransactionCategory category, final BigDecimal amount,
+                                                   final Rating rating) {
+        return new SourceAgnosticTransfer(TransferSource.SYNTHETIC, dateTime, loanId, orientation,
+                                          category, amount, () -> rating);
     }
 
-    public static SourceAgnosticTransaction real(final Transaction transaction, final Supplier<Rating> ratingSupplier) {
+    public static SourceAgnosticTransfer real(final Transaction transaction, final Supplier<Rating> ratingSupplier) {
         final OffsetDateTime date = transaction.getTransactionDate().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
-        return new SourceAgnosticTransaction(TransactionSource.REAL, date, transaction.getLoanId(),
-                                             transaction.getOrientation(),
-                                             transaction.getCategory(), transaction.getAmount(), ratingSupplier);
+        return new SourceAgnosticTransfer(TransferSource.REAL, date, transaction.getLoanId(),
+                                          transaction.getOrientation(),
+                                          transaction.getCategory(), transaction.getAmount(), ratingSupplier);
     }
 
-    public static SourceAgnosticTransaction blockation(final BlockedAmount blockedAmount,
-                                                       final Supplier<Rating> ratingSupplier) {
-        return new SourceAgnosticTransaction(TransactionSource.BLOCKED_AMOUNT,
-                                             blockedAmount.getDateStart(),
-                                             blockedAmount.getLoanId(), TransactionOrientation.OUT,
-                                             blockedAmount.getCategory(), blockedAmount.getAmount(), ratingSupplier);
+    public static SourceAgnosticTransfer blockation(final BlockedAmount blockedAmount,
+                                                    final Supplier<Rating> ratingSupplier) {
+        return new SourceAgnosticTransfer(TransferSource.BLOCKED_AMOUNT,
+                                          blockedAmount.getDateStart(),
+                                          blockedAmount.getLoanId(), TransactionOrientation.OUT,
+                                          blockedAmount.getCategory(), blockedAmount.getAmount(), ratingSupplier);
     }
 
-    public TransactionSource getSource() {
+    public TransferSource getSource() {
         return source;
     }
 
@@ -110,7 +110,7 @@ final class SourceAgnosticTransaction {
         return dateTime;
     }
 
-    public void promote(final TransactionSource newSource) {
+    public void promote(final TransferSource newSource) {
         if (source.canBePromotedTo(newSource)) {
             LOGGER.debug("Promoting to {}: {}.", newSource, this);
             source = newSource;
@@ -121,7 +121,7 @@ final class SourceAgnosticTransaction {
 
     @Override
     public String toString() {
-        return "SourceAgnosticTransaction{" +
+        return "SourceAgnosticTransfer{" +
                 "amount=" + amount +
                 ", category=" + category +
                 ", dateTime=" + dateTime +
@@ -138,7 +138,7 @@ final class SourceAgnosticTransaction {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final SourceAgnosticTransaction that = (SourceAgnosticTransaction) o;
+        final SourceAgnosticTransfer that = (SourceAgnosticTransfer) o;
         return loanId == that.loanId &&
                 category == that.category &&
                 Objects.equals(amount, that.amount);

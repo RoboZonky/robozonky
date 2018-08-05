@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
     private void testEmpty(final DelinquencyCategory category) {
-        final TransactionalPortfolio portfolio = new TransactionalPortfolio(null, mockTenant());
+        final Transactional portfolio = new Transactional(null, mockTenant());
         assertThat(category.update(portfolio, Collections.emptyList())).isEmpty();
     }
 
@@ -64,7 +64,7 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant t = mockTenant(z);
-        final TransactionalPortfolio portfolio = new TransactionalPortfolio(null, t);
+        final Transactional portfolio = new Transactional(null, t);
         assertThat(category.update(portfolio, Collections.singleton(i)))
                 .containsExactly(loanId);
         portfolio.run(); // finish the transaction

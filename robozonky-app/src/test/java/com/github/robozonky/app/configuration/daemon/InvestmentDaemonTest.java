@@ -29,7 +29,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.TransactionMonitor;
+import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +59,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         when(z.getAvailableLoans(notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, TransactionMonitor.createLazy(a));
+        final Portfolio portfolio = Portfolio.create(a, TransferMonitor.createLazy(a));
         final InvestmentStrategy is = mock(InvestmentStrategy.class);
         final Supplier<Optional<InvestmentStrategy>> s = () -> Optional.of(is);
         final InvestingDaemon d = new InvestingDaemon(t -> {
@@ -75,7 +75,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
     void underBalance() {
         final Zonky z = harmlessZonky(199);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, TransactionMonitor.createLazy(a));
+        final Portfolio portfolio = Portfolio.create(a, TransferMonitor.createLazy(a));
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(t -> {
         }, a, Investor.build(a), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));

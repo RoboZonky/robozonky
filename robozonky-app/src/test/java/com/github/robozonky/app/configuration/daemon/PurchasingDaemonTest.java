@@ -24,7 +24,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.TransactionMonitor;
+import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void standard() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, TransactionMonitor.createLazy(a));
+        final Portfolio portfolio = Portfolio.create(a, TransferMonitor.createLazy(a));
         final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
         }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
@@ -51,7 +51,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void noBalance() {
         final Zonky z = harmlessZonky(0);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, TransactionMonitor.createLazy(a));
+        final Portfolio portfolio = Portfolio.create(a, TransferMonitor.createLazy(a));
         final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
         }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
