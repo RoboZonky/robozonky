@@ -76,11 +76,11 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         // attempt to store it again, making sure no event is fired
         assertThat(category.update(portfolio, Collections.singleton(i)))
                 .containsExactly(loanId);
-        assertThat(this.getNewEvents()).isEqualTo(events);
+        assertThat(this.getNewEvents()).hasSize(1);
         // now update with no delinquents, making sure nothing is returned
         assertThat(category.update(portfolio, Collections.emptyList()))
                 .isEmpty();
-        assertThat(this.getNewEvents()).isEqualTo(events);
+        assertThat(this.getNewEvents()).hasSize(1);
     }
 
     @TestFactory

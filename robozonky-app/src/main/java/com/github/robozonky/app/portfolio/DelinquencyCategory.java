@@ -22,10 +22,11 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
@@ -72,10 +73,10 @@ enum DelinquencyCategory {
     }
 
     private static IntStream fromIdString(final Stream<String> idString) {
-        return idString.map(String::trim).filter(s -> s.length() > 0).mapToInt(Integer::parseInt);
+        return idString.map(String::trim).mapToInt(Integer::parseInt);
     }
 
-    private static Stream<String> toIdString(final int[] ids) {
+    private static Stream<String> toIdString(final int... ids) {
         return IntStream.of(ids).mapToObj(Integer::toString);
     }
 
@@ -96,23 +97,29 @@ enum DelinquencyCategory {
         }
     }
 
-    private static LoanDelinquentEvent getEvent(final LocalDate since, final Investment investment, final Loan loan,
-                                                final int threshold, final Collection<Development> collections) {
-        return getEventSupplier(threshold).apply(investment, loan, since, collections);
+    private static LoanDelinquentEvent getEvent(final Tenant tenant, final Investment investment, final int threshold) {
+        final Loan loan = LoanCache.INSTANCE.getLoan(investment.getLoanId(), tenant);
+        final LocalDate since = getPaymentMissedDate(investment);
+        return getEventSupplier(threshold).apply(investment, loan, since, getDevelopments(tenant, loan, since));
     }
 
     private static String getFieldName(final int dayThreshold) {
         return "notified" + dayThreshold + "plus";
     }
 
-    private static boolean isRelated(final Investment i, final int loanId) {
-        return i.getLoanId() == loanId;
-    }
-
     private static LocalDate getPaymentMissedDate(final Investment i) {
         return i.getNextPaymentDate()
                 .orElseThrow(() -> new IllegalStateException("Unexpected missing date: " + i))
                 .toLocalDate();
+    }
+
+    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
+                                                     final LocalDate delinquentSince) {
+        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
+                .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
+                .collect(toList());
+        Collections.reverse(developments);
+        return developments;
     }
 
     /**
@@ -133,36 +140,25 @@ enum DelinquencyCategory {
         final Tenant tenant = transactional.getTenant();
         final InstanceState<DelinquencyCategory> transactionalState = tenant.getState(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
-        final int[] keepThese = transactionalState.getValues(fieldName)
+        final Set<Integer> keepThese = transactionalState.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
                 .orElse(IntStream.empty())
-                .filter(id -> active.stream().anyMatch(d -> isRelated(d, id)))
-                .toArray();
+                .filter(id -> active.stream().anyMatch(d -> d.getLoanId() == id)) // remove no longer delinquent
+                .boxed()
+                .collect(Collectors.toSet());
         LOGGER.trace("Keeping {}.", keepThese);
         final IntStream addThese = active.stream()
+                .filter(d -> !keepThese.contains(d.getLoanId())) // this delinquency is newly over the threshold
                 .filter(d -> isOverThreshold(d, thresholdInDays))
-                .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
-                .peek(d -> {
-                    final int loanId = d.getLoanId();
-                    final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
-                    final LocalDate since = getPaymentMissedDate(d);
-                    final Event e = getEvent(since, d, l, thresholdInDays, getDevelopments(tenant, l, since));
-                    transactional.fire(e);
-                })
+                .peek(d -> transactional.fire(getEvent(tenant, d, thresholdInDays)))
                 .mapToInt(Investment::getLoanId);
-        final int[] storeThese = IntStream.concat(IntStream.of(keepThese), addThese).distinct().sorted().toArray();
+        final int[] storeThese = IntStream.concat(keepThese.stream().mapToInt(i -> i), addThese)
+                .distinct()
+                .sorted()
+                .toArray();
         transactionalState.update(b -> b.put(fieldName, toIdString(storeThese)));
         LOGGER.trace("Update over, stored {}.", storeThese);
         return storeThese;
-    }
-
-    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
-                                                     final LocalDate delinquentSince) {
-        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
-                .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
-                .collect(toList());
-        Collections.reverse(developments);
-        return developments;
     }
 
     @FunctionalInterface
