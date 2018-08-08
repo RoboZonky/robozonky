@@ -72,7 +72,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
     void nonexistingInvestment() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
         final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
         assertThatThrownBy(() -> LoanRepaidProcessor.INSTANCE.processApplicable(transfer, transactional))
@@ -93,7 +93,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
                 .build();
         when(zonky.getInvestment(eq(loan))).thenReturn(Optional.of(investment));
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
         LoanRepaidProcessor.INSTANCE.processApplicable(transfer, transactional);
         transactional.run(); // make sure the transaction is processed so that events could be fired
@@ -113,7 +113,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
                 .build();
         when(zonky.getInvestment(eq(loan))).thenReturn(Optional.of(investment));
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
         LoanRepaidProcessor.INSTANCE.processApplicable(transfer, transactional);
         transactional.run(); // make sure the transaction is processed so that events could be fired

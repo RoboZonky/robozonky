@@ -24,14 +24,14 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
 
     private static final BigDecimal THOUSAND = BigDecimal.TEN.pow(3);
+    private static final String PROPERTY = Settings.Key.DRY_RUN_BALANCE_MINIMUM.getName();
 
     @Test
     void testDryRun() {
@@ -51,13 +51,6 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
         when(z.getWallet()).thenReturn(new Wallet(startingBalance.subtract(THOUSAND)));
         rb.run(); // register the remote update
         Assertions.assertThat(b.get()).isEqualTo(THOUSAND.negate());
-    }
-
-    private static final String PROPERTY = Settings.Key.DRY_RUN_BALANCE_MINIMUM.getName();
-
-    @BeforeEach
-    void resetProperties() {
-        System.clearProperty(PROPERTY);
     }
 
     @Test

@@ -49,7 +49,7 @@ class TransactionProcessorTest extends AbstractZonkyLeveragingTest {
         final Transaction t3 = new Transaction(3, l2, amount, TransactionCategory.SMP_SELL, TransactionOrientation.IN);
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
         // here starts the test
         final TransactionProcessor tp = spy(new TestingTransactionProcessor());

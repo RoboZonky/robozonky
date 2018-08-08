@@ -136,7 +136,7 @@ final class Session {
 
     private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.simulatePurchase(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
+        portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
         portfolioOverview = portfolio.calculateOverview();
     }
 }

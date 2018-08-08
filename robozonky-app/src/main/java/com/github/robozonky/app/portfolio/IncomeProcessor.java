@@ -29,6 +29,8 @@ import com.github.robozonky.common.state.InstanceState;
 
 public final class IncomeProcessor implements PortfolioDependant {
 
+    static final String STATE_KEY = "lastSeenTransactionId";
+
     private static int processAllTransactions(final Stream<Transaction> transactions) {
         return transactions.mapToInt(Transaction::getId)
                 .max()
@@ -53,7 +55,7 @@ public final class IncomeProcessor implements PortfolioDependant {
     public void accept(final Transactional transactional) {
         final InstanceState<IncomeProcessor> state =
                 transactional.getTenant().getState(IncomeProcessor.class);
-        final int lastSeenTransactionId = state.getValue("lastSeenTransactionId")
+        final int lastSeenTransactionId = state.getValue(STATE_KEY)
                 .map(Integer::valueOf)
                 .orElse(-1);
         final OffsetDateTime lastUpdate = state.getLastUpdated().orElse(OffsetDateTime.now().minusMonths(1));
@@ -63,6 +65,6 @@ public final class IncomeProcessor implements PortfolioDependant {
         final int newLastSeenTransactionId = lastSeenTransactionId >= 0 ?
                 processNewTransactions(transactional, transactions, lastSeenTransactionId) :
                 processAllTransactions(transactions);
-        state.update(m -> m.put("lastSeenTransactionId", String.valueOf(newLastSeenTransactionId)));
+        state.update(m -> m.put(STATE_KEY, String.valueOf(newLastSeenTransactionId)));
     }
 }

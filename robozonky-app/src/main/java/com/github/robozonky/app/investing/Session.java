@@ -180,7 +180,7 @@ final class Session {
 
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.simulateInvestment(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
+        portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
         portfolioOverview = portfolio.calculateOverview();
     }
 

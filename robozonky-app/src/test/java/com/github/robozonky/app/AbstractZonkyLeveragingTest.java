@@ -42,7 +42,6 @@ import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
@@ -150,7 +149,6 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return mockTenant(harmlessZonky(10_000));
     }
 
-    @BeforeEach
     @AfterEach
     public void clearCache() {
         LoanCache.INSTANCE.clean();

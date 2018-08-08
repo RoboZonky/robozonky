@@ -30,12 +30,12 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
 import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.IncomeProcessor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.portfolio.Selling;
-import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,37 +49,37 @@ class PortfolioUpdater implements Runnable,
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
-    private final Supplier<TransferMonitor> transactions;
+    private final Supplier<BlockedAmountProcessor> blockedAmounts;
     private final Duration retryFor;
 
     PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                     final Supplier<TransferMonitor> transactions, final Duration retryFor) {
+                     final Supplier<BlockedAmountProcessor> blockedAmounts, final Duration retryFor) {
         this.shutdownCall = shutdownCall;
         this.tenant = tenant;
-        this.transactions = transactions;
+        this.blockedAmounts = blockedAmounts;
         this.retryFor = retryFor;
     }
 
     PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                     final Supplier<TransferMonitor> transactions) {
-        this(shutdownCall, tenant, transactions, Duration.ofHours(1));
+                     final Supplier<BlockedAmountProcessor> blockedAmounts) {
+        this(shutdownCall, tenant, blockedAmounts, Duration.ofHours(1));
     }
 
-    PortfolioUpdater(final Tenant tenant, final Supplier<TransferMonitor> transactions) {
+    PortfolioUpdater(final Tenant tenant, final Supplier<BlockedAmountProcessor> blockedAmounts) {
         this(t -> {
-        }, tenant, transactions, Duration.ofHours(1));
+        }, tenant, blockedAmounts, Duration.ofHours(1));
     }
 
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth,
                                           final Supplier<Optional<SellStrategy>> sp) {
-        final Supplier<TransferMonitor> transactions = TransferMonitor.createLazy(auth);
-        final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, transactions);
+        final Supplier<BlockedAmountProcessor> blockedAmounts = BlockedAmountProcessor.createLazy(auth);
+        final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, blockedAmounts);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
         updater.registerDependant(Delinquencies::update);
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
         // update portfolio with transactions coming from Zonky
-        updater.registerDependant(po -> transactions.get().accept(po));
+        updater.registerDependant(po -> blockedAmounts.get().accept(po));
         // send notifications based on new transactions coming from Zonky
         updater.registerDependant(new IncomeProcessor());
         return updater;
@@ -101,7 +101,7 @@ class PortfolioUpdater implements Runnable,
     }
 
     private Portfolio runIt(final Portfolio old) {
-        final Portfolio result = old == null ? Portfolio.create(tenant, transactions) : old;
+        final Portfolio result = old == null ? Portfolio.create(tenant, blockedAmounts) : old;
         final Transactional transactional = new Transactional(result, tenant);
         final CompletableFuture<Transactional> combined = dependants.stream()
                 .map(d -> (Function<Transactional, Transactional>) folio -> {

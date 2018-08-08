@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +43,11 @@ public abstract class AbstractRoboZonkyTest {
         SystemProperties.INSTANCE.restore();
     }
 
-    @BeforeEach
     @AfterEach
     protected void reinitScheduler() {
         reset(TestingSchedulerService.MOCK_SERVICE);
     }
 
-    @BeforeEach
     @AfterEach
     protected void deleteState() {
         TenantState.destroyAll();

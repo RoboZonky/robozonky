@@ -79,7 +79,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
@@ -101,7 +101,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
         new Selling(NONE_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
@@ -123,7 +123,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         final Tenant tenant = mockTenant(zonky, isDryRun);
-        final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction

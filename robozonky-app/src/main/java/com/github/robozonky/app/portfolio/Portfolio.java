@@ -29,10 +29,11 @@ public class Portfolio {
 
     private final Statistics statistics;
     private final RemoteBalance balance;
-    private final Supplier<TransferMonitor> transfers;
+    private final Supplier<BlockedAmountProcessor> blockedAmounts;
 
-    Portfolio(final Supplier<TransferMonitor> transfers, final Statistics statistics, final RemoteBalance balance) {
-        this.transfers = transfers;
+    Portfolio(final Supplier<BlockedAmountProcessor> blockedAmounts, final Statistics statistics,
+              final RemoteBalance balance) {
+        this.blockedAmounts = blockedAmounts;
         this.statistics = statistics;
         this.balance = balance;
     }
@@ -45,25 +46,18 @@ public class Portfolio {
      * the CLI would always end up calling Zonky and thus failing due to lack of authentication.
      * @return Empty in case there was a remote error.
      */
-    public static Portfolio create(final Tenant tenant, final Supplier<TransferMonitor> transfers) {
+    public static Portfolio create(final Tenant tenant, final Supplier<BlockedAmountProcessor> transfers) {
         return new Portfolio(transfers, tenant.call(Zonky::getStatistics), RemoteBalance.create(tenant));
     }
 
-    public static Portfolio create(final Tenant tenant, final Supplier<TransferMonitor> transfers,
+    public static Portfolio create(final Tenant tenant, final Supplier<BlockedAmountProcessor> transfers,
                                    final RemoteBalance balance) {
         return new Portfolio(transfers, tenant.call(Zonky::getStatistics), balance);
     }
 
-    public void simulateInvestment(final int loanId, final Rating rating, final BigDecimal amount) {
-        transfers.get().simulateInvestment(loanId, rating, amount);
-    }
-
-    public void simulatePurchase(final int loanId, final Rating rating, final BigDecimal amount) {
-        transfers.get().simulatePurchase(loanId, rating, amount);
-    }
-
-    Statistics getStatistics() {
-        return statistics;
+    public void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
+        blockedAmounts.get().simulateCharge(loanId, rating, amount);
+        balance.update(amount.negate());
     }
 
     public RemoteBalance getRemoteBalance() {
@@ -71,8 +65,7 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        final BigDecimal actualBalance = balance.get().subtract(transfers.get().getUndetectedBlockedBalance());
-        return PortfolioOverview.calculate(actualBalance, statistics, transfers.get().getAdjustments(),
+        return PortfolioOverview.calculate(balance.get(), statistics, blockedAmounts.get().getAdjustments(),
                                            Delinquencies.getAmountsAtRisk());
     }
 }

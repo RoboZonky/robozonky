@@ -29,8 +29,8 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +54,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     void rechecksMarketplaceIfBalanceIncreased() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
-        final Portfolio p = Portfolio.create(auth, TransferMonitor.createLazy(auth), mockBalance(zonky));
+        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth), mockBalance(zonky));
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
@@ -78,7 +78,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     void doesNotInvestOnEmptyMarketplace() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
-        final Portfolio p = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting());
         assertThat(e.apply(p, Collections.emptyList())).isEmpty();
         verify(e, never()).execute(any(), any(), any());

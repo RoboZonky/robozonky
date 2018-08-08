@@ -33,8 +33,8 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -67,7 +67,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Investing exec = new Investing(null, Optional::empty, null);
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Tenant auth = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
@@ -78,7 +78,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
     void noItems() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Tenant auth = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final Investor builder = Investor.build(auth);
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
@@ -98,7 +98,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(9000);
         final Tenant auth = mockTenant(z);
         final Investor builder = Investor.build(auth);
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
@@ -119,7 +119,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Investor investor = mock(Investor.class);
         when(investor.getConfirmationProvider()).thenReturn(Optional.of(mock(ConfirmationProvider.class)));
         when(investor.invest(any(), anyBoolean())).thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         when(z.getLoan(eq(loan.getId()))).thenReturn(loan);
         final Investing exec = new Investing(investor, ALL_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
@@ -146,7 +146,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant auth = mockTenant(z);
         final Investor builder = Investor.build(auth);
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
         final Collection<Investment> result = exec.apply(portfolio, Collections.singleton(ld));
         verify(z, never()).invest(any()); // dry run

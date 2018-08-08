@@ -37,8 +37,8 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.TransferMonitor;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -84,7 +84,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(NONE_ACCEPTING, auth);
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(2);
@@ -114,10 +114,10 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRating()).thenReturn(loan.getRating());
         final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
-        final Portfolio portfolio = spy(Portfolio.create(auth, TransferMonitor.createLazy(auth)));
+        final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
         verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
-        verify(portfolio).simulatePurchase(loanId, loan.getRating(), mock.getRemainingPrincipal());
+        verify(portfolio).simulateCharge(loanId, loan.getRating(), mock.getRemainingPrincipal());
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {
@@ -152,7 +152,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRating()).thenReturn(loan.getRating());
         final Tenant auth = mockTenant(zonky, false);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         verify(zonky).purchase(eq(mock)); // make sure purchase was called
         final List<Event> e = this.getNewEvents();
@@ -170,7 +170,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
-        final Portfolio portfolio = Portfolio.create(auth, TransferMonitor.createLazy(auth));
+        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
         assertThat(e).isEmpty();
