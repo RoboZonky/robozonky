@@ -17,13 +17,11 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -47,40 +45,25 @@ import static org.mockito.Mockito.when;
 
 class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
 
-    private static SourceAgnosticTransfer filteredTransfer(final TransferSource source,
-                                                           final TransactionCategory category) {
+    private static Transaction filteredTransfer(final TransactionCategory category) {
         final Loan l = Loan.custom().setRating(Rating.D).build();
         final BigDecimal amount = BigDecimal.valueOf(200);
-        switch (source) {
-            case REAL:
-                return SourceAgnosticTransfer.real(new Transaction(l, amount, category, TransactionOrientation.IN),
-                                                   l::getRating);
-            case BLOCKED_AMOUNT:
-                return SourceAgnosticTransfer.blockation(new BlockedAmount(l.getId(), amount), l::getRating);
-            case SYNTHETIC:
-                return SourceAgnosticTransfer.synthetic(OffsetDateTime.now(), l.getId(), TransactionOrientation.IN,
-                                                        category, amount, l.getRating());
-            default:
-                throw new IllegalStateException("Can not happen.");
-        }
+        return new Transaction(l, amount, category, TransactionOrientation.IN);
     }
 
     @TestFactory
     Collection<DynamicTest> filteringTests() {
         final Collection<DynamicTest> tests = new ArrayList<>(0);
-        for (final TransferSource source : TransferSource.values()) {
-            final boolean shouldSucceed = source == TransferSource.REAL;
-            for (final TransactionCategory category : TransactionCategory.values()) {
-                final boolean successExpected = shouldSucceed && category == TransactionCategory.PAYMENT;
-                final SourceAgnosticTransfer transfer = filteredTransfer(source, category);
-                final String name = category + " from " + source + " " +
-                        (successExpected ? "is" : "is not") +
-                        " a repayment.";
-                final DynamicTest test = DynamicTest.dynamicTest(name, () -> {
-                    assertThat(LoanRepaidProcessor.INSTANCE.filter(transfer)).isEqualTo(successExpected);
-                });
-                tests.add(test);
-            }
+        for (final TransactionCategory category : TransactionCategory.values()) {
+            final boolean successExpected = category == TransactionCategory.PAYMENT;
+            final Transaction transfer = filteredTransfer(category);
+            final String name = category + " " +
+                    (successExpected ? "is" : "is not") +
+                    " a repayment.";
+            final DynamicTest test = DynamicTest.dynamicTest(name, () -> {
+                assertThat(LoanRepaidProcessor.INSTANCE.isApplicable(transfer)).isEqualTo(successExpected);
+            });
+            tests.add(test);
         }
         return tests;
     }
@@ -91,8 +74,8 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
-        final SourceAgnosticTransfer transfer = filteredTransfer(TransferSource.REAL, TransactionCategory.PAYMENT);
-        assertThatThrownBy(() -> LoanRepaidProcessor.INSTANCE.process(transfer, transactional))
+        final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
+        assertThatThrownBy(() -> LoanRepaidProcessor.INSTANCE.processApplicable(transfer, transactional))
                 .isInstanceOf(Exception.class);
         transactional.run(); // make sure the transaction is processed so that events could be fired
         assertThat(getNewEvents()).isEmpty();
@@ -100,10 +83,9 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentNotYetRepaid() {
-        final SourceAgnosticTransfer transfer = filteredTransfer(TransferSource.REAL, TransactionCategory.PAYMENT);
-        final int loanId = transfer.getLoanData().get().getId();
-        final Rating rating = transfer.getLoanData().get().getRating();
-        final Loan loan = Loan.custom().setId(loanId).setRating(rating).build();
+        final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
+        final int loanId = transfer.getLoanId();
+        final Loan loan = Loan.custom().setId(loanId).build();
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
@@ -113,7 +95,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
-        LoanRepaidProcessor.INSTANCE.process(transfer, transactional);
+        LoanRepaidProcessor.INSTANCE.processApplicable(transfer, transactional);
         transactional.run(); // make sure the transaction is processed so that events could be fired
         verify(zonky).getInvestment(eq(loan)); // investment was processed
         assertThat(getNewEvents()).isEmpty();
@@ -121,10 +103,9 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentRepaid() {
-        final SourceAgnosticTransfer transfer = filteredTransfer(TransferSource.REAL, TransactionCategory.PAYMENT);
-        final int loanId = transfer.getLoanData().get().getId();
-        final Rating rating = transfer.getLoanData().get().getRating();
-        final Loan loan = Loan.custom().setId(loanId).setRating(rating).build();
+        final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
+        final int loanId = transfer.getLoanId();
+        final Loan loan = Loan.custom().setId(loanId).build();
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
@@ -134,7 +115,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, TransferMonitor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
-        LoanRepaidProcessor.INSTANCE.process(transfer, transactional);
+        LoanRepaidProcessor.INSTANCE.processApplicable(transfer, transactional);
         transactional.run(); // make sure the transaction is processed so that events could be fired
         assertThat(getNewEvents()).first().isInstanceOf(LoanRepaidEvent.class);
     }

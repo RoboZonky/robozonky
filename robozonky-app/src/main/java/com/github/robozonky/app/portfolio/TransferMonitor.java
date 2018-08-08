@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
-import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.LazyInitialized;
 import org.slf4j.Logger;
@@ -61,20 +60,11 @@ public class TransferMonitor implements PortfolioDependant {
     }
 
     private static boolean updateFromZonky(final Tenant tenant, final Transfers transfers) {
-        // load all transactions
-        final boolean updated = updateSingle(tenant,
-                                             z -> {
-                                                 final Select fromBeginning =
-                                                         new Select().greaterThanOrEquals("transaction.transactionDate",
-                                                                                          transfers.getMinimalEpoch());
-                                                 return z.getTransactions(fromBeginning);
-                                             },
-                                             t -> transfers.fromZonky(t, () -> getRating(tenant, t.getLoanId())));
         // load all blocked amounts
         final boolean updated2 = updateSingle(tenant,
                                               Zonky::getBlockedAmounts,
                                               ba -> transfers.fromZonky(ba, () -> getRating(tenant, ba.getLoanId())));
-        return (updated || updated2);
+        return (updated2);
     }
 
     static TransferMonitor create(final Tenant tenant) {
@@ -149,9 +139,6 @@ public class TransferMonitor implements PortfolioDependant {
             LOGGER.debug("Have new transactions.");
             adjustments.reset();
         }
-        LOGGER.debug("Running transaction processors.");
-        LoanRepaidProcessor.INSTANCE.accept(transfers.getUnprocessed(), transactional);
-        ParticipationSoldProcessor.INSTANCE.accept(transfers.getUnprocessed(), transactional);
         LOGGER.debug("Over.");
     }
 }

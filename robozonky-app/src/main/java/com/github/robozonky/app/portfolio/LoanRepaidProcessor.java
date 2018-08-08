@@ -17,14 +17,16 @@
 package com.github.robozonky.app.portfolio;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
+import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 
-class LoanRepaidProcessor extends TransferProcessor {
+class LoanRepaidProcessor extends TransactionProcessor {
 
     public static final LoanRepaidProcessor INSTANCE = new LoanRepaidProcessor();
 
@@ -33,14 +35,14 @@ class LoanRepaidProcessor extends TransferProcessor {
     }
 
     @Override
-    boolean filter(final SourceAgnosticTransfer transaction) {
-        return transaction.getSource() == TransferSource.REAL &&
-                transaction.getCategory() == TransactionCategory.PAYMENT;
+    boolean isApplicable(final Transaction transaction) {
+        return transaction.getCategory() == TransactionCategory.PAYMENT
+                && transaction.getOrientation() == TransactionOrientation.IN;
     }
 
     @Override
-    void process(final SourceAgnosticTransfer transfer, final Transactional transactional) {
-        final Loan l = LoanCache.INSTANCE.getLoan(getLoanId(transfer), transactional.getTenant());
+    void processApplicable(final Transaction transfer, final Transactional transactional) {
+        final Loan l = LoanCache.INSTANCE.getLoan(transfer.getLoanId(), transactional.getTenant());
         final Investment investment = lookupOrFail(l, transactional.getTenant());
         final boolean paidInFull = investment.getPaymentStatus()
                 .map(s -> s == PaymentStatus.PAID)
