@@ -78,7 +78,7 @@ class PortfolioUpdater implements Runnable,
         updater.registerDependant(Delinquencies::update);
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
-        // update portfolio with transactions coming from Zonky
+        // update portfolio with blocked amounts coming from Zonky
         updater.registerDependant(po -> blockedAmounts.get().accept(po));
         // send notifications based on new transactions coming from Zonky
         updater.registerDependant(new IncomeProcessor());
