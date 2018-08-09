@@ -66,18 +66,17 @@ enum DelinquencyCategory {
     }
 
     private static boolean isOverThreshold(final Investment d, final int threshold) {
-        final Duration target = Duration.ofDays(threshold);
         final OffsetDateTime since = getPaymentMissedDate(d).atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
-        final Duration actual = Duration.between(since, OffsetDateTime.now()).abs();
-        return actual.compareTo(target) >= 0;
+        final long actual = Duration.between(since, OffsetDateTime.now()).abs().toDays();
+        return actual >= threshold;
     }
 
     private static IntStream fromIdString(final Stream<String> idString) {
-        return idString.map(String::trim).mapToInt(Integer::parseInt);
+        return idString.mapToInt(Integer::parseInt);
     }
 
     private static Stream<String> toIdString(final int... ids) {
-        return IntStream.of(ids).mapToObj(Integer::toString);
+        return IntStream.of(ids).distinct().sorted().mapToObj(Integer::toString);
     }
 
     private static EventSupplier getEventSupplier(final int threshold) {
@@ -115,8 +114,9 @@ enum DelinquencyCategory {
 
     private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
                                                      final LocalDate delinquentSince) {
+        final LocalDate lastNonDelinquentDay = delinquentSince.minusDays(1);
         final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
-                .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
+                .filter(d -> d.getDateFrom().toLocalDate().isAfter(lastNonDelinquentDay))
                 .collect(toList());
         Collections.reverse(developments);
         return developments;
@@ -152,10 +152,7 @@ enum DelinquencyCategory {
                 .filter(d -> isOverThreshold(d, thresholdInDays))
                 .peek(d -> transactional.fire(getEvent(tenant, d, thresholdInDays)))
                 .mapToInt(Investment::getLoanId);
-        final int[] storeThese = IntStream.concat(keepThese.stream().mapToInt(i -> i), addThese)
-                .distinct()
-                .sorted()
-                .toArray();
+        final int[] storeThese = IntStream.concat(keepThese.stream().mapToInt(i -> i), addThese).toArray();
         transactionalState.update(b -> b.put(fieldName, toIdString(storeThese)));
         LOGGER.trace("Update over, stored {}.", storeThese);
         return storeThese;

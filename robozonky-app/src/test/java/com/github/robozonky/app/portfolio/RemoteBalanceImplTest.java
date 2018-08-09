@@ -35,6 +35,7 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void testDryRun() {
+        System.setProperty(PROPERTY, "-1");
         final BigDecimal startingBalance = BigDecimal.valueOf(2_000);
         final Zonky z = harmlessZonky(startingBalance.intValue());
         final Tenant a = mockTenant(z);
@@ -45,12 +46,10 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
         // test some local updates
         b.update(THOUSAND.negate());
         Assertions.assertThat(b.get()).isEqualTo(THOUSAND);
-        b.update(THOUSAND.negate());
-        Assertions.assertThat(b.get()).isEqualTo(BigDecimal.ZERO);
         // make a remote update to ensure local updates are still persisted
-        when(z.getWallet()).thenReturn(new Wallet(startingBalance.subtract(THOUSAND)));
-        rb.run(); // register the remote update
-        Assertions.assertThat(b.get()).isEqualTo(THOUSAND.negate());
+        when(z.getWallet()).thenReturn(new Wallet(BigDecimal.ZERO));
+        b.update(THOUSAND.negate());
+        Assertions.assertThat(b.get()).isEqualTo(BigDecimal.valueOf(-2000));
     }
 
     @Test
@@ -67,4 +66,20 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
         // minimum is set to be a thousand
         Assertions.assertThat(b.get()).isEqualTo(THOUSAND);
     }
+
+    @Test
+    void testDryRunWithZeroMinimumBalance() {
+        System.setProperty(PROPERTY, "0");
+        final BigDecimal startingBalance = BigDecimal.valueOf(1_000);
+        final Zonky z = harmlessZonky(startingBalance.intValue());
+        final Tenant a = mockTenant(z);
+        final RefreshableBalance rb = new RefreshableBalance(a);
+        rb.run();
+        final RemoteBalance b = new RemoteBalanceImpl(rb, true);
+        Assertions.assertThat(b.get()).isEqualTo(startingBalance);
+        b.update(BigDecimal.valueOf(-1_001));
+        // minimum is set to be a thousand
+        Assertions.assertThat(b.get()).isEqualTo(BigDecimal.ZERO);
+    }
+
 }

@@ -36,14 +36,15 @@ class ParticipationSoldProcessor extends TransactionProcessor {
     }
 
     @Override
-    boolean isApplicable(final Transaction transfer) {
-        return transfer.getOrientation() == TransactionOrientation.IN
-                && transfer.getCategory() == TransactionCategory.SMP_SELL;
+    boolean isApplicable(final Transaction transaction) {
+        return transaction.getOrientation() == TransactionOrientation.IN
+                && transaction.getCategory() == TransactionCategory.SMP_SELL;
+
     }
 
     @Override
-    void processApplicable(final Transaction transfer, final Transactional transactional) {
-        final int loanId = transfer.getLoanId();
+    void processApplicable(final Transaction transaction, final Transactional transactional) {
+        final int loanId = transaction.getLoanId();
         final Tenant tenant = transactional.getTenant();
         final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
         final Investment i = lookupOrFail(l, tenant);

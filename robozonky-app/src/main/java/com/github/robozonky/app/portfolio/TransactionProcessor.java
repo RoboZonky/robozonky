@@ -46,7 +46,6 @@ abstract class TransactionProcessor implements BiConsumer<Stream<Transaction>, T
     @Override
     public final void accept(final Stream<Transaction> transactions, final Transactional transactional) {
         transactions.filter(this::isApplicable) // user-provided filter
-                .filter(t -> t.getLoanId() > 0) // filter out all fees etc., we only care about loan-related
                 .peek(t -> logger.debug("Applicable: {}.", t))
                 .collect(Collectors.toMap(Transaction::getLoanId, t -> t, deduplicator)) // de-duplicate
                 .values()
