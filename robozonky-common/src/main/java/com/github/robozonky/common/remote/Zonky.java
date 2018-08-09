@@ -154,7 +154,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Investment> getInvestments(final Select select) {
-        final Function<Investment, LocalDate> investmentDateSupplier = (i) -> {
+        final Function<Investment, LocalDate> investmentDateSupplier = i -> {
             /*
              * Zonky makes it very difficult to figure out when any particular investment was made. this code attempts
              * to figure it out.

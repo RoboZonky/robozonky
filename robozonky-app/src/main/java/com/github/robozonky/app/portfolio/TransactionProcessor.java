@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 
 abstract class TransactionProcessor implements BiConsumer<Stream<Transaction>, Transactional> {
 
+    private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    private final BinaryOperator<Transaction> deduplicator = (a, b) -> a;
 
     protected static Investment lookupOrFail(final Loan loan, final Tenant auth) {
         return auth.call(zonky -> zonky.getInvestment(loan))
@@ -47,7 +47,7 @@ abstract class TransactionProcessor implements BiConsumer<Stream<Transaction>, T
     public final void accept(final Stream<Transaction> transactions, final Transactional transactional) {
         transactions.filter(this::isApplicable) // user-provided filter
                 .peek(t -> logger.debug("Applicable: {}.", t))
-                .collect(Collectors.toMap(Transaction::getLoanId, t -> t, deduplicator)) // de-duplicate
+                .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
                 .values()
                 .forEach(t -> {
                     logger.debug("Will process: {}", t);
