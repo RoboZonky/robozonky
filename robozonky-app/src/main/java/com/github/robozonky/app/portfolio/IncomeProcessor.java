@@ -58,7 +58,7 @@ public final class IncomeProcessor implements PortfolioDependant {
         final int lastSeenTransactionId = state.getValue(STATE_KEY)
                 .map(Integer::valueOf)
                 .orElse(-1);
-        final OffsetDateTime lastUpdate = state.getLastUpdated().orElse(OffsetDateTime.now().minusMonths(1));
+        final OffsetDateTime lastUpdate = state.getLastUpdated().orElse(OffsetDateTime.now().minusWeeks(1));
         final Select sinceLastUpdate = new Select().greaterThanOrEquals("transaction.transactionDate", lastUpdate);
         final Tenant tenant = transactional.getTenant();
         final Stream<Transaction> transactions = tenant.call(z -> z.getTransactions(sinceLastUpdate));
