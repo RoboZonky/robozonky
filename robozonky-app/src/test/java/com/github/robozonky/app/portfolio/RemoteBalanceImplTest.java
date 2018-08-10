@@ -24,17 +24,18 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
 
     private static final BigDecimal THOUSAND = BigDecimal.TEN.pow(3);
+    private static final String PROPERTY = Settings.Key.DRY_RUN_BALANCE_MINIMUM.getName();
 
     @Test
     void testDryRun() {
+        System.setProperty(PROPERTY, "-1");
         final BigDecimal startingBalance = BigDecimal.valueOf(2_000);
         final Zonky z = harmlessZonky(startingBalance.intValue());
         final Tenant a = mockTenant(z);
@@ -45,19 +46,10 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
         // test some local updates
         b.update(THOUSAND.negate());
         Assertions.assertThat(b.get()).isEqualTo(THOUSAND);
-        b.update(THOUSAND.negate());
-        Assertions.assertThat(b.get()).isEqualTo(BigDecimal.ZERO);
         // make a remote update to ensure local updates are still persisted
-        when(z.getWallet()).thenReturn(new Wallet(startingBalance.subtract(THOUSAND)));
-        rb.run(); // register the remote update
-        Assertions.assertThat(b.get()).isEqualTo(THOUSAND.negate());
-    }
-
-    private static final String PROPERTY = Settings.Key.DRY_RUN_BALANCE_MINIMUM.getName();
-
-    @BeforeEach
-    void resetProperties() {
-        System.clearProperty(PROPERTY);
+        when(z.getWallet()).thenReturn(new Wallet(BigDecimal.ZERO));
+        b.update(THOUSAND.negate());
+        Assertions.assertThat(b.get()).isEqualTo(BigDecimal.valueOf(-2000));
     }
 
     @Test
@@ -74,4 +66,20 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
         // minimum is set to be a thousand
         Assertions.assertThat(b.get()).isEqualTo(THOUSAND);
     }
+
+    @Test
+    void testDryRunWithZeroMinimumBalance() {
+        System.setProperty(PROPERTY, "0");
+        final BigDecimal startingBalance = BigDecimal.valueOf(1_000);
+        final Zonky z = harmlessZonky(startingBalance.intValue());
+        final Tenant a = mockTenant(z);
+        final RefreshableBalance rb = new RefreshableBalance(a);
+        rb.run();
+        final RemoteBalance b = new RemoteBalanceImpl(rb, true);
+        Assertions.assertThat(b.get()).isEqualTo(startingBalance);
+        b.update(BigDecimal.valueOf(-1_001));
+        // minimum is set to be a thousand
+        Assertions.assertThat(b.get()).isEqualTo(BigDecimal.ZERO);
+    }
+
 }

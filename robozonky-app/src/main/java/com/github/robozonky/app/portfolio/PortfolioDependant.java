@@ -18,12 +18,12 @@ package com.github.robozonky.app.portfolio;
 
 import java.util.function.Consumer;
 
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 
 /**
  * Represents code to be executed after a successful portfolio update, administered from within this package.
  */
 @FunctionalInterface
-public interface PortfolioDependant extends Consumer<TransactionalPortfolio> {
+public interface PortfolioDependant extends Consumer<Transactional> {
 
 }

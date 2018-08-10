@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,7 +29,6 @@ import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -63,24 +59,6 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         } finally {
             e.shutdownNow();
         }
-    }
-
-    @Test
-    void next4amTomorrow() {
-        final ZonedDateTime after4am = ZonedDateTime.of(LocalDate.now(), LocalTime.of(4, 0, 1), Defaults.ZONE_ID);
-        final Duration next = DaemonInvestmentMode.getUntilNext4am(after4am);
-        final ZonedDateTime next4am = after4am.plus(next);
-        assertThat(next4am)
-                .isEqualTo(ZonedDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(4, 0, 0), Defaults.ZONE_ID));
-    }
-
-    @Test
-    void next4amToday() {
-        final ZonedDateTime after4am = ZonedDateTime.of(LocalDate.now(), LocalTime.of(3, 59, 59), Defaults.ZONE_ID);
-        final Duration next = DaemonInvestmentMode.getUntilNext4am(after4am);
-        final ZonedDateTime next4am = after4am.plus(next);
-        assertThat(next4am)
-                .isEqualTo(ZonedDateTime.of(LocalDate.now(), LocalTime.of(4, 0, 0), Defaults.ZONE_ID));
     }
 
     @AfterEach

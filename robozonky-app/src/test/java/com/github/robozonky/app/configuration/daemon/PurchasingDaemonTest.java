@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,7 +39,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void standard() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
         final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
         }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
@@ -50,7 +51,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void noBalance() {
         final Zonky z = harmlessZonky(0);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
         final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
         }, a, s, () -> Optional.of(portfolio), Duration.ZERO);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package com.github.robozonky.common.remote;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -246,7 +246,7 @@ class ZonkyTest {
         final Optional<Investment> result = z.getInvestment(loan);
         assertThat(result).isPresent();
         final Investment actual = result.get();
-        final OffsetDateTime investmentDate = actual.getInvestmentDate();
+        final LocalDate investmentDate = actual.getInvestmentDate().toLocalDate();
         assertThat(investmentDate).isEqualTo(relevant.getTransactionDate().minusMonths(1));
     }
 
