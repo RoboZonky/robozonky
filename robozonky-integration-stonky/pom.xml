@@ -41,22 +41,22 @@
     <dependency>
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client</artifactId>
-      <version>1.23.0</version>
+      <version>1.24.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.oauth-client</groupId>
       <artifactId>google-oauth-client-jetty</artifactId>
-      <version>1.23.0</version>
+      <version>1.24.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-sheets</artifactId>
-      <version>v4-rev516-1.23.0</version>
+      <version>v4-rev536-1.24.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-drive</artifactId>
-      <version>v3-rev110-1.23.0</version>
+      <version>v3-rev124-1.24.1</version>
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
