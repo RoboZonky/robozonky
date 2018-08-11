@@ -127,6 +127,7 @@ class Stonky implements Payload {
 
     private static void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
             throws GeneralSecurityException, IOException, ExecutionException, InterruptedException {
+        LOGGER.debug("Updating Stonky spreadsheet.");
         final Drive driveService = Util.createDriveService(sessionInfo);
         final Sheets sheetsService = Util.createSheetsService(sessionInfo);
         final CompletableFuture<Summary> summary = CompletableFuture.supplyAsync(Util.wrap(() -> {
@@ -156,6 +157,10 @@ class Stonky implements Payload {
 
     @Override
     public void accept(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier) {
+        if (!Util.hasCredentials(sessionInfo)) {
+            LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
+                        sessionInfo.getUsername());
+        }
         try {
             run(sessionInfo, zonkyApiTokenSupplier);
         } catch (final Exception ex) {
