@@ -29,6 +29,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.api.Defaults;
@@ -113,5 +115,33 @@ class Util {
         }
     }
 
+    static <S, T> Function<S, T> wrap(final ThrowingFunction<S, T> function) {
+        return (s) -> {
+            try {
+                return function.apply(s);
+            } catch (final Exception ex) {
+                throw new IllegalStateException("Function failed.", ex);
+            }
+        };
+    }
 
+    static <T> Supplier<T> wrap(final ThrowingSupplier<T> supplier) {
+        return () -> {
+            try {
+                return supplier.get();
+            } catch (final Exception ex) {
+                throw new IllegalStateException("Supplier failed.", ex);
+            }
+        };
+    }
+
+    interface ThrowingFunction<S, T> {
+
+        T apply(S argument) throws Exception;
+    }
+
+    interface ThrowingSupplier<T> {
+
+        T get() throws Exception;
+    }
 }

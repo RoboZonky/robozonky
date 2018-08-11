@@ -173,18 +173,21 @@ class DriveOverview {
                 .setFields("id")
                 .execute();
         state.update(m -> m.put("stonky", OffsetDateTime.now().toString()));
-        LOGGER.debug("Created a copy of {} '{}'.", parent.getName(), result.getId());
+        LOGGER.debug("Created a copy of Stonky: {}.", result.getId());
         return result;
     }
 
     public File latestStonky() throws IOException {
         final File upstream = driveService.files().get(LATEST_SUPPORTED_STONKY_SPREADSHEET).execute();
+        LOGGER.debug("Latest Stonky spreadsheet: {}.", upstream.getId());
         final File parent = getOrCreateRoboZonkyFolder();
         final Optional<File> stonky = listSpreadsheets(getFilesInFolder(driveService, parent))
                 .filter(s -> Objects.equals(s.getName(), upstream.getName()))
                 .findFirst();
         if (stonky.isPresent()) {
-            return stonky.get();
+            final File result = stonky.get();
+            LOGGER.debug("Found a copy of Stonky: {}.", result.getId());
+            return result;
         } else {
             return cloneStonky(upstream, parent);
         }

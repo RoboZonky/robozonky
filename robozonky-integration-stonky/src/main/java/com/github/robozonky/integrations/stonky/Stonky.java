@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
@@ -46,25 +48,27 @@ import org.slf4j.LoggerFactory;
 class Stonky implements Payload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stonky.class);
+    private static final String ZONKY_ROOT = "https://api.zonky.cz/users/me";
 
     private static URL getUrl(final String prefix, final char... token) {
+        final String attempted = prefix + String.valueOf(token);
         try {
-            return new URL(prefix + String.valueOf(token));
+            return new URL(attempted);
         } catch (final MalformedURLException ex) {
-            throw new IllegalStateException("Failed downloading file.", ex);
+            throw new IllegalStateException("Failed creating URL: " + attempted, ex);
         }
     }
 
     private static URL getWalletXlsUrl(final ZonkyApiToken token) {
-        return getUrl("https://api.zonky.cz/users/me/wallet/transactions/export?access_token=", token.getAccessToken());
+        return getUrl(ZONKY_ROOT + "/wallet/transactions/export?access_token=", token.getAccessToken());
     }
 
     private static URL getInvestmentsXlsUrl(final ZonkyApiToken token) {
-        return getUrl("https://api.zonky.cz/users/me/investments/export?access_token=", token.getAccessToken());
+        return getUrl(ZONKY_ROOT + "/investments/export?access_token=", token.getAccessToken());
     }
 
-    private SheetProperties copySheet(final Sheets sheetsService, final Spreadsheet stonky, final File sheet) throws
-            IOException {
+    private static SheetProperties copySheet(final Sheets sheetsService, final Spreadsheet stonky,
+                                             final File sheet) throws IOException {
         final int sheetId = sheetsService.spreadsheets().get(sheet.getId())
                 .execute()
                 .getSheets()
@@ -79,9 +83,8 @@ class Stonky implements Payload {
                 .clone();
     }
 
-    private void copySheet(final Sheets sheetsService, final Spreadsheet stonky, final File sheet,
-                           final String name) throws
-            IOException {
+    private static Spreadsheet copySheet(final Sheets sheetsService, final Spreadsheet stonky, final File sheet,
+                                         final String name) throws IOException {
         LOGGER.debug("Processing sheet '{}'.", name);
         final Optional<Sheet> targetSheet = stonky.getSheets().stream()
                 .filter(s -> Objects.equals(s.getProperties().getTitle(), name))
@@ -106,35 +109,66 @@ class Stonky implements Payload {
         LOGGER.debug("Renaming sheet and changing position.");
         sheetsService.spreadsheets().batchUpdate(stonky.getSpreadsheetId(), batch).execute();
         LOGGER.debug("Stonky `{}` sheet processed.", name);
+        return stonky;
     }
 
-    private void acceptFailing(final SessionInfo sessionInfo,
-                               final Supplier<ZonkyApiToken> zonkyApiTokenSupplier) throws GeneralSecurityException,
-            IOException {
+    private static void run(final SessionInfo sessionInfo,
+                            final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
+            throws GeneralSecurityException, IOException, ExecutionException, InterruptedException {
         // see what we have in the drive, to see what we need to create or update
         final Drive driveService = Util.createDriveService(sessionInfo);
-        final DriveOverview overview = DriveOverview.create(sessionInfo, driveService);
-        // clone Stonky if necessary
-        final File stonky = overview.latestStonky();
-        // upload to Google Drive
-        final File wallet =
-                overview.latestWallet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
-        final File investments =
-                overview.latestInvestments(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
         final Sheets sheetsService = Util.createSheetsService(sessionInfo);
-        final Spreadsheet stonkySpreadsheet = sheetsService.spreadsheets().get(stonky.getId()).execute();
-        copySheet(sheetsService, stonkySpreadsheet, wallet, "Wallet");
-        copySheet(sheetsService, stonkySpreadsheet, investments, "People");
-        LOGGER.info("Stonky spreadsheet updated at: https://docs.google.com/spreadsheets/d/{}",
-                    stonkySpreadsheet.getSpreadsheetId());
+        final CompletableFuture<DriveOverview> overview = CompletableFuture.supplyAsync(
+                Util.wrap(() -> DriveOverview.create(sessionInfo, driveService)));
+        final CompletableFuture<Summary> summary = overview.thenApply(
+                Util.wrap(o -> {
+                    final File s = o.latestStonky();
+                    final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();
+                    return new Summary(o, result);
+                }));
+        final CompletableFuture<Spreadsheet> walletCopier = summary.thenApplyAsync(
+                Util.wrap(s -> {
+                    final DriveOverview o = s.getOverview();
+                    final File f = o.latestWallet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
+                    return copySheet(sheetsService, s.getStonky(), f, "Wallet");
+                }));
+        final CompletableFuture<Spreadsheet> peopleCopier = summary.thenApplyAsync(
+                Util.wrap(s -> {
+                    final DriveOverview o = s.getOverview();
+                    final File f = o.latestInvestments(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
+                    return copySheet(sheetsService, s.getStonky(), f, "People");
+                }));
+        final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> a);
+        LOGGER.debug("Blocking until all operations terminate.");
+        final String stonkySpreadsheetId = merged.get().getSpreadsheetId();
+        LOGGER.info("Stonky spreadsheet updated at: https://docs.google.com/spreadsheets/d/{}", stonkySpreadsheetId);
     }
 
     @Override
     public void accept(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier) {
         try {
-            acceptFailing(sessionInfo, zonkyApiTokenSupplier);
+            run(sessionInfo, zonkyApiTokenSupplier);
         } catch (final Exception ex) {
             throw new IllegalStateException("Failed integrating with Stonky.", ex);
+        }
+    }
+
+    private static final class Summary {
+
+        private final DriveOverview overview;
+        private final Spreadsheet stonky;
+
+        public Summary(final DriveOverview overview, final Spreadsheet stonky) {
+            this.overview = overview;
+            this.stonky = stonky;
+        }
+
+        public DriveOverview getOverview() {
+            return overview;
+        }
+
+        public Spreadsheet getStonky() {
+            return stonky;
         }
     }
 }
