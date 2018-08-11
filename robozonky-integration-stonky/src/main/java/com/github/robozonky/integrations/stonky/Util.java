@@ -25,6 +25,7 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.api.Defaults;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -44,7 +45,7 @@ class Util {
 
     private static final String APPLICATION_NAME = Defaults.ROBOZONKY_USER_AGENT;
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final String CREDENTIALS_FOLDER = "credentials"; // Directory to store user credentials.
+    private static final String CREDENTIALS_FOLDER = "google"; // Directory to store user credentials.
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -56,37 +57,40 @@ class Util {
 
     /**
      * Creates an authorized Credential object.
-     * @param HTTP_TRANSPORT The network HTTP Transport.
+     * @param sessionInfo User for which these credentials are being obtained.
+     * @param httpTransport The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If there is no client_secret.
      */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException,
-            GeneralSecurityException {
+    private static Credential getCredentials(final SessionInfo sessionInfo,
+                                             final NetHttpTransport httpTransport)
+            throws IOException, GeneralSecurityException {
         // Load client secrets.
         try (final InputStream in = new ByteArrayInputStream(ApiKey.get())) {
             final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
             // Build flow and trigger user authorization request.
-            final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                    HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                    .setDataStoreFactory(new FileDataStoreFactory(new File(CREDENTIALS_FOLDER)))
-                    .setAccessType("offline")
-                    .build();
-            return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+            final GoogleAuthorizationCodeFlow flow =
+                    new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
+                            .setDataStoreFactory(new FileDataStoreFactory(new File(CREDENTIALS_FOLDER)))
+                            .setAccessType("offline")
+                            .build();
+            return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
+                    .authorize(sessionInfo.getUsername());
         }
     }
 
-    static Drive createDriveService() throws GeneralSecurityException, IOException {
+    static Drive createDriveService(final SessionInfo sessionInfo) throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        return new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        return new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials(sessionInfo, httpTransport))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
 
-    static Sheets createSheetsService() throws GeneralSecurityException, IOException {
+    static Sheets createSheetsService(final SessionInfo sessionInfo) throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        return new Sheets.Builder(httpTransport, JSON_FACTORY, getCredentials(sessionInfo, httpTransport))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }

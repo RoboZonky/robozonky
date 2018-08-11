@@ -129,7 +129,7 @@ class Stonky implements Payload {
                                final Supplier<ZonkyApiToken> zonkyApiTokenSupplier) throws GeneralSecurityException,
             IOException {
         // see what we have in the drive, to see what we need to create or update
-        final Drive driveService = Util.createDriveService();
+        final Drive driveService = Util.createDriveService(sessionInfo);
         final DriveOverview overview = DriveOverview.create(sessionInfo, driveService);
         // clone Stonky if necessary
         final File stonky = overview.latestStonky();
@@ -138,7 +138,7 @@ class Stonky implements Payload {
                 overview.offerLatestWalletSpreadsheet(() -> download(getWalletXlsUrl(zonkyApiTokenSupplier.get())));
         final File investments =
                 overview.offerInvestmentsSpreadsheet(() -> download(getInvestmentsXlsUrl(zonkyApiTokenSupplier.get())));
-        final Sheets sheetsService = Util.createSheetsService();
+        final Sheets sheetsService = Util.createSheetsService(sessionInfo);
         final Spreadsheet stonkySpreadsheet = sheetsService.spreadsheets().get(stonky.getId()).execute();
         copySheet(sheetsService, stonkySpreadsheet, wallet, "Wallet");
         copySheet(sheetsService, stonkySpreadsheet, investments, "People");
