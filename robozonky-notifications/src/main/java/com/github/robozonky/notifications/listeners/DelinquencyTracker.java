@@ -33,7 +33,7 @@ class DelinquencyTracker {
     }
 
     private String toId(final Investment investment) {
-        return target.getId() + "-" + String.valueOf(investment.getLoanId());
+        return target.getId() + "-" + investment.getLoanId();
     }
 
     public void setDelinquent(final SessionInfo sessionInfo, final Investment investment) {
@@ -42,7 +42,7 @@ class DelinquencyTracker {
         }
         TenantState.of(sessionInfo)
                 .in(DelinquencyTracker.class)
-                .reset(b -> b.put(toId(investment), OffsetDateTime.now(Defaults.ZONE_ID).toString()));
+                .update(b -> b.put(toId(investment), OffsetDateTime.now(Defaults.ZONE_ID).toString()));
     }
 
     public void unsetDelinquent(final SessionInfo sessionInfo, final Investment investment) {
@@ -51,7 +51,7 @@ class DelinquencyTracker {
         }
         TenantState.of(sessionInfo)
                 .in(DelinquencyTracker.class)
-                .reset(b -> b.remove(toId(investment)));
+                .update(b -> b.remove(toId(investment)));
     }
 
     public boolean isDelinquent(final SessionInfo sessionInfo, final Investment investment) {
