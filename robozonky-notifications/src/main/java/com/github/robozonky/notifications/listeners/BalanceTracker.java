@@ -41,7 +41,7 @@ class BalanceTracker {
     public void setLastKnownBalance(final SessionInfo sessionInfo, final BigDecimal newBalance) {
         TenantState.of(sessionInfo)
                 .in(BalanceTracker.class)
-                .reset(b -> b.put(target.getId(), String.valueOf(newBalance)));
+                .update(b -> b.put(target.getId(), String.valueOf(newBalance)));
     }
 
     public static void reset(final SessionInfo sessionInfo) {
