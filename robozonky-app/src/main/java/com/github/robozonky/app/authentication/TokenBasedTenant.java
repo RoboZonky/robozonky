@@ -67,4 +67,9 @@ class TokenBasedTenant implements Tenant {
     public SessionInfo getSessionInfo() {
         return sessionInfo;
     }
+
+    @Override
+    public Supplier<ZonkyApiToken> getTokenSupplier() {
+        return tokenSupplier;
+    }
 }

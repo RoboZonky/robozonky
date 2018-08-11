@@ -21,11 +21,13 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -114,6 +116,11 @@ public final class Transactional implements Runnable {
         @Override
         public SessionInfo getSessionInfo() {
             return parent.getSessionInfo();
+        }
+
+        @Override
+        public Supplier<ZonkyApiToken> getTokenSupplier() {
+            return parent.getTokenSupplier();
         }
 
         @Override
