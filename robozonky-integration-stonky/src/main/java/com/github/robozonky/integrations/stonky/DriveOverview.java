@@ -17,6 +17,7 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -134,9 +135,9 @@ class DriveOverview {
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent));
     }
 
-    private static FileContent getFileContent(final Supplier<java.io.File> sheet) {
+    private static FileContent getFileContent(final URL sheet) {
         LOGGER.debug("Contacting Zonky to download the export.");
-        return new FileContent(MIME_TYPE_XLS_SPREADSHEET, sheet.get());
+        return new FileContent(MIME_TYPE_XLS_SPREADSHEET, Util.download(sheet));
     }
 
     private File createRoboZonkyFolder(final Drive driveService) throws IOException {
@@ -185,25 +186,25 @@ class DriveOverview {
         }
     }
 
-    public File offerLatestWalletSpreadsheet(final Supplier<java.io.File> sheet) throws IOException {
+    public File offerLatestWalletSpreadsheet(final Supplier<URL> sheet) throws IOException {
         LOGGER.debug("Processing wallet export.");
         wallet = uploadLatestSpreadsheet(driveService, wallet, sheet, ROBOZONKY_WALLET_SHEET_NAME);
         return wallet;
     }
 
-    public File offerInvestmentsSpreadsheet(final Supplier<java.io.File> sheet) throws IOException {
+    public File offerInvestmentsSpreadsheet(final Supplier<URL> sheet) throws IOException {
         LOGGER.debug("Processing investment export.");
         investments = uploadLatestSpreadsheet(driveService, investments, sheet, ROBOZONKY_INVESTMENTS_SHEET_NAME);
         return investments;
     }
 
-    private File createSpreadsheet(final Supplier<java.io.File> sheet, final String targetName) throws IOException {
+    private File createSpreadsheet(final Supplier<URL> sheet, final String targetName) throws IOException {
         final File parent = getOrCreateRoboZonkyFolder();
         final File f = new File();
         f.setName(targetName);
         f.setParents(Collections.singletonList(parent.getId()));
         f.setMimeType(MIME_TYPE_GOOGLE_SPREADSHEET);
-        final File result = driveService.files().create(f, getFileContent(sheet))
+        final File result = driveService.files().create(f, getFileContent(sheet.get()))
                 .setFields("id")
                 .execute();
         state.update(m -> m.put(targetName, OffsetDateTime.now().toString()));
@@ -211,14 +212,14 @@ class DriveOverview {
         return result;
     }
 
-    private File modifySpreadsheet(final Drive driveService, final File original,
-                                   final Supplier<java.io.File> sheet, final String targetName) throws IOException {
+    private File modifySpreadsheet(final Drive driveService, final File original, final Supplier<URL> sheet,
+                                   final String targetName) throws IOException {
         final boolean shouldUpdate = state.getValue(targetName)
                 .map(value -> OffsetDateTime.parse(value).isBefore(OffsetDateTime.now().minusDays(1)))
                 .orElse(true);
         if (shouldUpdate) {
             LOGGER.debug("Updating an existing Google spreadsheet '{}'.", original.getId());
-            final File result = driveService.files().update(original.getId(), null, getFileContent(sheet))
+            final File result = driveService.files().update(original.getId(), null, getFileContent(sheet.get()))
                     .setFields("id")
                     .execute();
             state.update(m -> m.put(targetName, OffsetDateTime.now().toString()));
@@ -230,8 +231,7 @@ class DriveOverview {
     }
 
     private File uploadLatestSpreadsheet(final Drive driveService, final File original,
-                                         final Supplier<java.io.File> sheet,
-                                         final String targetName) throws IOException {
+                                         final Supplier<URL> sheet, final String targetName) throws IOException {
         return (original == null) ?
                 createSpreadsheet(sheet, targetName) :
                 modifySpreadsheet(driveService, original, sheet, targetName);

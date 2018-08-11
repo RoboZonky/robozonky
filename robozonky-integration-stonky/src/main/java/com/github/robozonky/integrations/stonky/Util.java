@@ -18,9 +18,14 @@ package com.github.robozonky.integrations.stonky;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -94,4 +99,19 @@ class Util {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
+
+    static File download(final URL url) {
+        try {
+            final File f = File.createTempFile("robozonky-", ".download");
+            try (final FileOutputStream fos = new FileOutputStream(f); final FileChannel ch = fos.getChannel()) {
+                final ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+                ch.transferFrom(rbc, 0, Long.MAX_VALUE);
+                return f;
+            }
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Failed transferring remote data to file.", ex);
+        }
+    }
+
+
 }

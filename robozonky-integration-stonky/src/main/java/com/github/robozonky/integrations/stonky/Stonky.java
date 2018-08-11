@@ -16,13 +16,9 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,19 +61,6 @@ class Stonky implements Payload {
 
     private static URL getInvestmentsXlsUrl(final ZonkyApiToken token) {
         return getUrl("https://api.zonky.cz/users/me/investments/export?access_token=", token.getAccessToken());
-    }
-
-    private static java.io.File download(final URL url) {
-        try {
-            final java.io.File f = java.io.File.createTempFile("robozonky-", ".download");
-            try (final FileOutputStream fos = new FileOutputStream(f); final FileChannel ch = fos.getChannel()) {
-                final ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-                ch.transferFrom(rbc, 0, Long.MAX_VALUE);
-                return f;
-            }
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed transferring remote data to file.", ex);
-        }
     }
 
     private SheetProperties copySheet(final Sheets sheetsService, final Spreadsheet stonky, final File sheet) throws
@@ -135,9 +118,9 @@ class Stonky implements Payload {
         final File stonky = overview.latestStonky();
         // upload to Google Drive
         final File wallet =
-                overview.offerLatestWalletSpreadsheet(() -> download(getWalletXlsUrl(zonkyApiTokenSupplier.get())));
+                overview.offerLatestWalletSpreadsheet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
         final File investments =
-                overview.offerInvestmentsSpreadsheet(() -> download(getInvestmentsXlsUrl(zonkyApiTokenSupplier.get())));
+                overview.offerInvestmentsSpreadsheet(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
         final Sheets sheetsService = Util.createSheetsService(sessionInfo);
         final Spreadsheet stonkySpreadsheet = sheetsService.spreadsheets().get(stonky.getId()).execute();
         copySheet(sheetsService, stonkySpreadsheet, wallet, "Wallet");
