@@ -16,6 +16,7 @@ env:
     # then plugin modules
     - MODULE=robozonky-strategy-natural
     - MODULE=robozonky-integration-zonkoid
+    - MODULE=robozonky-integration-stonky
 os:
   - linux
 jdk:

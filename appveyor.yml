@@ -12,6 +12,7 @@ environment:
       # then plugin modules
       - MODULE: robozonky-strategy-natural
       - MODULE: robozonky-integration-zonkoid
+      - MODULE: robozonky-integration-stonky
 matrix:
   fast_finish: true
 branches:

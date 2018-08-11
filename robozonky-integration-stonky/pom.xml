@@ -15,7 +15,9 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>robozonky</artifactId>
     <groupId>com.github.robozonky</groupId>
@@ -23,11 +25,12 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>robozonky-test</artifactId>
-  <name>RoboZonky: Utility module in support of testing</name>
+  <artifactId>robozonky-integration-stonky</artifactId>
+
+  <name>RoboZonky: Integration with Stonky</name>
 
   <properties>
-    <project.automatic.module.name>com.github.robozonky.test</project.automatic.module.name>
+    <project.automatic.module.name>com.github.robozonky.integrations.stonky</project.automatic.module.name>
   </properties>
 
   <dependencies>
@@ -36,34 +39,30 @@
       <artifactId>robozonky-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>compile</scope>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+      <version>1.23.0</version>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
+      <groupId>com.google.oauth-client</groupId>
+      <artifactId>google-oauth-client-jetty</artifactId>
+      <version>1.23.0</version>
     </dependency>
     <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-sheets</artifactId>
+      <version>v4-rev516-1.23.0</version>
     </dependency>
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-drive</artifactId>
+      <version>v3-rev110-1.23.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-test</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.pitest</groupId>
-        <artifactId>pitest-maven</artifactId>
-        <configuration>
-          <skip>true</skip> <!-- these are test utilities; don't waste time with mutation coverage -->
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

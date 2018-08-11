@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 The RoboZonky Project
+  ~ Copyright 2018 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
     <module>robozonky-api</module>
     <module>robozonky-app</module>
     <module>robozonky-integration-zonkoid</module>
+    <module>robozonky-integration-stonky</module>
     <module>robozonky-notifications</module>
     <module>robozonky-extensions</module>
     <module>robozonky-common</module>
@@ -83,6 +84,11 @@
       <dependency>
         <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-integration-zonkoid</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.robozonky</groupId>
+        <artifactId>robozonky-integration-stonky</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
