@@ -118,9 +118,9 @@ class Stonky implements Payload {
         final File stonky = overview.latestStonky();
         // upload to Google Drive
         final File wallet =
-                overview.offerLatestWalletSpreadsheet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
+                overview.latestWallet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
         final File investments =
-                overview.offerInvestmentsSpreadsheet(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
+                overview.latestInvestments(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
         final Sheets sheetsService = Util.createSheetsService(sessionInfo);
         final Spreadsheet stonkySpreadsheet = sheetsService.spreadsheets().get(stonky.getId()).execute();
         copySheet(sheetsService, stonkySpreadsheet, wallet, "Wallet");

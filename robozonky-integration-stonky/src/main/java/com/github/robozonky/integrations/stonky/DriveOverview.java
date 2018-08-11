@@ -135,9 +135,13 @@ class DriveOverview {
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent));
     }
 
-    private static FileContent getFileContent(final URL sheet) {
+    private static FileContent downloadZonkyExport(final URL sheet) {
         LOGGER.debug("Contacting Zonky to download the export.");
         return new FileContent(MIME_TYPE_XLS_SPREADSHEET, Util.download(sheet));
+    }
+
+    private static String identify(final File file) {
+        return file.getId();
     }
 
     private File createRoboZonkyFolder(final Drive driveService) throws IOException {
@@ -186,42 +190,50 @@ class DriveOverview {
         }
     }
 
-    public File offerLatestWalletSpreadsheet(final Supplier<URL> sheet) throws IOException {
+    public File latestWallet(final Supplier<URL> xls) throws IOException {
         LOGGER.debug("Processing wallet export.");
-        wallet = uploadLatestSpreadsheet(driveService, wallet, sheet, ROBOZONKY_WALLET_SHEET_NAME);
+        wallet = getLatestSpreadsheet(xls, ROBOZONKY_WALLET_SHEET_NAME, wallet);
         return wallet;
     }
 
-    public File offerInvestmentsSpreadsheet(final Supplier<URL> sheet) throws IOException {
+    public File latestInvestments(final Supplier<URL> xls) throws IOException {
         LOGGER.debug("Processing investment export.");
-        investments = uploadLatestSpreadsheet(driveService, investments, sheet, ROBOZONKY_INVESTMENTS_SHEET_NAME);
+        investments = getLatestSpreadsheet(xls, ROBOZONKY_INVESTMENTS_SHEET_NAME, investments);
         return investments;
     }
 
-    private File createSpreadsheet(final Supplier<URL> sheet, final String targetName) throws IOException {
-        final File parent = getOrCreateRoboZonkyFolder();
+    private File createSpreadsheet(final String name, final Supplier<URL> xls) throws IOException {
+        final FileContent export = downloadZonkyExport(xls.get()); // download from Zonky first
+        final File parent = getOrCreateRoboZonkyFolder(); // retrieve Google folder in which to place the spreadsheet
+        // convert the Zonky XLS to Google Spreadsheet
         final File f = new File();
-        f.setName(targetName);
+        f.setName(name);
         f.setParents(Collections.singletonList(parent.getId()));
         f.setMimeType(MIME_TYPE_GOOGLE_SPREADSHEET);
-        final File result = driveService.files().create(f, getFileContent(sheet.get()))
+        final File result = driveService.files().create(f, export)
                 .setFields("id")
                 .execute();
-        state.update(m -> m.put(targetName, OffsetDateTime.now().toString()));
+        // and mark the time when the file was last updated
+        state.update(m -> m.put(identify(result), OffsetDateTime.now().toString()));
         LOGGER.debug("Created a new Google spreadsheet '{}'.", result.getId());
         return result;
     }
 
-    private File modifySpreadsheet(final Drive driveService, final File original, final Supplier<URL> sheet,
-                                   final String targetName) throws IOException {
+    private File actuallyModifySpreadsheet(final File original, final URL xls) throws IOException {
+        LOGGER.debug("Updating an existing Google spreadsheet '{}'.", original.getId());
+        final FileContent export = downloadZonkyExport(xls);
+        return driveService.files().update(original.getId(), null, export)
+                .setFields("id")
+                .execute();
+    }
+
+    private File modifySpreadsheet(final File original, final Supplier<URL> xls) throws IOException {
+        final String targetName = identify(original);
         final boolean shouldUpdate = state.getValue(targetName)
                 .map(value -> OffsetDateTime.parse(value).isBefore(OffsetDateTime.now().minusDays(1)))
                 .orElse(true);
         if (shouldUpdate) {
-            LOGGER.debug("Updating an existing Google spreadsheet '{}'.", original.getId());
-            final File result = driveService.files().update(original.getId(), null, getFileContent(sheet.get()))
-                    .setFields("id")
-                    .execute();
+            final File result = actuallyModifySpreadsheet(original, xls.get());
             state.update(m -> m.put(targetName, OffsetDateTime.now().toString()));
             return result;
         } else {
@@ -230,11 +242,18 @@ class DriveOverview {
         }
     }
 
-    private File uploadLatestSpreadsheet(final Drive driveService, final File original,
-                                         final Supplier<URL> sheet, final String targetName) throws IOException {
-        return (original == null) ?
-                createSpreadsheet(sheet, targetName) :
-                modifySpreadsheet(driveService, original, sheet, targetName);
+    /**
+     * Download the spreadsheet from Zonky and convert it to a Google Spreadsheet. May skip the Zonky download if the
+     * existing data is sufficiently recent.
+     * @param xls Where to download the Zonky spreadsheet from.
+     * @param name Name of the Google spreadsheet file to create if it doesn't exist.
+     * @param original Google spreadsheet file to update, or null if none exists.
+     * @return Guaranteed latest version of the Google Spreadsheet matching the Zonky spreadsheet.
+     * @throws IOException
+     */
+    private File getLatestSpreadsheet(final Supplier<URL> xls, final String name,
+                                      final File original) throws IOException {
+        return (original == null) ? createSpreadsheet(name, xls) : modifySpreadsheet(original, xls);
     }
 
     @Override
