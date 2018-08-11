@@ -17,14 +17,18 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
 import com.github.robozonky.api.jobs.Job;
 import com.github.robozonky.api.jobs.JobService;
 import com.github.robozonky.api.jobs.Payload;
+import com.github.robozonky.internal.api.Defaults;
 
 public class StonkyJobService implements JobService {
+
 
     private enum StonkyJob implements Job {
 
@@ -32,7 +36,10 @@ public class StonkyJobService implements JobService {
 
         @Override
         public Duration startIn() {
-            return Duration.ZERO;
+            final long randomSeconds = (long) (Math.random() * 1000);
+            final ZonedDateTime triggerOn =
+                    LocalDate.now().plusDays(1).atStartOfDay(Defaults.ZONE_ID).plusSeconds(randomSeconds);
+            return Duration.between(ZonedDateTime.now(), triggerOn);
         }
 
         @Override
