@@ -44,7 +44,6 @@ class DriveOverview {
     private static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
     private static final String ROBOZONKY_INVESTMENTS_SHEET_NAME = "Export investic";
     private static final String ROBOZONKY_WALLET_SHEET_NAME = "Export peněženky";
-    private static final String LATEST_SUPPORTED_STONKY_SPREADSHEET = "1MUhpUwFeTLXWOXS5ry1pNnSYG6GVNsiTmdRdBjAIVUw";
     private final InstanceState<DriveOverview> state;
     private final SessionInfo sessionInfo;
     private final Drive driveService;
@@ -70,8 +69,8 @@ class DriveOverview {
         this.sessionInfo = sessionInfo;
         this.driveService = driveService;
         this.folder = parent;
-        this.investments = wallet;
-        this.wallet = investments;
+        this.investments = investments;
+        this.wallet = wallet;
         this.state = TenantState.of(sessionInfo).in(DriveOverview.class);
     }
 
@@ -80,7 +79,6 @@ class DriveOverview {
     }
 
     public static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService) throws IOException {
-        LOGGER.debug("Querying Google for existence of parent folder.");
         final List<File> files = driveService.files().list().execute().getFiles();
         final Optional<File> result = files.stream()
                 .filter(f -> Objects.equals(f.getMimeType(), MIME_TYPE_FOLDER))
@@ -89,7 +87,6 @@ class DriveOverview {
         if (result.isPresent()) {
             return create(sessionInfo, driveService, result.get());
         } else {
-            LOGGER.debug("Parent folder not found on Google.");
             return new DriveOverview(sessionInfo, driveService);
         }
     }
@@ -113,9 +110,7 @@ class DriveOverview {
 
     private static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService,
                                         final File parent) throws IOException {
-        LOGGER.debug("Querying Google for existence of wallet export.");
         final List<File> all = getFilesInFolder(driveService, parent);
-        LOGGER.debug("Querying Google for existence of investment export.");
         return getSpreadsheetWithName(all, ROBOZONKY_WALLET_SHEET_NAME)
                 .map(f -> createWithWallet(sessionInfo, driveService, all, parent, f))
                 .orElseGet(() -> createWithoutWallet(sessionInfo, driveService, all, parent));
@@ -141,7 +136,7 @@ class DriveOverview {
     }
 
     private static String identify(final File file) {
-        return file.getId();
+        return file == null ? "null" : file.getId();
     }
 
     private File createRoboZonkyFolder(final Drive driveService) throws IOException {
@@ -178,8 +173,21 @@ class DriveOverview {
     }
 
     public File latestStonky() throws IOException {
-        final File upstream = driveService.files().get(LATEST_SUPPORTED_STONKY_SPREADSHEET).execute();
-        LOGGER.debug("Latest Stonky spreadsheet: {}.", upstream.getId());
+        return Properties.STONKY_COPY.getValue()
+                .map(Util.wrap(this::getStonkyOrFail))
+                .orElse(createOrReuseStonky());
+    }
+
+    private File getStonkyOrFail(final String fileId) throws IOException {
+        LOGGER.debug("Will look for Stonky spreadsheet: {}.", fileId);
+        return driveService.files().get(fileId).execute();
+    }
+
+    private File createOrReuseStonky() throws IOException {
+        final String masterId =
+                Properties.STONKY_MASTER.getValue().orElseThrow(() -> new IllegalStateException("Impossible"));
+        LOGGER.debug("Will look for Stonky master spreadsheet: {}.", masterId);
+        final File upstream = driveService.files().get(masterId).execute();
         final File parent = getOrCreateRoboZonkyFolder();
         final Optional<File> stonky = listSpreadsheets(getFilesInFolder(driveService, parent))
                 .filter(s -> Objects.equals(s.getName(), upstream.getName()))
@@ -213,17 +221,17 @@ class DriveOverview {
         f.setName(name);
         f.setParents(Collections.singletonList(parent.getId()));
         f.setMimeType(MIME_TYPE_GOOGLE_SPREADSHEET);
+        LOGGER.debug("Creating a new Google spreadsheet: {}.", f);
         final File result = driveService.files().create(f, export)
                 .setFields("id")
                 .execute();
         // and mark the time when the file was last updated
         state.update(m -> m.put(identify(result), OffsetDateTime.now().toString()));
-        LOGGER.debug("Created a new Google spreadsheet '{}'.", result.getId());
+        LOGGER.debug("New Google spreadsheet created: {}.", result.getId());
         return result;
     }
 
     private File actuallyModifySpreadsheet(final File original, final URL xls) throws IOException {
-        LOGGER.debug("Updating an existing Google spreadsheet '{}'.", original.getId());
         final FileContent export = downloadZonkyExport(xls);
         return driveService.files().update(original.getId(), null, export)
                 .setFields("id")
@@ -231,13 +239,15 @@ class DriveOverview {
     }
 
     private File modifySpreadsheet(final File original, final Supplier<URL> xls) throws IOException {
-        final String targetName = identify(original);
-        final boolean shouldUpdate = state.getValue(targetName)
+        final String id = identify(original);
+        final boolean shouldUpdate = state.getValue(id)
                 .map(value -> OffsetDateTime.parse(value).isBefore(OffsetDateTime.now().minusDays(1)))
                 .orElse(true);
         if (shouldUpdate) {
+            LOGGER.debug("Updating an existing Google spreadsheet: {}.", original.getId());
             final File result = actuallyModifySpreadsheet(original, xls.get());
-            state.update(m -> m.put(targetName, OffsetDateTime.now().toString()));
+            LOGGER.debug("Google spreadsheet updated.");
+            state.update(m -> m.put(id, OffsetDateTime.now().toString()));
             return result;
         } else {
             LOGGER.debug("Not touching the existing Google spreadsheet '{}'.", original.getId());
@@ -262,9 +272,9 @@ class DriveOverview {
     @Override
     public String toString() {
         return "DriveOverview{" +
-                "folder=" + folder +
-                ", investments=" + investments +
-                ", wallet=" + wallet +
+                "folder=" + identify(folder) +
+                ", investments=" + identify(investments) +
+                ", wallet=" + identify(wallet) +
                 '}';
     }
 }

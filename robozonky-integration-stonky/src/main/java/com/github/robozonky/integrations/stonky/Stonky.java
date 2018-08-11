@@ -67,9 +67,19 @@ class Stonky implements Payload {
         return getUrl(ZONKY_ROOT + "/investments/export?access_token=", token.getAccessToken());
     }
 
-    private static SheetProperties copySheet(final Sheets sheetsService, final Spreadsheet stonky,
-                                             final File sheet) throws IOException {
-        final int sheetId = sheetsService.spreadsheets().get(sheet.getId())
+    /**
+     * This is synchronized because if it weren't and two copies were happening at the same time, Google API would
+     * have thrown an undescribed HTTP 500 error when trying to execute the actual copying operation. A working theory
+     * is that all the old sheet IDs are invalidated when a new sheet is added - but this is not verified.
+     * @param sheetsService
+     * @param stonky
+     * @param export
+     * @return
+     * @throws IOException
+     */
+    private static synchronized SheetProperties copySheet(final Sheets sheetsService, final Spreadsheet stonky,
+                                                          final File export) throws IOException {
+        final int sheetId = sheetsService.spreadsheets().get(export.getId())
                 .execute()
                 .getSheets()
                 .get(0) // first and only sheet
@@ -77,15 +87,18 @@ class Stonky implements Payload {
                 .getSheetId();
         final CopySheetToAnotherSpreadsheetRequest r = new CopySheetToAnotherSpreadsheetRequest()
                 .setDestinationSpreadsheetId(stonky.getSpreadsheetId());
+        LOGGER.debug("Will copy sheet {} from spreadsheet '{}' to spreadsheet '{}'", sheetId, export.getId(),
+                     stonky.getSpreadsheetId());
         return sheetsService.spreadsheets().sheets()
-                .copyTo(sheet.getId(), sheetId, r)
+                .copyTo(export.getId(), sheetId, r)
                 .execute()
                 .clone();
     }
 
-    private static Spreadsheet copySheet(final Sheets sheetsService, final Spreadsheet stonky, final File sheet,
+    private static Spreadsheet copySheet(final Sheets sheetsService, final Spreadsheet stonky, final File export,
                                          final String name) throws IOException {
-        LOGGER.debug("Processing sheet '{}'.", name);
+        LOGGER.debug("Requested to copy sheet '{}' to Stonky '{}' from imported '{}'.", name, stonky.getSpreadsheetId(),
+                     export.getId());
         final Optional<Sheet> targetSheet = stonky.getSheets().stream()
                 .filter(s -> Objects.equals(s.getProperties().getTitle(), name))
                 .findFirst();
@@ -97,7 +110,7 @@ class Stonky implements Payload {
             requests.add(new Request().setDeleteSheet(delete));
         });
         LOGGER.debug("Copying sheet.");
-        final SheetProperties newSheet = copySheet(sheetsService, stonky, sheet)
+        final SheetProperties newSheet = copySheet(sheetsService, stonky, export)
                 .setIndex(0)
                 .setTitle(name);
         final UpdateSheetPropertiesRequest update = new UpdateSheetPropertiesRequest()
@@ -108,36 +121,33 @@ class Stonky implements Payload {
                 .setRequests(requests);
         LOGGER.debug("Renaming sheet and changing position.");
         sheetsService.spreadsheets().batchUpdate(stonky.getSpreadsheetId(), batch).execute();
-        LOGGER.debug("Stonky `{}` sheet processed.", name);
+        LOGGER.debug("Stonky '{}' sheet processed.", name);
         return stonky;
     }
 
-    private static void run(final SessionInfo sessionInfo,
-                            final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
+    private static void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
             throws GeneralSecurityException, IOException, ExecutionException, InterruptedException {
-        // see what we have in the drive, to see what we need to create or update
         final Drive driveService = Util.createDriveService(sessionInfo);
         final Sheets sheetsService = Util.createSheetsService(sessionInfo);
-        final CompletableFuture<DriveOverview> overview = CompletableFuture.supplyAsync(
-                Util.wrap(() -> DriveOverview.create(sessionInfo, driveService)));
-        final CompletableFuture<Summary> summary = overview.thenApply(
-                Util.wrap(o -> {
-                    final File s = o.latestStonky();
-                    final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();
-                    return new Summary(o, result);
-                }));
-        final CompletableFuture<Spreadsheet> walletCopier = summary.thenApplyAsync(
-                Util.wrap(s -> {
-                    final DriveOverview o = s.getOverview();
-                    final File f = o.latestWallet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
-                    return copySheet(sheetsService, s.getStonky(), f, "Wallet");
-                }));
-        final CompletableFuture<Spreadsheet> peopleCopier = summary.thenApplyAsync(
-                Util.wrap(s -> {
-                    final DriveOverview o = s.getOverview();
-                    final File f = o.latestInvestments(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
-                    return copySheet(sheetsService, s.getStonky(), f, "People");
-                }));
+        final CompletableFuture<Summary> summary = CompletableFuture.supplyAsync(Util.wrap(() -> {
+            final DriveOverview o = DriveOverview.create(sessionInfo, driveService);
+            LOGGER.debug("Google Drive overview: {}.", o);
+            final File s = o.latestStonky();
+            final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();
+            return new Summary(o, result);
+        }));
+        final CompletableFuture<Spreadsheet> walletCopier = summary.thenApplyAsync(Util.wrap(s -> {
+            LOGGER.debug("Requesting wallet export.");
+            final DriveOverview o = s.getOverview();
+            final File f = o.latestWallet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
+            return copySheet(sheetsService, s.getStonky(), f, "Wallet");
+        }));
+        final CompletableFuture<Spreadsheet> peopleCopier = summary.thenApplyAsync(Util.wrap(s -> {
+            LOGGER.debug("Requesting investments export.");
+            final DriveOverview o = s.getOverview();
+            final File f = o.latestInvestments(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
+            return copySheet(sheetsService, s.getStonky(), f, "People");
+        }));
         final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> a);
         LOGGER.debug("Blocking until all operations terminate.");
         final String stonkySpreadsheetId = merged.get().getSpreadsheetId();
