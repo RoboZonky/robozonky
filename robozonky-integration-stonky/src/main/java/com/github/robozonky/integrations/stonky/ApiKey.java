@@ -59,11 +59,11 @@ class ApiKey {
     public static void main(final String... args) throws Exception {
         final byte[] input = Files.readAllBytes(new File(args[0]).toPath());
         final SecretKeySpec key = createSecretKey();
-        System.out.println("Original password: " + new String(input));
-        final String encryptedPassword = encrypt(input, key);
-        System.out.println("Encrypted password: " + encryptedPassword);
-        final byte[] decryptedPassword = decrypt(encryptedPassword, key);
-        System.out.println("Decrypted password: " + new String(decryptedPassword));
+        System.out.println("Original: " + new String(input));
+        final String encrypted = encrypt(input, key);
+        System.out.println("Encrypted: " + encrypted);
+        final byte[] decrypted = decrypt(encrypted, key);
+        System.out.println("Decrypted: " + new String(decrypted));
     }
 
     public static byte[] get() throws GeneralSecurityException {
