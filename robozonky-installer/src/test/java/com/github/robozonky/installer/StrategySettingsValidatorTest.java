@@ -19,7 +19,9 @@ package com.github.robozonky.installer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 
+import com.github.robozonky.internal.api.Defaults;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -90,6 +92,18 @@ class StrategySettingsValidatorTest {
         final DataValidator.Status result = validator.validateData(d);
         // execute test
         assertThat(result).isEqualTo(DataValidator.Status.WARNING);
+    }
+
+    @Test
+    void allOk() throws IOException {
+        final File f = File.createTempFile("robozonky-", ".cfg");
+        Files.write(f.toPath(), "Robot má udržovat konzervativní portfolio.".getBytes(Defaults.CHARSET));
+        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f);
+        // execute sut
+        final DataValidator validator = new StrategySettingsValidator();
+        final DataValidator.Status result = validator.validateData(d);
+        // execute test
+        assertThat(result).isEqualTo(DataValidator.Status.OK);
     }
 
     @Test
