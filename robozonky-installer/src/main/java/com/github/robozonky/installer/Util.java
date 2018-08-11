@@ -53,6 +53,7 @@ final class Util {
         final Properties p = new Properties();
         p.setProperty("email.enabled", "true");
         p.setProperty("email.to", Variables.SMTP_TO.getValue(data));
+        p.setProperty("email.from", Variables.SMTP_USERNAME.getValue(data)); // seznam.cz demands, gmail does it anyway
         p.setProperty("email.smtp.requiresAuthentication", toBoolean(Variables.SMTP_AUTH.getValue(data)));
         p.setProperty("email.smtp.username", Variables.SMTP_USERNAME.getValue(data));
         p.setProperty("email.smtp.password", Variables.SMTP_PASSWORD.getValue(data));
