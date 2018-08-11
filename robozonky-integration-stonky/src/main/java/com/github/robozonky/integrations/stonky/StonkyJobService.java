@@ -37,7 +37,7 @@ public class StonkyJobService implements JobService {
 
         @Override
         public Duration repeatEvery() {
-            return Duration.ofHours(2);
+            return Duration.ofHours(24);
         }
 
         @Override
