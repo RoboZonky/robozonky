@@ -50,7 +50,7 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class Util {
+public class Util {
 
     private static final String APPLICATION_NAME = Defaults.ROBOZONKY_USER_AGENT;
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();

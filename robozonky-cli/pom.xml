@@ -41,6 +41,10 @@
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-integration-stonky</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-notifications</artifactId>
     </dependency>
     <dependency>

@@ -48,7 +48,8 @@ final class CommandLine {
 
     static Stream<Feature> listFeatures() {
         return Stream.of(new ZonkyPasswordFeature(), new ZonkoidPasswordFeature(), new MasterPasswordFeature(),
-                         new StrategyValidationFeature(), new NotificationTestingFeature());
+                         new StrategyValidationFeature(), new NotificationTestingFeature(),
+                         new GoogleCredentialsFeature());
     }
 
     private static Optional<Feature> parseUnsafe(final String... args) {

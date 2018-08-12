@@ -35,7 +35,7 @@ import com.google.api.services.drive.model.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class DriveOverview {
+public class DriveOverview {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DriveOverview.class);
 
