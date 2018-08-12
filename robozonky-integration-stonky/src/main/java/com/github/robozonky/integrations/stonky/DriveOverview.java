@@ -132,7 +132,9 @@ class DriveOverview {
 
     private static FileContent downloadZonkyExport(final URL sheet) {
         LOGGER.debug("Contacting Zonky to download the export.");
-        return new FileContent(MIME_TYPE_XLS_SPREADSHEET, Util.download(sheet));
+        final FileContent result = new FileContent(MIME_TYPE_XLS_SPREADSHEET, Util.download(sheet));
+        LOGGER.debug("Downloaded: {}.", result);
+        return result;
     }
 
     private static String identify(final File file) {

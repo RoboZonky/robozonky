@@ -164,7 +164,7 @@ class Stonky implements Payload {
         try {
             run(sessionInfo, zonkyApiTokenSupplier);
         } catch (final Exception ex) {
-            throw new IllegalStateException("Failed integrating with Stonky.", ex);
+            LOGGER.warn("Failed integrating with Stonky.", ex);
         }
     }
 
