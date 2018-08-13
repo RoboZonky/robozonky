@@ -18,7 +18,6 @@ package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -27,8 +26,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.state.TenantState;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -44,7 +41,6 @@ public class DriveOverview {
     private static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
     private static final String ROBOZONKY_INVESTMENTS_SHEET_NAME = "Export investic";
     private static final String ROBOZONKY_WALLET_SHEET_NAME = "Export peněženky";
-    private final InstanceState<DriveOverview> state;
     private final SessionInfo sessionInfo;
     private final Drive driveService;
     private volatile File folder;
@@ -71,7 +67,6 @@ public class DriveOverview {
         this.folder = parent;
         this.investments = investments;
         this.wallet = wallet;
-        this.state = TenantState.of(sessionInfo).in(DriveOverview.class);
     }
 
     private static String getFolderName(final SessionInfo sessionInfo) {
@@ -169,7 +164,6 @@ public class DriveOverview {
         final File result = driveService.files().copy(upstream.getId(), f)
                 .setFields("id")
                 .execute();
-        state.update(m -> m.put("stonky", OffsetDateTime.now().toString()));
         LOGGER.debug("Created a copy of Stonky: {}.", result.getId());
         return result;
     }
@@ -228,7 +222,6 @@ public class DriveOverview {
                 .setFields("id")
                 .execute();
         // and mark the time when the file was last updated
-        state.update(m -> m.put(identify(result), OffsetDateTime.now().toString()));
         LOGGER.debug("New Google spreadsheet created: {}.", result.getId());
         return result;
     }
@@ -242,24 +235,14 @@ public class DriveOverview {
 
     private File modifySpreadsheet(final File original, final Supplier<URL> xls) throws IOException {
         final String id = identify(original);
-        final boolean shouldUpdate = state.getValue(id)
-                .map(value -> OffsetDateTime.parse(value).isBefore(OffsetDateTime.now().minusDays(1)))
-                .orElse(true);
-        if (shouldUpdate) {
-            LOGGER.debug("Updating an existing Google spreadsheet: {}.", original.getId());
-            final File result = actuallyModifySpreadsheet(original, xls.get());
-            LOGGER.debug("Google spreadsheet updated.");
-            state.update(m -> m.put(id, OffsetDateTime.now().toString()));
-            return result;
-        } else {
-            LOGGER.debug("Not touching the existing Google spreadsheet '{}'.", original.getId());
-            return original;
-        }
+        LOGGER.debug("Updating an existing Google spreadsheet: {}.", original.getId());
+        final File result = actuallyModifySpreadsheet(original, xls.get());
+        LOGGER.debug("Google spreadsheet updated.");
+        return result;
     }
 
     /**
-     * Download the spreadsheet from Zonky and convert it to a Google Spreadsheet. May skip the Zonky download if the
-     * existing data is sufficiently recent.
+     * Download the spreadsheet from Zonky and convert it to a Google Spreadsheet.
      * @param xls Where to download the Zonky spreadsheet from.
      * @param name Name of the Google spreadsheet file to create if it doesn't exist.
      * @param original Google spreadsheet file to update, or null if none exists.
