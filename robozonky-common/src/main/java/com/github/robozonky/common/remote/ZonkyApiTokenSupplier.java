@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.authentication;
+package com.github.robozonky.common.remote;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +29,22 @@ import org.slf4j.LoggerFactory;
 /**
  * Will keep permanent user authentication running in the background.
  */
-class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
+public final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
+    private final String scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;
     private final Duration refresh;
     private volatile ZonkyApiToken token = null;
 
     public ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
+        this(ZonkyApiToken.SCOPE_APP_WEB_STRING, apis, secrets, refreshAfter);
+    }
+
+    public ZonkyApiTokenSupplier(final String scope, final ApiProvider apis, final SecretProvider secrets,
+                                 final Duration refreshAfter) {
+        this.scope = scope;
         this.apis = apis;
         this.secrets = secrets;
         // fit refresh interval between 1 and 4 minutes
@@ -47,10 +53,11 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
         refresh = Duration.ofSeconds(refreshSeconds);
     }
 
-    private static ZonkyApiToken login(final ApiProvider apis, final String username, final char... password) {
+    private ZonkyApiToken login() {
         return apis.oauth((oauth) -> {
-            LOGGER.trace("Authenticating as '{}', using password.", username);
-            return oauth.login(username, password);
+            final String username = secrets.getUsername();
+            LOGGER.trace("Requesting '{}' as '{}', using password.", scope, username);
+            return oauth.login(scope, username, secrets.getPassword());
         });
     }
 
@@ -59,19 +66,15 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
         return apis.oauth((oauth) -> oauth.refresh(token));
     }
 
-    private ZonkyApiToken getFreshToken() {
-        return login(apis, secrets.getUsername(), secrets.getPassword());
-    }
-
     private ZonkyApiToken refreshTokenIfNecessary(final ZonkyApiToken token) {
         if (token.willExpireIn(Duration.ZERO)) {
-            return getFreshToken();
+            return login();
         } else if (token.willExpireIn(refresh)) {
             try {
                 return refreshToken(token);
             } catch (final Exception ex) {
                 LOGGER.debug("Failed refreshing access token, falling back to password.", ex);
-                return getFreshToken();
+                return login();
             }
         } else {
             return token;
@@ -83,7 +86,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
      * cannot cancel out each others' token requests.
      */
     private ZonkyApiToken getTokenInAnyWay(final ZonkyApiToken currentToken) {
-        return currentToken == null ? getFreshToken() : refreshTokenIfNecessary(currentToken);
+        return currentToken == null ? login() : refreshTokenIfNecessary(currentToken);
     }
 
     @Override

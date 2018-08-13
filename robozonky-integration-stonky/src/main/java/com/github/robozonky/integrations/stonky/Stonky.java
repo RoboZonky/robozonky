@@ -29,8 +29,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.jobs.Payload;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
+import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.internal.api.Settings;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
@@ -156,13 +160,16 @@ class Stonky implements Payload {
     }
 
     @Override
-    public void accept(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier) {
+    public void accept(final SecretProvider secretProvider) {
+        final SessionInfo sessionInfo = new SessionInfo(secretProvider.getUsername());
         if (!Util.hasCredentials(sessionInfo)) {
             LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
                         sessionInfo.getUsername());
+            return;
         }
-        try {
-            run(sessionInfo, zonkyApiTokenSupplier);
+        try (final ApiProvider apis = new ApiProvider()) {
+            run(sessionInfo, new ZonkyApiTokenSupplier(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING, apis, secretProvider,
+                                                       Settings.INSTANCE.getTokenRefreshPeriod()));
         } catch (final Exception ex) {
             LOGGER.warn("Failed integrating with Stonky.", ex);
         }

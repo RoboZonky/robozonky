@@ -18,12 +18,11 @@ package com.github.robozonky.app.authentication;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.util.StreamUtil;
@@ -52,7 +51,7 @@ public interface Tenant {
 
     SessionInfo getSessionInfo();
 
-    Supplier<ZonkyApiToken> getTokenSupplier();
+    SecretProvider getSecrets();
 
     default <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);

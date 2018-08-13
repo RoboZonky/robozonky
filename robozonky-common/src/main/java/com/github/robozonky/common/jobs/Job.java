@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.jobs;
+package com.github.robozonky.common.jobs;
 
 import java.time.Duration;
 

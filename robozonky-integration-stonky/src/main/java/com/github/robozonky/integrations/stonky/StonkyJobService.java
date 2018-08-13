@@ -22,9 +22,9 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.api.jobs.Job;
-import com.github.robozonky.api.jobs.JobService;
-import com.github.robozonky.api.jobs.Payload;
+import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.JobService;
+import com.github.robozonky.common.jobs.Payload;
 import com.github.robozonky.internal.api.Defaults;
 
 public class StonkyJobService implements JobService {

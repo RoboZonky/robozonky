@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ZonkyApiToken extends BaseEntity {
 
-    private static final String REFRESH_TOKEN_STRING = "refresh_token",
-            SCOPE_APP_WEB_STRING = "SCOPE_APP_WEB";
+    public static final String REFRESH_TOKEN_STRING = "refresh_token",
+            SCOPE_APP_WEB_STRING = "SCOPE_APP_WEB",
+            SCOPE_FILE_DOWNLOAD_STRING = "SCOPE_FILE_DOWNLOAD";
 
     @XmlElement(name = "access_token")
     private char[] accessToken;

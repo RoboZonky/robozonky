@@ -78,7 +78,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private void scheduleJobs(final Scheduler executor) {
         JobServiceLoader.load().forEach(job -> {
             LOGGER.debug("Scheduling {}.", job);
-            final Runnable payload = () -> job.payload().accept(tenant.getSessionInfo(), tenant.getTokenSupplier());
+            final Runnable payload = () -> job.payload().accept(tenant.getSecrets());
             executor.submit(payload, job.repeatEvery(), job.startIn());
         });
     }

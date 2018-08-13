@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.jobs;
+package com.github.robozonky.common.jobs;
 
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.secrets.SecretProvider;
 
 @FunctionalInterface
-public interface Payload extends BiConsumer<SessionInfo, Supplier<ZonkyApiToken>> {
+public interface Payload extends Consumer<SecretProvider> {
 
 }

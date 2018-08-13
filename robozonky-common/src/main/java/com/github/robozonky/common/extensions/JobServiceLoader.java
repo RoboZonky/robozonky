@@ -19,8 +19,8 @@ package com.github.robozonky.common.extensions;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.jobs.Job;
-import com.github.robozonky.api.jobs.JobService;
+import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.JobService;
 import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
