@@ -17,7 +17,6 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -36,7 +36,6 @@ public class DriveOverview {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DriveOverview.class);
 
-    private static final String MIME_TYPE_XLS_SPREADSHEET = "application/vnd.ms-excel";
     private static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
     private static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
     private static final String ROBOZONKY_INVESTMENTS_SHEET_NAME = "Export investic";
@@ -44,7 +43,7 @@ public class DriveOverview {
     private final SessionInfo sessionInfo;
     private final Drive driveService;
     private volatile File folder;
-    private volatile File investments;
+    private volatile File people;
     private volatile File wallet;
 
     private DriveOverview(final SessionInfo sessionInfo, final Drive driveService) {
@@ -61,11 +60,11 @@ public class DriveOverview {
     }
 
     private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final File parent, final File wallet,
-                          final File investments) {
+                          final File people) {
         this.sessionInfo = sessionInfo;
         this.driveService = driveService;
         this.folder = parent;
-        this.investments = investments;
+        this.people = people;
         this.wallet = wallet;
     }
 
@@ -123,13 +122,6 @@ public class DriveOverview {
         return getSpreadsheetWithName(all, ROBOZONKY_INVESTMENTS_SHEET_NAME)
                 .map(f -> new DriveOverview(sessionInfo, driveService, parent, null, f))
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent));
-    }
-
-    private static FileContent downloadZonkyExport(final URL sheet) {
-        LOGGER.debug("Contacting Zonky to download the export.");
-        final FileContent result = new FileContent(MIME_TYPE_XLS_SPREADSHEET, Util.download(sheet));
-        LOGGER.debug("Downloaded: {}.", result);
-        return result;
     }
 
     private static String identify(final File file) {
@@ -197,20 +189,21 @@ public class DriveOverview {
         }
     }
 
-    public File latestWallet(final Supplier<URL> xls) throws IOException {
+    public File latestWallet(final Supplier<ZonkyApiToken> token) throws IOException {
         LOGGER.debug("Processing wallet export.");
-        wallet = getLatestSpreadsheet(xls, ROBOZONKY_WALLET_SHEET_NAME, wallet);
+        wallet = getLatestSpreadsheet(() -> Export.WALLET.download(token.get()), ROBOZONKY_WALLET_SHEET_NAME, wallet);
         return wallet;
     }
 
-    public File latestInvestments(final Supplier<URL> xls) throws IOException {
+    public File latestPeople(final Supplier<ZonkyApiToken> token) throws IOException {
         LOGGER.debug("Processing investment export.");
-        investments = getLatestSpreadsheet(xls, ROBOZONKY_INVESTMENTS_SHEET_NAME, investments);
-        return investments;
+        people = getLatestSpreadsheet(() -> Export.PEOPLE.download(token.get()),
+                                      ROBOZONKY_INVESTMENTS_SHEET_NAME, people);
+        return people;
     }
 
-    private File createSpreadsheet(final String name, final Supplier<URL> xls) throws IOException {
-        final FileContent export = downloadZonkyExport(xls.get()); // download from Zonky first
+    private File createSpreadsheet(final String name, final Supplier<FileContent> downloader) throws IOException {
+        final FileContent export = downloader.get(); // download from Zonky first
         final File parent = getOrCreateRoboZonkyFolder(); // retrieve Google folder in which to place the spreadsheet
         // convert the Zonky XLS to Google Spreadsheet
         final File f = new File();
@@ -226,39 +219,40 @@ public class DriveOverview {
         return result;
     }
 
-    private File actuallyModifySpreadsheet(final File original, final URL xls) throws IOException {
-        final FileContent export = downloadZonkyExport(xls);
+    private File actuallyModifySpreadsheet(final File original,
+                                           final Supplier<FileContent> downloader) throws IOException {
+        final FileContent export = downloader.get();
         return driveService.files().update(original.getId(), null, export)
                 .setFields("id")
                 .execute();
     }
 
-    private File modifySpreadsheet(final File original, final Supplier<URL> xls) throws IOException {
+    private File modifySpreadsheet(final File original, final Supplier<FileContent> downloader) throws IOException {
         final String id = identify(original);
-        LOGGER.debug("Updating an existing Google spreadsheet: {}.", original.getId());
-        final File result = actuallyModifySpreadsheet(original, xls.get());
+        LOGGER.debug("Updating an existing Google spreadsheet: {}.", id);
+        final File result = actuallyModifySpreadsheet(original, downloader);
         LOGGER.debug("Google spreadsheet updated.");
         return result;
     }
 
     /**
      * Download the spreadsheet from Zonky and convert it to a Google Spreadsheet.
-     * @param xls Where to download the Zonky spreadsheet from.
+     * @param downloader Called to download the file.
      * @param name Name of the Google spreadsheet file to create if it doesn't exist.
      * @param original Google spreadsheet file to update, or null if none exists.
      * @return Guaranteed latest version of the Google Spreadsheet matching the Zonky spreadsheet.
      * @throws IOException
      */
-    private File getLatestSpreadsheet(final Supplier<URL> xls, final String name,
+    private File getLatestSpreadsheet(final Supplier<FileContent> downloader, final String name,
                                       final File original) throws IOException {
-        return (original == null) ? createSpreadsheet(name, xls) : modifySpreadsheet(original, xls);
+        return (original == null) ? createSpreadsheet(name, downloader) : modifySpreadsheet(original, downloader);
     }
 
     @Override
     public String toString() {
         return "DriveOverview{" +
                 "folder=" + identify(folder) +
-                ", investments=" + identify(investments) +
+                ", people=" + identify(people) +
                 ", wallet=" + identify(wallet) +
                 '}';
     }

@@ -17,8 +17,6 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,24 +50,6 @@ import org.slf4j.LoggerFactory;
 class Stonky implements Payload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stonky.class);
-    private static final String ZONKY_ROOT = "https://api.zonky.cz/users/me";
-
-    private static URL getUrl(final String prefix, final char... token) {
-        final String attempted = prefix + String.valueOf(token);
-        try {
-            return new URL(attempted);
-        } catch (final MalformedURLException ex) {
-            throw new IllegalStateException("Failed creating URL: " + attempted, ex);
-        }
-    }
-
-    private static URL getWalletXlsUrl(final ZonkyApiToken token) {
-        return getUrl(ZONKY_ROOT + "/wallet/transactions/export?access_token=", token.getAccessToken());
-    }
-
-    private static URL getInvestmentsXlsUrl(final ZonkyApiToken token) {
-        return getUrl(ZONKY_ROOT + "/investments/export?access_token=", token.getAccessToken());
-    }
 
     /**
      * This is synchronized because if it weren't and two copies were happening at the same time, Google API would
@@ -144,13 +124,13 @@ class Stonky implements Payload {
         final CompletableFuture<Spreadsheet> walletCopier = summary.thenApplyAsync(Util.wrap(s -> {
             LOGGER.debug("Requesting wallet export.");
             final DriveOverview o = s.getOverview();
-            final File f = o.latestWallet(() -> getWalletXlsUrl(zonkyApiTokenSupplier.get()));
+            final File f = o.latestWallet(zonkyApiTokenSupplier);
             return copySheet(sheetsService, s.getStonky(), f, "Wallet");
         }));
         final CompletableFuture<Spreadsheet> peopleCopier = summary.thenApplyAsync(Util.wrap(s -> {
             LOGGER.debug("Requesting investments export.");
             final DriveOverview o = s.getOverview();
-            final File f = o.latestInvestments(() -> getInvestmentsXlsUrl(zonkyApiTokenSupplier.get()));
+            final File f = o.latestPeople(zonkyApiTokenSupplier);
             return copySheet(sheetsService, s.getStonky(), f, "People");
         }));
         final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> a);
