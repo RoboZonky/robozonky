@@ -16,16 +16,19 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.JobService;
+import org.junit.jupiter.api.Test;
 
-public class StonkyJobService implements JobService {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Override
-    public Collection<Job> getJobs() {
-        return Collections.singleton(StonkyJob.INSTANCE);
+class StonkyJobServiceTest {
+
+    @Test
+    void hasJustOneJob() {
+        final JobService s = new StonkyJobService();
+        assertThat(s.getJobs())
+                .hasSize(1)
+                .first()
+                .isInstanceOf(StonkyJob.class);
     }
 }
