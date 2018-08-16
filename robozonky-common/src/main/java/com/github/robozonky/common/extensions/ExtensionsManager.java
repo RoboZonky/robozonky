@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.ServiceLoader;
 
 import com.github.robozonky.util.FileUtil;
+import com.github.robozonky.util.LazyInitialized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,8 @@ import org.slf4j.LoggerFactory;
 enum ExtensionsManager {
 
     INSTANCE; // cheap thread-safe singleton
+
+    private final Logger LOGGER = LoggerFactory.getLogger(ExtensionsManager.class);
 
     ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
         this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
@@ -52,10 +55,15 @@ enum ExtensionsManager {
                 });
     }
 
-    private final Logger LOGGER = LoggerFactory.getLogger(ExtensionsManager.class);
-
-    public <T> ServiceLoader<T> getServiceLoader(final Class<T> serviceClass) {
-        return getServiceLoader(serviceClass, "extensions");
+    /**
+     * @param serviceClass
+     * @param <T>
+     * @return This is lazy initialized, since if we place the result in a static final variable, and the service
+     * loader initialization throws an exception, the parent class will fail to load and we will get a
+     * NoClassDefFoundError which gives us no information as to why it happened.
+     */
+    public <T> LazyInitialized<ServiceLoader<T>> getServiceLoader(final Class<T> serviceClass) {
+        return LazyInitialized.create(() -> getServiceLoader(serviceClass, "extensions"));
     }
 
     <T> ServiceLoader<T> getServiceLoader(final Class<T> serviceClass, final String folderName) {
