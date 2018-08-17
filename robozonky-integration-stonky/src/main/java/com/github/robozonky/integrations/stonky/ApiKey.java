@@ -30,6 +30,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.github.robozonky.internal.api.Defaults;
+
 /**
  * In order to communicate with the Google Sheets API, we need to authenticate against it. For that, we need to use a
  * secret. That secret can be obtained from Google's developer console, and should not be shared with anyone.
@@ -58,16 +60,17 @@ class ApiKey {
 
     public static void main(final String... args) throws Exception {
         final byte[] input = Files.readAllBytes(new File(args[0]).toPath());
-        final SecretKeySpec key = createSecretKey();
-        System.out.println("Original: " + new String(input));
-        final String encrypted = encrypt(input, key);
+        final String encrypted = new String(encrypt(input));
         System.out.println("Encrypted: " + encrypted);
-        final byte[] decrypted = decrypt(encrypted, key);
-        System.out.println("Decrypted: " + new String(decrypted));
+    }
+
+    static byte[] encrypt(final byte[] input) throws Exception {
+        final SecretKeySpec key = createSecretKey();
+        return encrypt(input, key).getBytes(Defaults.CHARSET);
     }
 
     public static byte[] get() throws GeneralSecurityException {
-        return decrypt(RESULT, createSecretKey());
+        return decrypt(RESULT);
     }
 
     private static SecretKeySpec createSecretKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -97,6 +100,10 @@ class ApiKey {
         final Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         pbeCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(base64Decode(iv)));
         return pbeCipher.doFinal(base64Decode(property));
+    }
+
+    static byte[] decrypt(final String string) throws GeneralSecurityException {
+        return decrypt(string, createSecretKey());
     }
 
     private static byte[] base64Decode(final String property) {

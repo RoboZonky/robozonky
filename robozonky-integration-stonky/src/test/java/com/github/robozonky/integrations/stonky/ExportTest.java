@@ -52,7 +52,7 @@ class ExportTest {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getLocalPort();
         server.when(request()
-                            .withPath("/users/me/investments/export")
+                            .withPath("/users/me/investments/export/data")
                             .withQueryStringParameter("access_token", String.valueOf(token.getAccessToken())))
                 .respond(response()
                                  .withHeader("Content-Disposition", "attachment; filename=\"people.xls\"")
@@ -61,7 +61,7 @@ class ExportTest {
                                  .withHeader("Content-Length", String.valueOf(PEOPLE_CONTENT.length()))
                                  .withBody(PEOPLE_CONTENT));
         server.when(request()
-                            .withPath("/users/me/wallet/transactions/export")
+                            .withPath("/users/me/wallet/transactions/export/data")
                             .withQueryStringParameter("access_token", String.valueOf(token.getAccessToken())))
                 .respond(response()
                                  .withHeader("Content-Disposition", "attachment; filename=\"wallet.xls\"")
