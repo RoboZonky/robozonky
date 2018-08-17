@@ -46,7 +46,11 @@ enum StonkyJob implements Job {
 
     @Override
     public Payload payload() {
-        return new Stonky();
+        try {
+            return new Stonky();
+        } catch (final Exception ex) {
+            throw new IllegalStateException("Failed instantiating Stonky integration.", ex);
+        }
     }
 
 }

@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
@@ -33,6 +34,8 @@ import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
@@ -50,6 +53,28 @@ import org.slf4j.LoggerFactory;
 class Stonky implements Payload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stonky.class);
+
+    private final HttpTransport transport;
+    private final Function<SessionInfo, Credential> credentialSupplier;
+
+    public Stonky() throws GeneralSecurityException, IOException {
+        this(Util.createTransport());
+    }
+
+    Stonky(final HttpTransport transport) {
+        this(transport, (sessionInfo) -> {
+            try {
+                return Util.getCredential(sessionInfo, transport);
+            } catch (final Exception ex) {
+                throw new IllegalStateException("Failed obtaining Google credential.", ex);
+            }
+        });
+    }
+
+    Stonky(final HttpTransport transport, final Function<SessionInfo, Credential> credentialSupplier) {
+        this.transport = transport;
+        this.credentialSupplier = credentialSupplier;
+    }
 
     /**
      * This is synchronized because if it weren't and two copies were happening at the same time, Google API would
@@ -109,11 +134,13 @@ class Stonky implements Payload {
         return stonky;
     }
 
-    private static void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
-            throws GeneralSecurityException, IOException, ExecutionException, InterruptedException {
+    private void run(final SessionInfo sessionInfo,
+                     final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
+            throws ExecutionException, InterruptedException {
         LOGGER.debug("Updating Stonky spreadsheet.");
-        final Drive driveService = Util.createDriveService(sessionInfo);
-        final Sheets sheetsService = Util.createSheetsService(sessionInfo);
+        final Credential credential = credentialSupplier.apply(sessionInfo);
+        final Drive driveService = Util.createDriveService(credential, transport);
+        final Sheets sheetsService = Util.createSheetsService(credential, transport);
         final CompletableFuture<Summary> summary = CompletableFuture.supplyAsync(Util.wrap(() -> {
             final DriveOverview o = DriveOverview.create(sessionInfo, driveService);
             LOGGER.debug("Google Drive overview: {}.", o);
@@ -142,7 +169,7 @@ class Stonky implements Payload {
     @Override
     public void accept(final SecretProvider secretProvider) {
         final SessionInfo sessionInfo = new SessionInfo(secretProvider.getUsername());
-        if (!Util.hasCredentials(sessionInfo)) {
+        if (!Util.hasCredential(sessionInfo, transport)) {
             LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
                         sessionInfo.getUsername());
             return;

@@ -1,0 +1,43 @@
+/*
+ * Copyright 2018 The RoboZonky Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.robozonky.integrations.stonky;
+
+import java.util.Optional;
+import java.util.function.BiFunction;
+
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public abstract class ResponseHandler implements BiFunction<String, String, Optional<MockLowLevelHttpResponse>> {
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+    abstract protected boolean appliesTo(final String method, final String url);
+
+    abstract protected MockLowLevelHttpResponse respond(final String method, final String url);
+
+    @Override
+    public Optional<MockLowLevelHttpResponse> apply(final String method, final String url) {
+        if (appliesTo(method, url)) {
+            return Optional.ofNullable(respond(method, url));
+        } else {
+            LOGGER.debug("Does not apply to {} {}.", method, url);
+            return Optional.empty();
+        }
+    }
+}

@@ -35,7 +35,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
@@ -60,7 +60,7 @@ public class Util {
                                                              SheetsScopes.DRIVE_FILE,
                                                              SheetsScopes.DRIVE);
 
-    private static GoogleAuthorizationCodeFlow createFlow(final NetHttpTransport httpTransport,
+    private static GoogleAuthorizationCodeFlow createFlow(final HttpTransport httpTransport,
                                                           final GoogleClientSecrets clientSecrets) throws IOException {
         return new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new File(CREDENTIALS_FOLDER)))
@@ -75,8 +75,7 @@ public class Util {
      * @return An authorized Credential object.
      * @throws IOException If there is no client_secret.
      */
-    private static Credential getCredentials(final SessionInfo sessionInfo,
-                                             final NetHttpTransport httpTransport)
+    public static Credential getCredential(final SessionInfo sessionInfo, final HttpTransport httpTransport)
             throws IOException, GeneralSecurityException {
         final GoogleClientSecrets clientSecrets = createClientSecrets();
         final GoogleAuthorizationCodeFlow flow = createFlow(httpTransport, clientSecrets);
@@ -90,10 +89,10 @@ public class Util {
         }
     }
 
-    public static boolean hasCredentials(final SessionInfo sessionInfo) {
+    public static boolean hasCredential(final SessionInfo sessionInfo, final HttpTransport transport) {
         try {
             final GoogleClientSecrets secrets = createClientSecrets();
-            final GoogleAuthorizationCodeFlow flow = createFlow(createTransport(), secrets);
+            final GoogleAuthorizationCodeFlow flow = createFlow(transport, secrets);
             return (flow.loadCredential(sessionInfo.getUsername()) != null);
         } catch (final Exception ex) {
             LOGGER.debug("Failed retrieving user credentials.", ex);
@@ -101,21 +100,18 @@ public class Util {
         }
     }
 
-    private static NetHttpTransport createTransport() throws GeneralSecurityException, IOException {
+    public static HttpTransport createTransport() throws GeneralSecurityException, IOException {
         return GoogleNetHttpTransport.newTrustedTransport();
     }
 
-    public static Drive createDriveService(final SessionInfo sessionInfo) throws GeneralSecurityException, IOException {
-        final NetHttpTransport httpTransport = createTransport();
-        return new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials(sessionInfo, httpTransport))
+    public static Drive createDriveService(final Credential credential, final HttpTransport transport) {
+        return new Drive.Builder(transport, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
 
-    public static Sheets createSheetsService(
-            final SessionInfo sessionInfo) throws GeneralSecurityException, IOException {
-        final NetHttpTransport httpTransport = createTransport();
-        return new Sheets.Builder(httpTransport, JSON_FACTORY, getCredentials(sessionInfo, httpTransport))
+    public static Sheets createSheetsService(final Credential credential, final HttpTransport transport) {
+        return new Sheets.Builder(transport, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }

@@ -21,6 +21,8 @@ import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.integrations.stonky.DriveOverview;
 import com.github.robozonky.integrations.stonky.Util;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +55,10 @@ public final class GoogleCredentialsFeature implements Feature {
         LOGGER.info("Unless you allow RoboZonky to access your Google Sheets, Stonky integration will be disabled.");
         try {
             final SessionInfo sessionInfo = new SessionInfo(username);
-            Util.createSheetsService(sessionInfo);
-            Util.createDriveService(sessionInfo);
+            final HttpTransport transport = Util.createTransport();
+            final Credential credential = Util.getCredential(sessionInfo, transport);
+            Util.createSheetsService(credential, transport);
+            Util.createDriveService(credential, transport);
             LOGGER.info("Press Enter to confirm that you have granted permission, otherwise exit.");
             System.in.read();
         } catch (final Exception ex) {
@@ -66,7 +70,9 @@ public final class GoogleCredentialsFeature implements Feature {
     public void test() throws TestFailedException {
         try {
             final SessionInfo sessionInfo = new SessionInfo(username);
-            final Drive service = Util.createDriveService(sessionInfo);
+            final HttpTransport transport = Util.createTransport();
+            final Credential credential = Util.getCredential(sessionInfo, transport);
+            final Drive service = Util.createDriveService(credential, transport);
             final DriveOverview driveOverview = DriveOverview.create(new SessionInfo(username), service);
             LOGGER.debug("Google Drive contents: {}.", driveOverview);
         } catch (final Exception ex) {
