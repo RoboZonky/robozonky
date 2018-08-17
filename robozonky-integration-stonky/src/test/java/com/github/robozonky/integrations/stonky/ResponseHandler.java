@@ -16,16 +16,36 @@
 
 package com.github.robozonky.integrations.stonky;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
+import com.google.api.client.http.json.JsonHttpContent;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class ResponseHandler implements BiFunction<String, String, Optional<MockLowLevelHttpResponse>> {
 
+    private static final JacksonFactory FACTORY = new JacksonFactory();
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+    protected static String toJson(final Object object) {
+        try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            new JsonHttpContent(FACTORY, object).writeTo(baos);
+            return baos.toString();
+        } catch (final IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    protected static String toJson(final Collection<?> objects) {
+        return objects.stream().map(ResponseHandler::toJson).collect(Collectors.joining(", "));
+    }
 
     abstract protected boolean appliesTo(final String method, final String url);
 
@@ -34,6 +54,7 @@ public abstract class ResponseHandler implements BiFunction<String, String, Opti
     @Override
     public Optional<MockLowLevelHttpResponse> apply(final String method, final String url) {
         if (appliesTo(method, url)) {
+            LOGGER.debug("Applies to {} {}.", method, url);
             return Optional.ofNullable(respond(method, url));
         } else {
             LOGGER.debug("Does not apply to {} {}.", method, url);

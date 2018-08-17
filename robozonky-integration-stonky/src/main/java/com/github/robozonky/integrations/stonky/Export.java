@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 enum Export {
 
-    WALLET("/users/me/wallet/transactions/export"),
-    PEOPLE("/users/me/investments/export");
+    WALLET("/users/me/wallet/transactions/export/data"),
+    PEOPLE("/users/me/investments/export/data");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Export.class);
     private static final String MIME_TYPE_XLS_SPREADSHEET = "application/vnd.ms-excel";

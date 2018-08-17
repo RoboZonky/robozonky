@@ -21,11 +21,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -34,12 +34,11 @@ import org.slf4j.LoggerFactory;
 
 public class DriveOverview {
 
+    static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
+    static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
+    static final String ROBOZONKY_PEOPLE_SHEET_NAME = "Export investic";
+    static final String ROBOZONKY_WALLET_SHEET_NAME = "Export peněženky";
     private static final Logger LOGGER = LoggerFactory.getLogger(DriveOverview.class);
-
-    private static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
-    private static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
-    private static final String ROBOZONKY_INVESTMENTS_SHEET_NAME = "Export investic";
-    private static final String ROBOZONKY_WALLET_SHEET_NAME = "Export peněženky";
     private final SessionInfo sessionInfo;
     private final Drive driveService;
     private volatile File folder;
@@ -68,7 +67,7 @@ public class DriveOverview {
         this.wallet = wallet;
     }
 
-    private static String getFolderName(final SessionInfo sessionInfo) {
+    static String getFolderName(final SessionInfo sessionInfo) {
         return "Stonky pro účet '" + sessionInfo.getUsername() + "'";
     }
 
@@ -112,20 +111,32 @@ public class DriveOverview {
 
     private static DriveOverview createWithWallet(final SessionInfo sessionInfo, final Drive driveService,
                                                   final List<File> all, final File parent, final File wallet) {
-        return getSpreadsheetWithName(all, ROBOZONKY_INVESTMENTS_SHEET_NAME)
+        return getSpreadsheetWithName(all, ROBOZONKY_PEOPLE_SHEET_NAME)
                 .map(f -> new DriveOverview(sessionInfo, driveService, parent, wallet, f))
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent, wallet, null));
     }
 
     private static DriveOverview createWithoutWallet(final SessionInfo sessionInfo, final Drive driveService,
                                                      final List<File> all, final File parent) {
-        return getSpreadsheetWithName(all, ROBOZONKY_INVESTMENTS_SHEET_NAME)
+        return getSpreadsheetWithName(all, ROBOZONKY_PEOPLE_SHEET_NAME)
                 .map(f -> new DriveOverview(sessionInfo, driveService, parent, null, f))
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent));
     }
 
     private static String identify(final File file) {
-        return file == null ? "null" : file.getId();
+        return file == null ? null : file.getId();
+    }
+
+    File getFolder() {
+        return folder;
+    }
+
+    File getPeople() {
+        return people;
+    }
+
+    File getWallet() {
+        return wallet;
     }
 
     private File createRoboZonkyFolder(final Drive driveService) throws IOException {
@@ -189,16 +200,15 @@ public class DriveOverview {
         }
     }
 
-    public File latestWallet(final Supplier<ZonkyApiToken> token) throws IOException {
+    public File latestWallet(final Function<Export, FileContent> downloader) throws IOException {
         LOGGER.debug("Processing wallet export.");
-        wallet = getLatestSpreadsheet(() -> Export.WALLET.download(token.get()), ROBOZONKY_WALLET_SHEET_NAME, wallet);
+        wallet = getLatestSpreadsheet(() -> downloader.apply(Export.WALLET), ROBOZONKY_WALLET_SHEET_NAME, wallet);
         return wallet;
     }
 
-    public File latestPeople(final Supplier<ZonkyApiToken> token) throws IOException {
+    public File latestPeople(final Function<Export, FileContent> downloader) throws IOException {
         LOGGER.debug("Processing investment export.");
-        people = getLatestSpreadsheet(() -> Export.PEOPLE.download(token.get()),
-                                      ROBOZONKY_INVESTMENTS_SHEET_NAME, people);
+        people = getLatestSpreadsheet(() -> downloader.apply(Export.PEOPLE), ROBOZONKY_PEOPLE_SHEET_NAME, people);
         return people;
     }
 

@@ -35,6 +35,7 @@ import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -134,8 +135,7 @@ class Stonky implements Payload {
         return stonky;
     }
 
-    private void run(final SessionInfo sessionInfo,
-                     final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
+    private void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
             throws ExecutionException, InterruptedException {
         LOGGER.debug("Updating Stonky spreadsheet.");
         final Credential credential = credentialSupplier.apply(sessionInfo);
@@ -148,16 +148,17 @@ class Stonky implements Payload {
             final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();
             return new Summary(o, result);
         }));
+        final Function<Export, FileContent> downloader = e -> e.download(zonkyApiTokenSupplier.get());
         final CompletableFuture<Spreadsheet> walletCopier = summary.thenApplyAsync(Util.wrap(s -> {
             LOGGER.debug("Requesting wallet export.");
             final DriveOverview o = s.getOverview();
-            final File f = o.latestWallet(zonkyApiTokenSupplier);
+            final File f = o.latestWallet(downloader);
             return copySheet(sheetsService, s.getStonky(), f, "Wallet");
         }));
         final CompletableFuture<Spreadsheet> peopleCopier = summary.thenApplyAsync(Util.wrap(s -> {
             LOGGER.debug("Requesting investments export.");
             final DriveOverview o = s.getOverview();
-            final File f = o.latestPeople(zonkyApiTokenSupplier);
+            final File f = o.latestPeople(downloader);
             return copySheet(sheetsService, s.getStonky(), f, "People");
         }));
         final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> a);
