@@ -16,8 +16,6 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.util.Optional;
-
 import com.github.robozonky.api.SessionInfo;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.testing.http.MockHttpTransport;
@@ -40,16 +38,9 @@ class GoogleCredentialProviderTest {
     }
 
     @Test
-    void emptyApiKey() {
-        final CredentialProvider c = new GoogleCredentialProvider(transport, Optional::empty);
-        assertThat(c.credentialExists(SESSION_INFO)).isFalse();
-        assertThatThrownBy(() -> c.getCredential(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
     void invalidApiKey() {
-        final CredentialProvider c = new GoogleCredentialProvider(transport, () -> Optional.of(EMPTY));
-        assertThat(c.credentialExists(SESSION_INFO)).isFalse();
+        final CredentialProvider c = new GoogleCredentialProvider(transport, () -> EMPTY);
+        assertThatThrownBy(() -> c.credentialExists(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> c.getCredential(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
     }
 }

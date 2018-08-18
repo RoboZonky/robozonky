@@ -23,7 +23,6 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
-import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -73,12 +72,11 @@ class ApiKey {
         return encrypt(input, key).getBytes(Defaults.CHARSET);
     }
 
-    public static Optional<byte[]> get() {
+    public static byte[] get() {
         try {
-            return Optional.of(decrypt(RESULT));
+            return decrypt(RESULT);
         } catch (final GeneralSecurityException ex) {
-            LOGGER.error("Failed reading API key.", ex);
-            return Optional.empty();
+            throw new IllegalStateException("Failed reading API key.", ex);
         }
     }
 

@@ -35,6 +35,6 @@ class ApiKeyTest {
 
     @Test
     void hasKey() {
-        assertThat(ApiKey.get()).isPresent();
+        assertThat(ApiKey.get()).isNotNull();
     }
 }
