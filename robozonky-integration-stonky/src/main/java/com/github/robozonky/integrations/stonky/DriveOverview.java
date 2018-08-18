@@ -142,7 +142,7 @@ public class DriveOverview {
     private File createRoboZonkyFolder(final Drive driveService) throws IOException {
         final File fileMetadata = new File();
         fileMetadata.setName(getFolderName(sessionInfo));
-        fileMetadata.setDescription("Obsah tohoto adresáře aktualizuje RoboZonky, a to jednou denně." +
+        fileMetadata.setDescription("RoboZonky aktualizuje obsah tohoto adresáře jednou denně brzy ráno." +
                                             "Adresář ani jeho obsah nemažte a pokud už to udělat musíte, " +
                                             "nezapomeňte ho odstranit také z Koše.");
         fileMetadata.setMimeType(MIME_TYPE_FOLDER);
