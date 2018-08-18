@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.JobService;
+import com.github.robozonky.util.LazyInitialized;
 import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public final class JobServiceLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobServiceLoader.class);
-    private static final ServiceLoader<JobService> LOADER =
+    private static final LazyInitialized<ServiceLoader<JobService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(JobService.class);
 
     private JobServiceLoader() {
@@ -43,7 +44,7 @@ public final class JobServiceLoader {
     }
 
     public static Stream<Job> load() {
-        return JobServiceLoader.load(JobServiceLoader.LOADER);
+        return JobServiceLoader.load(JobServiceLoader.LOADER.get());
     }
 }
 
