@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.integrations.stonky;
+package com.github.robozonky.common.remote;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.google.api.client.http.FileContent;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +29,9 @@ import org.slf4j.LoggerFactory;
 enum Export {
 
     WALLET("/users/me/wallet/transactions/export/data"),
-    PEOPLE("/users/me/investments/export/data");
+    INVESTMENTS("/users/me/investments/export/data");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Export.class);
-    private static final String MIME_TYPE_XLS_SPREADSHEET = "application/vnd.ms-excel";
-    private static final String ZONKY_ROOT = "https://api.zonky.cz";
     private final String path;
 
     Export(final String path) {
@@ -51,15 +48,15 @@ enum Export {
         return new URL(root + path + "?access_token=" + String.valueOf(token.getAccessToken()));
     }
 
-    public FileContent download(final ZonkyApiToken token) {
-        return download(token, ZONKY_ROOT);
+    public File download(final ZonkyApiToken token) {
+        return download(token, ApiProvider.ZONKY_URL);
     }
 
-    FileContent download(final ZonkyApiToken token, final String urlRoot) {
+    File download(final ZonkyApiToken token, final String urlRoot) {
         try {
             LOGGER.debug("Contacting Zonky to download the export.");
             final URL url = formUrl(urlRoot, token);
-            final FileContent result = new FileContent(MIME_TYPE_XLS_SPREADSHEET, downloadFromUrl(url));
+            final File result = downloadFromUrl(url);
             LOGGER.debug("Downloaded: {}.", result);
             return result;
         } catch (final IOException ex) {

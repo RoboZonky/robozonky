@@ -117,8 +117,10 @@ public class ApiProvider implements AutoCloseable {
     private synchronized Zonky authenticated(final Supplier<ZonkyApiToken> token) {
         return authenticated.computeIfAbsent(token, key -> {
             LOGGER.debug("Creating a new authenticated API for {}.", token);
-            return new Zonky(this.control(key), this.marketplace(key), this.secondaryMarketplace(key),
-                             this.portfolio(key), this.wallet(key), this.transaction(key), this.collections(key));
+            return new Zonky(this.control(key), this.exports(key), this.marketplace(key),
+                             this.secondaryMarketplace(key),
+                             this.portfolio(key), this.wallet(key), this.transaction(key), this.collections(key)
+            );
         });
     }
 
@@ -183,6 +185,16 @@ public class ApiProvider implements AutoCloseable {
     private Api<ControlApi> control(final Supplier<ZonkyApiToken> token) {
         final ControlApi proxy = ProxyFactory.newProxy(client, new AuthenticatedFilter(token), ControlApi.class,
                                                        ApiProvider.ZONKY_URL);
+        return new Api<>(proxy);
+    }
+
+    /**
+     * Retrieve user-specific Zonky API which requires authentication and allows to download various XLS exports.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
+     * @return New API instance.
+     */
+    private Api<ExportApi> exports(final Supplier<ZonkyApiToken> token) {
+        final ExportApi proxy = new ExportApi(token);
         return new Api<>(proxy);
     }
 

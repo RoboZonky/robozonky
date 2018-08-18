@@ -16,22 +16,29 @@
 
 package com.github.robozonky.integrations.stonky;
 
+import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.google.api.client.http.HttpTransport;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class StonkyTest {
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+class StonkyTest extends AbstractRoboZonkyTest {
 
     private static final SecretProvider SECRET_PROVIDER = SecretProvider.inMemory("someone@somewhere.cz");
 
     private final HttpTransport transport = new MultiRequestMockHttpTransport();
+    private final ApiProvider api = mock(ApiProvider.class);
 
     @Test
     void noCredentials() {
         final CredentialProvider credential = CredentialProvider.mock(false);
-        final Stonky stonky = new Stonky(transport, credential);
+        final Stonky stonky = new Stonky(transport, credential, api);
         stonky.accept(SECRET_PROVIDER); // no exception for non-existent credential = ssuccess
+        verify(api).close();
     }
 
     @Nested
@@ -41,7 +48,7 @@ class StonkyTest {
 
         @Test
         void passes() {
-            final Stonky stonky = new Stonky(transport, credential);
+            final Stonky stonky = new Stonky(transport, credential, api);
             stonky.accept(SECRET_PROVIDER);
         }
     }

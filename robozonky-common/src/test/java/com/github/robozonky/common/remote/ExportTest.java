@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.integrations.stonky;
+package com.github.robozonky.common.remote;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.google.api.client.http.FileContent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
 import org.mockserver.socket.PortFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 class ExportTest {
 
@@ -51,19 +51,19 @@ class ExportTest {
     void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getLocalPort();
-        server.when(request()
+        server.when(HttpRequest.request()
                             .withPath("/users/me/investments/export/data")
                             .withQueryStringParameter("access_token", String.valueOf(token.getAccessToken())))
-                .respond(response()
+                .respond(HttpResponse.response()
                                  .withHeader("Content-Disposition", "attachment; filename=\"people.xls\"")
                                  .withHeader("Content-Type", "application/force-download")
                                  .withHeader("Content-Transfer-Encoding", "binary")
                                  .withHeader("Content-Length", String.valueOf(PEOPLE_CONTENT.length()))
                                  .withBody(PEOPLE_CONTENT));
-        server.when(request()
+        server.when(HttpRequest.request()
                             .withPath("/users/me/wallet/transactions/export/data")
                             .withQueryStringParameter("access_token", String.valueOf(token.getAccessToken())))
-                .respond(response()
+                .respond(HttpResponse.response()
                                  .withHeader("Content-Disposition", "attachment; filename=\"wallet.xls\"")
                                  .withHeader("Content-Type", "application/force-download")
                                  .withHeader("Content-Transfer-Encoding", "binary")
@@ -78,28 +78,18 @@ class ExportTest {
 
     @Test
     void downloadPeople() throws IOException {
-        final Export export = Export.PEOPLE;
-        final FileContent f = export.download(token, "http://" + serverUrl);
-        final OutputStream resulting = new ByteArrayOutputStream();
-        f.writeTo(resulting);
-        final String result = resulting.toString();
-        assertSoftly(softly -> {
-            softly.assertThat(f.getType()).isEqualTo("application/vnd.ms-excel");
-            softly.assertThat(result).isEqualTo(PEOPLE_CONTENT);
-        });
+        final Export export = Export.INVESTMENTS;
+        final File f = export.download(token, "http://" + serverUrl);
+        final String result = Files.lines(f.toPath()).collect(Collectors.joining("\n"));
+        assertThat(result).isEqualTo(PEOPLE_CONTENT);
     }
 
     @Test
     void downloadWallet() throws IOException {
         final Export export = Export.WALLET;
-        final FileContent f = export.download(token, "http://" + serverUrl);
-        final OutputStream resulting = new ByteArrayOutputStream();
-        f.writeTo(resulting);
-        final String result = resulting.toString();
-        assertSoftly(softly -> {
-            softly.assertThat(f.getType()).isEqualTo("application/vnd.ms-excel");
-            softly.assertThat(result).isEqualTo(WALLET_CONTENT);
-        });
+        final File f = export.download(token, "http://" + serverUrl);
+        final String result = Files.lines(f.toPath()).collect(Collectors.joining("\n"));
+        assertThat(result).isEqualTo(WALLET_CONTENT);
     }
 
     @Test

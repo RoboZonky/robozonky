@@ -16,6 +16,7 @@
 
 package com.github.robozonky.common.remote;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -61,6 +62,7 @@ public class Zonky {
     private static final Logger LOGGER = LoggerFactory.getLogger(Zonky.class);
 
     private final Api<ControlApi> controlApi;
+    private final Api<ExportApi> exports;
     private final PaginatedApi<RawLoan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<RawInvestment, PortfolioApi> portfolioApi;
@@ -68,17 +70,18 @@ public class Zonky {
     private final PaginatedApi<Transaction, TransactionApi> transactions;
     private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
 
-    Zonky(final Api<ControlApi> control, final PaginatedApi<RawLoan, LoanApi> loans,
+    Zonky(final Api<ControlApi> control, final Api<ExportApi> exports, final PaginatedApi<RawLoan, LoanApi> loans,
           final PaginatedApi<Participation, ParticipationApi> participations,
           final PaginatedApi<RawInvestment, PortfolioApi> portfolio,
           final PaginatedApi<BlockedAmount, WalletApi> wallet,
           final PaginatedApi<Transaction, TransactionApi> transactions,
           final PaginatedApi<RawDevelopment, CollectionsApi> collections) {
-        if (control == null || loans == null || participations == null || portfolio == null || wallet == null ||
-                transactions == null || collections == null) {
+        if (control == null || exports == null || loans == null || participations == null || portfolio == null ||
+                wallet == null || transactions == null || collections == null) {
             throw new IllegalArgumentException("No API may be null.");
         }
         this.controlApi = control;
+        this.exports = exports;
         this.loanApi = loans;
         this.participationApi = participations;
         this.portfolioApi = portfolio;
@@ -110,30 +113,22 @@ public class Zonky {
 
     public void invest(final Investment investment) {
         LOGGER.info("Investing into loan #{}.", investment.getLoanId());
-        controlApi.run(api -> {
-            api.invest(new RawInvestment(investment));
-        });
+        controlApi.run(api -> api.invest(new RawInvestment(investment)));
     }
 
     public void cancel(final Investment investment) {
         LOGGER.info("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
-        controlApi.run(api -> {
-            api.cancel(investment.getId());
-        });
+        controlApi.run(api -> api.cancel(investment.getId()));
     }
 
     public void purchase(final Participation participation) {
         LOGGER.info("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
-        controlApi.run(api -> {
-            api.purchase(participation.getId(), new PurchaseRequest(participation));
-        });
+        controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
     }
 
     public void sell(final Investment investment) {
         LOGGER.info("Offering to sell investment in loan #{}.", investment.getLoanId());
-        controlApi.run(api -> {
-            api.offer(new SellRequest(new RawInvestment(investment)));
-        });
+        controlApi.run(api -> api.offer(new SellRequest(new RawInvestment(investment))));
     }
 
     public Wallet getWallet() {
@@ -238,6 +233,14 @@ public class Zonky {
      */
     public Stream<Participation> getAvailableParticipations(final Select select) {
         return Zonky.getStream(participationApi, ParticipationApi::items, select);
+    }
+
+    public File exportWallet() {
+        return exports.call(ExportApi::wallet);
+    }
+
+    public File exportInvestments() {
+        return exports.call(ExportApi::investments);
     }
 
     public Restrictions getRestrictions() {

@@ -22,7 +22,6 @@ import java.util.UUID;
 import com.github.robozonky.api.SessionInfo;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.testing.auth.oauth2.MockGoogleCredential;
-import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,10 +43,9 @@ class DriveOverviewTest {
         return result;
     }
 
-    private FileContent getDownloaded() {
+    private static java.io.File getDownloaded() {
         try {
-            final java.io.File f = java.io.File.createTempFile("robozonky-", ".testing");
-            return new FileContent("application/vnd.ms-excel", f);
+            return java.io.File.createTempFile("robozonky-", ".testing");
         } catch (final IOException ex) {
             throw new IllegalStateException(ex);
         }
@@ -211,7 +209,7 @@ class DriveOverviewTest {
                 void updateWalletSpreadsheet() throws IOException {
                     final DriveOverview overview = DriveOverview.create(SESSION_INFO, service);
                     // copy the spreadsheet since it does not exist
-                    final File result = overview.latestWallet((e) -> getDownloaded());
+                    final File result = overview.latestWallet(DriveOverviewTest::getDownloaded);
                     assertThat(result.getId()).isEqualTo(walletSpreadsheet.getId());
                 }
 
@@ -219,7 +217,7 @@ class DriveOverviewTest {
                 void updatePeopleSpreadsheet() throws IOException {
                     final DriveOverview overview = DriveOverview.create(SESSION_INFO, service);
                     // copy the spreadsheet since it does not exist
-                    final File result = overview.latestPeople((e) -> getDownloaded());
+                    final File result = overview.latestPeople(DriveOverviewTest::getDownloaded);
                     assertThat(result.getId()).isEqualTo(peopleSpreadsheet.getId());
                 }
             }

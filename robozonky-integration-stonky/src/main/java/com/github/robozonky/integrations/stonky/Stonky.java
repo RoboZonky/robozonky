@@ -31,11 +31,10 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.jobs.Payload;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.http.FileContent;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -57,6 +56,7 @@ class Stonky implements Payload {
 
     private final HttpTransport transport;
     private final CredentialProvider credentialSupplier;
+    private final ApiProvider api;
 
     public Stonky() throws GeneralSecurityException, IOException {
         this(Util.createTransport());
@@ -67,8 +67,13 @@ class Stonky implements Payload {
     }
 
     Stonky(final HttpTransport transport, final CredentialProvider credentialSupplier) {
+        this(transport, credentialSupplier, new ApiProvider());
+    }
+
+    Stonky(final HttpTransport transport, final CredentialProvider credentialSupplier, final ApiProvider api) {
         this.transport = transport;
         this.credentialSupplier = credentialSupplier;
+        this.api = api;
     }
 
     /**
@@ -129,7 +134,20 @@ class Stonky implements Payload {
         return stonky;
     }
 
-    private void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
+    private Supplier<java.io.File> getExporter(final Function<Zonky, java.io.File> exporter,
+                                               final Supplier<ZonkyApiToken> tokenSupplier) {
+        return () -> api.call(exporter, tokenSupplier);
+    }
+
+    private Supplier<java.io.File> getWalletExporter(final Supplier<ZonkyApiToken> tokenSupplier) {
+        return getExporter(Zonky::exportWallet, tokenSupplier);
+    }
+
+    private Supplier<java.io.File> getInvestmentsExporter(final Supplier<ZonkyApiToken> tokenSupplier) {
+        return getExporter(Zonky::exportInvestments, tokenSupplier);
+    }
+
+    private void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> tokenSupplier)
             throws ExecutionException, InterruptedException {
         LOGGER.debug("Updating Stonky spreadsheet.");
         final Credential credential = credentialSupplier.getCredential(sessionInfo)
@@ -143,17 +161,16 @@ class Stonky implements Payload {
             final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();
             return new Summary(o, result);
         }));
-        final Function<Export, FileContent> downloader = e -> e.download(zonkyApiTokenSupplier.get());
         final CompletableFuture<Spreadsheet> walletCopier = summary.thenApplyAsync(Util.wrap(s -> {
             LOGGER.debug("Requesting wallet export.");
             final DriveOverview o = s.getOverview();
-            final File f = o.latestWallet(downloader);
+            final File f = o.latestWallet(getWalletExporter(tokenSupplier));
             return copySheet(sheetsService, s.getStonky(), f, "Wallet");
         }));
         final CompletableFuture<Spreadsheet> peopleCopier = summary.thenApplyAsync(Util.wrap(s -> {
             LOGGER.debug("Requesting investments export.");
             final DriveOverview o = s.getOverview();
-            final File f = o.latestPeople(downloader);
+            final File f = o.latestPeople(getInvestmentsExporter(tokenSupplier));
             return copySheet(sheetsService, s.getStonky(), f, "People");
         }));
         final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> a);
@@ -165,16 +182,21 @@ class Stonky implements Payload {
     @Override
     public void accept(final SecretProvider secretProvider) {
         final SessionInfo sessionInfo = new SessionInfo(secretProvider.getUsername());
-        if (!credentialSupplier.credentialExists(sessionInfo)) {
-            LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
-                        sessionInfo.getUsername());
-            return;
-        }
-        try (final ApiProvider apis = new ApiProvider()) {
-            run(sessionInfo, new ZonkyApiTokenSupplier(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING, apis, secretProvider,
-                                                       Settings.INSTANCE.getTokenRefreshPeriod()));
+        try {
+            if (!credentialSupplier.credentialExists(sessionInfo)) {
+                LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
+                            sessionInfo.getUsername());
+                return;
+            }
+            final LazyInitialized<ZonkyApiToken> token =
+                    LazyInitialized.create(() -> api.oauth(a -> a.login(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING,
+                                                                        secretProvider.getUsername(),
+                                                                        secretProvider.getPassword())));
+            run(sessionInfo, token);
         } catch (final Exception ex) {
             LOGGER.warn("Failed integrating with Stonky.", ex);
+        } finally {
+            api.close();
         }
     }
 
