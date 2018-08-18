@@ -56,23 +56,17 @@ class Stonky implements Payload {
     private static final Logger LOGGER = LoggerFactory.getLogger(Stonky.class);
 
     private final HttpTransport transport;
-    private final Function<SessionInfo, Credential> credentialSupplier;
+    private final CredentialProvider credentialSupplier;
 
     public Stonky() throws GeneralSecurityException, IOException {
         this(Util.createTransport());
     }
 
     Stonky(final HttpTransport transport) {
-        this(transport, (sessionInfo) -> {
-            try {
-                return Util.getCredential(sessionInfo, transport);
-            } catch (final Exception ex) {
-                throw new IllegalStateException("Failed obtaining Google credential.", ex);
-            }
-        });
+        this(transport, CredentialProvider.live(transport));
     }
 
-    Stonky(final HttpTransport transport, final Function<SessionInfo, Credential> credentialSupplier) {
+    Stonky(final HttpTransport transport, final CredentialProvider credentialSupplier) {
         this.transport = transport;
         this.credentialSupplier = credentialSupplier;
     }
@@ -138,7 +132,8 @@ class Stonky implements Payload {
     private void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> zonkyApiTokenSupplier)
             throws ExecutionException, InterruptedException {
         LOGGER.debug("Updating Stonky spreadsheet.");
-        final Credential credential = credentialSupplier.apply(sessionInfo);
+        final Credential credential = credentialSupplier.getCredential(sessionInfo)
+                .orElseThrow(() -> new IllegalStateException("Google credentials not found."));
         final Drive driveService = Util.createDriveService(credential, transport);
         final Sheets sheetsService = Util.createSheetsService(credential, transport);
         final CompletableFuture<Summary> summary = CompletableFuture.supplyAsync(Util.wrap(() -> {
@@ -170,7 +165,7 @@ class Stonky implements Payload {
     @Override
     public void accept(final SecretProvider secretProvider) {
         final SessionInfo sessionInfo = new SessionInfo(secretProvider.getUsername());
-        if (!Util.hasCredential(sessionInfo, transport)) {
+        if (!credentialSupplier.credentialExists(sessionInfo)) {
             LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
                         sessionInfo.getUsername());
             return;

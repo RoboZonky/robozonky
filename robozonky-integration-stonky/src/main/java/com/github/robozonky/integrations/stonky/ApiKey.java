@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
+import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -31,6 +32,8 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.github.robozonky.internal.api.Defaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * In order to communicate with the Google Sheets API, we need to authenticate against it. For that, we need to use a
@@ -57,11 +60,12 @@ class ApiKey {
             "WANUa27fyuOPWk4XNzDmhtn62PZIbeg523mNDTAtKQ4HrS7abp040l2LsmGuUjLKkt3FtQLgB1F/qbn2BNqtE2nV/pWUH7UcxnNIWH3" +
             "4VKcQ8Ch7isExvpber+foq2aq2OybtARE34Dqwp39EroWTwsaa1kPr62eMxFynYz8TgJxOlnrDmZ44K8DjXs860pGfvHNma5VgNm9uM" +
             "pncJ2LT+xO4ybDH27dDVK3ZyK4HXxbyJkA==";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiKey.class);
 
     public static void main(final String... args) throws Exception {
         final byte[] input = Files.readAllBytes(new File(args[0]).toPath());
         final String encrypted = new String(encrypt(input));
-        System.out.println("Encrypted: " + encrypted);
+        LOGGER.info("Encrypted: '{}'.", encrypted);
     }
 
     static byte[] encrypt(final byte[] input) throws Exception {
@@ -69,8 +73,13 @@ class ApiKey {
         return encrypt(input, key).getBytes(Defaults.CHARSET);
     }
 
-    public static byte[] get() throws GeneralSecurityException {
-        return decrypt(RESULT);
+    public static Optional<byte[]> get() {
+        try {
+            return Optional.of(decrypt(RESULT));
+        } catch (final GeneralSecurityException ex) {
+            LOGGER.error("Failed reading API key.", ex);
+            return Optional.empty();
+        }
     }
 
     private static SecretKeySpec createSecretKey() throws NoSuchAlgorithmException, InvalidKeySpecException {

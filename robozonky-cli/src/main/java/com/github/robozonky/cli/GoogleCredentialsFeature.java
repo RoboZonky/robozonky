@@ -19,6 +19,7 @@ package com.github.robozonky.cli;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.integrations.stonky.CredentialProvider;
 import com.github.robozonky.integrations.stonky.DriveOverview;
 import com.github.robozonky.integrations.stonky.Util;
 import com.google.api.client.auth.oauth2.Credential;
@@ -56,7 +57,8 @@ public final class GoogleCredentialsFeature implements Feature {
         try {
             final SessionInfo sessionInfo = new SessionInfo(username);
             final HttpTransport transport = Util.createTransport();
-            final Credential credential = Util.getCredential(sessionInfo, transport);
+            final Credential credential = CredentialProvider.live(transport).getCredential(sessionInfo)
+                    .orElseThrow(() -> new IllegalStateException("No Google credential found."));
             Util.createSheetsService(credential, transport);
             Util.createDriveService(credential, transport);
             LOGGER.info("Press Enter to confirm that you have granted permission, otherwise exit.");
@@ -71,7 +73,8 @@ public final class GoogleCredentialsFeature implements Feature {
         try {
             final SessionInfo sessionInfo = new SessionInfo(username);
             final HttpTransport transport = Util.createTransport();
-            final Credential credential = Util.getCredential(sessionInfo, transport);
+            final Credential credential = CredentialProvider.live(transport).getCredential(sessionInfo)
+                    .orElseThrow(() -> new IllegalStateException("No Google credential found."));
             final Drive service = Util.createDriveService(credential, transport);
             final DriveOverview driveOverview = DriveOverview.create(new SessionInfo(username), service);
             LOGGER.debug("Google Drive contents: {}.", driveOverview);

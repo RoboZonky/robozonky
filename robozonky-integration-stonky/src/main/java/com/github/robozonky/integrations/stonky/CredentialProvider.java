@@ -16,25 +16,23 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.util.UUID;
+import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
+import com.github.robozonky.api.SessionInfo;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.HttpTransport;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public interface CredentialProvider {
 
-class ApiKeyTest {
-
-    @Test
-    void roundTrip() throws Exception {
-        final String uuid = UUID.randomUUID().toString();
-        final byte[] toEncrypt = uuid.getBytes();
-        final String encrypted = new String(ApiKey.encrypt(toEncrypt));
-        final byte[] decrypted = ApiKey.decrypt(encrypted);
-        assertThat(decrypted).isEqualTo(toEncrypt);
+    static CredentialProvider live(final HttpTransport transport) {
+        return new GoogleCredentialProvider(transport);
     }
 
-    @Test
-    void hasKey() {
-        assertThat(ApiKey.get()).isPresent();
+    static CredentialProvider mock(final boolean shouldExist) {
+        return new MockCredentialProvider(shouldExist);
     }
+
+    boolean credentialExists(final SessionInfo sessionInfo);
+
+    Optional<Credential> getCredential(final SessionInfo sessionInfo);
 }
