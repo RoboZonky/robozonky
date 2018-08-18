@@ -16,8 +16,6 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -35,8 +33,12 @@ public class Util {
     private static final String APPLICATION_NAME = Defaults.ROBOZONKY_USER_AGENT;
     static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
-    public static HttpTransport createTransport() throws GeneralSecurityException, IOException {
-        return GoogleNetHttpTransport.newTrustedTransport();
+    public static HttpTransport createTransport() {
+        try {
+            return GoogleNetHttpTransport.newTrustedTransport();
+        } catch (final Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     public static Drive createDriveService(final Credential credential, final HttpTransport transport) {

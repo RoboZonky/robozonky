@@ -17,7 +17,6 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +56,7 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
     private final CredentialProvider credentialSupplier;
     private final ApiProvider api;
 
-    public Stonky() throws GeneralSecurityException, IOException {
+    public Stonky() {
         this(Util.createTransport());
     }
 

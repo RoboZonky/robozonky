@@ -16,9 +16,6 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -29,7 +26,7 @@ class StonkyIntegrationTest {
 
     @Test
     @EnabledIfEnvironmentVariable(named = "ZONKY_USERNAME", matches = ".+")
-    void execute() throws GeneralSecurityException, IOException {
+    void execute() {
         final String username = System.getenv("ZONKY_USERNAME");
         final String password = System.getenv("ZONKY_PASSWORD");
         final SecretProvider secretProvider = SecretProvider.inMemory(username, password.toCharArray());

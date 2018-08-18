@@ -31,18 +31,26 @@ import org.slf4j.LoggerFactory;
 @Parameters(commandNames = "google-sheets-credentials", commandDescription = GoogleCredentialsFeature.DESCRIPTION)
 public final class GoogleCredentialsFeature implements Feature {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleCredentialsFeature.class);
-
     static final String DESCRIPTION = "Obtain authorization for RoboZonky to access Google Sheets.";
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleCredentialsFeature.class);
+    private final HttpTransport transport;
+    private final CredentialProvider credentialProvider;
     @Parameter(names = {"-u", "--username"}, description = "Zonky username.", required = true)
     private String username = null;
 
-    GoogleCredentialsFeature(final String username) {
+    GoogleCredentialsFeature(final String username, final HttpTransport transport,
+                             final CredentialProvider credentialProvider) {
         this.username = username;
+        this.transport = transport;
+        this.credentialProvider = credentialProvider;
+    }
+
+    GoogleCredentialsFeature(final HttpTransport transport) {
+        this("", transport, CredentialProvider.live(transport));
     }
 
     GoogleCredentialsFeature() {
-
+        this(Util.createTransport());
     }
 
     @Override
@@ -56,8 +64,7 @@ public final class GoogleCredentialsFeature implements Feature {
         LOGGER.info("Unless you allow RoboZonky to access your Google Sheets, Stonky integration will be disabled.");
         try {
             final SessionInfo sessionInfo = new SessionInfo(username);
-            final HttpTransport transport = Util.createTransport();
-            final Credential credential = CredentialProvider.live(transport).getCredential(sessionInfo);
+            final Credential credential = credentialProvider.getCredential(sessionInfo);
             Util.createSheetsService(credential, transport);
             Util.createDriveService(credential, transport);
             LOGGER.info("Press Enter to confirm that you have granted permission, otherwise exit.");
@@ -71,8 +78,7 @@ public final class GoogleCredentialsFeature implements Feature {
     public void test() throws TestFailedException {
         try {
             final SessionInfo sessionInfo = new SessionInfo(username);
-            final HttpTransport transport = Util.createTransport();
-            final Credential credential = CredentialProvider.live(transport).getCredential(sessionInfo);
+            final Credential credential = credentialProvider.getCredential(sessionInfo);
             final Drive service = Util.createDriveService(credential, transport);
             final DriveOverview driveOverview = DriveOverview.create(new SessionInfo(username), service);
             LOGGER.debug("Google Drive contents: {}.", driveOverview);
