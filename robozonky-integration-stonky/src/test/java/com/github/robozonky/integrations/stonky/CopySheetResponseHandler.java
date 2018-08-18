@@ -17,42 +17,33 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
-import com.google.api.services.drive.model.File;
+import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.SheetProperties;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
 
-public class CopyFileResponseHandler extends ResponseHandler {
+public class CopySheetResponseHandler extends ResponseHandler {
 
-    private final File source;
-    private final File target;
+    private final Sheet source;
+    private final Spreadsheet parent;
 
-    public CopyFileResponseHandler(final File source) {
-        this(source, source.clone());
-        target.setId(UUID.randomUUID().toString());
-    }
-
-    public CopyFileResponseHandler(final File source, final File target) {
+    public CopySheetResponseHandler(final Spreadsheet parent, final Sheet source) {
+        this.parent = parent;
         this.source = source;
-        this.target = target;
-    }
-
-    public File getSource() {
-        return source;
-    }
-
-    public File getTarget() {
-        return target;
     }
 
     @Override
     protected boolean appliesTo(final String method, final String url) {
+        final int id = source.getProperties().getSheetId();
         return Objects.equals(method, "POST") &&
-                url.startsWith("https://www.googleapis.com/drive/v3/files/" + source.getId() + "/copy?");
+                Objects.equals(url, "https://sheets.googleapis.com/v4/spreadsheets/" + parent.getSpreadsheetId() +
+                        "/sheets/" + id + ":copyTo");
     }
 
     @Override
     protected MockLowLevelHttpResponse respond(final String method, final String url) {
-        return new MockLowLevelHttpResponse().setContent(toJson(target));
+        final SheetProperties cloned = source.getProperties().clone();
+        return new MockLowLevelHttpResponse().setContent(toJson(cloned));
     }
 }

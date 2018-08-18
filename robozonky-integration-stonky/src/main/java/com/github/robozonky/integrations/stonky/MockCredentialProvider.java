@@ -16,8 +16,6 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.util.Optional;
-
 import com.github.robozonky.api.SessionInfo;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.testing.auth.oauth2.MockGoogleCredential;
@@ -36,7 +34,10 @@ final class MockCredentialProvider implements CredentialProvider {
     }
 
     @Override
-    public Optional<Credential> getCredential(final SessionInfo sessionInfo) {
-        return shouldExist ? Optional.of(new MockGoogleCredential.Builder().build()) : Optional.empty();
+    public Credential getCredential(final SessionInfo sessionInfo) {
+        if (shouldExist) {
+            return new MockGoogleCredential.Builder().build();
+        }
+        throw new IllegalStateException("Google credential not found.");
     }
 }

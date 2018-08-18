@@ -24,6 +24,7 @@ import com.google.api.client.testing.http.MockHttpTransport;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GoogleCredentialProviderTest {
 
@@ -42,13 +43,13 @@ class GoogleCredentialProviderTest {
     void emptyApiKey() {
         final CredentialProvider c = new GoogleCredentialProvider(transport, Optional::empty);
         assertThat(c.credentialExists(SESSION_INFO)).isFalse();
-        assertThat(c.getCredential(SESSION_INFO)).isEmpty();
+        assertThatThrownBy(() -> c.getCredential(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void invalidApiKey() {
         final CredentialProvider c = new GoogleCredentialProvider(transport, () -> Optional.of(EMPTY));
         assertThat(c.credentialExists(SESSION_INFO)).isFalse();
-        assertThat(c.getCredential(SESSION_INFO)).isEmpty();
+        assertThatThrownBy(() -> c.getCredential(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
     }
 }

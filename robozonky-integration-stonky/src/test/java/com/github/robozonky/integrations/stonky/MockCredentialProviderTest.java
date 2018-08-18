@@ -31,7 +31,7 @@ class MockCredentialProviderTest {
         final CredentialProvider c = CredentialProvider.mock(true);
         assertSoftly(softly -> {
             softly.assertThat(c.credentialExists(SESSION_INFO)).isTrue();
-            softly.assertThat(c.getCredential(SESSION_INFO)).containsInstanceOf(MockGoogleCredential.class);
+            softly.assertThat(c.getCredential(SESSION_INFO)).isInstanceOf(MockGoogleCredential.class);
         });
     }
 
@@ -40,7 +40,7 @@ class MockCredentialProviderTest {
         final CredentialProvider c = CredentialProvider.mock(false);
         assertSoftly(softly -> {
             softly.assertThat(c.credentialExists(SESSION_INFO)).isFalse();
-            softly.assertThat(c.getCredential(SESSION_INFO)).isEmpty();
+            softly.assertThatThrownBy(() -> c.getCredential(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
         });
     }
 }

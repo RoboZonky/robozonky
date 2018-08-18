@@ -16,40 +16,123 @@
 
 package com.github.robozonky.integrations.stonky;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.OAuth;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class StonkyTest extends AbstractRoboZonkyTest {
 
     private static final SecretProvider SECRET_PROVIDER = SecretProvider.inMemory("someone@somewhere.cz");
+    private static final SessionInfo SESSION_INFO = new SessionInfo(SECRET_PROVIDER.getUsername());
 
-    private final HttpTransport transport = new MultiRequestMockHttpTransport();
-    private final ApiProvider api = mock(ApiProvider.class);
+    private final MultiRequestMockHttpTransport transport = new MultiRequestMockHttpTransport();
+    private final OAuth oauth = mock(OAuth.class);
+    private final Zonky zonky = mock(Zonky.class);
+    private final ApiProvider api = mockApiProvider(oauth, zonky);
 
     @Test
-    void noCredentials() {
+    void noCredential() {
         final CredentialProvider credential = CredentialProvider.mock(false);
         final Stonky stonky = new Stonky(transport, credential, api);
-        stonky.accept(SECRET_PROVIDER); // no exception for non-existent credential = ssuccess
+        final Optional<String> result = stonky.apply(SECRET_PROVIDER);
+        assertThat(result).isEmpty();
         verify(api).close();
+    }
+
+    @Test
+    void uglyCredential() {
+        final CredentialProvider credential = new CredentialProvider() {
+            @Override
+            public boolean credentialExists(final SessionInfo sessionInfo) {
+                return true;
+            }
+
+            @Override
+            public Credential getCredential(final SessionInfo sessionInfo) {
+                return null; // this is not allowed when the above is true
+            }
+        };
+        final Stonky stonky = new Stonky(transport, credential, api);
+        final Optional<String> result = stonky.apply(SECRET_PROVIDER);
+        assertThat(result).isEmpty();
+        verify(api).close();
+    }
+
+    private File getFolder(final String name) {
+        final File result = GoogleUtil.getFile(name);
+        result.setMimeType(DriveOverview.MIME_TYPE_FOLDER);
+        return result;
     }
 
     @Nested
     class WithCredential {
 
         private final CredentialProvider credential = CredentialProvider.mock(true);
+        private final File stonkyFolder = getFolder(DriveOverview.getFolderName(SESSION_INFO));
+        private FilesInFolderResponseHandler stonkyFolderContent;
+        private File copyOfStonkyMaster;
+
+        @BeforeEach
+        void emptyExports() {
+            when(zonky.exportInvestments()).thenReturn(GoogleUtil.getDownloaded());
+            when(zonky.exportWallet()).thenReturn(GoogleUtil.getDownloaded());
+        }
+
+        @BeforeEach
+        void filledPortfolio() {
+            transport.addReponseHandler(new AllFilesResponseHandler(stonkyFolder));
+            stonkyFolderContent = new FilesInFolderResponseHandler(stonkyFolder);
+            transport.addReponseHandler(stonkyFolderContent);
+            final String stonkySpreadsheetToCopy = Properties.STONKY_MASTER.getValue()
+                    .orElseThrow(IllegalStateException::new);
+            // enable copying the master spreadsheet and the subsequent lookup of the copy by its ID
+            final File stonkyMaster = GoogleUtil.getSpreadsheetFile("Some Stonky file",
+                                                                    stonkySpreadsheetToCopy);
+            final CopyFileResponseHandler h = new CopyFileResponseHandler(stonkyMaster);
+            transport.addReponseHandler(h);
+            transport.addReponseHandler(new GetFileResponseHandler(h.getSource()));
+            copyOfStonkyMaster = h.getTarget();
+            stonkyFolderContent.add(copyOfStonkyMaster);
+            transport.addReponseHandler(new GetFileResponseHandler(copyOfStonkyMaster));
+            transport.addReponseHandler(
+                    new GetSpreadsheetResponseHandler(GoogleUtil.toSpreadsheet(copyOfStonkyMaster)));
+            // enable the creation of new spreadsheets and copying sheets among them
+            final Consumer<File> fileCreationNotififer = (f) -> {
+                stonkyFolderContent.add(f);
+                transport.addReponseHandler(new GetFileResponseHandler(f));
+                final Spreadsheet parent = GoogleUtil.toSpreadsheet(f);
+                transport.addReponseHandler(new GetSpreadsheetResponseHandler(parent));
+                parent.getSheets()
+                        .forEach(sheet -> transport.addReponseHandler(new CopySheetResponseHandler(parent, sheet)));
+            };
+            transport.addReponseHandler(new CreateFileResponseHandler(fileCreationNotififer));
+            transport.addReponseHandler(new SpreadsheetBatchUpdateResponseHandler(copyOfStonkyMaster));
+        }
 
         @Test
         void passes() {
             final Stonky stonky = new Stonky(transport, credential, api);
-            stonky.accept(SECRET_PROVIDER);
+            final Optional<String> result = stonky.apply(SECRET_PROVIDER);
+            assertThat(result).contains(copyOfStonkyMaster.getId());
+            verify(zonky).exportInvestments();
+            verify(zonky).exportWallet();
         }
     }
 }

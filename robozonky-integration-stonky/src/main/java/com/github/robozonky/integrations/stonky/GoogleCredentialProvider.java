@@ -89,16 +89,15 @@ final class GoogleCredentialProvider implements CredentialProvider {
     }
 
     @Override
-    public Optional<Credential> getCredential(final SessionInfo sessionInfo) {
+    public Credential getCredential(final SessionInfo sessionInfo) {
         try {
             final GoogleClientSecrets clientSecrets = createClientSecrets();
             final GoogleAuthorizationCodeFlow flow = createFlow(transport, clientSecrets);
             final Credential result = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
                     .authorize(sessionInfo.getUsername());
-            return Optional.of(result);
+            return result;
         } catch (final Exception ex) {
-            LOGGER.warn("Failed obtaining Google credentials.", ex);
-            return Optional.empty();
+            throw new IllegalStateException("Google credential not found.", ex);
         }
     }
 }

@@ -17,42 +17,26 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.api.services.drive.model.File;
 
-public class CopyFileResponseHandler extends ResponseHandler {
+public class SpreadsheetBatchUpdateResponseHandler extends ResponseHandler {
 
-    private final File source;
-    private final File target;
+    private final File parent;
 
-    public CopyFileResponseHandler(final File source) {
-        this(source, source.clone());
-        target.setId(UUID.randomUUID().toString());
-    }
-
-    public CopyFileResponseHandler(final File source, final File target) {
-        this.source = source;
-        this.target = target;
-    }
-
-    public File getSource() {
-        return source;
-    }
-
-    public File getTarget() {
-        return target;
+    public SpreadsheetBatchUpdateResponseHandler(final File parent) {
+        this.parent = parent;
     }
 
     @Override
     protected boolean appliesTo(final String method, final String url) {
         return Objects.equals(method, "POST") &&
-                url.startsWith("https://www.googleapis.com/drive/v3/files/" + source.getId() + "/copy?");
+                Objects.equals(url, "https://sheets.googleapis.com/v4/spreadsheets/" + parent.getId() + ":batchUpdate");
     }
 
     @Override
     protected MockLowLevelHttpResponse respond(final String method, final String url) {
-        return new MockLowLevelHttpResponse().setContent(toJson(target));
+        return new MockLowLevelHttpResponse().setContent("{}");
     }
 }

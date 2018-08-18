@@ -16,8 +16,6 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import java.util.Optional;
-
 import com.github.robozonky.api.SessionInfo;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
@@ -34,5 +32,5 @@ public interface CredentialProvider {
 
     boolean credentialExists(final SessionInfo sessionInfo);
 
-    Optional<Credential> getCredential(final SessionInfo sessionInfo);
+    Credential getCredential(final SessionInfo sessionInfo);
 }

@@ -29,7 +29,7 @@ class StonkyJobTest {
 
     @Test
     void instantiateStonky() {
-        assertThat(StonkyJob.INSTANCE.payload()).isInstanceOf(Stonky.class);
+        assertThat(StonkyJob.INSTANCE.payload()).isNotNull();
     }
 
     @Test

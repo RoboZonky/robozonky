@@ -29,7 +29,6 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.jobs.Payload;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
@@ -50,7 +49,7 @@ import com.google.api.services.sheets.v4.model.UpdateSheetPropertiesRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class Stonky implements Payload {
+class Stonky implements Function<SecretProvider, Optional<String>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stonky.class);
 
@@ -147,11 +146,9 @@ class Stonky implements Payload {
         return getExporter(Zonky::exportInvestments, tokenSupplier);
     }
 
-    private void run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> tokenSupplier)
-            throws ExecutionException, InterruptedException {
-        LOGGER.debug("Updating Stonky spreadsheet.");
-        final Credential credential = credentialSupplier.getCredential(sessionInfo)
-                .orElseThrow(() -> new IllegalStateException("Google credentials not found."));
+    private String run(final SessionInfo sessionInfo,
+                       final Supplier<ZonkyApiToken> tokenSupplier) throws ExecutionException, InterruptedException {
+        final Credential credential = credentialSupplier.getCredential(sessionInfo);
         final Drive driveService = Util.createDriveService(credential, transport);
         final Sheets sheetsService = Util.createSheetsService(credential, transport);
         final CompletableFuture<Summary> summary = CompletableFuture.supplyAsync(Util.wrap(() -> {
@@ -173,28 +170,36 @@ class Stonky implements Payload {
             final File f = o.latestPeople(getInvestmentsExporter(tokenSupplier));
             return copySheet(sheetsService, s.getStonky(), f, "People");
         }));
-        final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> a);
+        final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> {
+            if (Objects.equals(a.getSpreadsheetId(), b.getSpreadsheetId())) {
+                return a;
+            } else {
+                throw new IllegalStateException("Should not happen.");
+            }
+        });
         LOGGER.debug("Blocking until all operations terminate.");
         final String stonkySpreadsheetId = merged.get().getSpreadsheetId();
         LOGGER.info("Stonky spreadsheet updated at: https://docs.google.com/spreadsheets/d/{}", stonkySpreadsheetId);
+        return stonkySpreadsheetId;
     }
 
     @Override
-    public void accept(final SecretProvider secretProvider) {
+    public Optional<String> apply(final SecretProvider secretProvider) {
         final SessionInfo sessionInfo = new SessionInfo(secretProvider.getUsername());
         try {
             if (!credentialSupplier.credentialExists(sessionInfo)) {
                 LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
                             sessionInfo.getUsername());
-                return;
+                return Optional.empty();
             }
             final LazyInitialized<ZonkyApiToken> token =
                     LazyInitialized.create(() -> api.oauth(a -> a.login(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING,
                                                                         secretProvider.getUsername(),
                                                                         secretProvider.getPassword())));
-            run(sessionInfo, token);
+            return Optional.ofNullable(run(sessionInfo, token));
         } catch (final Exception ex) {
             LOGGER.warn("Failed integrating with Stonky.", ex);
+            return Optional.empty();
         } finally {
             api.close();
         }

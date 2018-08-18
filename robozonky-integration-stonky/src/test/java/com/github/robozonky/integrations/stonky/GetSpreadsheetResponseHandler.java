@@ -17,42 +17,26 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
-import com.google.api.services.drive.model.File;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
 
-public class CopyFileResponseHandler extends ResponseHandler {
+public class GetSpreadsheetResponseHandler extends ResponseHandler {
 
-    private final File source;
-    private final File target;
+    private final Spreadsheet file;
 
-    public CopyFileResponseHandler(final File source) {
-        this(source, source.clone());
-        target.setId(UUID.randomUUID().toString());
-    }
-
-    public CopyFileResponseHandler(final File source, final File target) {
-        this.source = source;
-        this.target = target;
-    }
-
-    public File getSource() {
-        return source;
-    }
-
-    public File getTarget() {
-        return target;
+    public GetSpreadsheetResponseHandler(final Spreadsheet file) {
+        this.file = file;
     }
 
     @Override
     protected boolean appliesTo(final String method, final String url) {
-        return Objects.equals(method, "POST") &&
-                url.startsWith("https://www.googleapis.com/drive/v3/files/" + source.getId() + "/copy?");
+        return Objects.equals(method, "GET") &&
+                Objects.equals(url, "https://sheets.googleapis.com/v4/spreadsheets/" + file.getSpreadsheetId());
     }
 
     @Override
     protected MockLowLevelHttpResponse respond(final String method, final String url) {
-        return new MockLowLevelHttpResponse().setContent(toJson(target));
+        return new MockLowLevelHttpResponse().setContent(toJson(file));
     }
 }
