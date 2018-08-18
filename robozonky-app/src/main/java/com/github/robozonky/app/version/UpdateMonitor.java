@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,10 +143,9 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
     @Override
     protected String getLatestSource() throws Exception {
-        try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
-                                                                     this.mavenCentralHostname)) {
-            return IOUtils.toString(s, Defaults.CHARSET);
-        }
+        final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                this.mavenCentralHostname);
+        return IOUtils.toString(s, Defaults.CHARSET);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -50,21 +51,23 @@ public class StrategyProvider implements Refreshable.RefreshListener<String> {
         return sp;
     }
 
-    private static <T> void set(final AtomicReference<T> ref, final Supplier<Optional<T>> provider, final String desc) {
+    private static <T> T set(final AtomicReference<T> ref, final Supplier<Optional<T>> provider, final String desc) {
         final T value = ref.updateAndGet(old -> provider.get().orElse(null));
-        final String log = (value == null) ?
+        final String log = Objects.isNull(value) ?
                 "{} strategy inactive or missing, disabling all such operations." :
                 "{} strategy correctly loaded.";
         LOGGER.info(log, desc);
+        return value;
     }
 
     @Override
     public void valueSet(final String newValue) {
         LOGGER.trace("Loading strategies.");
-        set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
-        set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
-        set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
-        if (toInvest.get() == null && toPurchase.get() == null && toSell.get() == null) {
+        final InvestmentStrategy i = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
+        final PurchaseStrategy p = set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
+        final SellStrategy s = set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
+        final boolean allMissing = Stream.of(i, p, s).allMatch(Objects::isNull);
+        if (allMissing) {
             LOGGER.warn("No strategies are available. Check log for parser errors.");
         }
         LOGGER.trace("Finished.");
