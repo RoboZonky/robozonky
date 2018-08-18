@@ -62,6 +62,6 @@ cache:
   directories:
   - $HOME/.m2
 install: # freshly build all required modules
-  - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
+- mvn --batch-mode -pl $MODULE -am clean install -DskipTests -Dgpg.skip
 script: # by default, run all tests incl. PITest, skipping all assemblies
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
