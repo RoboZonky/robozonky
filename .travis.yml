@@ -37,7 +37,7 @@ matrix:
   - stage: precache # independent stage for Maven to build and download all dependencies
     env: # empty
     install:
-      - mvn --batch-mode install -DskipTests -Dgpg.skip
+    - mvn --batch-mode clean install -DskipTests -Dgpg.skip
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
   - stage: sonar # independent build stage for Sonar code analysis
