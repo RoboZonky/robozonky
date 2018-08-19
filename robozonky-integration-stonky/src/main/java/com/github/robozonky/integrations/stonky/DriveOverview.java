@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -111,10 +112,10 @@ public class DriveOverview {
     private static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService,
                                         final File parent) throws IOException {
         LOGGER.debug("Looking for a wallet spreadsheet.");
-        final Stream<File> all = getFilesInFolder(driveService, parent);
-        return getSpreadsheetWithName(all, ROBOZONKY_WALLET_SHEET_NAME)
-                .map(f -> createWithWallet(sessionInfo, driveService, all, parent, f))
-                .orElseGet(() -> createWithoutWallet(sessionInfo, driveService, all, parent));
+        final List<File> all = getFilesInFolder(driveService, parent).collect(Collectors.toList());
+        return getSpreadsheetWithName(all.stream(), ROBOZONKY_WALLET_SHEET_NAME)
+                .map(f -> createWithWallet(sessionInfo, driveService, all.stream(), parent, f))
+                .orElseGet(() -> createWithoutWallet(sessionInfo, driveService, all.stream(), parent));
     }
 
     private static DriveOverview createWithWallet(final SessionInfo sessionInfo, final Drive driveService,
