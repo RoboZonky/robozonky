@@ -18,15 +18,15 @@ package com.github.robozonky.integrations.stonky;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -52,24 +52,29 @@ class ApiKey {
     /**
      * Obtained by running {@link #main(String...)} on the JSON secret provided by Google.
      */
-    private static final String RESULT = "kDbUDhMpf3zyt+ybZMSXWw==:SPuxElMuJ+gZq1qFB+DO6/qg4Y85Gg/idMIGqYrpoh0dxxckj" +
-            "VORe1ccun5leffFJPG1A3M3YscKJ7i/5sKtw7F4wwtg4CZdMBx4ikTmdHAOnoT8+WLes6JUI6o2WPrh+2ysWTDa/V54nMK2px6/nVrq" +
-            "Z7QQJcYeVmpsDeqtpBSov1J7S/4GqRFc24sibhtrDdZuLoZmFhqFHqXNIhEdbVs/0RQx6RYxQcPQ3r8RyfYoY+qONdrCwoOTR3sr4Jr" +
-            "/zvxm9x2a5spXqTxOOPTpXkzxYqEnCAYmeXGQW5JxNRiasNw0EU8pp6GFNz34kBSwCTjYVi2WfVqM67rKJrL3wzUS9C+Gv1cjo0g48Y" +
-            "WANUa27fyuOPWk4XNzDmhtn62PZIbeg523mNDTAtKQ4HrS7abp040l2LsmGuUjLKkt3FtQLgB1F/qbn2BNqtE2nV/pWUH7UcxnNIWH3" +
-            "4VKcQ8Ch7isExvpber+foq2aq2OybtARE34Dqwp39EroWTwsaa1kPr62eMxFynYz8TgJxOlnrDmZ44K8DjXs860pGfvHNma5VgNm9uM" +
-            "pncJ2LT+xO4ybDH27dDVK3ZyK4HXxbyJkA==";
+    private static final String RESULT = "ka6y1FmftPjeAToV:IzqU6mqiqgOi/6w5OnHBzZeEmONtzEH765+7VFGZgWhqGT6Fboe9s" +
+            "FKOBsYBn/wYDxWbkwjxeCxbBrF0pDxnRr/Zx4DYlHGqNL4E0+ITARAUZEmJnfcTwQD3bT543WHzFvT2sDpKaRogmaYG8Y2WiweJ" +
+            "Ak9Oh/WjzkgMi6/lfyTYvAOZWSz3UwBaI/pHMmB6pv8WUbLSZfXsvgIvyFTbMXZ7lS2WmtX+2hJ0ScOj25Wsa2EvgafQZcTxybm" +
+            "627JbuehQ8KeRaO5Y+HFjhRxgc45nD/iWQtqmLc7PHagQxUQbHRNBwx/wyKOyQzqfOqMBs48frwgBqFdYkGFwqB6YfLH6gSJPH6" +
+            "AiEbZf8mGwVRUz+Dul9VEpoZcxhm5mnQgz69GGP6F3oRJDd4ZNqquyXfOK2CwpuYE4ZkQFd8yMyfEYbc3hJtAzWXAy9nUB3tLL+" +
+            "ZL5vOGtCr8BFuwGh+udsZPp+mdkvM7HxJoM6T5DbrF6X3VT4i5ULy2RlvOym2HO2Rt0VrlATEFSn7InDX/EDavukoQ6L/7bGWCH" +
+            "m9q0RyQM3Zd2YOKbXL54T3zJjoVXaaa+5wvslURZ9nGbGT4Ucj+mf30=";
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiKey.class);
 
     public static void main(final String... args) throws Exception {
         final byte[] input = Files.readAllBytes(new File(args[0]).toPath());
         final String encrypted = new String(encrypt(input));
         LOGGER.info("Encrypted: '{}'.", encrypted);
+        LOGGER.info("Decrypted: '{}'.", new String(decrypt(encrypted)));
     }
 
     static byte[] encrypt(final byte[] input) throws Exception {
-        final SecretKeySpec key = createSecretKey();
-        return encrypt(input, key).getBytes(Defaults.CHARSET);
+        final Cipher cipher = getCipher();
+        cipher.init(Cipher.ENCRYPT_MODE, createSecretKey());
+        final byte[] cryptoText = cipher.doFinal(input);
+        final byte[] iv = cipher.getIV();
+        final String result = base64Encode(iv) + ":" + base64Encode(cryptoText);
+        return result.getBytes(Defaults.CHARSET);
     }
 
     public static byte[] get() {
@@ -87,30 +92,20 @@ class ApiKey {
         return new SecretKeySpec(keyTmp.getEncoded(), "AES");
     }
 
-    private static String encrypt(final byte[] property, final SecretKeySpec key) throws GeneralSecurityException {
-        final Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        pbeCipher.init(Cipher.ENCRYPT_MODE, key);
-        final AlgorithmParameters parameters = pbeCipher.getParameters();
-        final IvParameterSpec ivParameterSpec = parameters.getParameterSpec(IvParameterSpec.class);
-        final byte[] cryptoText = pbeCipher.doFinal(property);
-        final byte[] iv = ivParameterSpec.getIV();
-        return base64Encode(iv) + ":" + base64Encode(cryptoText);
+    private static Cipher getCipher() throws NoSuchPaddingException, NoSuchAlgorithmException {
+        return Cipher.getInstance("AES/GCM/NoPadding");
     }
 
     private static String base64Encode(final byte[] bytes) {
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    private static byte[] decrypt(final String string, final SecretKeySpec key) throws GeneralSecurityException {
+    static byte[] decrypt(final String string) throws GeneralSecurityException {
         final String iv = string.split(":")[0];
         final String property = string.split(":")[1];
-        final Cipher pbeCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        pbeCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(base64Decode(iv)));
-        return pbeCipher.doFinal(base64Decode(property));
-    }
-
-    static byte[] decrypt(final String string) throws GeneralSecurityException {
-        return decrypt(string, createSecretKey());
+        final Cipher cipher = getCipher();
+        cipher.init(Cipher.DECRYPT_MODE, createSecretKey(), new GCMParameterSpec(128, base64Decode(iv)));
+        return cipher.doFinal(base64Decode(property));
     }
 
     private static byte[] base64Decode(final String property) {

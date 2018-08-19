@@ -33,4 +33,10 @@ class StonkyIntegrationTest {
         final Stonky stonky = new Stonky();
         assertThat(stonky.apply(secretProvider)).isPresent();
     }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "CREDENTIALS_JSON", matches = ".+")
+    void encrypt() throws Exception {
+        ApiKey.main(System.getenv("CREDENTIALS_JSON"));
+    }
 }
