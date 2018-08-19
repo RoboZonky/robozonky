@@ -441,6 +441,9 @@
               <param>hashCode</param>
               <param>toString</param>
             </excludedMethods>
+            <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
+              <value>-Dfile.encoding=${project.build.sourceEncoding}</value>
+            </jvmArgs>
           </configuration>
         </plugin>
         <plugin>
