@@ -39,7 +39,8 @@ build_script: # no tests, just build
   - mvn --batch-mode -pl %MODULE% -am install -DskipTests -Dgpg.skip
 test_script: # all tests, no assembly
   - mvn --batch-mode -pl %MODULE% install -Dassembly.skipAssembly -Dgpg.skip
-after_test: # upload test results via rest-api
+after_test:
+# upload test results via rest-api
 - ps: |
     $wc = New-Object 'System.Net.WebClient'
     Get-ChildItem . -Name -Recurse 'TEST-*.xml' |
@@ -47,6 +48,10 @@ after_test: # upload test results via rest-api
     Foreach-Object {
         $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $_))
     }
-artifacts: # so that we can read the sysout readout of the tests
-- path: '**\target\surefire-reports\*-output.txt'
-  name: "Test Logs"
+# upload test artifacts in order and with a shortened file name
+- ps: |
+    Get-ChildItem . -Name -Recurse '*-output.txt' |
+    Sort-Object |
+    Foreach-Object {
+        Push-AppveyorArtifact (Resolve-Path $_) -DeploymentName "Test Logs"
+    }
