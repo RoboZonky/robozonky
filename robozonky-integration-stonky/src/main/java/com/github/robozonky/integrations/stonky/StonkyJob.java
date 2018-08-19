@@ -46,7 +46,7 @@ enum StonkyJob implements Job {
 
     @Override
     public Payload payload() {
-        return (secretProvider) -> {
+        return secretProvider -> {
             try {
                 final Stonky s = new Stonky();
                 s.apply(secretProvider);

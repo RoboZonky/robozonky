@@ -48,11 +48,7 @@ enum Export {
         return new URL(root + path + "?access_token=" + String.valueOf(token.getAccessToken()));
     }
 
-    public File download(final ZonkyApiToken token) {
-        return download(token, ApiProvider.ZONKY_URL);
-    }
-
-    File download(final ZonkyApiToken token, final String urlRoot) {
+    public File download(final ZonkyApiToken token, final String urlRoot) {
         try {
             LOGGER.debug("Contacting Zonky to download the export.");
             final URL url = formUrl(urlRoot, token);

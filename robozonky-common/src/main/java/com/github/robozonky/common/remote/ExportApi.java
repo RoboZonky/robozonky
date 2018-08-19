@@ -25,9 +25,15 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 class ExportApi {
 
     private final Supplier<ZonkyApiToken> token;
+    private final String rootUrl;
 
     public ExportApi(final Supplier<ZonkyApiToken> token) {
+        this(token, ApiProvider.ZONKY_URL);
+    }
+
+    ExportApi(final Supplier<ZonkyApiToken> token, final String rootUrl) {
         this.token = token;
+        this.rootUrl = rootUrl;
     }
 
     private ZonkyApiToken getToken() {
@@ -41,12 +47,10 @@ class ExportApi {
     }
 
     public File wallet() {
-        final ZonkyApiToken token = getToken();
-        return Export.WALLET.download(token);
+        return Export.WALLET.download(getToken(), rootUrl);
     }
 
     public File investments() {
-        final ZonkyApiToken token = getToken();
-        return Export.INVESTMENTS.download(token);
+        return Export.INVESTMENTS.download(getToken(), rootUrl);
     }
 }

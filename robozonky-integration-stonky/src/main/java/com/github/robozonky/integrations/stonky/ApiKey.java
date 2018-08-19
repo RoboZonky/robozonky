@@ -17,12 +17,17 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -61,14 +66,17 @@ class ApiKey {
             "m9q0RyQM3Zd2YOKbXL54T3zJjoVXaaa+5wvslURZ9nGbGT4Ucj+mf30=";
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiKey.class);
 
-    public static void main(final String... args) throws Exception {
+    public static void main(final String... args) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException,
+            IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidKeySpecException,
+            InvalidAlgorithmParameterException {
         final byte[] input = Files.readAllBytes(new File(args[0]).toPath());
         final String encrypted = new String(encrypt(input));
         LOGGER.info("Encrypted: '{}'.", encrypted);
         LOGGER.info("Decrypted: '{}'.", new String(decrypt(encrypted)));
     }
 
-    static byte[] encrypt(final byte[] input) throws Exception {
+    static byte[] encrypt(final byte[] input) throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         final Cipher cipher = getCipher();
         cipher.init(Cipher.ENCRYPT_MODE, createSecretKey());
         final byte[] cryptoText = cipher.doFinal(input);
@@ -100,7 +108,9 @@ class ApiKey {
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    static byte[] decrypt(final String string) throws GeneralSecurityException {
+    static byte[] decrypt(final String string) throws InvalidKeySpecException, NoSuchAlgorithmException,
+            NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException,
+            InvalidAlgorithmParameterException, InvalidKeyException {
         final String iv = string.split(":")[0];
         final String property = string.split(":")[1];
         final Cipher cipher = getCipher();

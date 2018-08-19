@@ -37,15 +37,14 @@ import org.mockserver.socket.PortFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
 
-class ExportTest {
+class ExportApiTest {
 
     private static final String PEOPLE_CONTENT = "Some content in place of People XLS export.";
     private static final String WALLET_CONTENT = "Some content in place of Wallet XLS export.";
-
+    private final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                                                          300, ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
     private ClientAndServer server;
     private String serverUrl;
-    private final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                                                          300);
 
     @BeforeEach
     void startServer() {
@@ -76,43 +75,54 @@ class ExportTest {
         server.stop();
     }
 
+    private ExportApi getApi(final String rootUrl) {
+        return new ExportApi(() -> token, rootUrl);
+    }
+
     @Test
     void downloadPeople() throws IOException {
-        final Export export = Export.INVESTMENTS;
-        final File f = export.download(token, "http://" + serverUrl);
+        final ExportApi api = getApi("http://" + serverUrl);
+        final File f = api.investments();
         final String result = Files.lines(f.toPath()).collect(Collectors.joining("\n"));
         assertThat(result).isEqualTo(PEOPLE_CONTENT);
     }
 
     @Test
     void downloadWallet() throws IOException {
-        final Export export = Export.WALLET;
-        final File f = export.download(token, "http://" + serverUrl);
+        final ExportApi api = getApi("http://" + serverUrl);
+        final File f = api.wallet();
         final String result = Files.lines(f.toPath()).collect(Collectors.joining("\n"));
         assertThat(result).isEqualTo(WALLET_CONTENT);
     }
 
     @Test
     void downloadFromWrongUrl() {
-        final Export export = Export.WALLET;
-        assertThatThrownBy(() -> export.download(token, serverUrl)) // missing protocol part of the URL
+        final ExportApi api = getApi(serverUrl);
+        assertThatThrownBy(api::wallet) // missing protocol part of the URL
                 .isInstanceOf(IllegalStateException.class)
                 .hasCauseInstanceOf(MalformedURLException.class);
     }
 
     @Test
     void downloadFromNonexistentRoot() {
-        final Export export = Export.WALLET;
-        assertThatThrownBy(() -> export.download(token, "http://localhost")) // not bound to anything
+        final ExportApi api = getApi("http://localhost");
+        assertThatThrownBy(api::wallet) // nothing is listening on the default port
                 .isInstanceOf(IllegalStateException.class)
                 .hasCauseInstanceOf(ConnectException.class);
     }
 
     @Test
     void downloadFromNonexistentPath() {
-        final Export export = Export.WALLET;
-        assertThatThrownBy(() -> export.download(token, "http://" + serverUrl + "/something")) // not bound to anything
+        final ExportApi api = getApi("http://" + serverUrl + "/something");
+        assertThatThrownBy(api::wallet) // not bound to anything
                 .isInstanceOf(IllegalStateException.class)
                 .hasCauseInstanceOf(FileNotFoundException.class);
+    }
+
+    @Test
+    void downloadWithWrongScope() {
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 300);
+        final ExportApi api = new ExportApi(() -> token, "http://" + serverUrl);
+        assertThatThrownBy(api::investments).isInstanceOf(IllegalStateException.class);
     }
 }

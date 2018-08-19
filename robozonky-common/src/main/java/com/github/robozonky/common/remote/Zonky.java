@@ -43,6 +43,7 @@ import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -70,24 +71,15 @@ public class Zonky {
     private final PaginatedApi<Transaction, TransactionApi> transactions;
     private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
 
-    Zonky(final Api<ControlApi> control, final Api<ExportApi> exports, final PaginatedApi<RawLoan, LoanApi> loans,
-          final PaginatedApi<Participation, ParticipationApi> participations,
-          final PaginatedApi<RawInvestment, PortfolioApi> portfolio,
-          final PaginatedApi<BlockedAmount, WalletApi> wallet,
-          final PaginatedApi<Transaction, TransactionApi> transactions,
-          final PaginatedApi<RawDevelopment, CollectionsApi> collections) {
-        if (control == null || exports == null || loans == null || participations == null || portfolio == null ||
-                wallet == null || transactions == null || collections == null) {
-            throw new IllegalArgumentException("No API may be null.");
-        }
-        this.controlApi = control;
-        this.exports = exports;
-        this.loanApi = loans;
-        this.participationApi = participations;
-        this.portfolioApi = portfolio;
-        this.walletApi = wallet;
-        this.transactions = transactions;
-        this.collectionsApi = collections;
+    Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
+        this.controlApi = api.control(tokenSupplier);
+        this.exports = api.exports(tokenSupplier);
+        this.loanApi = api.marketplace(tokenSupplier);
+        this.participationApi = api.secondaryMarketplace(tokenSupplier);
+        this.portfolioApi = api.portfolio(tokenSupplier);
+        this.walletApi = api.wallet(tokenSupplier);
+        this.transactions = api.transactions(tokenSupplier);
+        this.collectionsApi = api.collections(tokenSupplier);
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function) {

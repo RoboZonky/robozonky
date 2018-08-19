@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.remote;
+package com.github.robozonky.common.extensions;
 
-import com.github.robozonky.api.remote.LoanApi;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProxyFactoryTest {
+class JobServiceLoaderTest {
 
     @Test
-    void api() {
-        final ResteasyClient client = ProxyFactory.newResteasyClient();
-        final RoboZonkyFilter f = new RoboZonkyFilter();
-        assertThat(ProxyFactory.newProxy(client, f, LoanApi.class, "https://api.zonky.cz")).isNotNull();
+    void emptyByDefault() {
+        assertThat(JobServiceLoader.load()).isEmpty();
     }
 
-    @Test
-    void unfilteredApi() {
-        final ResteasyClient client = ProxyFactory.newResteasyClient();
-        assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
-    }
 }

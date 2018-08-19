@@ -16,6 +16,7 @@
 
 package com.github.robozonky.integrations.stonky;
 
+import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -53,8 +54,8 @@ public class Util {
                 .build();
     }
 
-    public static <S, T> Function<S, T> wrap(final ThrowingFunction<S, T> function) {
-        return (s) -> {
+    static <S, T> Function<S, T> wrap(final ThrowingFunction<S, T> function) {
+        return s -> {
             try {
                 return function.apply(s);
             } catch (final Exception ex) {
@@ -63,7 +64,7 @@ public class Util {
         };
     }
 
-    public static <T> Supplier<T> wrap(final ThrowingSupplier<T> supplier) {
+    static <T> Supplier<T> wrap(final ThrowingSupplier<T> supplier) {
         return () -> {
             try {
                 return supplier.get();
@@ -75,11 +76,11 @@ public class Util {
 
     interface ThrowingFunction<S, T> {
 
-        T apply(S argument) throws Exception;
+        T apply(S argument) throws IOException;
     }
 
     interface ThrowingSupplier<T> {
 
-        T get() throws Exception;
+        T get() throws IOException;
     }
 }

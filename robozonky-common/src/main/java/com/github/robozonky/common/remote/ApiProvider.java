@@ -70,6 +70,10 @@ public class ApiProvider implements AutoCloseable {
         this.client = client;
     }
 
+    static <T> Api<T> obtainNormal(final T proxy) {
+        return new Api<>(proxy);
+    }
+
     /**
      * Instantiate an API as a RESTEasy client proxy.
      * @param api RESTEasy endpoint.
@@ -79,9 +83,14 @@ public class ApiProvider implements AutoCloseable {
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
-    protected <S, T> PaginatedApi<S, T> obtainPaginated(final Class<T> api, final String url,
-                                                        final Supplier<ZonkyApiToken> token) {
+    <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api, final String url,
+                                                                             final Supplier<ZonkyApiToken> token) {
         return new PaginatedApi<>(api, url, token, client);
+    }
+
+    <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token) {
+        final T proxy = ProxyFactory.newProxy(client, new AuthenticatedFilter(token), api, ApiProvider.ZONKY_URL);
+        return obtainNormal(proxy);
     }
 
     private OAuth oauth() {
@@ -117,10 +126,7 @@ public class ApiProvider implements AutoCloseable {
     private synchronized Zonky authenticated(final Supplier<ZonkyApiToken> token) {
         return authenticated.computeIfAbsent(token, key -> {
             LOGGER.debug("Creating a new authenticated API for {}.", token);
-            return new Zonky(this.control(key), this.exports(key), this.marketplace(key),
-                             this.secondaryMarketplace(key),
-                             this.portfolio(key), this.wallet(key), this.transaction(key), this.collections(key)
-            );
+            return new Zonky(this, token);
         });
     }
 
@@ -137,7 +143,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<RawLoan, LoanApi> marketplace(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<RawLoan, LoanApi> marketplace(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(LoanApi.class, ApiProvider.ZONKY_URL, token);
     }
 
@@ -146,7 +152,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(ParticipationApi.class, ApiProvider.ZONKY_URL, token);
     }
 
@@ -155,7 +161,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<BlockedAmount, WalletApi> wallet(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<BlockedAmount, WalletApi> wallet(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(WalletApi.class, ApiProvider.ZONKY_URL, token);
     }
 
@@ -164,7 +170,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<Transaction, TransactionApi> transaction(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<Transaction, TransactionApi> transactions(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(TransactionApi.class, ApiProvider.ZONKY_URL, token);
     }
 
@@ -173,7 +179,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<RawInvestment, PortfolioApi> portfolio(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<RawInvestment, PortfolioApi> portfolio(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(PortfolioApi.class, ApiProvider.ZONKY_URL, token);
     }
 
@@ -182,10 +188,8 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private Api<ControlApi> control(final Supplier<ZonkyApiToken> token) {
-        final ControlApi proxy = ProxyFactory.newProxy(client, new AuthenticatedFilter(token), ControlApi.class,
-                                                       ApiProvider.ZONKY_URL);
-        return new Api<>(proxy);
+    Api<ControlApi> control(final Supplier<ZonkyApiToken> token) {
+        return obtainNormal(ControlApi.class, token);
     }
 
     /**
@@ -193,9 +197,8 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private Api<ExportApi> exports(final Supplier<ZonkyApiToken> token) {
-        final ExportApi proxy = new ExportApi(token);
-        return new Api<>(proxy);
+    Api<ExportApi> exports(final Supplier<ZonkyApiToken> token) {
+        return obtainNormal(new ExportApi(token));
     }
 
     /**
@@ -203,7 +206,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<RawDevelopment, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<RawDevelopment, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(CollectionsApi.class, ApiProvider.ZONKY_URL, token);
     }
 
