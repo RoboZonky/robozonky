@@ -72,10 +72,13 @@ public class DriveOverview {
     }
 
     public static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService) throws IOException {
+        final String folderName = getFolderName(sessionInfo);
+        LOGGER.debug("Listing all files in the Google Drive, looking up folder: {}.", folderName);
         final List<File> files = driveService.files().list().execute().getFiles();
         final Optional<File> result = files.stream()
+                .peek(f -> LOGGER.debug("Found '{}' ({}) as {}.", f.getName(), f.getMimeType(), f.getId()))
                 .filter(f -> Objects.equals(f.getMimeType(), MIME_TYPE_FOLDER))
-                .filter(f -> Objects.equals(f.getName(), getFolderName(sessionInfo)))
+                .filter(f -> Objects.equals(f.getName(), folderName))
                 .findFirst();
         if (result.isPresent()) {
             return create(sessionInfo, driveService, result.get());
@@ -84,40 +87,47 @@ public class DriveOverview {
         }
     }
 
-    private static Stream<File> listSpreadsheets(final List<File> all) {
-        return all.stream()
-                .filter(f -> Objects.equals(f.getMimeType(), MIME_TYPE_GOOGLE_SPREADSHEET));
+    private static Stream<File> listSpreadsheets(final Stream<File> all) {
+        return all.filter(f -> Objects.equals(f.getMimeType(), MIME_TYPE_GOOGLE_SPREADSHEET));
     }
 
-    private static Optional<File> getSpreadsheetWithName(final List<File> all, final String name) {
+    private static Optional<File> getSpreadsheetWithName(final Stream<File> all, final String name) {
+        LOGGER.debug("Looking up spreadsheet with name: {}.", name);
         return listSpreadsheets(all)
                 .filter(f -> Objects.equals(f.getName(), name))
                 .findFirst();
     }
 
-    private static List<File> getFilesInFolder(final Drive driveService, final File parent) throws IOException {
+    private static Stream<File> getFilesInFolder(final Drive driveService, final File parent) throws IOException {
+        LOGGER.debug("Listing files in folder {}.", parent.getId());
         return driveService.files().list()
                 .setQ("'" + parent.getId() + "' in parents")
-                .execute().getFiles();
+                .execute()
+                .getFiles()
+                .stream()
+                .peek(f -> LOGGER.debug("Found '{}' ({}) as {}.", f.getName(), f.getMimeType(), f.getId()));
     }
 
     private static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService,
                                         final File parent) throws IOException {
-        final List<File> all = getFilesInFolder(driveService, parent);
+        LOGGER.debug("Looking for a wallet spreadsheet.");
+        final Stream<File> all = getFilesInFolder(driveService, parent);
         return getSpreadsheetWithName(all, ROBOZONKY_WALLET_SHEET_NAME)
                 .map(f -> createWithWallet(sessionInfo, driveService, all, parent, f))
                 .orElseGet(() -> createWithoutWallet(sessionInfo, driveService, all, parent));
     }
 
     private static DriveOverview createWithWallet(final SessionInfo sessionInfo, final Drive driveService,
-                                                  final List<File> all, final File parent, final File wallet) {
+                                                  final Stream<File> all, final File parent, final File wallet) {
+        LOGGER.debug("Looking for a people spreadsheet.");
         return getSpreadsheetWithName(all, ROBOZONKY_PEOPLE_SHEET_NAME)
                 .map(f -> new DriveOverview(sessionInfo, driveService, parent, wallet, f))
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent, wallet, null));
     }
 
     private static DriveOverview createWithoutWallet(final SessionInfo sessionInfo, final Drive driveService,
-                                                     final List<File> all, final File parent) {
+                                                     final Stream<File> all, final File parent) {
+        LOGGER.debug("Looking for a people spreadsheet.");
         return getSpreadsheetWithName(all, ROBOZONKY_PEOPLE_SHEET_NAME)
                 .map(f -> new DriveOverview(sessionInfo, driveService, parent, null, f))
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent));
@@ -155,12 +165,14 @@ public class DriveOverview {
 
     private File getOrCreateRoboZonkyFolder() throws IOException {
         if (folder == null) {
+            LOGGER.debug("Creating a new Stonky folder.");
             folder = createRoboZonkyFolder(driveService);
         }
         return folder;
     }
 
     private File cloneStonky(final File upstream, final File parent) throws IOException {
+        LOGGER.debug("Cloning Stonky master spreadsheet.");
         final File f = new File();
         f.setName(upstream.getName());
         f.setParents(Collections.singletonList(parent.getId()));
