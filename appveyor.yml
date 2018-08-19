@@ -47,5 +47,5 @@ after_test: # upload test results via rest-api
         $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $_))
     }
 artifacts: # so that we can read the sysout readout of the tests
-- path: '**\target\surefire-reports\*.txt'
+- path: '**\target\surefire-reports\*-output.txt'
   name: "Test Logs"
