@@ -72,7 +72,8 @@ class ApiKey {
         final byte[] input = Files.readAllBytes(new File(args[0]).toPath());
         final String encrypted = new String(encrypt(input));
         LOGGER.info("Encrypted: '{}'.", encrypted);
-        LOGGER.info("Decrypted: '{}'.", new String(decrypt(encrypted)));
+        final String decrypted = new String(decrypt(encrypted));
+        LOGGER.info("Decrypted: '{}'.", decrypted);
     }
 
     static byte[] encrypt(final byte[] input) throws NoSuchAlgorithmException, NoSuchPaddingException,

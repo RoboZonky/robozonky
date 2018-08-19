@@ -32,16 +32,19 @@ public final class RoboZonkyTestExecutionListener implements TestExecutionListen
 
     @Override
     public void executionSkipped(final TestIdentifier testIdentifier, final String reason) {
-        LOGGER.info("Skipped {}. Cause: {}.", identifyTest(testIdentifier), reason);
+        final String id = identifyTest(testIdentifier);
+        LOGGER.info("Skipped {}. Cause: {}.", id, reason);
     }
 
     @Override
     public void executionStarted(final TestIdentifier testIdentifier) {
-        LOGGER.info("Started {}.", identifyTest(testIdentifier));
+        final String id = identifyTest(testIdentifier);
+        LOGGER.info("Started {}.", id);
     }
 
     @Override
     public void executionFinished(final TestIdentifier testIdentifier, final TestExecutionResult testExecutionResult) {
-        LOGGER.info("Finished {}.", identifyTest(testIdentifier));
+        final String id = identifyTest(testIdentifier);
+        LOGGER.info("Finished {}.", id);
     }
 }
