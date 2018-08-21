@@ -234,6 +234,10 @@
     <field type="check" variable="isStonkyEnabled" summaryKey="Integrace se Stonky povolena:">
       <spec txt="Chci povolit Stonky integraci, dám RoboZonky přístup ke svému Google Drive účtu." set="false"/>
     </field>
+    <field type="space" />
 
+    <field type="staticText" align="left"
+           txt="Více o Stonky se dozvíte zde: https://www.facebook.com/groups/204405453512737/."
+           id="stonky.description.6"/>
   </panel>
 </izpack:userinput>
