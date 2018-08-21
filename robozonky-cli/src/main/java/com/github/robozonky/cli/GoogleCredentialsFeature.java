@@ -49,7 +49,7 @@ public final class GoogleCredentialsFeature implements Feature {
         this("", transport, CredentialProvider.live(transport));
     }
 
-    GoogleCredentialsFeature() {
+    public GoogleCredentialsFeature() {
         this(Util.createTransport());
     }
 
@@ -58,15 +58,19 @@ public final class GoogleCredentialsFeature implements Feature {
         return DESCRIPTION;
     }
 
+    public void runGoogleCredentialCheck() {
+        final SessionInfo sessionInfo = new SessionInfo(username);
+        final Credential credential = credentialProvider.getCredential(sessionInfo);
+        Util.createSheetsService(credential, transport);
+        Util.createDriveService(credential, transport);
+    }
+
     @Override
     public void setup() throws SetupFailedException {
         LOGGER.info("A web browser window may open, or you may be asked to visit a Google link.");
         LOGGER.info("Unless you allow RoboZonky to access your Google Sheets, Stonky integration will be disabled.");
         try {
-            final SessionInfo sessionInfo = new SessionInfo(username);
-            final Credential credential = credentialProvider.getCredential(sessionInfo);
-            Util.createSheetsService(credential, transport);
-            Util.createDriveService(credential, transport);
+            runGoogleCredentialCheck();
             LOGGER.info("Press Enter to confirm that you have granted permission, otherwise exit.");
             System.in.read();
         } catch (final Exception ex) {
