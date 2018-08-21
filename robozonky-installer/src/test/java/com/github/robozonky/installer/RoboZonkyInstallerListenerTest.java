@@ -82,6 +82,8 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(data.getVariable(Variables.SMTP_TO.getKey())).thenReturn("recipient@server.cz");
         when(data.getVariable(Variables.SMTP_USERNAME.getKey())).thenReturn("sender@server.cz");
         when(data.getVariable(Variables.SMTP_PASSWORD.getKey())).thenReturn(UUID.randomUUID().toString());
+        // otherwise browser window will open to authenticate with Google
+        when(data.getVariable(Variables.IS_STONKY_ENABLED.getKey())).thenReturn("false");
         return data;
     }
 
