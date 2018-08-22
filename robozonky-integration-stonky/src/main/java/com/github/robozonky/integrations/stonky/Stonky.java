@@ -29,9 +29,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
@@ -72,6 +70,11 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
         this.transport = transport;
         this.credentialSupplier = credentialSupplier;
         this.api = api;
+    }
+
+    private static final Function<ApiProvider, ZonkyApiToken> getToken(final SecretProvider secrets,
+                                                                       final String scope) {
+        return api -> api.oauth(oauth -> oauth.login(scope, secrets.getUsername(), secrets.getPassword()));
     }
 
     /**
@@ -132,21 +135,8 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
         return stonky;
     }
 
-    private Supplier<java.io.File> getExporter(final Function<Zonky, java.io.File> exporter,
-                                               final Supplier<ZonkyApiToken> tokenSupplier) {
-        return () -> api.call(exporter, tokenSupplier);
-    }
-
-    private Supplier<java.io.File> getWalletExporter(final Supplier<ZonkyApiToken> tokenSupplier) {
-        return getExporter(Zonky::exportWallet, tokenSupplier);
-    }
-
-    private Supplier<java.io.File> getInvestmentsExporter(final Supplier<ZonkyApiToken> tokenSupplier) {
-        return getExporter(Zonky::exportInvestments, tokenSupplier);
-    }
-
-    private String run(final SessionInfo sessionInfo,
-                       final Supplier<ZonkyApiToken> tokenSupplier) throws ExecutionException, InterruptedException {
+    private String run(final SessionInfo sessionInfo, final Supplier<ZonkyApiToken> webScopedToken,
+                       final Supplier<ZonkyApiToken> fileScopedToken) throws ExecutionException, InterruptedException {
         final Credential credential = credentialSupplier.getCredential(sessionInfo);
         final Drive driveService = Util.createDriveService(credential, transport);
         final Sheets sheetsService = Util.createSheetsService(credential, transport);
@@ -157,18 +147,28 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
             final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();
             return new Summary(o, result);
         }));
-        final CompletableFuture<Spreadsheet> walletCopier = summary.thenApplyAsync(Util.wrap(s -> {
-            LOGGER.debug("Requesting wallet export.");
-            final DriveOverview o = s.getOverview();
-            final File f = o.latestWallet(getWalletExporter(tokenSupplier));
-            return copySheet(sheetsService, s.getStonky(), f, "Wallet");
-        }));
-        final CompletableFuture<Spreadsheet> peopleCopier = summary.thenApplyAsync(Util.wrap(s -> {
-            LOGGER.debug("Requesting investments export.");
-            final DriveOverview o = s.getOverview();
-            final File f = o.latestPeople(getInvestmentsExporter(tokenSupplier));
-            return copySheet(sheetsService, s.getStonky(), f, "People");
-        }));
+        final CompletableFuture<Spreadsheet> walletCopier = summary
+                .thenCombineAsync(Export.WALLET.download(api, webScopedToken, fileScopedToken), (s, maybeFile) -> {
+                    final java.io.File f =
+                            maybeFile.orElseThrow(() -> new IllegalStateException("Failed exporting wallet."));
+                    return new SummaryWithExport(s, f);
+                })
+                .thenApplyAsync(Util.wrap(s -> {
+                    LOGGER.debug("Requesting wallet export.");
+                    final File f = s.getOverview().latestWallet(s.getExport());
+                    return copySheet(sheetsService, s.getStonky(), f, "Wallet");
+                }));
+        final CompletableFuture<Spreadsheet> peopleCopier = summary
+                .thenCombineAsync(Export.INVESTMENTS.download(api, webScopedToken, fileScopedToken), (s, maybeFile) -> {
+                    final java.io.File f =
+                            maybeFile.orElseThrow(() -> new IllegalStateException("Failed exporting investments."));
+                    return new SummaryWithExport(s, f);
+                })
+                .thenApplyAsync(Util.wrap(s -> {
+                    LOGGER.debug("Requesting investments export.");
+                    final File f = s.getOverview().latestPeople(s.getExport());
+                    return copySheet(sheetsService, s.getStonky(), f, "People");
+                }));
         final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> {
             if (Objects.equals(a.getSpreadsheetId(), b.getSpreadsheetId())) {
                 return a;
@@ -185,26 +185,28 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
     @Override
     public Optional<String> apply(final SecretProvider secretProvider) {
         final SessionInfo sessionInfo = new SessionInfo(secretProvider.getUsername());
+        final TokenManager webScopedToken =
+                new TokenManager(api, getToken(secretProvider, ZonkyApiToken.SCOPE_APP_WEB_STRING));
+        final TokenManager fileScopedToken =
+                new TokenManager(api, getToken(secretProvider, ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING));
         try {
             if (!credentialSupplier.credentialExists(sessionInfo)) {
                 LOGGER.info("Stonky integration disabled. No Google credentials found for user '{}'.",
                             sessionInfo.getUsername());
                 return Optional.empty();
             }
-            final LazyInitialized<ZonkyApiToken> token =
-                    LazyInitialized.create(() -> api.oauth(a -> a.login(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING,
-                                                                        secretProvider.getUsername(),
-                                                                        secretProvider.getPassword())));
-            return Optional.ofNullable(run(sessionInfo, token));
+            return Optional.ofNullable(run(sessionInfo, webScopedToken, fileScopedToken));
         } catch (final Exception ex) {
             LOGGER.warn("Failed integrating with Stonky.", ex);
             return Optional.empty();
-        } finally {
+        } finally { // log out
+            webScopedToken.close();
+            fileScopedToken.close();
             api.close();
         }
     }
 
-    private static final class Summary {
+    private static class Summary {
 
         private final DriveOverview overview;
         private final Spreadsheet stonky;
@@ -220,6 +222,20 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
 
         public Spreadsheet getStonky() {
             return stonky;
+        }
+    }
+
+    private static final class SummaryWithExport extends Summary {
+
+        private final java.io.File export;
+
+        public SummaryWithExport(final Summary summary, final java.io.File export) {
+            super(summary.getOverview(), summary.getStonky());
+            this.export = export;
+        }
+
+        public java.io.File getExport() {
+            return export;
         }
     }
 }

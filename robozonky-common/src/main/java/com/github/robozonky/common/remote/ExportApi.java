@@ -13,44 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.robozonky.common.remote;
 
-import java.io.File;
-import java.util.Objects;
-import java.util.function.Supplier;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.api.ApiConstants;
+import com.github.robozonky.internal.api.Defaults;
 
-class ExportApi {
+@Path("/")
+@Produces(Defaults.MEDIA_TYPE)
+@Consumes(Defaults.MEDIA_TYPE)
+public interface ExportApi {
 
-    private final Supplier<ZonkyApiToken> token;
-    private final String rootUrl;
+    @POST
+    @Path(ApiConstants.WALLET_EXPORT)
+    void requestWalletExport();
 
-    public ExportApi(final Supplier<ZonkyApiToken> token) {
-        this(token, ApiProvider.ZONKY_URL);
-    }
+    @POST
+    @Path(ApiConstants.INVESTMENTS_EXPORT)
+    void requestInvestmentsExport();
 
-    ExportApi(final Supplier<ZonkyApiToken> token, final String rootUrl) {
-        this.token = token;
-        this.rootUrl = rootUrl;
-    }
+    @GET
+    @Path(ApiConstants.WALLET_EXPORT)
+    Response.Status getWalletExportStatus();
 
-    private ZonkyApiToken getToken() {
-        final ZonkyApiToken result = token.get();
-        final String actualScope = result.getScope();
-        final String requiredScope = ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING;
-        if (!Objects.equals(actualScope, requiredScope)) {
-            throw new IllegalStateException("OAuth token scoped to " + actualScope + " instead of " + requiredScope);
-        }
-        return result;
-    }
+    @GET
+    @Path(ApiConstants.INVESTMENTS_EXPORT)
+    Response.Status getInvestmentsExportStatus();
 
-    public File wallet() {
-        return Export.WALLET.download(getToken(), rootUrl);
-    }
+    @GET
+    @Path(ApiConstants.WALLET_EXPORT + "/data")
+    Response downloadWalletExport();
 
-    public File investments() {
-        return Export.INVESTMENTS.download(getToken(), rootUrl);
-    }
+    @GET
+    @Path(ApiConstants.INVESTMENTS_EXPORT + "/data")
+    Response downloadInvestmentsExport();
+
 }
+

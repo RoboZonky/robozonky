@@ -18,6 +18,7 @@ package com.github.robozonky.integrations.stonky;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -28,11 +29,18 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
+import org.mockserver.socket.PortFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,6 +55,20 @@ class StonkyTest extends AbstractRoboZonkyTest {
     private final Zonky zonky = mock(Zonky.class);
     private final ApiProvider api = mockApiProvider(oauth, zonky);
 
+    private ClientAndServer server;
+    private String serverUrl;
+
+    @BeforeEach
+    void startServer() {
+        server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
+        serverUrl = "127.0.0.1:" + server.getLocalPort();
+    }
+
+    @AfterEach
+    void stopServer() {
+        server.stop();
+    }
+
     @Test
     void noCredential() {
         final CredentialProvider credential = CredentialProvider.mock(false);
@@ -54,6 +76,16 @@ class StonkyTest extends AbstractRoboZonkyTest {
         final Optional<String> result = stonky.apply(SECRET_PROVIDER);
         assertThat(result).isEmpty();
         verify(api).close();
+    }
+
+    @BeforeEach
+    void emptyExports() {
+        server.when(new HttpRequest()).respond(new HttpResponse()); // just return something to be downloaded
+        final Response response = mock(Response.class);
+        when(response.getStatus()).thenReturn(302);
+        when(response.getHeaderString(any())).thenReturn("http://" + serverUrl + "/file");
+        doReturn(response).when(zonky).downloadWalletExport();
+        doReturn(response).when(zonky).downloadInvestmentsExport();
     }
 
     @Test
@@ -88,12 +120,6 @@ class StonkyTest extends AbstractRoboZonkyTest {
         private final File stonkyFolder = getFolder(DriveOverview.getFolderName(SESSION_INFO));
         private FilesInFolderResponseHandler stonkyFolderContent;
         private File copyOfStonkyMaster;
-
-        @BeforeEach
-        void emptyExports() {
-            when(zonky.exportInvestments()).thenReturn(GoogleUtil.getDownloaded());
-            when(zonky.exportWallet()).thenReturn(GoogleUtil.getDownloaded());
-        }
 
         @BeforeEach
         void filledPortfolio() {
@@ -131,8 +157,8 @@ class StonkyTest extends AbstractRoboZonkyTest {
             final Stonky stonky = new Stonky(transport, credential, api);
             final Optional<String> result = stonky.apply(SECRET_PROVIDER);
             assertThat(result).contains(copyOfStonkyMaster.getId());
-            verify(zonky).exportInvestments();
-            verify(zonky).exportWallet();
+            verify(zonky).downloadInvestmentsExport();
+            verify(zonky).downloadWalletExport();
         }
     }
 }

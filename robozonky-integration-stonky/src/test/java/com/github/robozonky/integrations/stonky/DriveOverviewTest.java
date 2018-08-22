@@ -176,7 +176,7 @@ class DriveOverviewTest {
                 void updateWalletSpreadsheet() throws IOException {
                     final DriveOverview overview = DriveOverview.create(SESSION_INFO, service);
                     // copy the spreadsheet since it does not exist
-                    final File result = overview.latestWallet(GoogleUtil::getDownloaded);
+                    final File result = overview.latestWallet(GoogleUtil.getDownloaded());
                     assertThat(result.getId()).isEqualTo(walletSpreadsheet.getId());
                 }
 
@@ -184,9 +184,10 @@ class DriveOverviewTest {
                 void updatePeopleSpreadsheet() throws IOException {
                     final DriveOverview overview = DriveOverview.create(SESSION_INFO, service);
                     // copy the spreadsheet since it does not exist
-                    final File result = overview.latestPeople(GoogleUtil::getDownloaded);
+                    final File result = overview.latestPeople(GoogleUtil.getDownloaded());
                     assertThat(result.getId()).isEqualTo(peopleSpreadsheet.getId());
                 }
+
             }
         }
     }

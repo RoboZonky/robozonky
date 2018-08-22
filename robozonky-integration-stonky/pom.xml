@@ -73,6 +73,11 @@
       <version>1.24.1</version>
     </dependency>
     <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-test</artifactId>
     </dependency>

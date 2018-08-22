@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -213,20 +212,19 @@ public class DriveOverview {
         }
     }
 
-    public File latestWallet(final Supplier<java.io.File> downloader) throws IOException {
+    public File latestWallet(final java.io.File download) throws IOException {
         LOGGER.debug("Processing wallet export.");
-        wallet = getLatestSpreadsheet(downloader, ROBOZONKY_WALLET_SHEET_NAME, wallet);
+        wallet = getLatestSpreadsheet(download, ROBOZONKY_WALLET_SHEET_NAME, wallet);
         return wallet;
     }
 
-    public File latestPeople(final Supplier<java.io.File> downloader) throws IOException {
+    public File latestPeople(final java.io.File download) throws IOException {
         LOGGER.debug("Processing investment export.");
-        people = getLatestSpreadsheet(downloader, ROBOZONKY_PEOPLE_SHEET_NAME, people);
+        people = getLatestSpreadsheet(download, ROBOZONKY_PEOPLE_SHEET_NAME, people);
         return people;
     }
 
-    private File createSpreadsheet(final String name, final Supplier<java.io.File> downloader) throws IOException {
-        final java.io.File export = downloader.get(); // download from Zonky first
+    private File createSpreadsheet(final String name, final java.io.File export) throws IOException {
         final FileContent fc = new FileContent(MIME_TYPE_XLS_SPREADSHEET, export);
         final File parent = getOrCreateRoboZonkyFolder(); // retrieve Google folder in which to place the spreadsheet
         // convert the Zonky XLS to Google Spreadsheet
@@ -243,34 +241,32 @@ public class DriveOverview {
         return result;
     }
 
-    private File actuallyModifySpreadsheet(final File original,
-                                           final Supplier<java.io.File> downloader) throws IOException {
-        final java.io.File export = downloader.get();
+    private File actuallyModifySpreadsheet(final File original, final java.io.File export) throws IOException {
         final FileContent fc = new FileContent(MIME_TYPE_XLS_SPREADSHEET, export);
         return driveService.files().update(original.getId(), null, fc)
                 .setFields("id")
                 .execute();
     }
 
-    private File modifySpreadsheet(final File original, final Supplier<java.io.File> downloader) throws IOException {
+    private File modifySpreadsheet(final File original, final java.io.File export) throws IOException {
         final String id = identify(original);
         LOGGER.debug("Updating an existing Google spreadsheet: {}.", id);
-        final File result = actuallyModifySpreadsheet(original, downloader);
+        final File result = actuallyModifySpreadsheet(original, export);
         LOGGER.debug("Google spreadsheet updated.");
         return result;
     }
 
     /**
      * Download the spreadsheet from Zonky and convert it to a Google Spreadsheet.
-     * @param downloader Called to download the file.
+     * @param download File to convert.
      * @param name Name of the Google spreadsheet file to create if it doesn't exist.
      * @param original Google spreadsheet file to update, or null if none exists.
      * @return Guaranteed latest version of the Google Spreadsheet matching the Zonky spreadsheet.
      * @throws IOException
      */
-    private File getLatestSpreadsheet(final Supplier<java.io.File> downloader, final String name,
+    private File getLatestSpreadsheet(final java.io.File download, final String name,
                                       final File original) throws IOException {
-        return (original == null) ? createSpreadsheet(name, downloader) : modifySpreadsheet(original, downloader);
+        return (original == null) ? createSpreadsheet(name, download) : modifySpreadsheet(original, download);
     }
 
     @Override

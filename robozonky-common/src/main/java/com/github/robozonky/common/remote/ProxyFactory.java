@@ -53,15 +53,19 @@ final class ProxyFactory {
             LOGGER.debug("Set HTTP proxy to {}:{}.", host, port);
         });
         /*
-         * In order to enable redirects, we need to configure the HTTP Client to support that. Unfortunately, if we then
-         * provide such client to the RESTEasy client builder, it will take the client as is and don't do other things
-         * that it would have otherwise done to a client that it itself created. Therefore, we do these things
+         * In order to configure redirects, we need to configure the HTTP Client to support that. Unfortunately, if we
+         * then provide such client to the RESTEasy client builder, it will take the client as is and don't do other
+         * things that it would have otherwise done to a client that it itself created. Therefore, we do these things
          * ourselves, represented by calling the HTTP engine builder.
          */
         final ApacheHttpClient43Engine engine = (ApacheHttpClient43Engine) new ClientHttpEngineBuilder43()
                 .resteasyClientBuilder(builder)
                 .build();
-        engine.setFollowRedirects(true);
+        /*
+         * Make absolutely sure the engine does not follow redirects. Downloading XLS from Zonky redirects to Amazon,
+         * and we can not make calls to Amazon with our request filters.
+         */
+        engine.setFollowRedirects(false);
         return builder.httpEngine(engine).build();
     }
 

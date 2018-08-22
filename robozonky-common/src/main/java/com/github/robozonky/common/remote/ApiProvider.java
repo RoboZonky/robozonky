@@ -198,7 +198,7 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      */
     Api<ExportApi> exports(final Supplier<ZonkyApiToken> token) {
-        return obtainNormal(new ExportApi(token));
+        return obtainNormal(ExportApi.class, token);
     }
 
     /**

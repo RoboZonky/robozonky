@@ -16,8 +16,6 @@
 
 package com.github.robozonky.common.remote;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -187,17 +185,6 @@ class ZonkyTest {
         z.logout();
         verify(control, times(1)).invest(any());
         verify(control, times(1)).logout();
-    }
-
-    @Test
-    void exports() throws IOException {
-        final ExportApi export = mock(ExportApi.class);
-        when(export.investments()).thenReturn(File.createTempFile("robozonky-", ".testing"));
-        when(export.wallet()).thenReturn(File.createTempFile("robozonky-", ".testing"));
-        final Api<ExportApi> ea = mockApi(export);
-        final Zonky z = mockZonkyExports(ea);
-        assertThat(z.exportInvestments()).exists();
-        assertThat(z.exportWallet()).exists();
     }
 
     @Test

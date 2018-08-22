@@ -16,7 +16,6 @@
 
 package com.github.robozonky.common.remote;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
@@ -227,12 +227,20 @@ public class Zonky {
         return Zonky.getStream(participationApi, ParticipationApi::items, select);
     }
 
-    public File exportWallet() {
-        return exports.call(ExportApi::wallet);
+    public void requestWalletExport() {
+        exports.run(ExportApi::requestWalletExport);
     }
 
-    public File exportInvestments() {
-        return exports.call(ExportApi::investments);
+    public void requestInvestmentsExport() {
+        exports.run(ExportApi::requestInvestmentsExport);
+    }
+
+    public Response downloadWalletExport() {
+        return exports.call(ExportApi::downloadWalletExport);
+    }
+
+    public Response downloadInvestmentsExport() {
+        return exports.call(ExportApi::downloadInvestmentsExport);
     }
 
     public Restrictions getRestrictions() {
