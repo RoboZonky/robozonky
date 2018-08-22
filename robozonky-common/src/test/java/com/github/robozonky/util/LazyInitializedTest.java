@@ -21,6 +21,9 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 class LazyInitializedTest {
 
@@ -34,5 +37,22 @@ class LazyInitializedTest {
         lazy.reset();
         final int third = lazy.get();
         assertThat(third).isNotEqualTo(second);
+    }
+
+    @Test
+    void destructNotInitialized() {
+        final Runnable r = mock(Runnable.class);
+        final LazyInitialized<Runnable> lazy = LazyInitialized.create(() -> r, Runnable::run);
+        lazy.close();
+        verify(r, never()).run();
+    }
+
+    @Test
+    void destructInitialized() {
+        final Runnable r = mock(Runnable.class);
+        final LazyInitialized<Runnable> lazy = LazyInitialized.create(() -> r, Runnable::run);
+        lazy.get();
+        lazy.close();
+        verify(r).run();
     }
 }

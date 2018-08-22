@@ -16,11 +16,20 @@
 
 package com.github.robozonky.integrations.stonky;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -28,11 +37,15 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.sheets.v4.Sheets;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Util {
 
-    private static final String APPLICATION_NAME = Defaults.ROBOZONKY_USER_AGENT;
     static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
+    private static final String APPLICATION_NAME = Defaults.ROBOZONKY_USER_AGENT;
 
     public static HttpTransport createTransport() {
         try {
@@ -72,6 +85,26 @@ public class Util {
                 throw new IllegalStateException("Supplier failed.", ex);
             }
         };
+    }
+
+    static Optional<File> download(final URL url) {
+        LOGGER.debug("Will download file from {}.", url);
+        try {
+            final File f = File.createTempFile("robozonky-", ".download");
+            FileUtils.copyURLToFile(url, f);
+            return Optional.of(f);
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed downloading file.", ex);
+            return Optional.empty();
+        }
+    }
+
+    static LazyInitialized<ZonkyApiToken> getToken(final ApiProvider api, final SecretProvider secrets,
+                                                   final String scope) {
+        final Supplier<ZonkyApiToken> tokenSupplier =
+                () -> api.oauth(o -> o.login(scope, secrets.getUsername(), secrets.getPassword()));
+        final Consumer<ZonkyApiToken> logout = token -> api.run(Zonky::logout, () -> token);
+        return LazyInitialized.create(tokenSupplier, logout);
     }
 
     interface ThrowingFunction<S, T> {

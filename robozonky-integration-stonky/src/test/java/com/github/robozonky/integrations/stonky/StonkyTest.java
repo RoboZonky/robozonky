@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
@@ -82,6 +83,7 @@ class StonkyTest extends AbstractRoboZonkyTest {
     void emptyExports() {
         server.when(new HttpRequest()).respond(new HttpResponse()); // just return something to be downloaded
         final Response response = mock(Response.class);
+        when(oauth.login(any(), any(), any())).thenAnswer(i -> mock(ZonkyApiToken.class));
         when(response.getStatus()).thenReturn(302);
         when(response.getHeaderString(any())).thenReturn("http://" + serverUrl + "/file");
         doReturn(response).when(zonky).downloadWalletExport();

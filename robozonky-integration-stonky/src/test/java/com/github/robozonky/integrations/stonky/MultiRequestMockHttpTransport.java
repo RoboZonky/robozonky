@@ -17,8 +17,8 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import com.google.api.client.http.LowLevelHttpRequest;
@@ -28,7 +28,7 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 
 public class MultiRequestMockHttpTransport extends MockHttpTransport {
 
-    private final Set<ResponseHandler> responseHandlers = new CopyOnWriteArraySet<>();
+    private final List<ResponseHandler> responseHandlers = new CopyOnWriteArrayList<>();
 
     private static LowLevelHttpRequest getRequest(final MockLowLevelHttpResponse response) {
         final MockLowLevelHttpRequest request = new MockLowLevelHttpRequest();

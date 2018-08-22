@@ -16,6 +16,7 @@
 
 package com.github.robozonky.test;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -27,10 +28,12 @@ import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -50,12 +53,17 @@ public abstract class AbstractRoboZonkyTest {
             final Function<OAuth, ?> f = i.getArgument(0);
             return f.apply(oauth);
         });
-        when(api.call(any(Function.class), any())).then(i -> {
+        when(api.call(any(), any())).then(i -> {
             final Supplier<ZonkyApiToken> s = i.getArgument(1);
             s.get();
             final Function<Zonky, ?> f = i.getArgument(0);
             return f.apply(z);
         });
+        doAnswer((Answer<Void>) invocation -> {
+            final Consumer<Zonky> f = invocation.getArgument(0);
+            f.accept(z);
+            return null;
+        }).when(api).run(any(), any());
         return api;
     }
 

@@ -53,9 +53,7 @@ public final class BlockedAmountProcessor implements PortfolioDependant {
     }
 
     public static Supplier<BlockedAmountProcessor> createLazy(final Tenant tenant) {
-        final LazyInitialized<BlockedAmountProcessor> monitor =
-                LazyInitialized.create(() -> BlockedAmountProcessor.create(tenant));
-        return monitor::get;
+        return LazyInitialized.create(() -> BlockedAmountProcessor.create(tenant));
     }
 
     private Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {

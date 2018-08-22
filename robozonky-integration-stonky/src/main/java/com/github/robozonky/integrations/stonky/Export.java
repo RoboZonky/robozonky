@@ -17,13 +17,11 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -33,7 +31,6 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.Backoff;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,46 +43,35 @@ enum Export {
     private final Consumer<Zonky> trigger;
     private final Function<Zonky, URL> download;
 
-    Export(final Consumer<Zonky> trigger, final Function<Zonky, Response> download) {
+    Export(final Consumer<Zonky> trigger, final Function<Zonky, Response> delegate) {
         this.trigger = trigger;
-        this.download = (api) -> {
-            try (final Response response = download.apply(api)) {
-                final int status = response.getStatus();
-                LOGGER.debug("Download endpoint returned HTTP {}.", status);
-                if (status != 302) {
-                    return null; // not yet finished, repeat the operation
-                }
-                final String s = response.getHeaderString("Location");
+        this.download = api -> download(api, delegate);
+    }
+
+    private URL download(final Zonky zonky, final Function<Zonky, Response> delegate) {
+        try (final Response response = delegate.apply(zonky)) {
+            final int status = response.getStatus();
+            LOGGER.debug("Download endpoint returned HTTP {}.", status);
+            if (status == 302) {
                 try {
+                    final String s = response.getHeaderString("Location");
                     return new URL(s);
                 } catch (final MalformedURLException ex) {
                     LOGGER.warn("Proper HTTP response, improper redirect location.", ex);
-                    return null; // failure downloading, repeat the operation
                 }
             }
-        };
-    }
-
-    private Optional<File> downloadFromUrl(final URL url) {
-        LOGGER.debug("Will download file from {}.", url);
-        try {
-            final File f = File.createTempFile("robozonky-", ".download");
-            FileUtils.copyURLToFile(url, f);
-            return Optional.of(f);
-        } catch (final IOException ex) {
-            LOGGER.warn("Failed downloading file.", ex);
-            return Optional.empty();
+            return null;
         }
     }
 
-    public CompletionStage<Optional<File>> download(final ApiProvider apiProvider,
-                                                    final Supplier<ZonkyApiToken> webScoped,
-                                                    final Supplier<ZonkyApiToken> fileScoped) {
+    public CompletableFuture<Optional<File>> download(final ApiProvider apiProvider,
+                                                      final Supplier<ZonkyApiToken> webScoped,
+                                                      final Supplier<ZonkyApiToken> fileScoped) {
         final Backoff<URL> waitWhileExportRunning =
                 Backoff.exponential(() -> apiProvider.call(download::apply, fileScoped), Duration.ofSeconds(1),
                                     Duration.ofHours(1));
         return CompletableFuture.runAsync(() -> apiProvider.run(trigger::accept, webScoped))
                 .thenApplyAsync(v -> waitWhileExportRunning.get())
-                .thenApplyAsync(url -> url.flatMap(this::downloadFromUrl));
+                .thenApplyAsync(url -> url.flatMap(Util::download));
     }
 }

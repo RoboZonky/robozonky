@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.internal.api.ToStringBuilder;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -133,10 +134,6 @@ public class DriveOverview {
                 .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent));
     }
 
-    private static String identify(final File file) {
-        return file == null ? null : file.getId();
-    }
-
     File getFolder() {
         return folder;
     }
@@ -195,8 +192,7 @@ public class DriveOverview {
     }
 
     private File createOrReuseStonky() throws IOException {
-        final String masterId =
-                Properties.STONKY_MASTER.getValue().orElseThrow(() -> new IllegalStateException("Impossible"));
+        final String masterId = Properties.STONKY_MASTER.getValue().orElse(null);
         LOGGER.debug("Will look for Stonky master spreadsheet: {}.", masterId);
         final File upstream = driveService.files().get(masterId).execute();
         final File parent = getOrCreateRoboZonkyFolder();
@@ -249,7 +245,7 @@ public class DriveOverview {
     }
 
     private File modifySpreadsheet(final File original, final java.io.File export) throws IOException {
-        final String id = identify(original);
+        final String id = original.getId();
         LOGGER.debug("Updating an existing Google spreadsheet: {}.", id);
         final File result = actuallyModifySpreadsheet(original, export);
         LOGGER.debug("Google spreadsheet updated.");
@@ -271,10 +267,6 @@ public class DriveOverview {
 
     @Override
     public String toString() {
-        return "DriveOverview{" +
-                "folder=" + identify(folder) +
-                ", people=" + identify(people) +
-                ", wallet=" + identify(wallet) +
-                '}';
+        return new ToStringBuilder(this, "sessionInfo", "driveService").toString();
     }
 }
