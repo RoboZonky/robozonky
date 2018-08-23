@@ -50,6 +50,7 @@ class InterestNumberFormatFactory extends TemplateNumberFormatFactory {
 
         private InterestNumberFormat(final Locale locale) {
             format = NumberFormat.getPercentInstance(locale);
+            format.setMinimumFractionDigits(2);
             format.setMaximumFractionDigits(2);
             format.setRoundingMode(RoundingMode.HALF_EVEN);
         }
