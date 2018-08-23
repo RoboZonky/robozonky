@@ -161,10 +161,11 @@ public class Delinquencies {
                                     mapping(i -> {
                                         final BigDecimal principalNotYetReturned = i.getRemainingPrincipal()
                                                 .subtract(i.getPaidInterest())
-                                                .subtract(i.getPaidPenalty());
+                                                .subtract(i.getPaidPenalty())
+                                                .max(BigDecimal.ZERO);
                                         LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
                                                      principalNotYetReturned, i.getLoanId(), i.getId());
-                                        return principalNotYetReturned.max(BigDecimal.ZERO);
+                                        return principalNotYetReturned;
                                     }, reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
         AMOUNTS_AT_RISK.set(atRisk);
         LOGGER.debug("Done, new amounts at risk are {}.", atRisk);
