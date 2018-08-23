@@ -39,7 +39,7 @@ enum Export {
     WALLET(Zonky::requestWalletExport, Zonky::downloadWalletExport),
     INVESTMENTS(Zonky::requestInvestmentsExport, Zonky::downloadInvestmentsExport);
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Export.class);
     private final Consumer<Zonky> trigger;
     private final Function<Zonky, URL> download;
 
@@ -48,7 +48,7 @@ enum Export {
         this.download = api -> download(api, delegate);
     }
 
-    private URL download(final Zonky zonky, final Function<Zonky, Response> delegate) {
+    private static URL download(final Zonky zonky, final Function<Zonky, Response> delegate) {
         try (final Response response = delegate.apply(zonky)) {
             final int status = response.getStatus();
             LOGGER.debug("Download endpoint returned HTTP {}.", status);

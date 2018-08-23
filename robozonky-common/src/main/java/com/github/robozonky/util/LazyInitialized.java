@@ -29,7 +29,7 @@ public final class LazyInitialized<T> implements Supplier<T>,
 
     private LazyInitialized(final Supplier<T> initializer, final Consumer<T> destructor) {
         this.initializer = initializer;
-        this.destructor = (x) -> { // prevent NPEs
+        this.destructor = x -> { // prevent NPEs
             if (x != null) {
                 destructor.accept(x);
             }
