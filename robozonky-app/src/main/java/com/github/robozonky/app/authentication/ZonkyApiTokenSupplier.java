@@ -82,14 +82,14 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
         }
     }
 
-    /*
-     * Synchronized so that the operation on the token is always only happening once and multiple threads therefore
-     * cannot cancel out each others' token requests.
-     */
     private ZonkyApiToken getTokenInAnyWay(final ZonkyApiToken currentToken) {
         return currentToken == null ? login() : refreshTokenIfNecessary(currentToken);
     }
 
+    /*
+     * Synchronized so that the operation on the token is always only happening once and multiple threads therefore
+     * cannot cancel out each others' token requests.
+     */
     @Override
     public synchronized ZonkyApiToken get() {
         try {
