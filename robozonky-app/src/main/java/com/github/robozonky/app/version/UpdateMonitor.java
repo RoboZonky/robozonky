@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,19 +143,25 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
     @Override
     protected String getLatestSource() throws Exception {
-        try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
-                                                                     this.mavenCentralHostname)) {
-            return IOUtils.toString(s, Defaults.CHARSET);
-        }
+        final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                this.mavenCentralHostname);
+        return IOUtils.toString(s, Defaults.CHARSET);
     }
 
     @Override
     protected Optional<VersionIdentifier> transform(final String source) {
-        try (final InputStream s = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
+        final InputStream s = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET));
+        try {
             return Optional.of(UpdateMonitor.parseVersionString(s));
         } catch (final Exception ex) {
             LOGGER.debug("Failed parsing source.", ex);
             return Optional.empty();
+        } finally { // don't use try-with-resources, as PITest generates 7 untestable mutations instead of finally
+            try {
+                s.close();
+            } catch (final IOException ex) {
+                // don't do anything
+            }
         }
     }
 }

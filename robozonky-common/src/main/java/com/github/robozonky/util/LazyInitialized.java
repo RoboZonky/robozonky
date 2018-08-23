@@ -17,23 +17,36 @@
 package com.github.robozonky.util;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class LazyInitialized<T> implements Supplier<T> {
+public final class LazyInitialized<T> implements Supplier<T>,
+                                                 AutoCloseable {
 
     private final Supplier<T> initializer;
+    private final Consumer<T> destructor;
     private final AtomicReference<T> value = new AtomicReference<>();
 
-    private LazyInitialized(final Supplier<T> initializer) {
+    private LazyInitialized(final Supplier<T> initializer, final Consumer<T> destructor) {
         this.initializer = initializer;
+        this.destructor = x -> { // prevent NPEs
+            if (x != null) {
+                destructor.accept(x);
+            }
+        };
     }
 
     public static <X> LazyInitialized<X> create(final Supplier<X> initializer) {
-        return new LazyInitialized<>(initializer);
+        return create(initializer, x -> {
+        });
+    }
+
+    public static <X> LazyInitialized<X> create(final Supplier<X> initializer, final Consumer<X> destructor) {
+        return new LazyInitialized<>(initializer, destructor);
     }
 
     public void reset() {
-        value.set(null);
+        destructor.accept(value.getAndSet(null));
     }
 
     @Override
@@ -44,5 +57,10 @@ public final class LazyInitialized<T> implements Supplier<T> {
             }
             return initializer.get();
         });
+    }
+
+    @Override
+    public void close() {
+        reset();
     }
 }

@@ -28,14 +28,15 @@ public class OAuth {
     }
 
     public ZonkyApiToken login(final String username, final char[] password) {
-        return api.call(a -> {
-            return a.login(username, String.valueOf(password), "password", "SCOPE_APP_WEB");
-        });
+        return login(ZonkyApiToken.SCOPE_APP_WEB_STRING, username, password);
+    }
+
+    public ZonkyApiToken login(final String scope, final String username, final char[] password) {
+        return api.call(a -> a.login(username, String.valueOf(password), "password", scope));
     }
 
     public ZonkyApiToken refresh(final ZonkyApiToken token) {
-        return api.call(a -> {
-            return a.refresh(String.valueOf(token.getRefreshToken()), "refresh_token", token.getScope());
-        });
+        return api.call(a -> a.refresh(String.valueOf(token.getRefreshToken()), ZonkyApiToken.REFRESH_TOKEN_STRING,
+                                       token.getScope()));
     }
 }

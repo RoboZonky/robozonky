@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote;
+package com.github.robozonky.common.jobs;
 
-final class Constants {
+import java.util.function.Consumer;
 
-    public static final String ME = "/users/me";
-    public static final String INVESTOR_ME = "/investors/me";
+import com.github.robozonky.common.secrets.SecretProvider;
 
-    private Constants() {
-        // no instances
-    }
+@FunctionalInterface
+public interface Payload extends Consumer<SecretProvider> {
+
 }

@@ -33,12 +33,14 @@ class TokenBasedTenant implements Tenant {
     private final Supplier<ZonkyApiToken> tokenSupplier;
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
+    private final SecretProvider secrets;
 
     private Instant lastRestrictionsUpdate = Instant.EPOCH;
     private Restrictions restrictions = null;
 
     TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
                      final boolean isDryRun, final Duration refreshAfter) {
+        this.secrets = secrets;
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
         this.tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets, refreshAfter);
@@ -66,5 +68,10 @@ class TokenBasedTenant implements Tenant {
     @Override
     public SessionInfo getSessionInfo() {
         return sessionInfo;
+    }
+
+    @Override
+    public SecretProvider getSecrets() {
+        return secrets;
     }
 }

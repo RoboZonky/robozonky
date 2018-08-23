@@ -26,6 +26,7 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
@@ -38,12 +39,14 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
     private final DaemonOperation[] daemons;
     private final PortfolioUpdater portfolioUpdater;
+    private final Tenant tenant;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant,
                                 final Investor investor, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
+        this.tenant = tenant;
         this.daemons = new DaemonOperation[]{
                 new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest, portfolioUpdater,
                                     primaryMarketplaceCheckPeriod),
@@ -59,7 +62,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return threadGroup;
     }
 
-    private void executeDaemons(final Scheduler executor) {
+    private void scheduleDaemons(final Scheduler executor) {
         executor.run(portfolioUpdater); // first run the update
         // schedule hourly refresh
         executor.submit(portfolioUpdater, Duration.ofHours(1), Duration.ofHours(1));
@@ -72,11 +75,20 @@ public class DaemonInvestmentMode implements InvestmentMode {
         });
     }
 
+    private void scheduleJobs(final Scheduler executor) {
+        JobServiceLoader.load().forEach(job -> {
+            LOGGER.debug("Scheduling {}.", job);
+            final Runnable payload = () -> job.payload().accept(tenant.getSecrets());
+            executor.submit(payload, job.repeatEvery(), job.startIn());
+        });
+    }
+
     @Override
     public ReturnCode apply(final Lifecycle lifecycle) {
+        scheduleJobs(Scheduler.inBackground());
         try (final Scheduler executor = Schedulers.INSTANCE.create(2, THREAD_FACTORY)) {
             // schedule the tasks
-            executeDaemons(executor);
+            scheduleDaemons(executor);
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");

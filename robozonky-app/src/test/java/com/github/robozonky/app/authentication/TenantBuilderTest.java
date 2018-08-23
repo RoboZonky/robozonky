@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -44,7 +45,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
                 .withSecrets(s)
                 .build();
         assertThat(t.getRestrictions()).isNotNull();
-        verify(o).login(eq(s.getUsername()), eq(s.getPassword()));
+        verify(o).login(any(), eq(s.getUsername()), eq(s.getPassword()));
         verify(z).getRestrictions();
     }
 

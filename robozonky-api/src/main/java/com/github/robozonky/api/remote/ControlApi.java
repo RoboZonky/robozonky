@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
+import com.github.robozonky.internal.api.ApiConstants;
 import com.github.robozonky.internal.api.Defaults;
 
 @Path("/")
@@ -34,12 +35,13 @@ import com.github.robozonky.internal.api.Defaults;
 @Consumes(Defaults.MEDIA_TYPE)
 public interface ControlApi {
 
+
     @GET
-    @Path(Constants.ME + "/logout")
+    @Path(ApiConstants.ME + "/logout")
     void logout();
 
     @GET
-    @Path(Constants.INVESTOR_ME + "/restrictions")
+    @Path(ApiConstants.INVESTOR_ME + "/restrictions")
     Restrictions restrictions();
 
     @POST
@@ -47,7 +49,7 @@ public interface ControlApi {
     void invest(RawInvestment investment);
 
     @POST
-    @Path(Constants.ME + "/traded-investments")
+    @Path(ApiConstants.ME + "/traded-investments")
     void offer(SellRequest sellRequest);
 
     @POST
@@ -57,5 +59,6 @@ public interface ControlApi {
     @DELETE
     @Path("/traded-investments/{id}")
     void cancel(@PathParam("id") int id);
+
 }
 

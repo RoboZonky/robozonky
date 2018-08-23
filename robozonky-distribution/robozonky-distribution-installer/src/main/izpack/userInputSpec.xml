@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2017 The RoboZonky Project
+  ~ Copyright 2018 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -40,17 +40,20 @@
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:" id="robozonky.controls"/>
     <field type="divider" />
-    <field type="check" variable="isZonkoidEnabled" summaryKey="Notifikace do aplikace Zonkoid povoleny:">
-      <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>
-    </field>
     <field type="check" variable="isEmailEnabled">
       <spec txt="Notifikovat e-mailem." set="true"/>
     </field>
-    <field type="check" variable="isJmxEnabled">
-      <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
+    <field type="check" variable="showStonkyPanel">
+      <spec txt="Integrovat se Stonky ('Statistics for Zonky'). Vyžaduje Google účet." set="false"/>
     </field>
     <field type="check" variable="isDryRun" summaryKey="Zkušební režim zapnut:">
       <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat." set="false"/>
+    </field>
+    <field type="check" variable="isZonkoidEnabled" summaryKey="Notifikace do aplikace Zonkoid povoleny:">
+      <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>
+    </field>
+    <field type="check" variable="isJmxEnabled">
+      <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
     </field>
 
     <field type="space" />
@@ -201,5 +204,40 @@
     <field type="staticText" align="left" bold="true"
            txt="https://robozonky.github.io/konfigurace-strategie/"
            id="strategy.generator.url.2"/>
+  </panel>
+  <panel id="stonkyEnablement" summaryKey="Integrace se Stonky">
+    <field type="staticText" align="left"
+           txt="Stonky je tabulka v Google Sheets, která zobrazuje nejrůznější užitečné statistiky o vašem portfoliu."
+           id="stonky.description.1"/>
+    <field type="space" />
+
+    <field type="staticText" align="left"
+           txt="Do této tabulky je nejprve potřeba importovat výpis peněženky a investic z Vašeho Google účtu. Následně můžete ručně spustit analýzu, která tato data zpracuje a vykreslí statistiky."
+           id="stonky.description.2"/>
+    <field type="space" />
+
+    <field type="staticText" align="left"
+           txt="Aby za vás RoboZonky mohl většinu těchto úkolů udělat, potřebuje k tomu přístup k vašemu Google Drive účtu. Pokud se jej rozhodnete povolit, RoboZonky bude ve Vašem Google Drive pravidelně vytvářet a upravovat složky a tabulky."
+           id="stonky.description.3"/>
+    <field type="space" />
+
+    <field type="staticText" align="left"
+           txt="Za tímto účelem se vám během této instalace může otevřít okno prohlížeče, kde budete vyzvání k přidání oprávnění. Pokud se tak nestane, navštivte prosím adresu, kterou místo toho instalátor vypíše do terminálu."
+           id="stonky.description.4"/>
+    <field type="space" />
+
+    <field type="staticText" align="left"
+           txt="Nejste-li si jisti, zda dokážete oprávnění přidat, následující pole nezaškrtávejte. Instalátor jinak pravděpodobně skončí chybou nebo se zasekne."
+           id="stonky.description.5"/>
+    <field type="space" />
+
+    <field type="check" variable="isStonkyEnabled" summaryKey="Integrace se Stonky povolena:">
+      <spec txt="Chci povolit Stonky integraci, dám RoboZonky přístup ke svému Google Drive účtu." set="false"/>
+    </field>
+    <field type="space" />
+
+    <field type="staticText" align="left"
+           txt="Více o Stonky se dozvíte zde: https://www.facebook.com/groups/204405453512737/."
+           id="stonky.description.6"/>
   </panel>
 </izpack:userinput>

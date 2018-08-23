@@ -29,7 +29,7 @@ import com.github.robozonky.internal.api.Defaults;
 @Path("/collections")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface CollectionsApi {
+public interface CollectionsApi extends EntityCollectionApi<RawDevelopment> {
 
     @GET
     @Path("loans/{loanId}/investor-events")
