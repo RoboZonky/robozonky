@@ -53,7 +53,7 @@ public class ZonkySettingsValidator extends AbstractValidator {
             return DataValidator.Status.OK;
         } catch (final TestFailedException t) {
             if (t.getCause() instanceof ServerErrorException) {
-                LOGGER.error("Failed accessing Zonky.", t.getCause());
+                LOGGER.error("Failed accessing Zonky.", t);
                 return DataValidator.Status.ERROR;
             } else {
                 LOGGER.warn("Failed logging in.", t);

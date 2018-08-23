@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,12 +27,14 @@ import com.github.robozonky.installer.CommandLinePart;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.Maps;
 import freemarker.template.TemplateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.internal.util.Maps.entry;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
-    private static final Logger LOGGER = Logger.getLogger(RunScriptGenerator.class.getSimpleName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(RunScriptGenerator.class.getSimpleName());
     protected final File configFile, distributionDirectory;
 
     protected RunScriptGenerator(final File distributionDirectory, final File configFile) {
@@ -76,7 +77,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
             ));
             final File target = this.getRunScript();
             Files.write(target.toPath(), finisher.apply(result).getBytes(Defaults.CHARSET));
-            LOGGER.info("Generated run script: " + target.getAbsolutePath());
+            LOGGER.info("Generated run script: {}.", target.getAbsolutePath());
             return target;
         } catch (final IOException | TemplateException e) {
             throw new IllegalStateException("Failed creating run script.", e);

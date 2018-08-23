@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2017 The RoboZonky Project
+  ~ Copyright 2018 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,9 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <configuration>
-  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
       <level>INFO</level>
@@ -24,8 +22,10 @@
       <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} %msg%n</pattern>
     </encoder>
   </appender>
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>robozonky-installer.log</file>
+    <append>false</append>
+    <immediateFlush>true</immediateFlush>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} [%thread@%X{process_id}] %-5level %logger{36} %msg%n</pattern>
     </encoder>

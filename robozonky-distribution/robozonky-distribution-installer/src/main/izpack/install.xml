@@ -99,7 +99,7 @@
     <panel classname="UserInputPanel" id="emailUserInput" condition="enableEmailPanel">
       <validator classname="com.github.robozonky.installer.EmailSettingsValidator"/>
     </panel>
-    <panel classname="UserInputPanel" id="stonkyEnablement" ondition="enableStonkyPanel" />
+    <panel classname="UserInputPanel" id="stonkyEnablement" condition="enableStonkyPanel" />
     <panel classname="UserInputPanel" id="zonkoidUserInput" condition="enableZonkoidPanel">
       <validator classname="com.github.robozonky.installer.ZonkoidSettingsValidator"/>
     </panel>

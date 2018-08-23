@@ -18,7 +18,7 @@
   <panel id="zonkyUserInput" summaryKey="Základní nastavení robota">
     <field type="title" align="left" txt="Nastavení komunikace se Zonky" id="zonky.title"/>
 
-    <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky" id="zonky.title"/>
+    <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky:" id="zonky.title"/>
     <field type="divider" />
     <field type="text" variable="zonkyUsername">
       <spec txt="Uživatelské jméno na Zonky:" id="zonky.username" size="20" set=""
