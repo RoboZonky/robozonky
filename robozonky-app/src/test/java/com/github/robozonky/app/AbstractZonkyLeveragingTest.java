@@ -113,6 +113,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         final Tenant auth = spy(Tenant.class);
         when(auth.getSessionInfo()).thenReturn(isDryRun ? SESSION_DRY : SESSION);
         when(auth.getRestrictions()).thenReturn(new Restrictions());
+        when(auth.isAvailable()).thenReturn(true);
         doAnswer(invocation -> {
             final Function<Zonky, Object> operation = invocation.getArgument(0);
             return operation.apply(zonky);
