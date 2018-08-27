@@ -152,6 +152,7 @@ class StonkyTest extends AbstractRoboZonkyTest {
             };
             transport.addReponseHandler(new CreateFileResponseHandler(fileCreationNotififer));
             transport.addReponseHandler(new SpreadsheetBatchUpdateResponseHandler(copyOfStonkyMaster));
+            transport.addReponseHandler(new DeleteFileResponseHandler());
         }
 
         @Test

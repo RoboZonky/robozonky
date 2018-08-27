@@ -17,6 +17,7 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -28,6 +29,7 @@ import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.LazyInitialized;
 import com.github.robozonky.util.ThrowingFunction;
 import com.github.robozonky.util.ThrowingSupplier;
@@ -91,8 +93,17 @@ public class Util {
     static Optional<File> download(final URL url) {
         LOGGER.debug("Will download file from {}.", url);
         try {
+            return IoUtil.applyCloseable(url::openStream, Util::download);
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed downloading file.", ex);
+            return Optional.empty();
+        }
+    }
+
+    static Optional<File> download(final InputStream stream) {
+        try {
             final File f = File.createTempFile("robozonky-", ".download");
-            FileUtils.copyURLToFile(url, f);
+            FileUtils.copyInputStreamToFile(stream, f);
             return Optional.of(f);
         } catch (final Exception ex) {
             LOGGER.warn("Failed downloading file.", ex);

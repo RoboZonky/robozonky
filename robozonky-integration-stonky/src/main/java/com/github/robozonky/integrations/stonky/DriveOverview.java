@@ -35,10 +35,12 @@ import org.slf4j.LoggerFactory;
 public class DriveOverview {
 
     static final String MIME_TYPE_XLS_SPREADSHEET = "application/vnd.ms-excel";
+    static final String MIME_TYPE_ODS_SPREADSHEET = "application/x-vnd.oasis.opendocument.spreadsheet";
     static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
     static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
     static final String ROBOZONKY_PEOPLE_SHEET_NAME = "Export investic";
     static final String ROBOZONKY_WALLET_SHEET_NAME = "Export peněženky";
+    static final String ROBOZONKY_WELCOME_SHEET_NAME = "Welcome";
     private static final Logger LOGGER = LoggerFactory.getLogger(DriveOverview.class);
     private final SessionInfo sessionInfo;
     private final Drive driveService;
@@ -220,10 +222,15 @@ public class DriveOverview {
         return people;
     }
 
-    private File createSpreadsheet(final String name, final java.io.File export) throws IOException {
-        final FileContent fc = new FileContent(MIME_TYPE_XLS_SPREADSHEET, export);
+    public File latestWelcome(final java.io.File download) throws IOException {
+        LOGGER.debug("Processing Welcome spreadsheet.");
+        return createSpreadsheetFromOds("Welcome", download);
+    }
+
+    private File createSpreadsheet(final String name, final java.io.File export, final String mime) throws IOException {
+        final FileContent fc = new FileContent(mime, export);
         final File parent = getOrCreateRoboZonkyFolder(); // retrieve Google folder in which to place the spreadsheet
-        // convert the Zonky XLS to Google Spreadsheet
+        // convert the spreadsheet to Google Spreadsheet
         final File f = new File();
         f.setName(name);
         f.setParents(Collections.singletonList(parent.getId()));
@@ -235,6 +242,14 @@ public class DriveOverview {
         // and mark the time when the file was last updated
         LOGGER.debug("New Google spreadsheet created: {}.", result.getId());
         return result;
+    }
+
+    private File createSpreadsheetFromXls(final String name, final java.io.File export) throws IOException {
+        return createSpreadsheet(name, export, MIME_TYPE_XLS_SPREADSHEET);
+    }
+
+    private File createSpreadsheetFromOds(final String name, final java.io.File export) throws IOException {
+        return createSpreadsheet(name, export, MIME_TYPE_ODS_SPREADSHEET);
     }
 
     private File actuallyModifySpreadsheet(final File original, final java.io.File export) throws IOException {
@@ -262,7 +277,7 @@ public class DriveOverview {
      */
     private File getLatestSpreadsheet(final java.io.File download, final String name,
                                       final File original) throws IOException {
-        return (original == null) ? createSpreadsheet(name, download) : modifySpreadsheet(original, download);
+        return (original == null) ? createSpreadsheetFromXls(name, download) : modifySpreadsheet(original, download);
     }
 
     @Override

@@ -17,12 +17,14 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -102,7 +104,8 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
     }
 
     private static Spreadsheet copySheet(final Sheets sheetsService, final Spreadsheet stonky, final File export,
-                                         final String name) throws IOException {
+                                         final InternalSheet sheet) throws IOException {
+        final String name = sheet.getId();
         LOGGER.debug("Requested to copy sheet '{}' to Stonky '{}' from imported '{}'.", name, stonky.getSpreadsheetId(),
                      export.getId());
         final Optional<Sheet> targetSheet = stonky.getSheets().stream()
@@ -117,7 +120,7 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
         });
         LOGGER.debug("Copying sheet.");
         final SheetProperties newSheet = copySheet(sheetsService, stonky, export)
-                .setIndex(0)
+                .setIndex(sheet.getOrder())
                 .setTitle(name);
         final UpdateSheetPropertiesRequest update = new UpdateSheetPropertiesRequest()
                 .setFields("title,index")
@@ -149,7 +152,7 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
                 .thenApplyAsync(Util.wrap(s -> {
                     LOGGER.debug("Requesting wallet export.");
                     final File f = s.getOverview().latestWallet(s.getExport());
-                    return copySheet(sheetsService, s.getStonky(), f, "Wallet");
+                    return copySheet(sheetsService, s.getStonky(), f, InternalSheet.WALLET);
                 }));
         final CompletableFuture<Spreadsheet> peopleCopier = summary
                 .thenCombineAsync(Export.INVESTMENTS.download(api, webScopedToken, fileScopedToken),
@@ -157,15 +160,28 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
                 .thenApplyAsync(Util.wrap(s -> {
                     LOGGER.debug("Requesting investments export.");
                     final File f = s.getOverview().latestPeople(s.getExport());
-                    return copySheet(sheetsService, s.getStonky(), f, "People");
+                    return copySheet(sheetsService, s.getStonky(), f, InternalSheet.PEOPLE);
                 }));
-        final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, (a, b) -> {
+        final CompletableFuture<Spreadsheet> welcomeCopier = summary
+                .thenApplyAsync(Util.wrap(s -> { // this is how Stonky tells the sheet was updated by RoboZonky
+                    LOGGER.debug("Preparing Welcome sheet.");
+                    final InputStream i = getClass().getResourceAsStream("stonky-welcome.ods");
+                    final java.io.File welcome = Util.download(i).orElse(null);
+                    LOGGER.debug("Importing Welcome sheet blueprint to Google.");
+                    final File f = s.getOverview().latestWelcome(welcome);
+                    final Spreadsheet result = copySheet(sheetsService, s.getStonky(), f, InternalSheet.WELCOME);
+                    driveService.files().delete(f.getId()).execute();
+                    return result;
+                }));
+        final BiFunction<Spreadsheet, Spreadsheet, Spreadsheet> combiner = (a, b) -> {
             if (Objects.equals(a.getSpreadsheetId(), b.getSpreadsheetId())) {
                 return a;
             } else {
                 throw new IllegalStateException("Should not happen.");
             }
-        });
+        };
+        final CompletableFuture<Spreadsheet> merged = walletCopier.thenCombine(peopleCopier, combiner)
+                .thenCombine(welcomeCopier, combiner);
         LOGGER.debug("Blocking until all operations terminate.");
         final String stonkySpreadsheetId = merged.get().getSpreadsheetId();
         LOGGER.info("Stonky spreadsheet updated at: https://docs.google.com/spreadsheets/d/{}", stonkySpreadsheetId);

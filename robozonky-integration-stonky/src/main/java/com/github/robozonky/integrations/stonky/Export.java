@@ -49,7 +49,8 @@ enum Export {
     }
 
     private static URL download(final Zonky zonky, final Function<Zonky, Response> delegate) {
-        try (final Response response = delegate.apply(zonky)) {
+        final Response response = delegate.apply(zonky);
+        try {
             final int status = response.getStatus();
             LOGGER.debug("Download endpoint returned HTTP {}.", status);
             if (status == 302) {
@@ -61,6 +62,8 @@ enum Export {
                 }
             }
             return null;
+        } finally { // not using try-with-resources, as that'd generate several untestable PITest mutations
+            response.close();
         }
     }
 
