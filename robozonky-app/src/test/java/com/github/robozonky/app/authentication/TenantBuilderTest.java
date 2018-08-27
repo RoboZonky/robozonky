@@ -45,6 +45,8 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
                 .withSecrets(s)
                 .build();
         assertThat(t.getRestrictions()).isNotNull();
+        assertThat(t.isAvailable()).isTrue();
+        assertThat(t.getSecrets()).isEqualTo(s);
         verify(o).login(any(), eq(s.getUsername()), eq(s.getPassword()));
         verify(z).getRestrictions();
     }

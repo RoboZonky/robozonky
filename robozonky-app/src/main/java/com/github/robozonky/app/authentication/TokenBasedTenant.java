@@ -19,18 +19,16 @@ package com.github.robozonky.app.authentication;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 
 class TokenBasedTenant implements Tenant {
 
-    private final Supplier<ZonkyApiToken> tokenSupplier;
+    private final ZonkyApiTokenSupplier tokenSupplier;
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
     private final SecretProvider secrets;
@@ -63,6 +61,11 @@ class TokenBasedTenant implements Tenant {
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
         return apis.call(operation, tokenSupplier);
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return !tokenSupplier.isUpdating();
     }
 
     @Override

@@ -39,6 +39,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -130,15 +131,18 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
      * @throws SAXException Failed reading XML.
      * @throws XPathExpressionException XPath parsing problem.
      */
-    private static VersionIdentifier parseVersionString(final InputStream xml) throws ParserConfigurationException,
-            IOException, SAXException, XPathExpressionException {
-        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        final DocumentBuilder builder = factory.newDocumentBuilder();
-        final Document doc = builder.parse(xml);
-        final XPathFactory xPathfactory = XPathFactory.newInstance();
-        final XPath xpath = xPathfactory.newXPath();
-        final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
-        return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+    private static VersionIdentifier parseVersionString(final InputStream xml) throws IOException {
+        try {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document doc = builder.parse(xml);
+            final XPathFactory xPathfactory = XPathFactory.newInstance();
+            final XPath xpath = xPathfactory.newXPath();
+            final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
+            return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+        } catch (final SAXException | XPathExpressionException | ParserConfigurationException ex) {
+            throw new IOException(ex);
+        }
     }
 
     @Override
@@ -150,18 +154,12 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
     @Override
     protected Optional<VersionIdentifier> transform(final String source) {
-        final InputStream s = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET));
         try {
-            return Optional.of(UpdateMonitor.parseVersionString(s));
+            return IoUtil.applyCloseable(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
+                                         s -> Optional.of(UpdateMonitor.parseVersionString(s)));
         } catch (final Exception ex) {
             LOGGER.debug("Failed parsing source.", ex);
             return Optional.empty();
-        } finally { // don't use try-with-resources, as PITest generates 7 untestable mutations instead of finally
-            try {
-                s.close();
-            } catch (final IOException ex) {
-                // don't do anything
-            }
         }
     }
 }

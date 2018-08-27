@@ -52,6 +52,12 @@ class TransactionalTenantTest {
     }
 
     @Test
+    void delegateAvailability() {
+        transactional.isAvailable();
+        verify(original).isAvailable();
+    }
+
+    @Test
     void delegateCall() {
         final Function<Zonky, Zonky> a = Function.identity();
         transactional.call(a);

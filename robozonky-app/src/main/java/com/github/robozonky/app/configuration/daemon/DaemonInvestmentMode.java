@@ -19,7 +19,6 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.authentication.Tenant;
@@ -37,7 +36,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
-    private final DaemonOperation[] daemons;
+    private final DaemonOperation investing, purchasing;
     private final PortfolioUpdater portfolioUpdater;
     private final Tenant tenant;
 
@@ -47,12 +46,10 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
         this.tenant = tenant;
-        this.daemons = new DaemonOperation[]{
-                new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest, portfolioUpdater,
-                                    primaryMarketplaceCheckPeriod),
-                new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolioUpdater,
-                                     secondaryMarketplaceCheckPeriod)
-        };
+        this.investing = new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest,
+                                             portfolioUpdater, primaryMarketplaceCheckPeriod);
+        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolioUpdater,
+                                               secondaryMarketplaceCheckPeriod);
     }
 
     private static ThreadGroup newThreadGroup(final String name) {
@@ -62,17 +59,22 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return threadGroup;
     }
 
+    private Skippable toSkippable(final DaemonOperation daemonOperation) {
+        return new Skippable(daemonOperation, this::isUpdating);
+    }
+
     private void scheduleDaemons(final Scheduler executor) {
         executor.run(portfolioUpdater); // first run the update
         // schedule hourly refresh
-        executor.submit(portfolioUpdater, Duration.ofHours(1), Duration.ofHours(1));
+        final Duration oneHour = Duration.ofHours(1);
+        executor.submit(portfolioUpdater, oneHour, oneHour);
         // run investing and purchasing daemons
-        IntStream.range(0, daemons.length).forEach(daemonId -> {
-            final DaemonOperation d = daemons[daemonId];
-            final long initialDelay = daemonId * 250L; // quarter second apart
-            final Runnable task = new Skippable(d, portfolioUpdater::isUpdating);
-            executor.submit(task, d.getRefreshInterval(), Duration.ofMillis(initialDelay));
-        });
+        executor.submit(toSkippable(investing), investing.getRefreshInterval());
+        executor.submit(toSkippable(purchasing), purchasing.getRefreshInterval(), Duration.ofMillis(250));
+    }
+
+    private boolean isUpdating() {
+        return !tenant.isAvailable() || portfolioUpdater.isUpdating();
     }
 
     private void scheduleJobs(final Scheduler executor) {

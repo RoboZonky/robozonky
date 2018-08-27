@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.util.IoUtil;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -67,12 +68,8 @@ final class GoogleCredentialProvider implements CredentialProvider {
 
     private GoogleClientSecrets createClientSecrets() throws IOException {
         final byte[] key = secrets.get();
-        final InputStreamReader r = new InputStreamReader(new ByteArrayInputStream(key));
-        try { // not using try-with-resources, as PITest generates 7 untestable conditions instead of the finally block
-            return GoogleClientSecrets.load(Util.JSON_FACTORY, r);
-        } finally {
-            r.close();
-        }
+        return IoUtil.applyCloseable(() -> new ByteArrayInputStream(key),
+                                     s -> GoogleClientSecrets.load(Util.JSON_FACTORY, new InputStreamReader(s)));
     }
 
     @Override

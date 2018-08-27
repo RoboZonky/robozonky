@@ -17,7 +17,6 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -30,6 +29,8 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.LazyInitialized;
+import com.github.robozonky.util.ThrowingFunction;
+import com.github.robozonky.util.ThrowingSupplier;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -107,13 +108,4 @@ public class Util {
         return LazyInitialized.create(tokenSupplier, logout);
     }
 
-    interface ThrowingFunction<S, T> {
-
-        T apply(S argument) throws IOException;
-    }
-
-    interface ThrowingSupplier<T> {
-
-        T get() throws IOException;
-    }
 }

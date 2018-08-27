@@ -47,6 +47,15 @@ public interface Tenant {
         call(StreamUtil.toFunction(operation));
     }
 
+    /**
+     *
+     * Check that the tenant can be operated on.
+     *
+     * @return False in cases such as when the user's authentication credentials are being refreshed and therefore
+     * the present authentication may already be invalid, without the new one being available yet.
+     */
+    boolean isAvailable();
+
     Restrictions getRestrictions();
 
     SessionInfo getSessionInfo();

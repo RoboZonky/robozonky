@@ -49,6 +49,11 @@ final class TransactionalTenant implements Tenant {
     }
 
     @Override
+    public boolean isAvailable() {
+        return parent.isAvailable();
+    }
+
+    @Override
     public Restrictions getRestrictions() {
         return parent.getRestrictions();
     }

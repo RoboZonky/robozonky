@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import javax.ws.rs.BadRequestException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -66,15 +65,17 @@ class ZonkyApiTokenSupplierTest {
     @Test
     void fixesExpiredToken() {
         final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.refresh(any())).thenThrow(IllegalStateException.class);
         when(oAuth.login(eq(ZonkyApiToken.SCOPE_APP_WEB_STRING), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getStaleToken());
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         final ZonkyApiToken token = t.get();
         final ZonkyApiToken token2 = t.get();
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
+        assertThat(t.isUpdating()).isFalse();
     }
 
     @Test
@@ -83,12 +84,13 @@ class ZonkyApiTokenSupplierTest {
         when(oAuth.login(eq(ZonkyApiToken.SCOPE_APP_WEB_STRING), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofMinutes(5)));
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         final ZonkyApiToken token = t.get();
         final ZonkyApiToken token2 = t.get();
         assertThat(token2)
                 .isNotNull()
                 .isEqualTo(token);
+        assertThat(t.isUpdating()).isFalse();
     }
 
     @Test
@@ -99,13 +101,14 @@ class ZonkyApiTokenSupplierTest {
         when(oAuth.refresh(any()))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ofSeconds(1));
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ofSeconds(1));
         final ZonkyApiToken token = t.get();
         final ZonkyApiToken token2 = t.get();
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
         verify(oAuth).refresh(eq(token));
+        assertThat(t.isUpdating()).isFalse();
     }
 
     @Test
@@ -116,12 +119,13 @@ class ZonkyApiTokenSupplierTest {
         when(oAuth.refresh(any()))
                 .thenThrow(BadRequestException.class);
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         final ZonkyApiToken token = t.get();
         final ZonkyApiToken token2 = t.get();
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
+        assertThat(t.isUpdating()).isFalse();
     }
 
     @Test
@@ -132,11 +136,13 @@ class ZonkyApiTokenSupplierTest {
         when(oAuth.refresh(any()))
                 .thenThrow(IllegalStateException.class);
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        assertThat(t.isUpdating()).isFalse();
         assertThat(t.get()).isNotNull();
         verify(oAuth).login(any(), any(), any());
         assertThat(t.get()).isNotNull();
         verify(oAuth).refresh(any()); // refresh was called
         verify(oAuth, times(2)).login(any(), any(), any()); // password-based login was used again
+        assertThat(t.isUpdating()).isFalse();
     }
 }

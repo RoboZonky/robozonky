@@ -18,6 +18,7 @@ package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
@@ -38,6 +39,7 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
     private final ApiProvider apis;
     private final Duration refresh;
     private volatile ZonkyApiToken token = null;
+    private final AtomicBoolean isUpdating = new AtomicBoolean(false);
 
     public ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
         this(ZonkyApiToken.SCOPE_APP_WEB_STRING, apis, secrets, refreshAfter);
@@ -68,22 +70,28 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
     }
 
     private ZonkyApiToken refreshTokenIfNecessary(final ZonkyApiToken token) {
-        if (token.willExpireIn(Duration.ZERO)) {
-            return login();
-        } else if (token.willExpireIn(refresh)) {
-            try {
-                return refreshToken(token);
-            } catch (final Exception ex) {
-                LOGGER.debug("Failed refreshing access token, falling back to password.", ex);
-                return login();
-            }
-        } else {
+        if (!token.willExpireIn(refresh)) {
             return token;
+        }
+        LOGGER.debug("Token refresh commencing.");
+        isUpdating.set(true);
+        try {
+            return refreshToken(token);
+        } catch (final Exception ex) {
+            LOGGER.debug("Failed refreshing access token, falling back to password.", ex);
+            return login();
+        } finally {
+            isUpdating.set(false);
+            LOGGER.debug("Token refresh over.");
         }
     }
 
     private ZonkyApiToken getTokenInAnyWay(final ZonkyApiToken currentToken) {
         return currentToken == null ? login() : refreshTokenIfNecessary(currentToken);
+    }
+
+    boolean isUpdating() {
+        return isUpdating.get();
     }
 
     /*
