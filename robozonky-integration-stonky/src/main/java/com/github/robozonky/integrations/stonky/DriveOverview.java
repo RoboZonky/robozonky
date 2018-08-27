@@ -40,7 +40,6 @@ public class DriveOverview {
     static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
     static final String ROBOZONKY_PEOPLE_SHEET_NAME = "Export investic";
     static final String ROBOZONKY_WALLET_SHEET_NAME = "Export peněženky";
-    static final String ROBOZONKY_WELCOME_SHEET_NAME = "Welcome";
     private static final Logger LOGGER = LoggerFactory.getLogger(DriveOverview.class);
     private final SessionInfo sessionInfo;
     private final Drive driveService;
@@ -224,7 +223,7 @@ public class DriveOverview {
 
     public File latestWelcome(final java.io.File download) throws IOException {
         LOGGER.debug("Processing Welcome spreadsheet.");
-        return createSpreadsheetFromOds("Welcome", download);
+        return createSpreadsheetFromOds(InternalSheet.WELCOME.getId(), download);
     }
 
     private File createSpreadsheet(final String name, final java.io.File export, final String mime) throws IOException {

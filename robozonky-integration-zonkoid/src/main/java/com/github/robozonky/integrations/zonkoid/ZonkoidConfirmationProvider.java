@@ -127,8 +127,8 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     }
 
     private static boolean respond(final HttpResponse response) {
-        ZonkoidConfirmationProvider.LOGGER.info("Response: '{}' (Body: '{}')", response.getStatusLine(),
-                                                Util.readEntity(response.getEntity()));
+        final String body = Util.readEntity(response.getEntity());
+        ZonkoidConfirmationProvider.LOGGER.info("Response: '{}' (Body: '{}')", response.getStatusLine(), body);
         return Util.isHttpSuccess(response.getStatusLine().getStatusCode());
     }
 

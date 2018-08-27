@@ -50,6 +50,10 @@ public class Util {
     private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
     private static final String APPLICATION_NAME = Defaults.ROBOZONKY_USER_AGENT;
 
+    private Util() {
+        // no instances
+    }
+
     public static HttpTransport createTransport() {
         try {
             return GoogleNetHttpTransport.newTrustedTransport();
