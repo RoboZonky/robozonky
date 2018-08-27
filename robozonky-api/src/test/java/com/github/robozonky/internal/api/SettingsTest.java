@@ -62,6 +62,8 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(50);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(443);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).isEmpty();
         });
     }
 
@@ -93,6 +95,8 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).contains("1000");
         });
     }
 
