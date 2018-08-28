@@ -57,7 +57,7 @@ final class StateCleaner implements Payload {
         synchronized (storage) { // write operations synchronized for the tenant across the application
             final Set<String> toRemove = storage.getSections()
                     .filter(section -> isOutdated(storage, section, threshold))
-                    .peek(section -> LOGGER.debug("Will remove section '{}'.", username))
+                    .peek(section -> LOGGER.debug("Will remove section '{}'.", section))
                     .collect(toSet());
             toRemove.forEach(storage::unsetValues);
             final boolean result = storage.store();
