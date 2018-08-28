@@ -20,17 +20,15 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.IoUtil;
-import com.github.robozonky.util.LazyInitialized;
 import com.github.robozonky.util.ThrowingFunction;
 import com.github.robozonky.util.ThrowingSupplier;
 import com.google.api.client.auth.oauth2.Credential;
@@ -115,12 +113,7 @@ public class Util {
         }
     }
 
-    static LazyInitialized<ZonkyApiToken> getToken(final ApiProvider api, final SecretProvider secrets,
-                                                   final String scope) {
-        final Supplier<ZonkyApiToken> tokenSupplier =
-                () -> api.oauth(o -> o.login(scope, secrets.getUsername(), secrets.getPassword()));
-        final Consumer<ZonkyApiToken> logout = token -> api.run(Zonky::logout, () -> token);
-        return LazyInitialized.create(tokenSupplier, logout);
+    static ZonkyApiTokenSupplier getToken(final ApiProvider api, final SecretProvider secrets, final String scope) {
+        return new ZonkyApiTokenSupplier(scope, api, secrets, Settings.INSTANCE.getTokenRefreshPeriod());
     }
-
 }

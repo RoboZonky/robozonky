@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
@@ -165,6 +166,23 @@ class ZonkyTest {
             softly.assertThat(z.getTransactions(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getDevelopments(Loan.custom().build())).isEmpty();
         });
+    }
+
+    @Test
+    void exports() {
+        final ExportApi api = mock(ExportApi.class);
+        when(api.downloadInvestmentsExport()).thenReturn(mock(Response.class));
+        when(api.downloadWalletExport()).thenReturn(mock(Response.class));
+        final Api<ExportApi> ea = mockApi(api);
+        final Zonky z = mockZonkyExports(ea);
+        assertSoftly(softly -> {
+            softly.assertThat(z.downloadInvestmentsExport()).isNotNull();
+            softly.assertThat(z.downloadWalletExport()).isNotNull();
+        });
+        z.requestInvestmentsExport();
+        verify(api).requestInvestmentsExport();
+        z.requestWalletExport();
+        verify(api).requestWalletExport();
     }
 
     @Test

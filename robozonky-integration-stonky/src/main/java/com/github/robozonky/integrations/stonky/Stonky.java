@@ -31,8 +31,8 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
@@ -191,9 +191,9 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
     @Override
     public Optional<String> apply(final SecretProvider secretProvider) {
         final SessionInfo sessionInfo = new SessionInfo(secretProvider.getUsername());
-        final LazyInitialized<ZonkyApiToken> webScopedToken =
+        final ZonkyApiTokenSupplier webScopedToken =
                 Util.getToken(api, secretProvider, ZonkyApiToken.SCOPE_APP_WEB_STRING);
-        final LazyInitialized<ZonkyApiToken> fileScopedToken =
+        final ZonkyApiTokenSupplier fileScopedToken =
                 Util.getToken(api, secretProvider, ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
         try {
             if (!credentialSupplier.credentialExists(sessionInfo)) {

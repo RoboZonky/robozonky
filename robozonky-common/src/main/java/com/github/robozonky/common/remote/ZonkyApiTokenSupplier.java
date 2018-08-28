@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.authentication;
+package com.github.robozonky.common.remote;
 
+import java.io.Closeable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +24,6 @@ import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +31,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Will keep permanent user authentication running in the background.
  */
-final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
+public final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
+                                                    Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
     private final String scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;
     private final Duration refresh;
-    private volatile ZonkyApiToken token = null;
     private final AtomicBoolean isUpdating = new AtomicBoolean(false);
+    private volatile ZonkyApiToken token = null;
 
     public ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
         this(ZonkyApiToken.SCOPE_APP_WEB_STRING, apis, secrets, refreshAfter);
@@ -90,7 +91,7 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
         return currentToken == null ? login() : refreshTokenIfNecessary(currentToken);
     }
 
-    boolean isUpdating() {
+    public boolean isUpdating() {
         return isUpdating.get();
     }
 
@@ -105,6 +106,15 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
             return token;
         } catch (final Exception ex) {
             throw new NotAuthorizedException(ex);
+        }
+    }
+
+    @Override
+    public synchronized void close() {
+        if (token != null && !token.willExpireIn(Duration.ZERO)) {
+            LOGGER.debug("Logging '{}' out of Zonky ({}).", secrets.getUsername(), scope);
+            apis.run(Zonky::logout, () -> token);
+            token = null;
         }
     }
 }

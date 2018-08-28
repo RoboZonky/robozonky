@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.authentication;
+package com.github.robozonky.common.remote;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.ws.rs.BadRequestException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,11 +57,26 @@ class ZonkyApiTokenSupplierTest {
     }
 
     private static ApiProvider mockApi(final OAuth oAuth) {
+        return mockApi(oAuth, mock(Zonky.class));
+    }
+
+    private static ApiProvider mockApi(final OAuth oAuth, final Zonky zonky) {
         final ApiProvider api = mock(ApiProvider.class);
         when(api.oauth(any())).thenAnswer(invocation -> {
             final Function<OAuth, Object> f = invocation.getArgument(0);
             return f.apply(oAuth);
         });
+        when(api.call(any(), any())).then(i -> {
+            final Supplier<ZonkyApiToken> s = i.getArgument(1);
+            s.get();
+            final Function<Zonky, ?> f = i.getArgument(0);
+            return f.apply(zonky);
+        });
+        doAnswer((Answer<Void>) invocation -> {
+            final Consumer<Zonky> f = invocation.getArgument(0);
+            f.accept(zonky);
+            return null;
+        }).when(api).run(any(), any());
         return api;
     }
 
@@ -144,5 +162,38 @@ class ZonkyApiTokenSupplierTest {
         verify(oAuth).refresh(any()); // refresh was called
         verify(oAuth, times(2)).login(any(), any(), any()); // password-based login was used again
         assertThat(t.isUpdating()).isFalse();
+    }
+
+    @Test
+    void closing() {
+        final Zonky zonky = mock(Zonky.class);
+        final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.login(eq(ZonkyApiToken.SCOPE_APP_WEB_STRING), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
+                .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
+        final ApiProvider api = mockApi(oAuth, zonky);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        t.close();
+        verify(oAuth, never()).login(any(), any(), any());
+        verify(zonky, never()).logout();
+        t.get();
+        verify(oAuth).login(any(), any(), any());
+        t.close();
+        verify(zonky).logout();
+    }
+
+    @Test
+    void notClosingWhenExpired() {
+        final Zonky zonky = mock(Zonky.class);
+        final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.login(eq(ZonkyApiToken.SCOPE_APP_WEB_STRING), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
+                .thenAnswer(invocation -> getTokenExpiringIn(Duration.ZERO));
+        final ApiProvider api = mockApi(oAuth, zonky);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        t.close();
+        verify(zonky, never()).logout();
+        t.get();
+        verify(oAuth).login(any(), any(), any());
+        t.close();
+        verify(zonky, never()).logout();
     }
 }

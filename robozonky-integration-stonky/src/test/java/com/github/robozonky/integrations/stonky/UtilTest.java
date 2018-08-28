@@ -24,9 +24,9 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import com.github.robozonky.util.LazyInitialized;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,8 +56,8 @@ class UtilTest extends AbstractRoboZonkyTest {
         final Zonky zonky = mock(Zonky.class);
         final ApiProvider api = mockApiProvider(oAuth, zonky);
         final SecretProvider secretProvider = SecretProvider.inMemory("someone@somewhere.cz");
-        final LazyInitialized<ZonkyApiToken> token = Util.getToken(api, secretProvider,
-                                                                   ZonkyApiToken.SCOPE_APP_WEB_STRING);
+        final ZonkyApiTokenSupplier token = Util.getToken(api, secretProvider,
+                                                          ZonkyApiToken.SCOPE_APP_WEB_STRING);
         final ZonkyApiToken actual = token.get();
         assertThat(actual).isNotNull();
         verify(oAuth).login(eq(ZonkyApiToken.SCOPE_APP_WEB_STRING), eq(secretProvider.getUsername()), any());
