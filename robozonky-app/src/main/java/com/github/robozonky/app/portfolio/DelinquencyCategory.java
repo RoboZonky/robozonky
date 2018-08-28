@@ -27,11 +27,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -56,7 +57,12 @@ enum DelinquencyCategory {
     MILD(10),
     SEVERE(30),
     CRITICAL(60),
-    HOPELESS(90);
+    HOPELESS(90),
+    /**
+     * This has a bit of a special meaning. Any delinquent can be both defaulted and either new, mild, severe, critical
+     * or hopeless.
+     */
+    DEFAULTED(-1);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
     private final int thresholdInDays;
@@ -81,6 +87,8 @@ enum DelinquencyCategory {
 
     private static EventSupplier getEventSupplier(final int threshold) {
         switch (threshold) {
+            case -1:
+                return LoanDefaultedEvent::new;
             case 0:
                 return LoanNowDelinquentEvent::new;
             case 10:
@@ -96,7 +104,7 @@ enum DelinquencyCategory {
         }
     }
 
-    private static LoanDelinquentEvent getEvent(final Tenant tenant, final Investment investment, final int threshold) {
+    private static Event getEvent(final Tenant tenant, final Investment investment, final int threshold) {
         final Loan loan = LoanCache.INSTANCE.getLoan(investment.getLoanId(), tenant);
         final LocalDate since = getPaymentMissedDate(investment);
         return getEventSupplier(threshold).apply(investment, loan, since, getDevelopments(tenant, loan, since));
@@ -161,8 +169,7 @@ enum DelinquencyCategory {
     @FunctionalInterface
     private interface EventSupplier {
 
-        LoanDelinquentEvent apply(final Investment i, final Loan l, final LocalDate d,
-                                  final Collection<Development> collections);
+        Event apply(final Investment i, final Loan l, final LocalDate d, final Collection<Development> collections);
     }
 
 }

@@ -178,7 +178,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     void configureNotifications() throws URISyntaxException, MalformedURLException {
         ListenerServiceLoader.registerConfiguration(SESSION_INFO,
                                                     AbstractListenerTest.class.getResource(
-                                                                        "notifications-enabled.cfg").toURI().toURL());
+                                                            "notifications-enabled.cfg").toURI().toURL());
     }
 
     @Test
@@ -233,7 +233,8 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.INVESTMENT_REJECTED,
                             new InvestmentRejectedEvent(recommendation, "random")),
                 forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, new LoanNoLongerDelinquentEvent(i, loan)),
-                forListener(SupportedListener.LOAN_DEFAULTED, new LoanDefaultedEvent(i, loan)),
+                forListener(SupportedListener.LOAN_DEFAULTED,
+                            new LoanDefaultedEvent(i, loan, LocalDate.now(), Collections.emptyList())),
                 forListener(SupportedListener.LOAN_LOST, new LoanLostEvent(i, loan)),
                 forListener(SupportedListener.LOAN_NOW_DELINQUENT,
                             new LoanNowDelinquentEvent(i, loan, LocalDate.now(), Collections.emptyList())),

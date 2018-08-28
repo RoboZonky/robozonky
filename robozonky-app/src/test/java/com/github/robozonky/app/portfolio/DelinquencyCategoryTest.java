@@ -86,10 +86,11 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
     @TestFactory
     Stream<DynamicNode> categories() {
         return Stream.of(DelinquencyCategory.values())
+                .filter(c -> c != DelinquencyCategory.DEFAULTED)
                 .map(category -> {
-                    final Period minimumMatchindDuration = Period.ofDays(category.getThresholdInDays());
+                    final Period minimumMatchingDuration = Period.ofDays(category.getThresholdInDays());
                     return dynamicContainer(category.toString(), Stream.of(
-                            dynamicTest("updates", () -> testAddAndRead(category, minimumMatchindDuration)),
+                            dynamicTest("updates", () -> testAddAndRead(category, minimumMatchingDuration)),
                             dynamicTest("empty", () -> testEmpty(category))
                     ));
                 });

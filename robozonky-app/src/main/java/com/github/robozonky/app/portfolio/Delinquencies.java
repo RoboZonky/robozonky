@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -99,19 +98,17 @@ public class Delinquencies {
     static void update(final Transactional transactional, final Collection<Investment> nowDelinquent,
                        final Set<Integer> knownDelinquents, final Set<Integer> knownDefaulted) {
         // process new defaults
-        nowDelinquent.stream()
+        final Collection<Investment> defaulted = nowDelinquent.stream()
                 .filter(Delinquencies::isDefaulted)
                 .filter(i -> !knownDefaulted.contains(i.getId()))
-                .forEach(i -> {
-                    final Loan l = getLoan(transactional, i);
-                    final LoanDefaultedEvent evt = new LoanDefaultedEvent(i, l);
-                    transactional.fire(evt);
-                });
+                .collect(toList());
+        DelinquencyCategory.DEFAULTED.update(transactional, defaulted);
         // process delinquent investments that are not defaults
         final Collection<Investment> stillDelinquent = nowDelinquent.stream()
                 .filter(i -> !isDefaulted(i))
                 .collect(toList());
         Stream.of(DelinquencyCategory.values())
+                .filter(c -> c != DelinquencyCategory.DEFAULTED)
                 .forEach(c -> c.update(transactional, stillDelinquent));
         // process investments that are no longer delinquent
         knownDelinquents.stream()

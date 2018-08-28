@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,33 @@
 
 package com.github.robozonky.api.notifications;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
-public final class LoanDefaultedEvent extends Event implements InvestmentBased {
+public final class LoanDefaultedEvent extends Event implements DelinquencyBased {
 
     private final Investment investment;
     private final Loan loan;
+    private final Collection<Development> collectionActions;
+    private final LocalDate delinquentSince;;
 
+    @Deprecated
     public LoanDefaultedEvent(final Investment investment, final Loan loan) {
+        this(investment, loan, LocalDate.from(Instant.EPOCH), Collections.emptyList());
+    }
+
+    public LoanDefaultedEvent(final Investment investment, final Loan loan, final LocalDate since,
+                              final Collection<Development> collectionActions) {
         this.investment = investment;
         this.loan = loan;
+        this.delinquentSince = since;
+        this.collectionActions = Collections.unmodifiableCollection(collectionActions);
     }
 
     @Override
@@ -39,4 +55,13 @@ public final class LoanDefaultedEvent extends Event implements InvestmentBased {
         return loan;
     }
 
+    @Override
+    public LocalDate getDelinquentSince() {
+        return delinquentSince;
+    }
+
+    @Override
+    public Collection<Development> getCollectionActions() {
+        return collectionActions;
+    }
 }
