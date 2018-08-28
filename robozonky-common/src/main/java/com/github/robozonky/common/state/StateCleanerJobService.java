@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.extensions;
+package com.github.robozonky.common.state;
 
-import org.junit.jupiter.api.Test;
+import java.util.Collection;
+import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.JobService;
 
-class JobServiceLoaderTest {
+public final class StateCleanerJobService implements JobService {
 
-    @Test
-    void defaultContents() {
-        assertThat(JobServiceLoader.load())
-                .hasSize(1); // state cleaner job service
+    @Override
+    public Collection<Job> getJobs() {
+        return Collections.singleton(new StateCleanerJob());
     }
 }

@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.extensions;
+package com.github.robozonky.common.state;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.github.robozonky.common.jobs.Job;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JobServiceLoaderTest {
+class StateCleanerJobServiceTest {
 
     @Test
-    void defaultContents() {
-        assertThat(JobServiceLoader.load())
-                .hasSize(1); // state cleaner job service
+    void provide() {
+        final StateCleanerJobService s = new StateCleanerJobService();
+        final List<Job> jobs = new ArrayList<>(s.getJobs());
+        assertThat(jobs).hasSize(1);
+        final Job job = jobs.get(0);
+        assertThat(job.startIn()).isEqualTo(Duration.ZERO);
+        assertThat(job.repeatEvery()).isEqualTo(Duration.ofDays(1));
+        assertThat(job.payload()).isInstanceOf(StateCleaner.class);
     }
+
 }

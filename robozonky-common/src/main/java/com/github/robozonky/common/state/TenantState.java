@@ -26,10 +26,10 @@ import com.github.robozonky.util.TextUtil;
 public final class TenantState {
 
     private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
-    private final FileBackedStateStorage current;
+    private final FileBackedStateStorage stateStorage;
 
     TenantState(final String username) { // no external instances
-        this.current = new FileBackedStateStorage(getFile(username));
+        this.stateStorage = new FileBackedStateStorage(getFile(username));
     }
 
     public static TenantState of(final SessionInfo session) {
@@ -38,6 +38,10 @@ public final class TenantState {
 
     public static Collection<String> getKnownTenants() {
         return Holder.getKnownTenants();
+    }
+
+    StateStorage getStateStorage() {
+        return stateStorage;
     }
 
     private static File getFile(final String username) {
@@ -58,7 +62,7 @@ public final class TenantState {
 
     public <T> InstanceState<T> in(final Class<T> cls) {
         assertNotDestroyed();
-        return new InstanceStateImpl<>(this, cls.getName(), current);
+        return new InstanceStateImpl<>(this, cls.getName(), stateStorage);
     }
 
     boolean isDestroyed() {
@@ -67,7 +71,7 @@ public final class TenantState {
 
     void destroy() {
         Holder.destroy(this);
-        current.destroy();
+        stateStorage.destroy();
         isDestroyed.set(true);
     }
 }
