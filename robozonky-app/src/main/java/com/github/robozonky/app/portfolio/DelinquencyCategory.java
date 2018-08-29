@@ -115,9 +115,9 @@ enum DelinquencyCategory {
     }
 
     private static LocalDate getPaymentMissedDate(final Investment i) {
-        return i.getNextPaymentDate()
-                .orElseThrow(() -> new IllegalStateException("Unexpected missing date: " + i))
-                .toLocalDate();
+        final int daysPastDue = i.getDaysPastDue()
+                .orElseThrow(() -> new IllegalStateException("Unexpected missing DPD: " + i));
+        return LocalDate.now().minusDays(daysPastDue);
     }
 
     private static List<Development> getDevelopments(final Tenant auth, final Loan loan,

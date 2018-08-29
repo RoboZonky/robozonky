@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.time.LocalDate;
-import java.time.OffsetTime;
 import java.time.Period;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +57,7 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         final Loan loan = Loan.custom().setId(loanId).setAmount(200).build();
         // store a delinquent loan
         final Investment i = Investment.fresh(loan, 200)
-                .setNextPaymentDate(LocalDate.now().minus(minimumMatchingDuration).atTime(OffsetTime.now()))
+                .setDaysPastDue(minimumMatchingDuration.getDays())
                 .build();
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
