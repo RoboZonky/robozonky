@@ -160,8 +160,7 @@
     </field>
     <field type="text" variable="jmxPort" summaryKey="JMX port:">
       <spec txt="Port pro JMX:" id="jmxPort" size="20" set="7091"/>
-      <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator"
-                 txt="Port musí být číslo." />
+      <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator" txt="Port musí být číslo." />
     </field>
     <field type="check" variable="isJmxSecurityEnabled" summaryKey="Vyžadovat autentizaci:">
       <spec txt="Vyžadovat autentizaci." id="jmxSecurity" size="20" set="false"/>
@@ -237,7 +236,31 @@
     <field type="space" />
 
     <field type="staticText" align="left"
-           txt="Více o Stonky se dozvíte zde: https://www.facebook.com/groups/204405453512737/."
+           txt="Google bude s RoboZonky komunikovat přes HTTP na následující adrese. Doporučujeme ponechat výchozí hodnoty."
            id="stonky.description.6"/>
+    <field type="space" />
+
+    <field type="staticText" align="left"
+           txt="Přesvědčte se, že nastavení vaší sítě případně firewallu umožní přístup nyní i kdykoli v budoucnu po vypršení platnosti původního Google oprávnění."
+           id="stonky.description.7"/>
+    <field type="space" />
+
+    <field type="text" variable="callbackHost" summaryKey="Hostitel:" readonlyCondition="readOnlyGoogleCallbackFields">
+      <spec txt="Hostitel:" size="30" set="localhost" />
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Hostitel je povinná položka." />
+    </field>
+    <field type="space" />
+
+    <field type="text" variable="callbackPort" summaryKey="Port:" readonlyCondition="readOnlyGoogleCallbackFields">
+      <spec txt="Port ('0' vybere náhodný):" size="30" set="0" />
+      <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator" txt="Port musí být číslo." />
+    </field>
+    <field type="space" />
+
+    <field type="staticText" align="left"
+           txt="Více o Stonky se dozvíte zde: https://www.facebook.com/groups/204405453512737/."
+           id="stonky.description.8"/>
+
   </panel>
 </izpack:userinput>

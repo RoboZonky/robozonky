@@ -22,8 +22,19 @@ import com.google.api.client.http.HttpTransport;
 
 public interface CredentialProvider {
 
+    /**
+     *
+     * @param transport
+     * @param callbackHost
+     * @param callbackPort 0 = auto-detect an open port
+     * @return
+     */
+    static CredentialProvider live(final HttpTransport transport, final String callbackHost, final int callbackPort) {
+        return new GoogleCredentialProvider(transport, callbackHost, callbackPort);
+    }
+
     static CredentialProvider live(final HttpTransport transport) {
-        return new GoogleCredentialProvider(transport);
+        return new GoogleCredentialProvider(transport, "localhost", 0);
     }
 
     static CredentialProvider mock(final boolean shouldExist) {
