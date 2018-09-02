@@ -16,9 +16,7 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +39,6 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +69,7 @@ enum DelinquencyCategory {
     }
 
     private static boolean isOverThreshold(final Investment d, final int threshold) {
-        final OffsetDateTime since = getPaymentMissedDate(d).atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
-        final long actual = Duration.between(since, OffsetDateTime.now()).abs().toDays();
-        return actual >= threshold;
+        return d.getDaysPastDue() >= threshold;
     }
 
     private static IntStream fromIdString(final Stream<String> idString) {
@@ -106,18 +101,12 @@ enum DelinquencyCategory {
 
     private static Event getEvent(final Tenant tenant, final Investment investment, final int threshold) {
         final Loan loan = LoanCache.INSTANCE.getLoan(investment.getLoanId(), tenant);
-        final LocalDate since = getPaymentMissedDate(investment);
+        final LocalDate since = LocalDate.now().minusDays(investment.getDaysPastDue());
         return getEventSupplier(threshold).apply(investment, loan, since, getDevelopments(tenant, loan, since));
     }
 
     private static String getFieldName(final int dayThreshold) {
         return "notified" + dayThreshold + "plus";
-    }
-
-    private static LocalDate getPaymentMissedDate(final Investment i) {
-        final int daysPastDue = i.getDaysPastDue()
-                .orElseThrow(() -> new IllegalStateException("Unexpected missing DPD: " + i));
-        return LocalDate.now().minusDays(daysPastDue);
     }
 
     private static List<Development> getDevelopments(final Tenant auth, final Loan loan,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class RawInvestment extends BaseInvestment {
         this.onSmp = investment.isOnSmp();
         this.canBeOffered = investment.canBeOffered();
         this.inWithdrawal = investment.isInWithdrawal().orElse(false);
-        this.legalDpd = investment.getDaysPastDue().orElse(0);
+        this.legalDpd = investment.getDaysPastDue();
         this.loanTermInMonth = investment.getOriginalTerm();
         this.remainingMonths = investment.getRemainingMonths();
         this.currentTerm = investment.getCurrentTerm();
