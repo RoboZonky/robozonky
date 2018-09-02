@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.api.services.drive.model.File;
 
-public class AllFilesResponseHandler extends ResponseHandler {
+class AllFilesResponseHandler extends ResponseHandler {
 
     private final Collection<File> files;
 

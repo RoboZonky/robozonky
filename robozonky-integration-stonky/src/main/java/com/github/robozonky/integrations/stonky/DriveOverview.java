@@ -75,8 +75,8 @@ public class DriveOverview {
 
     public static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService) throws IOException {
         final String folderName = getFolderName(sessionInfo);
-        LOGGER.debug("Listing all files in the Google Drive, looking up folder: {}.", folderName);
-        final List<File> files = driveService.files().list().execute().getFiles();
+        LOGGER.debug("Listing all files in the root of Google Drive, looking up folder: {}.", folderName);
+        final List<File> files = getFilesInFolder(driveService, "root").collect(Collectors.toList());
         final Optional<File> result = files.stream()
                 .peek(f -> LOGGER.debug("Found '{}' ({}) as {}.", f.getName(), f.getMimeType(), f.getId()))
                 .filter(f -> Objects.equals(f.getMimeType(), MIME_TYPE_FOLDER))
@@ -101,9 +101,13 @@ public class DriveOverview {
     }
 
     private static Stream<File> getFilesInFolder(final Drive driveService, final File parent) throws IOException {
-        LOGGER.debug("Listing files in folder {}.", parent.getId());
+        return getFilesInFolder(driveService, parent.getId());
+    }
+
+    private static Stream<File> getFilesInFolder(final Drive driveService, final String parentId) throws IOException {
+        LOGGER.debug("Listing files in folder {}.", parentId);
         return driveService.files().list()
-                .setQ("'" + parent.getId() + "' in parents")
+                .setQ("'" + parentId + "' in parents and trashed = false")
                 .execute()
                 .getFiles()
                 .stream()
@@ -150,9 +154,7 @@ public class DriveOverview {
     private File createRoboZonkyFolder(final Drive driveService) throws IOException {
         final File fileMetadata = new File();
         fileMetadata.setName(getFolderName(sessionInfo));
-        fileMetadata.setDescription("RoboZonky aktualizuje obsah tohoto adresáře jednou denně brzy ráno." +
-                                            "Adresář ani jeho obsah nemažte a pokud už to udělat musíte, " +
-                                            "nezapomeňte ho odstranit také z Koše.");
+        fileMetadata.setDescription("RoboZonky aktualizuje obsah tohoto adresáře jednou denně brzy ráno.");
         fileMetadata.setMimeType(MIME_TYPE_FOLDER);
         final File result = driveService.files().create(fileMetadata)
                 .setFields("id")

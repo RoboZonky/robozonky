@@ -125,8 +125,8 @@ class StonkyTest extends AbstractRoboZonkyTest {
 
         @BeforeEach
         void filledPortfolio() {
-            transport.addReponseHandler(new AllFilesResponseHandler(stonkyFolder));
-            stonkyFolderContent = new FilesInFolderResponseHandler(stonkyFolder);
+            transport.addReponseHandler(new FilesInFolderResponseHandler("root", stonkyFolder));
+            stonkyFolderContent = new FilesInFolderResponseHandler(stonkyFolder.getId());
             transport.addReponseHandler(stonkyFolderContent);
             final String stonkySpreadsheetToCopy = Properties.STONKY_MASTER.getValue()
                     .orElseThrow(IllegalStateException::new);

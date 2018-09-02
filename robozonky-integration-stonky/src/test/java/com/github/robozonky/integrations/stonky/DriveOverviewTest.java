@@ -40,7 +40,7 @@ class DriveOverviewTest {
     @Test
     void emptyGoogleDrive() throws IOException {
         final MultiRequestMockHttpTransport transport = new MultiRequestMockHttpTransport();
-        transport.addReponseHandler(new AllFilesResponseHandler());
+        transport.addReponseHandler(new FilesInFolderResponseHandler("root"));
         final Drive service = Util.createDriveService(credential, transport);
         final DriveOverview overview = DriveOverview.create(SESSION_INFO, service);
         assertSoftly(softly -> { // nothing was filled in
@@ -55,7 +55,7 @@ class DriveOverviewTest {
         final File randomFolder = GoogleUtil.getFolder(UUID.randomUUID().toString());
         final File randomFile = GoogleUtil.getFile(UUID.randomUUID().toString());
         final MultiRequestMockHttpTransport transport = new MultiRequestMockHttpTransport();
-        transport.addReponseHandler(new AllFilesResponseHandler(randomFile, randomFolder));
+        transport.addReponseHandler(new FilesInFolderResponseHandler("root", randomFile, randomFolder));
         final Drive service = Util.createDriveService(credential, transport);
         final DriveOverview overview = DriveOverview.create(SESSION_INFO, service);
         assertSoftly(softly -> { // nothing was filled in
@@ -76,8 +76,8 @@ class DriveOverviewTest {
         @BeforeEach
         void prepareFolder() {
             transport = new MultiRequestMockHttpTransport();
-            transport.addReponseHandler(new AllFilesResponseHandler(stonkyFolder));
-            stonkyFolderContent = new FilesInFolderResponseHandler(stonkyFolder);
+            transport.addReponseHandler(new FilesInFolderResponseHandler("root", stonkyFolder));
+            stonkyFolderContent = new FilesInFolderResponseHandler(stonkyFolder.getId());
             transport.addReponseHandler(stonkyFolderContent);
             service = Util.createDriveService(credential, transport);
         }
