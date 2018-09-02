@@ -22,16 +22,16 @@ import com.google.api.services.drive.model.File;
 
 public class FilesInFolderResponseHandler extends AllFilesResponseHandler {
 
-    private final File parent;
+    private final String parentId;
 
-    public FilesInFolderResponseHandler(final File parent, final File... files) {
+    public FilesInFolderResponseHandler(final String parentId, final File... files) {
         super(files);
-        this.parent = parent;
+        this.parentId = parentId;
     }
 
     @Override
     protected boolean appliesTo(final String method, final String url) {
-        final String expected = "https://www.googleapis.com/drive/v3/files?q='" + parent.getId() + "'%20in%20parents";
-        return Objects.equals(method, "GET") && Objects.equals(url, expected);
+        final String expected = "https://www.googleapis.com/drive/v3/files?q='" + parentId + "'%20in%20parents";
+        return Objects.equals(method, "GET") && url.startsWith(expected);
     }
 }
