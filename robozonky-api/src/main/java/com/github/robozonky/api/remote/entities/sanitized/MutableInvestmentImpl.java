@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.ToStringBuilder;
 
 final class MutableInvestmentImpl implements InvestmentBuilder {
@@ -51,7 +53,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private PaymentStatus paymentStatus;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
     // default value for investment date, in case it is null
-    private Supplier<OffsetDateTime> investmentDateSupplier = OffsetDateTime::now;
+    private Supplier<LocalDate> investmentDateSupplier = LocalDate::now;
 
     MutableInvestmentImpl() {
         this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
@@ -64,7 +66,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
      * @param investmentDateSupplier Will use this to lazy-load if the original is null.
      */
     MutableInvestmentImpl(final RawInvestment investment,
-                          final Function<Investment, OffsetDateTime> investmentDateSupplier) {
+                          final Function<Investment, LocalDate> investmentDateSupplier) {
         this.loanId = investment.getLoanId();
         this.id = investment.getId();
         this.currentTerm = investment.getCurrentTerm();
@@ -322,7 +324,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public synchronized OffsetDateTime getInvestmentDate() {
         if (investmentDate == null) {
-            investmentDate = investmentDateSupplier.get();
+            investmentDate = investmentDateSupplier.get().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
         }
         return investmentDate;
     }

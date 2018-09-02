@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 @Parameters(commandNames = "notification-tester", commandDescription = NotificationTestingFeature.DESCRIPTION)
 public final class NotificationTestingFeature implements Feature {
 
-    static final String DESCRIPTION = "Send a testing notification according to the provided configuration.";
+    static final String DESCRIPTION = "Send a testing notification using the provided configuration.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationTestingFeature.class);
 
     @Parameter(names = {"-u", "--username"}, description = "Zonky username.", required = true)
     private String username = null;
-    @Parameter(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
+    @Parameter(names = {"-l", "--location"}, description = "URL leading to the configuration.", required = true)
     private URL location;
 
     public NotificationTestingFeature(final String username, final URL location) {

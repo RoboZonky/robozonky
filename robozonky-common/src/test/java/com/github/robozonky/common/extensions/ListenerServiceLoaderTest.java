@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,22 @@
 
 package com.github.robozonky.common.extensions;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.common.state.TenantState;
 import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -42,6 +47,11 @@ class ListenerServiceLoaderTest {
 
     @Mock
     private EventListener<RoboZonkyStartingEvent> l;
+
+    @AfterEach
+    void deleteState() {
+        TenantState.destroyAll();
+    }
 
     @Test
     void correctLoading() {
@@ -70,5 +80,16 @@ class ListenerServiceLoaderTest {
         final List<EventListenerSupplier<RoboZonkyTestingEvent>> r =
                 ListenerServiceLoader.load(RoboZonkyTestingEvent.class);
         assertThat(r).isEmpty(); // no providers registered by default
+    }
+
+    @Test
+    void configuration() throws MalformedURLException {
+        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
+        final String url = "http://localhost";
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(sessionInfo)).isEmpty();
+        ListenerServiceLoader.registerConfiguration(sessionInfo, new URL(url));
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(sessionInfo)).contains(url);
+        ListenerServiceLoader.unregisterConfiguration(sessionInfo);
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(sessionInfo)).isEmpty();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,27 @@
 
 package com.github.robozonky.test;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.OAuth;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 /**
  * This is a suggested parent class for all RoboZonky tests using this module. It will make sure to clear shared state
@@ -33,6 +45,27 @@ import static org.mockito.Mockito.reset;
 public abstract class AbstractRoboZonkyTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRoboZonkyTest.class);
+
+    @SuppressWarnings("unchecked")
+    protected static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
+        final ApiProvider api = mock(ApiProvider.class);
+        when(api.oauth(any())).then(i -> {
+            final Function<OAuth, ?> f = i.getArgument(0);
+            return f.apply(oauth);
+        });
+        when(api.call(any(), any())).then(i -> {
+            final Supplier<ZonkyApiToken> s = i.getArgument(1);
+            s.get();
+            final Function<Zonky, ?> f = i.getArgument(0);
+            return f.apply(z);
+        });
+        doAnswer((Answer<Void>) invocation -> {
+            final Consumer<Zonky> f = invocation.getArgument(0);
+            f.accept(z);
+            return null;
+        }).when(api).run(any(), any());
+        return api;
+    }
 
     @BeforeAll
     static void loadSystemProperties() {
@@ -44,13 +77,11 @@ public abstract class AbstractRoboZonkyTest {
         SystemProperties.INSTANCE.restore();
     }
 
-    @BeforeEach
     @AfterEach
     protected void reinitScheduler() {
         reset(TestingSchedulerService.MOCK_SERVICE);
     }
 
-    @BeforeEach
     @AfterEach
     protected void deleteState() {
         TenantState.destroyAll();

@@ -21,7 +21,6 @@ import java.time.OffsetDateTime;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -29,7 +28,6 @@ import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -37,12 +35,9 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.RemoteBalance;
 import com.github.robozonky.app.util.LoanCache;
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
@@ -56,22 +51,6 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
     private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
                                                                false),
             SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
-
-    @SuppressWarnings("unchecked")
-    protected static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
-        final ApiProvider api = mock(ApiProvider.class);
-        when(api.oauth(any())).then(i -> {
-            final Function<OAuth, ?> f = i.getArgument(0);
-            return f.apply(oauth);
-        });
-        when(api.call(any(Function.class), any())).then(i -> {
-            final Supplier<ZonkyApiToken> s = i.getArgument(1);
-            s.get();
-            final Function<Zonky, ?> f = i.getArgument(0);
-            return f.apply(z);
-        });
-        return api;
-    }
 
     protected static RemoteBalance mockBalance(final Zonky zonky) {
         return new MockedBalance(zonky);
@@ -134,6 +113,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         final Tenant auth = spy(Tenant.class);
         when(auth.getSessionInfo()).thenReturn(isDryRun ? SESSION_DRY : SESSION);
         when(auth.getRestrictions()).thenReturn(new Restrictions());
+        when(auth.isAvailable()).thenReturn(true);
         doAnswer(invocation -> {
             final Function<Zonky, Object> operation = invocation.getArgument(0);
             return operation.apply(zonky);
@@ -150,7 +130,6 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return mockTenant(harmlessZonky(10_000));
     }
 
-    @BeforeEach
     @AfterEach
     public void clearCache() {
         LoanCache.INSTANCE.clean();

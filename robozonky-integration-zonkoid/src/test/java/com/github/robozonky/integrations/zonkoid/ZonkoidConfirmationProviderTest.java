@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,10 +63,9 @@ class ZonkoidConfirmationProviderTest {
 
     private boolean execute(final int code) {
         this.mockServerResponse(code);
-        final boolean result =
-                ZonkoidConfirmationProvider.requestConfirmation(new RequestId("user@somewhere.cz",
-                                                                              "apitest".toCharArray()), 1, 200,
-                                                                serverUrl);
+        final RequestId id = new RequestId("user@somewhere.cz", "apitest".toCharArray());
+        final ZonkoidConfirmationProvider zcp = new ZonkoidConfirmationProvider(serverUrl);
+        final boolean result = zcp.requestConfirmation(id , 1, 200);
         this.verifyClientRequest();
         return result;
     }

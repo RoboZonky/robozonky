@@ -23,6 +23,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.Transaction;
+import com.github.robozonky.internal.api.ApiConstants;
 import com.github.robozonky.internal.api.Defaults;
 
 @Produces(Defaults.MEDIA_TYPE)
@@ -30,6 +31,6 @@ import com.github.robozonky.internal.api.Defaults;
 public interface TransactionApi extends EntityCollectionApi<Transaction> {
 
     @GET
-    @Path(Constants.ME + "/wallet/transactions")
+    @Path(ApiConstants.ME + "/wallet/transactions")
     List<Transaction> items();
 }

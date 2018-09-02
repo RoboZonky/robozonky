@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,13 @@ import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
@@ -43,10 +42,8 @@ import org.mockito.verification.VerificationMode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,13 +56,6 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     private static final SellStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty();
     private static final Supplier<Optional<SellStrategy>> ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY),
             NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
-
-    private static Zonky mockApi() {
-        final Zonky zonky = mock(Zonky.class);
-        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ZERO));
-        when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
-        return zonky;
-    }
 
     private static Investment mockInvestment(final Loan loan) {
         return Investment.fresh(loan, 200)
@@ -87,10 +77,10 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
-        final Zonky zonky = mockApi();
-        final Portfolio portfolio = new Portfolio(mockBalance(zonky));
+        final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
-        final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
+        final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
         final List<Event> e = getNewEvents();
@@ -110,10 +100,10 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Investment i = mockInvestment(loan);
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
-        final Portfolio portfolio = new Portfolio(mockBalance(zonky));
         final Tenant tenant = mockTenant(zonky);
-        final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
-        new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
+        final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
+        new Selling(NONE_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(2);
@@ -132,9 +122,9 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
-        final Portfolio portfolio = new Portfolio(mockBalance(zonky));
         final Tenant tenant = mockTenant(zonky, isDryRun);
-        final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
+        final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
         final List<Event> e = getNewEvents();

@@ -28,6 +28,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.common.state.TenantState;
+import com.github.robozonky.util.LazyInitialized;
 import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public final class ListenerServiceLoader {
 
     private static final String CONFIG_LOCATION_PROPERTY = "configLocation";
     private static final Logger LOGGER = LoggerFactory.getLogger(ListenerServiceLoader.class);
-    private static final ServiceLoader<ListenerService> LOADER =
+    private static final LazyInitialized<ServiceLoader<ListenerService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
 
     private ListenerServiceLoader() {
@@ -110,6 +111,6 @@ public final class ListenerServiceLoader {
     }
 
     public static <T extends Event> List<EventListenerSupplier<T>> load(final Class<T> eventType) {
-        return ListenerServiceLoader.load(eventType, ListenerServiceLoader.LOADER);
+        return ListenerServiceLoader.load(eventType, ListenerServiceLoader.LOADER.get());
     }
 }

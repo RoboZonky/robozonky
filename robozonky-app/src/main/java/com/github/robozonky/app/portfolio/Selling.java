@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SessionState;
 import com.github.robozonky.common.remote.Select;
@@ -63,11 +63,10 @@ public class Selling implements PortfolioDependant {
         return new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, auth));
     }
 
-    private static Optional<Investment> processSale(final TransactionalPortfolio transactionalPortfolio,
-                                                    final RecommendedInvestment r,
+    private static Optional<Investment> processSale(final Transactional transactional, final RecommendedInvestment r,
                                                     final SessionState<Investment> sold) {
-        final Tenant tenant = transactionalPortfolio.getTenant();
-        transactionalPortfolio.fire(new SaleRequestedEvent(r));
+        final Tenant tenant = transactional.getTenant();
+        transactional.fire(new SaleRequestedEvent(r));
         final Investment i = r.descriptor().item();
         if (tenant.getSessionInfo().isDryRun()) {
             LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
@@ -77,39 +76,39 @@ public class Selling implements PortfolioDependant {
             tenant.run(z -> z.sell(i));
             LOGGER.trace("Request over.");
         }
-        transactionalPortfolio.fire(new SaleOfferedEvent(i, r.descriptor().related()));
+        transactional.fire(new SaleOfferedEvent(i, r.descriptor().related()));
         return Optional.of(i);
     }
 
-    private static void sell(final TransactionalPortfolio transactionalPortfolio, final SellStrategy strategy) {
+    private static void sell(final Transactional transactional, final SellStrategy strategy) {
         final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
-        final Tenant tenant = transactionalPortfolio.getTenant();
+        final Tenant tenant = transactional.getTenant();
         final SessionState<Investment> sold = new SessionState<>(tenant, Investment::getLoanId, "soldInvestments");
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .parallel()
                 .filter(i -> !sold.contains(i)) // to make dry run function properly
                 .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());
-        final Portfolio portfolio = transactionalPortfolio.getPortfolio();
+        final Portfolio portfolio = transactional.getPortfolio();
         final PortfolioOverview overview = portfolio.calculateOverview();
-        transactionalPortfolio.fire(new SellingStartedEvent(eligible, overview));
+        transactional.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
-                .peek(r -> transactionalPortfolio.fire(new SaleRecommendedEvent(r)))
-                .map(r -> processSale(transactionalPortfolio, r, sold))
+                .peek(r -> transactional.fire(new SaleRecommendedEvent(r)))
+                .map(r -> processSale(transactional, r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        transactionalPortfolio.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
+        transactional.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
     }
 
     /**
      * Execute the strategy on a given portfolio. Won't do anything if the supplier in
      * {@link #Selling(Supplier)} returns and empty {@link Optional}.
-     * @param portfolio Portfolio of investments to choose from.
+     * @param transactional Portfolio of investments to choose from.
      */
     @Override
-    public void accept(final TransactionalPortfolio portfolio) {
-        strategy.get().ifPresent(s -> sell(portfolio, s));
+    public void accept(final Transactional transactional) {
+        strategy.get().ifPresent(s -> sell(transactional, s));
     }
 }

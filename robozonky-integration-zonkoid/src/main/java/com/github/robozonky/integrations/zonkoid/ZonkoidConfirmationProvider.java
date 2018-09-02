@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -45,6 +46,16 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     static final String PATH = "/zonkycommander/rest/notifications";
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkoidConfirmationProvider.class);
     private static final String PROTOCOL_MAIN = "https", PROTOCOL_FALLBACK = "http", CLIENT_APP = "ROBOZONKY";
+
+    private final String rootUrl;
+
+    public ZonkoidConfirmationProvider() {
+        this("urbancoders.eu");
+    }
+
+    ZonkoidConfirmationProvider(final String rootUrl) {
+        this.rootUrl = rootUrl;
+    }
 
     static String md5(final String secret) throws NoSuchAlgorithmException {
         final MessageDigest mdEnc = MessageDigest.getInstance("MD5");
@@ -78,9 +89,9 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     }
 
     static HttpPost getRequest(final RequestId requestId, final int loanId, final int amount, final String protocol,
-                               final String domain) throws UnsupportedEncodingException {
+                               final String rootUrl) throws UnsupportedEncodingException {
         final String auth = ZonkoidConfirmationProvider.getAuthenticationString(requestId, loanId);
-        final HttpPost httpPost = new HttpPost(protocol + "://" + domain + ZonkoidConfirmationProvider.PATH);
+        final HttpPost httpPost = new HttpPost(protocol + "://" + rootUrl + ZonkoidConfirmationProvider.PATH);
         httpPost.addHeader("Accept", "text/plain");
         httpPost.addHeader("Authorization", auth);
         httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -105,36 +116,26 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     }
 
     private static boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount,
-                                               final String domain, final String protocol) {
+                                               final String rootUrl, final String protocol) {
         try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
             ZonkoidConfirmationProvider.LOGGER.debug("Requesting notification of {} CZK for loan #{}.", amount, loanId);
-            final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, protocol, domain);
-            return httpclient.execute(post, (response) -> {
-                final int statusCode = response.getStatusLine().getStatusCode();
-                if (Util.isHttpSuccess(statusCode)) {
-                    ZonkoidConfirmationProvider.LOGGER.debug("Response: '{}'", response.getStatusLine());
-                    return true;
-                } else {
-                    ZonkoidConfirmationProvider.LOGGER.info("Unknown response: '{}' (Body: '{}')",
-                                                            response.getStatusLine(),
-                                                            Util.readEntity(response.getEntity()));
-                    return false;
-                }
-            });
+            final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, protocol, rootUrl);
+            return httpclient.execute(post, ZonkoidConfirmationProvider::respond);
         } catch (final Exception ex) {
-            return ZonkoidConfirmationProvider.handleError(requestId, loanId, amount, domain, protocol, ex);
+            return ZonkoidConfirmationProvider.handleError(requestId, loanId, amount, rootUrl, protocol, ex);
         }
     }
 
-    static boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount,
-                                       final String domain) {
-        return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, domain,
-                                                               ZonkoidConfirmationProvider.PROTOCOL_MAIN);
+    private static boolean respond(final HttpResponse response) {
+        final String body = Util.readEntity(response.getEntity());
+        ZonkoidConfirmationProvider.LOGGER.info("Response: '{}' (Body: '{}')", response.getStatusLine(), body);
+        return Util.isHttpSuccess(response.getStatusLine().getStatusCode());
     }
 
     @Override
     public boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount) {
-        return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, "urbancoders.eu");
+        return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, rootUrl,
+                                                               ZonkoidConfirmationProvider.PROTOCOL_MAIN);
     }
 
     @Override

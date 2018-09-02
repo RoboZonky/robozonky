@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public interface Investment {
      * @return Sanitized investment.
      */
     static Investment sanitized(final RawInvestment investment,
-                                final Function<Investment, OffsetDateTime> investmentDateSupplier) {
+                                final Function<Investment, LocalDate> investmentDateSupplier) {
         return sanitize(investment, investmentDateSupplier).build();
     }
 
@@ -61,7 +62,7 @@ public interface Investment {
      * @return Sanitized modifiable investment.
      */
     static InvestmentBuilder sanitize(final RawInvestment investment,
-                                      final Function<Investment, OffsetDateTime> investmentDateSupplier) {
+                                      final Function<Investment, LocalDate> investmentDateSupplier) {
         return new MutableInvestmentImpl(investment, investmentDateSupplier);
     }
 

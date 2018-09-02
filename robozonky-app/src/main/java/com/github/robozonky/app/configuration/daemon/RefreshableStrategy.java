@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
 import org.apache.commons.io.IOUtils;
 
@@ -52,9 +52,7 @@ class RefreshableStrategy extends Refreshable<String> {
 
     @Override
     protected String getLatestSource() throws Exception {
-        try (final InputStream s = url.openStream()) {
-            return IOUtils.toString(s, Defaults.CHARSET);
-        }
+        return IoUtil.applyCloseable(url::openStream, s -> IOUtils.toString(s, Defaults.CHARSET));
     }
 
     @Override

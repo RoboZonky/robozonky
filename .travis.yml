@@ -16,6 +16,7 @@ env:
     # then plugin modules
     - MODULE=robozonky-strategy-natural
     - MODULE=robozonky-integration-zonkoid
+    - MODULE=robozonky-integration-stonky
 os:
   - linux
 jdk:
@@ -36,7 +37,7 @@ matrix:
   - stage: precache # independent stage for Maven to build and download all dependencies
     env: # empty
     install:
-      - mvn --batch-mode install -DskipTests -Dgpg.skip
+    - mvn --batch-mode clean install -DskipTests -Dgpg.skip
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
   - stage: sonar # independent build stage for Sonar code analysis
@@ -61,6 +62,6 @@ cache:
   directories:
   - $HOME/.m2
 install: # freshly build all required modules
-  - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
+  - mvn --batch-mode -pl $MODULE -am clean install -DskipTests -Dgpg.skip
 script: # by default, run all tests incl. PITest, skipping all assemblies
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip

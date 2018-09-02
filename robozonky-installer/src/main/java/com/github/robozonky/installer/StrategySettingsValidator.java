@@ -27,7 +27,7 @@ import com.izforge.izpack.api.installer.DataValidator;
 
 public class StrategySettingsValidator extends AbstractValidator {
 
-    private Feature getFeature(final String type, final String location) throws MalformedURLException {
+    private static Feature getFeature(final String type, final String location) throws MalformedURLException {
         switch (type) {
             case "file":
                 return new StrategyValidationFeature(new File(location));
@@ -49,18 +49,18 @@ public class StrategySettingsValidator extends AbstractValidator {
             f.test();
             return DataValidator.Status.OK;
         } catch (final Exception ex) {
-            LOGGER.warn("Strategy invalid: {}.", strategySource);
+            LOGGER.warn("Strategy invalid: {}.", strategySource, ex);
             return DataValidator.Status.WARNING;
         }
     }
 
     @Override
     public String getErrorMessageId() {
-        return "Nebyla zadána strategie.";
+        return "Zadaná strategie neexistuje nebo není platná.";
     }
 
     @Override
     public String getWarningMessageId() {
-        return "Zadaná strategie neexistuje. RoboZonky nemusí fungovat správně.";
+        return "Zadaná strategie neexistuje nebo není platná. RoboZonky nemusí fungovat správně.";
     }
 }

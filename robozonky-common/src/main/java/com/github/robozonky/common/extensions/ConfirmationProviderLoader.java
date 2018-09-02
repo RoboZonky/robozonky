@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.ConfirmationProviderService;
+import com.github.robozonky.util.LazyInitialized;
 import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public final class ConfirmationProviderLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmationProviderLoader.class);
-    private static final ServiceLoader<ConfirmationProviderService> LOADER =
+    private static final LazyInitialized<ServiceLoader<ConfirmationProviderService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ConfirmationProviderService.class);
 
     private ConfirmationProviderLoader() {
@@ -48,7 +49,7 @@ public final class ConfirmationProviderLoader {
     }
 
     public static Optional<ConfirmationProvider> load(final String providerId) {
-        return ConfirmationProviderLoader.load(providerId, ConfirmationProviderLoader.LOADER);
+        return ConfirmationProviderLoader.load(providerId, ConfirmationProviderLoader.LOADER.get());
     }
 }
 

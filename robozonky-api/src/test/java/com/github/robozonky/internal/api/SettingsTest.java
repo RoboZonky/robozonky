@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SettingsTest {
 
@@ -62,6 +62,8 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(50);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(443);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).isEmpty();
         });
     }
 
@@ -93,6 +95,8 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).contains("1000");
         });
     }
 

@@ -59,11 +59,11 @@ class LivenessCheck extends Refreshable<String> {
         return new RoboZonkyThreadFactory(tg);
     }
 
-    public static ShutdownHook.Handler setup(final MainControl livenessTrigger) {
+    public static ShutdownHook.Handler setup(final MainControl mainThreadControl) {
         final Refreshable<String> liveness = new LivenessCheck();
-        final Refreshable.RefreshListener<String> listener = new SchedulerControl();
-        liveness.registerListener(listener);
-        liveness.registerListener(livenessTrigger);
+        final Refreshable.RefreshListener<String> schedulerControl = new SchedulerControl();
+        liveness.registerListener(schedulerControl);
+        liveness.registerListener(mainThreadControl);
         // independent of the other schedulers; it controls whether or not the others are even allowed to run
         final ScheduledExecutorService e = Executors.newScheduledThreadPool(1, getThreadFactory());
         e.scheduleWithFixedDelay(liveness, 0, Duration.ofSeconds(5).toMillis(), TimeUnit.MILLISECONDS);
@@ -75,7 +75,7 @@ class LivenessCheck extends Refreshable<String> {
         try (final InputStream s = new URL(url).openStream()) {
             final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
                     .collect(Collectors.joining(System.lineSeparator()));
-            LOGGER.debug("API info coming from Zonky: {}.", source);
+            LOGGER.trace("API info coming from Zonky: {}.", source);
             final ApiVersion version = ApiVersion.read(source);
             // need to send parsed version, since the object itself changes every time due to currentApiTime field
             return version.getBuildVersion();

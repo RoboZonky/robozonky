@@ -19,26 +19,27 @@ package com.github.robozonky.app.authentication;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
 
 class TokenBasedTenant implements Tenant {
 
-    private final Supplier<ZonkyApiToken> tokenSupplier;
+    private final ZonkyApiTokenSupplier tokenSupplier;
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
+    private final SecretProvider secrets;
 
     private Instant lastRestrictionsUpdate = Instant.EPOCH;
     private Restrictions restrictions = null;
 
     TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
                      final boolean isDryRun, final Duration refreshAfter) {
+        this.secrets = secrets;
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
         this.tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets, refreshAfter);
@@ -64,7 +65,17 @@ class TokenBasedTenant implements Tenant {
     }
 
     @Override
+    public boolean isAvailable() {
+        return !tokenSupplier.isUpdating();
+    }
+
+    @Override
     public SessionInfo getSessionInfo() {
         return sessionInfo;
+    }
+
+    @Override
+    public SecretProvider getSecrets() {
+        return secrets;
     }
 }

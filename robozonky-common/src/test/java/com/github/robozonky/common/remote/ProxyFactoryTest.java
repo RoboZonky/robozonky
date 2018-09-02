@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.github.robozonky.api.remote.LoanApi;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ProxyFactoryTest {
 
@@ -29,5 +29,11 @@ class ProxyFactoryTest {
         final ResteasyClient client = ProxyFactory.newResteasyClient();
         final RoboZonkyFilter f = new RoboZonkyFilter();
         assertThat(ProxyFactory.newProxy(client, f, LoanApi.class, "https://api.zonky.cz")).isNotNull();
+    }
+
+    @Test
+    void unfilteredApi() {
+        final ResteasyClient client = ProxyFactory.newResteasyClient();
+        assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
     }
 }

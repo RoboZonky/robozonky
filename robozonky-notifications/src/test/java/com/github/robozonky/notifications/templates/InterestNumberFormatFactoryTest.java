@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 /**
  * Portions of this test are disabled on Java 8, as the percentage formatting for CZ locale changed in Java 9 and the
@@ -59,7 +59,7 @@ class InterestNumberFormatFactoryTest {
                                                                                 Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
-        assertThat(result.trim()).isEqualTo("0" + (char) 160 + "%");
+        assertThat(result.trim()).isEqualTo("0,00" + (char) 160 + "%");
     }
 
     @DisabledOnJre(JRE.JAVA_8)
@@ -70,7 +70,7 @@ class InterestNumberFormatFactoryTest {
                                                                                 Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
-        assertThat(result.trim()).isEqualTo("0,1" + (char) 160 + "%");
+        assertThat(result.trim()).isEqualTo("0,10" + (char) 160 + "%");
     }
 
     @Test

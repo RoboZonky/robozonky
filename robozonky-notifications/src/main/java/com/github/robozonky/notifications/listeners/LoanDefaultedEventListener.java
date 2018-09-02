@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.github.robozonky.notifications.listeners;
+
+import java.util.Map;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
@@ -36,6 +38,12 @@ public class LoanDefaultedEventListener extends AbstractListener<LoanDefaultedEv
     @Override
     String getSubject(final LoanDefaultedEvent event) {
         return "Půjčka " + Util.identifyLoan(event) + " byla zesplatněna";
+    }
+
+    @Override
+    protected Map<String, Object> getData(final LoanDefaultedEvent event) {
+        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
+                                      event.getDelinquentSince());
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -130,29 +131,32 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
      * @throws SAXException Failed reading XML.
      * @throws XPathExpressionException XPath parsing problem.
      */
-    private static VersionIdentifier parseVersionString(final InputStream xml) throws ParserConfigurationException,
-            IOException, SAXException, XPathExpressionException {
-        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        final DocumentBuilder builder = factory.newDocumentBuilder();
-        final Document doc = builder.parse(xml);
-        final XPathFactory xPathfactory = XPathFactory.newInstance();
-        final XPath xpath = xPathfactory.newXPath();
-        final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
-        return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
-    }
-
-    @Override
-    protected String getLatestSource() throws Exception {
-        try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
-                                                                     this.mavenCentralHostname)) {
-            return IOUtils.toString(s, Defaults.CHARSET);
+    private static VersionIdentifier parseVersionString(final InputStream xml) throws IOException {
+        try {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document doc = builder.parse(xml);
+            final XPathFactory xPathfactory = XPathFactory.newInstance();
+            final XPath xpath = xPathfactory.newXPath();
+            final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
+            return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+        } catch (final SAXException | XPathExpressionException | ParserConfigurationException ex) {
+            throw new IOException(ex);
         }
     }
 
     @Override
+    protected String getLatestSource() throws Exception {
+        final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                this.mavenCentralHostname);
+        return IOUtils.toString(s, Defaults.CHARSET);
+    }
+
+    @Override
     protected Optional<VersionIdentifier> transform(final String source) {
-        try (final InputStream s = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
-            return Optional.of(UpdateMonitor.parseVersionString(s));
+        try {
+            return IoUtil.applyCloseable(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
+                                         s -> Optional.of(UpdateMonitor.parseVersionString(s)));
         } catch (final Exception ex) {
             LOGGER.debug("Failed parsing source.", ex);
             return Optional.empty();

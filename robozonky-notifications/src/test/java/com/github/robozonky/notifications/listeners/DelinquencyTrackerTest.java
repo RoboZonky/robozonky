@@ -62,6 +62,19 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
     private static final Investment INVESTMENT = Investment.fresh(LOAN, 200)
             .setInvestmentDate(OffsetDateTime.now())
             .build();
+    private static final Loan LOAN2 = Loan.custom()
+            .setId(2)
+            .setAmount(200)
+            .setRating(Rating.A)
+            .setPurpose(Purpose.CESTOVANI)
+            .setRegion(Region.JIHOMORAVSKY)
+            .setMainIncomeType(MainIncomeType.OTHERS_MAIN)
+            .setName("")
+            .setUrl(getSomeUrl())
+            .build();
+    private static final Investment INVESTMENT2 = Investment.fresh(LOAN2, 200)
+            .setInvestmentDate(OffsetDateTime.now())
+            .build();
     private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
 
     public static URL getSomeUrl() {
@@ -78,8 +91,11 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         final DelinquencyTracker t = new DelinquencyTracker(Target.EMAIL);
         assertThat(t.isDelinquent(SESSION, INVESTMENT)).isFalse();
         t.setDelinquent(SESSION, INVESTMENT);
+        t.setDelinquent(SESSION, INVESTMENT2);
         assertThat(t.isDelinquent(SESSION, INVESTMENT)).isTrue();
+        assertThat(t.isDelinquent(SESSION, INVESTMENT2)).isTrue();
         t.unsetDelinquent(SESSION, INVESTMENT);
+        assertThat(t.isDelinquent(SESSION, INVESTMENT2)).isTrue();
         assertThat(t.isDelinquent(SESSION, INVESTMENT)).isFalse();
     }
 

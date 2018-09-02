@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -36,6 +35,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.github.robozonky.util.IoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +49,11 @@ public class KeyStoreHandler {
     private static final String KEYSTORE_TYPE = "JCEKS";
     private static final String KEY_TYPE = "PBE";
     private final AtomicBoolean dirty;
-    private char[] password;
     private final File keyStoreFile;
     private final KeyStore keyStore;
     private final KeyStore.ProtectionParameter protectionParameter;
     private final SecretKeyFactory keyFactory;
+    private char[] password;
 
     /**
      * Create a new instance, where {@link #isDirty()} will be false.
@@ -122,8 +122,8 @@ public class KeyStoreHandler {
      * @throws IOException If file does not exist or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
-    public static KeyStoreHandler open(final File keyStoreFile, final char... password)
-            throws IOException, KeyStoreException {
+    public static KeyStoreHandler open(final File keyStoreFile,
+                                       final char... password) throws IOException, KeyStoreException {
         if (keyStoreFile == null) {
             throw new FileNotFoundException(null);
         } else if (!keyStoreFile.exists()) {
@@ -131,12 +131,14 @@ public class KeyStoreHandler {
         }
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
-        try (final FileInputStream fis = new FileInputStream(keyStoreFile)) {
-            ks.load(fis, password);
-            return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(), false);
-        } catch (final CertificateException | NoSuchAlgorithmException ex) {
-            throw new IllegalStateException(ex);
-        }
+        return IoUtil.applyCloseable(() -> new FileInputStream(keyStoreFile), fis -> {
+            try {
+                ks.load(fis, password);
+                return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(), false);
+            } catch (final CertificateException | NoSuchAlgorithmException ex) {
+                throw new IllegalStateException(ex);
+            }
+        });
     }
 
     /**
@@ -173,9 +175,8 @@ public class KeyStoreHandler {
             final PBEKeySpec keySpec = (PBEKeySpec) this.keyFactory.getKeySpec(skEntry.getSecretKey(),
                                                                                PBEKeySpec.class);
             return Optional.of(keySpec.getPassword());
-        } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException ex) {
-            throw new IllegalStateException(ex);
-        } catch (final UnrecoverableEntryException ex) {
+        } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException |
+                UnrecoverableEntryException ex) {
             KeyStoreHandler.LOGGER.debug("Unrecoverable entry '{}'.", alias, ex);
             return Optional.empty();
         }
@@ -222,13 +223,13 @@ public class KeyStoreHandler {
      */
     public void save(final char... secret) throws IOException {
         this.password = secret.clone();
-        try (final OutputStream os = new BufferedOutputStream(new FileOutputStream(this.keyStoreFile))) {
+        IoUtil.acceptCloseable(() -> new BufferedOutputStream(new FileOutputStream(this.keyStoreFile)), os -> {
             try {
                 this.keyStore.store(os, secret);
                 this.dirty.set(false);
             } catch (final KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
                 throw new IllegalStateException(ex);
             }
-        }
+        });
     }
 }

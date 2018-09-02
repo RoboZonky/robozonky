@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.github.robozonky.cli.Feature;
+import com.github.robozonky.cli.GoogleCredentialsFeature;
 import com.github.robozonky.cli.SetupFailedException;
 import com.github.robozonky.cli.ZonkoidPasswordFeature;
 import com.github.robozonky.cli.ZonkyPasswordFeature;
@@ -202,7 +203,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     private static CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
-                                                      final CommandLinePart jmxConfig,
+                                                      final CommandLinePart stonky, final CommandLinePart jmxConfig,
                                                       final CommandLinePart credentials,
                                                       final CommandLinePart logging) {
         try {
@@ -214,7 +215,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                     .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
-            Stream.of(strategy, jmxConfig, credentials, logging)
+            Stream.of(strategy, stonky, jmxConfig, credentials, logging)
                     .map(CommandLinePart::getProperties)
                     .flatMap(p -> p.entrySet().stream())
                     .forEach(e -> {
@@ -260,7 +261,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    private CommandLinePart prepareLogging() {
+    private static CommandLinePart prepareLogging() {
         try {
             Util.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
             return new CommandLinePart()
@@ -270,23 +271,38 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    private static CommandLinePart prepareStonky() {
+        try {
+            if (Boolean.valueOf(Variables.IS_STONKY_ENABLED.getValue(DATA))) {
+                // reuse the same code for this as we do in CLI
+                new GoogleCredentialsFeature().runGoogleCredentialCheck();
+            }
+            return new CommandLinePart();
+        } catch (final Exception ex) {
+            throw new IllegalStateException("Failed configuring Google account.", ex);
+        }
+    }
+
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
         try {
-            progressListener.startAction("Konfigurace RoboZonky", 7);
+            progressListener.startAction("Konfigurace RoboZonky", 8);
             progressListener.nextStep("Příprava strategie.", 1, 1);
             final CommandLinePart strategyConfig = prepareStrategy();
             progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
             final CommandLinePart emailConfig = prepareEmailConfiguration();
-            progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
+            progressListener.nextStep("Příprava Google účtu.", 3, 1);
+            final CommandLinePart stonky = prepareStonky();
+            progressListener.nextStep("Příprava nastavení JMX.", 4, 1);
             final CommandLinePart jmx = prepareJmx();
-            progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
+            progressListener.nextStep("Příprava nastavení Zonky.", 5, 1);
             final CommandLinePart credentials = prepareCore();
-            progressListener.nextStep("Příprava nastavení logování.", 5, 1);
+            progressListener.nextStep("Příprava nastavení logování.", 6, 1);
             final CommandLinePart logging = prepareLogging();
-            progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
-            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials, logging);
-            progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
+            progressListener.nextStep("Generování parametrů příkazové řádky.", 7, 1);
+            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, stonky, jmx, credentials,
+                                                              logging);
+            progressListener.nextStep("Generování spustitelného souboru.", 8, 1);
             prepareRunScript(result);
             progressListener.stopAction();
         } catch (final Exception ex) {
