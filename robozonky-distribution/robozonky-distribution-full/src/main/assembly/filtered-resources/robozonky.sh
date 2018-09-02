@@ -4,4 +4,4 @@ if [ -f ${HERE}/Dist/bin/robozonky-app-${project.version}.jar ]; then
     HERE=$HERE/Dist
 fi
 ROBOZONKY_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
-java $ROBOZONKY_OPTS -jar ${HERE}/bin/robozonky-app-${project.version}.jar "$@"
+exec java $ROBOZONKY_OPTS -jar ${HERE}/bin/robozonky-app-${project.version}.jar "$@"
