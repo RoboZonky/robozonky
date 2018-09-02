@@ -3,7 +3,7 @@
 <table>
   <tr>
     <th style="text-align: right;">Zbývá splátek:</th>
-    <td><div title="Počet splátek v prodlení + 1 závěrečná">${data.loanTermRemaining?c}</div> z ${data.loanTerm?c}</td>
+    <td><div title="Počet splátek v prodlení + 1 závěrečná">${data.loanTermRemaining?c} z ${data.loanTerm?c}</div></td>
   </tr>
   <tr>
     <th style="text-align: right;">Zbývající jistina:</th>
