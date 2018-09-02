@@ -19,18 +19,27 @@ package com.github.robozonky.integrations.stonky;
 import java.util.Optional;
 
 import com.github.robozonky.internal.api.Settings;
+import com.google.api.client.http.HttpTransport;
 
-enum Properties {
+public enum Properties {
 
     /**
      * Google Drive's file ID of the master Stonky spreadsheet, to be copied for each user.
      */
-    STONKY_MASTER("com.github.robozonky.stonky.master_gdrive_id", "1ZnY1hJSsIuUZVF10dtk-GI09l2_RHJTSlgH75Opi7V8"),
+    STONKY_MASTER("robozonky.stonky.master_gdrive_id", "1ZnY1hJSsIuUZVF10dtk-GI09l2_RHJTSlgH75Opi7V8"),
     /**
      * Google Drive's file ID to the spreadsheet where the user wants the XLS from Zonky imported. If blank, will be
      * autodetected.
      */
-    STONKY_COPY("com.github.robozonky.stonky.gdrive_id", null);
+    STONKY_COPY("robozonky.stonky.gdrive_id", null),
+    /**
+     * To give to {@link GoogleCredentialProvider#live(HttpTransport, String, int)}.
+     */
+    GOOGLE_CALLBACK_HOST("robozonky.google.callback_host", "localhost"),
+    /**
+     * To give to {@link GoogleCredentialProvider#live(HttpTransport, String, int)}.
+     */
+    GOOGLE_CALLBACK_PORT("robozonky.google.callback_port", "0");
 
     private final String key;
     private final String defaultValue;
@@ -38,6 +47,10 @@ enum Properties {
     Properties(final String key, final String defaultValue) {
         this.key = key;
         this.defaultValue = defaultValue;
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public Optional<String> getValue() {

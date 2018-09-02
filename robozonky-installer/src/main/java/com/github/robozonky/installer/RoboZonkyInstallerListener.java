@@ -273,11 +273,19 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     private static CommandLinePart prepareStonky() {
         try {
+            final String host = Variables.GOOGLE_CALLBACK_HOST.getValue(DATA);
+            final String port = Variables.GOOGLE_CALLBACK_PORT.getValue(DATA);
             if (Boolean.valueOf(Variables.IS_STONKY_ENABLED.getValue(DATA))) {
                 // reuse the same code for this as we do in CLI
-                new GoogleCredentialsFeature().runGoogleCredentialCheck();
+                final GoogleCredentialsFeature google = new GoogleCredentialsFeature();
+                google.setHost(host);
+                google.setPort(Integer.parseInt(port));
+                google.runGoogleCredentialCheck();
             }
-            return new CommandLinePart();
+            final CommandLinePart cli = new CommandLinePart();
+            cli.setProperty(com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_HOST.getKey(), host);
+            cli.setProperty(com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_PORT.getKey(), port);
+            return cli;
         } catch (final Exception ex) {
             throw new IllegalStateException("Failed configuring Google account.", ex);
         }

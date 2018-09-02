@@ -39,7 +39,7 @@ class GoogleCredentialProviderTest {
 
     @Test
     void invalidApiKey() {
-        final CredentialProvider c = new GoogleCredentialProvider(transport, () -> EMPTY);
+        final CredentialProvider c = new GoogleCredentialProvider(transport, "localhost", 0, () -> EMPTY);
         assertThatThrownBy(() -> c.credentialExists(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> c.getCredential(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
     }

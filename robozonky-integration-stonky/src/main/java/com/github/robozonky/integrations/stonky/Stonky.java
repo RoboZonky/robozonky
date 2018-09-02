@@ -62,7 +62,9 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
     }
 
     Stonky(final HttpTransport transport) {
-        this(transport, CredentialProvider.live(transport));
+        this(transport,
+             CredentialProvider.live(transport, Properties.GOOGLE_CALLBACK_HOST.getValue().orElse("localhost"),
+                                     Integer.parseInt(Properties.GOOGLE_CALLBACK_PORT.getValue().orElse("0"))));
     }
 
     Stonky(final HttpTransport transport, final CredentialProvider credentialSupplier) {
