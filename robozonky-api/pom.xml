@@ -163,6 +163,17 @@
                     "parameterIndex": "1",
                     "elementKind": "parameter",
                     "justification": "Transaction date is always LocalDate on Zonky, time is always 00:00:00."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method java.util.OptionalInt com.github.robozonky.api.remote.entities.sanitized.Investment::getDaysPastDue()",
+                    "new": "method int com.github.robozonky.api.remote.entities.sanitized.Investment::getDaysPastDue()",
+                    "oldType": "java.util.OptionalInt",
+                    "newType": "int",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "getDaysPastDue",
+                    "elementKind": "method",
+                    "justification": "Days past due assumed to be zero when empty, instead of empty OptionalInt."
                   }
                 ]
               }

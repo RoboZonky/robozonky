@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -330,8 +329,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public OptionalInt getDaysPastDue() {
-        return daysPastDue == null ? OptionalInt.empty() : OptionalInt.of(daysPastDue);
+    public int getDaysPastDue() {
+        return daysPastDue == null ? 0 : daysPastDue;
     }
 
     @Override

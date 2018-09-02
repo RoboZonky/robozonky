@@ -146,13 +146,14 @@ public class Zonky {
              * Zonky makes it very difficult to figure out when any particular investment was made. this code attempts
              * to figure it out.
              *
-             * we find the first payment from past transactions. if there's no first payment, we use the expected date.
-             * in the very rare situation where both are missing, we just use the present date.
+             * we find the first payment from past transactions. if there's no first payment, we use the expected date
+             * or days past due.
              *
              * we subtract a month from that value to find out the approximate date when this loan was created.
              */
-            final Supplier<LocalDate> expectedPayment =
-                    () -> i.getNextPaymentDate().orElse(OffsetDateTime.now()).toLocalDate();
+            final Supplier<LocalDate> expectedPayment = () -> i.getNextPaymentDate()
+                    .map(OffsetDateTime::toLocalDate)
+                    .orElse(LocalDate.now().minusDays(i.getDaysPastDue()));
             final LocalDate lastPayment = getTransactions(i)
                     .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
                     .map(Transaction::getTransactionDate)

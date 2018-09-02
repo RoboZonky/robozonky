@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
@@ -125,11 +124,7 @@ public interface Investment {
 
     OffsetDateTime getInvestmentDate();
 
-    /**
-     * Only available from Zonky when the investment is already funded, processed and not yet sold.
-     * @return
-     */
-    OptionalInt getDaysPastDue();
+    int getDaysPastDue();
 
     /**
      * Only available from Zonky when the investment is not yet sold. Otherwise we calculate from other fields.
