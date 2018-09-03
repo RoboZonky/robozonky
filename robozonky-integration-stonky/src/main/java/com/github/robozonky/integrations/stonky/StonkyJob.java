@@ -23,6 +23,7 @@ import java.util.Random;
 
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 
 enum StonkyJob implements Job {
@@ -45,15 +46,27 @@ enum StonkyJob implements Job {
     }
 
     @Override
+    public Duration killIn() {
+        return Duration.ofMinutes(30);
+    }
+
+    @Override
     public Payload payload() {
-        return secretProvider -> {
-            try {
-                final Stonky s = new Stonky();
-                s.apply(secretProvider);
-            } catch (final Exception ex) {
-                throw new IllegalStateException("Failed instantiating Stonky integration.", ex);
-            }
-        };
+        return new StonkyPayload();
+    }
+
+    private static final class StonkyPayload implements Payload {
+
+        @Override
+        public String id() {
+            return "Stonky";
+        }
+
+        @Override
+        public void accept(final SecretProvider secretProvider) {
+            final Stonky s = new Stonky();
+            s.apply(secretProvider);
+        }
     }
 
 }

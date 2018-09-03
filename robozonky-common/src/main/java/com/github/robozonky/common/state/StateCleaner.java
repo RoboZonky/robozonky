@@ -64,4 +64,9 @@ final class StateCleaner implements Payload {
             LOGGER.debug("Cleaned up state: {}.", result);
         }
     }
+
+    @Override
+    public String id() {
+        return "State cleaner";
+    }
 }

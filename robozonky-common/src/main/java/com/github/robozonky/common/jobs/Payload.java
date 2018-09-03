@@ -20,7 +20,8 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.common.secrets.SecretProvider;
 
-@FunctionalInterface
 public interface Payload extends Consumer<SecretProvider> {
+
+    String id();
 
 }

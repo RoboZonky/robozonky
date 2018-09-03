@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class Scheduler implements AutoCloseable {
      * time.
      */
     private static final Scheduler BACKGROUND_SCHEDULER =
-            Schedulers.INSTANCE.create(1, new RoboZonkyThreadFactory(newThreadGroup("rzBackground")));
+            Schedulers.INSTANCE.create(2, new RoboZonkyThreadFactory(newThreadGroup("rzBackground")));
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Collection<Runnable> submitted = new HashSet<>(0);
@@ -86,6 +86,12 @@ public class Scheduler implements AutoCloseable {
     public Future run(final Runnable toRun) {
         Scheduler.LOGGER.debug("Submitting {} immediately.", toRun);
         return executor.submit(toRun);
+    }
+
+    public Future run(final Runnable toRun, final Duration delay) {
+        final long millis = delay.toMillis();
+        Scheduler.LOGGER.debug("Submitting {} to run in {} ms.", toRun, millis);
+        return executor.schedule(toRun, millis, TimeUnit.MILLISECONDS);
     }
 
     public boolean isSubmitted(final Runnable refreshable) {

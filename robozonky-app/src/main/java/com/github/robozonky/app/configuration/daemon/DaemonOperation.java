@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import org.slf4j.Logger;
@@ -53,7 +51,7 @@ abstract class DaemonOperation implements Runnable {
 
     @Override
     public void run() {
-        try {
+        DaemonInvestmentMode.runSafe(() -> {
             LOGGER.trace("Starting.");
             if (isEnabled(api)) {
                 final Portfolio p = portfolio.get()
@@ -63,12 +61,6 @@ abstract class DaemonOperation implements Runnable {
                 LOGGER.info("Access to marketplace disabled by Zonky.");
             }
             LOGGER.trace("Finished.");
-        } catch (final Exception ex) {
-            LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            Events.fire(new RoboZonkyDaemonFailedEvent(ex));
-        } catch (final Error t) {
-            LOGGER.error("Caught unexpected error, terminating.", t);
-            shutdownCall.accept(t);
-        }
+        }, shutdownCall);
     }
 }

@@ -20,9 +20,31 @@ import java.time.Duration;
 
 public interface Job {
 
+    /**
+     * How long to wait from when this method is called before first running the payload.
+     *
+     * @return
+     */
     Duration startIn();
 
+    /**
+     * How much time to leave between one task ending and the other starting.
+     * @return
+     */
     Duration repeatEvery();
 
+    /**
+     * Longest possible time duration that the task will be allowed to run for. A ceiling of 1 hour will be enforced.
+     * @return
+     */
+    default Duration killIn() {
+        return Duration.ofMinutes(1);
+    }
+
+    /**
+     * The task to run.
+     * @return
+     */
     Payload payload();
+
 }
