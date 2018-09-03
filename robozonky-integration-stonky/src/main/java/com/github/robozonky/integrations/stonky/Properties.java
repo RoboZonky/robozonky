@@ -26,7 +26,7 @@ public enum Properties {
     /**
      * Google Drive's file ID of the master Stonky spreadsheet, to be copied for each user.
      */
-    STONKY_MASTER("robozonky.stonky.master_gdrive_id", "1ZnY1hJSsIuUZVF10dtk-GI09l2_RHJTSlgH75Opi7V8"),
+    STONKY_MASTER("robozonky.stonky.master_gdrive_id", "1q_8AAdFSh9iwpNS0XkMroAfR-TagxNnh7xUshjTprZ0"),
     /**
      * Google Drive's file ID to the spreadsheet where the user wants the XLS from Zonky imported. If blank, will be
      * autodetected.
