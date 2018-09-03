@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,12 @@ class PaginatedApi<S, T> {
 
     <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter) {
         final T proxy = ProxyFactory.newProxy(client, filter, api, url);
-        return function.apply(proxy);
+        try {
+            LOGGER.trace("Executing...");
+            return function.apply(proxy);
+        } finally {
+            LOGGER.trace("... done.");
+        }
     }
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,

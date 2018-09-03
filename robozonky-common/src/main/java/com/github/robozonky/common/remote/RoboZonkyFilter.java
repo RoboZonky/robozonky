@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class RoboZonkyFilter implements ClientRequestFilter,
                                  ClientResponseFilter {
 
     // not static, so that filters extending this one get the proper logger class
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Map<String, Object[]> queryParams = new HashMap<>(0);
     private final Map<String, String> requestHeaders = new HashMap<>(0);
     private Map<String, String> responseHeaders = Collections.emptyMap();
@@ -91,7 +91,7 @@ class RoboZonkyFilter implements ClientRequestFilter,
     public void filter(final ClientRequestContext clientRequestContext) {
         requestHeaders.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
         clientRequestContext.setUri(rebuild(clientRequestContext.getUri()));
-        this.logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
+        logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 
     private String getResponseEntity(final ClientResponseContext clientResponseContext) throws IOException {
@@ -108,9 +108,9 @@ class RoboZonkyFilter implements ClientRequestFilter,
     @Override
     public void filter(final ClientRequestContext clientRequestContext,
                        final ClientResponseContext clientResponseContext) throws IOException {
-        this.logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
-                          clientRequestContext.getUri(), clientResponseContext.getStatus(),
-                          clientResponseContext.getStatusInfo().getReasonPhrase());
+        logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
+                     clientRequestContext.getUri(), clientResponseContext.getStatus(),
+                     clientResponseContext.getStatusInfo().getReasonPhrase());
         final String responseEntity = getResponseEntity(clientResponseContext);
         if (clientResponseContext.getStatus() == 400 && responseEntity.contains("invalid_token")) {
             // Zonky is dumb and throws 400 when it should throw 401
