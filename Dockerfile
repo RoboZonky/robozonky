@@ -6,8 +6,8 @@ ENV SOURCE_DIRECTORY=/usr/src/robozonky \
 COPY . $SOURCE_DIRECTORY
 WORKDIR $SOURCE_DIRECTORY
 RUN dnf -y install maven xz \
-    && mvn clean install -T1C -B -Dgpg.skip -DskipTests -Ddocker \
-    && ROBOZONKY_VERSION=$(mvn -q \
+    && mvn clean install -T1C -B -Dgpg.skip -DskipTests -Ddocker
+RUN ROBOZONKY_VERSION=$(mvn -q \
             -Dexec.executable="echo" \
             -Dexec.args='${project.version}' \
             --non-recursive \
@@ -17,13 +17,14 @@ RUN dnf -y install maven xz \
     && mkdir -vp $BINARY_DIRECTORY \
     && tar -C $BINARY_DIRECTORY -xvf $ROBOZONKY_TAR_XZ
 
-# ... then restart from a minimal image, copy built binary from previous stage and install latest JRE
+# ... then restart from a minimal image, copy built binary from previous stage and install latest JRE.
 FROM fedora:latest
 LABEL maintainer="The RoboZonky Project (www.robozonky.cz)"
 ENV INSTALL_DIRECTORY=/opt/robozonky \
-     CONFIG_DIRECTORY=/etc/robozonky
+     CONFIG_DIRECTORY=/etc/robozonky \
+    WORKING_DIRECTORY=/var/robozonky
 COPY --from=builder /tmp/robozonky $INSTALL_DIRECTORY
-WORKDIR /var/robozonky
+WORKDIR $WORKING_DIRECTORY
 RUN dnf -y install java-openjdk-headless \
     && dnf clean all \
     && alternatives --set java  $(alternatives --display java |grep java-openjdk|grep -Eo '^[^ ]+') \
