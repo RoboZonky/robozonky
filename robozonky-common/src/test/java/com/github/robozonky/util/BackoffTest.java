@@ -27,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +55,7 @@ class BackoffTest {
         // make sure the operation took at least the expected duration
         assertThat(took).isGreaterThan(maxDuration);
         // make sure the operation was tried the expected number of times, the sum of n^2 for n=[0, ...)
-        verify(operation, times(11)).get();
+        verify(operation, atLeast(10)).get();
     }
 
     @Test
