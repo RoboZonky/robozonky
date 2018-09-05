@@ -42,6 +42,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_HOST;
+import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_PORT;
+
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
@@ -218,12 +221,16 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             Stream.of(strategy, stonky, jmxConfig, credentials, logging)
                     .map(CommandLinePart::getProperties)
                     .flatMap(p -> p.entrySet().stream())
+                    .peek(e -> LOGGER.trace("Processing property {}.", e))
+                    .filter(e -> e.getValue() != null) // prevent NPEs coming from evil code
                     .forEach(e -> {
                         final String key = e.getKey();
                         final String value = e.getValue();
                         if (key.startsWith("robozonky")) { // RoboZonky setting to be written to separate file
+                            LOGGER.debug("Storing property {}.", e);
                             settings.setProperty(key, value);
                         } else { // general Java system property to end up on the command line
+                            LOGGER.debug("Setting property {}.", e);
                             commandLine.setProperty(key, value);
                         }
                     });
@@ -239,6 +246,36 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         for (final ServiceGenerator serviceGenerator : ServiceGenerator.values()) {
             final File result = serviceGenerator.apply(runScript);
             LOGGER.info("Generated {} as a {} service.", result, serviceGenerator);
+        }
+    }
+
+    private static CommandLinePart prepareLogging() {
+        try {
+            Util.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
+            return new CommandLinePart()
+                    .setProperty("logback.configurationFile", LOGBACK_CONFIG_FILE.getAbsolutePath());
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Failed copying log file.", ex);
+        }
+    }
+
+    private static CommandLinePart prepareStonky() {
+        try {
+            final String host = Variables.GOOGLE_CALLBACK_HOST.getValue(DATA);
+            final String port = Variables.GOOGLE_CALLBACK_PORT.getValue(DATA);
+            final CommandLinePart cli = new CommandLinePart();
+            if (Boolean.valueOf(Variables.IS_STONKY_ENABLED.getValue(DATA))) {
+                cli.setProperty(GOOGLE_CALLBACK_HOST.getKey(), host);
+                cli.setProperty(GOOGLE_CALLBACK_PORT.getKey(), port);
+                // reuse the same code for this as we do in CLI
+                final GoogleCredentialsFeature google = new GoogleCredentialsFeature();
+                google.setHost(host);
+                google.setPort(Integer.parseInt(port));
+                google.runGoogleCredentialCheck();
+            }
+            return cli;
+        } catch (final Exception ex) {
+            throw new IllegalStateException("Failed configuring Google account.", ex);
         }
     }
 
@@ -258,36 +295,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         });
         if (operatingSystem == OS.LINUX) {
             prepareLinuxServices(runScript);
-        }
-    }
-
-    private static CommandLinePart prepareLogging() {
-        try {
-            Util.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
-            return new CommandLinePart()
-                    .setProperty("logback.configurationFile", LOGBACK_CONFIG_FILE.getAbsolutePath());
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed copying log file.", ex);
-        }
-    }
-
-    private static CommandLinePart prepareStonky() {
-        try {
-            final String host = Variables.GOOGLE_CALLBACK_HOST.getValue(DATA);
-            final String port = Variables.GOOGLE_CALLBACK_PORT.getValue(DATA);
-            if (Boolean.valueOf(Variables.IS_STONKY_ENABLED.getValue(DATA))) {
-                // reuse the same code for this as we do in CLI
-                final GoogleCredentialsFeature google = new GoogleCredentialsFeature();
-                google.setHost(host);
-                google.setPort(Integer.parseInt(port));
-                google.runGoogleCredentialCheck();
-            }
-            final CommandLinePart cli = new CommandLinePart();
-            cli.setProperty(com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_HOST.getKey(), host);
-            cli.setProperty(com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_PORT.getKey(), port);
-            return cli;
-        } catch (final Exception ex) {
-            throw new IllegalStateException("Failed configuring Google account.", ex);
         }
     }
 
