@@ -20,17 +20,26 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.Payload;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 
-enum StonkyJob implements Job {
-
-    INSTANCE;
+final class StonkyJob implements Job {
 
     private final Random random = new Random();
+
+    private final Consumer<SecretProvider> stonky;
+
+    public StonkyJob() {
+        this(arg -> new Stonky().apply(arg));
+    }
+
+    StonkyJob(final Consumer<SecretProvider> provider) {
+        this.stonky = provider;
+    }
 
     @Override
     public Duration startIn() {
@@ -55,7 +64,7 @@ enum StonkyJob implements Job {
         return new StonkyPayload();
     }
 
-    private static final class StonkyPayload implements Payload {
+    private final class StonkyPayload implements Payload {
 
         @Override
         public String id() {
@@ -64,9 +73,7 @@ enum StonkyJob implements Job {
 
         @Override
         public void accept(final SecretProvider secretProvider) {
-            final Stonky s = new Stonky();
-            s.apply(secretProvider);
+            stonky.accept(secretProvider);
         }
     }
-
 }

@@ -16,6 +16,8 @@
 
 package com.github.robozonky.cli;
 
+import java.util.function.Function;
+
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.SessionInfo;
@@ -25,6 +27,7 @@ import com.github.robozonky.integrations.stonky.Util;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.sheets.v4.Sheets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,15 +82,26 @@ public final class GoogleCredentialsFeature implements Feature {
         return DESCRIPTION;
     }
 
-    private Drive runGoogleCredentialCheck(final SessionInfo sessionInfo) {
+    private <T> T runGoogleCredentialCheck(final SessionInfo sessionInfo, final Function<Credential, T> provider) {
         final Credential credential = getCredentialProvider().getCredential(sessionInfo);
-        Util.createSheetsService(credential, transport);
-        return Util.createDriveService(credential, transport);
+        return provider.apply(credential);
+    }
+
+    Drive runGoogleCredentialCheckForDrive(final SessionInfo sessionInfo) {
+        return runGoogleCredentialCheck(sessionInfo, c -> Util.createDriveService(c, transport));
+    }
+
+    Sheets runGoogleCredentialCheckForSheets(final SessionInfo sessionInfo) {
+        return runGoogleCredentialCheck(sessionInfo, c -> Util.createSheetsService(c, transport));
+    }
+
+    private void runGoogleCredentialCheck(final SessionInfo sessionInfo) {
+        runGoogleCredentialCheckForDrive(sessionInfo);
+        runGoogleCredentialCheckForSheets(sessionInfo);
     }
 
     public void runGoogleCredentialCheck() {
-        final SessionInfo sessionInfo = new SessionInfo(username);
-        runGoogleCredentialCheck(sessionInfo);
+        runGoogleCredentialCheck(new SessionInfo(username));
     }
 
     @Override
@@ -95,8 +109,7 @@ public final class GoogleCredentialsFeature implements Feature {
         LOGGER.info("A web browser window may open, or you may be asked to visit a Google link.");
         LOGGER.info("Unless you allow RoboZonky to access your Google Sheets, Stonky integration will be disabled.");
         try {
-            final SessionInfo sessionInfo = new SessionInfo(username);
-            runGoogleCredentialCheck(sessionInfo);
+            runGoogleCredentialCheck();
             LOGGER.info("Press Enter to confirm that you have granted permission, otherwise exit.");
             System.in.read();
         } catch (final Exception ex) {
@@ -108,8 +121,9 @@ public final class GoogleCredentialsFeature implements Feature {
     public void test() throws TestFailedException {
         try {
             final SessionInfo sessionInfo = new SessionInfo(username);
-            final Drive service = runGoogleCredentialCheck(sessionInfo);
-            final DriveOverview driveOverview = DriveOverview.create(new SessionInfo(username), service);
+            final Drive service = runGoogleCredentialCheckForDrive(sessionInfo);
+            final Sheets service2 = runGoogleCredentialCheckForSheets(sessionInfo);
+            final DriveOverview driveOverview = DriveOverview.create(new SessionInfo(username), service, service2);
             LOGGER.debug("Google Drive contents: {}.", driveOverview);
         } catch (final Exception ex) {
             throw new TestFailedException(ex);

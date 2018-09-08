@@ -142,7 +142,7 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
         final Drive driveService = Util.createDriveService(credential, transport);
         final Sheets sheetsService = Util.createSheetsService(credential, transport);
         final CompletableFuture<Summary> summary = CompletableFuture.supplyAsync(Util.wrap(() -> {
-            final DriveOverview o = DriveOverview.create(sessionInfo, driveService);
+            final DriveOverview o = DriveOverview.create(sessionInfo, driveService, sheetsService);
             LOGGER.debug("Google Drive overview: {}.", o);
             final File s = o.latestStonky();
             final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();

@@ -124,6 +124,16 @@ class StonkyTest extends AbstractRoboZonkyTest {
         private File copyOfStonkyMaster;
 
         @BeforeEach
+        void enforceStonkyMaster() {
+            System.setProperty(Properties.STONKY_MASTER.getKey(), "someRandomstonkyMasterId");
+        }
+
+        @AfterEach
+        void restoreOriginalStonkyMaster() {
+            System.clearProperty(Properties.STONKY_MASTER.getKey());
+        }
+
+        @BeforeEach
         void filledPortfolio() {
             transport.addReponseHandler(new FilesInFolderResponseHandler("root", stonkyFolder));
             stonkyFolderContent = new FilesInFolderResponseHandler(stonkyFolder.getId());
