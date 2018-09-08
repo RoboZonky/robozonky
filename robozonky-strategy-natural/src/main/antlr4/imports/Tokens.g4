@@ -93,10 +93,7 @@ purposeExpression returns [Purpose result] :
 dateExpr returns [LocalDate result] :
     d=intExpr DOT m=intExpr DOT y=intExpr
     {
-        $result = LocalDate.now()
-            .withDayOfMonth($d.result)
-            .withMonth($m.result)
-            .withYear($y.result);
+        $result = LocalDate.of($y.result, $m.result, $d.result);
     }
 ;
 
