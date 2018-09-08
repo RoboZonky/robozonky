@@ -18,15 +18,21 @@ package com.github.robozonky.installer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.IoUtil;
 import com.izforge.izpack.api.data.InstallData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class Util {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     private Util() {
         // no instances
@@ -44,9 +50,8 @@ final class Util {
     }
 
     public static void writeOutProperties(final Properties properties, final File target) throws IOException {
-        try (final Writer w = Files.newBufferedWriter(target.toPath(), Defaults.CHARSET)) {
-            properties.store(w, Defaults.ROBOZONKY_USER_AGENT);
-        }
+        IoUtil.acceptCloseable(() -> Files.newBufferedWriter(target.toPath(), Defaults.CHARSET),
+                               w -> properties.store(w, Defaults.ROBOZONKY_USER_AGENT));
     }
 
     public static Properties configureEmailNotifications(final InstallData data) {
@@ -86,5 +91,25 @@ final class Util {
 
     public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
         source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[v.size()])));
+    }
+
+    static void processCommandLine(final CommandLinePart commandLine, final Properties settings,
+                                   final CommandLinePart... parts) {
+        Stream.of(parts)
+                .map(CommandLinePart::getProperties)
+                .flatMap(p -> p.entrySet().stream())
+                .peek(e -> LOGGER.trace("Processing property {}.", e))
+                .filter(e -> Objects.nonNull(e.getValue())) // prevent NPEs coming from evil code
+                .forEach(e -> {
+                    final String key = e.getKey();
+                    final String value = e.getValue();
+                    if (key.startsWith("robozonky")) { // RoboZonky settings to be written to a separate file
+                        LOGGER.debug("Storing property {}.", e);
+                        settings.setProperty(key, value);
+                    } else { // general Java system property to end up on the command line
+                        LOGGER.debug("Setting property {}.", e);
+                        commandLine.setProperty(key, value);
+                    }
+                });
     }
 }
