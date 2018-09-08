@@ -17,6 +17,7 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -58,7 +59,9 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
     public void doesNotQueryAtFirstAttempt() {
         processor.accept(transactional);
         transactional.run(); // persist
-        verify(zonky, times(1)).getTransactions((Select) any());
+        final Select s = new
+                Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusWeeks(1));
+        verify(zonky, times(1)).getTransactions(eq(s));
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("-1"); // nothing found
     }
 
@@ -67,7 +70,9 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
         state.update(m -> m.put(IncomeProcessor.STATE_KEY, "1"));
         processor.accept(transactional);
         transactional.run(); // persist
-        verify(zonky, times(1)).getTransactions((Select) any());
+        final Select s = new
+                Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusDays(1));
+        verify(zonky, times(1)).getTransactions(eq(s));
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("1"); // keep existing maximum
     }
 

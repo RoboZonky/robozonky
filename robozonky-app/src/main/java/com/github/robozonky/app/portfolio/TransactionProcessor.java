@@ -45,7 +45,10 @@ abstract class TransactionProcessor implements BiConsumer<Stream<Transaction>, T
 
     @Override
     public final void accept(final Stream<Transaction> transactions, final Transactional transactional) {
-        transactions.filter(this::isApplicable) // user-provided filter
+        logger.debug("Running {}.", this);
+        transactions
+                .peek(t -> logger.trace("Reading: {}.", t))
+                .filter(this::isApplicable) // user-provided filter
                 .peek(t -> logger.debug("Applicable: {}.", t))
                 .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
                 .values()
@@ -53,5 +56,6 @@ abstract class TransactionProcessor implements BiConsumer<Stream<Transaction>, T
                     logger.debug("Will process: {}", t);
                     processApplicable(t, transactional);
                 });
+        logger.debug("{} is over.", this);
     }
 }
