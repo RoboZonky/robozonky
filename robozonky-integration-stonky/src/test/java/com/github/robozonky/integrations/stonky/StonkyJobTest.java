@@ -16,35 +16,59 @@
 
 package com.github.robozonky.integrations.stonky;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class StonkyJobTest {
 
     @Test
     void instantiateStonky() {
-        assertThat(StonkyJob.INSTANCE.payload()).isNotNull();
+        assertThat(new StonkyJob().payload()).isNotNull();
     }
 
     @Test
     void refreshesDaily() {
-        assertThat(StonkyJob.INSTANCE.repeatEvery()).isEqualTo(Duration.ofDays(1));
+        assertThat(new StonkyJob().repeatEvery()).isEqualTo(Duration.ofDays(1));
     }
 
     @Test
     void refreshesShortlyAfterMidnight() {
-        final Duration startIn = StonkyJob.INSTANCE.startIn();
+        final StonkyJob instance = new StonkyJob();
+        final Duration startIn = instance.startIn();
         final OffsetDateTime timeToStartOn = OffsetDateTime.now().plus(startIn);
         final OffsetDateTime timeToStartBefore = timeToStartOn.plusSeconds(1000);
         final OffsetDateTime tomorrow = LocalDate.now().plusDays(1).atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
         assertThat(timeToStartOn)
                 .isAfter(tomorrow)
                 .isBefore(timeToStartBefore);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void callsStonky() throws IOException {
+        final ThrowingConsumer<SecretProvider> c = mock(ThrowingConsumer.class);
+        final StonkyJob instance = new StonkyJob(c);
+        final SecretProvider s = SecretProvider.inMemory("someone@somewhere.cz");
+        instance.payload().accept(s);
+        verify(c).accept(eq(s));
+        // the exception is caught and translated
+        doThrow(IllegalArgumentException.class).when(c).accept(eq(s));
+        assertThatThrownBy(() -> instance.payload().accept(s))
+                .isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(IllegalArgumentException.class);
     }
 }

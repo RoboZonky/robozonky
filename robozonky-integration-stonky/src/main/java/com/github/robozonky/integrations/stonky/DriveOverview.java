@@ -29,6 +29,8 @@ import com.github.robozonky.internal.api.ToStringBuilder;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.ValueRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,27 +45,30 @@ public class DriveOverview {
     private static final Logger LOGGER = LoggerFactory.getLogger(DriveOverview.class);
     private final SessionInfo sessionInfo;
     private final Drive driveService;
+    private final Sheets sheetService;
     private volatile File folder;
     private volatile File people;
     private volatile File wallet;
 
-    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService) {
-        this(sessionInfo, driveService, null);
+    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final Sheets sheetService) {
+        this(sessionInfo, driveService, sheetService, null);
     }
 
-    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final File parent) {
-        this(sessionInfo, driveService, parent, null);
+    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final Sheets sheetService,
+                          final File parent) {
+        this(sessionInfo, driveService, sheetService, parent, null);
     }
 
-    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final File parent,
-                          final File wallet) {
-        this(sessionInfo, driveService, parent, wallet, null);
+    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final Sheets sheetService,
+                          final File parent, final File wallet) {
+        this(sessionInfo, driveService, sheetService, parent, wallet, null);
     }
 
-    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final File parent, final File wallet,
-                          final File people) {
+    private DriveOverview(final SessionInfo sessionInfo, final Drive driveService, final Sheets sheetService,
+                          final File parent, final File wallet, final File people) {
         this.sessionInfo = sessionInfo;
         this.driveService = driveService;
+        this.sheetService = sheetService;
         this.folder = parent;
         this.people = people;
         this.wallet = wallet;
@@ -73,7 +78,8 @@ public class DriveOverview {
         return "Stonky pro účet '" + sessionInfo.getUsername() + "'";
     }
 
-    public static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService) throws IOException {
+    public static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService,
+                                       final Sheets sheetService) throws IOException {
         final String folderName = getFolderName(sessionInfo);
         LOGGER.debug("Listing all files in the root of Google Drive, looking up folder: {}.", folderName);
         final List<File> files = getFilesInFolder(driveService, "root").collect(Collectors.toList());
@@ -83,9 +89,9 @@ public class DriveOverview {
                 .filter(f -> Objects.equals(f.getName(), folderName))
                 .findFirst();
         if (result.isPresent()) {
-            return create(sessionInfo, driveService, result.get());
+            return create(sessionInfo, driveService, sheetService, result.get());
         } else {
-            return new DriveOverview(sessionInfo, driveService);
+            return new DriveOverview(sessionInfo, driveService, sheetService);
         }
     }
 
@@ -115,28 +121,30 @@ public class DriveOverview {
     }
 
     private static DriveOverview create(final SessionInfo sessionInfo, final Drive driveService,
-                                        final File parent) throws IOException {
+                                        final Sheets sheetService, final File parent) throws IOException {
         LOGGER.debug("Looking for a wallet spreadsheet.");
         final List<File> all = getFilesInFolder(driveService, parent).collect(Collectors.toList());
         return getSpreadsheetWithName(all.stream(), ROBOZONKY_WALLET_SHEET_NAME)
-                .map(f -> createWithWallet(sessionInfo, driveService, all.stream(), parent, f))
-                .orElseGet(() -> createWithoutWallet(sessionInfo, driveService, all.stream(), parent));
+                .map(f -> createWithWallet(sessionInfo, driveService, sheetService, all.stream(), parent, f))
+                .orElseGet(() -> createWithoutWallet(sessionInfo, driveService, sheetService, all.stream(), parent));
     }
 
     private static DriveOverview createWithWallet(final SessionInfo sessionInfo, final Drive driveService,
-                                                  final Stream<File> all, final File parent, final File wallet) {
+                                                  final Sheets sheetService, final Stream<File> all, final File parent,
+                                                  final File wallet) {
         LOGGER.debug("Looking for a people spreadsheet.");
         return getSpreadsheetWithName(all, ROBOZONKY_PEOPLE_SHEET_NAME)
-                .map(f -> new DriveOverview(sessionInfo, driveService, parent, wallet, f))
-                .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent, wallet, null));
+                .map(f -> new DriveOverview(sessionInfo, driveService, sheetService, parent, wallet, f))
+                .orElseGet(() -> new DriveOverview(sessionInfo, driveService, sheetService, parent, wallet, null));
     }
 
     private static DriveOverview createWithoutWallet(final SessionInfo sessionInfo, final Drive driveService,
-                                                     final Stream<File> all, final File parent) {
+                                                     final Sheets sheetService, final Stream<File> all,
+                                                     final File parent) {
         LOGGER.debug("Looking for a people spreadsheet.");
         return getSpreadsheetWithName(all, ROBOZONKY_PEOPLE_SHEET_NAME)
-                .map(f -> new DriveOverview(sessionInfo, driveService, parent, null, f))
-                .orElseGet(() -> new DriveOverview(sessionInfo, driveService, parent));
+                .map(f -> new DriveOverview(sessionInfo, driveService, sheetService, parent, null, f))
+                .orElseGet(() -> new DriveOverview(sessionInfo, driveService, sheetService, parent));
     }
 
     File getFolder() {
@@ -194,8 +202,20 @@ public class DriveOverview {
         return driveService.files().get(fileId).execute();
     }
 
+    private String autodetectLatestStonkyVersion() throws IOException {
+        final ValueRange data = sheetService.spreadsheets().values()
+                .get("1ipnVJ7jehwwGLTY-Oi0eHwyfyjCNCoQGOz0oO_9Pp80", "Sheet1!A2:E2")
+                .execute();
+        LOGGER.trace("Received '{}' from Stonky release spreadsheet.", data);
+        final List<List<Object>> matrix = data.getValues();
+        final String result = (String)matrix.get(0).get(4); // cell E2
+        LOGGER.debug("Stonky version auto-detected to {}.", matrix.get(0).get(1)); // cell B2
+        return result;
+    }
+
     private File createOrReuseStonky() throws IOException {
-        final String masterId = Properties.STONKY_MASTER.getValue().orElse(null);
+        final String masterId = Properties.STONKY_MASTER.getValue()
+                .orElseGet(() -> Util.wrap(this::autodetectLatestStonkyVersion).get());
         LOGGER.debug("Will look for Stonky master spreadsheet: {}.", masterId);
         final File upstream = driveService.files().get(masterId).execute();
         final File parent = getOrCreateRoboZonkyFolder();

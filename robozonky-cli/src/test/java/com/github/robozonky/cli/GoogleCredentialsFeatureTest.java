@@ -18,6 +18,7 @@ package com.github.robozonky.cli;
 
 import java.io.InputStream;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.integrations.stonky.CredentialProvider;
 import com.github.robozonky.internal.api.Defaults;
 import com.google.api.client.http.HttpTransport;
@@ -27,11 +28,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GoogleCredentialsFeatureTest {
 
-    private InputStream systemIn = System.in;
+    private final InputStream originalSystemIn = System.in;
 
     @BeforeEach
     void replaceSystemIn() {
@@ -40,18 +42,27 @@ class GoogleCredentialsFeatureTest {
 
     @AfterEach
     void restoreSystemIn() {
-        System.setIn(systemIn);
+        System.setIn(originalSystemIn);
     }
 
     @Test
     void setupAndTest() throws SetupFailedException {
         final HttpTransport transport = new MockHttpTransport();
         final CredentialProvider credentialProvider = CredentialProvider.mock(true);
-        final GoogleCredentialsFeature feature =
-                new GoogleCredentialsFeature("someone@somewhere.cz", transport, credentialProvider);
+        final Feature feature = new GoogleCredentialsFeature("someone@somewhere.cz", transport, credentialProvider);
         feature.setup();
-        // this will fail and is too hard to mock away; doesn't matter much, this is all tested in Sstonky module
+        // this will fail and is too hard to mock away; doesn't matter much, this is all tested in Stonky module
         assertThatThrownBy(feature::test).isInstanceOf(TestFailedException.class);
     }
 
+    @Test
+    void credentialRetrieval() {
+        final HttpTransport transport = new MockHttpTransport();
+        final CredentialProvider credentialProvider = CredentialProvider.mock(true);
+        final String username = "someone@somewhere.cz";
+        final GoogleCredentialsFeature feature = new GoogleCredentialsFeature(username, transport, credentialProvider);
+        final SessionInfo sessionInfo = new SessionInfo(username);
+        assertThat(feature.runGoogleCredentialCheckForDrive(sessionInfo)).isNotNull();
+        assertThat(feature.runGoogleCredentialCheckForSheets(sessionInfo)).isNotNull();
+    }
 }

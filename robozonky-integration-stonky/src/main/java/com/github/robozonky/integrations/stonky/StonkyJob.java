@@ -23,13 +23,23 @@ import java.util.Random;
 
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.ThrowingConsumer;
 
-enum StonkyJob implements Job {
-
-    INSTANCE;
+final class StonkyJob implements Job {
 
     private final Random random = new Random();
+
+    private final ThrowingConsumer<SecretProvider> stonky;
+
+    public StonkyJob() {
+        this(arg -> new Stonky().apply(arg));
+    }
+
+    StonkyJob(final ThrowingConsumer<SecretProvider> provider) {
+        this.stonky = provider;
+    }
 
     @Override
     public Duration startIn() {
@@ -48,12 +58,10 @@ enum StonkyJob implements Job {
     public Payload payload() {
         return secretProvider -> {
             try {
-                final Stonky s = new Stonky();
-                s.apply(secretProvider);
+                stonky.accept(secretProvider);
             } catch (final Exception ex) {
                 throw new IllegalStateException("Failed instantiating Stonky integration.", ex);
             }
         };
     }
-
 }

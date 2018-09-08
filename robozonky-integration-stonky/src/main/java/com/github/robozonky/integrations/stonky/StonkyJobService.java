@@ -26,6 +26,6 @@ public class StonkyJobService implements JobService {
 
     @Override
     public Collection<Job> getJobs() {
-        return Collections.singleton(StonkyJob.INSTANCE);
+        return Collections.singleton(new StonkyJob());
     }
 }
