@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +76,8 @@ public class NaturalLanguageStrategyService implements StrategyService {
             }
             LOGGER.warn("Strategy does not support your version of RoboZonky. Please upgrade.");
         } catch (final Exception ex) {
-            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, may try others. Reason: {}.",
-                                                        ex.getMessage());
+            LOGGER.trace("Failed parsing strategy.", ex);
+            LOGGER.debug("Failed parsing strategy, may still try using other formats. Reason: {}.", ex.getMessage());
         }
         return Optional.empty();
     }
