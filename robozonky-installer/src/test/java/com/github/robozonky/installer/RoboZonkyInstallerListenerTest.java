@@ -32,7 +32,10 @@ import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -291,4 +294,19 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
                 .nextStep(anyString(), anyInt(), eq(1));
         verify(progress, times(1)).stopAction();
     }
+
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    void properLinux() {
+        final RoboZonkyInstallerListener listener = new RoboZonkyInstallerListener();
+        assertThat(listener.getOperatingSystem()).isEqualTo(RoboZonkyInstallerListener.OS.LINUX);
+    }
+
+    @Test
+    @EnabledOnOs(OS.WINDOWS)
+    void properWindows() {
+        final RoboZonkyInstallerListener listener = new RoboZonkyInstallerListener();
+        assertThat(listener.getOperatingSystem()).isEqualTo(RoboZonkyInstallerListener.OS.WINDOWS);
+    }
 }
+

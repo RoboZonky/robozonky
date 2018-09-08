@@ -52,21 +52,25 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
             CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
     private static InstallData DATA;
-    private OS operatingSystem = OS.OTHER;
+    private RoboZonkyInstallerListener.OS operatingSystem = RoboZonkyInstallerListener.OS.OTHER;
 
     public RoboZonkyInstallerListener() {
         if (SystemUtils.IS_OS_LINUX) {
-            operatingSystem = OS.LINUX;
+            operatingSystem = RoboZonkyInstallerListener.OS.LINUX;
         } else if (SystemUtils.IS_OS_WINDOWS) {
-            operatingSystem = OS.WINDOWS;
+            operatingSystem = RoboZonkyInstallerListener.OS.WINDOWS;
         }
+    }
+
+    RoboZonkyInstallerListener.OS getOperatingSystem() {
+        return operatingSystem;
     }
 
     /**
      * Testing OS-specific behavior was proving very difficult, this constructor takes all of that pain away.
      * @param os Fake operating system used for testing.
      */
-    RoboZonkyInstallerListener(final OS os) {
+    RoboZonkyInstallerListener(final RoboZonkyInstallerListener.OS os) {
         operatingSystem = os;
     }
 
@@ -218,22 +222,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                     .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
-            Stream.of(strategy, stonky, jmxConfig, credentials, logging)
-                    .map(CommandLinePart::getProperties)
-                    .flatMap(p -> p.entrySet().stream())
-                    .peek(e -> LOGGER.trace("Processing property {}.", e))
-                    .filter(e -> e.getValue() != null) // prevent NPEs coming from evil code
-                    .forEach(e -> {
-                        final String key = e.getKey();
-                        final String value = e.getValue();
-                        if (key.startsWith("robozonky")) { // RoboZonky setting to be written to separate file
-                            LOGGER.debug("Storing property {}.", e);
-                            settings.setProperty(key, value);
-                        } else { // general Java system property to end up on the command line
-                            LOGGER.debug("Setting property {}.", e);
-                            commandLine.setProperty(key, value);
-                        }
-                    });
+            Util.processCommandLine(commandLine, settings, strategy, stonky, jmxConfig, credentials, logging);
             // write settings to a file
             Util.writeOutProperties(settings, SETTINGS_FILE);
             return commandLine;
@@ -284,7 +273,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             commandLine.setJvmArgument("XX:+UseG1GC");
         }
         commandLine.setJvmArgument("Xmx32m");
-        final RunScriptGenerator generator = operatingSystem == OS.WINDOWS ?
+        final RunScriptGenerator generator = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS ?
                 RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
                 : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
         final File runScript = generator.apply(commandLine);
@@ -293,7 +282,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final boolean success = script.setExecutable(true);
             LOGGER.info("Made '{}' executable: {}.", script, success);
         });
-        if (operatingSystem == OS.LINUX) {
+        if (operatingSystem == RoboZonkyInstallerListener.OS.LINUX) {
             prepareLinuxServices(runScript);
         }
     }
