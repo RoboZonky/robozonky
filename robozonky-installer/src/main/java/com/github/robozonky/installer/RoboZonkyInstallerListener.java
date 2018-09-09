@@ -112,6 +112,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static void primeKeyStore(final char... keystorePassword) throws SetupFailedException {
         final String username = Variables.ZONKY_USERNAME.getValue(DATA);
         final char[] password = Variables.ZONKY_PASSWORD.getValue(DATA).toCharArray();
+        final boolean keystoreDeleted = KEYSTORE_FILE.delete(); // re-install into the same directory otherwise fails
+        LOGGER.debug("Deleted original {}: {}", KEYSTORE_FILE, keystoreDeleted);
         final Feature f = new ZonkyPasswordFeature(KEYSTORE_FILE, keystorePassword, username, password);
         f.setup();
     }
