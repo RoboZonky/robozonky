@@ -38,12 +38,14 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_HOST;
 import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_PORT;
+import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_LOCAL_FOLDER;
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
@@ -261,6 +263,17 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                 google.setHost(host);
                 google.setPort(Integer.parseInt(port));
                 google.runGoogleCredentialCheck();
+                // copy credentials to the correct directory
+                final String dirName = GOOGLE_LOCAL_FOLDER.getValue()
+                        .orElseThrow(() -> new IllegalStateException("Not possible."));
+                final File source = new File(dirName);
+                if (!source.isDirectory()) {
+                    throw new IllegalStateException("Google credentials folder was not created.");
+                }
+                final File target = new File(INSTALL_PATH, dirName);
+                LOGGER.debug("Will copy {} to {}.", source, target);
+                FileUtils.copyDirectory(source, target);
+                FileUtils.deleteDirectory(source);
             }
             return cli;
         } catch (final Exception ex) {

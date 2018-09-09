@@ -34,6 +34,11 @@ public enum Properties {
      */
     STONKY_COPY("robozonky.stonky.gdrive_id", null),
     /**
+     * Name (not path) of the folder where RoboZonky will be looking up Google credentials. Will always be relative to
+     * the current working directory.
+     */
+    GOOGLE_LOCAL_FOLDER("robozonky.google.local_credentials_folder", "Google"),
+    /**
      * To give to {@link GoogleCredentialProvider#live(HttpTransport, String, int)}.
      */
     GOOGLE_CALLBACK_HOST("robozonky.google.callback_host", "localhost"),
