@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 final class GoogleCredentialProvider implements CredentialProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleCredentialProvider.class);
-    private static final String CREDENTIALS_FOLDER = "Google"; // Directory to store user credentials.
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -69,8 +68,10 @@ final class GoogleCredentialProvider implements CredentialProvider {
     }
 
     private AuthorizationCodeFlow createFlow(final HttpTransport httpTransport) throws IOException {
+        final String dirName = Properties.GOOGLE_LOCAL_FOLDER.getValue()
+                .orElseThrow(() -> new IllegalStateException("Not possible."));
         return new GoogleAuthorizationCodeFlow.Builder(httpTransport, Util.JSON_FACTORY, createClientSecrets(), SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new File(CREDENTIALS_FOLDER)))
+                .setDataStoreFactory(new FileDataStoreFactory(new File(dirName)))
                 .setAccessType("offline")
                 .build();
     }
