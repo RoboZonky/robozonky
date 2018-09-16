@@ -57,6 +57,8 @@
     <version.org.jboss.resteasy>3.6.1.Final</version.org.jboss.resteasy>
     <version.org.junit>5.2.0</version.org.junit>
     <version.org.slf4j>1.7.25</version.org.slf4j>
+    <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
+    <version.com.sun.mail>1.6.2</version.com.sun.mail>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
@@ -177,6 +179,16 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-email</artifactId>
         <version>1.5</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.mail</groupId>
+        <artifactId>javax.mail</artifactId>
+        <version>${version.com.sun.mail}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.mail</groupId>
+        <artifactId>smtp</artifactId>
+        <version>${version.com.sun.mail}</version>
       </dependency>
       <dependency>
         <groupId>com.icegreen</groupId>
