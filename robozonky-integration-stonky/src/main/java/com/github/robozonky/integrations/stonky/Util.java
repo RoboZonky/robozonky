@@ -42,12 +42,11 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Util {
+public final class Util {
 
     static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
     private static final String APPLICATION_NAME = Defaults.ROBOZONKY_USER_AGENT;
-    private static final Object[][] EMPTY_OBJECT_ARRAY = new Object[0][0];
 
     private Util() {
         // no instances

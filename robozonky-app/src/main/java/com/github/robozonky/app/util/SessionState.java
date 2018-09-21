@@ -85,7 +85,8 @@ public final class SessionState<T> {
 
     private void write(final Collection<Integer> items) {
         state.update(b -> b.put(key, items.stream().map(String::valueOf)));
-        SessionState.LOGGER.trace("'{}' wrote '{}'.", key, state.getValue(key).orElse("nothing"));
+        final String value = state.getValue(key).orElse("nothing");
+        SessionState.LOGGER.trace("'{}' wrote '{}'.", key, value);
     }
 
     /**

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileUtil {
+public final class FileUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
@@ -39,9 +39,9 @@ public class FileUtil {
     }
 
     public static Optional<File> findFolder(final String folderName) {
-        try {
-            return Files.find(new File(System.getProperty("user.dir")).toPath(), 1, (path, attr) -> attr.isDirectory())
-                    .map(Path::toFile)
+        final Path root = new File(System.getProperty("user.dir")).toPath();
+        try (final Stream<Path> s = Files.find(root, 1, (path, attr) -> attr.isDirectory())) {
+            return s.map(Path::toFile)
                     .filter(f -> Objects.equals(f.getName(), folderName))
                     .findFirst();
         } catch (final Exception ex) {
