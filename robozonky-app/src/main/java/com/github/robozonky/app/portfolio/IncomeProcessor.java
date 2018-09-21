@@ -17,7 +17,7 @@
 package com.github.robozonky.app.portfolio;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,6 +30,7 @@ import com.github.robozonky.common.state.InstanceState;
 public final class IncomeProcessor implements PortfolioDependant {
 
     static final String STATE_KEY = "lastSeenTransactionId";
+    private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
 
     private static int processAllTransactions(final Stream<Transaction> transactions) {
         return transactions.mapToInt(Transaction::getId)
@@ -37,15 +38,19 @@ public final class IncomeProcessor implements PortfolioDependant {
                 .orElse(-1);
     }
 
-    private static int processNewTransactions(final Transactional transactional,
-                                              final Stream<Transaction> transactions,
+    private static void processTransaction(final TransactionProcessor processor, final Transaction transaction) {
+        processor.accept(transaction);
+    }
+
+    private static int processNewTransactions(final Transactional transactional, final Stream<Transaction> transactions,
                                               final int lastSeenTransactionId) {
-        final Collection<Transaction> toProcess = transactions.parallel() // retrieve remote pages in parallel
+        return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
-                .collect(Collectors.toSet());
-        LoanRepaidProcessor.INSTANCE.accept(toProcess.stream(), transactional);
-        ParticipationSoldProcessor.INSTANCE.accept(toProcess.stream(), transactional);
-        return toProcess.stream()
+                .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
+                .values()
+                .parallelStream() // possibly thousands of transactions, process them in parallel
+                .peek(t -> processTransaction(new LoanRepaidProcessor(transactional), t))
+                .peek(t -> processTransaction(new ParticipationSoldProcessor(transactional), t))
                 .mapToInt(Transaction::getId)
                 .max()
                 .orElse(lastSeenTransactionId);

@@ -60,8 +60,10 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
             final String name = category + " " +
                     (successExpected ? "is" : "is not") +
                     " a participation sale.";
+            final Transactional transactional = createTransactional();
+            final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
             final DynamicTest test = DynamicTest.dynamicTest(name, () -> {
-                assertThat(ParticipationSoldProcessor.INSTANCE.isApplicable(transfer)).isEqualTo(successExpected);
+                assertThat(processor.isApplicable(transfer)).isEqualTo(successExpected);
             });
             tests.add(test);
         }
@@ -75,7 +77,8 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
         final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
-        assertThatThrownBy(() -> ParticipationSoldProcessor.INSTANCE.processApplicable(transfer, transactional))
+        final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
+        assertThatThrownBy(() -> processor.processApplicable(transfer))
                 .isInstanceOf(Exception.class);
         transactional.run(); // make sure the transaction is processed so that events could be fired
         assertThat(getNewEvents()).isEmpty();
@@ -94,11 +97,12 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
                 .setPaymentStatus(PaymentStatus.PAID)
                 .build();
-        when(zonky.getInvestment(eq(loan))).thenReturn(Optional.of(investment));
+        when(zonky.getInvestmentByLoanId(eq(loan.getId()))).thenReturn(Optional.of(investment));
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final Transactional transactional = new Transactional(portfolio, tenant);
-        ParticipationSoldProcessor.INSTANCE.processApplicable(transfer, transactional);
+        final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
+        processor.processApplicable(transfer);
         transactional.run(); // make sure the transaction is processed so that events could be fired
         assertThat(getNewEvents()).first().isInstanceOf(InvestmentSoldEvent.class);
         assertThat(SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId)).isTrue();

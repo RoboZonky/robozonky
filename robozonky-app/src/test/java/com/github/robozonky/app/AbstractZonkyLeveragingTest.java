@@ -33,6 +33,9 @@ import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.RemoteBalance;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
@@ -77,6 +80,17 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     protected static LoanDescriptor mockLoanDescriptorWithoutCaptcha() {
         return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt(), false);
+    }
+
+    protected static Transactional createTransactional() {
+        final Zonky zonky = harmlessZonky(10_000);
+        return createTransactional(zonky);
+    }
+
+    protected static Transactional createTransactional(final Zonky zonky) {
+        final Tenant tenant = mockTenant(zonky);
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
+        return new Transactional(portfolio, tenant);
     }
 
     private static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {

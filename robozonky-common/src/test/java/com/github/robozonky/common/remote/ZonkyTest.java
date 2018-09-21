@@ -258,7 +258,7 @@ class ZonkyTest {
                 new Transaction(i, BigDecimal.ZERO, TransactionCategory.PAYMENT, TransactionOrientation.IN);
         final PaginatedApi<Transaction, TransactionApi> ta = mockApi(Arrays.asList(irrelevant1, relevant, irrelevant2));
         final Zonky z = mockZonky(pa, ta);
-        final Optional<Investment> result = z.getInvestment(loan);
+        final Optional<Investment> result = z.getInvestmentByLoanId(loan.getId());
         assertThat(result).isPresent();
         final Investment actual = result.get();
         final LocalDate investmentDate = actual.getInvestmentDate().toLocalDate();

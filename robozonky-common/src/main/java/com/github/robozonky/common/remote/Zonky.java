@@ -177,8 +177,8 @@ public class Zonky {
         return getInvestments(s).findFirst();
     }
 
-    public Optional<Investment> getInvestment(final Loan loan) {
-        final Select s = new Select().equals("loan.id", loan.getId());
+    public Optional<Investment> getInvestmentByLoanId(final int loanId) {
+        final Select s = new Select().equals("loan.id", loanId);
         return getInvestments(s).findFirst();
     }
 
