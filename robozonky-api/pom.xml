@@ -117,64 +117,6 @@
                   }
                 },
                 "ignore": [
-                  {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Transaction::getTransactionDate()",
-                    "new": "method java.time.LocalDate com.github.robozonky.api.remote.entities.Transaction::getTransactionDate()",
-                    "oldType": "java.time.OffsetDateTime",
-                    "newType": "java.time.LocalDate",
-                    "package": "com.github.robozonky.api.remote.entities",
-                    "classSimpleName": "Transaction",
-                    "methodName": "getTransactionDate",
-                    "elementKind": "method",
-                    "justification": "Transaction date is always LocalDate on Zonky, time is always 00:00:00."
-                  }, {
-                    "code": "java.annotation.removed",
-                    "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Transaction::getTransactionDate()",
-                    "new": "method java.time.LocalDate com.github.robozonky.api.remote.entities.Transaction::getTransactionDate()",
-                    "annotationType": "javax.xml.bind.annotation.XmlElement",
-                    "annotation": "@javax.xml.bind.annotation.XmlElement",
-                    "package": "com.github.robozonky.api.remote.entities",
-                    "classSimpleName": "Transaction",
-                    "methodName": "getTransactionDate",
-                    "elementKind": "method",
-                    "justification": "Transaction date is always LocalDate on Zonky, time is always 00:00:00."
-                  }, {
-                    "code": "java.method.parameterTypeParameterChanged",
-                    "old": "parameter com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder com.github.robozonky.api.remote.entities.sanitized.Investment::sanitize(com.github.robozonky.api.remote.entities.RawInvestment, ===java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.OffsetDateTime>===)",
-                    "new": "parameter com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder com.github.robozonky.api.remote.entities.sanitized.Investment::sanitize(com.github.robozonky.api.remote.entities.RawInvestment, ===java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.LocalDate>===)",
-                    "oldType": "java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.OffsetDateTime>",
-                    "newType": "java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.LocalDate>",
-                    "package": "com.github.robozonky.api.remote.entities.sanitized",
-                    "classSimpleName": "Investment",
-                    "methodName": "sanitize",
-                    "parameterIndex": "1",
-                    "elementKind": "parameter",
-                    "justification": "Transaction date is always LocalDate on Zonky, time is always 00:00:00."
-                  }, {
-                    "code": "java.method.parameterTypeParameterChanged",
-                    "old": "parameter com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.remote.entities.sanitized.Investment::sanitized(com.github.robozonky.api.remote.entities.RawInvestment, ===java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.OffsetDateTime>===)",
-                    "new": "parameter com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.remote.entities.sanitized.Investment::sanitized(com.github.robozonky.api.remote.entities.RawInvestment, ===java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.LocalDate>===)",
-                    "oldType": "java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.OffsetDateTime>",
-                    "newType": "java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.LocalDate>",
-                    "package": "com.github.robozonky.api.remote.entities.sanitized",
-                    "classSimpleName": "Investment",
-                    "methodName": "sanitized",
-                    "parameterIndex": "1",
-                    "elementKind": "parameter",
-                    "justification": "Transaction date is always LocalDate on Zonky, time is always 00:00:00."
-                  }, {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method java.util.OptionalInt com.github.robozonky.api.remote.entities.sanitized.Investment::getDaysPastDue()",
-                    "new": "method int com.github.robozonky.api.remote.entities.sanitized.Investment::getDaysPastDue()",
-                    "oldType": "java.util.OptionalInt",
-                    "newType": "int",
-                    "package": "com.github.robozonky.api.remote.entities.sanitized",
-                    "classSimpleName": "Investment",
-                    "methodName": "getDaysPastDue",
-                    "elementKind": "method",
-                    "justification": "Days past due assumed to be zero when empty, instead of empty OptionalInt."
-                  }
                 ]
               }
             }
