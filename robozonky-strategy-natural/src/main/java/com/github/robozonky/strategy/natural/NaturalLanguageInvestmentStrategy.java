@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,12 +66,13 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         final BigDecimal balance = portfolio.getCzkAvailable();
         final InvestmentSizeRecommender recommender = new InvestmentSizeRecommender(strategy, restrictions);
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
+                .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
-                .map(l -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = recommender.apply(l.item(), balance.intValue());
+                .map(d -> { // recommend amount to invest per strategy
+                    final int recommendedAmount = recommender.apply(d.item(), balance.intValue());
                     if (recommendedAmount > 0) {
-                        return l.recommend(recommendedAmount, needsConfirmation(l));
+                        return d.recommend(recommendedAmount, needsConfirmation(d));
                     } else {
                         return Optional.<RecommendedLoan>empty();
                     }
