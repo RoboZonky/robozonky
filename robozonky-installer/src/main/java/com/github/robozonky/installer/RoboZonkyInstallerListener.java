@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -109,11 +110,10 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         LOGBACK_CONFIG_FILE = null;
     }
 
-    private static void primeKeyStore(final char... keystorePassword) throws SetupFailedException {
+    private static void primeKeyStore(final char... keystorePassword) throws SetupFailedException, IOException {
         final String username = Variables.ZONKY_USERNAME.getValue(DATA);
         final char[] password = Variables.ZONKY_PASSWORD.getValue(DATA).toCharArray();
-        final boolean keystoreDeleted = KEYSTORE_FILE.delete(); // re-install into the same directory otherwise fails
-        LOGGER.debug("Deleted original {}: {}", KEYSTORE_FILE, keystoreDeleted);
+        Files.deleteIfExists(KEYSTORE_FILE.toPath()); // re-install into the same directory otherwise fails
         final Feature f = new ZonkyPasswordFeature(KEYSTORE_FILE, keystorePassword, username, password);
         f.setup();
     }
@@ -124,7 +124,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         f.setup();
     }
 
-    private static CommandLinePart prepareCore(final char... keystorePassword) throws SetupFailedException {
+    private static CommandLinePart prepareCore(final char... keystorePassword) throws SetupFailedException, IOException {
         final String zonkoidId = "zonkoid";
         final CommandLinePart cli = new CommandLinePart()
                 .setOption("-p", String.valueOf(keystorePassword));
@@ -209,7 +209,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                 .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
     }
 
-    static CommandLinePart prepareCore() throws SetupFailedException {
+    static CommandLinePart prepareCore() throws SetupFailedException, IOException {
         return prepareCore(KEYSTORE_PASSWORD);
     }
 

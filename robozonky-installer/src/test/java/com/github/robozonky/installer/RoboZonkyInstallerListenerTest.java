@@ -167,7 +167,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void coreWithoutTweaks() throws SetupFailedException {
+    void coreWithoutTweaks() throws SetupFailedException, IOException {
         // prepare
         RoboZonkyInstallerListener.setInstallData(data);
         // execute SUT
@@ -184,7 +184,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void coreWithTweaks() throws SetupFailedException {
+    void coreWithTweaks() throws SetupFailedException, IOException {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
         when(localData.getVariable(Variables.IS_DRY_RUN.getKey())).thenReturn("true");
