@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,26 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class FileUtilTest {
+
+    private static final File SOME_DIR = new File(UUID.randomUUID().toString());
+
+    @AfterAll
+    static void deleteDir() {
+        if (SOME_DIR.exists()) {
+            SOME_DIR.delete();
+        }
+    }
 
     @Test
     void processFaultyFiles() throws URISyntaxException {
@@ -37,7 +50,26 @@ class FileUtilTest {
     }
 
     @Test
-    void lookupNonexistentFolder() {
+    void lookupExistingFolder() {
+        assertThat(FileUtil.findFolder("target")).isPresent();
+    }
+
+    @Test
+    void lookupNonExistentFolder() {
+        assertThat(FileUtil.findFolder(UUID.randomUUID().toString())).isEmpty();
+    }
+
+    @Test
+    void lookupExistingFolderIncludingNonWritableFolder() {
+        SOME_DIR.mkdir();
+        SOME_DIR.setReadable(false);
+        assertThat(FileUtil.findFolder(UUID.randomUUID().toString())).isEmpty();
+    }
+
+    @Test
+    void lookupNonExistentFolderIncludingNonWritableFolder() {
+        SOME_DIR.mkdir();
+        SOME_DIR.setReadable(false);
         assertThat(FileUtil.findFolder("target")).isPresent();
     }
 
