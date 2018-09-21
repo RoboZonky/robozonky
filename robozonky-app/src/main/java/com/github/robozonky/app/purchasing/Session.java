@@ -63,7 +63,7 @@ final class Session {
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
-        this.portfolioOverview = portfolio.calculateOverview();
+        this.portfolioOverview = portfolio.getOverview();
     }
 
     public static Collection<Investment> purchase(final Portfolio portfolio,
@@ -137,6 +137,6 @@ final class Session {
     private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
         portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
-        portfolioOverview = portfolio.calculateOverview();
+        portfolioOverview = portfolio.getOverview();
     }
 }

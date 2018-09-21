@@ -54,7 +54,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     void rechecksMarketplaceIfBalanceIncreased() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
-        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth), mockBalance(zonky));
+        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth), x -> mockBalance(zonky));
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);

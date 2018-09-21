@@ -17,6 +17,8 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -27,46 +29,47 @@ import com.github.robozonky.common.remote.Zonky;
 
 public class Portfolio {
 
+    private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
     private final Statistics statistics;
     private final RemoteBalance balance;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
 
-    Portfolio(final Supplier<BlockedAmountProcessor> blockedAmounts, final Statistics statistics,
-              final RemoteBalance balance) {
+    private Portfolio(final Supplier<BlockedAmountProcessor> blockedAmounts, final Statistics statistics,
+                      final Function<Portfolio, RemoteBalance> balance) {
         this.blockedAmounts = blockedAmounts;
         this.statistics = statistics;
-        this.balance = balance;
+        this.balance = balance.apply(this);
     }
 
-    /**
-     * Return a new instance of the class, loading information about all investments present and past from the Zonky
-     * interface. This operation may take a while, as there may easily be hundreds or thousands of such investments.
-     * @param tenant The API to be used to retrieve the data from Zonky.
-     * @param transfers This will be initialized lazily as otherwise black-box system integration tests which test
-     * the CLI would always end up calling Zonky and thus failing due to lack of authentication.
-     * @return Empty in case there was a remote error.
-     */
     public static Portfolio create(final Tenant tenant, final Supplier<BlockedAmountProcessor> transfers) {
-        return new Portfolio(transfers, tenant.call(Zonky::getStatistics), RemoteBalance.create(tenant));
+        return create(tenant, transfers, p -> RemoteBalance.create(tenant, p::balanceUpdated));
     }
 
     public static Portfolio create(final Tenant tenant, final Supplier<BlockedAmountProcessor> transfers,
-                                   final RemoteBalance balance) {
+                                   final Function<Portfolio, RemoteBalance> balance) {
         return new Portfolio(transfers, tenant.call(Zonky::getStatistics), balance);
     }
 
     public void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
         blockedAmounts.get().simulateCharge(loanId, rating, amount);
-        balance.update(amount.negate());
+        balance.update(amount.negate()); // will result in balanceUpdated() getting called
+    }
+
+    public void balanceUpdated(final BigDecimal newBalance) {
+        portfolioOverview.set(null); // reset overview, so that it could be recalculated on-demand
     }
 
     public RemoteBalance getRemoteBalance() {
         return balance;
     }
 
-    // FIXME only recalculate when balance and or blocked amounts actually change, otherwise wasters CPU and memory
-    public PortfolioOverview calculateOverview() {
-        return PortfolioOverview.calculate(balance.get(), statistics, blockedAmounts.get().getAdjustments(),
-                                           Delinquencies.getAmountsAtRisk());
+    public PortfolioOverview getOverview() {
+        return portfolioOverview.updateAndGet(po -> {
+            if (po == null) {
+                return PortfolioOverview.calculate(balance.get(), statistics, blockedAmounts.get().getAdjustments(),
+                                                   Delinquencies.getAmountsAtRisk());
+            }
+            return po;
+        });
     }
 }

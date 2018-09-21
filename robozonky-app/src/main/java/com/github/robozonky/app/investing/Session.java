@@ -67,7 +67,7 @@ final class Session {
         this.seen = newSessionState(tenant, marketplace, "seenLoans");
         this.loansStillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
-        this.portfolioOverview = portfolio.calculateOverview();
+        this.portfolioOverview = portfolio.getOverview();
     }
 
     private static SessionState<LoanDescriptor> newSessionState(final Tenant tenant,
@@ -181,7 +181,7 @@ final class Session {
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
-        portfolioOverview = portfolio.calculateOverview();
+        portfolioOverview = portfolio.getOverview();
     }
 
     private void discard(final LoanDescriptor loan) {

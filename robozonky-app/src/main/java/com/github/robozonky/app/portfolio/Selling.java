@@ -92,14 +92,14 @@ public class Selling implements PortfolioDependant {
                 .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());
         final Portfolio portfolio = transactional.getPortfolio();
-        final PortfolioOverview overview = portfolio.calculateOverview();
+        final PortfolioOverview overview = portfolio.getOverview();
         transactional.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
                 .peek(r -> transactional.fire(new SaleRecommendedEvent(r)))
                 .map(r -> processSale(transactional, r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        transactional.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
+        transactional.fire(new SellingCompletedEvent(investmentsSold, portfolio.getOverview()));
     }
 
     /**

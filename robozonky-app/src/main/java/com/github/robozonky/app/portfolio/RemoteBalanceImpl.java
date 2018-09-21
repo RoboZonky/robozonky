@@ -17,35 +17,37 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.Refreshable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class RemoteBalanceImpl implements RemoteBalance,
                                    Refreshable.RefreshListener<BigDecimal> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteBalanceImpl.class);
-
     private final Refreshable<BigDecimal> provider;
     private final boolean isDryRun;
     private final BigDecimal dryRunMinimum = BigDecimal.valueOf(Settings.INSTANCE.getDryRunBalanceMinimum());
-    private final AtomicReference<BigDecimal> latest = new AtomicReference<>(BigDecimal.valueOf(Integer.MIN_VALUE));
+    private final ValueTracker latest;
 
-    public RemoteBalanceImpl(final Refreshable<BigDecimal> provider, final boolean isDryRun) {
+    public RemoteBalanceImpl(final Refreshable<BigDecimal> provider, final boolean isDryRun,
+                             final Consumer<BigDecimal> changeListener) {
         this.isDryRun = isDryRun;
         this.provider = provider;
+        this.latest = new ValueTracker(BigDecimal.valueOf(Integer.MIN_VALUE), changeListener);
         provider.registerListener(this);
+    }
+
+    RemoteBalanceImpl(final Refreshable<BigDecimal> provider, final boolean isDryRun) {
+        this(provider, isDryRun, b -> {
+        });
     }
 
     @Override
     public void update(final BigDecimal change) {
         provider.run();
         if (isDryRun) {
-            latest.accumulateAndGet(change, BigDecimal::add);
-            LOGGER.debug("Locally added {} CZK, is {} CZK.", change, latest.get());
+            latest.add(change);
         }
     }
 
@@ -61,7 +63,6 @@ class RemoteBalanceImpl implements RemoteBalance,
     @Override
     public void valueSet(final BigDecimal newValue) {
         latest.set(newValue);
-        LOGGER.debug("Set to {} CZK.", newValue);
     }
 
     @Override
@@ -72,7 +73,6 @@ class RemoteBalanceImpl implements RemoteBalance,
     @Override
     public void valueChanged(final BigDecimal oldValue, final BigDecimal newValue) {
         final BigDecimal difference = newValue.subtract(oldValue);
-        latest.accumulateAndGet(difference, BigDecimal::add);
-        LOGGER.debug("Remotely added {} CZK, is {} CZK.", difference, latest.get());
+        latest.add(difference);
     }
 }

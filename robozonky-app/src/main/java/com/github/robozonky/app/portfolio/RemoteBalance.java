@@ -18,6 +18,7 @@ package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.robozonky.app.authentication.Tenant;
@@ -28,10 +29,10 @@ import com.github.robozonky.util.Scheduler;
  */
 public interface RemoteBalance extends Supplier<BigDecimal> {
 
-    static RemoteBalance create(final Tenant auth) {
+    static RemoteBalance create(final Tenant auth, final Consumer<BigDecimal> changeListener) {
         final RefreshableBalance b = new RefreshableBalance(auth);
         Scheduler.inBackground().submit(b, Duration.ofMinutes(1));
-        return new RemoteBalanceImpl(b, auth.getSessionInfo().isDryRun());
+        return new RemoteBalanceImpl(b, auth.getSessionInfo().isDryRun(), changeListener);
     }
 
     /**
