@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.github.robozonky.app;
 
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -27,7 +26,6 @@ import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.app.version.UpdateMonitor;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.SystemExitService;
 import com.github.robozonky.util.SystemExitServiceLoader;
@@ -68,7 +66,6 @@ public class App {
         Events.fire(new RoboZonkyStartingEvent());
         try {
             ensureLiveness();
-            Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
             App.SHUTDOWN_HOOKS.register(new Management(LIFECYCLE));
             final String sessionName = Events.getSessionInfo().flatMap(SessionInfo::getName).orElse(null);
             App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier(sessionName));

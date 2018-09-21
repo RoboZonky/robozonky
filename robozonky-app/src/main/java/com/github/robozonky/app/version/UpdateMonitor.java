@@ -51,7 +51,7 @@ import org.xml.sax.SAXException;
  * Retrieve latest released version from Maven Central. By default will check
  * https://repo1.maven.org/maven2/com/github/robozonky/robozonky/maven-metadata.xml.
  */
-public class UpdateMonitor extends Refreshable<VersionIdentifier> {
+final class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
     private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
@@ -147,9 +147,9 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
     @Override
     protected String getLatestSource() throws Exception {
-        final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
-                                                                this.mavenCentralHostname);
-        return IOUtils.toString(s, Defaults.CHARSET);
+        return IoUtil.applyCloseable(() -> UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                             this.mavenCentralHostname),
+                                     s -> IOUtils.toString(s, Defaults.CHARSET));
     }
 
     @Override
