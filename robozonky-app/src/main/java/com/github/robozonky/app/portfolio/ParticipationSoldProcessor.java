@@ -22,6 +22,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
@@ -29,26 +30,27 @@ import com.github.robozonky.app.util.SoldParticipationCache;
 
 class ParticipationSoldProcessor extends TransactionProcessor {
 
-    public static final ParticipationSoldProcessor INSTANCE = new ParticipationSoldProcessor();
+    private final PortfolioOverview overview;
+    private final Transactional transactional;
 
-    private ParticipationSoldProcessor() {
-        // singleton
+    ParticipationSoldProcessor(final Transactional transactional) {
+        this.transactional = transactional;
+        this.overview = transactional.getPortfolio().calculateOverview(); // can cache as this processor is read-only
     }
 
     @Override
     boolean isApplicable(final Transaction transaction) {
         return transaction.getOrientation() == TransactionOrientation.IN
                 && transaction.getCategory() == TransactionCategory.SMP_SELL;
-
     }
 
     @Override
-    void processApplicable(final Transaction transaction, final Transactional transactional) {
+    void processApplicable(final Transaction transaction) {
         final int loanId = transaction.getLoanId();
         final Tenant tenant = transactional.getTenant();
         final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
         final Investment i = lookupOrFail(l, tenant);
-        transactional.fire(new InvestmentSoldEvent(i, l, transactional.getPortfolio().calculateOverview()));
+        transactional.fire(new InvestmentSoldEvent(i, l, overview));
         SoldParticipationCache.forTenant(tenant).markAsSold(loanId);
     }
 }

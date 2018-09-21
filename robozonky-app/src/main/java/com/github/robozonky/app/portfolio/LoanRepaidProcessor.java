@@ -23,15 +23,18 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 
 class LoanRepaidProcessor extends TransactionProcessor {
 
-    public static final LoanRepaidProcessor INSTANCE = new LoanRepaidProcessor();
+    private final PortfolioOverview overview;
+    private final Transactional transactional;
 
-    private LoanRepaidProcessor() {
-        // singleton
+    LoanRepaidProcessor(final Transactional transactional) {
+        this.transactional = transactional;
+        this.overview = transactional.getPortfolio().calculateOverview(); // can cache as this processor is read-only
     }
 
     @Override
@@ -41,9 +44,9 @@ class LoanRepaidProcessor extends TransactionProcessor {
     }
 
     @Override
-    void processApplicable(final Transaction transfer, final Transactional transactional) {
-        final Loan l = LoanCache.INSTANCE.getLoan(transfer.getLoanId(), transactional.getTenant());
-        final Investment investment = lookupOrFail(l, transactional.getTenant());
+    void processApplicable(final Transaction transfer) {
+        final int loanId = transfer.getLoanId();
+        final Investment investment = lookupOrFail(loanId, transactional.getTenant());
         final boolean paidInFull = investment.getPaymentStatus()
                 .map(s -> s == PaymentStatus.PAID)
                 .orElse(false);
@@ -51,6 +54,7 @@ class LoanRepaidProcessor extends TransactionProcessor {
             logger.debug("Not yet repaid in full: {}.", transfer);
             return;
         }
-        transactional.fire(new LoanRepaidEvent(investment, l, transactional.getPortfolio().calculateOverview()));
+        final Loan l = LoanCache.INSTANCE.getLoan(loanId, transactional.getTenant());
+        transactional.fire(new LoanRepaidEvent(investment, l, overview));
     }
 }

@@ -21,8 +21,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -95,14 +93,12 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getTransactions((Select) any())).thenAnswer(i -> Stream.of(t2, t3, t1));
         when(zonky.getLoan(eq(l2.getId()))).thenReturn(l2);
         when(zonky.getLoan(eq(l3.getId()))).thenReturn(l3);
-        when(zonky.getInvestment(eq(l2))).thenReturn(Optional.of(i2));
-        when(zonky.getInvestment(eq(l3))).thenReturn(Optional.of(i3));
+        when(zonky.getInvestmentByLoanId(eq(l2.getId()))).thenReturn(Optional.of(i2));
+        when(zonky.getInvestmentByLoanId(eq(l3.getId()))).thenReturn(Optional.of(i3));
         processor.accept(transactional);
         transactional.run(); // persist
         verify(zonky, times(1)).getTransactions((Select) any());
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("3"); // new maximum
         assertThat(getNewEvents()).hasSize(2);
-        assertThat(getNewEvents().get(0)).isInstanceOf(LoanRepaidEvent.class);
-        assertThat(getNewEvents().get(1)).isInstanceOf(InvestmentSoldEvent.class);
     }
 }

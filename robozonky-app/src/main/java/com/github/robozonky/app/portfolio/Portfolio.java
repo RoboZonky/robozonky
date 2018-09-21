@@ -64,6 +64,7 @@ public class Portfolio {
         return balance;
     }
 
+    // FIXME only recalculate when balance and or blocked amounts actually change, otherwise wasters CPU and memory
     public PortfolioOverview calculateOverview() {
         return PortfolioOverview.calculate(balance.get(), statistics, blockedAmounts.get().getAdjustments(),
                                            Delinquencies.getAmountsAtRisk());

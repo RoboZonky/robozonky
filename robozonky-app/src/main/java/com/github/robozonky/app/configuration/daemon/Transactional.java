@@ -16,8 +16,8 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.app.Events;
@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Updates to state, which happen through {@link #getTenant()}, are postponed until {@link #run()} is called. Likewise
  * for events fired through {@link #fire(Event)}.
+ *
+ * This class is thread-safe, since multiple threads may want to fire events and/or store state data at the same time.
  */
 public class Transactional implements Runnable {
 
@@ -36,8 +38,8 @@ public class Transactional implements Runnable {
 
     private final Portfolio portfolio;
     private final Tenant tenant;
-    private final Queue<Event> eventsToFire = new LinkedList<>();
-    private final Queue<Runnable> stateUpdates = new LinkedList<>();
+    private final Queue<Event> eventsToFire = new ConcurrentLinkedQueue<>();
+    private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
 
     public Transactional(final Portfolio portfolio, final Tenant tenant) {
         this.portfolio = portfolio;
