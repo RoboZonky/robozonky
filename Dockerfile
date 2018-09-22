@@ -5,8 +5,8 @@ ENV SOURCE_DIRECTORY=/usr/src/robozonky \
     BINARY_DIRECTORY=/tmp/robozonky
 COPY . $SOURCE_DIRECTORY
 WORKDIR $SOURCE_DIRECTORY
-RUN dnf -y install maven xz \
-    && mvn clean install -T1C -B -Dgpg.skip -DskipTests -Ddocker
+RUN dnf -y install java-11-openjdk-devel maven xz \
+    && JAVA_HOME=/usr/lib/jvm/java-11 mvn install -T1C -B -Dgpg.skip -DskipTests -Ddocker
 RUN ROBOZONKY_VERSION=$(mvn -q \
             -Dexec.executable="echo" \
             -Dexec.args='${project.version}' \
@@ -25,9 +25,9 @@ ENV INSTALL_DIRECTORY=/opt/robozonky \
     WORKING_DIRECTORY=/var/robozonky
 COPY --from=builder /tmp/robozonky $INSTALL_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
-RUN dnf -y install java-openjdk-headless \
+RUN dnf -y install java-11-openjdk-headless \
     && dnf clean all \
-    && alternatives --set java  $(alternatives --display java |grep java-openjdk|grep -Eo '^[^ ]+') \
+    && alternatives --set java  $(alternatives --display java |grep java-11-openjdk|grep -Eo '^[^ ]+') \
     && java -version
 EXPOSE 7091
 ENTRYPOINT JAVA_OPTS="$JAVA_OPTS \
