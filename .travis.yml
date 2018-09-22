@@ -19,10 +19,8 @@ env:
     - MODULE=robozonky-integration-stonky
 os:
   - linux
-jdk:
-  - openjdk8
+jdk: # JDK releases (non-EA) belong here
   - openjdk11
-  - oraclejdk8
   - oraclejdk11
 stages: # order the stages we'll use during this build
   - precache
