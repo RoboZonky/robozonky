@@ -24,7 +24,6 @@
     <appversion>@{project.version}</appversion>
     <appsubpath>robozonky</appsubpath>
     <url>http://www.robozonky.cz/</url>
-    <javaversion>@{java.version}</javaversion>
     <uninstaller write="no" />
   </info>
 

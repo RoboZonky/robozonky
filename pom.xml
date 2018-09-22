@@ -41,10 +41,10 @@
     <!-- Default encoding is UTF-8, no matter what platform we're on. -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
-    <!-- Minimal supported JDK version is 1.8. -->
-    <java.version>1.8</java.version>
+    <!-- Minimal supported JDK version is 11. -->
+    <java.version>11</java.version>
     <!--
-      Default Java 9 automatic module name; modules may override to comply with the module system spec.
+      Default JPMS automatic module name; modules may override to comply with the module system spec.
       The RoboZonky-specific rule is that this must match the top-level package in the JAR.
     -->
     <project.automatic.module.name>${project.groupId}.${project.artifactId}</project.automatic.module.name>
