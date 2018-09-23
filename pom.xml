@@ -57,6 +57,7 @@
     <version.org.jboss.resteasy>3.6.1.Final</version.org.jboss.resteasy>
     <version.org.junit5>3.1</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
+    <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
     <version.com.sun.mail>1.6.2</version.com.sun.mail>
@@ -266,7 +267,7 @@
       <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-launcher</artifactId>
-        <version>1.${version.org.junit5}</version>
+        <version>${version.org.junit.platform}</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -462,6 +463,18 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <workingDirectory>${basedir}/target</workingDirectory>
           </configuration>
+          <dependencies> <!-- possibly remove this after https://github.com/apache/maven-surefire/pull/193 is fixed -->
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-launcher</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-engine</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
