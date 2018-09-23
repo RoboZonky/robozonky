@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2017 The RoboZonky Project
+  ~ Copyright 2018 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
   ~ limitations under the License.
   -->
 
-<configuration>
-  <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook">
-    <delay>1000</delay> <!-- Wait a while before robot ends to flush all logging events -->
-  </shutdownHook>
+<configuration packagingData="true">
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook">
+        <delay>1000</delay> <!-- Wait a while before robot ends to flush all logging events -->
+    </shutdownHook>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
@@ -28,7 +28,6 @@
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>robozonky.log</file>
-        <immediateFlush>false</immediateFlush>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>robozonky.%d{yyyyMMdd}.log</fileNamePattern>
           <maxHistory>10</maxHistory>

@@ -14,6 +14,9 @@
   ~ limitations under the License.
   -->
 <configuration packagingData="true">
+  <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook">
+    <delay>1000</delay> <!-- Wait a while before robot ends to flush all logging events -->
+  </shutdownHook>
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
       <level>INFO</level>
@@ -25,7 +28,6 @@
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>robozonky.log</file>
     <append>false</append>
-    <immediateFlush>true</immediateFlush>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} [%thread@%X{process_id}] %-5level %logger{36} %msg%n</pattern>
     </encoder>
