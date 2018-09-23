@@ -29,6 +29,7 @@
 
   <properties>
     <project.automatic.module.name>com.github.robozonky.integrations.stonky</project.automatic.module.name>
+    <version.com.google.apis>1.25.0</version.com.google.apis>
   </properties>
 
   <dependencies>
@@ -44,31 +45,31 @@
     <dependency>
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client</artifactId>
-      <version>1.24.1</version>
+      <version>${version.com.google.apis}</version>
     </dependency>
     <dependency>
       <groupId>com.google.oauth-client</groupId>
       <artifactId>google-oauth-client-jetty</artifactId>
-      <version>1.24.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-sheets</artifactId>
-      <version>v4-rev536-1.24.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-drive</artifactId>
-      <version>v3-rev124-1.24.1</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
+      <version>${version.com.google.apis}</version>
     </dependency>
     <dependency> <!-- added explicitly here, as we use it for testing -->
       <groupId>com.google.http-client</groupId>
       <artifactId>google-http-client</artifactId>
-      <version>1.24.1</version>
+      <version>${version.com.google.apis}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-sheets</artifactId>
+      <version>v4-rev543-${version.com.google.apis}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-drive</artifactId>
+      <version>v3-rev130-${version.com.google.apis}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mock-server</groupId>
