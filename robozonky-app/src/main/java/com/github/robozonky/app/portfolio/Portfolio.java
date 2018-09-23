@@ -26,8 +26,12 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Portfolio {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
 
     private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
     private final Statistics statistics;
@@ -56,6 +60,7 @@ public class Portfolio {
     }
 
     public void balanceUpdated(final BigDecimal newBalance) {
+        LOGGER.debug("Reset.");
         portfolioOverview.set(null); // reset overview, so that it could be recalculated on-demand
     }
 
@@ -66,8 +71,11 @@ public class Portfolio {
     public PortfolioOverview getOverview() {
         return portfolioOverview.updateAndGet(po -> {
             if (po == null) {
-                return PortfolioOverview.calculate(balance.get(), statistics, blockedAmounts.get().getAdjustments(),
-                                                   Delinquencies.getAmountsAtRisk());
+                final PortfolioOverview overview = PortfolioOverview.calculate(balance.get(), statistics,
+                                                                               blockedAmounts.get().getAdjustments(),
+                                                                               Delinquencies.getAmountsAtRisk());
+                LOGGER.debug("Calculated: {}.", overview);
+                return overview;
             }
             return po;
         });
