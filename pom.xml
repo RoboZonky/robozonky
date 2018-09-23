@@ -55,7 +55,9 @@
     <version.org.antlr>4.7.1</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
     <version.org.jboss.resteasy>3.6.1.Final</version.org.jboss.resteasy>
-    <version.org.junit>5.2.0</version.org.junit>
+    <version.org.junit5>3.1</version.org.junit5>
+    <version.org.junit>5.${version.org.junit5}</version.org.junit>
+    <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
     <version.com.sun.mail>1.6.2</version.com.sun.mail>
@@ -265,7 +267,7 @@
       <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-launcher</artifactId>
-        <version>1.2.0</version>
+        <version>${version.org.junit.platform}</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -325,6 +327,30 @@
       <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
+        <version>1.4.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>0.7</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <skip>${skipTests}</skip>
+          <timestampedReports>false</timestampedReports>
+          <coverageThreshold>85</coverageThreshold>
+          <mutationThreshold>85</mutationThreshold>
+          <targetClasses>
+            <param>com.github.robozonky.*</param>
+          </targetClasses>
+          <excludedMethods>
+            <param>hashCode</param>
+            <param>toString</param>
+          </excludedMethods>
+          <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
+            <value>-Dfile.encoding=${project.build.sourceEncoding}</value>
+          </jvmArgs>
+        </configuration>
         <executions>
           <execution>
             <id>fail-on-coverage</id>
@@ -431,41 +457,24 @@
           <version>3.1.1</version>
         </plugin>
         <plugin>
-          <groupId>org.pitest</groupId>
-          <artifactId>pitest-maven</artifactId>
-          <version>1.4.1</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.pitest</groupId>
-              <artifactId>pitest-junit5-plugin</artifactId>
-              <version>0.5</version>
-            </dependency>
-          </dependencies>
-          <configuration>
-            <skip>${skipTests}</skip>
-            <timestampedReports>false</timestampedReports>
-            <coverageThreshold>85</coverageThreshold>
-            <mutationThreshold>85</mutationThreshold>
-            <targetClasses>
-              <param>com.github.robozonky.*</param>
-            </targetClasses>
-            <excludedMethods>
-              <param>hashCode</param>
-              <param>toString</param>
-            </excludedMethods>
-            <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
-              <value>-Dfile.encoding=${project.build.sourceEncoding}</value>
-            </jvmArgs>
-          </configuration>
-        </plugin>
-        <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.version}</version>
           <configuration>
-            <reuseForks>false</reuseForks>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <workingDirectory>${basedir}/target</workingDirectory>
           </configuration>
+          <dependencies> <!-- possibly remove this after https://github.com/apache/maven-surefire/pull/193 is fixed -->
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-launcher</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-engine</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>

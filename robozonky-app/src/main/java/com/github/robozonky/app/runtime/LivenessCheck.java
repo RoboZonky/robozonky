@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
@@ -29,6 +28,7 @@ import java.util.stream.Collectors;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Schedulers;
@@ -72,13 +72,15 @@ class LivenessCheck extends Refreshable<String> {
 
     @Override
     protected String getLatestSource() {
-        try (final InputStream s = new URL(url).openStream()) {
-            final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
-                    .collect(Collectors.joining(System.lineSeparator()));
-            LOGGER.trace("API info coming from Zonky: {}.", source);
-            final ApiVersion version = ApiVersion.read(source);
-            // need to send parsed version, since the object itself changes every time due to currentApiTime field
-            return version.getBuildVersion();
+        try {
+            return IoUtil.applyCloseable(() -> new URL(url).openStream(), s -> {
+                final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
+                        .collect(Collectors.joining(System.lineSeparator()));
+                LOGGER.trace("API info coming from Zonky: {}.", source);
+                final ApiVersion version = ApiVersion.read(source);
+                // need to send parsed version, since the object itself changes every time due to currentApiTime field
+                return version.getBuildVersion();
+            });
         } catch (final Exception ex) {
             // don't propagate this exception as it is likely to happen and the calling code would WARN about it
             LOGGER.debug("Zonky servers are likely unavailable.", ex);
