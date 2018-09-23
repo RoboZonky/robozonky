@@ -325,6 +325,30 @@
       <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
+        <version>1.4.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>0.7</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <skip>${skipTests}</skip>
+          <timestampedReports>false</timestampedReports>
+          <coverageThreshold>85</coverageThreshold>
+          <mutationThreshold>85</mutationThreshold>
+          <targetClasses>
+            <param>com.github.robozonky.*</param>
+          </targetClasses>
+          <excludedMethods>
+            <param>hashCode</param>
+            <param>toString</param>
+          </excludedMethods>
+          <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
+            <value>-Dfile.encoding=${project.build.sourceEncoding}</value>
+          </jvmArgs>
+        </configuration>
         <executions>
           <execution>
             <id>fail-on-coverage</id>
@@ -429,34 +453,6 @@
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>3.1.1</version>
-        </plugin>
-        <plugin>
-          <groupId>org.pitest</groupId>
-          <artifactId>pitest-maven</artifactId>
-          <version>1.4.1</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.pitest</groupId>
-              <artifactId>pitest-junit5-plugin</artifactId>
-              <version>0.5</version>
-            </dependency>
-          </dependencies>
-          <configuration>
-            <skip>${skipTests}</skip>
-            <timestampedReports>false</timestampedReports>
-            <coverageThreshold>85</coverageThreshold>
-            <mutationThreshold>85</mutationThreshold>
-            <targetClasses>
-              <param>com.github.robozonky.*</param>
-            </targetClasses>
-            <excludedMethods>
-              <param>hashCode</param>
-              <param>toString</param>
-            </excludedMethods>
-            <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
-              <value>-Dfile.encoding=${project.build.sourceEncoding}</value>
-            </jvmArgs>
-          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
