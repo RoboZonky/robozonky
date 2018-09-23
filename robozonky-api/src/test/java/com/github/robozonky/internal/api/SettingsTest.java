@@ -37,6 +37,7 @@ class SettingsTest {
     @AfterEach
     void reinit() {
         Settings.INSTANCE.reinit();
+        System.clearProperty(Settings.FILE_LOCATION_PROPERTY);
     }
 
     @Test
