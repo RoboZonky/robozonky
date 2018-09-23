@@ -17,9 +17,10 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -67,11 +68,17 @@ final class GoogleCredentialProvider implements CredentialProvider {
         this.secrets = secret;
     }
 
-    private AuthorizationCodeFlow createFlow(final HttpTransport httpTransport) throws IOException {
+    private static Path getLocalFolder() {
         final String dirName = Properties.GOOGLE_LOCAL_FOLDER.getValue()
                 .orElseThrow(() -> new IllegalStateException("Not possible."));
+        return Paths.get("").resolve(dirName).toAbsolutePath();
+    }
+
+    private AuthorizationCodeFlow createFlow(final HttpTransport httpTransport) throws IOException {
+        final Path localFolder = getLocalFolder();
+        LOGGER.debug("Will look for Google credentials in '{}'.", localFolder);
         return new GoogleAuthorizationCodeFlow.Builder(httpTransport, Util.JSON_FACTORY, createClientSecrets(), SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new File(dirName)))
+                .setDataStoreFactory(new FileDataStoreFactory(localFolder.toFile()))
                 .setAccessType("offline")
                 .build();
     }
