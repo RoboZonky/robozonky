@@ -41,6 +41,10 @@ import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Updates delinquency information based on the information about loans that are either currently delinquent or no
+ * longer active. Will fire events on new delinquencies, defaults and/or loans no longer delinquent.
+ */
 final class Delinquencies implements Payload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquencies.class);
@@ -108,11 +112,6 @@ final class Delinquencies implements Payload {
                 });
     }
 
-    /**
-     * Updates delinquency information based on the information about loans that are either currently delinquent or no
-     * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
-     * @param transactional The API that will be used to retrieve the loan instances, store state and fire events.
-     */
     static void notify(final Transactional transactional) {
         LOGGER.debug("Updating delinquent loans.");
         final Tenant tenant = transactional.getTenant();
