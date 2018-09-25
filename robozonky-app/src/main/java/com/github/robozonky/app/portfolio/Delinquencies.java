@@ -97,6 +97,7 @@ public class Delinquencies {
 
     static void update(final Transactional transactional, final Collection<Investment> nowDelinquent,
                        final Set<Integer> knownDelinquents, final Set<Integer> knownDefaulted) {
+        LOGGER.debug("Processing delinquent loans by category.");
         // process new defaults
         final Collection<Investment> defaulted = nowDelinquent.stream()
                 .filter(Delinquencies::isDefaulted)
@@ -111,6 +112,7 @@ public class Delinquencies {
                 .filter(c -> c != DelinquencyCategory.DEFAULTED)
                 .forEach(c -> c.update(transactional, stillDelinquent));
         // process investments that are no longer delinquent
+        LOGGER.debug("Processing loans that are no longer delinquent.");
         knownDelinquents.stream()
                 .filter(d -> nowDelinquent.stream().noneMatch(i -> i.getId() == d))
                 .distinct()
@@ -136,6 +138,7 @@ public class Delinquencies {
                                                           .in("loan.status", "ACTIVE", "PAID_OFF")
                                                           .equals("loan.unpaidLastInst", "true")
                                                           .equals("status", "ACTIVE")))
+                        .parallel() // there's potentially many pages of this; retrieve in parallel
                         .collect(toList());
         final InstanceState<Delinquencies> transactionalState = tenant.getState(Delinquencies.class);
         final Optional<IntStream> delinquents = transactionalState.getValues(DELINQUENT_KEY)
@@ -152,6 +155,7 @@ public class Delinquencies {
             b.put(DEFAULTED_KEY, toIds(delinquentInvestments.stream().filter(Delinquencies::isDefaulted)));
         });
         // update amounts at risk
+        LOGGER.debug("Processing amounts at risk.");
         final Map<Rating, BigDecimal> atRisk = delinquentInvestments.stream()
                 .collect(groupingBy(Investment::getRating,
                                     () -> new EnumMap<>(Rating.class),

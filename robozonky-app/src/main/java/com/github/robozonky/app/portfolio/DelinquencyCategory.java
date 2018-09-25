@@ -100,9 +100,13 @@ enum DelinquencyCategory {
     }
 
     private static Event getEvent(final Tenant tenant, final Investment investment, final int threshold) {
+        LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
         final Loan loan = LoanCache.INSTANCE.getLoan(investment.getLoanId(), tenant);
         final LocalDate since = LocalDate.now().minusDays(investment.getDaysPastDue());
-        return getEventSupplier(threshold).apply(investment, loan, since, getDevelopments(tenant, loan, since));
+        final Collection<Development> developments = getDevelopments(tenant, loan, since);
+        final Event e = getEventSupplier(threshold).apply(investment, loan, since, developments);
+        LOGGER.trace("Done.");
+        return e;
     }
 
     private static String getFieldName(final int dayThreshold) {
@@ -133,7 +137,7 @@ enum DelinquencyCategory {
      * @return IDs of loans that are being tracked in this category.
      */
     public int[] update(final Transactional transactional, final Collection<Investment> active) {
-        LOGGER.trace("Updating {}.", this);
+        LOGGER.debug("Updating {}.", this);
         final Tenant tenant = transactional.getTenant();
         final InstanceState<DelinquencyCategory> transactionalState = tenant.getState(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
