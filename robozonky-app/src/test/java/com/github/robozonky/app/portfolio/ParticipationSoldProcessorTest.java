@@ -31,7 +31,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.SoldParticipationCache;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicTest;
@@ -60,7 +60,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
             final String name = category + " " +
                     (successExpected ? "is" : "is not") +
                     " a participation sale.";
-            final Transactional transactional = createTransactional();
+            final TransactionalPortfolio transactional = createTransactionalPortfolio();
             final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
             final DynamicTest test = DynamicTest.dynamicTest(name, () -> {
                 assertThat(processor.isApplicable(transfer)).isEqualTo(successExpected);
@@ -75,7 +75,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final Transactional transactional = new Transactional(portfolio, tenant);
+        final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
         final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
         final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
         assertThatThrownBy(() -> processor.processApplicable(transfer))
@@ -100,7 +100,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getInvestmentByLoanId(eq(loan.getId()))).thenReturn(Optional.of(investment));
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final Transactional transactional = new Transactional(portfolio, tenant);
+        final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
         final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
         processor.processApplicable(transfer);
         transactional.run(); // make sure the transaction is processed so that events could be fired

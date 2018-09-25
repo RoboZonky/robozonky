@@ -101,9 +101,9 @@ class PortfolioUpdater implements Runnable,
 
     private Portfolio runIt(final Portfolio old) {
         final Portfolio result = old == null ? Portfolio.create(tenant, blockedAmounts) : old;
-        final Transactional transactional = new Transactional(result, tenant);
-        final CompletableFuture<Transactional> combined = dependants.stream()
-                .map(d -> (Function<Transactional, Transactional>) folio -> {
+        final TransactionalPortfolio transactional = new TransactionalPortfolio(result, tenant);
+        final CompletableFuture<TransactionalPortfolio> combined = dependants.stream()
+                .map(d -> (Function<TransactionalPortfolio, TransactionalPortfolio>) folio -> {
                     LOGGER.trace("Running {}.", d);
                     d.accept(folio);
                     LOGGER.trace("Finished {}.", d);
@@ -113,7 +113,7 @@ class PortfolioUpdater implements Runnable,
                         CompletableFuture::thenApply,
                         (s1, s2) -> s1.thenCombine(s2, (p1, p2) -> p2));
         try {
-            final Transactional p = combined.get();
+            final TransactionalPortfolio p = combined.get();
             p.run(); // persist stored information
             return p.getPortfolio();
         } catch (final Throwable t) {

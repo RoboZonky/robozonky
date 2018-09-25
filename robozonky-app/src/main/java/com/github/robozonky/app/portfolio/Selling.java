@@ -35,7 +35,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SessionState;
 import com.github.robozonky.common.remote.Select;
@@ -63,7 +63,7 @@ public class Selling implements PortfolioDependant {
         return new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, auth));
     }
 
-    private static Optional<Investment> processSale(final Transactional transactional, final RecommendedInvestment r,
+    private static Optional<Investment> processSale(final TransactionalPortfolio transactional, final RecommendedInvestment r,
                                                     final SessionState<Investment> sold) {
         final Tenant tenant = transactional.getTenant();
         transactional.fire(new SaleRequestedEvent(r));
@@ -80,7 +80,7 @@ public class Selling implements PortfolioDependant {
         return Optional.of(i);
     }
 
-    private static void sell(final Transactional transactional, final SellStrategy strategy) {
+    private static void sell(final TransactionalPortfolio transactional, final SellStrategy strategy) {
         final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
@@ -108,7 +108,7 @@ public class Selling implements PortfolioDependant {
      * @param transactional Portfolio of investments to choose from.
      */
     @Override
-    public void accept(final Transactional transactional) {
+    public void accept(final TransactionalPortfolio transactional) {
         strategy.get().ifPresent(s -> sell(transactional, s));
     }
 }

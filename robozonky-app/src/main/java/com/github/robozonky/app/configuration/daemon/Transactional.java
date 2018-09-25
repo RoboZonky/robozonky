@@ -16,9 +16,14 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.portfolio.Portfolio;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Updates to state, which happen through {@link #getTenant()}, are postponed until {@link #run()} is called. Likewise
@@ -26,17 +31,51 @@ import com.github.robozonky.app.portfolio.Portfolio;
  *
  * This class is thread-safe, since multiple threads may want to fire events and/or store state data at the same time.
  */
-public class Transactional extends SimpleTransactional implements Runnable {
+public class Transactional implements Runnable {
 
-    private final Portfolio portfolio;
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    public Transactional(final Portfolio portfolio, final Tenant tenant) {
-        super(tenant);
-        this.portfolio = portfolio;
+    private final Tenant tenant;
+    private final Queue<Event> eventsToFire = new ConcurrentLinkedQueue<>();
+    private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
+
+    public Transactional(final Tenant tenant) {
+        this.tenant = new TransactionalTenant(this, tenant);
     }
 
-    public Portfolio getPortfolio() {
-        return portfolio;
+    Queue<Runnable> getStateUpdates() {
+        return stateUpdates;
     }
 
+    /**
+     * Returns {@link TransactionalTenant} instead of the default implementation.
+     * @return
+     */
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    /**
+     * Stores event for future firing when {@link #run()}  is called.
+     * @param event
+     */
+    public void fire(final Event event) {
+        LOGGER.trace("Event stored within transaction: {}.", event);
+        eventsToFire.add(event);
+    }
+
+    /**
+     * Fire events and update state. Clears internal state, so that the next {@link #run()} call would not do anything
+     * unless {@link #fire(Event)} or state updates are performed inbetween.
+     */
+    @Override
+    public void run() {
+        LOGGER.debug("Replaying transaction.");
+        while (!stateUpdates.isEmpty()) {
+            stateUpdates.poll().run();
+        }
+        while (!eventsToFire.isEmpty()) {
+            Events.fire(eventsToFire.poll());
+        }
+    }
 }

@@ -29,7 +29,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
@@ -49,7 +49,7 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
     private final Zonky zonky = harmlessZonky(10_000);
     private final Tenant tenant = mockTenant(zonky);
     private final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-    private final Transactional transactional = new Transactional(portfolio, tenant);
+    private final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
     private final InstanceState<IncomeProcessor> state =
             TenantState.of(tenant.getSessionInfo()).in(IncomeProcessor.class);
 

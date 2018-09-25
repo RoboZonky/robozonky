@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 
@@ -42,7 +42,7 @@ public final class IncomeProcessor implements PortfolioDependant {
         processor.accept(transaction);
     }
 
-    private static int processNewTransactions(final Transactional transactional, final Stream<Transaction> transactions,
+    private static int processNewTransactions(final TransactionalPortfolio transactional, final Stream<Transaction> transactions,
                                               final int lastSeenTransactionId) {
         return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
@@ -57,7 +57,7 @@ public final class IncomeProcessor implements PortfolioDependant {
     }
 
     @Override
-    public void accept(final Transactional transactional) {
+    public void accept(final TransactionalPortfolio transactional) {
         final InstanceState<IncomeProcessor> state =
                 transactional.getTenant().getState(IncomeProcessor.class);
         final int lastSeenTransactionId = state.getValue(STATE_KEY)

@@ -23,15 +23,15 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SoldParticipationCache;
 
 class ParticipationSoldProcessor extends TransactionProcessor {
 
-    private final Transactional transactional;
+    private final TransactionalPortfolio transactional;
 
-    ParticipationSoldProcessor(final Transactional transactional) {
+    ParticipationSoldProcessor(final TransactionalPortfolio transactional) {
         this.transactional = transactional;
     }
 

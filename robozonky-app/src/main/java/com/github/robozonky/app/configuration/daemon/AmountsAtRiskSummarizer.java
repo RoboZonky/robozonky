@@ -38,7 +38,7 @@ final class AmountsAtRiskSummarizer implements PortfolioDependant {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmountsAtRiskSummarizer.class);
 
     @Override
-    public void accept(final Transactional transactional) {
+    public void accept(final TransactionalPortfolio transactional) {
         final Tenant tenant = transactional.getTenant();
         final Map<Rating, BigDecimal> summarized = tenant.call(Zonky::getDelinquentInvestments)
                 .parallel() // possibly many pages' worth of results; fetch in parallel

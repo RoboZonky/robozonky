@@ -38,7 +38,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         when(z.getInvestments(any())).thenAnswer(invocation -> Stream.empty());
         final Tenant a = mockTenant(z);
-        final Transactional p = new Transactional(null, a);
+        final TransactionalPortfolio p = new TransactionalPortfolio(null, a);
         Delinquencies.notify(p);
         p.run(); // finish the transaction
         verify(z, atLeastOnce()).getInvestments(any());
@@ -79,7 +79,7 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
                 .build();
         // make sure new delinquencies are reported and stored
         final Tenant t = mockTenant();
-        final Transactional p = new Transactional(null, t);
+        final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
         Delinquencies.update(p, Collections.singleton(i), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
         assertThat(this.getNewEvents()).hasSize(1);
@@ -128,7 +128,7 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         final Tenant t = mockTenant(zonky);
         // register delinquence
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
-        final Transactional p = new Transactional(null, t);
+        final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
         Delinquencies.notify(p);
         p.run(); // finish the transaction
         this.readPreexistingEvents(); // ignore events just emitted
@@ -155,7 +155,7 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
                 .build();
         // register delinquency
         final Tenant t = mockTenant();
-        final Transactional p = new Transactional(null, t);
+        final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
         Delinquencies.update(p, Collections.emptyList(), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
         this.readPreexistingEvents(); // ignore events just emitted

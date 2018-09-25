@@ -25,7 +25,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.util.Maps;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class BlockedAmountProcessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(fee, forLoan));
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         final Portfolio po = Portfolio.create(tenant, p);
-        final Transactional tp = new Transactional(po, tenant);
+        final TransactionalPortfolio tp = new TransactionalPortfolio(po, tenant);
         final BlockedAmountProcessor bp = p.get();
         bp.accept(tp);
         assertThat(bp.getAdjustments()).containsExactly(Maps.entry(Rating.D, BigDecimal.TEN));
@@ -78,7 +78,7 @@ class BlockedAmountProcessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(forLoan));
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         final Portfolio po = Portfolio.create(tenant, sp);
-        final Transactional tp = new Transactional(po, tenant);
+        final TransactionalPortfolio tp = new TransactionalPortfolio(po, tenant);
         p.accept(tp); // no change in blocked amounts, just the synthetic is removed in favor of real
         assertThat(p.getAdjustments()).containsExactly(Maps.entry(Rating.D, BigDecimal.TEN));
         // and now remove even the real one as it was finally processed by Zonky

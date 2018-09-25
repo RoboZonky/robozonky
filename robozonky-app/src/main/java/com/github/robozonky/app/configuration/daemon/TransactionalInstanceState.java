@@ -34,10 +34,10 @@ final class TransactionalInstanceState<T> implements InstanceState<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalInstanceState.class);
 
-    private SimpleTransactional transactional;
+    private Transactional transactional;
     private final InstanceState<T> parent;
 
-    public TransactionalInstanceState(final SimpleTransactional transactional, final InstanceState<T> parent) {
+    public TransactionalInstanceState(final Transactional transactional, final InstanceState<T> parent) {
         this.transactional = transactional;
         this.parent = parent;
     }

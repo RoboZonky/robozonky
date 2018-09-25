@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
-import java.util.function.Consumer;
+import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.portfolio.Portfolio;
 
-import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+public class TransactionalPortfolio extends Transactional implements Runnable {
 
-/**
- * Represents code to be executed after a successful portfolio update, administered from within this package.
- */
-@FunctionalInterface
-public interface PortfolioDependant extends Consumer<TransactionalPortfolio> {
+    private final Portfolio portfolio;
+
+    public TransactionalPortfolio(final Portfolio portfolio, final Tenant tenant) {
+        super(tenant);
+        this.portfolio = portfolio;
+    }
+
+    public Portfolio getPortfolio() {
+        return portfolio;
+    }
 
 }

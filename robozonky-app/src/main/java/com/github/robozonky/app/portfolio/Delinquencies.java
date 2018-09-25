@@ -29,7 +29,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.SimpleTransactional;
+import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
@@ -62,7 +62,7 @@ public class Delinquencies {
         return investments.boxed().collect(Collectors.toSet());
     }
 
-    private static void processNoLongerDelinquent(final SimpleTransactional transactional, final Investment investment,
+    private static void processNoLongerDelinquent(final Transactional transactional, final Investment investment,
                                                   final PaymentStatus status) {
         final Loan loan = LoanCache.INSTANCE.getLoan(investment, transactional.getTenant());
         switch (status) {
@@ -79,7 +79,7 @@ public class Delinquencies {
         }
     }
 
-    static void update(final SimpleTransactional transactional, final Collection<Investment> nowDelinquent,
+    static void update(final Transactional transactional, final Collection<Investment> nowDelinquent,
                        final Set<Integer> knownDelinquents, final Set<Integer> knownDefaulted) {
         LOGGER.debug("Processing delinquent loans by category.");
         // process new defaults
@@ -114,7 +114,7 @@ public class Delinquencies {
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
      * @param transactional The API that will be used to retrieve the loan instances.
      */
-    public static void notify(final SimpleTransactional transactional) {
+    public static void notify(final Transactional transactional) {
         LOGGER.debug("Updating delinquent loans.");
         final Tenant tenant = transactional.getTenant();
         final Collection<Investment> delinquentInvestments = tenant.call(Zonky::getDelinquentInvestments)

@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.LazyInitialized;
@@ -102,7 +102,7 @@ public final class BlockedAmountProcessor implements PortfolioDependant {
     }
 
     @Override
-    public void accept(final Transactional transactional) {
+    public void accept(final TransactionalPortfolio transactional) {
         final BigDecimal before = calculateUnprocessedBlockedBalance();
         realById.set(readBlockedAmounts(transactional.getTenant()));
         final BigDecimal after = calculateUnprocessedBlockedBalance();

@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verify;
 class TransactionalTenantTest {
 
     private final Tenant original = mock(Tenant.class);
-    private final Tenant transactional = new TransactionalTenant(mock(Transactional.class), original);
+    private final Tenant transactional = new TransactionalTenant(mock(TransactionalPortfolio.class), original);
 
     @Test
     void delegatesRestrictions() {

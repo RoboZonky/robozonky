@@ -23,14 +23,14 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 
 class LoanRepaidProcessor extends TransactionProcessor {
 
-    private final Transactional transactional;
+    private final TransactionalPortfolio transactional;
 
-    LoanRepaidProcessor(final Transactional transactional) {
+    LoanRepaidProcessor(final TransactionalPortfolio transactional) {
         this.transactional = transactional;
     }
 

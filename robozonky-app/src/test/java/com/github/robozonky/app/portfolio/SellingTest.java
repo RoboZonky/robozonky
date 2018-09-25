@@ -34,7 +34,7 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
@@ -80,7 +80,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
+        final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
         final List<Event> e = getNewEvents();
@@ -102,7 +102,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         final Tenant tenant = mockTenant(zonky);
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
+        final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
         new Selling(NONE_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
         final List<Event> e = getNewEvents();
@@ -124,7 +124,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         final Tenant tenant = mockTenant(zonky, isDryRun);
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final Transactional transactionalPortfolio = new Transactional(portfolio, tenant);
+        final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
         final List<Event> e = getNewEvents();
