@@ -149,6 +149,7 @@ enum DelinquencyCategory {
                 .collect(Collectors.toSet());
         LOGGER.trace("Keeping {}.", keepThese);
         final IntStream addThese = active.stream()
+                .parallel() // there is potentially a lot of these, and each involves several REST requests
                 .filter(d -> !keepThese.contains(d.getLoanId())) // this delinquency is newly over the threshold
                 .filter(d -> isOverThreshold(d, thresholdInDays))
                 .peek(d -> transactional.fire(getEvent(tenant, d, thresholdInDays)))

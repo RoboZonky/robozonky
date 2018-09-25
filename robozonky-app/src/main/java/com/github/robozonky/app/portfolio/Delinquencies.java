@@ -101,6 +101,7 @@ final class Delinquencies implements Payload {
         // process investments that are no longer delinquent
         LOGGER.debug("Processing loans that are no longer delinquent.");
         knownDelinquents.stream()
+                .parallel() // there is potentially a lot of those, and there are REST requests involved
                 .filter(d -> nowDelinquent.stream().noneMatch(i -> i.getId() == d))
                 .distinct()
                 .map(d -> transactional.getTenant().call(z -> z.getInvestment(d)))
@@ -113,11 +114,13 @@ final class Delinquencies implements Payload {
     }
 
     static void notify(final Transactional transactional) {
-        LOGGER.debug("Updating delinquent loans.");
+        LOGGER.debug("Updating delinquent investments.");
         final Tenant tenant = transactional.getTenant();
         final Collection<Investment> delinquentInvestments = tenant.call(Zonky::getDelinquentInvestments)
                 .parallel() // possibly many pages' worth of results; fetch in parallel
                 .collect(toList());
+        final int count = delinquentInvestments.size();
+        LOGGER.debug("There are {} delinquent investments to process.", count);
         final InstanceState<Delinquencies> transactionalState = tenant.getState(Delinquencies.class);
         final Optional<IntStream> delinquents = transactionalState.getValues(DELINQUENT_KEY)
                 .map(s -> s.mapToInt(Integer::parseInt));
