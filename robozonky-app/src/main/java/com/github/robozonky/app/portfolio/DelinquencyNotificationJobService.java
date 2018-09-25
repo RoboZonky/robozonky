@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.jobs;
+package com.github.robozonky.app.portfolio;
 
-import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.Collection;
+import java.util.Collections;
 
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.JobService;
 
-public interface Payload extends Consumer<SecretProvider> {
+public class DelinquencyNotificationJobService implements JobService {
 
-    default String id() {
-        return UUID.randomUUID().toString();
+    private static final Job JOB = new DelinquencyNotificationJob();
+
+    @Override
+    public Collection<Job> getJobs() {
+        return Collections.singleton(JOB);
     }
-
 }

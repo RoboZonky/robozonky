@@ -14,17 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.jobs;
+package com.github.robozonky.app.portfolio;
 
-import java.util.UUID;
-import java.util.function.Consumer;
+import java.time.Duration;
 
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.Payload;
 
-public interface Payload extends Consumer<SecretProvider> {
+public class DelinquencyNotificationJob implements Job {
 
-    default String id() {
-        return UUID.randomUUID().toString();
+    private final Payload payload = new Delinquencies();
+
+    @Override
+    public Duration startIn() {
+        return Duration.ZERO;
     }
 
+    @Override
+    public Duration repeatEvery() {
+        return Duration.ofHours(1);
+    }
+
+    @Override
+    public Payload payload() {
+        return payload;
+    }
 }

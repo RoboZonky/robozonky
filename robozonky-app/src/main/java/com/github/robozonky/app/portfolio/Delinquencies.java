@@ -29,23 +29,22 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
+import com.github.robozonky.common.jobs.Payload;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toList;
 
-public class Delinquencies {
+final class Delinquencies implements Payload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquencies.class);
     private static final String DELINQUENT_KEY = "delinquent", DEFAULTED_KEY = "defaulted";
-
-    private Delinquencies() {
-        // no need for an instance
-    }
 
     private static boolean isDefaulted(final Investment i) {
         return i.getPaymentStatus().map(s -> s == PaymentStatus.PAID_OFF).orElse(false);
@@ -112,9 +111,9 @@ public class Delinquencies {
     /**
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
-     * @param transactional The API that will be used to retrieve the loan instances.
+     * @param transactional The API that will be used to retrieve the loan instances, store state and fire events.
      */
-    public static void notify(final Transactional transactional) {
+    static void notify(final Transactional transactional) {
         LOGGER.debug("Updating delinquent loans.");
         final Tenant tenant = transactional.getTenant();
         final Collection<Investment> delinquentInvestments = tenant.call(Zonky::getDelinquentInvestments)
@@ -136,4 +135,10 @@ public class Delinquencies {
         });
     }
 
+    @Override
+    public void accept(final SecretProvider secretProvider) {
+        final Tenant tenant = new TenantBuilder().withSecrets(secretProvider).build();
+        final Transactional t = new Transactional(tenant);
+        notify(t);
+    }
 }
