@@ -60,7 +60,7 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         when(z.getInvestments(any())).thenAnswer(invocation -> Stream.empty());
         final Tenant a = mockTenant(z);
         final Transactional p = new Transactional(null, a);
-        Delinquencies.update(p);
+        Delinquencies.notify(p);
         p.run(); // finish the transaction
         verify(z, atLeastOnce()).getInvestments(any());
     }
@@ -129,14 +129,14 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         // register delinquence
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         final Transactional p = new Transactional(null, t);
-        Delinquencies.update(p);
+        Delinquencies.notify(p);
         p.run(); // finish the transaction
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is no longer delinquent
         when(zonky.getInvestments(any())).thenReturn(Stream.empty());
         final List<Development> developments = assembleDevelopments(delinquencyStart);
         when(zonky.getDevelopments(eq(l))).thenReturn(developments.stream());
-        Delinquencies.update(p);
+        Delinquencies.notify(p);
         p.run(); // finish the transaction
         // event is fired; only includes developments after delinquency occured, in reverse order
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
@@ -165,30 +165,4 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
     }
 
-    @Test
-    void paid() {
-        final Loan l = Loan.custom()
-                .setId(RANDOM.nextInt(10000))
-                .setRating(Rating.D)
-                .setMyInvestment(mockMyInvestment())
-                .build();
-        final Investment i = Investment.fresh(l, 200)
-                .setPaymentStatus(PaymentStatus.PAID)
-                .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
-                .build();
-        // register delinquence
-        final Zonky zonky = harmlessZonky(10_000);
-        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-        final Tenant t = mockTenant(zonky);
-        final Transactional p = new Transactional(null, t);
-        Delinquencies.update(p, Collections.singleton(i), new HashSet<>(), new HashSet<>());
-        p.run(); // finish the transaction
-        assertThat(Delinquencies.getAmountsAtRisk()).isEmpty();
-        this.readPreexistingEvents(); // ignore events just emitted
-        // the investment is paid
-        Delinquencies.update(p, Collections.emptyList(), Collections.singleton(i.getId()), new HashSet<>());
-        p.run(); // finish the transaction
-        assertThat(Delinquencies.getAmountsAtRisk()).isEmpty();
-        assertThat(this.getNewEvents()).isEmpty();
-    }
 }

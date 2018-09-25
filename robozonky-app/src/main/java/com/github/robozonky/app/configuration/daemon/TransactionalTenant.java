@@ -35,10 +35,10 @@ final class TransactionalTenant implements Tenant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTenant.class);
 
-    private Transactional transactional;
+    private SimpleTransactional transactional;
     private final Tenant parent;
 
-    public TransactionalTenant(final Transactional transactional, final Tenant parent) {
+    public TransactionalTenant(final SimpleTransactional transactional, final Tenant parent) {
         this.transactional = transactional;
         this.parent = parent;
     }

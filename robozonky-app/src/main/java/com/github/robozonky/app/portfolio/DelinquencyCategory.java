@@ -36,7 +36,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
+import com.github.robozonky.app.configuration.daemon.SimpleTransactional;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
@@ -136,7 +136,7 @@ enum DelinquencyCategory {
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
      * @return IDs of loans that are being tracked in this category.
      */
-    public int[] update(final Transactional transactional, final Collection<Investment> active) {
+    public int[] update(final SimpleTransactional transactional, final Collection<Investment> active) {
         LOGGER.debug("Updating {}.", this);
         final Tenant tenant = transactional.getTenant();
         final InstanceState<DelinquencyCategory> transactionalState = tenant.getState(DelinquencyCategory.class);
