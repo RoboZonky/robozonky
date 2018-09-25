@@ -17,6 +17,8 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -34,6 +36,7 @@ public class Portfolio {
     private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
 
     private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
+    private final AtomicReference<Map<Rating, BigDecimal>> amountsAtRisk = new AtomicReference<>(Collections.emptyMap());
     private final Statistics statistics;
     private final RemoteBalance balance;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
@@ -60,8 +63,14 @@ public class Portfolio {
     }
 
     public void balanceUpdated(final BigDecimal newBalance) {
-        LOGGER.debug("Reset.");
+        LOGGER.debug("New balance: {} CZK.", newBalance);
         portfolioOverview.set(null); // reset overview, so that it could be recalculated on-demand
+    }
+
+    public void amountsAtRiskUpdated(final Map<Rating, BigDecimal> newAmountsAtRisk) {
+        LOGGER.debug("New amounts at risk: {}.", newAmountsAtRisk);
+        amountsAtRisk.set(newAmountsAtRisk);
+        portfolioOverview.set(null);
     }
 
     public RemoteBalance getRemoteBalance() {
@@ -73,7 +82,7 @@ public class Portfolio {
             if (po == null) {
                 final PortfolioOverview overview = PortfolioOverview.calculate(balance.get(), statistics,
                                                                                blockedAmounts.get().getAdjustments(),
-                                                                               Delinquencies.getAmountsAtRisk());
+                                                                               amountsAtRisk.get());
                 LOGGER.debug("Calculated: {}.", overview);
                 return overview;
             }

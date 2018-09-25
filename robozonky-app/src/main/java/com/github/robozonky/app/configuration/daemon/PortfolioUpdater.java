@@ -31,7 +31,6 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
-import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.IncomeProcessor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
@@ -75,7 +74,7 @@ class PortfolioUpdater implements Runnable,
         final Supplier<BlockedAmountProcessor> blockedAmounts = BlockedAmountProcessor.createLazy(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, blockedAmounts);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
-        updater.registerDependant(Delinquencies::update);
+        updater.registerDependant(new AmountsAtRiskSummarizer());
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
         // update portfolio with blocked amounts coming from Zonky

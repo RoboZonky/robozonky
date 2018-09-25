@@ -16,14 +16,9 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -33,26 +28,19 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.daemon.Transactional;
 import com.github.robozonky.app.util.LoanCache;
-import com.github.robozonky.common.remote.Select;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toList;
 
 public class Delinquencies {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquencies.class);
-    private static final AtomicReference<Map<Rating, BigDecimal>> AMOUNTS_AT_RISK =
-            new AtomicReference<>(Collections.emptyMap());
     private static final String DELINQUENT_KEY = "delinquent", DEFAULTED_KEY = "defaulted";
 
     private Delinquencies() {
@@ -130,16 +118,12 @@ public class Delinquencies {
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
      * @param transactional The API that will be used to retrieve the loan instances.
      */
-    public static void update(final Transactional transactional) {
+    public static void notify(final Transactional transactional) {
         LOGGER.debug("Updating delinquent loans.");
         final Tenant tenant = transactional.getTenant();
-        final Collection<Investment> delinquentInvestments =
-                tenant.call(z -> z.getInvestments(new Select()
-                                                          .in("loan.status", "ACTIVE", "PAID_OFF")
-                                                          .equals("loan.unpaidLastInst", "true")
-                                                          .equals("status", "ACTIVE")))
-                        .parallel() // there's potentially many pages of this; retrieve in parallel
-                        .collect(toList());
+        final Collection<Investment> delinquentInvestments = tenant.call(Zonky::getDelinquentInvestments)
+                .parallel() // possibly many pages' worth of results; fetch in parallel
+                .collect(toList());
         final InstanceState<Delinquencies> transactionalState = tenant.getState(Delinquencies.class);
         final Optional<IntStream> delinquents = transactionalState.getValues(DELINQUENT_KEY)
                 .map(s -> s.mapToInt(Integer::parseInt));
@@ -154,25 +138,6 @@ public class Delinquencies {
             b.put(DELINQUENT_KEY, toIds(delinquentInvestments.stream()));
             b.put(DEFAULTED_KEY, toIds(delinquentInvestments.stream().filter(Delinquencies::isDefaulted)));
         });
-        // update amounts at risk
-        LOGGER.debug("Processing amounts at risk.");
-        final Map<Rating, BigDecimal> atRisk = delinquentInvestments.stream()
-                .collect(groupingBy(Investment::getRating,
-                                    () -> new EnumMap<>(Rating.class),
-                                    mapping(i -> {
-                                        final BigDecimal principalNotYetReturned = i.getRemainingPrincipal()
-                                                .subtract(i.getPaidInterest())
-                                                .subtract(i.getPaidPenalty())
-                                                .max(BigDecimal.ZERO);
-                                        LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
-                                                     principalNotYetReturned, i.getLoanId(), i.getId());
-                                        return principalNotYetReturned;
-                                    }, reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
-        AMOUNTS_AT_RISK.set(atRisk);
-        LOGGER.debug("Done, new amounts at risk are {}.", atRisk);
     }
 
-    static Map<Rating, BigDecimal> getAmountsAtRisk() {
-        return Delinquencies.AMOUNTS_AT_RISK.get();
-    }
 }
