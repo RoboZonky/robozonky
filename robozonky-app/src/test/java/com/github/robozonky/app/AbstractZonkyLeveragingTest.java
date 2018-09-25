@@ -178,5 +178,10 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         public BigDecimal get() {
             return zonky.getWallet().getAvailableBalance().add(difference);
         }
+
+        @Override
+        public void close() {
+
+        }
     }
 }

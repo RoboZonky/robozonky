@@ -119,8 +119,8 @@ final class DelinquencyNotificationPayload implements Payload {
                 .collect(toList());
         final int count = delinquentInvestments.size();
         LOGGER.debug("There are {} delinquent investments to process.", count);
-        final InstanceState<DelinquencyNotificationPayload> transactionalState = tenant.getState(
-                DelinquencyNotificationPayload.class);
+        final InstanceState<DelinquencyNotificationPayload> transactionalState =
+                tenant.getState(DelinquencyNotificationPayload.class);
         final Optional<IntStream> delinquents = transactionalState.getValues(DELINQUENT_KEY)
                 .map(s -> s.mapToInt(Integer::parseInt));
         if (delinquents.isPresent()) { // process updates and notify

@@ -116,19 +116,26 @@ class PortfolioUpdater implements Runnable,
         }
     }
 
+    private void terminate(final Exception cause) {
+        portfolio.set(null);
+        shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.", cause));
+    }
+
     @Override
     public void run() {
         LOGGER.info("Updating internal data structures, may take a long time for large portfolios.");
-        final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(portfolio.get()), Duration.ofSeconds(1),
-                                                               retryFor);
-        final Optional<Portfolio> p = backoff.get();
-        if (p.isPresent()) {
-            portfolio.set(p.get());
-            LOGGER.info("Update finished.");
-        } else {
-            portfolio.set(null);
-            shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.",
-                                                          backoff.getLastException().orElse(null)));
+        try (final Portfolio old = portfolio.get()) { // close the old portfolio at the end of the operation
+            final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(old), Duration.ofSeconds(1),
+                                                                   retryFor);
+            final Optional<Portfolio> p = backoff.get();
+            if (p.isPresent()) {
+                portfolio.set(p.get());
+                LOGGER.info("Update finished.");
+            } else {
+                terminate(backoff.getLastException().orElse(null));
+            }
+        } catch (final Exception ex) {
+            terminate(null);
         }
     }
 

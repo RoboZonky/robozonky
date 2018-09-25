@@ -16,23 +16,33 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.io.Closeable;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.util.Scheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Available balance register which periodically updates from the remote Zonky API.
  */
-public interface RemoteBalance extends Supplier<BigDecimal> {
+public interface RemoteBalance extends Supplier<BigDecimal>, Closeable {
 
     static RemoteBalance create(final Tenant auth, final Consumer<BigDecimal> changeListener) {
+        final Logger LOGGER = LoggerFactory.getLogger(RemoteBalance.class);
         final RefreshableBalance b = new RefreshableBalance(auth);
-        Scheduler.inBackground().submit(b, Duration.ofMinutes(1));
-        return new RemoteBalanceImpl(b, auth.getSessionInfo().isDryRun(), changeListener);
+        LOGGER.debug("Scheduling remote balance refresh: {}.", b);
+        final ScheduledFuture<?> future = Scheduler.inBackground().submit(b, Duration.ofMinutes(1));
+        final Runnable callToCancel = () -> {
+            LOGGER.debug("Cancelling balance refresh: {}.", b);
+            future.cancel(true);
+        };
+        return new RemoteBalanceImpl(b, auth.getSessionInfo().isDryRun(), changeListener, callToCancel);
     }
 
     /**

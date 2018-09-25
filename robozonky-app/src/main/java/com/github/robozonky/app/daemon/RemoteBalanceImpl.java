@@ -29,17 +29,28 @@ class RemoteBalanceImpl implements RemoteBalance,
     private final boolean isDryRun;
     private final BigDecimal dryRunMinimum = BigDecimal.valueOf(Settings.INSTANCE.getDryRunBalanceMinimum());
     private final ValueTracker latest;
+    private final Runnable closer;
 
+    /**
+     *
+     * @param provider
+     * @param isDryRun
+     * @param changeListener
+     * @param closer This will be called during {@link #close()} to make sure that any resources open during the setup
+     * for this object have been freed when this object is no longer necessary.
+     */
     public RemoteBalanceImpl(final Refreshable<BigDecimal> provider, final boolean isDryRun,
-                             final Consumer<BigDecimal> changeListener) {
+                             final Consumer<BigDecimal> changeListener, final Runnable closer) {
         this.isDryRun = isDryRun;
         this.provider = provider;
         this.latest = new ValueTracker(BigDecimal.valueOf(Integer.MIN_VALUE), changeListener);
+        this.closer = closer;
         provider.registerListener(this);
     }
 
     RemoteBalanceImpl(final Refreshable<BigDecimal> provider, final boolean isDryRun) {
         this(provider, isDryRun, b -> {
+        }, () -> {
         });
     }
 
@@ -74,5 +85,10 @@ class RemoteBalanceImpl implements RemoteBalance,
     public void valueChanged(final BigDecimal oldValue, final BigDecimal newValue) {
         final BigDecimal difference = newValue.subtract(oldValue);
         latest.add(difference);
+    }
+
+    @Override
+    public void close() {
+        closer.run();
     }
 }

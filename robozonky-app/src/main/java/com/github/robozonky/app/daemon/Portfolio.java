@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
@@ -31,7 +33,7 @@ import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Portfolio {
+public class Portfolio implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
 
@@ -88,5 +90,10 @@ public class Portfolio {
             }
             return po;
         });
+    }
+
+    @Override
+    public void close() throws IOException {
+        balance.close();
     }
 }
