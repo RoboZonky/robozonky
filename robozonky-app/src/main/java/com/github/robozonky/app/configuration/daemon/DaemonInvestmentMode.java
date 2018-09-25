@@ -41,7 +41,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
     private final DaemonOperation investing, purchasing;
-    private final PortfolioUpdater portfolioUpdater;
+    private final PortfolioUpdater portfolio;
     private final Tenant tenant;
     private final Consumer<Throwable> shutdownCall;
 
@@ -49,11 +49,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                 final Investor investor, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
+        this.portfolio = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
         this.tenant = tenant;
         this.investing = new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest,
-                                             portfolioUpdater, primaryMarketplaceCheckPeriod);
-        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolioUpdater,
+                                             portfolio, primaryMarketplaceCheckPeriod);
+        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolio,
                                                secondaryMarketplaceCheckPeriod);
         this.shutdownCall = shutdownCall;
     }
@@ -89,22 +89,22 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     private void scheduleDaemons(final Scheduler executor) {
-        executor.run(portfolioUpdater); // first run the update
+        executor.run(portfolio); // first run the update
         // schedule hourly refresh
         final Duration oneHour = Duration.ofHours(1);
-        executor.submit(portfolioUpdater, oneHour, oneHour);
+        executor.submit(portfolio, oneHour, oneHour);
         // run investing and purchasing daemons
         executor.submit(toSkippable(investing), investing.getRefreshInterval());
         executor.submit(toSkippable(purchasing), purchasing.getRefreshInterval(), Duration.ofMillis(250));
     }
 
     private boolean isUpdating() {
-        return !tenant.isAvailable() || portfolioUpdater.isUpdating();
+        return !tenant.isAvailable() || portfolio.isInitializing();
     }
 
     private void scheduleJob(final Job job, final Scheduler executor) {
         final Payload payload = job.payload();
-        final String payloadId = payload.id();
+        final String payloadId = payload.toString();
         final Runnable runnable = () -> {
             LOGGER.debug("Running payload {} ({}).", payloadId, job);
             runSafe(() -> payload.accept(tenant.getSecrets()), shutdownCall);

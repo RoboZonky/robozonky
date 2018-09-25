@@ -26,11 +26,6 @@ public class DelinquencyNotificationJob implements Job {
     private final Payload payload = new Delinquencies();
 
     @Override
-    public Duration startIn() {
-        return Duration.ZERO;
-    }
-
-    @Override
     public Duration repeatEvery() {
         return Duration.ofHours(1);
     }

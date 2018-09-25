@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -46,7 +45,6 @@ class PortfolioUpdater implements Runnable,
     private final Tenant tenant;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
-    private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
     private final Duration retryFor;
@@ -95,8 +93,8 @@ class PortfolioUpdater implements Runnable,
         return Collections.unmodifiableCollection(dependants);
     }
 
-    public boolean isUpdating() {
-        return updating.get();
+    public boolean isInitializing() {
+        return !get().isPresent();
     }
 
     private Portfolio runIt(final Portfolio old) {
@@ -123,16 +121,15 @@ class PortfolioUpdater implements Runnable,
 
     @Override
     public void run() {
-        LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
-        updating.set(true);
+        LOGGER.info("Updating internal data structures, may take a long time for large portfolios.");
         final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(portfolio.get()), Duration.ofSeconds(1),
                                                                retryFor);
         final Optional<Portfolio> p = backoff.get();
         if (p.isPresent()) {
             portfolio.set(p.get());
-            updating.set(false);
-            LOGGER.info("RoboZonky resumed.");
+            LOGGER.info("Update finished.");
         } else {
+            portfolio.set(null);
             shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.",
                                                           backoff.getLastException().orElse(null)));
         }

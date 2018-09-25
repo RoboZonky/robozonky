@@ -19,7 +19,6 @@ package com.github.robozonky.app.version;
 import com.github.robozonky.common.jobs.Payload;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,7 +29,6 @@ class VersionDetectionPayloadTest {
     void test() {
         final Runnable mock = mock(Runnable.class);
         final Payload p = new VersionDetectionPayload(mock);
-        assertThat(p.id()).isNotNull();
         verify(mock, never()).run();
         p.accept(null);
         verify(mock).run();

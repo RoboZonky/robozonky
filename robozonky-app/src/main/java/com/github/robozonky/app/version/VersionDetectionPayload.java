@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.version;
 
-import java.util.UUID;
-
 import com.github.robozonky.common.jobs.Payload;
 import com.github.robozonky.common.secrets.SecretProvider;
 
@@ -31,11 +29,6 @@ final class VersionDetectionPayload implements Payload {
 
     VersionDetectionPayload(final Runnable monitor) {
         this.monitor = monitor;
-    }
-
-    @Override
-    public String id() {
-        return UUID.randomUUID().toString();
     }
 
     @Override
