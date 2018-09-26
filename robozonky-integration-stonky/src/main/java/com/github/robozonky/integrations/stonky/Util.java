@@ -95,7 +95,7 @@ public final class Util {
     static Optional<File> download(final URL url) {
         LOGGER.debug("Will download file from {}.", url);
         try {
-            return IoUtil.applyCloseable(url::openStream, Util::download);
+            return IoUtil.tryFunction(url::openStream, Util::download);
         } catch (final Exception ex) {
             LOGGER.warn("Failed downloading file.", ex);
             return Optional.empty();

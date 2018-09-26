@@ -15,3 +15,4 @@
 #
 
 com.github.robozonky.app.version.VersionDetectionJobService
+com.github.robozonky.app.daemon.DelinquencyNotificationJobService

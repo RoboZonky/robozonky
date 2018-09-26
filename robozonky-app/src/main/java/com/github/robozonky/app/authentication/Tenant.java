@@ -48,7 +48,6 @@ public interface Tenant {
     }
 
     /**
-     *
      * Check that the tenant can be operated on.
      *
      * @return False in cases such as when the user's authentication credentials are being refreshed and therefore

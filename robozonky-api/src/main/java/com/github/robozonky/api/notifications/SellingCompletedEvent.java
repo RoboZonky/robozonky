@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
- * Fired immediately after the investing algorithm is finished selling participations in the secondary marketplace.
+ * Fired immediately after the investing algorithm is finished offering participations in the secondary marketplace.
+ * Does not guarantee anything was actually sold.
  */
 public final class SellingCompletedEvent extends Event implements Financial {
 
@@ -36,7 +37,7 @@ public final class SellingCompletedEvent extends Event implements Financial {
     }
 
     /**
-     * @return The investments that were made.
+     * @return The investments that were offered on the secondary marketplace.
      */
     public Collection<Investment> getInvestments() {
         return investments;

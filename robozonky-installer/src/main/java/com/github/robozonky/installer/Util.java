@@ -50,7 +50,7 @@ final class Util {
     }
 
     public static void writeOutProperties(final Properties properties, final File target) throws IOException {
-        IoUtil.acceptCloseable(() -> Files.newBufferedWriter(target.toPath(), Defaults.CHARSET),
+        IoUtil.tryConsumer(() -> Files.newBufferedWriter(target.toPath(), Defaults.CHARSET),
                                w -> properties.store(w, Defaults.ROBOZONKY_USER_AGENT));
     }
 

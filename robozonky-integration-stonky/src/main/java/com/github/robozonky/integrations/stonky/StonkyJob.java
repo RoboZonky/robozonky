@@ -19,7 +19,6 @@ package com.github.robozonky.integrations.stonky;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.Random;
 import java.util.function.Consumer;
 
 import com.github.robozonky.common.jobs.Job;
@@ -28,8 +27,6 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 
 final class StonkyJob implements Job {
-
-    private final Random random = new Random();
 
     private final Consumer<SecretProvider> stonky;
 
@@ -41,11 +38,14 @@ final class StonkyJob implements Job {
         this.stonky = provider;
     }
 
+    /**
+     *
+     * @return When added to the current time, will result in some random time shortly after midnight tomorrow.
+     */
     @Override
     public Duration startIn() {
-        final int randomSeconds = random.nextInt(1000);
-        final ZonedDateTime triggerOn =
-                LocalDate.now().plusDays(1).atStartOfDay(Defaults.ZONE_ID).plusSeconds(randomSeconds);
+        final Duration random = Job.super.startIn();
+        final ZonedDateTime triggerOn = LocalDate.now().plusDays(1).atStartOfDay(Defaults.ZONE_ID).plus(random);
         return Duration.between(ZonedDateTime.now(), triggerOn);
     }
 
@@ -67,13 +67,10 @@ final class StonkyJob implements Job {
     private final class StonkyPayload implements Payload {
 
         @Override
-        public String id() {
-            return "Stonky";
-        }
-
-        @Override
         public void accept(final SecretProvider secretProvider) {
             stonky.accept(secretProvider);
         }
+
     }
+
 }

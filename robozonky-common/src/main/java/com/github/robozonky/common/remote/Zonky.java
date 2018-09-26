@@ -168,6 +168,13 @@ public class Zonky {
                 .map(raw -> Investment.sanitized(raw, investmentDateSupplier));
     }
 
+    public Stream<Investment> getDelinquentInvestments() {
+        return getInvestments(new Select()
+                                      .in("loan.status", "ACTIVE", "PAID_OFF")
+                                      .equals("loan.unpaidLastInst", "true")
+                                      .equals("status", "ACTIVE"));
+    }
+
     public Loan getLoan(final int id) {
         return Loan.sanitized(loanApi.execute(api -> api.item(id)));
     }

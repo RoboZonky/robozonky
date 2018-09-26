@@ -22,10 +22,12 @@ public interface Job {
 
     /**
      * How long to wait from when this method is called before first running the payload.
-     *
-     * @return
+     * @return By default, this returns a random duration of less than 1000 seconds.
      */
-    Duration startIn();
+    default Duration startIn() {
+        final long randomSeconds = (long) Math.abs(Math.random() * 1000);
+        return Duration.ofSeconds(randomSeconds);
+    }
 
     /**
      * How much time to leave between one task ending and the other starting.
@@ -46,5 +48,4 @@ public interface Job {
      * @return
      */
     Payload payload();
-
 }

@@ -31,7 +31,7 @@ class IoUtilTest {
     @Test
     void closes() throws IOException {
         final InputStream s = mock(InputStream.class);
-        final int result = IoUtil.applyCloseable(() -> s, InputStream::read);
+        final int result = IoUtil.tryFunction(() -> s, InputStream::read);
         assertThat(result).isEqualTo(0);
         verify(s).close();
     }
@@ -39,7 +39,7 @@ class IoUtilTest {
     @Test
     void closesOnException() throws IOException {
         final InputStream s = mock(InputStream.class);
-        assertThatThrownBy(() -> IoUtil.applyCloseable(() -> s, x -> {
+        assertThatThrownBy(() -> IoUtil.tryFunction(() -> s, x -> {
             throw new IOException("Testing");
         })).isInstanceOf(IOException.class);
         verify(s).close();
@@ -48,14 +48,14 @@ class IoUtilTest {
     @Test
     void consumerCloses() throws IOException {
         final InputStream s = mock(InputStream.class);
-        IoUtil.acceptCloseable(() -> s, InputStream::read);
+        IoUtil.tryConsumer(() -> s, InputStream::read);
         verify(s).close();
     }
 
     @Test
     void consumerClosesOnException() throws IOException {
         final InputStream s = mock(InputStream.class);
-        assertThatThrownBy(() -> IoUtil.acceptCloseable(() -> s, x -> {
+        assertThatThrownBy(() -> IoUtil.tryConsumer(() -> s, x -> {
             throw new IOException("Testing");
         })).isInstanceOf(IOException.class);
         verify(s).close();

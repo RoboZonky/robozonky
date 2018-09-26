@@ -33,12 +33,14 @@ import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.configuration.daemon.Transactional;
-import com.github.robozonky.app.portfolio.BlockedAmountProcessor;
-import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.RemoteBalance;
-import com.github.robozonky.app.util.LoanCache;
+import com.github.robozonky.app.daemon.BlockedAmountProcessor;
+import com.github.robozonky.app.daemon.LoanCache;
+import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.app.daemon.RemoteBalance;
+import com.github.robozonky.app.daemon.Transactional;
+import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 
@@ -82,6 +84,17 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt(), false);
     }
 
+    protected static TransactionalPortfolio createTransactionalPortfolio() {
+        final Zonky zonky = harmlessZonky(10_000);
+        return createTransactionalPortfolio(zonky);
+    }
+
+    protected static TransactionalPortfolio createTransactionalPortfolio(final Zonky zonky) {
+        final Tenant tenant = mockTenant(zonky);
+        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
+        return new TransactionalPortfolio(portfolio, tenant);
+    }
+
     protected static Transactional createTransactional() {
         final Zonky zonky = harmlessZonky(10_000);
         return createTransactional(zonky);
@@ -89,8 +102,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     protected static Transactional createTransactional(final Zonky zonky) {
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        return new Transactional(portfolio, tenant);
+        return new Transactional(tenant);
     }
 
     private static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
@@ -123,9 +135,11 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return mockTenant(zonky, true);
     }
 
+    @SuppressWarnings("unchecked")
     protected static Tenant mockTenant(final Zonky zonky, final boolean isDryRun) {
         final Tenant auth = spy(Tenant.class);
         when(auth.getSessionInfo()).thenReturn(isDryRun ? SESSION_DRY : SESSION);
+        when(auth.getSecrets()).thenReturn(SecretProvider.inMemory(SESSION.getUsername()));
         when(auth.getRestrictions()).thenReturn(new Restrictions());
         when(auth.isAvailable()).thenReturn(true);
         doAnswer(invocation -> {
@@ -166,6 +180,11 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         @Override
         public BigDecimal get() {
             return zonky.getWallet().getAvailableBalance().add(difference);
+        }
+
+        @Override
+        public void close() {
+
         }
     }
 }

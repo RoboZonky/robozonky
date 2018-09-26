@@ -65,8 +65,4 @@ final class StateCleaner implements Payload {
         }
     }
 
-    @Override
-    public String id() {
-        return "State cleaner";
-    }
 }

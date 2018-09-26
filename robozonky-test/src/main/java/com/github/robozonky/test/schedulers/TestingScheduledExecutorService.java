@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -44,22 +45,19 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
 
     @Override
     public <V> ScheduledFuture<V> schedule(final Callable<V> callable, final long l, final TimeUnit timeUnit) {
-        submit(callable);
-        return null;
+        return (ScheduledFuture<V>)submit(callable);
     }
 
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(final Runnable runnable, final long l, final long l1,
                                                   final TimeUnit timeUnit) {
-        submit(runnable);
-        return null;
+        return submit(runnable);
     }
 
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable runnable, final long l, final long l1,
                                                      final TimeUnit timeUnit) {
-        submit(runnable);
-        return null;
+        return submit(runnable);
     }
 
     @Override
@@ -87,29 +85,39 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Future<T> submit(final Callable<T> callable) {
         try {
             callable.call();
+            return (Future<T>)getFuture();
         } catch (final Exception ex) {
             LOGGER.warn("Callable failed.", ex);
+            return null;
         }
-        return null;
     }
 
     @Override
-    public <T> Future<T> submit(final Runnable runnable, final T t) {
-        execute(runnable);
-        return null;
+    @SuppressWarnings("unchecked")
+    public <T> ScheduledFuture<T> submit(final Runnable runnable, final T t) {
+        return (ScheduledFuture<T>)submit(runnable);
     }
 
-    @Override
-    public Future<?> submit(final Runnable runnable) {
-        execute(runnable);
-        return new Future<Object>() {
+    private static ScheduledFuture<?> getFuture() {
+        return new ScheduledFuture<Object>() {
+            @Override
+            public int compareTo(final Delayed o) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public long getDelay(final TimeUnit unit) {
+                throw new UnsupportedOperationException();
+            }
+
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
-                throw new UnsupportedOperationException();
+                return true;
             }
 
             @Override
@@ -132,6 +140,12 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
                 return null;
             }
         };
+    }
+
+    @Override
+    public ScheduledFuture<?> submit(final Runnable runnable) {
+        execute(runnable);
+        return getFuture();
     }
 
     @Override
@@ -158,10 +172,13 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
 
     @Override
     public void execute(final Runnable runnable) {
+        LOGGER.debug("Started executing task {}.", runnable);
         try {
             runnable.run();
         } catch (final Exception ex) {
             LOGGER.warn("Task execution failed.", ex);
+        } finally {
+            LOGGER.debug("Finished executing task.");
         }
     }
 
