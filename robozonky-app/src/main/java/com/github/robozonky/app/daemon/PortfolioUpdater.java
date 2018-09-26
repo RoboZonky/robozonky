@@ -40,7 +40,7 @@ class PortfolioUpdater implements Runnable,
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
     private final Tenant tenant;
-    private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
+    private final AtomicReference<Portfolio> currentlyUsedPortfolio = new AtomicReference<>();
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final Consumer<Throwable> shutdownCall;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
@@ -72,7 +72,7 @@ class PortfolioUpdater implements Runnable,
         updater.registerDependant(new AmountsAtRiskSummarizer());
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
-        // update portfolio with blocked amounts coming from Zonky
+        // update currentlyUsedPortfolio with blocked amounts coming from Zonky
         updater.registerDependant(po -> blockedAmounts.get().accept(po));
         // send notifications based on new transactions coming from Zonky
         updater.registerDependant(new IncomeProcessor());
@@ -117,30 +117,30 @@ class PortfolioUpdater implements Runnable,
     }
 
     private void terminate(final Exception cause) {
-        portfolio.set(null);
+        currentlyUsedPortfolio.set(null);
         shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.", cause));
     }
 
     @Override
     public void run() {
         LOGGER.info("Updating internal data structures, may take a long time for large portfolios.");
-        try (final Portfolio old = portfolio.get()) { // close the old portfolio at the end of the operation
+        try (final Portfolio old = currentlyUsedPortfolio.get()) { // close the old one at the end of the operation
             final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(old), Duration.ofSeconds(1),
                                                                    retryFor);
             final Optional<Portfolio> p = backoff.get();
             if (p.isPresent()) {
-                portfolio.set(p.get());
+                currentlyUsedPortfolio.set(p.get());
                 LOGGER.info("Update finished.");
             } else {
                 terminate(backoff.getLastException().orElse(null));
             }
         } catch (final Exception ex) {
-            terminate(null);
+            terminate(ex);
         }
     }
 
     @Override
     public Optional<Portfolio> get() {
-        return Optional.ofNullable(portfolio.get());
+        return Optional.ofNullable(currentlyUsedPortfolio.get());
     }
 }

@@ -89,11 +89,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     private void scheduleDaemons(final Scheduler executor) {
+        LOGGER.debug("Scheduling portfolio updates." );
         executor.run(portfolio); // first run the update
         // schedule hourly refresh
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(portfolio, oneHour, oneHour);
         // run investing and purchasing daemons
+        LOGGER.debug("Scheduling daemon threads." );
         executor.submit(toSkippable(investing), investing.getRefreshInterval());
         executor.submit(toSkippable(purchasing), purchasing.getRefreshInterval(), Duration.ofMillis(250));
     }
@@ -102,7 +104,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return !tenant.isAvailable() || portfolio.isInitializing();
     }
 
-    private void scheduleJob(final Job job, final Scheduler executor) {
+    void scheduleJob(final Job job, final Scheduler executor) {
+        LOGGER.debug("Scheduling batch jobs." );
         final Payload payload = job.payload();
         final String payloadId = payload.toString();
         final Runnable runnable = () -> {

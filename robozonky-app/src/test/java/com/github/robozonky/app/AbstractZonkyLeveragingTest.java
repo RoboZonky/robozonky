@@ -40,6 +40,7 @@ import com.github.robozonky.app.daemon.RemoteBalance;
 import com.github.robozonky.app.daemon.Transactional;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 
@@ -134,9 +135,11 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return mockTenant(zonky, true);
     }
 
+    @SuppressWarnings("unchecked")
     protected static Tenant mockTenant(final Zonky zonky, final boolean isDryRun) {
         final Tenant auth = spy(Tenant.class);
         when(auth.getSessionInfo()).thenReturn(isDryRun ? SESSION_DRY : SESSION);
+        when(auth.getSecrets()).thenReturn(SecretProvider.inMemory(SESSION.getUsername()));
         when(auth.getRestrictions()).thenReturn(new Restrictions());
         when(auth.isAvailable()).thenReturn(true);
         doAnswer(invocation -> {

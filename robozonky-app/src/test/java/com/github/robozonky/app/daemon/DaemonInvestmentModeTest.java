@@ -34,7 +34,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
@@ -48,8 +51,9 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final ExecutorService e = Executors.newFixedThreadPool(1);
         try {
             final StrategyProvider p = mock(StrategyProvider.class);
-            final DaemonInvestmentMode d = new DaemonInvestmentMode(t -> {
-            }, a, b, p, Duration.ofSeconds(1), Duration.ofSeconds(1));
+            final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(t -> {
+            }, a, b, p, Duration.ofSeconds(1), Duration.ofSeconds(1)));
+            doNothing().when(d).scheduleJob(any(), any()); // otherwise jobs will run, which may try to log into Zonky
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock

@@ -43,7 +43,6 @@ import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -56,12 +55,11 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
     @Test
     void nop() {
         final Zonky z = harmlessZonky(10_000);
-        when(z.getInvestments(any())).thenAnswer(invocation -> Stream.empty());
-        final Tenant a = mockTenant(z);
-        final TransactionalPortfolio p = new TransactionalPortfolio(null, a);
+        when(z.getDelinquentInvestments()).thenAnswer(invocation -> Stream.empty());
+        final TransactionalPortfolio p = createTransactionalPortfolio(z);
         DelinquencyNotificationPayload.notify(p);
         p.run(); // finish the transaction
-        verify(z, atLeastOnce()).getInvestments(any());
+        verify(z, atLeastOnce()).getDelinquentInvestments();
     }
 
     @Test
@@ -77,9 +75,8 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
                 .setNextPaymentDate(OffsetDateTime.now().minusDays(1))
                 .build();
         // make sure new delinquencies are reported and stored
-        final Tenant t = mockTenant();
-        final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
-        DelinquencyNotificationPayload.update(p, Collections.singleton(i), new HashSet<>(), new HashSet<>());
+        final TransactionalPortfolio p = createTransactionalPortfolio();
+        DelinquencyNotificationPayload.update(p, Collections.singleton(i), Collections.emptySet(), Collections.emptySet());
         p.run(); // finish the transaction
         assertThat(this.getNewEvents()).hasSize(1);
         assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
@@ -124,15 +121,14 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         when(zonky.getInvestment(eq(my.getId()))).thenReturn(Optional.of(i));
-        final Tenant t = mockTenant(zonky);
         // register delinquence
-        when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
-        final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i));
+        final TransactionalPortfolio p = createTransactionalPortfolio(zonky);
         DelinquencyNotificationPayload.notify(p);
         p.run(); // finish the transaction
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is no longer delinquent
-        when(zonky.getInvestments(any())).thenReturn(Stream.empty());
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
         final List<Development> developments = assembleDevelopments(delinquencyStart);
         when(zonky.getDevelopments(eq(l))).thenReturn(developments.stream());
         DelinquencyNotificationPayload.notify(p);
