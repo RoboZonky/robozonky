@@ -52,7 +52,7 @@ class RefreshableStrategy extends Refreshable<String> {
 
     @Override
     protected String getLatestSource() throws Exception {
-        return IoUtil.applyCloseable(url::openStream, s -> IOUtils.toString(s, Defaults.CHARSET));
+        return IoUtil.tryFunction(url::openStream, s -> IOUtils.toString(s, Defaults.CHARSET));
     }
 
     @Override

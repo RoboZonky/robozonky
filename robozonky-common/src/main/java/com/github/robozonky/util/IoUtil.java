@@ -37,8 +37,8 @@ public final class IoUtil {
      * @return
      * @throws IOException
      */
-    public static <T, S extends Closeable> T applyCloseable(final ThrowingSupplier<S> in,
-                                                            final ThrowingFunction<S, T> f) throws IOException {
+    public static <T, S extends Closeable> T tryFunction(final ThrowingSupplier<S> in,
+                                                         final ThrowingFunction<S, T> f) throws IOException {
         try (final S s = in.get()) {
             return f.apply(s);
         }
@@ -54,8 +54,8 @@ public final class IoUtil {
      * @param <S>
      * @throws IOException
      */
-    public static <S extends Closeable> void acceptCloseable(final ThrowingSupplier<S> in,
-                                                             final ThrowingConsumer<S> f) throws IOException {
+    public static <S extends Closeable> void tryConsumer(final ThrowingSupplier<S> in,
+                                                         final ThrowingConsumer<S> f) throws IOException {
         try (final S s = in.get()) {
             f.accept(s);
         }

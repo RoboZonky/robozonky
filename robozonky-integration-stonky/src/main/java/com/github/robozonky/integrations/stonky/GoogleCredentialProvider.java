@@ -85,7 +85,7 @@ final class GoogleCredentialProvider implements CredentialProvider {
 
     private GoogleClientSecrets createClientSecrets() throws IOException {
         final byte[] key = secrets.get();
-        return IoUtil.applyCloseable(() -> new ByteArrayInputStream(key),
+        return IoUtil.tryFunction(() -> new ByteArrayInputStream(key),
                                      s -> GoogleClientSecrets.load(Util.JSON_FACTORY, new InputStreamReader(s)));
     }
 

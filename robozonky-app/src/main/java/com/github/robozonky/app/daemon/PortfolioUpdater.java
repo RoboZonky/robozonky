@@ -126,7 +126,7 @@ class PortfolioUpdater implements Runnable,
     public void run() {
         LOGGER.info("Updating internal data structures. May take a long time for large portfolios.");
         try { // close the old portfolio
-            IoUtil.acceptCloseable(current::get, old -> {
+            IoUtil.tryConsumer(current::get, old -> {
                 final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(old), Duration.ofSeconds(1),
                                                                        retryFor);
                 final Optional<Portfolio> maybeNew = backoff.get();

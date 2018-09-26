@@ -147,15 +147,15 @@ final class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
     @Override
     protected String getLatestSource() throws Exception {
-        return IoUtil.applyCloseable(() -> UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
-                                                                             this.mavenCentralHostname),
+        return IoUtil.tryFunction(() -> UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                          this.mavenCentralHostname),
                                      s -> IOUtils.toString(s, Defaults.CHARSET));
     }
 
     @Override
     protected Optional<VersionIdentifier> transform(final String source) {
         try {
-            return IoUtil.applyCloseable(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
+            return IoUtil.tryFunction(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
                                          s -> Optional.of(UpdateMonitor.parseVersionString(s)));
         } catch (final Exception ex) {
             LOGGER.debug("Failed parsing source.", ex);

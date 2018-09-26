@@ -73,7 +73,7 @@ class LivenessCheck extends Refreshable<String> {
     @Override
     protected String getLatestSource() {
         try {
-            return IoUtil.applyCloseable(() -> new URL(url).openStream(), s -> {
+            return IoUtil.tryFunction(() -> new URL(url).openStream(), s -> {
                 final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
                         .collect(Collectors.joining(System.lineSeparator()));
                 LOGGER.trace("API info coming from Zonky: {}.", source);

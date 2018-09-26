@@ -131,7 +131,7 @@ public class KeyStoreHandler {
         }
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
-        return IoUtil.applyCloseable(() -> new FileInputStream(keyStoreFile), fis -> {
+        return IoUtil.tryFunction(() -> new FileInputStream(keyStoreFile), fis -> {
             try {
                 ks.load(fis, password);
                 return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(), false);
@@ -223,7 +223,7 @@ public class KeyStoreHandler {
      */
     public void save(final char... secret) throws IOException {
         this.password = secret.clone();
-        IoUtil.acceptCloseable(() -> new BufferedOutputStream(new FileOutputStream(this.keyStoreFile)), os -> {
+        IoUtil.tryConsumer(() -> new BufferedOutputStream(new FileOutputStream(this.keyStoreFile)), os -> {
             try {
                 this.keyStore.store(os, secret);
                 this.dirty.set(false);
