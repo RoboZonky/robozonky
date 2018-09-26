@@ -32,6 +32,7 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
 import com.github.robozonky.util.Backoff;
+import com.github.robozonky.util.IoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ class PortfolioUpdater implements Runnable,
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
     private final Tenant tenant;
-    private final AtomicReference<Portfolio> currentlyUsedPortfolio = new AtomicReference<>();
+    private final AtomicReference<Portfolio> current = new AtomicReference<>();
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final Consumer<Throwable> shutdownCall;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
@@ -117,23 +118,25 @@ class PortfolioUpdater implements Runnable,
     }
 
     private void terminate(final Exception cause) {
-        currentlyUsedPortfolio.set(null);
+        current.set(null);
         shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.", cause));
     }
 
     @Override
     public void run() {
-        LOGGER.info("Updating internal data structures, may take a long time for large portfolios.");
-        try (final Portfolio old = currentlyUsedPortfolio.get()) { // close the old one at the end of the operation
-            final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(old), Duration.ofSeconds(1),
-                                                                   retryFor);
-            final Optional<Portfolio> p = backoff.get();
-            if (p.isPresent()) {
-                currentlyUsedPortfolio.set(p.get());
-                LOGGER.info("Update finished.");
-            } else {
-                terminate(backoff.getLastException().orElse(null));
-            }
+        LOGGER.info("Updating internal data structures. May take a long time for large portfolios.");
+        try { // close the old portfolio
+            IoUtil.acceptCloseable(current::get, old -> {
+                final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(old), Duration.ofSeconds(1),
+                                                                       retryFor);
+                final Optional<Portfolio> maybeNew = backoff.get();
+                if (maybeNew.isPresent()) {
+                    current.set(maybeNew.get());
+                    LOGGER.info("Update finished.");
+                } else {
+                    terminate(backoff.getLastException().orElse(null));
+                }
+            });
         } catch (final Exception ex) {
             terminate(ex);
         }
@@ -141,6 +144,6 @@ class PortfolioUpdater implements Runnable,
 
     @Override
     public Optional<Portfolio> get() {
-        return Optional.ofNullable(currentlyUsedPortfolio.get());
+        return Optional.ofNullable(current.get());
     }
 }
