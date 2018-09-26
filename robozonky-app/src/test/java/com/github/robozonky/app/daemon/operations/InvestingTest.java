@@ -133,16 +133,14 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void someAccepted() {
-        final int loanId = (int) (Math.random() * 1000); // new ID every time to avoid caches
         final Loan loan = Loan.custom()
-                .setId(loanId)
                 .setAmount(100_000)
-                .setRating(Rating.D)
+                .setRating(Rating.C)
                 .setRemainingInvestment(20_000)
-                .setDatePublished(OffsetDateTime.now())
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = harmlessZonky(10_000);
+        final int loanId = loan.getId(); // will be random, to avoid problems with caching
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant auth = mockTenant(z);
         final Investor builder = Investor.build(auth);
