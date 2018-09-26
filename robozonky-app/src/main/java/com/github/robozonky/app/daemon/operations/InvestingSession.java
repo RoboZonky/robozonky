@@ -125,10 +125,12 @@ final class InvestingSession {
      * @return True if investment successful. The investment is reflected in {@link #getResult()}.
      */
     boolean invest(final RecommendedLoan recommendation) {
+        LOGGER.debug("Will attempt to invest in {}.", recommendation);
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
         if (portfolioOverview.getCzkAvailable().compareTo(recommendation.amount()) < 0) {
             // should not be allowed by the calling code
+            LOGGER.debug("Balance was less than recommendation.");
             return false;
         }
         Events.fire(new InvestmentRequestedEvent(recommendation));
