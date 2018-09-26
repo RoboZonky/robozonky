@@ -114,25 +114,25 @@ final class DelinquencyNotificationPayload implements Payload {
     static void notify(final Transactional transactional) {
         LOGGER.debug("Updating delinquent investments.");
         final Tenant tenant = transactional.getTenant();
-        final Collection<Investment> delinquentInvestments = tenant.call(Zonky::getDelinquentInvestments)
+        final Collection<Investment> currentDelinquents = tenant.call(Zonky::getDelinquentInvestments)
                 .parallel() // possibly many pages' worth of results; fetch in parallel
                 .collect(toList());
-        final int count = delinquentInvestments.size();
+        final int count = currentDelinquents.size();
         LOGGER.debug("There are {} delinquent investments to process.", count);
         final InstanceState<DelinquencyNotificationPayload> transactionalState =
                 tenant.getState(DelinquencyNotificationPayload.class);
-        final Optional<IntStream> delinquents = transactionalState.getValues(DELINQUENT_KEY)
+        final Optional<IntStream> knownDelinquents = transactionalState.getValues(DELINQUENT_KEY)
                 .map(s -> s.mapToInt(Integer::parseInt));
-        if (delinquents.isPresent()) { // process updates and notify
+        if (knownDelinquents.isPresent()) { // process updates and notify
             final IntStream defaulted = transactionalState.getValues(DEFAULTED_KEY)
                     .map(s -> s.mapToInt(Integer::parseInt))
                     .orElse(IntStream.empty());
-            update(transactional, delinquentInvestments, toIdSet(delinquents.get()), toIdSet(defaulted));
+            update(transactional, currentDelinquents, toIdSet(knownDelinquents.get()), toIdSet(defaulted));
         }
         // store current state
         transactionalState.update(b -> {
-            b.put(DELINQUENT_KEY, toIds(delinquentInvestments.stream()));
-            b.put(DEFAULTED_KEY, toIds(delinquentInvestments.stream().filter(DelinquencyNotificationPayload::isDefaulted)));
+            b.put(DELINQUENT_KEY, toIds(currentDelinquents.stream()));
+            b.put(DEFAULTED_KEY, toIds(currentDelinquents.stream().filter(DelinquencyNotificationPayload::isDefaulted)));
         });
     }
 

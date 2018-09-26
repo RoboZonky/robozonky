@@ -16,7 +16,9 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.function.Consumer;
 
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -26,6 +28,9 @@ import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
@@ -80,6 +85,17 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
         b.update(BigDecimal.valueOf(-1_001));
         // minimum is set to be a thousand
         Assertions.assertThat(b.get()).isEqualTo(BigDecimal.ZERO);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void closing() throws IOException {
+        final Runnable r = mock(Runnable.class);
+        final RefreshableBalance rb = new RefreshableBalance(mockTenant());
+        RemoteBalance b = new RemoteBalanceImpl(rb, false, mock(Consumer.class), r);
+        verify(r, never()).run();
+        b.close();
+        verify(r).run();
     }
 
 }

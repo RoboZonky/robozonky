@@ -16,22 +16,22 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.state.InstanceState;
+import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.common.jobs.Job;
-import com.github.robozonky.common.jobs.Payload;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-class DelinquencyNotificationJob implements Job {
+class TransactionalInstanceStateTest extends AbstractZonkyLeveragingTest {
 
-    private final Payload payload = new DelinquencyNotificationPayload();
-
-    @Override
-    public Duration repeatEvery() {
-        return Duration.ofHours(12);
+    @SuppressWarnings("unchecked")
+    @Test
+    void delegatesKeys() {
+        final InstanceState<String> parent = mock(InstanceState.class);
+        final TransactionalInstanceState<String> s = new TransactionalInstanceState<>(createTransactional(), parent);
+        s.getKeys();
+        verify(parent).getKeys();
     }
 
-    @Override
-    public Payload payload() {
-        return payload;
-    }
 }

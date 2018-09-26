@@ -35,7 +35,7 @@ import com.github.robozonky.util.LazyInitialized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BlockedAmountProcessor implements PortfolioDependant {
+public class BlockedAmountProcessor implements PortfolioDependant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockedAmountProcessor.class);
 

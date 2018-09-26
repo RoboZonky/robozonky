@@ -19,19 +19,19 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 
 import com.github.robozonky.common.jobs.Job;
-import com.github.robozonky.common.jobs.Payload;
+import org.junit.jupiter.api.Test;
 
-class DelinquencyNotificationJob implements Job {
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-    private final Payload payload = new DelinquencyNotificationPayload();
+class DelinquencyNotificationJobTest {
 
-    @Override
-    public Duration repeatEvery() {
-        return Duration.ofHours(12);
+    @Test
+    void test() {
+        final Job job = new DelinquencyNotificationJob();
+        assertSoftly(softly -> {
+           softly.assertThat(job.payload()).isInstanceOf(DelinquencyNotificationPayload.class);
+           softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofHours(12));
+        });
     }
 
-    @Override
-    public Payload payload() {
-        return payload;
-    }
 }

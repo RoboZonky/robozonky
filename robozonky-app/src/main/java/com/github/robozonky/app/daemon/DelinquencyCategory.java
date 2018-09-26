@@ -131,10 +131,10 @@ enum DelinquencyCategory {
     /**
      * Update internal state trackers and send events if necessary.
      * @param transactional Portfolio to update.
-     * @param active Active delinquencies - ie. payments that are, right now, overdue.
+     * @param delinquents Active delinquencies - ie. payments that are, right now, overdue.
      * @return IDs of loans that are being tracked in this category.
      */
-    public int[] update(final Transactional transactional, final Collection<Investment> active) {
+    public int[] update(final Transactional transactional, final Collection<Investment> delinquents) {
         LOGGER.debug("Updating {}.", this);
         final Tenant tenant = transactional.getTenant();
         final InstanceState<DelinquencyCategory> transactionalState = tenant.getState(DelinquencyCategory.class);
@@ -142,11 +142,11 @@ enum DelinquencyCategory {
         final Set<Integer> keepThese = transactionalState.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
                 .orElse(IntStream.empty())
-                .filter(id -> active.stream().anyMatch(d -> d.getLoanId() == id)) // remove no longer delinquent
+                .filter(id -> delinquents.stream().anyMatch(d -> d.getLoanId() == id)) // remove no longer delinquent
                 .boxed()
                 .collect(Collectors.toSet());
         LOGGER.trace("Keeping {}.", keepThese);
-        final IntStream addThese = active.stream()
+        final IntStream addThese = delinquents.stream()
                 .parallel() // there is potentially a lot of these, and each involves several REST requests
                 .filter(d -> !keepThese.contains(d.getLoanId())) // this delinquency is newly over the threshold
                 .filter(d -> isOverThreshold(d, thresholdInDays))
