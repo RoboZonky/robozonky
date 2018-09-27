@@ -82,6 +82,7 @@
            txt="Pokračováním bude odeslána zkušební notifikace, běžte si pro telefon."
            id="zonkoid.test"/>
   </panel>
+
   <panel id="emailConfigTypeInput" summaryKey="Nastavení e-mailových notifikací">
     <field type="title" align="left" txt="Nastavení e-mailových notifikací" />
 
@@ -91,8 +92,8 @@
         <choice txt="Mám účet na Seznam.cz." value="seznam.cz" set="true"/>
         <choice txt="Mám účet na Gmail.com." value="gmail.com" />
         <choice txt="Používám jiný SMTP server." value="custom" />
-        <choice txt="Chci načíst nastavení ze souboru." value="file" />
-        <choice txt="Chci načíst nastavení z webové adresy." value="url" />
+        <choice txt="Chci načíst nastavení ze souboru. (Nebude se ověřovat.)" value="file" />
+        <choice txt="Chci načíst nastavení z webové adresy. (Nebude se ověřovat.)" value="url" />
       </spec>
     </field>
 
@@ -108,12 +109,39 @@
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Odkaz je povinná položka." />
     </field>
-
   </panel>
-  <panel id="emailUserInput" summaryKey="Nastavení e-mailových notifikací">
-    <field type="title" align="left" txt="Nastavení notifikací do e-mailu" id="email.title"/>
 
-    <field type="staticText" align="left" bold="true" txt="Nastavení e-mailového serveru (GMail, Seznam, ...)"
+  <panel id="simpleEmailUserInput" summaryKey="Zjednodušené nastavení e-mailového serveru">
+    <field type="title" align="left" txt="Zjednodušené nastavení e-mailového serveru" />
+
+    <field type="staticText" align="left" bold="true" txt="Vložte přihlašovací údaje:" />
+    <field type="divider" />
+    <field type="text" variable="smtpUsername">
+      <spec txt="Uživatel:" id="smtp.username" size="20" set=""/>
+    </field>
+    <field type="password" variable="smtpPassword">
+      <spec>
+        <pwd txt="Heslo:" id="smtp.password" size="20" set=""/>
+      </spec>
+    </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" txt="Další nastavení:" />
+    <field type="divider" />
+    <field type="text" variable="smtpTo" summaryKey="Adresát e-mailových notifikací:">
+      <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
+                 txt="Adresát není platný.">
+        <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
+      </validator>
+    </field>
+  </panel>
+
+  <panel id="advancedEmailUserInput" summaryKey="Pokročilé nastavení e-mailového serveru">
+    <field type="title" align="left" txt="Pokročilé nastavení e-mailového serveru" id="email.title"/>
+
+    <field type="staticText" align="left" bold="true" txt="Nastavení e-mailového serveru"
            id="smtp.title"/>
     <field type="divider" />
     <field type="text" variable="smtpTo" summaryKey="Adresát e-mailových notifikací:">
@@ -150,9 +178,11 @@
     <field type="check" variable="smtpIsSsl">
       <spec txt="Vyžaduje SSL." set="false"/>
     </field>
+  </panel>
 
-    <field type="space" />
-    <field type="space" />
+  <panel id="emailNotificationUserInput" summaryKey="Vybrané e-mailové notifikace">
+    <field type="title" align="left" txt="Výběr žádaných notifikací"/>
+
     <field type="staticText" align="left" bold="true" txt="Vyberte notifikace, které si přejete povolit:"
            id="notifications.title"/>
     <field type="divider" />
@@ -169,12 +199,12 @@
       <spec txt="Kritická chyba RoboZonky, robot se pravděpodobně ukončí." set="true"/>
     </field>
 
-
     <field type="space" />
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Pokračováním bude odeslán zkušební e-mail."
            id="email.test"/>
   </panel>
+
   <panel id="jmxUserInput" summaryKey="Nastavení vzdáleného přístupu">
     <field type="title" align="left" txt="Nastavení vzdáleného přístupu k JMX" id="jmx.title"/>
 
