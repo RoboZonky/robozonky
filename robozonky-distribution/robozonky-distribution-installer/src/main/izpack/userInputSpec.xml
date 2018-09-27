@@ -82,6 +82,34 @@
            txt="Pokračováním bude odeslána zkušební notifikace, běžte si pro telefon."
            id="zonkoid.test"/>
   </panel>
+  <panel id="emailConfigTypeInput" summaryKey="Nastavení e-mailových notifikací">
+    <field type="title" align="left" txt="Nastavení e-mailových notifikací" />
+
+    <field type="radio" variable="emailConfigType">
+      <description txt="Vyberte jednu z možností:"/>
+      <spec>
+        <choice txt="Mám účet na Seznam.cz." value="seznam.cz" set="true"/>
+        <choice txt="Mám účet na Gmail.com." value="gmail.com" />
+        <choice txt="Používám jiný SMTP server." value="custom" />
+        <choice txt="Chci načíst nastavení ze souboru." value="file" />
+        <choice txt="Chci načíst nastavení z webové adresy." value="url" />
+      </spec>
+    </field>
+
+    <field type="space"/>
+
+    <field type="file" variable="emailConfig" conditionid="isEmailConfigByFile" summaryKey="Konfigurace ze souboru:">
+      <spec txt="Vyberte soubor s nastavením notifikací:" size="30" />
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Soubor je povinná položka." />
+    </field>
+    <field type="text" variable="emailConfig" conditionid="isEmailConfigByUrl" summaryKey="Konfigurace z webu:">
+      <spec txt="Vložte odkaz na nastavení notifikací:" size="30" />
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Odkaz je povinná položka." />
+    </field>
+
+  </panel>
   <panel id="emailUserInput" summaryKey="Nastavení e-mailových notifikací">
     <field type="title" align="left" txt="Nastavení notifikací do e-mailu" id="email.title"/>
 

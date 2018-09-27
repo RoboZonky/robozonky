@@ -81,6 +81,14 @@
       <name>strategyType</name>
       <value>url</value>
     </condition>
+    <condition type="variable" id="isEmailConfigByFile">
+      <name>emailConfigType</name>
+      <value>file</value>
+    </condition>
+    <condition type="variable" id="isEmailConfigByUrl">
+      <name>emailConfigType</name>
+      <value>url</value>
+    </condition>
   </conditions>
 
   <panels>
@@ -100,6 +108,7 @@
     <panel classname="UserInputPanel" id="strategyUserInput">
       <validator classname="com.github.robozonky.installer.StrategySettingsValidator"/>
     </panel>
+    <panel classname="UserInputPanel" id="emailConfigTypeInput" condition="enableEmailPanel" />
     <panel classname="UserInputPanel" id="emailUserInput" condition="enableEmailPanel">
       <validator classname="com.github.robozonky.installer.EmailSettingsValidator"/>
     </panel>
