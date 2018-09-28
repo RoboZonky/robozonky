@@ -18,9 +18,9 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,15 +30,16 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoanCache {
 
-    public static final LoanCache INSTANCE = new LoanCache();
     private static final int INITIAL_CACHE_SIZE = 20;
     private static final Duration EVICT_AFTER = Duration.ofHours(1);
+    private static final LazyInitialized<LoanCache> INSTANCE = LazyInitialized.create(LoanCache::new);
     private final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
     private final Lock updateLock = new ReentrantLock(true);
     private final AtomicReference<Map<Integer, Pair<Loan, Instant>>> cache = new AtomicReference<>();
@@ -47,6 +48,10 @@ public class LoanCache {
         clean();
         final Duration thirtyMinutes = Duration.ofMinutes(30);
         Scheduler.inBackground().submit(this::evict, thirtyMinutes, thirtyMinutes); // schedule automated eviction
+    }
+
+    public static LoanCache get() {
+        return INSTANCE.get();
     }
 
     private static boolean isExpired(final Pair<Loan, Instant> p) {
@@ -58,7 +63,8 @@ public class LoanCache {
         LOGGER.trace("Evicting loans.");
         runLocked(() -> cache.updateAndGet(storage -> storage.entrySet().stream()
                 .filter(e -> !isExpired(e.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a,
+                                          () -> new ConcurrentHashMap<>(INITIAL_CACHE_SIZE)))));
         LOGGER.trace("Evicted.");
     }
 
@@ -107,7 +113,7 @@ public class LoanCache {
     }
 
     public void clean() {
-        runLocked(() -> cache.set(new HashMap<>(INITIAL_CACHE_SIZE)));
+        runLocked(() -> cache.set(new ConcurrentHashMap<>(INITIAL_CACHE_SIZE)));
     }
 
     private static final class Pair<A, B> {

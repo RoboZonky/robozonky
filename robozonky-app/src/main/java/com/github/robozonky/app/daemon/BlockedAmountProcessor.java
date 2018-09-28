@@ -59,7 +59,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
                 .peek(ba -> LOGGER.debug("Found: {}.", ba))
                 .filter(ba -> ba.getLoanId() > 0)
                 .collect(Collectors.toMap(BlockedAmount::getId, ba -> {
-                    final Loan l = LoanCache.INSTANCE.getLoan(ba.getLoanId(), tenant);
+                    final Loan l = LoanCache.get().getLoan(ba.getLoanId(), tenant);
                     syntheticByLoanId.remove(l.getId()); // remove synthetic
                     return new Blocked(ba.getAmount(), l.getRating()); // replace it with a real item
                 }));

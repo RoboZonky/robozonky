@@ -51,7 +51,7 @@ class LoanRepaidProcessor extends TransactionProcessor {
             logger.debug("Not yet repaid in full: {}.", transfer);
             return;
         }
-        final Loan l = LoanCache.INSTANCE.getLoan(loanId, transactional.getTenant());
+        final Loan l = LoanCache.get().getLoan(loanId, transactional.getTenant());
         transactional.fire(new LoanRepaidEvent(investment, l, transactional.getPortfolio().getOverview()));
     }
 }

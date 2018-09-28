@@ -44,7 +44,7 @@ class ParticipationSoldProcessor extends TransactionProcessor {
     void processApplicable(final Transaction transaction) {
         final int loanId = transaction.getLoanId();
         final Tenant tenant = transactional.getTenant();
-        final Loan l = LoanCache.INSTANCE.getLoan(loanId, tenant);
+        final Loan l = LoanCache.get().getLoan(loanId, tenant);
         final Investment i = lookupOrFail(l, tenant);
         transactional.fire(new InvestmentSoldEvent(i, l, transactional.getPortfolio().getOverview()));
         SoldParticipationCache.forTenant(tenant).markAsSold(loanId);

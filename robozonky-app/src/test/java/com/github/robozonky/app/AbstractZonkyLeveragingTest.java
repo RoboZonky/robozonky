@@ -160,7 +160,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     @AfterEach
     public void clearCache() {
-        LoanCache.INSTANCE.clean();
+        LoanCache.get().clean();
     }
 
     private static final class MockedBalance implements RemoteBalance {

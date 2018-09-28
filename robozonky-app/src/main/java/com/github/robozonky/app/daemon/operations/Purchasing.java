@@ -46,7 +46,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     }
 
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
-        return new ParticipationDescriptor(p, LoanCache.INSTANCE.getLoan(p.getLoanId(), auth));
+        return new ParticipationDescriptor(p, LoanCache.get().getLoan(p.getLoanId(), auth));
     }
 
     @Override

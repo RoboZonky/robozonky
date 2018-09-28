@@ -99,7 +99,7 @@ enum DelinquencyCategory {
 
     private static Event getEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final Loan loan = LoanCache.INSTANCE.getLoan(investment.getLoanId(), tenant);
+        final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), tenant);
         final LocalDate since = LocalDate.now().minusDays(investment.getDaysPastDue());
         final Collection<Development> developments = getDevelopments(tenant, loan, since);
         final Event e = getEventSupplier(threshold).apply(investment, loan, since, developments);

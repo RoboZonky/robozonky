@@ -65,7 +65,7 @@ final class DelinquencyNotificationPayload implements Payload {
 
     private static void processNoLongerDelinquent(final Transactional transactional, final Investment investment,
                                                   final PaymentStatus status) {
-        final Loan loan = LoanCache.INSTANCE.getLoan(investment, transactional.getTenant());
+        final Loan loan = LoanCache.get().getLoan(investment, transactional.getTenant());
         switch (status) {
             case WRITTEN_OFF: // investment is lost for good
                 transactional.fire(new LoanLostEvent(investment, loan));
