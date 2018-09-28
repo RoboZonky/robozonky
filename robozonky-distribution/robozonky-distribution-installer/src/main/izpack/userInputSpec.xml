@@ -16,12 +16,12 @@
 
 <izpack:userinput version="5.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:izpack="http://izpack.org/schema/userinput" xsi:schemaLocation="http://izpack.org/schema/userinput http://izpack.org/schema/5.0/izpack-userinput-5.0.xsd">
   <panel id="zonkyUserInput" summaryKey="Základní nastavení robota">
-    <field type="title" align="left" txt="Nastavení komunikace se Zonky" id="zonky.title"/>
+    <field type="title" align="left" txt="Nastavení komunikace se Zonky" />
 
-    <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky:" id="zonky.title"/>
+    <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky:"/>
     <field type="divider" />
     <field type="text" variable="zonkyUsername">
-      <spec txt="Uživatelské jméno na Zonky:" id="zonky.username" size="20" set="" summaryKey="Uživatelské jméno na Zonky"/>
+      <spec txt="Uživatelské jméno na Zonky:" size="20" set="" summaryKey="Uživatelské jméno na Zonky"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Uživatelské jméno musí mít tvar e-mailové adresy.">
         <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
@@ -29,7 +29,7 @@
     </field>
     <field type="password" variable="zonkyPassword">
       <spec>
-        <pwd txt="Uživatelské heslo:" id="zonky.password" size="20" set=""/>
+        <pwd txt="Uživatelské heslo:" size="20" set=""/>
       </spec>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Heslo je povinná položka." />
@@ -37,7 +37,7 @@
 
     <field type="space" />
     <field type="space" />
-    <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:" id="robozonky.controls"/>
+    <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:"/>
     <field type="divider" />
     <field type="check" variable="isEmailEnabled" summaryKey="Notifikovat e-mailem:">
       <spec txt="Notifikovat e-mailem." set="true"/>
@@ -57,16 +57,16 @@
 
     <field type="space" />
     <field type="space" />
-    <field type="staticText" align="left" bold="true" txt="Pokračováním dojde ke zkušebnímu přihlášení do Zonky."
-           id="zonky.test"/>
+    <field type="staticText" align="left" bold="true" txt="Pokračováním dojde ke zkušebnímu přihlášení do Zonky." />
   </panel>
-  <panel id="zonkoidUserInput">
-    <field type="title" align="left" txt="Nastavení notifikací do Zonkoidu" id="zonkoid.title"/>
 
-    <field type="staticText" align="left" id="zonky.title"
+  <panel id="zonkoidUserInput">
+    <field type="title" align="left" txt="Nastavení notifikací do Zonkoidu" />
+
+    <field type="staticText" align="left"
            txt="Umožní RoboZonky odesílat notifikace do mobilní aplikace Zonkoid. Budete potřebovat šestimístný číselný kod, který najdete v nastavení notifikací v Zonkoidu." />
     <field type="text" variable="zonkoidToken">
-      <spec txt="Vložte kod ze Zonkoidu:" id="zonkoid.token" size="10" set=""/>
+      <spec txt="Vložte kod ze Zonkoidu:" size="10" set=""/>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Kod je povinná položka." />
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
@@ -77,9 +77,7 @@
 
     <field type="space" />
     <field type="space" />
-    <field type="staticText" align="left" bold="true"
-           txt="Pokračováním bude odeslána zkušební notifikace, běžte si pro telefon."
-           id="zonkoid.test"/>
+    <field type="staticText" align="left" bold="true" txt="Pokračováním bude odeslána zkušební notifikace, běžte si pro telefon." />
   </panel>
 
   <panel id="emailConfigTypeInput" summaryKey="Nastavení e-mailových notifikací">
@@ -99,12 +97,12 @@
     <field type="space"/>
 
     <field type="file" variable="emailConfig" conditionid="isEmailConfigByFile" summaryKey="Konfigurace ze souboru:">
-      <spec txt="Vyberte soubor s nastavením notifikací:" size="30" />
+      <spec txt="Vyberte soubor:" size="30" />
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Soubor je povinná položka." />
     </field>
     <field type="text" variable="emailConfig" conditionid="isEmailConfigByUrl" summaryKey="Konfigurace z webu:">
-      <spec txt="Vložte odkaz na nastavení notifikací:" size="30" />
+      <spec txt="Vložte odkaz:" size="30" />
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Odkaz je povinná položka." />
     </field>
@@ -116,11 +114,11 @@
     <field type="staticText" align="left" bold="true" txt="Vložte přihlašovací údaje:" />
     <field type="divider" />
     <field type="text" variable="smtpUsername" summaryKey="Odesílatel:">
-      <spec txt="Uživatel:" id="smtp.username" size="20" set="" />
+      <spec txt="Uživatel:" size="20" set="" />
     </field>
     <field type="password" variable="smtpPassword">
       <spec>
-        <pwd txt="Heslo:" id="smtp.password" size="20" set=""/>
+        <pwd txt="Heslo:" size="20" set=""/>
       </spec>
     </field>
 
@@ -129,7 +127,7 @@
     <field type="staticText" align="left" bold="true" txt="Další nastavení:" />
     <field type="divider" />
     <field type="text" variable="smtpTo" summaryKey="Adresát:">
-      <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
+      <spec txt="Adresát:" size="20" set="${zonkyUsername}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Adresát není platný.">
         <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
@@ -138,25 +136,24 @@
   </panel>
 
   <panel id="advancedEmailUserInput" summaryKey="Pokročilé nastavení e-mailového serveru">
-    <field type="title" align="left" txt="Pokročilé nastavení e-mailového serveru" id="email.title"/>
+    <field type="title" align="left" txt="Pokročilé nastavení e-mailového serveru" />
 
-    <field type="staticText" align="left" bold="true" txt="Nastavení e-mailového serveru"
-           id="smtp.title"/>
+    <field type="staticText" align="left" bold="true" txt="Nastavení e-mailového serveru" />
     <field type="divider" />
     <field type="text" variable="smtpTo" summaryKey="Adresát:">
-      <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
+      <spec txt="Adresát:" size="20" set="${zonkyUsername}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Adresát není platný.">
         <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
       </validator>
     </field>
     <field type="text" variable="smtpHostname" summaryKey="SMTP server pro odesílání notifikací:">
-      <spec txt="Adresa SMTP serveru:" id="smtp.hostname" size="20" set=""/>
+      <spec txt="Adresa SMTP serveru:" size="20" set=""/>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Adresa serveru je povinná položka." />
     </field>
     <field type="text" variable="smtpPort" summaryKey="SMTP port:">
-      <spec txt="Port na SMTP serveru:" id="smtp.port" size="20" set=""/>
+      <spec txt="Port na SMTP serveru:" size="20" set=""/>
       <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator"
                  txt="Port musí být číslo." />
     </field>
@@ -164,11 +161,11 @@
       <spec txt="Vyžaduje autentizaci." set="true"/>
     </field>
     <field type="text" variable="smtpUsername" conditionid="enableSmtpAuthenticationFields" summaryKey="Uživatel SMTP serveru:">
-      <spec txt="Uživatel SMTP:" id="smtp.username" size="20" set="${zonkyUsername}"/>
+      <spec txt="Uživatel SMTP:" size="20" set="${zonkyUsername}"/>
     </field>
     <field type="password" variable="smtpPassword" conditionid="enableSmtpAuthenticationFields">
       <spec>
-        <pwd txt="Heslo k SMTP:" id="smtp.password" size="20" set=""/>
+        <pwd txt="Heslo k SMTP:" size="20" set=""/>
       </spec>
     </field>
     <field type="check" variable="smtpIsTls">
@@ -182,8 +179,7 @@
   <panel id="emailNotificationUserInput" summaryKey="Vybrané e-mailové notifikace">
     <field type="title" align="left" txt="Výběr žádaných notifikací"/>
 
-    <field type="staticText" align="left" bold="true" txt="Vyberte notifikace, které si přejete povolit:"
-           id="notifications.title"/>
+    <field type="staticText" align="left" bold="true" txt="Vyberte notifikace, které si přejete povolit:" />
     <field type="divider" />
     <field type="check" variable="isInvestmentNotificationEnabled" summaryKey="Nové investice a zdraví existujících:">
       <spec txt="Nové investice a zdraví existujících." set="false"/>
@@ -200,53 +196,51 @@
 
     <field type="space" />
     <field type="space" />
-    <field type="staticText" align="left" bold="true" txt="Pokračováním bude odeslán zkušební e-mail."
-           id="email.test"/>
+    <field type="staticText" align="left" bold="true" txt="Pokračováním bude odeslán zkušební e-mail." />
   </panel>
 
   <panel id="jmxUserInput" summaryKey="Nastavení vzdáleného přístupu">
-    <field type="title" align="left" txt="Nastavení vzdáleného přístupu k JMX" id="jmx.title"/>
+    <field type="title" align="left" txt="Nastavení vzdáleného přístupu k JMX" />
 
-    <field type="staticText" align="left" bold="true" txt="Parametry připojení"
-           id="jmx.host.title"/>
+    <field type="staticText" align="left" bold="true" txt="Parametry připojení" />
     <field type="divider" />
     <field type="text" variable="jmxHostname" summaryKey="JMX adresa:">
-      <spec txt="Vnější adresa zařízení:" id="jmx.hostname" size="20" set="${IP_ADDRESS}"/>
+      <spec txt="Vnější adresa zařízení:" size="20" set="${IP_ADDRESS}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Adresa je povinná položka." />
     </field>
     <field type="text" variable="jmxPort" summaryKey="JMX port:">
-      <spec txt="Port pro JMX:" id="jmxPort" size="20" set="7091"/>
+      <spec txt="Port pro JMX:" size="20" set="7091"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator" txt="Port musí být číslo." />
     </field>
     <field type="check" variable="isJmxSecurityEnabled" summaryKey="Vyžadovat autentizaci:">
-      <spec txt="Vyžadovat autentizaci." id="jmxSecurity" size="20" set="false"/>
+      <spec txt="Vyžadovat autentizaci." size="20" set="false"/>
     </field>
     <field type="space" />
     <field type="space" />
-    <field type="staticText" align="left" bold="true" id="jmx.warning.2"
-           txt="Pozor: Nevhodné nastavení může způsobit, že se robot nespustí!" />
+    <field type="staticText" align="left" bold="true" txt="Pozor: Nevhodné nastavení může způsobit, že se robot nespustí!" />
   </panel>
+
   <panel id="strategyUserInput" summaryKey="Nastavení investiční strategie">
-    <field type="title" align="left" txt="Nastavení investiční strategie" id="strategy.title"/>
+    <field type="title" align="left" txt="Nastavení investiční strategie"/>
 
     <field type="radio" variable="strategyType">
-      <description txt="Odkud načíst strategii:" id="strategy.radio"/>
+      <description txt="Odkud načíst strategii:"/>
       <spec>
-        <choice txt="Ze zadaného souboru." id="strategy.file" value="file" set="true"/>
-        <choice txt="Ze zadané webové adresy." id="strategy.url" value="url" />
+        <choice txt="Ze zadaného souboru." value="file" set="true"/>
+        <choice txt="Ze zadané webové adresy." value="url" />
       </spec>
     </field>
 
     <field type="space"/>
 
     <field type="file" variable="strategy" conditionid="isStrategyByFile" summaryKey="Strategie ze souboru:">
-      <spec txt="Vyberte soubor s investiční strategií:" size="30" />
+      <spec txt="Vyberte soubor:" size="30" />
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Strategie je povinná položka." />
     </field>
     <field type="text" variable="strategy" conditionid="isStrategyByUrl" summaryKey="Strategie z webu:">
-      <spec txt="Vložte odkaz na investiční strategii:" size="30" />
+      <spec txt="Vložte odkaz:" size="30" />
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Strategie je povinná položka." />
     </field>
@@ -254,37 +248,29 @@
     <field type="space" />
     <field type="space" />
 
-    <field type="staticText" align="left" bold="true"
-           txt="Strategii si můžete vytvořit na následující webové adrese:"
-           id="strategy.generator.url.1"/>
-    <field type="staticText" align="left" bold="true"
-           txt="https://robozonky.github.io/konfigurace-strategie/"
-           id="strategy.generator.url.2"/>
+    <field type="staticText" align="left" bold="true" txt="Strategii si můžete vytvořit na následující webové adrese:" />
+    <field type="staticText" align="left" bold="true" txt="https://robozonky.github.io/konfigurace-strategie/" />
   </panel>
+
   <panel id="stonkyEnablement" summaryKey="Integrace se Stonky">
     <field type="staticText" align="left"
-           txt="Stonky je tabulka v Google Sheets, která zobrazuje nejrůznější užitečné statistiky o vašem portfoliu."
-           id="stonky.description.1"/>
+           txt="Stonky je tabulka v Google Sheets, která zobrazuje nejrůznější užitečné statistiky o vašem portfoliu." />
     <field type="space" />
 
     <field type="staticText" align="left"
-           txt="Do této tabulky je nejprve potřeba importovat výpis peněženky a investic z Vašeho Google účtu. Následně můžete ručně spustit analýzu, která tato data zpracuje a vykreslí statistiky."
-           id="stonky.description.2"/>
+           txt="Do této tabulky je nejprve potřeba importovat výpis peněženky a investic z Vašeho Google účtu. Následně můžete ručně spustit analýzu, která tato data zpracuje a vykreslí statistiky." />
     <field type="space" />
 
     <field type="staticText" align="left"
-           txt="Aby za vás RoboZonky mohl většinu těchto úkolů udělat, potřebuje k tomu přístup k vašemu Google Drive účtu. Pokud se jej rozhodnete povolit, RoboZonky bude ve Vašem Google Drive pravidelně vytvářet a upravovat složky a tabulky."
-           id="stonky.description.3"/>
+           txt="Aby za vás RoboZonky mohl většinu těchto úkolů udělat, potřebuje k tomu přístup k vašemu Google Drive účtu. Pokud se jej rozhodnete povolit, RoboZonky bude ve Vašem Google Drive pravidelně vytvářet a upravovat složky a tabulky." />
     <field type="space" />
 
     <field type="staticText" align="left"
-           txt="Za tímto účelem se vám během této instalace může otevřít okno prohlížeče, kde budete vyzvání k přidání oprávnění. Pokud se tak nestane, navštivte prosím adresu, kterou místo toho instalátor vypíše do terminálu."
-           id="stonky.description.4"/>
+           txt="Za tímto účelem se Vám během této instalace může otevřít okno prohlížeče, kde budete vyzvání k přidání oprávnění. Pokud se tak nestane, navštivte prosím adresu, kterou místo toho instalátor vypíše do terminálu." />
     <field type="space" />
 
     <field type="staticText" align="left"
-           txt="Nejste-li si jisti, zda dokážete oprávnění přidat, následující pole nezaškrtávejte. Instalátor jinak pravděpodobně skončí chybou nebo se zasekne."
-           id="stonky.description.5"/>
+           txt="Nejste-li si jisti, zda dokážete oprávnění přidat, následující pole nezaškrtávejte. Instalátor jinak pravděpodobně skončí chybou nebo se zasekne." />
     <field type="space" />
 
     <field type="check" variable="isStonkyEnabled" summaryKey="Integrace se Stonky povolena:">
@@ -293,13 +279,11 @@
     <field type="space" />
 
     <field type="staticText" align="left"
-           txt="Google bude s RoboZonky komunikovat přes HTTP na následující adrese. Doporučujeme ponechat výchozí hodnoty."
-           id="stonky.description.6"/>
+           txt="Google bude s RoboZonky komunikovat přes HTTP na následující adrese. Doporučujeme ponechat výchozí hodnoty." />
     <field type="space" />
 
     <field type="staticText" align="left"
-           txt="Přesvědčte se, že nastavení vaší sítě případně firewallu umožní přístup nyní i kdykoli v budoucnu po vypršení platnosti původního Google oprávnění."
-           id="stonky.description.7"/>
+           txt="Přesvědčte se, že nastavení vaší sítě případně firewallu umožní přístup nyní i kdykoli v budoucnu po vypršení platnosti původního Google oprávnění." />
     <field type="space" />
 
     <field type="text" variable="callbackHost" summaryKey="Hostitel:" readonlyCondition="readOnlyGoogleCallbackFields">
@@ -315,9 +299,6 @@
     </field>
     <field type="space" />
 
-    <field type="staticText" align="left"
-           txt="Více o Stonky se dozvíte zde: https://www.facebook.com/groups/204405453512737/."
-           id="stonky.description.8"/>
-
+    <field type="staticText" align="left" txt="Více o Stonky se dozvíte zde: https://www.facebook.com/groups/204405453512737/." />
   </panel>
 </izpack:userinput>
