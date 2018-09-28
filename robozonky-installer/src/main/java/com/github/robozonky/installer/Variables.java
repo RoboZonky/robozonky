@@ -64,4 +64,9 @@ enum Variables {
         return installData.getVariable(key);
     }
 
+    public void setValue(final InstallData installData, final String value) {
+        installData.setVariable(key, value);
+    }
+
+
 }

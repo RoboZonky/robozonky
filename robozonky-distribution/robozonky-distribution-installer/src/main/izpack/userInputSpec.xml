@@ -40,10 +40,10 @@
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:" id="robozonky.controls"/>
     <field type="divider" />
-    <field type="check" variable="isEmailEnabled">
+    <field type="check" variable="isEmailEnabled" summaryKey="Notifikovat e-mailem:">
       <spec txt="Notifikovat e-mailem." set="true"/>
     </field>
-    <field type="check" variable="showStonkyPanel">
+    <field type="check" variable="showStonkyPanel" summaryKey="Integrace se Stonky povolena:">
       <spec txt="Integrovat se Stonky ('Statistics for Zonky'). Vyžaduje Google účet." set="false"/>
     </field>
     <field type="check" variable="isDryRun" summaryKey="Zkušební režim zapnut:">
@@ -52,7 +52,7 @@
     <field type="check" variable="isZonkoidEnabled" summaryKey="Notifikace do aplikace Zonkoid povoleny:">
       <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>
     </field>
-    <field type="check" variable="isJmxEnabled">
+    <field type="check" variable="isJmxEnabled" summaryKey="Vzdálená správa povolena:">
       <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
     </field>
 
@@ -86,7 +86,7 @@
   <panel id="emailConfigTypeInput" summaryKey="Nastavení e-mailových notifikací">
     <field type="title" align="left" txt="Nastavení e-mailových notifikací" />
 
-    <field type="radio" variable="emailConfigType">
+    <field type="radio" variable="emailConfigType" summaryKey="Typ konfigurace:">
       <description txt="Vyberte jednu z možností:"/>
       <spec>
         <choice txt="Mám účet na Seznam.cz." value="seznam.cz" set="true"/>
@@ -116,8 +116,8 @@
 
     <field type="staticText" align="left" bold="true" txt="Vložte přihlašovací údaje:" />
     <field type="divider" />
-    <field type="text" variable="smtpUsername">
-      <spec txt="Uživatel:" id="smtp.username" size="20" set=""/>
+    <field type="text" variable="smtpUsername" summaryKey="Odesílatel:">
+      <spec txt="Uživatel:" id="smtp.username" size="20" set="" />
     </field>
     <field type="password" variable="smtpPassword">
       <spec>
@@ -129,7 +129,7 @@
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Další nastavení:" />
     <field type="divider" />
-    <field type="text" variable="smtpTo" summaryKey="Adresát e-mailových notifikací:">
+    <field type="text" variable="smtpTo" summaryKey="Adresát:">
       <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Adresát není platný.">
@@ -144,7 +144,7 @@
     <field type="staticText" align="left" bold="true" txt="Nastavení e-mailového serveru"
            id="smtp.title"/>
     <field type="divider" />
-    <field type="text" variable="smtpTo" summaryKey="Adresát e-mailových notifikací:">
+    <field type="text" variable="smtpTo" summaryKey="Adresát:">
       <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Adresát není platný.">
@@ -156,7 +156,7 @@
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Adresa serveru je povinná položka." />
     </field>
-    <field type="text" variable="smtpPort">
+    <field type="text" variable="smtpPort" summaryKey="SMTP port:">
       <spec txt="Port na SMTP serveru:" id="smtp.port" size="20" set=""/>
       <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator"
                  txt="Port musí být číslo." />
@@ -164,7 +164,7 @@
     <field type="check" variable="isSmtpAuthenticationEnabled">
       <spec txt="Vyžaduje autentizaci." set="true"/>
     </field>
-    <field type="text" variable="smtpUsername" conditionid="enableSmtpAuthenticationFields">
+    <field type="text" variable="smtpUsername" conditionid="enableSmtpAuthenticationFields" summaryKey="Uživatel SMTP serveru:">
       <spec txt="Uživatel SMTP:" id="smtp.username" size="20" set="${zonkyUsername}"/>
     </field>
     <field type="password" variable="smtpPassword" conditionid="enableSmtpAuthenticationFields">
@@ -173,7 +173,7 @@
       </spec>
     </field>
     <field type="check" variable="smtpIsTls">
-      <spec txt="Vyžaduje TLS." set="false"/>
+      <spec txt="Vyžaduje StartTLS." set="false"/>
     </field>
     <field type="check" variable="smtpIsSsl">
       <spec txt="Vyžaduje SSL." set="false"/>
@@ -186,16 +186,16 @@
     <field type="staticText" align="left" bold="true" txt="Vyberte notifikace, které si přejete povolit:"
            id="notifications.title"/>
     <field type="divider" />
-    <field type="check" variable="isInvestmentNotificationEnabled">
+    <field type="check" variable="isInvestmentNotificationEnabled" summaryKey="Nové investice a zdraví existujících:">
       <spec txt="Nové investice a zdraví existujících." set="false"/>
     </field>
-    <field type="check" variable="isBalanceOver200NotificationEnabled">
+    <field type="check" variable="isBalanceOver200NotificationEnabled" summaryKey="Zůstatek přesáhl 200,- Kč:">
       <spec txt="Zůstatek v peněžence přesáhl 200,- Kč." set="false"/>
     </field>
-    <field type="check" variable="isFailureNotificationEnabled">
+    <field type="check" variable="isFailureNotificationEnabled" summaryKey="Notifikace o chybách:">
       <spec txt="Chyba RoboZonky, robot pravděpodobně pokračuje." set="false"/>
     </field>
-    <field type="check" variable="isCriticalFailureNotificationEnabled">
+    <field type="check" variable="isCriticalFailureNotificationEnabled" summaryKey="Notifikace o kritických chybách:">
       <spec txt="Kritická chyba RoboZonky, robot se pravděpodobně ukončí." set="true"/>
     </field>
 

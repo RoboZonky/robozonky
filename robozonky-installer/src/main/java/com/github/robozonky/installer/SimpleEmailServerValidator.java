@@ -16,39 +16,26 @@
 
 package com.github.robozonky.installer;
 
-import java.io.File;
-import java.util.Properties;
-
-import com.github.robozonky.cli.Feature;
-import com.github.robozonky.cli.NotificationTestingFeature;
 import com.izforge.izpack.api.data.InstallData;
 
-public class SimpleEmailServerValidator extends AbstractValidator {
+public class SimpleEmailServerValidator extends AbstractEmailServerValidator {
 
     @Override
-    protected Status validateDataPossiblyThrowingException(final InstallData installData) {
-        try { // configure e-mail notification properties
-            final Properties emailConfig = Util.configureEmailNotifications(installData);
-            final File emailConfigTarget = File.createTempFile("robozonky-", ".cfg");
-            Util.writeOutProperties(emailConfig, emailConfigTarget);
-            final Feature f = new NotificationTestingFeature(Variables.ZONKY_USERNAME.getValue(installData),
-                                                             emailConfigTarget.toURI().toURL());
-            f.setup();
-            f.test();
-            return Status.OK;
-        } catch (final Exception ex) {
-            LOGGER.warn("Failed sending e-mail.", ex);
-            return Status.WARNING;
+    protected void configure(final InstallData data) {
+        Variables.IS_EMAIL_ENABLED.setValue(data, "true");
+        Variables.SMTP_AUTH.setValue(data, "true");
+        Variables.SMTP_IS_TLS.setValue(data, "false");
+        Variables.SMTP_IS_SSL.setValue(data, "true");
+        Variables.SMTP_PORT.setValue(data, "465");
+        switch (data.getVariable("emailConfigType")) {
+            case "gmail.com":
+                Variables.SMTP_HOSTNAME.setValue(data, "smtp.gmail.com");
+                return;
+            case "seznam.cz":
+                Variables.SMTP_HOSTNAME.setValue(data, "smtp.seznam.cz");
+                return;
+            default:
+                throw new IllegalStateException("Can not happen.");
         }
-    }
-
-    @Override
-    public String getErrorMessageId() {
-        return "Konfigurace se nezdařila. Pravděpodobně se jedná o chybu v RoboZonky.";
-    }
-
-    @Override
-    public String getWarningMessageId() {
-        return "Došlo k chybě při komunikaci s SMTP. E-mailové notifikace nemusí fungovat správně.";
     }
 }
