@@ -17,8 +17,8 @@
 package com.github.robozonky.installer;
 
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
 
@@ -26,6 +26,8 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
 abstract class AbstractEmailServerValidator extends AbstractValidator {
+
+    private ClosingTransport transport;
 
     private static Properties getSmtpProperties(final InstallData installData) {
         final Properties props = new Properties();
@@ -35,8 +37,14 @@ abstract class AbstractEmailServerValidator extends AbstractValidator {
         return props;
     }
 
-    Transport getTransport(final Session session) throws NoSuchProviderException {
-        return session.getTransport("smtp");
+    /**
+     * The whole point of this horrible hack is to give the tests a chance to catch the try-with-resources statement
+     * happening in {@link #validateDataPossiblyThrowingException(InstallData)}. Otherwise PITest would show failing
+     * mutations that are unkillable.
+     * @return
+     */
+    ClosingTransport getTransport() {
+        return transport;
     }
 
     @Override
@@ -44,12 +52,13 @@ abstract class AbstractEmailServerValidator extends AbstractValidator {
         configure(installData);
         final Properties smtpProps = getSmtpProperties(installData);
         final Session session = Session.getInstance(smtpProps, null);
-        try (final Transport transport = getTransport(session)) {
+        try (final ClosingTransport t = new ClosingTransport(session.getTransport("smtp"))) {
+            transport = t;
             final String host = Variables.SMTP_HOSTNAME.getValue(installData);
-            final int port =  Integer.parseInt(Variables.SMTP_PORT.getValue(installData));
+            final int port = Integer.parseInt(Variables.SMTP_PORT.getValue(installData));
             LOGGER.debug("Connecting to {}:{} with {}.", host, port, smtpProps);
-            transport.connect(host, port, Variables.SMTP_USERNAME.getValue(installData),
-                              Variables.SMTP_PASSWORD.getValue(installData));
+            t.getTransport().connect(host, port, Variables.SMTP_USERNAME.getValue(installData),
+                                     Variables.SMTP_PASSWORD.getValue(installData));
             return DataValidator.Status.OK;
         } catch (final MessagingException ex) {
             LOGGER.warn("Failed authenticating with SMTP server.", ex);
@@ -67,5 +76,29 @@ abstract class AbstractEmailServerValidator extends AbstractValidator {
     @Override
     public String getErrorMessageId() {
         return "Něco se nepodařilo. Pravděpodobně se jedná o chybu v RoboZonky.";
+    }
+
+    static final class ClosingTransport implements AutoCloseable {
+
+        private final Transport transport;
+        private final AtomicBoolean closed = new AtomicBoolean(false);
+
+        public ClosingTransport(final Transport transport) {
+            this.transport = transport;
+        }
+
+        public Transport getTransport() {
+            return transport;
+        }
+
+        public AtomicBoolean getClosed() {
+            return closed;
+        }
+
+        @Override
+        public void close() throws MessagingException {
+            closed.set(true);
+            transport.close();
+        }
     }
 }

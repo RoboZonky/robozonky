@@ -17,6 +17,8 @@
 package com.github.robozonky.installer;
 
 import java.util.UUID;
+import javax.mail.MessagingException;
+import javax.mail.Transport;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -33,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AdvancedEmailServerValidatorTest {
@@ -94,9 +97,10 @@ class AdvancedEmailServerValidatorTest {
                 .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
         when(data.getVariable(eq(Variables.SMTP_TO.getKey())))
                 .thenReturn("recipient@server.cz");
-        final DataValidator validator = new AdvancedEmailServerValidator();
+        final AdvancedEmailServerValidator validator = new AdvancedEmailServerValidator();
         final DataValidator.Status result = validator.validateData(data);
         assertThat(result).isEqualTo(DataValidator.Status.OK);
+        assertThat(validator.getTransport().getClosed()).isTrue();
     }
 
     @Test
@@ -111,8 +115,17 @@ class AdvancedEmailServerValidatorTest {
                 .thenReturn(String.valueOf(EMAIL.getSmtp().getPort()));
         when(data.getVariable(eq(Variables.SMTP_HOSTNAME.getKey())))
                 .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
-        final DataValidator validator = new AdvancedEmailServerValidator();
+        final AdvancedEmailServerValidator validator = new AdvancedEmailServerValidator();
         final DataValidator.Status result = validator.validateData(data);
         assertThat(result).isEqualTo(DataValidator.Status.WARNING);
+        assertThat(validator.getTransport().getClosed()).isTrue();
+    }
+
+    @Test
+    void closingTransport() throws MessagingException {
+        final Transport t = mock(Transport.class);
+        final AbstractEmailServerValidator.ClosingTransport ct = new AbstractEmailServerValidator.ClosingTransport(t);
+        ct.close();
+        verify(t).close();
     }
 }
