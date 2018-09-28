@@ -25,7 +25,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
-import com.github.robozonky.util.LazyInitialized;
+import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

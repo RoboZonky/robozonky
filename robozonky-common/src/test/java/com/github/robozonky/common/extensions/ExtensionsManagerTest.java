@@ -22,7 +22,7 @@ import java.util.ServiceLoader;
 import java.util.UUID;
 
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.util.LazyInitialized;
+import com.github.robozonky.internal.util.LazyInitialized;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.stream.IntStream;
 
@@ -30,6 +31,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
+import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,23 +51,23 @@ public final class FinancialCalculator {
     private static final BigDecimal ONE_PERCENT = new BigDecimal("0.01"), FIVE_PERCENT = new BigDecimal("0.05"),
             TEN_PERCENT = new BigDecimal("0.1"), FIFTEEN_PERCENT = new BigDecimal("0.15"),
             TWENTY_PERCENT = new BigDecimal("0.2");
-    private static final EnumMap<Rating, BigDecimal> FEES = new EnumMap<Rating, BigDecimal>(Rating.class);
+    private static final LazyInitialized<Map<Rating, BigDecimal>> FEES = LazyInitialized.create(() -> {
+        final Map<Rating, BigDecimal> result = new EnumMap<>(Rating.class);
+        result.put(Rating.AAAAA, new BigDecimal("0.002"));
+        result.put(Rating.AAAA, new BigDecimal("0.005"));
+        result.put(Rating.AAA, ONE_PERCENT);
+        result.put(Rating.AA, new BigDecimal("0.025"));
+        result.put(Rating.A, new BigDecimal("0.03"));
+        result.put(Rating.B, new BigDecimal("0.035"));
+        result.put(Rating.C, new BigDecimal("0.04"));
+        result.put(Rating.D, FIVE_PERCENT);
+        return result;
+    });
     private static final SortedMap<Integer, BigDecimal> FEE_DISCOUNTS = Maps.ofEntriesSorted(
             entry(150_000, FIVE_PERCENT),
             entry(200_000, TEN_PERCENT),
             entry(500_000, FIFTEEN_PERCENT),
             entry(1_000_000, TWENTY_PERCENT));
-
-    static {
-        FEES.put(Rating.AAAAA, new BigDecimal("0.002"));
-        FEES.put(Rating.AAAA, new BigDecimal("0.005"));
-        FEES.put(Rating.AAA, ONE_PERCENT);
-        FEES.put(Rating.AA, new BigDecimal("0.025"));
-        FEES.put(Rating.A, new BigDecimal("0.03"));
-        FEES.put(Rating.B, new BigDecimal("0.035"));
-        FEES.put(Rating.C, new BigDecimal("0.04"));
-        FEES.put(Rating.D, FIVE_PERCENT);
-    }
 
     private FinancialCalculator() {
         // no instances
@@ -76,7 +78,7 @@ public final class FinancialCalculator {
         if (investmentDate.toInstant().isBefore(MIDNIGHT_2017_09_01)) {
             return ONE_PERCENT;
         }
-        return FEES.get(investment.getRating());
+        return FEES.get().get(investment.getRating());
     }
 
     /**

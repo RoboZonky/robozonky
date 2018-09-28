@@ -22,8 +22,8 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.ServiceLoader;
 
+import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.FileUtil;
-import com.github.robozonky.util.LazyInitialized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

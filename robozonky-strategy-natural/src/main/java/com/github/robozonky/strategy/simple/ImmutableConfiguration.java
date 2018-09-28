@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,22 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.Properties;
 
+import com.github.robozonky.internal.util.LazyInitialized;
+
 /**
  * Simple wrapper around a property file.
  */
 class ImmutableConfiguration {
 
-    private static final DecimalFormat DECIMAL_FORMAT;
-
-    static {
+    private static final LazyInitialized<DecimalFormat> DECIMAL_FORMAT = LazyInitialized.create(() -> {
         final DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator(',');
         symbols.setDecimalSeparator('.');
         final String pattern = "#,##0.0#";
-        DECIMAL_FORMAT = new DecimalFormat(pattern, symbols);
-        ImmutableConfiguration.DECIMAL_FORMAT.setParseBigDecimal(true);
-    }
+        final DecimalFormat result = new DecimalFormat(pattern, symbols);
+        result.setParseBigDecimal(true);
+        return result;
+    });
 
     /**
      * Load the strategy from a file, representing a {@link Properties} file.
@@ -51,7 +52,7 @@ class ImmutableConfiguration {
         try (final Reader reader = new StringReader(properties)) {
             final Properties props = new Properties();
             props.load(reader);
-            return ImmutableConfiguration.from(props);
+            return from(props);
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed reading strategy.", ex);
         }
@@ -127,7 +128,7 @@ class ImmutableConfiguration {
         }
         final String value = this.getValue(key, "0.0");
         try {
-            return Optional.of((BigDecimal) ImmutableConfiguration.DECIMAL_FORMAT.parse(value));
+            return Optional.of((BigDecimal) DECIMAL_FORMAT.get().parse(value));
         } catch (final ParseException ex) {
             throw new IllegalStateException("Invalid value for property '" + key + "': '" + value + "'", ex);
         }

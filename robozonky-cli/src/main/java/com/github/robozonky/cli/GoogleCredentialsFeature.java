@@ -24,7 +24,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.integrations.stonky.CredentialProvider;
 import com.github.robozonky.integrations.stonky.DriveOverview;
 import com.github.robozonky.integrations.stonky.Util;
-import com.github.robozonky.util.LazyInitialized;
+import com.github.robozonky.internal.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;

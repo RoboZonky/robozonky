@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.internal.util;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
