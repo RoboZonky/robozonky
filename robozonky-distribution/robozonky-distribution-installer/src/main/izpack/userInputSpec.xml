@@ -21,8 +21,7 @@
     <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky:" id="zonky.title"/>
     <field type="divider" />
     <field type="text" variable="zonkyUsername">
-      <spec txt="Uživatelské jméno na Zonky:" id="zonky.username" size="20" set=""
-            summaryKey="Uživatelské jméno na Zonky"/>
+      <spec txt="Uživatelské jméno na Zonky:" id="zonky.username" size="20" set="" summaryKey="Uživatelské jméno na Zonky"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Uživatelské jméno musí mít tvar e-mailové adresy.">
         <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>

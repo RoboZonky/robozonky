@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -169,14 +170,30 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    private static URL getEmailConfiguration() throws IOException {
+        final String type = Variables.EMAIL_CONFIGURATION_TYPE.getValue(DATA);
+        LOGGER.debug("Configuring notifications: {}", type);
+        switch (type) {
+            case "file":
+                final Path p = Path.of(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
+                Util.copyFile(p.toFile(), EMAIL_CONFIG_FILE);
+                return EMAIL_CONFIG_FILE.toURI().toURL();
+            case "url":
+                return new URL(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
+            default:
+                final Properties props = Util.configureEmailNotifications(DATA);
+                Util.writeOutProperties(props, EMAIL_CONFIG_FILE);
+                return EMAIL_CONFIG_FILE.toURI().toURL();
+        }
+    }
+
     static CommandLinePart prepareEmailConfiguration() {
         if (!Boolean.valueOf(Variables.IS_EMAIL_ENABLED.getValue(DATA))) {
             return new CommandLinePart();
         }
-        final Properties p = Util.configureEmailNotifications(DATA);
         try {
-            Util.writeOutProperties(p, EMAIL_CONFIG_FILE);
-            return new CommandLinePart().setOption("-i", EMAIL_CONFIG_FILE.toURI().toURL().toExternalForm());
+            final URL url = getEmailConfiguration();
+            return new CommandLinePart().setOption("-i", url.toExternalForm());
         } catch (final Exception ex) {
             throw new IllegalStateException("Failed writing e-mail configuration.", ex);
         }
