@@ -114,6 +114,7 @@ public class DriveOverview {
         LOGGER.debug("Listing files in folder {}.", parentId);
         return driveService.files().list()
                 .setQ("'" + parentId + "' in parents and trashed = false")
+                .setFields("nextPageToken, files(id, name, modifiedTime, mimeType)")
                 .execute()
                 .getFiles()
                 .stream()
@@ -165,7 +166,7 @@ public class DriveOverview {
         fileMetadata.setDescription("RoboZonky aktualizuje obsah tohoto adresáře jednou denně brzy ráno.");
         fileMetadata.setMimeType(MIME_TYPE_FOLDER);
         final File result = driveService.files().create(fileMetadata)
-                .setFields("id")
+                .setFields("id,name,modifiedTime")
                 .execute();
         LOGGER.debug("Created a new Google folder '{}'.", result.getId());
         return result;
@@ -179,27 +180,10 @@ public class DriveOverview {
         return folder;
     }
 
-    private File cloneStonky(final File upstream, final File parent) throws IOException {
-        LOGGER.debug("Cloning Stonky master spreadsheet.");
-        final File f = new File();
-        f.setName(upstream.getName());
-        f.setParents(Collections.singletonList(parent.getId()));
-        final File result = driveService.files().copy(upstream.getId(), f)
-                .setFields("id")
-                .execute();
-        LOGGER.debug("Created a copy of Stonky: {}.", result.getId());
-        return result;
-    }
-
     public File latestStonky() throws IOException {
         return Properties.STONKY_COPY.getValue()
-                .map(Util.wrap(this::getStonkyOrFail))
+                .map(Util.wrap(id -> Util.getFile(driveService, id)))
                 .orElse(createOrReuseStonky());
-    }
-
-    private File getStonkyOrFail(final String fileId) throws IOException {
-        LOGGER.debug("Will look for Stonky spreadsheet: {}.", fileId);
-        return driveService.files().get(fileId).execute();
     }
 
     private String autodetectLatestStonkyVersion() throws IOException {
@@ -208,7 +192,7 @@ public class DriveOverview {
                 .execute();
         LOGGER.trace("Received '{}' from Stonky release spreadsheet.", data);
         final List<List<Object>> matrix = data.getValues();
-        final String result = (String)matrix.get(0).get(4); // cell E2
+        final String result = (String) matrix.get(0).get(4); // cell E2
         LOGGER.debug("Stonky version auto-detected to {}.", matrix.get(0).get(1)); // cell B2
         return result;
     }
@@ -217,17 +201,18 @@ public class DriveOverview {
         final String masterId = Properties.STONKY_MASTER.getValue()
                 .orElseGet(() -> Util.wrap(this::autodetectLatestStonkyVersion).get());
         LOGGER.debug("Will look for Stonky master spreadsheet: {}.", masterId);
-        final File upstream = driveService.files().get(masterId).execute();
+        final File upstream = Util.getFile(driveService, masterId);
         final File parent = getOrCreateRoboZonkyFolder();
+        final String expectedName = "My " + upstream.getName(); // such as "My Stonky 0.8 [Public Beta Release]"
         final Optional<File> stonky = listSpreadsheets(getFilesInFolder(driveService, parent))
-                .filter(s -> Objects.equals(s.getName(), upstream.getName()))
+                .filter(s -> Objects.equals(s.getName(), expectedName))
                 .findFirst();
         if (stonky.isPresent()) {
             final File result = stonky.get();
             LOGGER.debug("Found a copy of Stonky: {}.", result.getId());
             return result;
         } else {
-            return cloneStonky(upstream, parent);
+            return Util.copyFile(driveService, upstream, parent, expectedName);
         }
     }
 
@@ -258,7 +243,7 @@ public class DriveOverview {
         f.setMimeType(MIME_TYPE_GOOGLE_SPREADSHEET);
         LOGGER.debug("Creating a new Google spreadsheet: {}.", f);
         final File result = driveService.files().create(f, fc)
-                .setFields("id")
+                .setFields("id,name,modifiedTime")
                 .execute();
         // and mark the time when the file was last updated
         LOGGER.debug("New Google spreadsheet created: {}.", result.getId());
@@ -276,7 +261,7 @@ public class DriveOverview {
     private File actuallyModifySpreadsheet(final File original, final java.io.File export) throws IOException {
         final FileContent fc = new FileContent(MIME_TYPE_XLS_SPREADSHEET, export);
         return driveService.files().update(original.getId(), null, fc)
-                .setFields("id")
+                .setFields("id,name,modifiedTime")
                 .execute();
     }
 

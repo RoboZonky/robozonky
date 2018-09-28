@@ -277,10 +277,13 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                 cli.setProperty(GOOGLE_CALLBACK_HOST.getKey(), host);
                 cli.setProperty(GOOGLE_CALLBACK_PORT.getKey(), port);
                 // reuse the same code for this as we do in CLI
-                final GoogleCredentialsFeature google = new GoogleCredentialsFeature();
+                LOGGER.debug("Preparing Google credentials.");
+                final String username = Variables.ZONKY_USERNAME.getValue(DATA);
+                final GoogleCredentialsFeature google = new GoogleCredentialsFeature(username);
                 google.setHost(host);
                 google.setPort(Integer.parseInt(port));
                 google.runGoogleCredentialCheck();
+                LOGGER.debug("Credential check over.");
                 // copy credentials to the correct directory
                 final String dirName = GOOGLE_LOCAL_FOLDER.getValue()
                         .orElseThrow(() -> new IllegalStateException("Not possible."));

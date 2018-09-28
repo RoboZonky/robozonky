@@ -32,7 +32,7 @@ public class GetFileResponseHandler extends ResponseHandler {
     @Override
     protected boolean appliesTo(final String method, final String url) {
         return Objects.equals(method, "GET") &&
-                Objects.equals(url, "https://www.googleapis.com/drive/v3/files/" + file.getId());
+                url.startsWith("https://www.googleapis.com/drive/v3/files/" + file.getId());
     }
 
     @Override

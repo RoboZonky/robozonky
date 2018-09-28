@@ -24,6 +24,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.integrations.stonky.CredentialProvider;
 import com.github.robozonky.integrations.stonky.DriveOverview;
 import com.github.robozonky.integrations.stonky.Util;
+import com.github.robozonky.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
@@ -37,7 +38,7 @@ public final class GoogleCredentialsFeature implements Feature {
     static final String DESCRIPTION = "Obtain authorization for RoboZonky to access Google Sheets.";
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleCredentialsFeature.class);
     private final HttpTransport transport;
-    private volatile CredentialProvider credentialProvider;
+    private final LazyInitialized<CredentialProvider> credentialProvider;
     @Parameter(names = {"-u", "--username"}, description = "Zonky username.", required = true)
     private String username = null;
     @Parameter(names = {"-h", "--callback-host"}, description = "Host to listen for OAuth response from Google.")
@@ -50,7 +51,9 @@ public final class GoogleCredentialsFeature implements Feature {
                              final CredentialProvider credentialProvider) {
         this.username = username;
         this.transport = transport;
-        this.credentialProvider = credentialProvider;
+        this.credentialProvider = LazyInitialized.create(() -> credentialProvider == null ?
+                CredentialProvider.live(transport, host, port) :
+                credentialProvider);
     }
 
     private GoogleCredentialsFeature(final HttpTransport transport) {
@@ -61,12 +64,8 @@ public final class GoogleCredentialsFeature implements Feature {
         this(Util.createTransport());
     }
 
-    private synchronized CredentialProvider getCredentialProvider() {
-        // lazy-initialized to account for host/port only having been set after the constructor calls
-        if (credentialProvider == null) {
-            credentialProvider = CredentialProvider.live(transport, host, port);
-        }
-        return credentialProvider;
+    public GoogleCredentialsFeature(final String username) {
+        this(username, Util.createTransport(), null);
     }
 
     public void setHost(final String host) {
@@ -83,7 +82,8 @@ public final class GoogleCredentialsFeature implements Feature {
     }
 
     private <T> T runGoogleCredentialCheck(final SessionInfo sessionInfo, final Function<Credential, T> provider) {
-        final Credential credential = getCredentialProvider().getCredential(sessionInfo);
+        LOGGER.debug("Running credential check.");
+        final Credential credential = credentialProvider.get().getCredential(sessionInfo);
         return provider.apply(credential);
     }
 
@@ -123,7 +123,7 @@ public final class GoogleCredentialsFeature implements Feature {
             final SessionInfo sessionInfo = new SessionInfo(username);
             final Drive service = runGoogleCredentialCheckForDrive(sessionInfo);
             final Sheets service2 = runGoogleCredentialCheckForSheets(sessionInfo);
-            final DriveOverview driveOverview = DriveOverview.create(new SessionInfo(username), service, service2);
+            final DriveOverview driveOverview = DriveOverview.create(sessionInfo, service, service2);
             LOGGER.debug("Google Drive contents: {}.", driveOverview);
         } catch (final Exception ex) {
             throw new TestFailedException(ex);

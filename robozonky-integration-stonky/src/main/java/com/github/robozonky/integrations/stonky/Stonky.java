@@ -18,6 +18,9 @@ package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +36,7 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.internal.api.Defaults;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
@@ -145,6 +149,12 @@ class Stonky implements Function<SecretProvider, Optional<String>> {
             final DriveOverview o = DriveOverview.create(sessionInfo, driveService, sheetsService);
             LOGGER.debug("Google Drive overview: {}.", o);
             final File s = o.latestStonky();
+            LOGGER.debug("Making a backup of the existing spreadsheet.");
+            final Instant lastModified = Instant.EPOCH.plus(Duration.ofMillis(s.getModifiedTime().getValue()));
+            final LocalDate d = lastModified.atZone(Defaults.ZONE_ID).toLocalDate();
+            if (d.isBefore(LocalDate.now())) {
+                Util.copyFile(driveService, s, o.getFolder(), d + " " + s.getName());
+            }
             final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();
             return new Summary(o, result);
         }));

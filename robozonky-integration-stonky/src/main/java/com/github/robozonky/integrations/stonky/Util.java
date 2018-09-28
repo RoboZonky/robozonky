@@ -17,8 +17,10 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -50,6 +52,29 @@ public final class Util {
 
     private Util() {
         // no instances
+    }
+
+    public static com.google.api.services.drive.model.File getFile(final Drive driveService,
+                                                                   final String id) throws IOException {
+        LOGGER.debug("Loading file: {}.", id);
+        return driveService.files().get(id)
+                .setFields("id,name,modifiedTime")
+                .execute();
+    }
+
+    public static com.google.api.services.drive.model.File copyFile(final Drive driveService,
+                                                                    final com.google.api.services.drive.model.File upstream,
+                                                                    final com.google.api.services.drive.model.File parent,
+                                                                    final String name) throws IOException {
+        LOGGER.debug("Cloning master spreadsheet '{}', setting name: {}.", upstream.getId(), name);
+        final com.google.api.services.drive.model.File f = new com.google.api.services.drive.model.File();
+        f.setName(name);
+        f.setParents(Collections.singletonList(parent.getId()));
+        final com.google.api.services.drive.model.File result = driveService.files().copy(upstream.getId(), f)
+                .setFields("id,name,modifiedTime")
+                .execute();
+        LOGGER.debug("Created a copy: {}.", result.getId());
+        return result;
     }
 
     public static HttpTransport createTransport() {

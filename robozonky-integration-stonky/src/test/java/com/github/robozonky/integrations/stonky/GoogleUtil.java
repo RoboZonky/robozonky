@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.SheetProperties;
@@ -51,6 +52,7 @@ final class GoogleUtil {
         result.setId(id);
         result.setMimeType("application/vnd.google-apps.files");
         result.setName(name);
+        result.setModifiedTime(new DateTime(System.currentTimeMillis()));
         return result;
     }
 

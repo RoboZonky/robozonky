@@ -31,7 +31,8 @@ public class FilesInFolderResponseHandler extends AllFilesResponseHandler {
 
     @Override
     protected boolean appliesTo(final String method, final String url) {
-        final String expected = "https://www.googleapis.com/drive/v3/files?q='" + parentId + "'%20in%20parents";
-        return Objects.equals(method, "GET") && url.startsWith(expected);
+        final String expected = "https://www.googleapis.com/drive/v3/files?";
+        return Objects.equals(method, "GET") && url.startsWith(expected)
+                && url.contains("q='" + parentId + "'%20in%20parents");
     }
 }
