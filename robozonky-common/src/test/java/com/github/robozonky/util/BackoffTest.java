@@ -16,6 +16,7 @@
 
 package com.github.robozonky.util;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -74,4 +75,26 @@ class BackoffTest {
         // make sure the operation took less than the max duration
         assertThat(took).isLessThan(maxDuration);
     }
+
+    @Test
+    void initialBackOffTimeCalculation() {
+        final Duration initial = Duration.ofSeconds(123);
+        final Optional<Duration> backoff = Backoff.calculateBackoffTime(null, Duration.ZERO, initial);
+        assertThat(backoff).contains(initial);
+    }
+
+    @Test
+    void continuedBackOffTimeCalculation() {
+        final Duration initial = Duration.ofSeconds(123);
+        final Optional<Duration> backoff = Backoff.calculateBackoffTime(null, Duration.ofSeconds(1), initial);
+        assertThat(backoff).contains(Duration.ofSeconds(2));
+    }
+
+    @Test
+    void noMoreBackoff() {
+        final Duration initial = Duration.ofSeconds(123);
+        final Optional<Duration> backoff = Backoff.calculateBackoffTime(BigDecimal.TEN, Duration.ofSeconds(1), initial);
+        assertThat(backoff).isEmpty();
+    }
 }
+

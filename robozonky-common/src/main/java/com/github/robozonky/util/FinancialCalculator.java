@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,10 +137,10 @@ public final class FinancialCalculator {
     }
 
     private static Integer countTermsInZonky(final Investment investment) {
-        final int original = investment.getCurrentTerm() - investment.getRemainingMonths();
         return investment.getPaymentStatus()
-                .map(s -> s == PaymentStatus.PAID ? investment.getCurrentTerm() : original)
-                .orElse(original);
+                .filter(s -> s == PaymentStatus.PAID)
+                .map(s -> investment.getCurrentTerm())
+                .orElse(investment.getCurrentTerm() - investment.getRemainingMonths());
     }
 
     public static BigDecimal actualInterestAfterFees(final Investment investment,

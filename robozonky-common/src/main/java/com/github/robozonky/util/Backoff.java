@@ -34,6 +34,18 @@ public class Backoff<T> implements Supplier<Optional<T>> {
     private final Duration cancelAfter;
     private Exception lastException = null;
 
+    static <T> Optional<Duration> calculateBackoffTime(final T value, final Duration original, final Duration initial) {
+        if (value == null) {
+            if (Objects.equals(original, Duration.ZERO)) {
+                return Optional.of(initial);
+            } else {
+                return Optional.of(Duration.ofNanos(original.toNanos() * 2));
+            }
+        } else { // no more backing off is needed
+            return Optional.empty();
+        }
+    }
+
     public Backoff(final Operation<T> operation, final BackoffTimeCalculator<T> backoffTimeCalculator,
                    final Duration cancelAfter) {
         this.operation = operation;
@@ -53,17 +65,8 @@ public class Backoff<T> implements Supplier<Optional<T>> {
      */
     public static <O> Backoff<O> exponential(final Operation<O> operation, final Duration initialBackoffTime,
                                              final Duration cancelAfter) {
-        final BackoffTimeCalculator<O> exponential = (value, originalBackoffTime) -> {
-            if (value == null) {
-                if (Objects.equals(originalBackoffTime, Duration.ZERO)) {
-                    return Optional.of(initialBackoffTime);
-                } else {
-                    return Optional.of(Duration.ofNanos(originalBackoffTime.toNanos() * 2));
-                }
-            } else { // no more backing off is needed
-                return Optional.empty();
-            }
-        };
+        final BackoffTimeCalculator<O> exponential =
+                (value, originalBackoffTime) -> calculateBackoffTime(value, originalBackoffTime, initialBackoffTime);
         return new Backoff<>(operation, exponential, cancelAfter);
     }
 
