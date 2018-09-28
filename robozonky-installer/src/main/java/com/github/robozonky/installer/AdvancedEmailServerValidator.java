@@ -21,7 +21,7 @@ import com.izforge.izpack.api.data.InstallData;
 public class AdvancedEmailServerValidator extends AbstractEmailServerValidator {
 
     @Override
-    protected void configure(final InstallData data) {
+    void configure(final InstallData data) {
         // all is already configured
     }
 }

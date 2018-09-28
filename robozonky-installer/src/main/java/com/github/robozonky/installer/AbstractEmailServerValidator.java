@@ -17,6 +17,8 @@
 package com.github.robozonky.installer;
 
 import java.util.Properties;
+import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
 
@@ -33,25 +35,29 @@ abstract class AbstractEmailServerValidator extends AbstractValidator {
         return props;
     }
 
+    Transport getTransport(final Session session) throws NoSuchProviderException {
+        return session.getTransport("smtp");
+    }
+
     @Override
     protected Status validateDataPossiblyThrowingException(final InstallData installData) {
         configure(installData);
         final Properties smtpProps = getSmtpProperties(installData);
         final Session session = Session.getInstance(smtpProps, null);
-        try (final Transport transport = session.getTransport("smtp")) {
+        try (final Transport transport = getTransport(session)) {
             final String host = Variables.SMTP_HOSTNAME.getValue(installData);
             final int port =  Integer.parseInt(Variables.SMTP_PORT.getValue(installData));
             LOGGER.debug("Connecting to {}:{} with {}.", host, port, smtpProps);
             transport.connect(host, port, Variables.SMTP_USERNAME.getValue(installData),
                               Variables.SMTP_PASSWORD.getValue(installData));
             return DataValidator.Status.OK;
-        } catch (final Exception ex) {
+        } catch (final MessagingException ex) {
             LOGGER.warn("Failed authenticating with SMTP server.", ex);
             return DataValidator.Status.WARNING;
         }
     }
 
-    abstract protected void configure(final InstallData data);
+    abstract void configure(final InstallData data);
 
     @Override
     public String getWarningMessageId() {

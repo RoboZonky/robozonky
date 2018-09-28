@@ -21,7 +21,7 @@ import com.izforge.izpack.api.data.InstallData;
 public class SimpleEmailServerValidator extends AbstractEmailServerValidator {
 
     @Override
-    protected void configure(final InstallData data) {
+    void configure(final InstallData data) {
         Variables.IS_EMAIL_ENABLED.setValue(data, "true");
         Variables.SMTP_AUTH.setValue(data, "true");
         Variables.SMTP_IS_TLS.setValue(data, "false");
