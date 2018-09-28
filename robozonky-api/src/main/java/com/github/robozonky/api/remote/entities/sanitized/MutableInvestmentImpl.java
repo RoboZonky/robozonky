@@ -76,8 +76,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.nextPaymentDate = investment.getNextPaymentDate();
         this.canBeOffered = investment.isCanBeOffered();
         this.isOnSmp = investment.isOnSmp();
-        this.originalPrincipal = Util.cacheBigDecimal(investment.getPurchasePrice()); // likely to be multiples of 200
-        this.interestRate = Util.cacheBigDecimal(investment.getInterestRate()); // only a handful of these exist
+        this.originalPrincipal = investment.getPurchasePrice();
+        this.interestRate = investment.getInterestRate();
         this.paidPrincipal = investment.getPaidPrincipal();
         this.duePrincipal = investment.getDuePrincipal();
         this.paidInterest = investment.getPaidInterest();
@@ -109,7 +109,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.daysPastDue = 0;
         this.canBeOffered = false;
         this.isOnSmp = false;
-        this.originalPrincipal = Util.cacheBigDecimal(originalPrincipal); // likely to be multiples of 200
+        this.originalPrincipal = originalPrincipal;
         this.interestRate = loan.getInterestRate();
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.ZERO;

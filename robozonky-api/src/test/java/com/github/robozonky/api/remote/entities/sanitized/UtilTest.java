@@ -16,8 +16,6 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import java.math.BigDecimal;
-
 import com.github.robozonky.api.remote.entities.RawLoan;
 import org.junit.jupiter.api.Test;
 
@@ -27,26 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class UtilTest {
-
-    @Test
-    void cachesBigDecimals() {
-        final BigDecimal something = new BigDecimal("0.0001");
-        final BigDecimal theSame = something.add(BigDecimal.ZERO);
-        final BigDecimal cached = Util.cacheBigDecimal(something);
-        assertThat(cached).isSameAs(something);
-        final BigDecimal cached2 = Util.cacheBigDecimal(theSame);
-        assertThat(cached2).isSameAs(something);
-    }
-
-    @Test
-    void recognizesDifferentBigDecimals() {
-        final BigDecimal something = new BigDecimal("0.0002");
-        final BigDecimal different = new BigDecimal("0.00020");
-        final BigDecimal cached = Util.cacheBigDecimal(something);
-        assertThat(cached).isSameAs(something);
-        final BigDecimal cached2 = Util.cacheBigDecimal(different);
-        assertThat(cached2).isSameAs(different);
-    }
 
     @Test
     void guessesUrl() {
