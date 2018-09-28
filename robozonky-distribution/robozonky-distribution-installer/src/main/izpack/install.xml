@@ -53,10 +53,6 @@
       <name>isZonkoidEnabled</name>
       <value>true</value>
     </condition>
-    <condition type="variable" id="enableEmailPanel">
-      <name>isEmailEnabled</name>
-      <value>true</value>
-    </condition>
     <condition type="variable" id="enableStonkyPanel">
       <name>showStonkyPanel</name>
       <value>true</value>
@@ -81,9 +77,51 @@
       <name>strategyType</name>
       <value>url</value>
     </condition>
+    <!-- configure the e-mail settings panels -->
+    <condition type="variable" id="enableEmailPanel">
+      <name>isEmailEnabled</name>
+      <value>true</value>
+    </condition>
+    <condition type="and" id="enableAdvancedEmailConfigPanel">
+      <condition type="ref" refid="enableEmailPanel"/>
+      <condition type="ref" refid="isEmailConfigCustom"/>
+    </condition>
+    <condition type="or" id="isKnownEmailConfig">
+      <condition type="ref" refid="isEmailConfigSeznam"/>
+      <condition type="ref" refid="isEmailConfigGmail"/>
+    </condition>
+    <condition type="and" id="enableSimpleEmailConfigPanel">
+      <condition type="ref" refid="enableEmailPanel"/>
+      <condition type="ref" refid="isKnownEmailConfig"/>
+    </condition>
+    <condition type="or" id="enableNotificationPickerPanel">
+      <condition type="ref" refid="enableSimpleEmailConfigPanel"/>
+      <condition type="ref" refid="enableAdvancedEmailConfigPanel"/>
+    </condition>
+    <condition type="variable" id="isEmailConfigSeznam">
+      <name>emailConfigType</name>
+      <value>seznam.cz</value>
+    </condition>
+    <condition type="variable" id="isEmailConfigGmail">
+      <name>emailConfigType</name>
+      <value>gmail.com</value>
+    </condition>
+    <condition type="variable" id="isEmailConfigCustom">
+      <name>emailConfigType</name>
+      <value>custom</value>
+    </condition>
+    <condition type="variable" id="isEmailConfigByFile">
+      <name>emailConfigType</name>
+      <value>file</value>
+    </condition>
+    <condition type="variable" id="isEmailConfigByUrl">
+      <name>emailConfigType</name>
+      <value>url</value>
+    </condition>
   </conditions>
 
   <panels>
+    <!-- Mandatory panels -->
     <panel classname="HelloPanel"/>
     <panel classname="LicencePanel">
       <configuration>
@@ -100,9 +138,18 @@
     <panel classname="UserInputPanel" id="strategyUserInput">
       <validator classname="com.github.robozonky.installer.StrategySettingsValidator"/>
     </panel>
-    <panel classname="UserInputPanel" id="emailUserInput" condition="enableEmailPanel">
+    <!-- Whole bunch of e-mail settings panels -->
+    <panel classname="UserInputPanel" id="emailConfigTypeInput" condition="enableEmailPanel" />
+    <panel classname="UserInputPanel" id="advancedEmailUserInput" condition="enableAdvancedEmailConfigPanel">
+      <validator classname="com.github.robozonky.installer.AdvancedEmailServerValidator"/>
+    </panel>
+    <panel classname="UserInputPanel" id="simpleEmailUserInput" condition="enableSimpleEmailConfigPanel">
+      <validator classname="com.github.robozonky.installer.SimpleEmailServerValidator"/>
+    </panel>
+    <panel classname="UserInputPanel" id="emailNotificationUserInput" condition="enableNotificationPickerPanel">
       <validator classname="com.github.robozonky.installer.EmailSettingsValidator"/>
     </panel>
+    <!-- Settings for various integrations -->
     <panel classname="UserInputPanel" id="stonkyEnablement" condition="enableStonkyPanel" />
     <panel classname="UserInputPanel" id="zonkoidUserInput" condition="enableZonkoidPanel">
       <validator classname="com.github.robozonky.installer.ZonkoidSettingsValidator"/>

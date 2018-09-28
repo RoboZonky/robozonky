@@ -19,6 +19,7 @@ package com.github.robozonky.installer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.Properties;
@@ -52,6 +53,7 @@ final class Util {
     public static void writeOutProperties(final Properties properties, final File target) throws IOException {
         IoUtil.tryConsumer(() -> Files.newBufferedWriter(target.toPath(), Defaults.CHARSET),
                                w -> properties.store(w, Defaults.ROBOZONKY_USER_AGENT));
+        LOGGER.debug("Written properties to {}.", target);
     }
 
     public static Properties configureEmailNotifications(final InstallData data) {
@@ -86,7 +88,10 @@ final class Util {
     }
 
     public static void copyFile(final File from, final File to) throws IOException {
-        Files.copy(from.toPath(), to.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+        final Path f = from.getAbsoluteFile().toPath();
+        final Path t = to.getAbsoluteFile().toPath();
+        LOGGER.debug("Copying {} to {}", f, t);
+        Files.copy(f, t, StandardCopyOption.REPLACE_EXISTING);
     }
 
     public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {

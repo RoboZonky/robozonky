@@ -18,6 +18,7 @@ package com.github.robozonky.installer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.UUID;
@@ -81,8 +82,9 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(data.getVariable(Variables.ZONKY_PASSWORD.getKey()))
                 .thenReturn(RoboZonkyInstallerListenerTest.ZONKY_PASSWORD);
         when(data.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
+        when(data.getVariable(Variables.EMAIL_CONFIGURATION_TYPE.getKey())).thenReturn("custom");
         when(data.getVariable(Variables.SMTP_HOSTNAME.getKey())).thenReturn("127.0.0.1");
-        when(data.getVariable(Variables.SMTP_TO.getKey())).thenReturn("recipient@server.cz");
+        when(data.getVariable(Variables.SMTP_TO.getKey())).thenReturn("recipie  nt@server.cz");
         when(data.getVariable(Variables.SMTP_USERNAME.getKey())).thenReturn("sender@server.cz");
         when(data.getVariable(Variables.SMTP_PASSWORD.getKey())).thenReturn(UUID.randomUUID().toString());
         // otherwise browser window will open to authenticate with Google
@@ -141,7 +143,6 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     void emailEnabled() {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        when(localData.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
         RoboZonkyInstallerListener.setInstallData(localData);
         // execute SUT
         final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
@@ -150,6 +151,36 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
             softly.assertThat(clp.getOptions()).containsOnlyKeys("-i");
             softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE).canRead();
         });
+    }
+
+    @Test
+    void emailEnabledConfiguredFromFile() throws IOException {
+        final File f = File.createTempFile("robozonky-", ".tmp");
+        // prepare
+        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
+        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_TYPE.getKey())).thenReturn("file");
+        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_SOURCE.getKey())).thenReturn(f.getAbsolutePath());
+        RoboZonkyInstallerListener.setInstallData(localData);
+        // execute SUT
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
+        // test
+        assertSoftly(softly -> {
+            softly.assertThat(clp.getOptions()).containsOnlyKeys("-i");
+            softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE).canRead();
+        });
+    }
+
+    @Test
+    void emailEnabledConfiguredFromURL() throws IOException {
+        final URL f = File.createTempFile("robozonky-", ".tmp").toURI().toURL();
+        // prepare
+        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
+        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_TYPE.getKey())).thenReturn("url");
+        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_SOURCE.getKey())).thenReturn(f.toExternalForm());
+        RoboZonkyInstallerListener.setInstallData(localData);
+        // execute SUT
+        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
+        assertThat(clp.getOptions()).containsOnlyKeys("-i");
     }
 
     @Test

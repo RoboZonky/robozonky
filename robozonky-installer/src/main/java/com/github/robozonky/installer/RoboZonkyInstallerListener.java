@@ -169,14 +169,30 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    private static URL getEmailConfiguration() throws IOException {
+        final String type = Variables.EMAIL_CONFIGURATION_TYPE.getValue(DATA);
+        LOGGER.debug("Configuring notifications: {}", type);
+        switch (type) {
+            case "file":
+                final File f = new File(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
+                Util.copyFile(f, EMAIL_CONFIG_FILE);
+                return EMAIL_CONFIG_FILE.toURI().toURL();
+            case "url":
+                return new URL(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
+            default:
+                final Properties props = Util.configureEmailNotifications(DATA);
+                Util.writeOutProperties(props, EMAIL_CONFIG_FILE);
+                return EMAIL_CONFIG_FILE.toURI().toURL();
+        }
+    }
+
     static CommandLinePart prepareEmailConfiguration() {
         if (!Boolean.valueOf(Variables.IS_EMAIL_ENABLED.getValue(DATA))) {
             return new CommandLinePart();
         }
-        final Properties p = Util.configureEmailNotifications(DATA);
         try {
-            Util.writeOutProperties(p, EMAIL_CONFIG_FILE);
-            return new CommandLinePart().setOption("-i", EMAIL_CONFIG_FILE.toURI().toURL().toExternalForm());
+            final URL url = getEmailConfiguration();
+            return new CommandLinePart().setOption("-i", url.toExternalForm());
         } catch (final Exception ex) {
             throw new IllegalStateException("Failed writing e-mail configuration.", ex);
         }

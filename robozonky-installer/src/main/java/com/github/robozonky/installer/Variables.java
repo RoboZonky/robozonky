@@ -28,6 +28,8 @@ enum Variables {
     INSTALL_PATH("INSTALL_PATH"),
     IS_DRY_RUN("isDryRun"),
     IS_EMAIL_ENABLED("isEmailEnabled"),
+    EMAIL_CONFIGURATION_TYPE("emailConfigType"),
+    EMAIL_CONFIGURATION_SOURCE("emailConfig"),
     IS_JMX_ENABLED("isJmxEnabled"),
     IS_JMX_SECURITY_ENABLED("isJmxSecurityEnabled"),
     IS_STONKY_ENABLED("isStonkyEnabled"),
@@ -63,5 +65,10 @@ enum Variables {
     public String getValue(final InstallData installData) {
         return installData.getVariable(key);
     }
+
+    public void setValue(final InstallData installData, final String value) {
+        installData.setVariable(key, value);
+    }
+
 
 }
