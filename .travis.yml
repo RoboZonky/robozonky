@@ -21,9 +21,9 @@ os:
   - linux
 jdk:
   - openjdk8
-  - openjdk10
+  - openjdk11
   - oraclejdk8
-  - oraclejdk10
+  - oraclejdk11
 stages: # order the stages we'll use during this build
   - precache
   - test
