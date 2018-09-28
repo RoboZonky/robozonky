@@ -92,6 +92,7 @@ class EmailHandlerTest {
     @BeforeEach
     void startEmailing() {
         EMAIL.start();
+        EMAIL.setUser("user@seznam.cz", "user@seznam.cz", "pass").create();
         LOGGER.info("Started e-mailing.");
     }
 
@@ -99,10 +100,11 @@ class EmailHandlerTest {
     void stopEmailing() {
         LOGGER.info("Stopping e-mailing.");
         try {
-            EMAIL.purgeEmailFromAllMailboxes();
             EMAIL.stop();
         } catch (final Exception ex) {
             LOGGER.warn("Failed stopping e-mail server.", ex);
+        } finally {
+            EMAIL.reset();
         }
     }
 }
