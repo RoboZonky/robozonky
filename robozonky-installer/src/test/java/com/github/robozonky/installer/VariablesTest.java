@@ -24,8 +24,10 @@ import java.util.stream.Stream;
 import com.izforge.izpack.api.data.InstallData;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class VariablesTest {
 
@@ -45,6 +47,17 @@ class VariablesTest {
             final InstallData data = mock(InstallData.class);
             when(data.getVariable(key)).thenReturn(value);
             assertThat(variable.getValue(data)).isSameAs(value);
+        }
+    }
+
+    @Test
+    void storeValue() {
+        for (final Variables variable : Variables.values()) {
+            final String key = variable.getKey();
+            final String value = UUID.randomUUID().toString();
+            final InstallData data = mock(InstallData.class);
+            variable.setValue(data, value);
+            verify(data).setVariable(key, value);
         }
     }
 }
