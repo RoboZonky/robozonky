@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,44 +61,42 @@ public class CommandLine {
         this.shutdownCall = shutdownCall;
     }
 
-    private static void terminate(final ParameterException ex) {
+    private static void terminate(final App main, final ParameterException ex) {
         System.out.println(ex.getMessage()); // error will be shown to users on stdout
         ex.getJCommander().usage();
-        App.exit(new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null));
+        main.exit(new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null));
     }
 
-    private static void terminate(final JCommander jc) {
+    private static void terminate(final App main, final JCommander jc) {
         jc.usage();
-        App.exit(new ShutdownHook.Result(ReturnCode.OK, null));
+        main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
     }
 
     /**
      * Takes command-line arguments and converts them into an application configuration, printing command line usage
      * information in case the arguments are somehow invalid.
-     * @param args Command-line arguments, coming from the main() method.
-     * @param shutdownCall To pass to the daemon operations to allow them to shut down properly.
+     * @param main The code that called this code.
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
-    public static Optional<InvestmentMode> parse(final Consumer<Throwable> shutdownCall, final String... args) {
+    public static Optional<InvestmentMode> parse(final App main) {
         try {
-            return CommandLine.parseUnsafe(shutdownCall, args);
+            return CommandLine.parseUnsafe(main);
         } catch (final ParameterException ex) {
             CommandLine.LOGGER.debug("Command line parsing ended with parameter exception.", ex);
-            CommandLine.terminate(ex);
+            CommandLine.terminate(main, ex);
             return Optional.empty();
         }
     }
 
-    private static Optional<InvestmentMode> parseUnsafe(final Consumer<Throwable> shutdownCall,
-                                                        final String... args) throws ParameterException {
-        final CommandLine cli = new CommandLine(shutdownCall);
+    private static Optional<InvestmentMode> parseUnsafe(final App main) throws ParameterException {
+        final CommandLine cli = new CommandLine(main::resumeToFail);
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(CommandLine.getScriptIdentifier())
                 .addObject(cli);
         final JCommander jc = builder.build();
-        jc.parse(args);
+        jc.parse(main.getArgs());
         if (cli.help) { // don't validate since the CLI is likely to be invalid
-            CommandLine.terminate(jc);
+            CommandLine.terminate(main, jc);
             return Optional.empty();
         }
         return cli.newApplicationConfiguration();

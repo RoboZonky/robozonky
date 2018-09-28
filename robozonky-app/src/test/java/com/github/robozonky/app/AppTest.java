@@ -16,34 +16,30 @@
 
 package com.github.robozonky.app;
 
-import com.github.robozonky.test.exit.TestingSystemExit;
-import com.github.robozonky.test.exit.TestingSystemExitService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 class AppTest extends AbstractEventLeveragingTest {
 
-    private static final TestingSystemExit EXIT = TestingSystemExitService.INSTANCE;
-
-    @BeforeEach
-    @AfterEach
-    void reset() {
-        EXIT.reset();
-    }
-
     @Test
     void notWellFormedCli() {
-        App.main();
-        assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
+        final App main = spy(new App());
+        doNothing().when(main).actuallyExit(anyInt());
+        main.run();
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_WRONG_PARAMETERS.getCode()));
     }
 
     @Test
     void help() {
-        App.main("-h");
-        assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
+        final App main = spy(new App("-h"));
+        doNothing().when(main).actuallyExit(anyInt());
+        main.run();
+        verify(main).actuallyExit(eq(ReturnCode.OK.getCode()));
     }
 
 }
