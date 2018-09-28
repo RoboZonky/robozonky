@@ -42,7 +42,7 @@ import com.github.robozonky.api.remote.enums.Region;
  */
 public class RawLoan extends BaseEntity {
 
-    private boolean topped, covered, published, questionsAllowed, insuranceActive, multicash;
+    private boolean topped, covered, published, questionsAllowed, insuranceActive, multicash, fastcash;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount;
     private double amount, remainingInvestment;
     private String name, nickName, story, url;
@@ -149,6 +149,11 @@ public class RawLoan extends BaseEntity {
     @XmlElement
     public boolean isMulticash() {
         return multicash;
+    }
+
+    @XmlElement
+    public boolean isFastcash() {
+        return fastcash;
     }
 
     @XmlElement
