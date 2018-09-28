@@ -295,11 +295,10 @@
         <artifactId>jackson-coreutils</artifactId>
         <version>1.8</version>
       </dependency>
-      <dependency> <!-- Mockserver, for whatever reason, includes this in "compile" scope. We don't want that. -->
+      <dependency> <!-- Address dependency hell. Otherwise the classpath test in robozonky-distribution-full fails. -->
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>18.0</version>
-        <scope>test</scope>
+        <version>20.0</version>
       </dependency>
       <!-- Logging. -->
       <dependency>
@@ -371,6 +370,19 @@
             <id>attach-javadocs</id>
             <goals>
               <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>run-integration-tests</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
             </goals>
           </execution>
         </executions>
@@ -458,6 +470,26 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire.version}</version>
+          <configuration>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <workingDirectory>${basedir}/target</workingDirectory>
+          </configuration>
+          <dependencies> <!-- possibly remove this after https://github.com/apache/maven-surefire/pull/193 is fixed -->
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-launcher</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-engine</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
           <version>${surefire.version}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>

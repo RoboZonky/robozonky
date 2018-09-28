@@ -22,7 +22,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StonkyIntegrationTest {
+class StonkyIT {
 
     @Test
     @EnabledIfEnvironmentVariable(named = "ZONKY_USERNAME", matches = ".+")

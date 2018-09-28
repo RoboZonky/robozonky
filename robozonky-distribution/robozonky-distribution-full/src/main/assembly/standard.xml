@@ -28,6 +28,13 @@
 
   <fileSets>
     <fileSet>
+      <directory>target/dependency</directory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+      <outputDirectory>bin/</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>target</directory>
       <includes>
         <include>robozonky-app-${project.version}.jar</include>
@@ -68,12 +75,4 @@
       <outputDirectory/>
     </fileSet>
   </fileSets>
-
-  <dependencySets>
-    <dependencySet>
-      <outputDirectory>bin/</outputDirectory>
-      <useStrictFiltering>true</useStrictFiltering>
-      <useProjectArtifact>false</useProjectArtifact>
-    </dependencySet>
-  </dependencySets>
 </assembly>
