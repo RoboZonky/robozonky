@@ -81,6 +81,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(data.getVariable(Variables.ZONKY_PASSWORD.getKey()))
                 .thenReturn(RoboZonkyInstallerListenerTest.ZONKY_PASSWORD);
         when(data.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
+        when(data.getVariable(Variables.EMAIL_CONFIGURATION_TYPE.getKey())).thenReturn("custom");
         when(data.getVariable(Variables.SMTP_HOSTNAME.getKey())).thenReturn("127.0.0.1");
         when(data.getVariable(Variables.SMTP_TO.getKey())).thenReturn("recipient@server.cz");
         when(data.getVariable(Variables.SMTP_USERNAME.getKey())).thenReturn("sender@server.cz");
@@ -141,7 +142,6 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     void emailEnabled() {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        when(localData.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
         RoboZonkyInstallerListener.setInstallData(localData);
         // execute SUT
         final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();

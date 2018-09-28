@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -175,8 +174,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         LOGGER.debug("Configuring notifications: {}", type);
         switch (type) {
             case "file":
-                final Path p = Path.of(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
-                Util.copyFile(p.toFile(), EMAIL_CONFIG_FILE);
+                final File f = new File(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
+                Util.copyFile(f, EMAIL_CONFIG_FILE);
                 return EMAIL_CONFIG_FILE.toURI().toURL();
             case "url":
                 return new URL(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
