@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * The only public members of this package are the ones directly necessary for implementing
- * {@link com.github.robozonky.strategy.simple.SimpleStrategyService}. They may be hidden after this
- * is removed.
- */
 package com.github.robozonky.strategy.natural;
+
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class GeneratedStrategyVerifierTest {
+
+    @Test
+    void simpleStrategy() {
+        final ParsedStrategy s = GeneratedStrategyVerifier.parseWithAntlr("Robot má udržovat konzervativní portfolio.");
+        assertThat(s).isNotNull();
+    }
+
+}

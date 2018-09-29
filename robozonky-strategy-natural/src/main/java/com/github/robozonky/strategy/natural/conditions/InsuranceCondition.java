@@ -22,21 +22,15 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public class InsuranceCondition extends MarketplaceFilterConditionImpl {
 
-    public static final MarketplaceFilterCondition ACTIVE = new InsuranceCondition(true), INACTIVE = ACTIVE.invert();
-
-    private final boolean expected;
-
-    private InsuranceCondition(final boolean expected) {
-        this.expected = expected;
-    }
+    public static final MarketplaceFilterCondition ACTIVE = new InsuranceCondition(), INACTIVE = ACTIVE.invert();
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of(expected ? "With insurance." : "Without insurance.");
+        return Optional.of("With insurance.");
     }
 
     @Override
     public boolean test(final Wrapper wrapper) {
-        return wrapper.isInsuranceActive() == expected;
+        return wrapper.isInsuranceActive();
     }
 }

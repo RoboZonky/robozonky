@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package com.github.robozonky.strategy.natural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
@@ -36,13 +34,12 @@ import org.slf4j.LoggerFactory;
  * The focus of this class is to always return the correct filters, no matter whether we are in a normal mode or in exit
  * strategy mode.
  */
-public class FilterSupplier {
+class FilterSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterSupplier.class);
 
     private final DefaultValues defaults;
     private final Supplier<Collection<MarketplaceFilter>> primarySupplier, secondarySupplier, sellSupplier;
-    private final Lock lock = new ReentrantLock(true);
     private final boolean primaryMarketplaceEnabled, secondaryMarketplaceEnabled;
     private volatile Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters, sellFilters;
     private volatile long lastCheckedMonthsBeforeExit = -1;
@@ -133,7 +130,7 @@ public class FilterSupplier {
         return getFilters(() -> Collections.unmodifiableCollection(sellSupplier.get()), defaults.isSelloffStarted());
     }
 
-    private void refreshLocked() {
+    private synchronized void refresh() {
         final boolean sellOffTriggered = defaults.isSelloffStarted() != lastCheckedSellOffStarted;
         final boolean exitStrategyTriggered = defaults.getMonthsBeforeExit() != lastCheckedMonthsBeforeExit;
         final boolean needsReinit = !wasCheckedOnce || sellOffTriggered || exitStrategyTriggered;
@@ -146,16 +143,17 @@ public class FilterSupplier {
         this.primaryMarketplaceFilters = refreshPrimaryMarketplaceFilters();
         this.secondaryMarketplaceFilters = refreshSecondaryMarketplaceFilters();
         this.sellFilters = refreshSellFilters();
+        final boolean exitActive = lastCheckedMonthsBeforeExit > -1;
         if (sellOffTriggered) {
             if (lastCheckedSellOffStarted) {
                 LOGGER.info("Exit sell-off in effect. No new loans will be invested, full portfolio is up for sale.");
-            } else if (lastCheckedMonthsBeforeExit > -1) {
+            } else if (exitActive) {
                 LOGGER.info("Exit sell-off no longer in effect, exit strategy still active.");
             } else {
                 LOGGER.info("Returning from exit strategy, resuming normal operation.");
             }
         } else if (exitStrategyTriggered) { // no need to notify of this if already notified of the big sell-off
-            if (lastCheckedMonthsBeforeExit > -1) {
+            if (exitActive) {
                 LOGGER.info("Exit strategy is active. New loans and participations over {} months will be ignored.",
                             lastCheckedMonthsBeforeExit);
             } else {
@@ -164,28 +162,21 @@ public class FilterSupplier {
         }
     }
 
-    private void refresh() {
-        lock.lock();
-        try { // only ever run the refresh once at a time
-            refreshLocked();
-        } finally {
-            lock.unlock();
-        }
+    private Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> filters) {
+        refresh();
+        return filters.get();
     }
 
     public Collection<MarketplaceFilter> getPrimaryMarketplaceFilters() {
-        refresh();
-        return primaryMarketplaceFilters;
+        return getFilters(() -> primaryMarketplaceFilters);
     }
 
     public Collection<MarketplaceFilter> getSecondaryMarketplaceFilters() {
-        refresh();
-        return secondaryMarketplaceFilters;
+        return getFilters(() -> secondaryMarketplaceFilters);
     }
 
     public Collection<MarketplaceFilter> getSellFilters() {
-        refresh();
-        return sellFilters;
+        return getFilters(() -> sellFilters);
     }
 
     @Override

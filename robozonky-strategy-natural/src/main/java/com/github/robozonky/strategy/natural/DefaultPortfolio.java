@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.EnumMap;
 
 import com.github.robozonky.api.remote.enums.Rating;
 
-public enum DefaultPortfolio {
+enum DefaultPortfolio {
 
     CONSERVATIVE(3, 6, 16, 25, 20, 15, 15, 0),
     BALANCED(1, 3, 17, 20, 25, 20, 12, 2),

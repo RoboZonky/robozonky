@@ -33,7 +33,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
-public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
+class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private static final Comparator<LoanDescriptor> COMPARATOR = new PrimaryMarketplaceComparator();
     private final ParsedStrategy strategy;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,20 @@ import java.math.BigDecimal;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import com.github.robozonky.strategy.natural.Util;
-
 class RangeCondition<T> implements Predicate<T> {
 
     private final Function<T, Number> targetAccessor;
     private final BigDecimal minInclusive, maxInclusive;
 
+    private static BigDecimal toBigDecimal(final Number num) {
+        return new BigDecimal(num.toString());
+    }
+
     public RangeCondition(final Function<T, Number> targetAccessor, final Number minValueInclusive,
                           final Number maxValueInclusive) {
         this.targetAccessor = targetAccessor;
-        final BigDecimal min = Util.toBigDecimal(minValueInclusive);
-        final BigDecimal max = Util.toBigDecimal(maxValueInclusive);
+        final BigDecimal min = toBigDecimal(minValueInclusive);
+        final BigDecimal max = toBigDecimal(maxValueInclusive);
         this.minInclusive = min.min(max);
         this.maxInclusive = min.max(max);
     }
@@ -46,7 +48,7 @@ class RangeCondition<T> implements Predicate<T> {
 
     @Override
     public boolean test(final T item) {
-        final BigDecimal target = Util.toBigDecimal(targetAccessor.apply(item));
+        final BigDecimal target = toBigDecimal(targetAccessor.apply(item));
         return target.compareTo(minInclusive) >= 0 && target.compareTo(maxInclusive) <= 0;
     }
 }

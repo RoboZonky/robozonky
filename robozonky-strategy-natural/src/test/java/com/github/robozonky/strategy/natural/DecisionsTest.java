@@ -13,4 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.robozonky.strategy.simple;
+
+package com.github.robozonky.strategy.natural;
+
+import java.util.function.Consumer;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+class DecisionsTest {
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void logs() {
+        final Consumer<Logger> c = mock(Consumer.class);
+        Decisions.report(c);
+        verify(c).accept(any());
+    }
+
+}

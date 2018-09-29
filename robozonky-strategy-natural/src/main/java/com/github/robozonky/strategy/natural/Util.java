@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
-public final class Util {
+final class Util {
 
     private static final BigDecimal ONE_HUNDRED = BigDecimal.TEN.pow(2);
 
@@ -38,8 +38,8 @@ public final class Util {
         // no instances
     }
 
-    public static Stream<Rating> rankRatingsByDemand(final ParsedStrategy strategy,
-                                                     final Map<Rating, BigDecimal> currentShare) {
+    static Stream<Rating> rankRatingsByDemand(final ParsedStrategy strategy,
+                                              final Map<Rating, BigDecimal> currentShare) {
         final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {
@@ -50,15 +50,12 @@ public final class Util {
                 Decisions.report(logger -> logger.debug("Rating {} over-invested by {} percentage points.", r, pp));
                 return;
             }
-            mostWantedRatings.compute(undershare, (k, v) -> { // rank the rating
-                if (v == null) {
-                    return EnumSet.of(r);
-                }
-                v.add(r);
-                return v;
-            });
+            // rank the rating
+            mostWantedRatings.computeIfAbsent(undershare, k -> EnumSet.noneOf(Rating.class));
+            mostWantedRatings.get(undershare).add(r);
+            // inform that the rating is under-invested
             final BigDecimal minimumNeededShare = divide(strategy.getMinimumShare(r), ONE_HUNDRED);
-            if (currentRatingShare.compareTo(minimumNeededShare) < 0) { // inform that the rating is under-invested
+            if (currentRatingShare.compareTo(minimumNeededShare) < 0) {
                 final BigDecimal pp = minimumNeededShare.subtract(currentRatingShare).multiply(ONE_HUNDRED);
                 Decisions.report(logger -> logger.debug("Rating {} under-invested by {} percentage points.", r, pp));
             }
@@ -66,7 +63,7 @@ public final class Util {
         return mostWantedRatings.values().stream().flatMap(Collection::stream);
     }
 
-    public static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
+    static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
         final int balance = portfolio.getCzkAvailable().intValue();
         if (balance < strategy.getMinimumBalance()) {
             Decisions.report(logger -> logger.debug("Not recommending any loans due to balance under minimum."));
@@ -79,9 +76,5 @@ public final class Util {
             return false;
         }
         return true;
-    }
-
-    public static BigDecimal toBigDecimal(final Number num) {
-        return new BigDecimal(num.toString());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
-public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
+class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     private static final Comparator<ParticipationDescriptor> COMPARATOR = new SecondaryMarketplaceComparator();
     private final ParsedStrategy strategy;
