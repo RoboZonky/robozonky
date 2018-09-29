@@ -76,10 +76,11 @@ public class App implements Runnable {
         actuallyExit(result.getReturnCode().getCode());
     }
 
-    private ReturnCode execute(final InvestmentMode mode) {
+    ReturnCode execute(final InvestmentMode mode) {
         shutdownHooks.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
         Events.fire(new RoboZonkyStartingEvent());
         try {
+            lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
             ensureLiveness();
             shutdownHooks.register(new Management(lifecycle));
             final String sessionName = Events.getSessionInfo().flatMap(SessionInfo::getName).orElse(null);
@@ -95,8 +96,7 @@ public class App implements Runnable {
         lifecycle.resumeToFail(throwable);
     }
 
-    private void ensureLiveness() {
-        lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
+    void ensureLiveness() {
         if (!lifecycle.waitUntilOnline()) {
             exit(ReturnCode.ERROR_DOWN);
         }

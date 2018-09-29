@@ -33,6 +33,15 @@ class SchedulerTest {
     private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
 
     @Test
+    void backgroundRestarts() {
+        final Scheduler s = Scheduler.inBackground();
+        s.close();
+        try (final Scheduler s2 = Scheduler.inBackground()) {
+            assertThat(s).isNotSameAs(s2);
+        }
+    }
+
+    @Test
     void submit() {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
             assertThat(s.isSubmitted(REFRESHABLE)).isFalse();

@@ -71,6 +71,13 @@ class CommandLineTest extends AbstractRoboZonkyTest {
     }
 
     @Test
+    void validDaemonCliNoKeystore() {
+        final App main = mockedApp("-g", "a", "-p", "p", "-i", "somewhere.txt", "-s", "somewhere");
+        final Optional<InvestmentMode> cfg = CommandLine.parse(main);
+        assertThat(cfg).isEmpty();
+    }
+
+    @Test
     void helpCli() {
         final App main = mockedApp("-h");
         CommandLine.parse(main);

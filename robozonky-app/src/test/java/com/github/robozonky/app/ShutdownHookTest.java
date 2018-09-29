@@ -17,14 +17,17 @@
 package com.github.robozonky.app;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ShutdownHookTest {
@@ -68,5 +71,18 @@ class ShutdownHookTest {
         } catch (final RuntimeException ex) {
             fail("Should not have been thrown.", ex);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void proper() {
+        final Consumer<ShutdownHook.Result> c = mock(Consumer.class);
+        final ShutdownHook.Handler h = mock(ShutdownHook.Handler.class);
+        when(h.get()).thenReturn(Optional.of(c));
+        final ShutdownHook s = new ShutdownHook();
+        assertThat(s.register(h)).isTrue();
+        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
+        s.execute(r);
+        verify(c).accept(eq(r));
     }
 }
