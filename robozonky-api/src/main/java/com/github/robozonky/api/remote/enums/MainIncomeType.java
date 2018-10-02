@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,11 @@ public enum MainIncomeType implements BaseEnum {
     STUDENT("student"),
     UNEMPLOYED("bez zaměstnání"),
     LIBERAL_PROFESSION("svobodné povolání"),
+    RENT("rentiér"),
     OTHERS_MAIN("jiné"),
     // there are some loans in the API with these values; it is not documented and has no translation
     NEXT_WORK("?"),
-    NEXT_PENSION("??"),
-    RENT("???");
+    NEXT_PENSION("??");
 
 
     static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
