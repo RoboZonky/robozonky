@@ -39,6 +39,7 @@ class ShutdownEnabler implements ShutdownHook.Handler {
     public void waitUntilTriggered() {
         LOGGER.debug("Waiting for shutdown on {}.", daemonAllowedToTerminate);
         daemonAllowedToTerminate.acquireUninterruptibly();
+        LOGGER.debug("Shutdown allowed.");
     }
 
     @Override

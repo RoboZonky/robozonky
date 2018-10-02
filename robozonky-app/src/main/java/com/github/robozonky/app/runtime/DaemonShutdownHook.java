@@ -16,12 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 class DaemonShutdownHook extends Thread {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DaemonShutdownHook.class);
 
     private final ShutdownEnabler shutdownEnabler;
     private final Lifecycle lifecycle;
@@ -33,14 +28,9 @@ class DaemonShutdownHook extends Thread {
 
     @Override
     public void run() {
-        LOGGER.debug("Shutdown requested through {}.", lifecycle);
         // will release the main thread and thus terminate the daemon
         lifecycle.resumeToShutdown();
         // only allow to shut down after the daemon has been closed by the app
-        try {
-            shutdownEnabler.waitUntilTriggered();
-        } finally {
-            LOGGER.debug("Shutdown allowed.");
-        }
+        shutdownEnabler.waitUntilTriggered();
     }
 }
