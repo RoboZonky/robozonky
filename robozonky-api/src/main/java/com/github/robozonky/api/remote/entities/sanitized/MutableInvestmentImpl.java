@@ -34,9 +34,12 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class MutableInvestmentImpl implements InvestmentBuilder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MutableInvestmentImpl.class);
     private static final Random RANDOM = new Random(0L);
 
     private int loanId, id, currentTerm, originalTerm, remainingMonths;
@@ -66,6 +69,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
      */
     MutableInvestmentImpl(final RawInvestment investment,
                           final Function<Investment, LocalDate> investmentDateSupplier) {
+        LOGGER.trace("Sanitizing investment #{} for loan #{}.", investment.getId(), investment.getLoanId());
         this.loanId = investment.getLoanId();
         this.id = investment.getId();
         this.currentTerm = investment.getCurrentTerm();
