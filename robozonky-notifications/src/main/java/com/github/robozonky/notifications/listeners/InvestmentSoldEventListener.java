@@ -23,7 +23,6 @@ import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.util.FinancialCalculator;
 
 public class InvestmentSoldEventListener extends AbstractListener<InvestmentSoldEvent> {
 

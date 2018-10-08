@@ -22,7 +22,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.util.FinancialCalculator;
 
 public class LoanRepaidEventListener extends AbstractListener<LoanRepaidEvent> {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.notifications.listeners;
 
 import java.math.BigDecimal;
 
@@ -27,7 +27,7 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
  * Cleaned up and adapted from here:
  * https://www.experts-exchange.com/articles/1948/A-Guide-to-the-PMT-FV-IPMT-and-PPMT-Functions.html
  */
-class FinancialUtil {
+final class FinancialUtil {
 
     private FinancialUtil() {
         // no instances

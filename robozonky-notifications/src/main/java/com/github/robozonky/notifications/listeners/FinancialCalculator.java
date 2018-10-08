@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.notifications.listeners;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -42,7 +42,7 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.toScale;
 import static com.github.robozonky.internal.util.Maps.entry;
 
-public final class FinancialCalculator {
+final class FinancialCalculator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FinancialCalculator.class);
     private static final Instant MIDNIGHT_2017_09_01 =
