@@ -16,15 +16,16 @@
 
 package com.github.robozonky.app.daemon.transactions;
 
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.events.EventFactory;
 
 class LoanRepaidProcessor extends TransactionProcessor {
 
@@ -43,7 +44,8 @@ class LoanRepaidProcessor extends TransactionProcessor {
     @Override
     void processApplicable(final Transaction transfer) {
         final int loanId = transfer.getLoanId();
-        final Investment investment = lookupOrFail(loanId, transactional.getTenant());
+        final Tenant tenant = transactional.getTenant();
+        final Investment investment = lookupOrFail(loanId, tenant);
         final boolean paidInFull = investment.getPaymentStatus()
                 .map(s -> s == PaymentStatus.PAID)
                 .orElse(false);
@@ -51,7 +53,7 @@ class LoanRepaidProcessor extends TransactionProcessor {
             logger.debug("Not yet repaid in full: {}.", transfer);
             return;
         }
-        final Loan l = LoanCache.get().getLoan(loanId, transactional.getTenant());
-        transactional.fire(new LoanRepaidEvent(investment, l, transactional.getPortfolio().getOverview()));
+        final Loan loan = LoanCache.get().getLoan(loanId, tenant);
+        transactional.fire(EventFactory.loanRepaid(investment, loan, transactional.getPortfolio().getOverview()));
     }
 }

@@ -130,7 +130,7 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         // the investment is no longer delinquent
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
         final List<Development> developments = assembleDevelopments(delinquencyStart);
-        when(zonky.getDevelopments(eq(l))).thenReturn(developments.stream());
+        when(zonky.getDevelopments(eq(l.getId()))).thenReturn(developments.stream());
         DelinquencyNotificationPayload.notify(p);
         p.run(); // finish the transaction
         // event is fired; only includes developments after delinquency occured, in reverse order

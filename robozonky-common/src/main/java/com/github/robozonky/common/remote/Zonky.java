@@ -219,11 +219,11 @@ public class Zonky {
 
     /**
      * Retrieve loan collections information via {@link CollectionsApi}.
-     * @param loan Loan in question.
+     * @param loanId Loan in question.
      * @return All items from the remote API, lazy-loaded.
      */
-    public Stream<Development> getDevelopments(final Loan loan) {
-        return Zonky.getStream(collectionsApi, a -> a.items(loan.getId())).map(Development::sanitized);
+    public Stream<Development> getDevelopments(final int loanId) {
+        return Zonky.getStream(collectionsApi, a -> a.items(loanId)).map(Development::sanitized);
     }
 
     /**

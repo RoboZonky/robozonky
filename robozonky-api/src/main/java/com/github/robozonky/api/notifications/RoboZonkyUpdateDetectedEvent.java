@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,7 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired when RoboZonky detects that a new stable (X.Y.Z) version is available in Maven Central.
  */
-public class RoboZonkyUpdateDetectedEvent extends Event {
+public interface RoboZonkyUpdateDetectedEvent extends Event {
 
-    private final String newVersion;
-
-    public RoboZonkyUpdateDetectedEvent(final String newVersion) {
-        this.newVersion = newVersion;
-    }
-
-    public final String getNewVersion() {
-        return newVersion;
-    }
+    String getNewVersion();
 }

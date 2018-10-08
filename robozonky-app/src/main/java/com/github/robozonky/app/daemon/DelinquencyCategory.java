@@ -26,16 +26,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.events.EventFactory;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,17 +76,17 @@ enum DelinquencyCategory {
     private static EventSupplier getEventSupplier(final int threshold) {
         switch (threshold) {
             case -1:
-                return LoanDefaultedEvent::new;
+                return EventFactory::loanDefaulted;
             case 0:
-                return LoanNowDelinquentEvent::new;
+                return EventFactory::loanNowDelinquent;
             case 10:
-                return LoanDelinquent10DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent10plus;
             case 30:
-                return LoanDelinquent30DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent30plus;
             case 60:
-                return LoanDelinquent60DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent60plus;
             case 90:
-                return LoanDelinquent90DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent90plus;
             default:
                 throw new IllegalArgumentException("Wrong delinquency threshold: " + threshold);
         }
@@ -99,9 +94,10 @@ enum DelinquencyCategory {
 
     private static Event getEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), tenant);
         final LocalDate since = LocalDate.now().minusDays(investment.getDaysPastDue());
-        final Collection<Development> developments = getDevelopments(tenant, loan, since);
+        final int loanId = investment.getLoanId();
+        final Collection<Development> developments = getDevelopments(tenant, loanId, since);
+        final Loan loan = LoanCache.get().getLoan(loanId, tenant);
         final Event e = getEventSupplier(threshold).apply(investment, loan, since, developments);
         LOGGER.trace("Done.");
         return e;
@@ -111,10 +107,10 @@ enum DelinquencyCategory {
         return "notified" + dayThreshold + "plus";
     }
 
-    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
+    private static List<Development> getDevelopments(final Tenant auth, final int loanId,
                                                      final LocalDate delinquentSince) {
         final LocalDate lastNonDelinquentDay = delinquentSince.minusDays(1);
-        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
+        final List<Development> developments = auth.call(z -> z.getDevelopments(loanId))
                 .filter(d -> d.getDateFrom().toLocalDate().isAfter(lastNonDelinquentDay))
                 .collect(toList());
         Collections.reverse(developments);

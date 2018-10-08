@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon.transactions;
 
-import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -25,6 +24,8 @@ import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
+
+import static com.github.robozonky.app.events.EventFactory.investmentSold;
 
 class ParticipationSoldProcessor extends TransactionProcessor {
 
@@ -44,9 +45,9 @@ class ParticipationSoldProcessor extends TransactionProcessor {
     void processApplicable(final Transaction transaction) {
         final int loanId = transaction.getLoanId();
         final Tenant tenant = transactional.getTenant();
+        final Investment i = lookupOrFail(loanId, tenant);
         final Loan l = LoanCache.get().getLoan(loanId, tenant);
-        final Investment i = lookupOrFail(l, tenant);
-        transactional.fire(new InvestmentSoldEvent(i, l, transactional.getPortfolio().getOverview()));
+        transactional.fire(investmentSold(i, l, transactional.getPortfolio().getOverview()));
         SoldParticipationCache.forTenant(tenant).markAsSold(loanId);
     }
 }

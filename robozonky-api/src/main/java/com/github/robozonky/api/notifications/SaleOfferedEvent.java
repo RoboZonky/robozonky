@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,9 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-
 /**
  * Fired immediately after secondary market purchase was submitted to the API.
  */
-public final class SaleOfferedEvent extends Event implements InvestmentBased {
-
-    private final Investment investment;
-    private final Loan loan;
-
-    public SaleOfferedEvent(final Investment investment, final Loan loan) {
-        this.investment = investment;
-        this.loan = loan;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
-    }
-
-    @Override
-    public Investment getInvestment() {
-        return investment;
-    }
+public interface SaleOfferedEvent extends InvestmentBased {
 
 }

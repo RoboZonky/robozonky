@@ -23,16 +23,9 @@ import java.util.List;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
-import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -41,6 +34,15 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.Portfolio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.EventFactory.executionCompleted;
+import static com.github.robozonky.app.events.EventFactory.executionStarted;
+import static com.github.robozonky.app.events.EventFactory.investmentDelegated;
+import static com.github.robozonky.app.events.EventFactory.investmentMade;
+import static com.github.robozonky.app.events.EventFactory.investmentRejected;
+import static com.github.robozonky.app.events.EventFactory.investmentRequested;
+import static com.github.robozonky.app.events.EventFactory.investmentSkipped;
+import static com.github.robozonky.app.events.EventFactory.loanRecommended;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
@@ -80,13 +82,13 @@ final class InvestingSession {
         final InvestingSession session = new InvestingSession(portfolio, loans, investor, auth);
         final PortfolioOverview portfolioOverview = portfolio.getOverview();
         final int balance = portfolioOverview.getCzkAvailable().intValue();
-        Events.fire(new ExecutionStartedEvent(loans, portfolioOverview));
+        Events.fire(executionStarted(loans, portfolioOverview));
         if (balance >= auth.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
             session.invest(strategy);
         }
         final Collection<Investment> result = session.getResult();
         // make sure we get fresh portfolio reference here
-        Events.fire(new ExecutionCompletedEvent(result, portfolio.getOverview()));
+        Events.fire(executionCompleted(result, portfolio.getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -94,7 +96,7 @@ final class InvestingSession {
         boolean invested;
         do {
             invested = strategy.apply(getAvailable(), portfolio.getOverview())
-                    .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
+                    .peek(r -> Events.fire(loanRecommended(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -131,7 +133,7 @@ final class InvestingSession {
             LOGGER.debug("Balance was less than recommendation.");
             return false;
         }
-        Events.fire(new InvestmentRequestedEvent(recommendation));
+        Events.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
         final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);
@@ -139,20 +141,20 @@ final class InvestingSession {
         switch (response.getType()) {
             case REJECTED:
                 return investor.getConfirmationProvider().map(c -> {
-                    Events.fire(new InvestmentRejectedEvent(recommendation, providerId));
+                    Events.fire(investmentRejected(recommendation, providerId));
                     // rejected through a confirmation provider => forget
                     discard(loan);
                     return false;
                 }).orElseGet(() -> {
                     // rejected due to no confirmation provider => make available for direct investment later
-                    Events.fire(new InvestmentSkippedEvent(recommendation));
+                    Events.fire(investmentSkipped(recommendation));
                     InvestingSession.LOGGER.debug(
                             "Loan #{} protected by CAPTCHA, will check back later.", loanId);
                     skip(loan);
                     return false;
                 });
             case DELEGATED:
-                final Event e = new InvestmentDelegatedEvent(recommendation, providerId);
+                final Event e = investmentDelegated(recommendation, providerId);
                 Events.fire(e);
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
@@ -164,11 +166,11 @@ final class InvestingSession {
                 return false;
             case INVESTED:
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
-                final Investment i = Investment.fresh(recommendation.descriptor().item(),
-                                                      confirmedAmount);
+                final Loan l = recommendation.descriptor().item();
+                final Investment i = Investment.fresh(l, confirmedAmount);
                 markSuccessfulInvestment(i);
                 discard(recommendation.descriptor()); // never show again
-                Events.fire(new InvestmentMadeEvent(i, loan.item(), portfolio.getOverview()));
+                Events.fire(investmentMade(i, l, portfolio.getOverview()));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA
                 return false;

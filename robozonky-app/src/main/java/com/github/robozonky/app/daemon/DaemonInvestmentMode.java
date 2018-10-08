@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.authentication.Tenant;
@@ -35,6 +34,8 @@ import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.EventFactory.roboZonkyDaemonFailed;
 
 public class DaemonInvestmentMode implements InvestmentMode {
 
@@ -63,7 +64,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
             runnable.run();
         } catch (final Exception ex) {
             LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            Events.fire(new RoboZonkyDaemonFailedEvent(ex));
+            Events.fire(roboZonkyDaemonFailed(ex));
         } catch (final Error t) {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);
@@ -89,13 +90,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     private void scheduleDaemons(final Scheduler executor) {
-        LOGGER.debug("Scheduling portfolio updates." );
+        LOGGER.debug("Scheduling portfolio updates.");
         executor.run(portfolio); // first run the update
         // schedule hourly refresh
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(portfolio, oneHour, oneHour);
         // run investing and purchasing daemons
-        LOGGER.debug("Scheduling daemon threads." );
+        LOGGER.debug("Scheduling daemon threads.");
         executor.submit(toSkippable(investing), investing.getRefreshInterval());
         executor.submit(toSkippable(purchasing), purchasing.getRefreshInterval(), Duration.ofMillis(250));
     }
@@ -105,7 +106,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     void scheduleJob(final Job job, final Scheduler executor) {
-        LOGGER.debug("Scheduling batch jobs." );
+        LOGGER.debug("Scheduling batch jobs.");
         final Payload payload = job.payload();
         final String payloadId = payload.toString();
         final Runnable runnable = () -> {

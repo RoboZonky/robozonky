@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Optional;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.app.events.EventFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -45,7 +46,7 @@ class EventsTest extends AbstractEventLeveragingTest {
         final Events.EventSpecific<RoboZonkyStartingEvent> event =
                 Events.INSTANCE.loadListeners(RoboZonkyStartingEvent.class, r);
         assertThat(event).isNotNull();
-        final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
+        final RoboZonkyStartingEvent e = EventFactory.roboZonkyStarting();
         Events.fire(e);
         assertThat(Events.getFired()).contains(e);
         verify(listener).handle(eq(e), any());

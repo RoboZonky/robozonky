@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,56 +16,13 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-
 import com.github.robozonky.api.remote.entities.RawInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 /**
  * Fired immediately after an {@link RawInvestment} is identified as delinquent.
  */
-public abstract class LoanDelinquentEvent extends Event implements DelinquencyBased {
+public interface LoanDelinquentEvent extends DelinquencyBased {
 
-    private final Investment investment;
-    private final Loan loan;
-    private final LocalDate since;
-    private final int thresholdInDays;
-    private final Collection<Development> collectionActions;
+    int getThresholdInDays();
 
-    LoanDelinquentEvent(final Investment investment, final Loan loan, final LocalDate since, final int thresholdInDays,
-                        final Collection<Development> collectionActions) {
-        this.investment = investment;
-        this.loan = loan;
-        this.since = since;
-        this.thresholdInDays = thresholdInDays;
-        this.collectionActions = Collections.unmodifiableCollection(collectionActions);
-    }
-
-    @Override
-    public Investment getInvestment() {
-        return investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
-    }
-
-    public int getThresholdInDays() {
-        return thresholdInDays;
-    }
-
-    @Override
-    public Collection<Development> getCollectionActions() {
-        return collectionActions;
-    }
-
-    @Override
-    public LocalDate getDelinquentSince() {
-        return since;
-    }
 }

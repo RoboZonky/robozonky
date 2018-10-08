@@ -44,6 +44,7 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -127,7 +128,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         when(zonky.getRestrictions()).thenReturn(new Restrictions());
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
-        when(zonky.getDevelopments(any())).thenAnswer(i -> Stream.empty());
+        when(zonky.getDevelopments(anyInt())).thenAnswer(i -> Stream.empty());
         return zonky;
     }
 

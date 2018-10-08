@@ -17,34 +17,17 @@
 package com.github.robozonky.api.notifications;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately after the investing algorithm is finished offering participations in the secondary marketplace.
  * Does not guarantee anything was actually sold.
  */
-public final class SellingCompletedEvent extends Event implements Financial {
-
-    private final Collection<Investment> investments;
-    private final PortfolioOverview portfolioOverview;
-
-    public SellingCompletedEvent(final Collection<Investment> investment, final PortfolioOverview portfolio) {
-        this.investments = Collections.unmodifiableCollection(investment);
-        this.portfolioOverview = portfolio;
-    }
+public interface SellingCompletedEvent extends Financial {
 
     /**
      * @return The investments that were offered on the secondary marketplace.
      */
-    public Collection<Investment> getInvestments() {
-        return investments;
-    }
-
-    @Override
-    public PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview;
-    }
+    Collection<Investment> getInvestments();
 }

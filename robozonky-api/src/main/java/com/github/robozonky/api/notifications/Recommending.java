@@ -18,7 +18,7 @@ package com.github.robozonky.api.notifications;
 
 import java.math.BigDecimal;
 
-public interface Recommending {
+public interface Recommending extends Event {
 
     BigDecimal getRecommendation();
 }

@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import static com.github.robozonky.app.events.EventFactory.roboZonkyTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -56,7 +57,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     void updatingDependants() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final PortfolioDependant dependant = tp -> tp.fire(new RoboZonkyTestingEvent());
+        final PortfolioDependant dependant = tp -> tp.fire(roboZonkyTesting());
         final PortfolioUpdater instance = new PortfolioUpdater(a, BlockedAmountProcessor.createLazy(a));
         instance.registerDependant(dependant);
         instance.run();
@@ -72,7 +73,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, BlockedAmountProcessor.createLazy(a),
                                                                Duration.ofSeconds(2));
         instance.registerDependant(tp -> { // fire event
-            tp.fire(new RoboZonkyTestingEvent());
+            tp.fire(roboZonkyTesting());
         });
         instance.registerDependant(tp -> { // fail
             throw new IllegalStateException("Testing exception");
