@@ -38,7 +38,8 @@ public class Portfolio implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
 
     private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
-    private final AtomicReference<Map<Rating, BigDecimal>> amountsAtRisk = new AtomicReference<>(Collections.emptyMap());
+    private final AtomicReference<Map<Rating, BigDecimal>> amountsAtRisk = new AtomicReference<>(
+            Collections.emptyMap());
     private final Statistics statistics;
     private final RemoteBalance balance;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
@@ -80,15 +81,15 @@ public class Portfolio implements Closeable {
     }
 
     public PortfolioOverview getOverview() {
-        return portfolioOverview.updateAndGet(po -> {
-            if (po == null) {
-                final PortfolioOverview overview = PortfolioOverview.calculate(balance.get(), statistics,
-                                                                               blockedAmounts.get().getAdjustments(),
-                                                                               amountsAtRisk.get());
-                LOGGER.debug("Calculated: {}.", overview);
-                return overview;
+        return portfolioOverview.updateAndGet(old -> {
+            if (old == null) {
+                final PortfolioOverview current = PortfolioOverviewImpl.calculate(balance.get(), statistics,
+                                                                                  blockedAmounts.get().getAdjustments(),
+                                                                                  amountsAtRisk.get());
+                LOGGER.debug("Calculated: {}.", current);
+                return current;
             }
-            return po;
+            return old;
         });
     }
 

@@ -16,11 +16,13 @@
 
 package com.github.robozonky.test;
 
+import java.math.BigDecimal;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
@@ -86,5 +88,18 @@ public abstract class AbstractRoboZonkyTest {
     protected void deleteState() {
         TenantState.destroyAll();
         AbstractRoboZonkyTest.LOGGER.info("Destroyed state.");
+    }
+
+    protected static PortfolioOverview mockPortfolioOverview(final int balance) {
+        final PortfolioOverview po = mock(PortfolioOverview.class);
+        when(po.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance));
+        when(po.getCzkInvested()).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkAtRisk()).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkAtRisk(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getShareAtRisk()).thenReturn(BigDecimal.ZERO);
+        when(po.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        return po;
     }
 }

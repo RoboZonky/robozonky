@@ -20,7 +20,6 @@ import java.util.Map;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.util.FinancialCalculator;
@@ -49,9 +48,9 @@ public class LoanRepaidEventListener extends AbstractListener<LoanRepaidEvent> {
 
     @Override
     protected Map<String, Object> getData(final LoanRepaidEvent event) {
-        final PortfolioOverview p = event.getPortfolioOverview();
         final Map<String, Object> result = super.getData(event);
-        result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), p));
+        final int invested = event.getPortfolioOverview().getCzkInvested().intValue();
+        result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), invested));
         return result;
     }
 }

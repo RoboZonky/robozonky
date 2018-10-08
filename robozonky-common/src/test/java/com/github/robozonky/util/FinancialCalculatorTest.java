@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,12 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -40,13 +36,6 @@ import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class FinancialCalculatorTest {
-
-    private static PortfolioOverview getPortfolioOverview(final int total) {
-        final int amountPerRating = total / Rating.values().length;
-        final Map<Rating, BigDecimal> shares = Arrays.stream(Rating.values())
-                .collect(Collectors.toMap(Function.identity(), r -> BigDecimal.valueOf(amountPerRating)));
-        return PortfolioOverview.calculate(BigDecimal.valueOf(1000), shares);
-    }
 
     private static Loan mockLoan(final Rating rating) {
         final MyInvestment investment = Mockito.mock(MyInvestment.class);
@@ -62,8 +51,8 @@ class FinancialCalculatorTest {
 
     private static void fees(final Rating rating, final int threshold) {
         final Investment i = Investment.fresh(mockLoan(rating), 1000);
-        final BigDecimal before = FinancialCalculator.estimateFeeRate(i, getPortfolioOverview(threshold - 1));
-        final BigDecimal after = FinancialCalculator.estimateFeeRate(i, getPortfolioOverview(threshold));
+        final BigDecimal before = FinancialCalculator.estimateFeeRate(i, threshold - 1);
+        final BigDecimal after = FinancialCalculator.estimateFeeRate(i, threshold);
         assertThat(after).isLessThan(before);
     }
 
@@ -71,8 +60,8 @@ class FinancialCalculatorTest {
         final Investment i = Investment.fresh(mockLoan(rating), 1000)
                 .setInterestRate(BigDecimal.TEN)
                 .setRemainingMonths(50).build();
-        final BigDecimal before = FinancialCalculator.expectedInterestAfterFees(i, getPortfolioOverview(threshold - 1));
-        final BigDecimal after = FinancialCalculator.expectedInterestAfterFees(i, getPortfolioOverview(threshold));
+        final BigDecimal before = FinancialCalculator.expectedInterestAfterFees(i, threshold - 1);
+        final BigDecimal after = FinancialCalculator.expectedInterestAfterFees(i, threshold);
         assertThat(after).isGreaterThan(before);
     }
 
@@ -80,9 +69,8 @@ class FinancialCalculatorTest {
         final Investment i = Investment.fresh(mockLoan(rating), 1000)
                 .setInterestRate(BigDecimal.TEN)
                 .setRemainingMonths(50);
-        final BigDecimal before = FinancialCalculator.expectedInterestRateAfterFees(i, getPortfolioOverview(
-                threshold - 1));
-        final BigDecimal after = FinancialCalculator.expectedInterestRateAfterFees(i, getPortfolioOverview(threshold));
+        final BigDecimal before = FinancialCalculator.expectedInterestRateAfterFees(i, threshold - 1);
+        final BigDecimal after = FinancialCalculator.expectedInterestRateAfterFees(i, threshold);
         assertThat(after).isGreaterThan(before);
     }
 
@@ -94,12 +82,10 @@ class FinancialCalculatorTest {
                 .setRemainingMonths(40)
                 .setCurrentTerm(50)
                 .setSmpFee(BigDecimal.ONE);
-        final BigDecimal before = FinancialCalculator.actualInterestAfterFees(i, getPortfolioOverview(threshold - 1));
-        final BigDecimal after = FinancialCalculator.actualInterestAfterFees(i, getPortfolioOverview(threshold));
+        final BigDecimal before = FinancialCalculator.actualInterestAfterFees(i, threshold - 1);
+        final BigDecimal after = FinancialCalculator.actualInterestAfterFees(i, threshold);
         assertThat(after).isGreaterThan(before);
-        final BigDecimal afterSmpFee = FinancialCalculator.actualInterestAfterFees(i,
-                                                                                   getPortfolioOverview(threshold),
-                                                                                   true);
+        final BigDecimal afterSmpFee = FinancialCalculator.actualInterestAfterFees(i, threshold, true);
         assertThat(after).isGreaterThan(afterSmpFee);
     }
 

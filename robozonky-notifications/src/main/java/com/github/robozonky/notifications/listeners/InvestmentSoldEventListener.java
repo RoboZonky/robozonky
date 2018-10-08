@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,8 @@ public class InvestmentSoldEventListener extends AbstractListener<InvestmentSold
     @Override
     protected Map<String, Object> getData(final InvestmentSoldEvent event) {
         final Map<String, Object> result = super.getData(event);
-        result.put("yield",
-                   FinancialCalculator.actualInterestAfterFees(event.getInvestment(), event.getPortfolioOverview(),
-                                                               true));
+        final int invested = event.getPortfolioOverview().getCzkInvested().intValue();
+        result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), invested, true));
         return result;
     }
 }

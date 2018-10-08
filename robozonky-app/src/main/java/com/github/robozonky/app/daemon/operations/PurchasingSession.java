@@ -33,7 +33,6 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
@@ -55,14 +54,12 @@ final class PurchasingSession {
     private final Tenant authenticated;
     private final Portfolio portfolio;
     private final SessionState<ParticipationDescriptor> discarded;
-    private PortfolioOverview portfolioOverview;
 
     PurchasingSession(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace, final Tenant tenant) {
         this.authenticated = tenant;
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
-        this.portfolioOverview = portfolio.getOverview();
     }
 
     public static Collection<Investment> purchase(final Portfolio portfolio,
@@ -74,18 +71,18 @@ final class PurchasingSession {
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        Events.fire(new PurchasingStartedEvent(c, session.portfolioOverview));
+        Events.fire(new PurchasingStartedEvent(c, portfolio.getOverview()));
         session.purchase(strategy);
         final Collection<Investment> result = session.getResult();
-        Events.fire(new PurchasingCompletedEvent(result, session.portfolioOverview));
+        Events.fire(new PurchasingCompletedEvent(result, portfolio.getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
     private void purchase(final RestrictedPurchaseStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.apply(getAvailable(), portfolioOverview)
-                    .filter(r -> portfolioOverview.getCzkAvailable().compareTo(r.amount()) >= 0)
+            invested = strategy.apply(getAvailable(), portfolio.getOverview())
+                    .filter(r -> portfolio.getOverview().getCzkAvailable().compareTo(r.amount()) >= 0)
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -128,7 +125,7 @@ final class PurchasingSession {
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);
             discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
-            Events.fire(new InvestmentPurchasedEvent(i, loan, portfolioOverview));
+            Events.fire(new InvestmentPurchasedEvent(i, loan, portfolio.getOverview()));
         }
         return purchased;
     }
@@ -136,6 +133,5 @@ final class PurchasingSession {
     private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
         portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
-        portfolioOverview = portfolio.getOverview();
     }
 }

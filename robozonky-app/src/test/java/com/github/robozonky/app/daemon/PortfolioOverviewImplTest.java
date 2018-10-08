@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -22,18 +22,19 @@ import java.util.Map;
 
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
-class PortfolioOverviewTest {
+class PortfolioOverviewImplTest {
 
     @Test
     void emptyPortfolio() {
         final BigDecimal balance = BigDecimal.TEN;
-        final PortfolioOverview po = PortfolioOverview.calculate(balance, Statistics.empty(),
-                                                                 Collections.emptyMap(), Collections.emptyMap());
+        final PortfolioOverview po = PortfolioOverviewImpl.calculate(balance, Statistics.empty(),
+                                                                     Collections.emptyMap(), Collections.emptyMap());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
@@ -56,7 +57,7 @@ class PortfolioOverviewTest {
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final BigDecimal adj = BigDecimal.TEN;
         final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
-        final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.ZERO, Statistics.empty(), in, in);
+        final PortfolioOverview po = PortfolioOverviewImpl.calculate(BigDecimal.ZERO, Statistics.empty(), in, in);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);

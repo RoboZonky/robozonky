@@ -16,7 +16,6 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 
 import com.github.robozonky.api.SessionInfo;
@@ -48,7 +47,7 @@ class BalanceOnTargetEventListenerTest extends AbstractRoboZonkyTest {
         when(h.getTarget()).thenReturn(Target.EMAIL);
         when(h.getListenerSpecificIntProperty(eq(SupportedListener.BALANCE_ON_TARGET), eq("targetBalance"), anyInt()))
                 .thenAnswer(i -> i.getArgument(2));
-        final PortfolioOverview p = PortfolioOverview.calculate(BigDecimal.valueOf(1000), Collections.emptyMap());
+        final PortfolioOverview p = mockPortfolioOverview(1000);
         final ExecutionStartedEvent evt = new ExecutionStartedEvent(Collections.emptyList(), p);
         final AbstractListener<ExecutionStartedEvent> l =
                 new BalanceOnTargetEventListener(SupportedListener.BALANCE_ON_TARGET, h);
@@ -56,7 +55,7 @@ class BalanceOnTargetEventListenerTest extends AbstractRoboZonkyTest {
         verify(h, times(1)).offer(any());
         l.handle(evt, SESSION_INFO); // no change, no notification
         verify(h, times(1)).offer(any());
-        final PortfolioOverview p2 = PortfolioOverview.calculate(BigDecimal.ZERO, Collections.emptyMap());
+        final PortfolioOverview p2 = mockPortfolioOverview(0);
         final ExecutionStartedEvent evt2 = new ExecutionStartedEvent(Collections.emptyList(), p2);
         l.handle(evt2, SESSION_INFO); // no change, no notification
         verify(h, times(1)).offer(any());

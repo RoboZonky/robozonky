@@ -96,12 +96,8 @@ import static org.mockito.Mockito.verify;
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
-    private static final PortfolioOverview MAX_PORTFOLIO = createPortfolio(Integer.MAX_VALUE);
+    private static final PortfolioOverview MAX_PORTFOLIO = mockPortfolioOverview(Integer.MAX_VALUE);
     private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
-
-    private static PortfolioOverview createPortfolio(final int balance) {
-        return PortfolioOverview.calculate(BigDecimal.valueOf(balance), Collections.emptyMap());
-    }
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,
                                                                  final AbstractTargetHandler p) {
@@ -254,7 +250,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.BALANCE_ON_TARGET,
                             new ExecutionStartedEvent(Collections.emptyList(), MAX_PORTFOLIO)),
                 forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
-                            new ExecutionStartedEvent(Collections.emptyList(), createPortfolio(0))),
+                            new ExecutionStartedEvent(Collections.emptyList(), mockPortfolioOverview(0))),
                 forListener(SupportedListener.CRASHED, new RoboZonkyCrashedEvent(new RuntimeException())),
                 forListener(SupportedListener.REMOTE_OPERATION_FAILED,
                             new RemoteOperationFailedEvent(new RuntimeException())),

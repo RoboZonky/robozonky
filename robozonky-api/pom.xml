@@ -117,6 +117,219 @@
                   }
                 },
                 "ignore": [
+                  {
+                    "code": "java.method.removed",
+                    "old": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, com.github.robozonky.api.remote.entities.Statistics, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.math.BigDecimal>, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.math.BigDecimal>)",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "calculate",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.math.BigDecimal>)",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "calculate",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.Object java.lang.Object::clone() throws java.lang.CloneNotSupportedException @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "clone",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method boolean java.lang.Object::equals(java.lang.Object) @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "equals",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void java.lang.Object::finalize() throws java.lang.Throwable @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "finalize",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getAtRiskShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getAtRiskShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getAtRiskShareOnInvestment",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.Class<?> java.lang.Object::getClass() @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getClass",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk()",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk()",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkAtRisk",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk(com.github.robozonky.api.remote.enums.Rating)",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk(com.github.robozonky.api.remote.enums.Rating)",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkAtRisk",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAvailable()",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAvailable()",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkAvailable",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested()",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested()",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkInvested",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested(com.github.robozonky.api.remote.enums.Rating)",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested(com.github.robozonky.api.remote.enums.Rating)",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getCzkInvested",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getShareAtRisk()",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getShareAtRisk()",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getShareAtRisk",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.nowAbstract",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+                    "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "getShareOnInvestment",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method int java.lang.Object::hashCode() @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "hashCode",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void java.lang.Object::notify() @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "notify",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void java.lang.Object::notifyAll() @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "notifyAll",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.robozonky.api.strategies.PortfolioOverview::toString()",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "toString",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void java.lang.Object::wait() throws java.lang.InterruptedException @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "wait",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void java.lang.Object::wait(long) throws java.lang.InterruptedException @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "wait",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void java.lang.Object::wait(long, int) throws java.lang.InterruptedException @ com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "wait",
+                    "elementKind": "method",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.class.kindChanged",
+                    "old": "class com.github.robozonky.api.strategies.PortfolioOverview",
+                    "new": "interface com.github.robozonky.api.strategies.PortfolioOverview",
+                    "oldKind": "class",
+                    "newKind": "interface",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "elementKind": "class",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }, {
+                    "code": "java.class.nowAbstract",
+                    "old": "class com.github.robozonky.api.strategies.PortfolioOverview",
+                    "new": "interface com.github.robozonky.api.strategies.PortfolioOverview",
+                    "oldModifiers": "public",
+                    "newModifiers": "public abstract",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "elementKind": "class",
+                    "justification": "PortfolioOverview becomes an interface with a private implementation elsewhere."
+                  }
                 ]
               }
             }
