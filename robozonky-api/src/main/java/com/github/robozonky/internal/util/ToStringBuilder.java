@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.api;
+package com.github.robozonky.internal.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -26,12 +26,15 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 
-public class ToStringBuilder {
+public final class ToStringBuilder {
 
     private final ReflectionToStringBuilder builder;
 
-    // FIXME cache this
-    public ToStringBuilder(final Object o, final String... excludeFields) {
+    public static LazyInitialized<String> createFor(final Object o, final String... excludeFields) {
+        return LazyInitialized.create(() -> new ToStringBuilder(o, excludeFields).toString());
+    }
+
+    private ToStringBuilder(final Object o, final String... excludeFields) {
         final String[] fieldExclusions = Stream.concat(Stream.of("password"), Arrays.stream(excludeFields))
                 .distinct()
                 .toArray(String[]::new);

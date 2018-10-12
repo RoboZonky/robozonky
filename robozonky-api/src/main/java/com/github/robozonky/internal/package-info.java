@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,4 +19,4 @@
  * in the public-facing API. These APIs are subject to change without warning and applications are discouraged from
  * using them. When Java 9 finally brings modules, this package will only be exported to known RoboZonky modules.
  */
-package com.github.robozonky.internal.api;
+package com.github.robozonky.internal;

@@ -17,12 +17,11 @@
 package com.github.robozonky.app.events;
 
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.internal.api.ToStringBuilder;
+import com.github.robozonky.internal.util.LazyInitialized;
+import com.github.robozonky.internal.util.ToStringBuilder;
 
 /**
  * Mandatory parent for any event that may be fired any time during RoboZonky's runtime.
@@ -33,11 +32,12 @@ import com.github.robozonky.internal.api.ToStringBuilder;
 abstract class AbstractEventImpl implements Event {
 
     private final OffsetDateTime creationDateTime = OffsetDateTime.now();
-    private final Collection<String> toStringIgnoredFields;
+    private final LazyInitialized<String> toString;
 
     protected AbstractEventImpl(final String... toStringIgnoredFields) {
-        this.toStringIgnoredFields = Stream.concat(Stream.of("toStringIgnoredFields"), Stream.of(toStringIgnoredFields))
-                .collect(Collectors.toList());
+        final String[] ignored = Stream.concat(Stream.of("toString"), Stream.of(toStringIgnoredFields))
+                .toArray(String[]::new);
+        this.toString = ToStringBuilder.createFor(this, ignored);
     }
 
     public OffsetDateTime getCreatedOn() {
@@ -46,7 +46,6 @@ abstract class AbstractEventImpl implements Event {
 
     @Override
     public final String toString() {
-        final String[] ignored = toStringIgnoredFields.toArray(new String[toStringIgnoredFields.size()]);
-        return new ToStringBuilder(this, ignored).toString();
+        return toString.get();
     }
 }

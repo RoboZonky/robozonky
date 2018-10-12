@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package com.github.robozonky.app.configuration;
 
-import com.github.robozonky.internal.api.ToStringBuilder;
+import com.github.robozonky.internal.util.LazyInitialized;
+import com.github.robozonky.internal.util.ToStringBuilder;
 
 abstract class AbstractCommandLineFragment {
 
+    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "toString");
+
     @Override
     public final String toString() {
-        return new ToStringBuilder(this).toString();
+        return toString.get();
     }
 }

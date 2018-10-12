@@ -32,6 +32,8 @@ import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
+import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
@@ -40,6 +42,7 @@ import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
@@ -183,6 +186,29 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void loanNoLongerDelinquent() {
+        final LoanNoLongerDelinquentEvent e = EventFactory.loanNoLongerDelinquent(Investment.custom().build(),
+                                                                             Loan.custom().build());
+        assertSoftly(softly -> {
+            softly.assertThat(e.getLoan()).isNotNull();
+            softly.assertThat(e.getInvestment()).isNotNull();
+        });
+    }
+
+    @Test
+    void loanNowDelinquent() {
+        final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(Investment.custom().build(),
+                                                                        Loan.custom().build(),
+                                                                        LocalDate.now(), Collections.emptyList());
+        assertSoftly(softly -> {
+            softly.assertThat(e.getLoan()).isNotNull();
+            softly.assertThat(e.getInvestment()).isNotNull();
+            softly.assertThat(e.getDelinquentSince()).isNotNull();
+            softly.assertThat(e.getCollectionActions()).isEmpty();
+        });
+    }
+
+    @Test
     void loanLost() {
         final LoanLostEvent e = EventFactory.loanLost(Investment.custom().build(), Loan.custom().build());
         assertSoftly(softly -> {
@@ -261,6 +287,15 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     void robozonkyDaemonFailed() {
         final RoboZonkyDaemonFailedEvent e = EventFactory.roboZonkyDaemonFailed(new IllegalArgumentException());
         assertThat(e.getCause()).isNotNull();
+    }
+
+    @Test
+    void saleOffered() {
+        final SaleOfferedEvent e = EventFactory.saleOffered(Investment.custom().build(), Loan.custom().build());
+        assertSoftly(softly -> {
+            softly.assertThat(e.getLoan()).isNotNull();
+            softly.assertThat(e.getInvestment()).isNotNull();
+        });
     }
 
     @Test

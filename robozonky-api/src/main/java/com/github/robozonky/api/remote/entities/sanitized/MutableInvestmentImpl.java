@@ -33,7 +33,8 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.ToStringBuilder;
+import com.github.robozonky.internal.util.LazyInitialized;
+import com.github.robozonky.internal.util.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
     // default value for investment date, in case it is null
     private Supplier<LocalDate> investmentDateSupplier = LocalDate::now;
+    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "toString");
 
     MutableInvestmentImpl() {
         this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
@@ -448,6 +450,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
 
     @Override
     public final String toString() {
-        return new ToStringBuilder(this).toString();
+        return toString.get();
     }
 }
