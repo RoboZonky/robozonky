@@ -25,14 +25,12 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ToStringBuilder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilder.class);
     private final ReflectionToStringBuilder builder;
-
-    public static LazyInitialized<String> createFor(final Object o, final String... excludeFields) {
-        return LazyInitialized.create(() -> new ToStringBuilder(o, excludeFields).toString());
-    }
 
     private ToStringBuilder(final Object o, final String... excludeFields) {
         final String[] fieldExclusions = Stream.concat(Stream.of("password"), Arrays.stream(excludeFields))
@@ -40,6 +38,17 @@ public final class ToStringBuilder {
                 .toArray(String[]::new);
         this.builder = new ToStringBuilder.CustomReflectionToStringBuilder(o)
                 .setExcludeFieldNames(fieldExclusions);
+    }
+
+    public static LazyInitialized<String> createFor(final Object o, final String... excludeFields) {
+        return LazyInitialized.create(() -> {
+            try {
+                return new ToStringBuilder(o, excludeFields).toString();
+            } catch (final Exception ex) {
+                LOGGER.debug("Error creating toString().", ex);
+                return "ERROR";
+            }
+        });
     }
 
     @Override

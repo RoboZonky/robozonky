@@ -89,6 +89,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.getInvestments()).isEmpty();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
             softly.assertThat(e.getCreatedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
+            softly.assertThat(e.toString()).isNotEmpty();
         });
     }
 
