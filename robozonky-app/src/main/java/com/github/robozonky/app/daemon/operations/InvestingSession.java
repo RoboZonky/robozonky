@@ -59,9 +59,11 @@ final class InvestingSession {
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
     private final Portfolio portfolio;
+    private final Events events;
 
     InvestingSession(final Portfolio portfolio, final Collection<LoanDescriptor> marketplace, final Investor investor,
                      final Tenant tenant) {
+        this.events = Events.forSession(tenant.getSessionInfo());
         this.investor = investor;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
         this.seen = newSessionState(tenant, marketplace, "seenLoans");
@@ -82,13 +84,13 @@ final class InvestingSession {
         final InvestingSession session = new InvestingSession(portfolio, loans, investor, auth);
         final PortfolioOverview portfolioOverview = portfolio.getOverview();
         final int balance = portfolioOverview.getCzkAvailable().intValue();
-        Events.get().fire(executionStarted(loans, portfolioOverview));
+        session.events.fire(executionStarted(loans, portfolioOverview));
         if (balance >= auth.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
             session.invest(strategy);
         }
         final Collection<Investment> result = session.getResult();
         // make sure we get fresh portfolio reference here
-        Events.get().fire(executionCompleted(result, portfolio.getOverview()));
+        session.events.fire(executionCompleted(result, portfolio.getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -96,7 +98,7 @@ final class InvestingSession {
         boolean invested;
         do {
             invested = strategy.apply(getAvailable(), portfolio.getOverview())
-                    .peek(r -> Events.get().fire(loanRecommended(r)))
+                    .peek(r -> events.fire(loanRecommended(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -133,7 +135,7 @@ final class InvestingSession {
             LOGGER.debug("Balance was less than recommendation.");
             return false;
         }
-        Events.get().fire(investmentRequested(recommendation));
+        events.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
         final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);
@@ -141,13 +143,13 @@ final class InvestingSession {
         switch (response.getType()) {
             case REJECTED:
                 return investor.getConfirmationProvider().map(c -> {
-                    Events.get().fire(investmentRejected(recommendation, providerId));
+                    events.fire(investmentRejected(recommendation, providerId));
                     // rejected through a confirmation provider => forget
                     discard(loan);
                     return false;
                 }).orElseGet(() -> {
                     // rejected due to no confirmation provider => make available for direct investment later
-                    Events.get().fire(investmentSkipped(recommendation));
+                    events.fire(investmentSkipped(recommendation));
                     InvestingSession.LOGGER.debug(
                             "Loan #{} protected by CAPTCHA, will check back later.", loanId);
                     skip(loan);
@@ -155,7 +157,7 @@ final class InvestingSession {
                 });
             case DELEGATED:
                 final Event e = investmentDelegated(recommendation, providerId);
-                Events.get().fire(e);
+                events.fire(e);
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
                     discard(loan);
@@ -170,7 +172,7 @@ final class InvestingSession {
                 final Investment i = Investment.fresh(l, confirmedAmount);
                 markSuccessfulInvestment(i);
                 discard(recommendation.descriptor()); // never show again
-                Events.get().fire(investmentMade(i, l, portfolio.getOverview()));
+                events.fire(investmentMade(i, l, portfolio.getOverview()));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA
                 return false;

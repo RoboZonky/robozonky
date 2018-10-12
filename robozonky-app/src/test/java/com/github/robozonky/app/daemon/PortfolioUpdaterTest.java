@@ -62,7 +62,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         instance.registerDependant(dependant);
         instance.run();
         // make sure that the dependants were called with the proper value of Portfolio
-        assertThat(getNewEvents()).first().isInstanceOf(RoboZonkyTestingEvent.class);
+        assertThat(getEventsRequested()).first().isInstanceOf(RoboZonkyTestingEvent.class);
         assertThat(instance.isInitializing()).isFalse(); // it's false when update finished
     }
 
@@ -82,7 +82,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         assertSoftly(softly -> {
             softly.assertThat(instance.get()).isEmpty();
             softly.assertThat(instance.isInitializing()).isTrue();
-            softly.assertThat(getNewEvents()).isEmpty();
+            softly.assertThat(getEventsRequested()).isEmpty();
         });
         verify(t).accept(notNull());
     }

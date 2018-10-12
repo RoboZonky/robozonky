@@ -55,9 +55,11 @@ final class PurchasingSession {
     private final Tenant authenticated;
     private final Portfolio portfolio;
     private final SessionState<ParticipationDescriptor> discarded;
+    private final Events events;
 
     PurchasingSession(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace,
                       final Tenant tenant) {
+        this.events = Events.forSession(tenant.getSessionInfo());
         this.authenticated = tenant;
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = new ArrayList<>(marketplace);
@@ -73,10 +75,10 @@ final class PurchasingSession {
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        Events.get().fire(purchasingStarted(c, portfolio.getOverview()));
+        session.events.fire(purchasingStarted(c, portfolio.getOverview()));
         session.purchase(strategy);
         final Collection<Investment> result = session.getResult();
-        Events.get().fire(purchasingCompleted(result, portfolio.getOverview()));
+        session.events.fire(purchasingCompleted(result, portfolio.getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -85,7 +87,7 @@ final class PurchasingSession {
         do {
             invested = strategy.apply(getAvailable(), portfolio.getOverview())
                     .filter(r -> portfolio.getOverview().getCzkAvailable().compareTo(r.amount()) >= 0)
-                    .peek(r -> Events.get().fire(purchaseRecommended(r)))
+                    .peek(r -> events.fire(purchaseRecommended(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -119,7 +121,7 @@ final class PurchasingSession {
     }
 
     boolean purchase(final RecommendedParticipation recommendation) {
-        Events.get().fire(purchaseRequested(recommendation));
+        events.fire(purchaseRequested(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan loan = recommendation.descriptor().related();
         final boolean purchased = authenticated.getSessionInfo().isDryRun() || actualPurchase(participation);
@@ -127,7 +129,7 @@ final class PurchasingSession {
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);
             discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
-            Events.get().fire(investmentPurchased(i, loan, portfolio.getOverview()));
+            events.fire(investmentPurchased(i, loan, portfolio.getOverview()));
         }
         return purchased;
     }

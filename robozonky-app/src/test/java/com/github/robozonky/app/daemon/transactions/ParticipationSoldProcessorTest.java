@@ -82,7 +82,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         assertThatThrownBy(() -> processor.processApplicable(transfer))
                 .isInstanceOf(Exception.class);
         transactional.run(); // make sure the transaction is processed so that events could be fired
-        assertThat(getNewEvents()).isEmpty();
+        assertThat(getEventsRequested()).isEmpty();
         final int loanId = transfer.getLoanId();
         assertThat(SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId)).isFalse();
     }
@@ -105,7 +105,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
         processor.processApplicable(transfer);
         transactional.run(); // make sure the transaction is processed so that events could be fired
-        assertThat(getNewEvents()).first().isInstanceOf(InvestmentSoldEvent.class);
+        assertThat(getEventsRequested()).first().isInstanceOf(InvestmentSoldEvent.class);
         assertThat(SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId)).isTrue();
     }
 }

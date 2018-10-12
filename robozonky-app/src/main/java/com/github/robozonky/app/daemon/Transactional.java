@@ -75,7 +75,7 @@ public class Transactional implements Runnable {
             stateUpdates.poll().run();
         }
         while (!eventsToFire.isEmpty()) {
-            Events.get().fire(eventsToFire.poll());
+            Events.forSession(getTenant().getSessionInfo()).fire(eventsToFire.poll());
         }
     }
 }

@@ -70,7 +70,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
         // check events
-        final List<Event> events = this.getNewEvents();
+        final List<Event> events = getEventsRequested();
         assertThat(events).isEmpty();
     }
 

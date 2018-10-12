@@ -66,4 +66,13 @@ public final class SessionInfo {
     public Optional<String> getName() {
         return Optional.ofNullable(name);
     }
+
+    @Override
+    public String toString() {
+        return "SessionInfo{" +
+                "isDryRun=" + isDryRun +
+                ", name='" + name + '\'' +
+                ", userName='" + userName + '\'' +
+                '}';
+    }
 }

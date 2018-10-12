@@ -48,12 +48,12 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     public Optional<Consumer<ShutdownHook.Result>> get() {
         final String name = sessionName == null ? "RoboZonky" : "RoboZonky '" + sessionName + "'";
         RoboZonkyStartupNotifier.LOGGER.info("===== {} v{} at your service! =====", name, Defaults.ROBOZONKY_VERSION);
-        Events.get().fire(roboZonkyInitialized());
+        Events.allSessions().fire(roboZonkyInitialized());
         return Optional.of((result) -> {
             if (result.getReturnCode() == ReturnCode.OK) {
-                Events.get().fire(roboZonkyEnding());
+                Events.allSessions().fire(roboZonkyEnding());
             } else {
-                Events.get().fire(roboZonkyCrashed(result.getCause()));
+                Events.allSessions().fire(roboZonkyCrashed(result.getCause()));
             }
             RoboZonkyStartupNotifier.LOGGER.info("===== {} out. =====", name);
         });

@@ -78,8 +78,8 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         final TransactionalPortfolio p = createTransactionalPortfolio();
         DelinquencyNotificationPayload.update(p, Collections.singleton(i), Collections.emptySet(), Collections.emptySet());
         p.run(); // finish the transaction
-        assertThat(this.getNewEvents()).hasSize(1);
-        assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
+        assertThat(getEventsRequested()).hasSize(1);
+        assertThat(getEventsRequested().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
     }
 
     private List<Development> assembleDevelopments(final OffsetDateTime target) {
@@ -134,7 +134,9 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         DelinquencyNotificationPayload.notify(p);
         p.run(); // finish the transaction
         // event is fired; only includes developments after delinquency occured, in reverse order
-        assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
+        assertThat(getEventsRequested())
+                .hasSize(1)
+                .first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
     }
 
     @Test
@@ -157,7 +159,9 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         // the investment is defaulted
         DelinquencyNotificationPayload.update(p, Collections.singleton(i), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
-        assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
+        assertThat(getEventsRequested())
+                .hasSize(1)
+                .first().isInstanceOf(LoanDefaultedEvent.class);
     }
 
 }

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app.events;
 
-import java.util.function.Function;
+import com.github.robozonky.api.notifications.Event;
 
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.runtime.Lifecycle;
+public interface EventFiringListener {
 
-public interface InvestmentMode extends Function<Lifecycle, ReturnCode> {
+    void requested(Event event);
 
-    String getSessionName();
+    void queued(Event event);
+
+    void fired(Event event);
+
+    void failed(Event event, final Exception ex);
 
 }

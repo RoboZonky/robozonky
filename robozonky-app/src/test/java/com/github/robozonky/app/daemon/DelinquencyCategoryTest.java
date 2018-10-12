@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 
 class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
-    private void testEmpty(final DelinquencyCategory category) {
+    private static void testEmpty(final DelinquencyCategory category) {
         final TransactionalPortfolio portfolio = new TransactionalPortfolio(null, mockTenant());
         assertThat(category.update(portfolio, Collections.emptyList())).isEmpty();
     }
@@ -65,7 +65,7 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         assertThat(category.update(portfolio, Collections.singleton(i)))
                 .containsExactly(loanId);
         portfolio.run(); // finish the transaction
-        final List<Event> events = this.getNewEvents();
+        final List<Event> events = getEventsRequested();
         assertSoftly(softly -> {
             softly.assertThat(events).hasSize(1);
             softly.assertThat(events).first().isInstanceOf(LoanDelinquentEvent.class);
@@ -73,11 +73,11 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         // attempt to store it again, making sure no event is fired
         assertThat(category.update(portfolio, Collections.singleton(i)))
                 .containsExactly(loanId);
-        assertThat(this.getNewEvents()).hasSize(1);
+        assertThat(getEventsRequested()).hasSize(1);
         // now update with no delinquents, making sure nothing is returned
         assertThat(category.update(portfolio, Collections.emptyList()))
                 .isEmpty();
-        assertThat(this.getNewEvents()).hasSize(1);
+        assertThat(getEventsRequested()).hasSize(1);
     }
 
     @TestFactory

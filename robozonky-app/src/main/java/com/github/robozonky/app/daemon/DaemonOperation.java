@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.events.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ abstract class DaemonOperation implements Runnable {
 
     @Override
     public void run() {
-        DaemonInvestmentMode.runSafe(() -> {
+        DaemonInvestmentMode.runSafe(Events.forSession(api.getSessionInfo()), () -> {
             LOGGER.trace("Starting.");
             if (isEnabled(api)) {
                 final Portfolio p = portfolio.get()

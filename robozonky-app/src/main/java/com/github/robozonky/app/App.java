@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.EventFactory;
@@ -79,13 +78,12 @@ public class App implements Runnable {
 
     ReturnCode execute(final InvestmentMode mode) {
         shutdownHooks.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
-        Events.get().fire(EventFactory.roboZonkyStarting());
+        Events.allSessions().fire(EventFactory.roboZonkyStarting());
         try {
             lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
             ensureLiveness();
             shutdownHooks.register(new Management(lifecycle));
-            final String sessionName = Events.get().getSessionInfo().flatMap(SessionInfo::getName).orElse(null);
-            shutdownHooks.register(new RoboZonkyStartupNotifier(sessionName));
+            shutdownHooks.register(new RoboZonkyStartupNotifier(mode.getSessionName()));
             return mode.apply(lifecycle);
         } catch (final Throwable t) {
             LOGGER.error("Caught unexpected exception, terminating daemon.", t);

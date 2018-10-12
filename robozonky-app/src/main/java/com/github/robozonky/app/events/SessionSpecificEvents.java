@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app.events;
 
-import java.util.function.Function;
+public interface SessionSpecificEvents extends Events {
 
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.runtime.Lifecycle;
+    boolean addListener(final EventFiringListener listener);
 
-public interface InvestmentMode extends Function<Lifecycle, ReturnCode> {
-
-    String getSessionName();
+    boolean removeListener(final EventFiringListener listener);
 
 }

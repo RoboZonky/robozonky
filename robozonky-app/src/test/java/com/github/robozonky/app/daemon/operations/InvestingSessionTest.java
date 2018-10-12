@@ -115,7 +115,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
                                                                  mockStrategy(loanId, amount));
         // check that one investment was made
         assertThat(i).hasSize(1);
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(5);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(ExecutionStartedEvent.class);
@@ -139,7 +139,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final boolean result = it.invest(recommendation.get());
         // verify result
         assertThat(result).isFalse();
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).isEmpty();
     }
 
@@ -155,7 +155,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final boolean result = t.invest(recommendation);
         // verify result
         assertThat(result).isFalse();
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).isEmpty();
     }
 
@@ -189,7 +189,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -216,7 +216,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -243,7 +243,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -271,7 +271,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -302,7 +302,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(investments).hasSize(1);
         assertThat(investments.get(0).getOriginalPrincipal().intValue()).isEqualTo(amountToInvest);
         // validate event sequence
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);

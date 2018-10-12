@@ -45,11 +45,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final PortfolioUpdater portfolio;
     private final Tenant tenant;
     private final Consumer<Throwable> shutdownCall;
+    private final String sessionName;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant,
+    public DaemonInvestmentMode(final String sessionName, final Consumer<Throwable> shutdownCall, final Tenant tenant,
                                 final Investor investor, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
+        this.sessionName = sessionName;
         this.portfolio = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
         this.tenant = tenant;
         this.investing = new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest,
@@ -59,12 +61,12 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.shutdownCall = shutdownCall;
     }
 
-    static void runSafe(final Runnable runnable, final Consumer<Throwable> shutdownCall) {
+    static void runSafe(final Events events, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
         try {
             runnable.run();
         } catch (final Exception ex) {
             LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            Events.get().fire(roboZonkyDaemonFailed(ex));
+            events.fire(roboZonkyDaemonFailed(ex));
         } catch (final Error t) {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);
@@ -111,7 +113,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
         final String payloadId = payload.toString();
         final Runnable runnable = () -> {
             LOGGER.debug("Running payload {} ({}).", payloadId, job);
-            runSafe(() -> payload.accept(tenant.getSecrets()), shutdownCall);
+            runSafe(Events.forSession(tenant.getSessionInfo()), () -> payload.accept(tenant.getSecrets()),
+                    shutdownCall);
             LOGGER.debug("Finished payload {} ({}).", payloadId, job);
         };
         final Duration maxRunTime = getMaxJobRuntime(job);
@@ -124,6 +127,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private void scheduleJobs(final Scheduler executor) {
         JobServiceLoader.load().forEach(job -> scheduleJob(job, executor));
+    }
+
+    @Override
+    public String getSessionName() {
+        return sessionName;
     }
 
     @Override

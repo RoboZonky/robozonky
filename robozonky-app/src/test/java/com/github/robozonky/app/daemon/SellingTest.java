@@ -70,8 +70,9 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noSaleDueToNoStrategy() {
-        new Selling(Optional::empty).accept(null);
-        final List<Event> e = getNewEvents();
+        final TransactionalPortfolio t = createTransactionalPortfolio();
+        new Selling(Optional::empty).accept(t);
+        final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(0);
     }
 
@@ -83,7 +84,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
-        final List<Event> e = getNewEvents();
+        final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
@@ -105,7 +106,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
         new Selling(NONE_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
-        final List<Event> e = getNewEvents();
+        final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
@@ -127,7 +128,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
         new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
-        final List<Event> e = getNewEvents();
+        final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {
             softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);

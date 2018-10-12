@@ -78,7 +78,7 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
         updateVersion(newVersion, lastKnownStableVersion, (v) -> {
             UpdateNotification.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to {}.",
                                            newVersion);
-            Events.get().fire(roboZonkyUpdateDetected(newVersion));
+            Events.allSessions().fire(roboZonkyUpdateDetected(newVersion));
         });
     }
 
@@ -86,7 +86,7 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
         updateVersion(newVersion, lastKnownUnstableVersion, (v) -> {
             UpdateNotification.LOGGER.info("Experimental version of RoboZonky is available. Try {} at your own risk.",
                                            newVersion);
-            Events.get().fire(roboZonkyExperimentalUpdateDetected(newVersion));
+            Events.allSessions().fire(roboZonkyExperimentalUpdateDetected(newVersion));
         });
     }
 
