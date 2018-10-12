@@ -86,7 +86,7 @@ public class LoanCache {
         }
     }
 
-    public Optional<Loan> getLoan(final int loanId) {
+    Optional<Loan> getLoan(final int loanId) {
         final Pair<Loan, Instant> result = callLocked(() -> cache.get().get(loanId));
         if (result == null || isExpired(result)) {
             LOGGER.trace("Cache miss for loan #{}.", loanId);
