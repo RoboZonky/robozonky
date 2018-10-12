@@ -37,6 +37,6 @@ final class AllSessionEvents implements Events {
     @Override
     public void fire(final LazyEvent<? extends Event> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
-        SessionSpecificEventsImpl.all().forEach(s -> s.fire(event));
+        SessionEventsImpl.all().forEach(s -> s.fire(event));
     }
 }

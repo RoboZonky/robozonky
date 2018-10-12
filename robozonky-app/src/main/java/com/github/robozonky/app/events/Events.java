@@ -18,6 +18,7 @@ package com.github.robozonky.app.events;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListener;
 
 public interface Events {
 
@@ -25,8 +26,8 @@ public interface Events {
         return AllSessionEvents.get();
     }
 
-    static SessionSpecificEvents forSession(final SessionInfo sessionInfo) {
-        return SessionSpecificEventsImpl.forSession(sessionInfo);
+    static SessionEvents forSession(final SessionInfo sessionInfo) {
+        return SessionEventsImpl.forSession(sessionInfo);
     }
 
     /**
@@ -38,5 +39,11 @@ public interface Events {
         fire(new LazyEventImpl<>((Class<Event>) event.getClass(), () -> event));
     }
 
+    /**
+     * Send the {@link Event} to all the {@link EventListener}s registered for it. May not instantiate the event in case
+     * there are no registered {@link EventListener}s. May hand the notifications to a background thread and not wait
+     * for them to finish. Will catch all exceptions and log them.
+     * @param event
+     */
     void fire(LazyEvent<? extends Event> event);
 }

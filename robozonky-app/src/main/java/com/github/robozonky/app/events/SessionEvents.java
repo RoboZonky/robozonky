@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.events;
 
-public interface SessionSpecificEvents extends Events {
+public interface SessionEvents extends Events {
 
     boolean addListener(final EventFiringListener listener);
 

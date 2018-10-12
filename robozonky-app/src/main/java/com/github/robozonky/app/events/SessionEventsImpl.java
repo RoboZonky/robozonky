@@ -33,29 +33,30 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
+import com.github.robozonky.util.Scheduler;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class SessionSpecificEventsImpl implements SessionSpecificEvents {
+final class SessionEventsImpl implements SessionEvents {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionSpecificEventsImpl.class);
-    private static final Map<String, SessionSpecificEventsImpl> BY_TENANT = new ConcurrentHashMap<>(0);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionEventsImpl.class);
+    private static final Map<String, SessionEventsImpl> BY_TENANT = new ConcurrentHashMap<>(0);
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> listeners = new LinkedHashSet<>(0);
     private final SessionInfo sessionInfo;
 
-    private SessionSpecificEventsImpl(final SessionInfo sessionInfo) {
+    private SessionEventsImpl(final SessionInfo sessionInfo) {
         this.sessionInfo = sessionInfo;
-        addListener(new MyEventFiringListener(sessionInfo));
+        addListener(new LoggingEventFiringListener(sessionInfo));
     }
 
-    static Collection<SessionSpecificEventsImpl> all() { // defensive copy
+    static Collection<SessionEventsImpl> all() { // defensive copy
         return Collections.unmodifiableCollection(new ArrayList<>(BY_TENANT.values()));
     }
 
-    static SessionSpecificEventsImpl forSession(final SessionInfo sessionInfo) {
-        return BY_TENANT.computeIfAbsent(sessionInfo.getUsername(), i -> new SessionSpecificEventsImpl(sessionInfo));
+    static SessionEventsImpl forSession(final SessionInfo sessionInfo) {
+        return BY_TENANT.computeIfAbsent(sessionInfo.getUsername(), i -> new SessionEventsImpl(sessionInfo));
     }
 
     @SuppressWarnings("unchecked")
@@ -111,35 +112,9 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
         // send the event to all listeners
         s.stream().map(Supplier::get)
                 .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()))
-                .forEach(l -> fire(event, (EventListener<Event>) l));
-    }
-
-    private static class MyEventFiringListener implements EventFiringListener {
-
-        private final SessionInfo sessionInfo;
-
-        public MyEventFiringListener(final SessionInfo sessionInfo) {
-            this.sessionInfo = sessionInfo;
-        }
-
-        @Override
-        public void requested(final LazyEvent<? extends Event> event) {
-            LOGGER.trace("Requested firing {} for {}.", event.getEventType(), sessionInfo);
-        }
-
-        @Override
-        public void queued(final Event event) {
-            LOGGER.trace("Queued firing {} for {}.", event, sessionInfo);
-        }
-
-        @Override
-        public void fired(final Event event) {
-            LOGGER.debug("Fired {} for {}.", event, sessionInfo);
-        }
-
-        @Override
-        public void failed(final LazyEvent<? extends Event> event, final Exception ex) {
-            LOGGER.warn("Listener failed for {}.", event, ex);
-        }
+                .forEach(l -> { // execute the notification on background
+                    final Runnable r = () -> fire(event, (EventListener<Event>) l);
+                    Scheduler.inBackground().run(r);
+                });
     }
 }

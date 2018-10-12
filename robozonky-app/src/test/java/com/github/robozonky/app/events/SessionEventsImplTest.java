@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SessionSpecificEventsImplTest {
+class SessionEventsImplTest {
 
     @Test
     void identifiesEventTypeWhenClass() {
@@ -34,13 +34,13 @@ class SessionSpecificEventsImplTest {
                                                                                     Loan.custom().build(),
                                                                                     LocalDate.now(),
                                                                                     Collections.emptyList());
-        assertThat(SessionSpecificEventsImpl.getImplementingEvent(e.getClass()))
+        assertThat(SessionEventsImpl.getImplementingEvent(e.getClass()))
                 .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);
     }
 
     @Test
     void identifiesEventTypeWhenInterface() {
-        assertThat(SessionSpecificEventsImpl.getImplementingEvent(LoanDelinquent90DaysOrMoreEvent.class))
+        assertThat(SessionEventsImpl.getImplementingEvent(LoanDelinquent90DaysOrMoreEvent.class))
                 .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);
     }
 }
