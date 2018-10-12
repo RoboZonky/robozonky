@@ -104,9 +104,10 @@ final class SessionEventsImpl implements SessionEvents {
     public void fire(final LazyEvent<? extends Event> event) {
         // loan all listeners
         listeners.forEach(l -> l.requested(event));
-        final List<EventListenerSupplier<? extends Event>> s = suppliers.computeIfAbsent(event.getClass(), key -> {
-            final Class<? extends Event> impl = getImplementingEvent(event.getEventType());
-            LOGGER.debug("Event {} implements {}.", event.getClass(), impl);
+        final Class<? extends Event> eventType = event.getEventType();
+        final List<EventListenerSupplier<? extends Event>> s = suppliers.computeIfAbsent(eventType, key -> {
+            final Class<? extends Event> impl = getImplementingEvent(eventType);
+            LOGGER.debug("Event {} implements {}.", eventType, impl);
             return new ArrayList<>(ListenerServiceLoader.load(impl));
         });
         // send the event to all listeners

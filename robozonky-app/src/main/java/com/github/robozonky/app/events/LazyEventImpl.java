@@ -27,13 +27,13 @@ final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LazyEventImpl.class);
 
-    private final Class<T> clz;
+    private final Class<T> eventType;
     private final LazyInitialized<T> supplier;
 
-    public LazyEventImpl(final Class<T> clz, final Supplier<T> eventSupplier) {
-        this.clz = clz;
+    public LazyEventImpl(final Class<T> eventType, final Supplier<T> eventSupplier) {
+        this.eventType = eventType;
         this.supplier = LazyInitialized.create(() -> {
-            LOGGER.trace("Instantiating {}.", clz);
+            LOGGER.trace("Instantiating {}.", eventType);
             final T result = eventSupplier.get();
             LOGGER.trace("Instantiated to {}.", result);
             return result;
@@ -42,11 +42,18 @@ final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
 
     @Override
     public Class<T> getEventType() {
-        return clz;
+        return eventType;
     }
 
     @Override
     public T get() {
         return supplier.get();
+    }
+
+    @Override
+    public String toString() {
+        return "LazyEventImpl{" +
+                "eventType=" + eventType +
+                '}';
     }
 }

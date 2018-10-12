@@ -27,6 +27,7 @@ import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.daemon.StrategyProvider;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;
@@ -84,6 +85,9 @@ final class OperatingMode {
         ListenerServiceLoader.unregisterConfiguration(session);
         // register if needed
         cli.getNotificationConfigLocation().ifPresent(cfg -> ListenerServiceLoader.registerConfiguration(session, cfg));
+        // create event handler for this session, otherwise session-less notifications will not be sent
+        final Events e = Events.forSession(session);
+        LOGGER.debug("Notification subsystem initialized: {}.", e);
     }
 
     private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
