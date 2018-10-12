@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.events.EventFiringListener;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.LazyEvent;
@@ -80,13 +81,19 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         }
 
         @Override
-        public void queued(final Event event) {
+        public <T extends Event> void queued(final T event, final Class<? extends EventListener<T>> listener) {
             eventsQueued.add(event);
         }
 
         @Override
-        public void fired(final Event event) {
+        public <T extends Event> void fired(final T event, final Class<? extends EventListener<T>> listener) {
             eventsFired.add(event);
+        }
+
+        @Override
+        public <T extends Event> void failed(final LazyEvent<? extends Event> event,
+                                             final Class<? extends EventListener<T>> listener, final Exception ex) {
+            eventsFailed.add(event.get());
         }
 
         public List<Event> getEventsFired() {
@@ -103,11 +110,6 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
         public List<Event> getEventsQueued() {
             return eventsQueued;
-        }
-
-        @Override
-        public void failed(final LazyEvent<? extends Event> event, final Exception ex) {
-            eventsFailed.add(event.get());
         }
 
         public void clear() {

@@ -32,23 +32,27 @@ public interface EventFiringListener {
     void requested(LazyEvent<? extends Event> event);
 
     /**
-     * Called after {@link #requested(LazyEvent)} and before {@link #fired(Event)}. The event was already initialized
-     * and was scheduled for being sent to the {@link EventListener}s.
+     * Called after {@link #requested(LazyEvent)} and before {@link #fired(Event, Class)}. The event was already
+     * initialized and was scheduled for being sent to the {@link EventListener}.
      * @param event The event that was instantiated from the original {@link LazyEvent}.
+     * @param listener
      */
-    void queued(Event event);
+    <T extends Event> void queued(T event, Class<? extends EventListener<T>> listener);
 
     /**
-     * Event was processed and delivered to all registered {@link EventListener}s.
+     * Event was processed and delivered to the {@link EventListener}.
      * @param event The event that was delivered.
+     * @param listener
      */
-    void fired(Event event);
+    <T extends Event> void fired(T event, Class<? extends EventListener<T>> listener);
 
     /**
      * Called whenever an exception is thrown during event processing.
      * @param event Does not provide the {@link Event} instance directly since instantiating it may have been the cause
      * of the failure.
+     * @param listener
      * @param ex Cause of the failure.
      */
-    void failed(LazyEvent<? extends Event> event, final Exception ex);
+    <T extends Event> void failed(LazyEvent<? extends Event> event, Class<? extends EventListener<T>> listener,
+                                  final Exception ex);
 }

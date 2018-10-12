@@ -18,6 +18,7 @@ package com.github.robozonky.app.events;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +38,19 @@ class LoggingEventFiringListener implements EventFiringListener {
     }
 
     @Override
-    public void queued(final Event event) {
-        LOGGER.trace("Queued firing {} for {}.", event, sessionInfo);
+    public <T extends Event> void queued(final T event, final Class<? extends EventListener<T>> listener) {
+        LOGGER.trace("Queued {} to {} for {}.", event, listener, sessionInfo);
     }
 
     @Override
-    public void fired(final Event event) {
-        LOGGER.debug("Fired {} for {}.", event, sessionInfo);
+    public <T extends Event> void fired(final T event, final Class<? extends EventListener<T>> listener) {
+        LOGGER.debug("Sent {} to {} for {}.", event, listener, sessionInfo);
     }
 
     @Override
-    public void failed(final LazyEvent<? extends Event> event, final Exception ex) {
-        LOGGER.warn("Listener failed for {}.", event, ex);
+    public <T extends Event> void failed(final LazyEvent<? extends Event> event,
+                                         final Class<? extends EventListener<T>> listener, final Exception ex) {
+        LOGGER.warn("Listener {} failed for {}.", listener, event, ex);
     }
+
 }
