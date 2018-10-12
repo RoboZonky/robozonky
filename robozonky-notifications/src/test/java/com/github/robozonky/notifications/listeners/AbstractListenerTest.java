@@ -663,6 +663,11 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         public Collection<Development> getCollectionActions() {
             return Collections.emptyList();
         }
+
+        @Override
+        public int getThresholdInDays() {
+            return 10;
+        }
     }
 
     private static class MyLoanDelinquent30Plus implements LoanDelinquent30DaysOrMoreEvent {
@@ -698,6 +703,11 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public Collection<Development> getCollectionActions() {
             return Collections.emptyList();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 30;
         }
     }
 
@@ -735,6 +745,11 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         public Collection<Development> getCollectionActions() {
             return Collections.emptyList();
         }
+
+        @Override
+        public int getThresholdInDays() {
+            return 60;
+        }
     }
 
     private static class MyLoanDelinquent90Plus implements LoanDelinquent90DaysOrMoreEvent {
@@ -771,6 +786,11 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         public Collection<Development> getCollectionActions() {
             return Collections.emptyList();
         }
+
+        @Override
+        public int getThresholdInDays() {
+            return 90;
+        }
     }
 
     private static class MyLoanNowDelinquent implements LoanNowDelinquentEvent {
@@ -806,6 +826,11 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public Collection<Development> getCollectionActions() {
             return Collections.emptyList();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 0;
         }
     }
 

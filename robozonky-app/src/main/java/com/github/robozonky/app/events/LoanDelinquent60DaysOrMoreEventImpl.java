@@ -30,4 +30,9 @@ final class LoanDelinquent60DaysOrMoreEventImpl extends AbstractLoanDelinquentEv
                                                final Collection<Development> collectionActions) {
         super(investment, loan, since, collectionActions);
     }
+
+    @Override
+    public int getThresholdInDays() {
+        return 60;
+    }
 }

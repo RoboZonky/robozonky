@@ -18,8 +18,4 @@ package com.github.robozonky.api.notifications;
 
 public interface LoanNowDelinquentEvent extends LoanDelinquentEvent {
 
-    @Override
-    default int getThresholdInDays() {
-        return 0;
-    }
 }

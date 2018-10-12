@@ -145,6 +145,11 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         public OffsetDateTime getCreatedOn() {
             return OffsetDateTime.now();
         }
+
+        @Override
+        public int getThresholdInDays() {
+            return 10;
+        }
     }
 
     private static class MyLoanNoLongerDelinquentEvent implements LoanNoLongerDelinquentEvent {

@@ -30,4 +30,9 @@ final class LoanNowDelinquentEventImpl extends AbstractLoanDelinquentEventImpl i
                                       final Collection<Development> collectionActions) {
         super(investment, loan, since, collectionActions);
     }
+
+    @Override
+    public int getThresholdInDays() {
+        return 0;
+    }
 }
