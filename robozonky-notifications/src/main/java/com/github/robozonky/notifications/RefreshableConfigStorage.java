@@ -19,13 +19,13 @@ package com.github.robozonky.notifications;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
 
 public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
@@ -44,15 +44,15 @@ public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
     }
 
     private static String readUrl(final URL url) throws IOException {
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
-            return r.lines().collect(Collectors.joining(System.lineSeparator()));
-        }
+        return IoUtil.tryFunction(() -> new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET)),
+                                  r -> r.lines().collect(Collectors.joining(System.lineSeparator())));
     }
 
     @Override
     protected Optional<ConfigStorage> transform(final String source) {
-        try (final InputStream baos = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
-            return Optional.of(ConfigStorage.create(baos));
+        try {
+            return IoUtil.tryFunction(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
+                                      baos -> Optional.of(ConfigStorage.create(baos)));
         } catch (final IOException ex) {
             LOGGER.warn("Failed transforming source.", ex);
             return Optional.empty();
