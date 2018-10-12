@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.robozonky.app.Events;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.Refreshable;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
         updateVersion(newVersion, lastKnownStableVersion, (v) -> {
             UpdateNotification.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to {}.",
                                            newVersion);
-            Events.fire(roboZonkyUpdateDetected(newVersion));
+            Events.get().fire(roboZonkyUpdateDetected(newVersion));
         });
     }
 
@@ -86,7 +86,7 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
         updateVersion(newVersion, lastKnownUnstableVersion, (v) -> {
             UpdateNotification.LOGGER.info("Experimental version of RoboZonky is available. Try {} at your own risk.",
                                            newVersion);
-            Events.fire(roboZonkyExperimentalUpdateDetected(newVersion));
+            Events.get().fire(roboZonkyExperimentalUpdateDetected(newVersion));
         });
     }
 

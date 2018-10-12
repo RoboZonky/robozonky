@@ -29,9 +29,9 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.app.events.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,10 +73,10 @@ final class PurchasingSession {
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        Events.fire(purchasingStarted(c, portfolio.getOverview()));
+        Events.get().fire(purchasingStarted(c, portfolio.getOverview()));
         session.purchase(strategy);
         final Collection<Investment> result = session.getResult();
-        Events.fire(purchasingCompleted(result, portfolio.getOverview()));
+        Events.get().fire(purchasingCompleted(result, portfolio.getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -85,7 +85,7 @@ final class PurchasingSession {
         do {
             invested = strategy.apply(getAvailable(), portfolio.getOverview())
                     .filter(r -> portfolio.getOverview().getCzkAvailable().compareTo(r.amount()) >= 0)
-                    .peek(r -> Events.fire(purchaseRecommended(r)))
+                    .peek(r -> Events.get().fire(purchaseRecommended(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -119,7 +119,7 @@ final class PurchasingSession {
     }
 
     boolean purchase(final RecommendedParticipation recommendation) {
-        Events.fire(purchaseRequested(recommendation));
+        Events.get().fire(purchaseRequested(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan loan = recommendation.descriptor().related();
         final boolean purchased = authenticated.getSessionInfo().isDryRun() || actualPurchase(participation);
@@ -127,7 +127,7 @@ final class PurchasingSession {
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);
             discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
-            Events.fire(investmentPurchased(i, loan, portfolio.getOverview()));
+            Events.get().fire(investmentPurchased(i, loan, portfolio.getOverview()));
         }
         return purchased;
     }

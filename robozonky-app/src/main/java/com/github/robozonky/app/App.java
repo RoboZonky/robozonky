@@ -24,6 +24,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.EventFactory;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.util.Scheduler;
@@ -78,12 +79,12 @@ public class App implements Runnable {
 
     ReturnCode execute(final InvestmentMode mode) {
         shutdownHooks.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
-        Events.fire(EventFactory.roboZonkyStarting());
+        Events.get().fire(EventFactory.roboZonkyStarting());
         try {
             lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
             ensureLiveness();
             shutdownHooks.register(new Management(lifecycle));
-            final String sessionName = Events.getSessionInfo().flatMap(SessionInfo::getName).orElse(null);
+            final String sessionName = Events.get().getSessionInfo().flatMap(SessionInfo::getName).orElse(null);
             shutdownHooks.register(new RoboZonkyStartupNotifier(sessionName));
             return mode.apply(lifecycle);
         } catch (final Throwable t) {

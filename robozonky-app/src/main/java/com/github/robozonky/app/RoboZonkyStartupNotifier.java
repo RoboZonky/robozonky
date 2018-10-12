@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +48,12 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     public Optional<Consumer<ShutdownHook.Result>> get() {
         final String name = sessionName == null ? "RoboZonky" : "RoboZonky '" + sessionName + "'";
         RoboZonkyStartupNotifier.LOGGER.info("===== {} v{} at your service! =====", name, Defaults.ROBOZONKY_VERSION);
-        Events.fire(roboZonkyInitialized());
+        Events.get().fire(roboZonkyInitialized());
         return Optional.of((result) -> {
             if (result.getReturnCode() == ReturnCode.OK) {
-                Events.fire(roboZonkyEnding());
+                Events.get().fire(roboZonkyEnding());
             } else {
-                Events.fire(roboZonkyCrashed(result.getCause()));
+                Events.get().fire(roboZonkyCrashed(result.getCause()));
             }
             RoboZonkyStartupNotifier.LOGGER.info("===== {} out. =====", name);
         });

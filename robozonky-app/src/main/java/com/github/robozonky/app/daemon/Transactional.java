@@ -20,8 +20,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.events.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class Transactional implements Runnable {
             stateUpdates.poll().run();
         }
         while (!eventsToFire.isEmpty()) {
-            Events.fire(eventsToFire.poll());
+            Events.get().fire(eventsToFire.poll());
         }
     }
 }

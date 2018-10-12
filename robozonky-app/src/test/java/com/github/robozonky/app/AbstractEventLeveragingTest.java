@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
@@ -38,18 +39,17 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
     @AfterEach
     public void clear() {
-        Events.getFired().clear();
-        Events.INSTANCE.registries.clear();
+        Events.get().getFired().clear();
     }
 
     protected List<Event> getNewEvents() {
-        return Events.getFired().stream()
+        return Events.get().getFired().stream()
                 .filter(e -> !previouslyExistingEvents.contains(e))
                 .collect(Collectors.toList());
     }
 
     @BeforeEach
     public void readPreexistingEvents() {
-        previouslyExistingEvents.addAll(Events.getFired());
+        previouslyExistingEvents.addAll(Events.get().getFired());
     }
 }

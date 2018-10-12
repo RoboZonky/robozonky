@@ -20,11 +20,11 @@ import java.time.Duration;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
@@ -64,7 +64,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
             runnable.run();
         } catch (final Exception ex) {
             LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            Events.fire(roboZonkyDaemonFailed(ex));
+            Events.get().fire(roboZonkyDaemonFailed(ex));
         } catch (final Error t) {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);

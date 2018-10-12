@@ -22,12 +22,12 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.daemon.StrategyProvider;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;

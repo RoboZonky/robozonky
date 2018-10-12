@@ -36,9 +36,6 @@ abstract class AbstractEventImpl implements Event {
     private final Collection<String> toStringIgnoredFields;
 
     protected AbstractEventImpl(final String... toStringIgnoredFields) {
-        if (!this.getClass().getSimpleName().endsWith("Event")) { // guarantee for dependent code
-            throw new IllegalStateException("Event subclass' names must end with 'Event'.");
-        }
         this.toStringIgnoredFields = Stream.concat(Stream.of("toStringIgnoredFields"), Stream.of(toStringIgnoredFields))
                 .collect(Collectors.toList());
     }
