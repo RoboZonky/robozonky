@@ -29,7 +29,14 @@ public interface Events {
         return SessionSpecificEventsImpl.forSession(sessionInfo);
     }
 
-    void fire(Event event);
+    /**
+     * Transforms given {@link Event} into {@link LazyEvent} and delegates to {@link #fire(LazyEvent)}.
+     * @param event
+     */
+    @SuppressWarnings("unchecked")
+    default void fire(final Event event) {
+        fire(new LazyEventImpl<>((Class<Event>) event.getClass(), () -> event));
+    }
 
     void fire(LazyEvent<? extends Event> event);
 }

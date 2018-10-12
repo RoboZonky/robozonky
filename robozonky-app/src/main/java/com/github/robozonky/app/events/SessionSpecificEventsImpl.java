@@ -73,14 +73,14 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
     }
 
     private void fire(final LazyEvent<? extends Event> lazyEvent, final EventListener<Event> listener) {
-        final Event event = lazyEvent.get(); // possibly incurring performance penalties
         try {
+            final Event event = lazyEvent.get(); // possibly incurring performance penalties
             listeners.forEach(l -> l.queued(event));
             LOGGER.trace("Sending {} to listener {} for {}.", event, listener, sessionInfo);
             listener.handle(event, sessionInfo);
             listeners.forEach(l -> l.fired(event));
         } catch (final RuntimeException ex) {
-            listeners.forEach(l -> l.failed(event, ex));
+            listeners.forEach(l -> l.failed(lazyEvent, ex));
         } finally {
             LOGGER.trace("Fired.");
         }
@@ -96,12 +96,6 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
     public boolean removeListener(final EventFiringListener listener) {
         LOGGER.debug("Removing listener {} for {}.", listener, sessionInfo);
         return listeners.remove(listener);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void fire(final Event event) {
-        fire(new LazyEventImpl<>((Class<Event>) event.getClass(), () -> event));
     }
 
     @SuppressWarnings("unchecked")
@@ -130,12 +124,12 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
 
         @Override
         public void requested(final LazyEvent<? extends Event> event) {
-            LOGGER.debug("Requested firing {} for {}.", event.getEventType(), sessionInfo);
+            LOGGER.trace("Requested firing {} for {}.", event.getEventType(), sessionInfo);
         }
 
         @Override
         public void queued(final Event event) {
-            LOGGER.debug("Queued firing {} for {}.", event, sessionInfo);
+            LOGGER.trace("Queued firing {} for {}.", event, sessionInfo);
         }
 
         @Override
@@ -144,7 +138,7 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
         }
 
         @Override
-        public void failed(final Event event, final Exception ex) {
+        public void failed(final LazyEvent<? extends Event> event, final Exception ex) {
             LOGGER.warn("Listener failed for {}.", event, ex);
         }
     }

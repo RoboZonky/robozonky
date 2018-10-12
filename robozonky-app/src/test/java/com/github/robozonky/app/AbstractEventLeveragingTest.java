@@ -106,8 +106,8 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         }
 
         @Override
-        public void failed(final Event event, final Exception ex) {
-            eventsFailed.add(event);
+        public void failed(final LazyEvent<? extends Event> event, final Exception ex) {
+            eventsFailed.add(event.get());
         }
 
         public void clear() {
