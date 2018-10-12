@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -72,22 +71,6 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void nonexistingInvestment() {
-        final Zonky zonky = harmlessZonky(10_000);
-        final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
-        final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
-        final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
-        assertThatThrownBy(() -> processor.processApplicable(transfer))
-                .isInstanceOf(Exception.class);
-        transactional.run(); // make sure the transaction is processed so that events could be fired
-        assertThat(getNewEvents()).isEmpty();
-        final int loanId = transfer.getLoanId();
-        assertThat(SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId)).isFalse();
-    }
-
-    @Test
     void investmentSold() {
         final Loan loan = Loan.custom().build();
         final Transaction transfer = new Transaction(loan, BigDecimal.TEN, TransactionCategory.SMP_SELL,
@@ -105,7 +88,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
         processor.processApplicable(transfer);
         transactional.run(); // make sure the transaction is processed so that events could be fired
-        assertThat(getNewEvents()).first().isInstanceOf(InvestmentSoldEvent.class);
+        assertThat(getEventsRequested()).first().isInstanceOf(InvestmentSoldEvent.class);
         assertThat(SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId)).isTrue();
     }
 }

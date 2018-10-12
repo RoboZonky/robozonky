@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.app.events.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.SoftAssertions;
@@ -64,7 +65,7 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     }
 
     private DynamicTest getParametersForExecutionCompleted() {
-        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
+        final ExecutionCompletedEvent evt = EventFactory.executionCompleted(Collections.emptyList(), null);
         final Consumer<SoftAssertions> before = (softly) -> {
         };
         final Consumer<SoftAssertions> after = (softly) -> {

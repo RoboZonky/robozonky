@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-
 /**
  * Fired immediately after secondary market purchase was detected by the robot.
  */
-public final class InvestmentSoldEvent extends Event implements InvestmentBased,
-                                                                Financial {
+public interface InvestmentSoldEvent extends InvestmentBased,
+                                             Financial {
 
-    private final Investment investment;
-    private final Loan loan;
-    private final PortfolioOverview portfolioOverview;
-
-    public InvestmentSoldEvent(final Investment investment, final Loan loan, final PortfolioOverview portfolio) {
-        this.investment = investment;
-        this.loan = loan;
-        this.portfolioOverview = portfolio;
-    }
-
-    @Override
-    public Investment getInvestment() {
-        return investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
-    }
-
-    @Override
-    public PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview;
-    }
 }

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -36,6 +37,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.events.EventFactory;
+import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,31 +81,56 @@ enum DelinquencyCategory {
         return IntStream.of(ids).distinct().sorted().mapToObj(Integer::toString);
     }
 
-    private static EventSupplier getEventSupplier(final int threshold) {
+    private static EventSupplier getEventSupplierConstructor(final int threshold) {
         switch (threshold) {
             case -1:
-                return LoanDefaultedEvent::new;
+                return EventFactory::loanDefaulted;
             case 0:
-                return LoanNowDelinquentEvent::new;
+                return EventFactory::loanNowDelinquent;
             case 10:
-                return LoanDelinquent10DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent10plus;
             case 30:
-                return LoanDelinquent30DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent30plus;
             case 60:
-                return LoanDelinquent60DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent60plus;
             case 90:
-                return LoanDelinquent90DaysOrMoreEvent::new;
+                return EventFactory::loanDelinquent90plus;
             default:
                 throw new IllegalArgumentException("Wrong delinquency threshold: " + threshold);
         }
     }
 
-    private static Event getEvent(final Tenant tenant, final Investment investment, final int threshold) {
+    @SuppressWarnings("unchecked")
+    private static LazyEvent<? extends Event> getLazyEventSupplier(final int threshold,
+                                                                   final Supplier<? extends Event> event) {
+        switch (threshold) {
+            case -1:
+                return EventFactory.loanDefaultedLazy((Supplier<LoanDefaultedEvent>) event);
+            case 0:
+                return EventFactory.loanNowDelinquentLazy((Supplier<LoanNowDelinquentEvent>) event);
+            case 10:
+                return EventFactory.loanDelinquent10plusLazy((Supplier<LoanDelinquent10DaysOrMoreEvent>) event);
+            case 30:
+                return EventFactory.loanDelinquent30plusLazy((Supplier<LoanDelinquent30DaysOrMoreEvent>) event);
+            case 60:
+                return EventFactory.loanDelinquent60plusLazy((Supplier<LoanDelinquent60DaysOrMoreEvent>) event);
+            case 90:
+                return EventFactory.loanDelinquent90plusLazy((Supplier<LoanDelinquent90DaysOrMoreEvent>) event);
+            default:
+                throw new IllegalArgumentException("Wrong delinquency threshold: " + threshold);
+        }
+    }
+
+    private static LazyEvent<? extends Event> getEvent(final Tenant tenant, final Investment investment,
+                                                       final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), tenant);
         final LocalDate since = LocalDate.now().minusDays(investment.getDaysPastDue());
-        final Collection<Development> developments = getDevelopments(tenant, loan, since);
-        final Event e = getEventSupplier(threshold).apply(investment, loan, since, developments);
+        final int loanId = investment.getLoanId();
+        final Collection<Development> developments = getDevelopments(tenant, loanId, since);
+        final Loan loan = LoanCache.get().getLoan(loanId, tenant);
+        final Supplier<Event> s = () -> getEventSupplierConstructor(threshold).apply(investment, loan, since,
+                                                                                     developments);
+        final LazyEvent<? extends Event> e = getLazyEventSupplier(threshold, s);
         LOGGER.trace("Done.");
         return e;
     }
@@ -111,10 +139,10 @@ enum DelinquencyCategory {
         return "notified" + dayThreshold + "plus";
     }
 
-    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
+    private static List<Development> getDevelopments(final Tenant auth, final int loanId,
                                                      final LocalDate delinquentSince) {
         final LocalDate lastNonDelinquentDay = delinquentSince.minusDays(1);
-        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
+        final List<Development> developments = auth.call(z -> z.getDevelopments(loanId))
                 .filter(d -> d.getDateFrom().toLocalDate().isAfter(lastNonDelinquentDay))
                 .collect(toList());
         Collections.reverse(developments);

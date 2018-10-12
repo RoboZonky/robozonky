@@ -101,6 +101,6 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
         transactional.run(); // persist
         verify(zonky, times(1)).getTransactions((Select) any());
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("3"); // new maximum
-        assertThat(getNewEvents()).hasSize(2);
+        assertThat(getEventsRequested()).hasSize(2);
     }
 }

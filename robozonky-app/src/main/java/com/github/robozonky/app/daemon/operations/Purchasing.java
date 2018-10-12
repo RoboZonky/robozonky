@@ -65,15 +65,16 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .map(p -> toDescriptor(p, auth))
-                .filter(d -> { // never re-purchase what was once sold
-                    final int loanId = d.item().getLoanId();
+                .filter(p -> { // never re-purchase what was once sold
+                    final int loanId = p.getLoanId();
                     final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
                     if (wasSoldBefore) {
                         LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
                     }
                     return !wasSoldBefore;
-                }).collect(Collectors.toCollection(ArrayList::new));
+                })
+                .map(d -> toDescriptor(d, auth))
+                .collect(Collectors.toCollection(ArrayList::new));
         final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
         return PurchasingSession.purchase(portfolio, auth, participations, s);
     }

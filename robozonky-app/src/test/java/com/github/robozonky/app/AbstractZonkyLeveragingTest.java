@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -44,6 +43,7 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -53,9 +53,6 @@ import static org.mockito.Mockito.when;
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
-    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
-                                                               false),
-            SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
 
     protected static RemoteBalance mockBalance(final Zonky zonky) {
         return new MockedBalance(zonky);
@@ -127,7 +124,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         when(zonky.getRestrictions()).thenReturn(new Restrictions());
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
-        when(zonky.getDevelopments(any())).thenAnswer(i -> Stream.empty());
+        when(zonky.getDevelopments(anyInt())).thenAnswer(i -> Stream.empty());
         return zonky;
     }
 

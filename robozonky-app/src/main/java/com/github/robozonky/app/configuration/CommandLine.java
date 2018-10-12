@@ -55,7 +55,7 @@ public class CommandLine {
     @Parameter(names = {"-i", "--inform"}, description = "Configure RoboZonky notifications from a given location.")
     private String notificationConfigLocation;
     @Parameter(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
-    private String name;
+    private String name = "Unnamed";
 
     public CommandLine(final Consumer<Throwable> shutdownCall) {
         this.shutdownCall = shutdownCall;

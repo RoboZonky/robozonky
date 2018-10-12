@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Collections;
 
 import com.github.robozonky.api.SessionInfo;
@@ -27,6 +28,7 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -106,15 +108,65 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
                 new LoanDelinquentEventListener(SupportedListener.LOAN_DELINQUENT_10_PLUS, h);
         final EventListener<LoanNoLongerDelinquentEvent> l2 =
                 new LoanNoLongerDelinquentEventListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, h);
-        final LoanNoLongerDelinquentEvent evt = new LoanNoLongerDelinquentEvent(INVESTMENT, LOAN);
+        final LoanNoLongerDelinquentEvent evt = new MyLoanNoLongerDelinquentEvent();
         l2.handle(evt, SESSION);
         verify(h, never()).send(any(), any(), any(), any()); // not delinquent before, not sending
-        l.handle(new LoanDelinquent10DaysOrMoreEvent(INVESTMENT, LOAN, LocalDate.now(), Collections.emptyList()),
-                 SESSION);
+        l.handle(new MyLoanDelinquent10DaysOrMoreEvent(), SESSION);
         verify(h).send(eq(SESSION), any(), any(), any());
         l2.handle(evt, SESSION);
         verify(h, times(2)).send(eq(SESSION), any(), any(), any()); // delinquency now registered, send
         l2.handle(evt, SESSION);
         verify(h, times(2)).send(eq(SESSION), any(), any(), any()); // already unregistered, no send
+    }
+
+    private static class MyLoanDelinquent10DaysOrMoreEvent implements LoanDelinquent10DaysOrMoreEvent {
+
+        @Override
+        public LocalDate getDelinquentSince() {
+            return LocalDate.now();
+        }
+
+        @Override
+        public Collection<Development> getCollectionActions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return INVESTMENT;
+        }
+
+        @Override
+        public Loan getLoan() {
+            return LOAN;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 10;
+        }
+    }
+
+    private static class MyLoanNoLongerDelinquentEvent implements LoanNoLongerDelinquentEvent {
+
+        @Override
+        public Investment getInvestment() {
+            return INVESTMENT;
+        }
+
+        @Override
+        public Loan getLoan() {
+            return LOAN;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
     }
 }

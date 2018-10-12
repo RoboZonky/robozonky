@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@ package com.github.robozonky.app;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.EventFactory.roboZonkyCrashed;
+import static com.github.robozonky.app.events.EventFactory.roboZonkyEnding;
+import static com.github.robozonky.app.events.EventFactory.roboZonkyInitialized;
 
 /**
  * Will send {@link RoboZonkyInitializedEvent} immediately and {@link RoboZonkyEndingEvent} when it's time to shut down
@@ -44,12 +48,12 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     public Optional<Consumer<ShutdownHook.Result>> get() {
         final String name = sessionName == null ? "RoboZonky" : "RoboZonky '" + sessionName + "'";
         RoboZonkyStartupNotifier.LOGGER.info("===== {} v{} at your service! =====", name, Defaults.ROBOZONKY_VERSION);
-        Events.fire(new RoboZonkyInitializedEvent());
+        Events.allSessions().fire(roboZonkyInitialized());
         return Optional.of((result) -> {
             if (result.getReturnCode() == ReturnCode.OK) {
-                Events.fire(new RoboZonkyEndingEvent());
+                Events.allSessions().fire(roboZonkyEnding());
             } else {
-                Events.fire(new RoboZonkyCrashedEvent(result.getCause()));
+                Events.allSessions().fire(roboZonkyCrashed(result.getCause()));
             }
             RoboZonkyStartupNotifier.LOGGER.info("===== {} out. =====", name);
         });

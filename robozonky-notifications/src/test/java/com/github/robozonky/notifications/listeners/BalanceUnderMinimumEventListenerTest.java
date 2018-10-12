@@ -16,8 +16,6 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Collections;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -27,10 +25,10 @@ import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,7 +47,7 @@ class BalanceUnderMinimumEventListenerTest extends AbstractRoboZonkyTest {
                                               anyInt()))
                 .thenAnswer(i -> i.getArgument(2));
         final PortfolioOverview p = mockPortfolioOverview(1);
-        final ExecutionStartedEvent evt = new ExecutionStartedEvent(Collections.emptyList(), p);
+        final ExecutionStartedEvent evt = new TestingExecutionStartedEvent(p);
         final AbstractListener<ExecutionStartedEvent> l =
                 new BalanceUnderMinimumEventListener(SupportedListener.BALANCE_UNDER_MINIMUM, h);
         l.handle(evt, SESSION_INFO); // balance change
@@ -57,7 +55,7 @@ class BalanceUnderMinimumEventListenerTest extends AbstractRoboZonkyTest {
         l.handle(evt, SESSION_INFO); // no change, no notification
         verify(h, times(1)).offer(any());
         final PortfolioOverview p2 = mockPortfolioOverview(1000);
-        final ExecutionStartedEvent evt2 = new ExecutionStartedEvent(Collections.emptyList(), p2);
+        final ExecutionStartedEvent evt2 = new TestingExecutionStartedEvent(p2);
         l.handle(evt2, SESSION_INFO); // no change, no notification
         verify(h, times(1)).offer(any());
         l.handle(evt, SESSION_INFO); // back over threshold, send notification

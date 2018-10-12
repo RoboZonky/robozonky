@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.authentication.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +31,6 @@ abstract class TransactionProcessor implements Consumer<Transaction> {
     protected static Investment lookupOrFail(final int loanId, final Tenant auth) {
         return auth.call(zonky -> zonky.getInvestmentByLoanId(loanId))
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan #" + loanId));
-    }
-
-    protected static Investment lookupOrFail(final Loan loan, final Tenant auth) {
-        return lookupOrFail(loan.getId(), auth);
     }
 
     abstract boolean isApplicable(final Transaction transaction);

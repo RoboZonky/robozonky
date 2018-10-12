@@ -34,7 +34,6 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -56,7 +55,6 @@ import com.github.robozonky.notifications.listeners.LoanDelinquentEventListener;
 import com.github.robozonky.notifications.listeners.LoanLostEventListener;
 import com.github.robozonky.notifications.listeners.LoanNoLongerDelinquentEventListener;
 import com.github.robozonky.notifications.listeners.LoanRepaidEventListener;
-import com.github.robozonky.notifications.listeners.RemoteOperationFailedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyCrashedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyDaemonFailedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyEndingEventListener;
@@ -303,17 +301,6 @@ public enum SupportedListener {
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyDaemonFailedEventListener(this, targetHandler);
-        }
-    },
-    REMOTE_OPERATION_FAILED {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return RemoteOperationFailedEvent.class;
-        }
-
-        @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new RemoteOperationFailedEventListener(this, targetHandler);
         }
     },
     INITIALIZED {

@@ -23,11 +23,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SaleRecommendedEvent;
-import com.github.robozonky.api.notifications.SaleRequestedEvent;
-import com.github.robozonky.api.notifications.SellingCompletedEvent;
-import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
@@ -39,6 +34,7 @@ import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.daemon.PortfolioDependant;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.events.EventFactory;
 import com.github.robozonky.common.remote.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,10 +60,11 @@ public class Selling implements PortfolioDependant {
         return new InvestmentDescriptor(i, LoanCache.get().getLoan(i, auth));
     }
 
-    private static Optional<Investment> processSale(final TransactionalPortfolio transactional, final RecommendedInvestment r,
+    private static Optional<Investment> processSale(final TransactionalPortfolio transactional,
+                                                    final RecommendedInvestment r,
                                                     final SessionState<Investment> sold) {
         final Tenant tenant = transactional.getTenant();
-        transactional.fire(new SaleRequestedEvent(r));
+        transactional.fire(EventFactory.saleRequested(r));
         final Investment i = r.descriptor().item();
         if (tenant.getSessionInfo().isDryRun()) {
             LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
@@ -77,7 +74,7 @@ public class Selling implements PortfolioDependant {
             tenant.run(z -> z.sell(i));
             LOGGER.trace("Request over.");
         }
-        transactional.fire(new SaleOfferedEvent(i, r.descriptor().related()));
+        transactional.fire(EventFactory.saleOffered(i, r.descriptor().related()));
         return Optional.of(i);
     }
 
@@ -94,13 +91,13 @@ public class Selling implements PortfolioDependant {
                 .collect(Collectors.toSet());
         final Portfolio portfolio = transactional.getPortfolio();
         final PortfolioOverview overview = portfolio.getOverview();
-        transactional.fire(new SellingStartedEvent(eligible, overview));
+        transactional.fire(EventFactory.sellingStarted(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
-                .peek(r -> transactional.fire(new SaleRecommendedEvent(r)))
+                .peek(r -> transactional.fire(EventFactory.saleRecommended(r)))
                 .map(r -> processSale(transactional, r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        transactional.fire(new SellingCompletedEvent(investmentsSold, portfolio.getOverview()));
+        transactional.fire(EventFactory.sellingCompleted(investmentsSold, portfolio.getOverview()));
     }
 
     /**

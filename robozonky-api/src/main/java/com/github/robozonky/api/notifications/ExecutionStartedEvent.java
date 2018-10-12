@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,36 +17,18 @@
 package com.github.robozonky.api.notifications;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately before the loans are submitted to the investing algorithm. Will eventually be followed by
  * {@link ExecutionCompletedEvent}.
  */
-public final class ExecutionStartedEvent extends Event implements Financial {
-
-    private final Collection<LoanDescriptor> loanDescriptors;
-    private final PortfolioOverview portfolioOverview;
-
-    public ExecutionStartedEvent(final Collection<LoanDescriptor> loanDescriptors, final PortfolioOverview portfolio) {
-        super("loanDescriptors");
-        this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
-        this.portfolioOverview = portfolio;
-    }
-
-    @Override
-    public PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview;
-    }
+public interface ExecutionStartedEvent extends Financial {
 
     /**
      * @return Loans found on the marketplace that are available for robotic investment.
      */
-    public Collection<LoanDescriptor> getLoanDescriptors() {
-        return this.loanDescriptors;
-    }
+    Collection<LoanDescriptor> getLoanDescriptors();
 
 }

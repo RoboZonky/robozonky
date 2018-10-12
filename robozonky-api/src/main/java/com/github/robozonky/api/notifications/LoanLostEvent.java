@@ -16,30 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-
 /**
  * Fired when the application detects that Zonky marked a particular investment as lost. The remaining principal will
  * never be retrieved.
  */
-public final class LoanLostEvent extends Event implements InvestmentBased {
+public interface LoanLostEvent extends InvestmentBased {
 
-    private final Investment investment;
-    private final Loan loan;
-
-    public LoanLostEvent(final Investment investment, final Loan loan) {
-        this.investment = investment;
-        this.loan = loan;
-    }
-
-    @Override
-    public Investment getInvestment() {
-        return investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
-    }
 }

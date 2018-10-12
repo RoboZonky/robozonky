@@ -22,12 +22,12 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.daemon.StrategyProvider;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;
@@ -85,14 +85,15 @@ final class OperatingMode {
         ListenerServiceLoader.unregisterConfiguration(session);
         // register if needed
         cli.getNotificationConfigLocation().ifPresent(cfg -> ListenerServiceLoader.registerConfiguration(session, cfg));
-        // initialize SessionInfo before the robot potentially sends the first notification
-        Events.initialize(session);
+        // create event handler for this session, otherwise session-less notifications will not be sent
+        final Events e = Events.forSession(session);
+        LOGGER.debug("Notification subsystem initialized: {}.", e);
     }
 
     private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
                                                        final Investor investor) {
         final StrategyProvider sp = StrategyProvider.createFor(cli.getStrategyLocation());
-        final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, investor, sp,
+        final InvestmentMode m = new DaemonInvestmentMode(cli.getName(), shutdownCall, auth, investor, sp,
                                                           cli.getMarketplace().getPrimaryMarketplaceCheckDelay(),
                                                           cli.getMarketplace().getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);

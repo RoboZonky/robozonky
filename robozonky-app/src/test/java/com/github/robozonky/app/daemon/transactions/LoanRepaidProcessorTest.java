@@ -77,7 +77,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         assertThatThrownBy(() -> instance.processApplicable(transfer))
                 .isInstanceOf(IllegalStateException.class);
         transactional.run(); // make sure the transaction is processed so that events could be fired
-        assertThat(getNewEvents()).isEmpty();
+        assertThat(getEventsRequested()).isEmpty();
     }
 
     @Test
@@ -96,7 +96,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         instance.processApplicable(transfer);
         transactional.run(); // make sure the transaction is processed so that events could be fired
         verify(zonky).getInvestmentByLoanId(eq(loan.getId())); // investment was processed
-        assertThat(getNewEvents()).isEmpty();
+        assertThat(getEventsRequested()).isEmpty();
     }
 
     @Test
@@ -114,6 +114,6 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         final LoanRepaidProcessor instance = new LoanRepaidProcessor(transactional);
         instance.processApplicable(transfer);
         transactional.run(); // make sure the transaction is processed so that events could be fired
-        assertThat(getNewEvents()).first().isInstanceOf(LoanRepaidEvent.class);
+        assertThat(getEventsRequested()).first().isInstanceOf(LoanRepaidEvent.class);
     }
 }

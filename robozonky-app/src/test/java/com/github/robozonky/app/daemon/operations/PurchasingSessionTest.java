@@ -80,7 +80,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                                                                     new RestrictedPurchaseStrategy(s, new Restrictions()));
         assertSoftly(softly -> {
             softly.assertThat(i).isEmpty();
-            softly.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
+            softly.assertThat(getEventsRequested()).has(new Condition<List<? extends Event>>() {
                 @Override
                 public boolean matches(final List<? extends Event> events) {
                     return events.stream().noneMatch(e -> e instanceof PurchaseRequestedEvent);
@@ -116,7 +116,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd),
                                                                     new RestrictedPurchaseStrategy(s, new Restrictions()));
         assertThat(i).hasSize(1);
-        assertThat(this.getNewEvents()).hasSize(5);
+        assertThat(getEventsRequested()).hasSize(5);
         verify(z).purchase(eq(p));
     }
 }
