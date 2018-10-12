@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ public class ToStringBuilder {
 
     private final ReflectionToStringBuilder builder;
 
+    // FIXME cache this
     public ToStringBuilder(final Object o, final String... excludeFields) {
         final String[] fieldExclusions = Stream.concat(Stream.of("password"), Arrays.stream(excludeFields))
                 .distinct()

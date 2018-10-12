@@ -74,6 +74,23 @@ public abstract class AbstractRoboZonkyTest {
         SystemProperties.INSTANCE.save();
     }
 
+    protected static PortfolioOverview mockPortfolioOverview(final int balance) {
+        final PortfolioOverview po = mock(PortfolioOverview.class);
+        when(po.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance));
+        when(po.getCzkInvested()).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkAtRisk()).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkAtRisk(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getShareAtRisk()).thenReturn(BigDecimal.ZERO);
+        when(po.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        return po;
+    }
+
+    protected static PortfolioOverview mockPortfolioOverview() {
+        return mockPortfolioOverview(0);
+    }
+
     @AfterEach
     void restoreSystemProperties() {
         SystemProperties.INSTANCE.restore();
@@ -88,18 +105,5 @@ public abstract class AbstractRoboZonkyTest {
     protected void deleteState() {
         TenantState.destroyAll();
         AbstractRoboZonkyTest.LOGGER.info("Destroyed state.");
-    }
-
-    protected static PortfolioOverview mockPortfolioOverview(final int balance) {
-        final PortfolioOverview po = mock(PortfolioOverview.class);
-        when(po.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance));
-        when(po.getCzkInvested()).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkAtRisk()).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkAtRisk(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getShareAtRisk()).thenReturn(BigDecimal.ZERO);
-        when(po.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        return po;
     }
 }

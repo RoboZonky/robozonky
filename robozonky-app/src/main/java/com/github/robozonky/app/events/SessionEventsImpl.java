@@ -45,6 +45,7 @@ final class SessionEventsImpl implements SessionEvents {
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> listeners = new LinkedHashSet<>(0);
     private final SessionInfo sessionInfo;
+    private EventListener<? extends Event> injectedListener;
 
     private SessionEventsImpl(final SessionInfo sessionInfo) {
         this.sessionInfo = sessionInfo;
@@ -74,7 +75,7 @@ final class SessionEventsImpl implements SessionEvents {
     }
 
     private void fire(final LazyEvent<? extends Event> lazyEvent, final EventListener<Event> listener) {
-        try {
+        try { // FIXME will send the events to listeners more than once
             final Event event = lazyEvent.get(); // possibly incurring performance penalties
             listeners.forEach(l -> l.queued(event));
             LOGGER.trace("Sending {} to listener {} for {}.", event, listener, sessionInfo);
@@ -99,7 +100,15 @@ final class SessionEventsImpl implements SessionEvents {
         return listeners.remove(listener);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Purely for testing purposes.
+     * @param listener
+     */
+    void injectEventListener(final EventListener<? extends Event> listener) {
+        this.injectedListener = listener;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void fire(final LazyEvent<? extends Event> event) {
         // loan all listeners
@@ -111,11 +120,14 @@ final class SessionEventsImpl implements SessionEvents {
             return new ArrayList<>(ListenerServiceLoader.load(impl));
         });
         // send the event to all listeners
-        s.stream().map(Supplier::get)
-                .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()))
-                .forEach(l -> { // execute the notification on background
-                    final Runnable r = () -> fire(event, (EventListener<Event>) l);
-                    Scheduler.inBackground().run(r);
-                });
+        final Stream<EventListener> listeners = s.stream().map(Supplier::get)
+                .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()));
+        final Stream<EventListener> withInjected = injectedListener == null ?
+                listeners :
+                Stream.concat(Stream.of(injectedListener), listeners);
+        withInjected.forEach(l -> { // execute the notification on background
+            final Runnable r = () -> fire(event, (EventListener<Event>) l);
+            Scheduler.inBackground().run(r);
+        });
     }
 }
