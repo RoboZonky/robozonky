@@ -16,33 +16,37 @@
 
 package com.github.robozonky.app.events;
 
+import java.util.function.Supplier;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.util.LazyInitialized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class AllSessionEvents implements Events {
+final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AllSessionEvents.class);
-    private static final LazyInitialized<AllSessionEvents> INSTANCE = LazyInitialized.create(AllSessionEvents::new);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LazyEventImpl.class);
 
-    private AllSessionEvents() {
-        // no external instances
-    }
+    private final Class<T> clz;
+    private final LazyInitialized<T> supplier;
 
-    static Events get() {
-        return INSTANCE.get();
+    public LazyEventImpl(final Class<T> clz, final Supplier<T> eventSupplier) {
+        this.clz = clz;
+        this.supplier = LazyInitialized.create(() -> {
+            LOGGER.trace("Instantiating {}.", clz);
+            final T result = eventSupplier.get();
+            LOGGER.trace("Instantiated to {}.", result);
+            return result;
+        });
     }
 
     @Override
-    public void fire(final Event event) {
-        LOGGER.debug("Firing {} for all sessions.", event);
-        SessionSpecificEventsImpl.all().forEach(s -> s.fire(event));
+    public Class<T> getEventType() {
+        return clz;
     }
 
     @Override
-    public void fire(final LazyEvent<? extends Event> event) {
-        LOGGER.debug("Firing {} for all sessions.", event);
-        SessionSpecificEventsImpl.all().forEach(s -> s.fire(event));
+    public T get() {
+        return supplier.get();
     }
 }

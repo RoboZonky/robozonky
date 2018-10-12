@@ -30,4 +30,6 @@ public interface Events {
     }
 
     void fire(Event event);
+
+    void fire(LazyEvent<? extends Event> event);
 }

@@ -60,15 +60,20 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
 
     @SuppressWarnings("unchecked")
     static <T extends Event> Class<T> getImplementingEvent(final Class<T> original) {
-        return (Class<T>) ClassUtils.getAllInterfaces(original).stream()
-                .filter(i -> Objects.equals(i.getPackage().getName(), "com.github.robozonky.api.notifications"))
+        final Stream<Class<?>> provided = ClassUtils.getAllInterfaces(original).stream();
+        final Stream<Class<?>> interfaces = original.isInterface() ? // interface could be extending it directly
+                Stream.concat(Stream.of(original), provided) :
+                provided;
+        return (Class<T>) interfaces.filter(
+                i -> Objects.equals(i.getPackage().getName(), "com.github.robozonky.api.notifications"))
                 .filter(i -> i.getSimpleName().endsWith("Event"))
                 .filter(i -> !Objects.equals(i.getSimpleName(), "Event"))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Not an event:" + original));
     }
 
-    private <E extends Event> void fire(final E event, final EventListener<E> listener) {
+    private void fire(final LazyEvent<? extends Event> lazyEvent, final EventListener<Event> listener) {
+        final Event event = lazyEvent.get(); // possibly incurring performance penalties
         try {
             listeners.forEach(l -> l.queued(event));
             LOGGER.trace("Sending {} to listener {} for {}.", event, listener, sessionInfo);
@@ -96,12 +101,20 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
     @SuppressWarnings("unchecked")
     @Override
     public void fire(final Event event) {
+        fire(new LazyEventImpl<>((Class<Event>) event.getClass(), () -> event));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void fire(final LazyEvent<? extends Event> event) {
+        // loan all listeners
         listeners.forEach(l -> l.requested(event));
         final List<EventListenerSupplier<? extends Event>> s = suppliers.computeIfAbsent(event.getClass(), key -> {
-            final Class<? extends Event> impl = getImplementingEvent(event.getClass());
+            final Class<? extends Event> impl = getImplementingEvent(event.getEventType());
             LOGGER.debug("Event {} implements {}.", event.getClass(), impl);
             return new ArrayList<>(ListenerServiceLoader.load(impl));
         });
+        // send the event to all listeners
         s.stream().map(Supplier::get)
                 .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()))
                 .forEach(l -> fire(event, (EventListener<Event>) l));
@@ -116,8 +129,8 @@ final class SessionSpecificEventsImpl implements SessionSpecificEvents {
         }
 
         @Override
-        public void requested(final Event event) {
-            LOGGER.debug("Requested firing {} for {}.", event, sessionInfo);
+        public void requested(final LazyEvent<? extends Event> event) {
+            LOGGER.debug("Requested firing {} for {}.", event.getEventType(), sessionInfo);
         }
 
         @Override

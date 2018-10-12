@@ -26,6 +26,7 @@ import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
 
 import static com.github.robozonky.app.events.EventFactory.investmentSold;
+import static com.github.robozonky.app.events.EventFactory.investmentSoldLazy;
 
 class ParticipationSoldProcessor extends TransactionProcessor {
 
@@ -45,9 +46,11 @@ class ParticipationSoldProcessor extends TransactionProcessor {
     void processApplicable(final Transaction transaction) {
         final int loanId = transaction.getLoanId();
         final Tenant tenant = transactional.getTenant();
-        final Investment i = lookupOrFail(loanId, tenant);
-        final Loan l = LoanCache.get().getLoan(loanId, tenant);
-        transactional.fire(investmentSold(i, l, transactional.getPortfolio().getOverview()));
+        transactional.fire(investmentSoldLazy(() -> {
+            final Investment i = lookupOrFail(loanId, tenant);
+            final Loan l = LoanCache.get().getLoan(loanId, tenant);
+            return investmentSold(i, l, transactional.getPortfolio().getOverview());
+        }));
         SoldParticipationCache.forTenant(tenant).markAsSold(loanId);
     }
 }

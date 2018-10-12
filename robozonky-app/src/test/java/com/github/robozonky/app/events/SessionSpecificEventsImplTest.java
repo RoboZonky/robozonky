@@ -29,12 +29,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SessionSpecificEventsImplTest {
 
     @Test
-    void identifiesEventType() {
+    void identifiesEventTypeWhenClass() {
         final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(Investment.custom().build(),
                                                                                     Loan.custom().build(),
                                                                                     LocalDate.now(),
                                                                                     Collections.emptyList());
         assertThat(SessionSpecificEventsImpl.getImplementingEvent(e.getClass()))
+                .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);
+    }
+
+    @Test
+    void identifiesEventTypeWhenInterface() {
+        assertThat(SessionSpecificEventsImpl.getImplementingEvent(LoanDelinquent90DaysOrMoreEvent.class))
                 .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);
     }
 }

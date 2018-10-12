@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -69,22 +68,6 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
             tests.add(test);
         }
         return tests;
-    }
-
-    @Test
-    void nonexistingInvestment() {
-        final Zonky zonky = harmlessZonky(10_000);
-        final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
-        final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
-        final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
-        assertThatThrownBy(() -> processor.processApplicable(transfer))
-                .isInstanceOf(Exception.class);
-        transactional.run(); // make sure the transaction is processed so that events could be fired
-        assertThat(getEventsRequested()).isEmpty();
-        final int loanId = transfer.getLoanId();
-        assertThat(SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId)).isFalse();
     }
 
     @Test

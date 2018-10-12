@@ -16,16 +16,12 @@
 
 package com.github.robozonky.app.events;
 
+import java.util.function.Supplier;
+
 import com.github.robozonky.api.notifications.Event;
 
-public interface EventFiringListener {
+public interface LazyEvent<T extends Event> extends Supplier<T> {
 
-    void requested(LazyEvent<? extends Event> event);
-
-    void queued(Event event);
-
-    void fired(Event event);
-
-    void failed(Event event, final Exception ex);
+    Class<T> getEventType();
 
 }

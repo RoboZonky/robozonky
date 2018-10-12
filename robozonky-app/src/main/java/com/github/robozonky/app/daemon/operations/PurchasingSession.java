@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.app.events.EventFactory.investmentPurchased;
+import static com.github.robozonky.app.events.EventFactory.investmentPurchasedLazy;
 import static com.github.robozonky.app.events.EventFactory.purchaseRecommended;
 import static com.github.robozonky.app.events.EventFactory.purchaseRequested;
 import static com.github.robozonky.app.events.EventFactory.purchasingCompleted;
@@ -129,7 +130,7 @@ final class PurchasingSession {
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);
             discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
-            events.fire(investmentPurchased(i, loan, portfolio.getOverview()));
+            events.fire(investmentPurchasedLazy(() -> investmentPurchased(i, loan, portfolio.getOverview())));
         }
         return purchased;
     }

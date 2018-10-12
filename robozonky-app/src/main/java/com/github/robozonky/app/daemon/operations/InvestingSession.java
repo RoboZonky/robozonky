@@ -39,6 +39,7 @@ import static com.github.robozonky.app.events.EventFactory.executionCompleted;
 import static com.github.robozonky.app.events.EventFactory.executionStarted;
 import static com.github.robozonky.app.events.EventFactory.investmentDelegated;
 import static com.github.robozonky.app.events.EventFactory.investmentMade;
+import static com.github.robozonky.app.events.EventFactory.investmentMadeLazy;
 import static com.github.robozonky.app.events.EventFactory.investmentRejected;
 import static com.github.robozonky.app.events.EventFactory.investmentRequested;
 import static com.github.robozonky.app.events.EventFactory.investmentSkipped;
@@ -172,7 +173,7 @@ final class InvestingSession {
                 final Investment i = Investment.fresh(l, confirmedAmount);
                 markSuccessfulInvestment(i);
                 discard(recommendation.descriptor()); // never show again
-                events.fire(investmentMade(i, l, portfolio.getOverview()));
+                events.fire(investmentMadeLazy(() -> investmentMade(i, l, portfolio.getOverview())));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA
                 return false;

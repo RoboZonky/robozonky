@@ -36,7 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.app.events.EventFactory.loanLost;
+import static com.github.robozonky.app.events.EventFactory.loanLostLazy;
 import static com.github.robozonky.app.events.EventFactory.loanNoLongerDelinquent;
+import static com.github.robozonky.app.events.EventFactory.loanNoLongerDelinquentLazy;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -65,17 +67,22 @@ final class DelinquencyNotificationPayload implements Payload {
 
     private static void processNoLongerDelinquent(final Transactional transactional, final Investment investment,
                                                   final PaymentStatus status) {
-        final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), transactional.getTenant());
         switch (status) {
             case WRITTEN_OFF: // investment is lost for good
-                transactional.fire(loanLost(investment, loan));
+                transactional.fire(loanLostLazy(() -> {
+                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), transactional.getTenant());
+                    return loanLost(investment, loan);
+                }));
                 return;
             case PAID:
                 LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.",
                              investment.getId());
                 return;
             default:
-                transactional.fire(loanNoLongerDelinquent(investment, loan));
+                transactional.fire(loanNoLongerDelinquentLazy(() -> {
+                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), transactional.getTenant());
+                    return loanNoLongerDelinquent(investment, loan);
+                }));
                 return;
         }
     }

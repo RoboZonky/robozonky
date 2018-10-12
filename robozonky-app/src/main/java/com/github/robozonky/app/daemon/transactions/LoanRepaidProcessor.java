@@ -25,7 +25,9 @@ import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
-import com.github.robozonky.app.events.EventFactory;
+
+import static com.github.robozonky.app.events.EventFactory.loanRepaid;
+import static com.github.robozonky.app.events.EventFactory.loanRepaidLazy;
 
 class LoanRepaidProcessor extends TransactionProcessor {
 
@@ -53,7 +55,9 @@ class LoanRepaidProcessor extends TransactionProcessor {
             logger.debug("Not yet repaid in full: {}.", transfer);
             return;
         }
-        final Loan loan = LoanCache.get().getLoan(loanId, tenant);
-        transactional.fire(EventFactory.loanRepaid(investment, loan, transactional.getPortfolio().getOverview()));
+        transactional.fire(loanRepaidLazy(() ->  {
+            final Loan loan = LoanCache.get().getLoan(loanId, tenant);
+            return loanRepaid(investment, loan, transactional.getPortfolio().getOverview());
+        }));
     }
 }

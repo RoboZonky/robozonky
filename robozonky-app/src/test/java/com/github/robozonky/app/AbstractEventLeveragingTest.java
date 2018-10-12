@@ -23,6 +23,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.app.events.EventFiringListener;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,8 +75,8 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         private final List<Event> eventsQueued = new ArrayList<>(0);
 
         @Override
-        public void requested(final Event event) {
-            eventsRequested.add(event);
+        public void requested(final LazyEvent<? extends Event> event) {
+            eventsRequested.add(event.get());
         }
 
         @Override

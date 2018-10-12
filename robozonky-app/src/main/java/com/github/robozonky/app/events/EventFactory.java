@@ -18,7 +18,9 @@ package com.github.robozonky.app.events;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.function.Supplier;
 
+import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
@@ -237,5 +239,64 @@ public final class EventFactory {
     public static SellingStartedEvent sellingStarted(final Collection<InvestmentDescriptor> investments,
                                                      final PortfolioOverview portfolio) {
         return new SellingStartedEventImpl(investments, portfolio);
+    }
+
+    public static LazyEvent<InvestmentMadeEvent> investmentMadeLazy(final Supplier<InvestmentMadeEvent> supplier) {
+        return async(InvestmentMadeEvent.class, supplier);
+    }
+
+    public static LazyEvent<InvestmentPurchasedEvent> investmentPurchasedLazy(
+            final Supplier<InvestmentPurchasedEvent> supplier) {
+        return async(InvestmentPurchasedEvent.class, supplier);
+    }
+
+    public static LazyEvent<InvestmentSoldEvent> investmentSoldLazy(final Supplier<InvestmentSoldEvent> supplier) {
+        return async(InvestmentSoldEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanDefaultedEvent> loanDefaultedLazy(final Supplier<LoanDefaultedEvent> supplier) {
+        return async(LoanDefaultedEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanNowDelinquentEvent> loanNowDelinquentLazy(
+            final Supplier<LoanNowDelinquentEvent> supplier) {
+        return async(LoanNowDelinquentEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanDelinquent10DaysOrMoreEvent> loanDelinquent10plusLazy(
+            final Supplier<LoanDelinquent10DaysOrMoreEvent> supplier) {
+        return async(LoanDelinquent10DaysOrMoreEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanDelinquent30DaysOrMoreEvent> loanDelinquent30plusLazy(
+            final Supplier<LoanDelinquent30DaysOrMoreEvent> supplier) {
+        return async(LoanDelinquent30DaysOrMoreEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanDelinquent60DaysOrMoreEvent> loanDelinquent60plusLazy(
+            final Supplier<LoanDelinquent60DaysOrMoreEvent> supplier) {
+        return async(LoanDelinquent60DaysOrMoreEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanDelinquent90DaysOrMoreEvent> loanDelinquent90plusLazy(
+            final Supplier<LoanDelinquent90DaysOrMoreEvent> supplier) {
+        return async(LoanDelinquent90DaysOrMoreEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanLostEvent> loanLostLazy(final Supplier<LoanLostEvent> supplier) {
+        return async(LoanLostEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanNoLongerDelinquentEvent> loanNoLongerDelinquentLazy(
+            final Supplier<LoanNoLongerDelinquentEvent> supplier) {
+        return async(LoanNoLongerDelinquentEvent.class, supplier);
+    }
+
+    public static LazyEvent<LoanRepaidEvent> loanRepaidLazy(final Supplier<LoanRepaidEvent> supplier) {
+        return async(LoanRepaidEvent.class, supplier);
+    }
+
+    private static <T extends Event> LazyEvent<T> async(final Class<T> clz, final Supplier<T> eventSupplier) {
+        return new LazyEventImpl<>(clz, eventSupplier);
     }
 }
