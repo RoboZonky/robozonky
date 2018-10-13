@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package com.github.robozonky.strategy.natural;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class DefaultValuesTest {
 
@@ -48,7 +49,7 @@ class DefaultValuesTest {
     void setTargetPortfolioSize() {
         final DefaultPortfolio p = DefaultPortfolio.PROGRESSIVE;
         final DefaultValues sut = new DefaultValues(p);
-        assertThat(sut.getTargetPortfolioSize()).isEqualTo(Integer.MAX_VALUE);
+        assertThat(sut.getTargetPortfolioSize()).isEqualTo(Long.MAX_VALUE);
         sut.setTargetPortfolioSize(400);
         assertThat(sut.getTargetPortfolioSize()).isEqualTo(400);
     }

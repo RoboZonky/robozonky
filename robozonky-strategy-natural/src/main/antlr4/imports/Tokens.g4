@@ -22,13 +22,13 @@ portfolioExpression returns [DefaultPortfolio result] :
     ) ' portfolio' DOT
 ;
 
-targetPortfolioSizeExpression returns [int result] :
-    'Cílová zůstatková částka je ' maximumInvestmentInCzk=intExpr KC DOT
+targetPortfolioSizeExpression returns [long result] :
+    'Cílová zůstatková částka je ' maximumInvestmentInCzk=longExpr KC DOT
     {$result = $maximumInvestmentInCzk.result;}
 ;
 
-targetBalanceExpression returns [int result] :
-    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=intExpr KC DOT
+targetBalanceExpression returns [long result] :
+    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=longExpr KC DOT
     {$result = $balance.result;}
 ;
 
@@ -107,6 +107,12 @@ floatExpr returns [BigDecimal result] :
 intExpr returns [int result] :
     i=INTEGER {
         $result = Integer.parseInt($i.getText());
+    }
+;
+
+longExpr returns [long result] :
+    i=INTEGER {
+        $result = Long.parseLong($i.getText());
     }
 ;
 

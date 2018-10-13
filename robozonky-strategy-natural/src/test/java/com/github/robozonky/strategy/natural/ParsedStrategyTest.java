@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,12 @@ import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ParsedStrategyTest {
 
@@ -59,7 +62,7 @@ class ParsedStrategyTest {
         final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
         assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumBalance()).isEqualTo(0);
-            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk()).isEqualTo(Integer.MAX_VALUE);
+            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk()).isEqualTo(Long.MAX_VALUE);
             softly.assertThat(strategy.getMinimumShare(Rating.A))
                     .isEqualTo(portfolio.getDefaultShare(Rating.A));
             softly.assertThat(strategy.getMaximumShare(Rating.B))

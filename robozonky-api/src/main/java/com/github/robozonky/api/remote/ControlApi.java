@@ -54,11 +54,11 @@ public interface ControlApi {
 
     @POST
     @Path("/smp/investments/{id}/shares")
-    void purchase(@PathParam("id") int id, PurchaseRequest purchaseRequest);
+    void purchase(@PathParam("id") long id, PurchaseRequest purchaseRequest);
 
     @DELETE
     @Path("/traded-investments/{id}")
-    void cancel(@PathParam("id") int id);
+    void cancel(@PathParam("id") long id);
 
 }
 

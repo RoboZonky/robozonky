@@ -109,7 +109,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Participation mock = mock(Participation.class);
-        when(mock.getId()).thenReturn(1);
+        when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loan.getId());
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         when(mock.getRating()).thenReturn(loan.getRating());
@@ -147,7 +147,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         doThrow(BadRequestException.class).when(zonky).purchase(any());
         final Participation mock = mock(Participation.class);
-        when(mock.getId()).thenReturn(1);
+        when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loan.getId());
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         when(mock.getRating()).thenReturn(loan.getRating());

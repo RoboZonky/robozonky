@@ -56,7 +56,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     boolean sizeMatchesStrategy(final Participation participation, final BigDecimal balance) {
         final int id = participation.getLoanId();
-        final int participationId = participation.getId();
+        final long participationId = participation.getId();
         final int[] recommended = getRecommendationBoundaries(participation);
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];

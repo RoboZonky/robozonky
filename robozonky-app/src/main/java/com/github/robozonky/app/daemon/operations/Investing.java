@@ -33,7 +33,7 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
 
     private final Tenant auth;
     private final Investor investor;
-    private final AtomicReference<int[]> actionableWhenLastChecked = new AtomicReference<>(new int[0]);
+    private final AtomicReference<long[]> actionableWhenLastChecked = new AtomicReference<>(new long[0]);
 
     public Investing(final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
                      final Tenant auth) {
@@ -56,11 +56,11 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
 
     @Override
     protected boolean hasMarketplaceUpdates(final Collection<LoanDescriptor> marketplace) {
-        final int[] actionableLoansNow = marketplace.stream()
+        final long[] actionableLoansNow = marketplace.stream()
                 .filter(Investing::isActionable)
-                .mapToInt(l -> l.item().getId())
+                .mapToLong(l -> l.item().getId())
                 .toArray();
-        final int[] lastCheckedActionableLoans = actionableWhenLastChecked.getAndSet(actionableLoansNow);
+        final long[] lastCheckedActionableLoans = actionableWhenLastChecked.getAndSet(actionableLoansNow);
         return NumberUtil.hasAdditions(lastCheckedActionableLoans, actionableLoansNow);
     }
 

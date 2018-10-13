@@ -80,7 +80,7 @@ class InvestmentTest {
     void freshFromParticipation() {
         final Loan l = Loan.custom().build();
         final Participation p = mock(Participation.class);
-        when(p.getInvestmentId()).thenReturn(1);
+        when(p.getInvestmentId()).thenReturn(1L);
         when(p.getRemainingInstalmentCount()).thenReturn(2);
         final Investment i = Investment.fresh(p, l, BigDecimal.valueOf(1000));
         assertSoftly(softly -> {

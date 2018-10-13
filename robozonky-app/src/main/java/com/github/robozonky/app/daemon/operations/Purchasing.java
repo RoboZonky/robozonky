@@ -37,7 +37,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
 
     private final Tenant auth;
     private final SoldParticipationCache soldParticipationCache;
-    private final AtomicReference<int[]> lastChecked = new AtomicReference<>(new int[0]);
+    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(new long[0]);
 
     public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth) {
         super(strategy);
@@ -56,8 +56,8 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
 
     @Override
     protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
-        final int[] idsFromMarketplace = marketplace.stream().mapToInt(Participation::getId).toArray();
-        final int[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
+        final long[] idsFromMarketplace = marketplace.stream().mapToLong(Participation::getId).toArray();
+        final long[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
         return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
     }
 

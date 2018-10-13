@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class RiskPortfolio extends OverallPortfolio {
         // for JAXB
     }
 
-    public RiskPortfolio(final Rating rating, final int paid, final int unpaid, final int due) {
+    public RiskPortfolio(final Rating rating, final long paid, final long unpaid, final long due) {
         super(paid, unpaid, due);
         this.rating = rating;
         this.totalAmount = BigDecimal.valueOf(paid + unpaid + due);

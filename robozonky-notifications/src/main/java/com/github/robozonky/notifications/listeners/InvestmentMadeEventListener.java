@@ -45,7 +45,7 @@ public class InvestmentMadeEventListener extends AbstractListener<InvestmentMade
     protected Map<String, Object> getData(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = super.getData(event);
-        final int invested = event.getPortfolioOverview().getCzkInvested().intValue();
+        final long invested = event.getPortfolioOverview().getCzkInvested().longValue();
         result.put("yield", FinancialCalculator.expectedInterestAfterFees(i, invested));
         final BigDecimal interestRate = FinancialCalculator.expectedInterestRateAfterFees(i, invested);
         result.put("relativeYield", interestRate);

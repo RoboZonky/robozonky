@@ -64,13 +64,13 @@ final class Util {
     }
 
     static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
-        final int balance = portfolio.getCzkAvailable().intValue();
+        final long balance = portfolio.getCzkAvailable().longValue();
         if (balance < strategy.getMinimumBalance()) {
             Decisions.report(logger -> logger.debug("Not recommending any loans due to balance under minimum."));
             return false;
         }
-        final int invested = portfolio.getCzkInvested().intValue();
-        final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
+        final long invested = portfolio.getCzkInvested().longValue();
+        final long investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
         if (invested >= investmentCeiling) {
             Decisions.report(logger -> logger.debug("Not recommending any loans due to reaching the ceiling."));
             return false;
