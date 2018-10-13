@@ -64,7 +64,6 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         }, a, Investor.build(a), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));
         d.run();
         verify(z).getAvailableLoans(notNull());
-        verify(z).getLoan(ml.getId());
         verify(is).recommend(any(), any(), any());
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }

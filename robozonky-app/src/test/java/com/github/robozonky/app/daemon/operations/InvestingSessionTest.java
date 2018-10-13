@@ -58,7 +58,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
@@ -107,7 +106,6 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final int amount = 200;
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptorWithoutCaptcha();
         final int loanId = ld.item().getId();
-        when(z.getLoan(eq(loanId))).thenReturn(ld.item());
         final Tenant auth = mockTenant(z);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
@@ -285,7 +283,6 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final int amountToInvest = 200;
         final RecommendedLoan r = AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(amountToInvest).get();
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(oldBalance);
-        when(z.getLoan(eq(r.descriptor().item().getId()))).thenReturn(r.descriptor().item());
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(new ZonkyResponse(amountToInvest))

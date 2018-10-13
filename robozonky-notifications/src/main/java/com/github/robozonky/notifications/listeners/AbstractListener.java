@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.Financial;
 import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.MarketplaceInvestmentBased;
+import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
@@ -87,6 +89,14 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
                 return Util.getLoanData(e.getInvestment(), e.getLoan());
             } else {
                 final LoanBased e = (LoanBased) event;
+                return Util.getLoanData(e.getLoan());
+            }
+        } else if (event instanceof MarketplaceLoanBased) {
+            if (event instanceof MarketplaceInvestmentBased) {
+                final MarketplaceInvestmentBased e = (MarketplaceInvestmentBased) event;
+                return Util.getLoanData(e.getInvestment(), e.getLoan());
+            } else {
+                final MarketplaceLoanBased e = (MarketplaceLoanBased) event;
                 return Util.getLoanData(e.getLoan());
             }
         }

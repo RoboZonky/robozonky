@@ -37,7 +37,6 @@ import com.github.robozonky.api.remote.enums.DevelopmentType;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
@@ -75,7 +74,9 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
                 .setNextPaymentDate(OffsetDateTime.now().minusDays(1))
                 .build();
         // make sure new delinquencies are reported and stored
-        final TransactionalPortfolio p = createTransactionalPortfolio();
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final TransactionalPortfolio p = createTransactionalPortfolio(z);
         DelinquencyNotificationPayload.update(p, Collections.singleton(i), Collections.emptySet(), Collections.emptySet());
         p.run(); // finish the transaction
         assertThat(getEventsRequested()).hasSize(1);
@@ -151,8 +152,9 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
         // register delinquency
-        final Tenant t = mockTenant();
-        final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final TransactionalPortfolio p = createTransactionalPortfolio(z);
         DelinquencyNotificationPayload.update(p, Collections.emptyList(), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
         this.readPreexistingEvents(); // ignore events just emitted

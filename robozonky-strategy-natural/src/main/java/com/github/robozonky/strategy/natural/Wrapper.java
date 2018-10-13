@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Objects;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -29,7 +30,7 @@ import com.github.robozonky.api.remote.enums.Region;
 
 public class Wrapper {
 
-    private final Loan loan;
+    private final MarketplaceLoan loan;
     private final String identifier;
     private final int remainingTermInMonths, originalTermInMonths;
     private final BigDecimal remainingAmount;
@@ -40,7 +41,7 @@ public class Wrapper {
         return suffix == null ? prefix : prefix + " (" + suffix + ")";
     }
 
-    public Wrapper(final Loan loan) {
+    public Wrapper(final MarketplaceLoan loan) {
         this.loan = loan;
         this.identifier = identify(loan.getId(), null);
         this.remainingTermInMonths = loan.getTermInMonths();

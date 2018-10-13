@@ -22,7 +22,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
  * Fired immediately after {@link InvestmentStrategy} has recommended a particular loan.
  * {@link InvestmentRequestedEvent} may be fired next.
  */
-public interface LoanRecommendedEvent extends LoanBased,
+public interface LoanRecommendedEvent extends MarketplaceLoanBased,
                                               Recommending {
 
 }

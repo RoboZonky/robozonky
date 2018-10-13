@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Tenant;
@@ -54,7 +53,7 @@ class InvestingDaemon extends DaemonOperation {
     @Override
     protected void execute(final Portfolio portfolio, final Tenant authenticated) {
         // don't query anything unless we have enough money to invest
-        final int balance = portfolio.getRemoteBalance().get().intValue();
+        final long balance = portfolio.getRemoteBalance().get().longValue();
         final int minimum = authenticated.getRestrictions().getMinimumInvestmentAmount();
         if (balance < minimum) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
@@ -62,22 +61,7 @@ class InvestingDaemon extends DaemonOperation {
         }
         // query marketplace for investment opportunities
         final Collection<LoanDescriptor> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
-                .parallel()
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
-                .map(l -> {
-                    /*
-                     * Loan is first retrieved from the authenticated API. This way, we get all available
-                     * information, such as borrower nicknames from other loans made by the same person.
-                     */
-                    final Loan complete = LoanCache.get().getLoan(l.getId(), authenticated);
-                    /*
-                     * We update the loan within the cache with latest information from the marketplace. This is
-                     * done so that we don't cache stale loan information, such as how much of the loan is remaining
-                     * to be invested.
-                     */
-                    Loan.updateFromMarketplace(complete, l);
-                    return complete;
-                })
                 .map(LoanDescriptor::new)
                 .collect(Collectors.toList());
         investing.apply(portfolio, loans);

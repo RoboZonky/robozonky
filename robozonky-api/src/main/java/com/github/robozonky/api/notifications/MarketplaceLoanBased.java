@@ -16,13 +16,9 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 
-/**
- * Fired immediately after {@link ConfirmationProvider} delegated a given investment.
- */
-public interface InvestmentDelegatedEvent extends MarketplaceLoanBased, Recommending {
+public interface MarketplaceLoanBased extends Event {
 
-    String getConfirmationProviderId();
-
+    MarketplaceLoan getLoan();
 }

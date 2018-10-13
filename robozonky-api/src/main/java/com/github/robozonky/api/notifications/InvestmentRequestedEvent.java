@@ -23,7 +23,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
  * Fired immediately before {@link ControlApi#invest(RawInvestment)} call is made or, in case of dry run,
  * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentMadeEvent}.
  */
-public interface InvestmentRequestedEvent extends LoanBased,
+public interface InvestmentRequestedEvent extends MarketplaceLoanBased,
                                                   Recommending {
 
 }

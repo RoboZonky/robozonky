@@ -25,7 +25,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -169,7 +169,7 @@ final class InvestingSession {
                 return false;
             case INVESTED:
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
-                final Loan l = recommendation.descriptor().item();
+                final MarketplaceLoan l = recommendation.descriptor().item();
                 final Investment i = Investment.fresh(l, confirmedAmount);
                 markSuccessfulInvestment(i);
                 discard(recommendation.descriptor()); // never show again

@@ -18,16 +18,16 @@ package com.github.robozonky.app.events;
 
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class InvestmentMadeEventImpl extends AbstractEventImpl implements InvestmentMadeEvent {
 
     private final Investment investment;
-    private final Loan loan;
+    private final MarketplaceLoan loan;
     private final PortfolioOverview portfolioOverview;
 
-    public InvestmentMadeEventImpl(final Investment investment, final Loan loan,
+    public InvestmentMadeEventImpl(final Investment investment, final MarketplaceLoan loan,
                                    final PortfolioOverview portfolioOverview) {
         this.investment = investment;
         this.loan = loan;
@@ -35,7 +35,7 @@ final class InvestmentMadeEventImpl extends AbstractEventImpl implements Investm
     }
 
     @Override
-    public Loan getLoan() {
+    public MarketplaceLoan getLoan() {
         return loan;
     }
 

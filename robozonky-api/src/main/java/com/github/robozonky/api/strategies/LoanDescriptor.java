@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Optional;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +36,9 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanDescriptor.class);
 
-    private final Loan loan;
+    private final MarketplaceLoan loan;
 
-    public LoanDescriptor(final Loan loan) {
+    public LoanDescriptor(final MarketplaceLoan loan) {
         this.loan = loan;
     }
 
@@ -81,12 +80,12 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
     }
 
     @Override
-    public Loan item() {
+    public MarketplaceLoan item() {
         return loan;
     }
 
     @Override
-    public Loan related() {
+    public MarketplaceLoan related() {
         return loan;
     }
 

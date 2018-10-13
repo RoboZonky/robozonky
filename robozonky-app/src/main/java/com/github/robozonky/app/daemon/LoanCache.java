@@ -103,7 +103,11 @@ public class LoanCache {
     public Loan getLoan(final int loanId, final Tenant tenant) {
         return getLoan(loanId).orElseGet(() -> {
             final Loan l = tenant.call(api -> api.getLoan(loanId));
-            addLoan(loanId, l);
+            if (l.getRemainingInvestment() > 0) {  // prevent caching information which will soon be outdated
+                LOGGER.debug("Not adding loan {} to cache as it is not yet fully invested.", l);
+            } else {
+                addLoan(loanId, l);
+            }
             return l;
         });
     }
