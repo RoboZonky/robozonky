@@ -19,9 +19,9 @@ package com.github.robozonky.app.daemon.operations;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.state.InstanceState;
@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
 final class SessionState<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);
-    private final Collection<Integer> items;
-    private final ToIntFunction<T> idSupplier;
+    private final Collection<Long> items;
+    private final ToLongFunction<T> idSupplier;
     private final String key;
     private final InstanceState<SessionState> state;
 
@@ -53,7 +53,7 @@ final class SessionState<T> {
      * @param key Name of this collection elements. Different instances with the same value operate on the same
      * underlying storage.
      */
-    public SessionState(final Tenant tenant, final ToIntFunction<T> idSupplier, final String key) {
+    public SessionState(final Tenant tenant, final ToLongFunction<T> idSupplier, final String key) {
         this(tenant, Collections.emptyList(), idSupplier, key);
     }
 
@@ -65,25 +65,25 @@ final class SessionState<T> {
      * @param key Name of this collection elements. Different instances with the same value operate on the same
      * underlying storage.
      */
-    public SessionState(final Tenant tenant, final Collection<T> retain, final ToIntFunction<T> idSupplier,
+    public SessionState(final Tenant tenant, final Collection<T> retain, final ToLongFunction<T> idSupplier,
                         final String key) {
         this.state = tenant.getState(SessionState.class);
         this.key = key;
         this.idSupplier = idSupplier;
         this.items = read();
-        this.items.retainAll(retain.stream().mapToInt(idSupplier).boxed().collect(Collectors.toSet()));
+        this.items.retainAll(retain.stream().mapToLong(idSupplier).boxed().collect(Collectors.toSet()));
         SessionState.LOGGER.debug("'{}' contains {}.", key, items);
     }
 
-    private Set<Integer> read() {
-        final int[] result = state.getValues(key)
-                .map(s -> s.mapToInt(Integer::parseInt).toArray())
-                .orElse(new int[0]);
+    private Set<Long> read() {
+        final long[] result = state.getValues(key)
+                .map(s -> s.mapToLong(Integer::parseInt).toArray())
+                .orElse(new long[0]);
         SessionState.LOGGER.trace("'{}' read {}.", key, result);
-        return IntStream.of(result).boxed().collect(Collectors.toSet());
+        return LongStream.of(result).boxed().collect(Collectors.toSet());
     }
 
-    private void write(final Collection<Integer> items) {
+    private void write(final Collection<Long> items) {
         state.update(b -> b.put(key, items.stream().map(String::valueOf)));
         final String value = state.getValue(key).orElse("nothing");
         SessionState.LOGGER.trace("'{}' wrote '{}'.", key, value);
@@ -94,7 +94,7 @@ final class SessionState<T> {
      * @param item
      */
     public synchronized void put(final T item) {
-        items.add(idSupplier.applyAsInt(item));
+        items.add(idSupplier.applyAsLong(item));
         write(items);
     }
 
@@ -103,6 +103,6 @@ final class SessionState<T> {
      * @param item
      */
     public synchronized boolean contains(final T item) {
-        return items.contains(idSupplier.applyAsInt(item));
+        return items.contains(idSupplier.applyAsLong(item));
     }
 }

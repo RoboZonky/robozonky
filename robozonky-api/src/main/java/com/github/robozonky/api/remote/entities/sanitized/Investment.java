@@ -85,7 +85,7 @@ public interface Investment {
 
     BigDecimal getOriginalPrincipal();
 
-    int getId();
+    long getId();
 
     BigDecimal getInterestRate();
 

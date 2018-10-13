@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,30 @@ import javax.xml.bind.annotation.XmlElement;
 
 abstract class BaseOverview extends BaseEntity {
 
-    private int totalInvestment, principalPaid, interestPaid, investmentCount, penaltyPaid;
+    private long totalInvestment, principalPaid, interestPaid, investmentCount, penaltyPaid;
 
     @XmlElement
-    public int getTotalInvestment() {
+    public long getTotalInvestment() {
         return totalInvestment;
     }
 
     @XmlElement
-    public int getPrincipalPaid() {
+    public long getPrincipalPaid() {
         return principalPaid;
     }
 
     @XmlElement
-    public int getInterestPaid() {
+    public long getInterestPaid() {
         return interestPaid;
     }
 
     @XmlElement
-    public int getPenaltyPaid() {
+    public long getPenaltyPaid() {
         return penaltyPaid;
     }
 
     @XmlElement
-    public int getInvestmentCount() {
+    public long getInvestmentCount() {
         return investmentCount;
     }
 }

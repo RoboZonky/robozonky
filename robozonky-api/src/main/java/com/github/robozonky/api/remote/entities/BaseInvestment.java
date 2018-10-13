@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
  */
 abstract class BaseInvestment extends BaseEntity {
 
-    private int id, loanId;
+    private long id;
+    private int loanId;
     private BigDecimal amount, additionalAmount, firstAmount;
     private InvestmentStatus status;
     private OffsetDateTime timeCreated = OffsetDateTime.MIN;
@@ -78,7 +79,7 @@ abstract class BaseInvestment extends BaseEntity {
     }
 
     @XmlElement
-    public int getId() {
+    public long getId() {
         return id;
     }
 }

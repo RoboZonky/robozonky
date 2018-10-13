@@ -64,7 +64,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     private static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
         final MyInvestment m = mock(MyInvestment.class);
-        when(m.getId()).thenReturn(RANDOM.nextInt());
+        when(m.getId()).thenReturn(RANDOM.nextLong());
         when(m.getTimeCreated()).thenReturn(creationDate);
         return m;
     }

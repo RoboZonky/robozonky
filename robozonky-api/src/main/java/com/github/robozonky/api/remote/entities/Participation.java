@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ public class Participation extends BaseEntity {
 
     private OffsetDateTime deadline;
     private LocalDate nextPaymentDate;
-    private int id, investmentId, loanId, originalInstalmentCount, remainingInstalmentCount, userId;
+    private int loanId, originalInstalmentCount, remainingInstalmentCount, userId;
+    private long id, investmentId;
     private MainIncomeType incomeType;
     private BigDecimal interestRate, remainingPrincipal;
     private String loanName;
@@ -49,12 +50,12 @@ public class Participation extends BaseEntity {
     }
 
     @XmlElement
-    public int getId() {
+    public long getId() {
         return id;
     }
 
     @XmlElement
-    public int getInvestmentId() {
+    public long getInvestmentId() {
         return investmentId;
     }
 

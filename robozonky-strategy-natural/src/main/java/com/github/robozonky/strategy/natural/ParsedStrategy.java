@@ -97,7 +97,7 @@ class ParsedStrategy {
         return defaults.needsConfirmation(loan.item());
     }
 
-    public int getMinimumBalance() {
+    public long getMinimumBalance() {
         return defaults.getMinimumBalance();
     }
 
@@ -109,7 +109,7 @@ class ParsedStrategy {
         return defaults.getInvestmentShare().getMaximumShareInPercent();
     }
 
-    public int getMaximumInvestmentSizeInCzk() {
+    public long getMaximumInvestmentSizeInCzk() {
         return defaults.getTargetPortfolioSize();
     }
 

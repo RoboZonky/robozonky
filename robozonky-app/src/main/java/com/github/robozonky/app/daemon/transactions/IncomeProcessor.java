@@ -33,8 +33,8 @@ public final class IncomeProcessor implements PortfolioDependant {
     static final String STATE_KEY = "lastSeenTransactionId";
     private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
 
-    private static int processAllTransactions(final Stream<Transaction> transactions) {
-        return transactions.mapToInt(Transaction::getId)
+    private static long processAllTransactions(final Stream<Transaction> transactions) {
+        return transactions.mapToLong(Transaction::getId)
                 .max()
                 .orElse(-1);
     }
@@ -43,8 +43,9 @@ public final class IncomeProcessor implements PortfolioDependant {
         processor.accept(transaction);
     }
 
-    private static int processNewTransactions(final TransactionalPortfolio transactional, final Stream<Transaction> transactions,
-                                              final int lastSeenTransactionId) {
+    private static long processNewTransactions(final TransactionalPortfolio transactional,
+                                               final Stream<Transaction> transactions,
+                                               final long lastSeenTransactionId) {
         return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
                 .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
@@ -52,7 +53,7 @@ public final class IncomeProcessor implements PortfolioDependant {
                 .parallelStream() // possibly thousands of transactions, process them in parallel
                 .peek(t -> processTransaction(new LoanRepaidProcessor(transactional), t))
                 .peek(t -> processTransaction(new ParticipationSoldProcessor(transactional), t))
-                .mapToInt(Transaction::getId)
+                .mapToLong(Transaction::getId)
                 .max()
                 .orElse(lastSeenTransactionId);
     }
@@ -61,7 +62,7 @@ public final class IncomeProcessor implements PortfolioDependant {
     public void accept(final TransactionalPortfolio transactional) {
         final InstanceState<IncomeProcessor> state =
                 transactional.getTenant().getState(IncomeProcessor.class);
-        final int lastSeenTransactionId = state.getValue(STATE_KEY)
+        final long lastSeenTransactionId = state.getValue(STATE_KEY)
                 .map(Integer::valueOf)
                 .orElse(-1);
         // transactions from overnight processing have timestamps from the midnight of previous day
@@ -71,7 +72,7 @@ public final class IncomeProcessor implements PortfolioDependant {
         final Select sinceLastUpdate = new Select().greaterThanOrEquals("transaction.transactionDate", lastUpdate);
         final Tenant tenant = transactional.getTenant();
         final Stream<Transaction> transactions = tenant.call(z -> z.getTransactions(sinceLastUpdate));
-        final int newLastSeenTransactionId = lastSeenTransactionId >= 0 ?
+        final long newLastSeenTransactionId = lastSeenTransactionId >= 0 ?
                 processNewTransactions(transactional, transactions, lastSeenTransactionId) :
                 processAllTransactions(transactions);
         state.update(m -> m.put(STATE_KEY, String.valueOf(newLastSeenTransactionId)));

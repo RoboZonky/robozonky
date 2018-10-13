@@ -43,7 +43,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MutableInvestmentImpl.class);
     private static final Random RANDOM = new Random(0L);
 
-    private int loanId, id, currentTerm, originalTerm, remainingMonths;
+    private long id;
+    private int loanId, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;
     private OffsetDateTime nextPaymentDate;
     private volatile OffsetDateTime investmentDate; // may be updated from various threads
@@ -145,7 +146,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public InvestmentBuilder setId(final int id) {
+    public InvestmentBuilder setId(final long id) {
         this.id = id;
         return this;
     }
@@ -307,7 +308,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public int getId() {
+    public long getId() {
         return id;
     }
 

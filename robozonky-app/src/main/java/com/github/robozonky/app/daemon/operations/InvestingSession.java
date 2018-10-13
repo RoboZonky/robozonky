@@ -84,7 +84,7 @@ final class InvestingSession {
                                                 final RestrictedInvestmentStrategy strategy) {
         final InvestingSession session = new InvestingSession(portfolio, loans, investor, auth);
         final PortfolioOverview portfolioOverview = portfolio.getOverview();
-        final int balance = portfolioOverview.getCzkAvailable().intValue();
+        final long balance = portfolioOverview.getCzkAvailable().longValue();
         session.events.fire(executionStarted(loans, portfolioOverview));
         if (balance >= auth.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
             session.invest(strategy);

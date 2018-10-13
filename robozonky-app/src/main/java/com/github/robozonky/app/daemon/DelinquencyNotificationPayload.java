@@ -55,10 +55,10 @@ final class DelinquencyNotificationPayload implements Payload {
     }
 
     private static Stream<String> toIds(final Stream<Investment> investments) {
-        return investments.mapToInt(Investment::getId)
+        return investments.mapToLong(Investment::getId)
                 .distinct()
                 .sorted()
-                .mapToObj(Integer::toString);
+                .mapToObj(Long::toString);
     }
 
     private static Set<Integer> toIdSet(final IntStream investments) {

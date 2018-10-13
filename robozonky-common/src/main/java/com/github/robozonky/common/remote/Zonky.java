@@ -179,7 +179,7 @@ public class Zonky {
         return Loan.sanitized(loanApi.execute(api -> api.item(id)));
     }
 
-    public Optional<Investment> getInvestment(final int id) {
+    public Optional<Investment> getInvestment(final long id) {
         final Select s = new Select().equals("id", id);
         return getInvestments(s).findFirst();
     }

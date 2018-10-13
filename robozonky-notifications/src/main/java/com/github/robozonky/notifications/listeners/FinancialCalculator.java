@@ -85,8 +85,12 @@ final class FinancialCalculator {
      * @return
      * @see "https://zonky.cz/zonky-vyhody/"
      */
-    private static BigDecimal feeDiscount(final int totalInvested) {
-        final SortedMap<Integer, BigDecimal> applicableDiscounts = FEE_DISCOUNTS.headMap(totalInvested + 1);
+    private static BigDecimal feeDiscount(final long totalInvested) {
+        /* For the institutional investor ("zonky"), total will cause int overflow. Cap the value be max integer value,
+         * since the only place where it will be used in this method doesn't use more than the order of millions.
+         */
+        final int totalCapped = (totalInvested > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int)totalInvested + 1;
+        final SortedMap<Integer, BigDecimal> applicableDiscounts = FEE_DISCOUNTS.headMap(totalCapped);
         if (applicableDiscounts.isEmpty()) {
             return BigDecimal.ZERO;
         } else {
@@ -95,13 +99,13 @@ final class FinancialCalculator {
     }
 
     public static BigDecimal estimateFeeRate(final Investment investment,
-                                             final int totalInvested) {
+                                             final long totalInvested) {
         final BigDecimal baseFee = baseFee(investment);
         final BigDecimal feeDiscount = feeDiscount(totalInvested);
         return minus(baseFee, times(baseFee, feeDiscount));
     }
 
-    private static BigDecimal feePaid(final Investment investment, final int totalInvested, final int totalMonths) {
+    private static BigDecimal feePaid(final Investment investment, final long totalInvested, final int totalMonths) {
         if (totalMonths == 0) {
             return BigDecimal.ZERO;
         }
@@ -142,7 +146,7 @@ final class FinancialCalculator {
                 .orElse(investment.getCurrentTerm() - investment.getRemainingMonths());
     }
 
-    public static BigDecimal actualInterestAfterFees(final Investment investment, final int totalInvested,
+    public static BigDecimal actualInterestAfterFees(final Investment investment, final long totalInvested,
                                                      final boolean includeSmpSaleFee) {
         final int termsInZonky = countTermsInZonky(investment);
         final BigDecimal fee = feePaid(investment, totalInvested, termsInZonky);
@@ -152,18 +156,18 @@ final class FinancialCalculator {
         return minus(interest, actualFee);
     }
 
-    public static BigDecimal actualInterestAfterFees(final Investment investment, final int totalInvested) {
+    public static BigDecimal actualInterestAfterFees(final Investment investment, final long totalInvested) {
         return actualInterestAfterFees(investment, totalInvested, false);
     }
 
-    public static BigDecimal expectedInterestAfterFees(final Investment investment, final int totalInvested) {
+    public static BigDecimal expectedInterestAfterFees(final Investment investment, final long totalInvested) {
         final int terms = investment.getRemainingMonths();
         final BigDecimal expectedFee = feePaid(investment, totalInvested, terms);
         final BigDecimal expectedIncome = expectedInterest(investment);
         return minus(expectedIncome, expectedFee);
     }
 
-    public static BigDecimal expectedInterestRateAfterFees(final Investment investment, final int totalInvested) {
+    public static BigDecimal expectedInterestRateAfterFees(final Investment investment, final long totalInvested) {
         final BigDecimal interestRate = investment.getInterestRate();
         final BigDecimal feeRate = estimateFeeRate(investment, totalInvested);
         return minus(interestRate, feeRate);
