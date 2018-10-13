@@ -16,6 +16,7 @@
 
 package com.github.robozonky.util;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
@@ -32,19 +33,19 @@ public enum Schedulers {
 
     private final Collection<Scheduler> items = new CopyOnWriteArraySet<>();
 
-    public Scheduler create(final Integer parallelism, final ThreadFactory threadFactory) {
-        final Scheduler scheduler = new Scheduler(parallelism, threadFactory);
+    public Scheduler create(final Integer parallelism, final Duration terminationWait, final ThreadFactory threadFactory) {
+        final Scheduler scheduler = new Scheduler(parallelism, terminationWait, threadFactory);
         items.add(scheduler);
         LOGGER.trace("Created {}.", scheduler);
         return scheduler;
     }
 
-    public Scheduler create(final Integer parallelism) {
-        return create(parallelism, Executors.defaultThreadFactory());
+    public Scheduler create(final Integer parallelism, final ThreadFactory threadFactory) {
+        return create(parallelism, Duration.ofSeconds(5), threadFactory);
     }
 
     public Scheduler create() {
-        return create(1);
+        return create(1, Executors.defaultThreadFactory());
     }
 
     boolean destroy(final Scheduler scheduler) {
