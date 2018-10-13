@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -54,14 +54,18 @@ final class DelinquencyNotificationPayload implements Payload {
         return i.getPaymentStatus().map(s -> s == PaymentStatus.PAID_OFF).orElse(false);
     }
 
-    private static Stream<String> toIds(final Stream<Investment> investments) {
+    private static Stream<String> toIdStrings(final Stream<Investment> investments) {
         return investments.mapToLong(Investment::getId)
                 .distinct()
                 .sorted()
                 .mapToObj(Long::toString);
     }
 
-    private static Set<Integer> toIdSet(final IntStream investments) {
+    private static LongStream toIds(final Stream<String> ids) {
+        return ids.mapToLong(Long::parseLong);
+    }
+
+    private static Set<Long> toIdSet(final LongStream investments) {
         return investments.boxed().collect(Collectors.toSet());
     }
 
@@ -88,7 +92,7 @@ final class DelinquencyNotificationPayload implements Payload {
     }
 
     static void update(final Transactional transactional, final Collection<Investment> nowDelinquent,
-                       final Set<Integer> knownDelinquents, final Set<Integer> knownDefaulted) {
+                       final Set<Long> knownDelinquents, final Set<Long> knownDefaulted) {
         LOGGER.debug("Processing delinquent loans by category.");
         // process new defaults
         final Collection<Investment> defaulted = nowDelinquent.stream()
@@ -128,18 +132,19 @@ final class DelinquencyNotificationPayload implements Payload {
         LOGGER.debug("There are {} delinquent investments to process.", count);
         final InstanceState<DelinquencyNotificationPayload> transactionalState =
                 tenant.getState(DelinquencyNotificationPayload.class);
-        final Optional<IntStream> knownDelinquents = transactionalState.getValues(DELINQUENT_KEY)
-                .map(s -> s.mapToInt(Integer::parseInt));
+        final Optional<LongStream> knownDelinquents = transactionalState.getValues(DELINQUENT_KEY)
+                .map(DelinquencyNotificationPayload::toIds);
         if (knownDelinquents.isPresent()) { // process updates and notify
-            final IntStream defaulted = transactionalState.getValues(DEFAULTED_KEY)
-                    .map(s -> s.mapToInt(Integer::parseInt))
-                    .orElse(IntStream.empty());
+            final LongStream defaulted = transactionalState.getValues(DEFAULTED_KEY)
+                    .map(DelinquencyNotificationPayload::toIds)
+                    .orElse(LongStream.empty());
             update(transactional, currentDelinquents, toIdSet(knownDelinquents.get()), toIdSet(defaulted));
         }
         // store current state
         transactionalState.update(b -> {
-            b.put(DELINQUENT_KEY, toIds(currentDelinquents.stream()));
-            b.put(DEFAULTED_KEY, toIds(currentDelinquents.stream().filter(DelinquencyNotificationPayload::isDefaulted)));
+            b.put(DELINQUENT_KEY, toIdStrings(currentDelinquents.stream()));
+            b.put(DEFAULTED_KEY,
+                  toIdStrings(currentDelinquents.stream().filter(DelinquencyNotificationPayload::isDefaulted)));
         });
     }
 

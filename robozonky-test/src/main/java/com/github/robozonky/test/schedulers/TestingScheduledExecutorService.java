@@ -82,7 +82,7 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
 
     @Override
     public boolean awaitTermination(final long l, final TimeUnit timeUnit) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @SuppressWarnings("unchecked")
