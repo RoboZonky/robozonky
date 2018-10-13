@@ -29,16 +29,11 @@ public final class LazyInitialized<T> implements Supplier<T>,
 
     private LazyInitialized(final Supplier<T> initializer, final Consumer<T> destructor) {
         this.initializer = initializer;
-        this.destructor = x -> { // prevent NPEs
-            if (x != null) {
-                destructor.accept(x);
-            }
-        };
+        this.destructor = destructor;
     }
 
     public static <X> LazyInitialized<X> create(final Supplier<X> initializer) {
-        return create(initializer, x -> {
-        });
+        return create(initializer, null);
     }
 
     public static <X> LazyInitialized<X> create(final Supplier<X> initializer, final Consumer<X> destructor) {
@@ -46,7 +41,11 @@ public final class LazyInitialized<T> implements Supplier<T>,
     }
 
     public void reset() {
-        destructor.accept(value.getAndSet(null));
+        final T val = value.getAndSet(null);
+        if (destructor == null || val == null) {
+            return;
+        }
+        destructor.accept(val);
     }
 
     @Override
