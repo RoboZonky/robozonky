@@ -34,6 +34,7 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
 
     AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since,
                                     final Collection<Development> collectionActions) {
+        super("collectionActions");
         this.investment = investment;
         this.loan = loan;
         this.since = since;

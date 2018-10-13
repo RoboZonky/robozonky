@@ -30,10 +30,11 @@ final class LoanDefaultedEventImpl extends AbstractEventImpl implements LoanDefa
     private final Investment investment;
     private final Loan loan;
     private final Collection<Development> collectionActions;
-    private final LocalDate delinquentSince;;
+    private final LocalDate delinquentSince;
 
     public LoanDefaultedEventImpl(final Investment investment, final Loan loan, final LocalDate since,
                                   final Collection<Development> collectionActions) {
+        super("collectionActions");
         this.investment = investment;
         this.loan = loan;
         this.delinquentSince = since;

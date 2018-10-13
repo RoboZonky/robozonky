@@ -29,6 +29,7 @@ final class ExecutionCompletedEventImpl extends AbstractEventImpl implements Exe
     private final PortfolioOverview portfolioOverview;
 
     public ExecutionCompletedEventImpl(final Collection<Investment> investment, final PortfolioOverview portfolio) {
+        super("investments");
         this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
     }

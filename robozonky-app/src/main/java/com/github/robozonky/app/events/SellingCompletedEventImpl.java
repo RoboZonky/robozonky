@@ -29,6 +29,7 @@ final class SellingCompletedEventImpl extends AbstractEventImpl implements Selli
     private final PortfolioOverview portfolioOverview;
 
     public SellingCompletedEventImpl(final Collection<Investment> investment, final PortfolioOverview portfolio) {
+        super("investments");
         this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
     }

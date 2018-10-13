@@ -29,6 +29,7 @@ final class PurchasingCompletedEventImpl extends AbstractEventImpl implements Pu
     private final PortfolioOverview portfolioOverview;
 
     public PurchasingCompletedEventImpl(final Collection<Investment> investment, final PortfolioOverview portfolio) {
+        super("investments");
         this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
     }
