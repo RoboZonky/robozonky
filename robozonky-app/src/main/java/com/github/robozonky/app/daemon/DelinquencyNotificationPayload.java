@@ -71,6 +71,7 @@ final class DelinquencyNotificationPayload implements Payload {
 
     private static void processNoLongerDelinquent(final Transactional transactional, final Investment investment,
                                                   final PaymentStatus status) {
+        LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
         switch (status) {
             case WRITTEN_OFF: // investment is lost for good
                 transactional.fire(loanLostLazy(() -> {
@@ -79,7 +80,7 @@ final class DelinquencyNotificationPayload implements Payload {
                 }));
                 return;
             case PAID:
-                LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.",
+                LOGGER.debug("Ignoring a repaid investment #{}, will be handled by transaction processors.",
                              investment.getId());
                 return;
             default:
@@ -116,7 +117,6 @@ final class DelinquencyNotificationPayload implements Payload {
                 .map(d -> transactional.getTenant().call(z -> z.getInvestment(d)))
                 .flatMap(i -> i.map(Stream::of).orElse(Stream.empty()))
                 .forEach(investment -> {
-                    LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
                     investment.getPaymentStatus()
                             .ifPresent(status -> processNoLongerDelinquent(transactional, investment, status));
                 });
