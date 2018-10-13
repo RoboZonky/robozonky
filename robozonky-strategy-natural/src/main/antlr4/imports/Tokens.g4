@@ -22,12 +22,12 @@ portfolioExpression returns [DefaultPortfolio result] :
     ) ' portfolio' DOT
 ;
 
-targetPortfolioSizeExpression returns [int result] :
+targetPortfolioSizeExpression returns [long result] :
     'Cílová zůstatková částka je ' maximumInvestmentInCzk=longExpr KC DOT
     {$result = $maximumInvestmentInCzk.result;}
 ;
 
-targetBalanceExpression returns [int result] :
+targetBalanceExpression returns [long result] :
     'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=longExpr KC DOT
     {$result = $balance.result;}
 ;
