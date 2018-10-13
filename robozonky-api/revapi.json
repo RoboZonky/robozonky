@@ -5563,7 +5563,8 @@
         "methodName": "related",
         "elementKind": "method",
         "justification": "MarketplaceLoan is now used in places where the event is dealing with marketplace data."
-      }, {
+      },
+      {
         "code": "java.method.removed",
         "old": "method void com.github.robozonky.api.remote.entities.sanitized.Loan::updateFromMarketplace(com.github.robozonky.api.remote.entities.sanitized.Loan, com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan)",
         "package": "com.github.robozonky.api.remote.entities.sanitized",
