@@ -141,8 +141,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
             @Override
             public Map<String, Object> getData() {
-                final Map<String, Object> data =
-                        new HashMap<>(AbstractListener.this.getData(event, sessionInfo));
+                final Map<String, Object> data = new HashMap<>(AbstractListener.this.getData(event, sessionInfo));
                 data.put("subject", getSubject());
                 return Collections.unmodifiableMap(data);
             }
@@ -182,6 +181,8 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
                 finish(event, sessionInfo);
             } catch (final Exception ex) {
                 LOGGER.trace("Finisher failed.", ex);
+            } finally {
+                LOGGER.debug("Notified {}.", event);
             }
         }
     }

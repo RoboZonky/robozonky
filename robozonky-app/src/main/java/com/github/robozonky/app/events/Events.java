@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
@@ -33,17 +35,19 @@ public interface Events {
     /**
      * Transforms given {@link Event} into {@link LazyEvent} and delegates to {@link #fire(LazyEvent)}.
      * @param event
+     * @return
      */
     @SuppressWarnings("unchecked")
-    default void fire(final Event event) {
-        fire(new LazyEventImpl<>((Class<Event>) event.getClass(), () -> event));
+    default CompletableFuture<Void> fire(final Event event) {
+        return fire(new LazyEventImpl<>((Class<Event>) event.getClass(), () -> event));
     }
 
     /**
      * Send the {@link Event} to all the {@link EventListener}s registered for it. May not instantiate the event in case
-     * there are no registered {@link EventListener}s. May hand the notifications to a background thread and not wait
-     * for them to finish. Will catch all exceptions and log them.
+     * there are no registered {@link EventListener}s. May hand the notifications to a background thread. Will catch all
+     * exceptions and log them.
      * @param event
+     * @return When done, the event is guaranteed to be processed by all registered listener.
      */
-    void fire(LazyEvent<? extends Event> event);
+    CompletableFuture<Void> fire(LazyEvent<? extends Event> event);
 }

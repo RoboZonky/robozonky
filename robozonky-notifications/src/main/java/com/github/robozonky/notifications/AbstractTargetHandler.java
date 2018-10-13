@@ -30,7 +30,7 @@ public abstract class AbstractTargetHandler {
     private static final String HOURLY_LIMIT = "hourlyMaxEmails";
     protected final Target target;
     final ConfigStorage config;
-    private final Logger LOGGER = LoggerFactory.getLogger(AbstractTargetHandler.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private final Counter notifications;
     private final Map<SupportedListener, Counter> specificNotifications = new HashMap<>(0);
 
@@ -95,6 +95,7 @@ public abstract class AbstractTargetHandler {
     }
 
     public void offer(final Submission s) throws Exception {
+        LOGGER.trace("Received submission.");
         final SupportedListener listener = s.getSupportedListener();
         final SessionInfo session = s.getSessionInfo();
         if (!shouldNotify(listener, session)) {
@@ -102,9 +103,12 @@ public abstract class AbstractTargetHandler {
             return;
         }
         final Map<String, Object> data = s.getData();
+        LOGGER.trace("Triggering.");
         send(session, s.getSubject(), s.getMessage(data), s.getFallbackMessage(data));
+        LOGGER.trace("Triggered.");
         getSpecificCounter(listener).increase(session);
         notifications.increase(session);
+        LOGGER.trace("Finished.");
     }
 
     public abstract void send(final SessionInfo sessionInfo, final String subject,

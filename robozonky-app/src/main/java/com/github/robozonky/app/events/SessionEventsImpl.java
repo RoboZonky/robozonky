@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -74,19 +75,26 @@ final class SessionEventsImpl implements SessionEvents {
                 .orElseThrow(() -> new IllegalStateException("Not an event:" + original));
     }
 
+    private static CompletableFuture<Void> runAsync(final Runnable future) {
+        return CompletableFuture.runAsync(future, Scheduler.inBackground().getExecutor());
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static CompletableFuture<Void> runAsync(final Stream<Runnable> futures) {
+        final CompletableFuture[] results = futures.map(SessionEventsImpl::runAsync).toArray(CompletableFuture[]::new);
+        return CompletableFuture.allOf(results);
+    }
+
     @SuppressWarnings("unchecked")
     private <T extends Event> void fire(final LazyEvent<T> lazyEvent, final EventListener<T> listener) {
-        final Class<EventListener<T>> listenerType = (Class<EventListener<T>>)listener.getClass();
+        final Class<EventListener<T>> listenerType = (Class<EventListener<T>>) listener.getClass();
         try {
             final T event = lazyEvent.get(); // possibly incurring performance penalties
             listeners.forEach(l -> l.queued(event, listenerType));
-            LOGGER.trace("Sending {} to listener {} for {}.", event, listener, sessionInfo);
             listener.handle(event, sessionInfo);
             listeners.forEach(l -> l.fired(event, listenerType));
-        } catch (final RuntimeException ex) {
+        } catch (final Exception ex) {
             listeners.forEach(l -> l.failed(lazyEvent, listenerType, ex));
-        } finally {
-            LOGGER.trace("Fired.");
         }
     }
 
@@ -110,9 +118,9 @@ final class SessionEventsImpl implements SessionEvents {
         this.injectedListener = listener;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void fire(final LazyEvent<? extends Event> event) {
+    public CompletableFuture<Void> fire(final LazyEvent<? extends Event> event) {
         // loan all listeners
         listeners.forEach(l -> l.requested(event));
         final Class<? extends Event> eventType = event.getEventType();
@@ -121,15 +129,12 @@ final class SessionEventsImpl implements SessionEvents {
             LOGGER.debug("Event {} implements {}.", eventType, impl);
             return new ArrayList<>(ListenerServiceLoader.load(impl));
         });
-        // send the event to all listeners
+        // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream().map(Supplier::get)
                 .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()));
         final Stream<EventListener> withInjected = injectedListener == null ?
                 registered :
                 Stream.concat(Stream.of(injectedListener), registered);
-        withInjected.forEach(l -> { // execute the notification on background
-            final Runnable r = () -> fire(event, l);
-            Scheduler.inBackground().run(r);
-        });
+        return runAsync(withInjected.map(l -> () -> fire(event, l)));
     }
 }

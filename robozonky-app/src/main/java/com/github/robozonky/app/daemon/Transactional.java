@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * This class is thread-safe, since multiple threads may want to fire events and/or store state data at the same time.
  */
-public class Transactional implements Runnable, Events {
+public class Transactional implements Runnable {
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -60,13 +60,11 @@ public class Transactional implements Runnable, Events {
      * Stores event for future firing when {@link #run()}  is called.
      * @param event
      */
-    @Override
     public void fire(final Event event) {
         LOGGER.trace("Event stored within transaction: {}.", event);
         eventsToFire.add(event);
     }
 
-    @Override
     public void fire(final LazyEvent<? extends Event> event) {
         LOGGER.trace("Lazy event stored within transaction: {}.", event);
         eventsToFire.add(event);

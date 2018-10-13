@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -128,6 +129,10 @@ public class Scheduler implements AutoCloseable {
 
     public boolean isClosed() {
         return executor.isShutdown();
+    }
+
+    public ScheduledExecutorService getExecutor() {
+        return executor;
     }
 
     /**

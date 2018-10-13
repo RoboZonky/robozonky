@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.util.LazyInitialized;
 import org.slf4j.Logger;
@@ -34,9 +36,13 @@ final class AllSessionEvents implements Events {
         return INSTANCE.get();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public void fire(final LazyEvent<? extends Event> event) {
+    public CompletableFuture<Void> fire(final LazyEvent<? extends Event> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
-        SessionEventsImpl.all().forEach(s -> s.fire(event));
+        final CompletableFuture[] futures = SessionEventsImpl.all().stream()
+                .map(s -> s.fire(event))
+                .toArray(CompletableFuture[]::new);
+        return CompletableFuture.allOf(futures);
     }
 }
