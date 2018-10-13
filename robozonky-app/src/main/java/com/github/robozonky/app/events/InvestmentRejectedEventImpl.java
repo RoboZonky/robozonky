@@ -19,12 +19,12 @@ package com.github.robozonky.app.events;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
 final class InvestmentRejectedEventImpl extends AbstractEventImpl implements InvestmentRejectedEvent {
 
-    private final Loan loan;
+    private final MarketplaceLoan loan;
     private final BigDecimal recommendation;
     private final String confirmationProviderId;
 
@@ -35,7 +35,7 @@ final class InvestmentRejectedEventImpl extends AbstractEventImpl implements Inv
     }
 
     @Override
-    public Loan getLoan() {
+    public MarketplaceLoan getLoan() {
         return loan;
     }
 

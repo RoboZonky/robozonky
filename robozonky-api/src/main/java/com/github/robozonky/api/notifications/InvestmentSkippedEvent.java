@@ -20,7 +20,7 @@ package com.github.robozonky.api.notifications;
  * Fired when an event was skipped by the investment algorithm due to CAPTCHA, to be evaluated later after CAPTCHA
  * expires.
  */
-public interface InvestmentSkippedEvent extends LoanBased,
+public interface InvestmentSkippedEvent extends MarketplaceLoanBased,
                                                 Recommending {
 
 }

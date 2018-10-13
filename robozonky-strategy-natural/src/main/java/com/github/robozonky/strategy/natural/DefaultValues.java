@@ -19,7 +19,7 @@ package com.github.robozonky.strategy.natural;
 import java.time.LocalDate;
 import java.time.Period;
 
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 class DefaultValues {
@@ -98,7 +98,7 @@ class DefaultValues {
         this.investmentSize = investmentSize;
     }
 
-    public boolean needsConfirmation(final Loan loan) {
+    public boolean needsConfirmation(final MarketplaceLoan loan) {
         return confirmationCondition.test(new Wrapper(loan));
     }
 

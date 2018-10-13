@@ -60,6 +60,7 @@ import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -89,7 +90,7 @@ public final class EventFactory {
         return new InvestmentDelegatedEventImpl(recommendation, confirmationProviderId);
     }
 
-    public static InvestmentMadeEvent investmentMade(final Investment investment, final Loan loan,
+    public static InvestmentMadeEvent investmentMade(final Investment investment, final MarketplaceLoan loan,
                                                      final PortfolioOverview portfolioOverview) {
         return new InvestmentMadeEventImpl(investment, loan, portfolioOverview);
     }

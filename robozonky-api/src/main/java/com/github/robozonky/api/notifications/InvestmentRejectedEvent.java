@@ -21,7 +21,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 /**
  * Fired immediately after {@link ConfirmationProvider} rejected a given investment.
  */
-public interface InvestmentRejectedEvent extends LoanBased,
+public interface InvestmentRejectedEvent extends MarketplaceLoanBased,
                                                  Recommending {
 
     String getConfirmationProviderId();

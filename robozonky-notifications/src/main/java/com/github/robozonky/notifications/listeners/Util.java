@@ -33,9 +33,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
@@ -60,12 +62,17 @@ final class Util {
         return Date.from(offsetDateTime.toInstant());
     }
 
+    public static String identifyLoan(final MarketplaceLoanBased event) {
+        final MarketplaceLoan loan = event.getLoan();
+        return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
+    }
+
     public static String identifyLoan(final LoanBased event) {
         final Loan loan = event.getLoan();
         return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
     }
 
-    public static Map<String, Object> getLoanData(final Loan loan) {
+    public static Map<String, Object> getLoanData(final MarketplaceLoan loan) {
         return Maps.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()),
@@ -105,7 +112,7 @@ final class Util {
         return Period.between(i.getInvestmentDate().toLocalDate(), LocalDate.now()).toTotalMonths();
     }
 
-    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
+    public static Map<String, Object> getLoanData(final Investment i, final MarketplaceLoan l) {
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", Util.toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());

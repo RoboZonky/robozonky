@@ -21,10 +21,10 @@ import java.math.RoundingMode;
 import java.util.function.BiFunction;
 
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 
-class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
+class InvestmentSizeRecommender implements BiFunction<MarketplaceLoan, Integer, Integer> {
 
     private final ParsedStrategy strategy;
     private final Restrictions restrictions;
@@ -45,7 +45,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
                 .intValue();
     }
 
-    private int[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan) {
+    private int[] getInvestmentBounds(final ParsedStrategy strategy, final MarketplaceLoan loan) {
         final Rating rating = loan.getRating();
         final int absoluteMinimum = Math.max(strategy.getMinimumInvestmentSizeInCzk(rating),
                                              restrictions.getMinimumInvestmentAmount());
@@ -73,7 +73,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
     }
 
     @Override
-    public Integer apply(final Loan loan, final Integer balance) {
+    public Integer apply(final MarketplaceLoan loan, final Integer balance) {
         final int id = loan.getId();
         final int[] recommended = getInvestmentBounds(strategy, loan);
         final int minimumRecommendation = recommended[0];
