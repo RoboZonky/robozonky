@@ -169,11 +169,11 @@ class ParsedStrategy {
             return Stream.empty();
         }
         return items.stream().filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i.related());
+            final Wrapper w = new Wrapper(i.item(), i::related);
             return !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
                                   "{} to be ignored as it matched secondary marketplace filter {}.");
         }).filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i.related());
+            final Wrapper w = new Wrapper(i.item(), i::related);
             return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
         });
     }
@@ -192,7 +192,7 @@ class ParsedStrategy {
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
         return items.stream().filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i.related());
+            final Wrapper w = new Wrapper(i.item(), i::related);
             return matchesFilter(w, filters.getSellFilters(), "{} to be sold as it matched sell filter {}.");
         });
     }

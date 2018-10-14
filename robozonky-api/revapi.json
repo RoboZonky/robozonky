@@ -5572,6 +5572,32 @@
         "methodName": "updateFromMarketplace",
         "elementKind": "method",
         "justification": "No longer necessary on account of the MarketplaceLoan changes."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.InvestmentDescriptor::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, ===com.github.robozonky.api.remote.entities.sanitized.Loan===)",
+        "new": "parameter void com.github.robozonky.api.strategies.InvestmentDescriptor::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>===)",
+        "oldType": "com.github.robozonky.api.remote.entities.sanitized.Loan",
+        "newType": "java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>",
+        "package": "com.github.robozonky.api.strategies",
+        "classSimpleName": "InvestmentDescriptor",
+        "methodName": "<init>",
+        "parameterIndex": "1",
+        "elementKind": "parameter",
+        "justification": "Loans are now loaded on-demand."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.ParticipationDescriptor::<init>(com.github.robozonky.api.remote.entities.Participation, ===com.github.robozonky.api.remote.entities.sanitized.Loan===)",
+        "new": "parameter void com.github.robozonky.api.strategies.ParticipationDescriptor::<init>(com.github.robozonky.api.remote.entities.Participation, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>===)",
+        "oldType": "com.github.robozonky.api.remote.entities.sanitized.Loan",
+        "newType": "java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>",
+        "package": "com.github.robozonky.api.strategies",
+        "classSimpleName": "ParticipationDescriptor",
+        "methodName": "<init>",
+        "parameterIndex": "1",
+        "elementKind": "parameter",
+        "justification": "Loans are now loaded on-demand."
       }
     ]
   }

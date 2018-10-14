@@ -62,7 +62,7 @@ class SecondaryMarketplaceComparatorTest {
         when(p.getRemainingInstalmentCount()).thenReturn(remainingInstalments);
         when(p.getDeadline()).thenReturn(deadline);
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(loan.getAmount()));
-        return new ParticipationDescriptor(p, loan);
+        return new ParticipationDescriptor(p, () -> loan);
     }
 
     @Test

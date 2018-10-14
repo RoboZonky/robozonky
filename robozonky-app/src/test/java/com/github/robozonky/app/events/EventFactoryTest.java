@@ -73,12 +73,12 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     private static RecommendedParticipation recommendedParticipation() {
         final Participation p = mock(Participation.class);
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
-        return new ParticipationDescriptor(p, Loan.custom().build()).recommend().orElse(null);
+        return new ParticipationDescriptor(p, () -> Loan.custom().build()).recommend().orElse(null);
     }
 
     private static RecommendedInvestment recommendedInvestment() {
         return new InvestmentDescriptor(Investment.custom().setRemainingPrincipal(BigDecimal.TEN).build(),
-                                        Loan.custom().build()).recommend().orElse(null);
+                                        () -> Loan.custom().build()).recommend().orElse(null);
     }
 
     @Test

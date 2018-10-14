@@ -57,7 +57,7 @@ public class Selling implements PortfolioDependant {
     }
 
     private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant auth) {
-        return new InvestmentDescriptor(i, LoanCache.get().getLoan(i, auth));
+        return new InvestmentDescriptor(i, () -> LoanCache.get().getLoan(i, auth));
     }
 
     private static Optional<Investment> processSale(final TransactionalPortfolio transactional,

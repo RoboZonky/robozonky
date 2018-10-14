@@ -72,7 +72,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                             .map(ParticipationDescriptor::recommend)
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
@@ -112,7 +112,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Tenant auth = mockTenant(z, false);
         final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd),
                                                                     new RestrictedPurchaseStrategy(s, new Restrictions()));
         assertThat(i).hasSize(1);

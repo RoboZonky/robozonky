@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package com.github.robozonky.api.strategies;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.internal.util.LazyInitialized;
 
 /**
  * Carries metadata regarding a {@link MarketplaceLoan}.
@@ -30,15 +32,17 @@ import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 public final class InvestmentDescriptor implements Descriptor<RecommendedInvestment, InvestmentDescriptor, Investment> {
 
     private final Investment investment;
-    private final Loan related;
+    private final LazyInitialized<Loan> related;
 
-    InvestmentDescriptor(final Investment investment) { // for testing purposes only
-        this(investment, null);
-    }
-
-    public InvestmentDescriptor(final Investment investment, final Loan related) {
+    /**
+     *
+     * @param investment
+     * @param related Provided as a Supplier in order to allow the calling code to retrieve the (likely remote) entity
+     * on-demand.
+     */
+    public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related) {
         this.investment = investment;
-        this.related = related;
+        this.related = LazyInitialized.create(related);
     }
 
     @Override
@@ -48,7 +52,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
 
     @Override
     public Loan related() {
-        return related;
+        return related.get();
     }
 
     private BigDecimal getRemainingPrincipal() {

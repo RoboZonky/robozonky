@@ -18,10 +18,10 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.enums.Region;
 
 public class Wrapper {
 
-    private final MarketplaceLoan loan;
+    private final Supplier<MarketplaceLoan> loan;
     private final String identifier;
     private final int remainingTermInMonths, originalTermInMonths;
     private final BigDecimal remainingAmount;
@@ -42,7 +42,7 @@ public class Wrapper {
     }
 
     public Wrapper(final MarketplaceLoan loan) {
-        this.loan = loan;
+        this.loan = () -> loan;
         this.identifier = identify(loan.getId(), null);
         this.remainingTermInMonths = loan.getTermInMonths();
         this.originalTermInMonths = loan.getTermInMonths();
@@ -50,18 +50,30 @@ public class Wrapper {
         this.insuranceActive = loan.isInsuranceActive();
     }
 
-    public Wrapper(final Participation participation, final Loan loan) {
+    /**
+     *
+     * @param participation
+     * @param loan This has the form of a supplier. Allows for the loan to only be retrieved when actually needed, which
+     * may, in turn, cause some expensive remote operations on background.
+     */
+    public Wrapper(final Participation participation, final Supplier<MarketplaceLoan> loan) {
         this.loan = loan;
-        this.identifier = identify(loan.getId(), "participation #" + participation.getId());
+        this.identifier = identify(participation.getLoanId(), "participation #" + participation.getId());
         this.remainingTermInMonths = participation.getRemainingInstalmentCount();
         this.originalTermInMonths = participation.getOriginalInstalmentCount();
         this.remainingAmount = participation.getRemainingPrincipal();
         this.insuranceActive = participation.isInsuranceActive();
     }
 
-    public Wrapper(final Investment investment, final Loan loan) {
+    /**
+     *
+     * @param investment
+     * @param loan This has the form of a supplier. Allows for the loan to only be retrieved when actually needed, which
+     * may, in turn, cause some expensive remote operations on background.
+     */
+    public Wrapper(final Investment investment, final Supplier<MarketplaceLoan> loan) {
         this.loan = loan;
-        this.identifier = identify(loan.getId(), "investment #" + investment.getId());
+        this.identifier = identify(investment.getLoanId(), "investment #" + investment.getId());
         this.remainingTermInMonths = investment.getRemainingMonths();
         this.originalTermInMonths = investment.getOriginalTerm();
         this.remainingAmount = investment.getRemainingPrincipal();
@@ -72,32 +84,36 @@ public class Wrapper {
         return insuranceActive;
     }
 
+    private MarketplaceLoan getLoan() {
+        return loan.get();
+    }
+
     public int getLoanId() {
-        return loan.getId();
+        return getLoan().getId();
     }
 
     public Region getRegion() {
-        return loan.getRegion();
+        return getLoan().getRegion();
     }
 
     public String getStory() {
-        return loan.getStory();
+        return getLoan().getStory();
     }
 
     public MainIncomeType getMainIncomeType() {
-        return loan.getMainIncomeType();
+        return getLoan().getMainIncomeType();
     }
 
     public BigDecimal getInterestRate() {
-        return loan.getInterestRate();
+        return getLoan().getInterestRate();
     }
 
     public Purpose getPurpose() {
-        return loan.getPurpose();
+        return getLoan().getPurpose();
     }
 
     public Rating getRating() {
-        return loan.getRating();
+        return getLoan().getRating();
     }
 
     public int getOriginalTermInMonths() {
@@ -109,7 +125,7 @@ public class Wrapper {
     }
 
     public int getOriginalAmount() {
-        return loan.getAmount();
+        return getLoan().getAmount();
     }
 
     public BigDecimal getRemainingAmount() {

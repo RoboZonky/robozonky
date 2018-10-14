@@ -30,23 +30,20 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.Portfolio;
-import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
 import com.github.robozonky.util.NumberUtil;
 
 public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
 
     private final Tenant auth;
-    private final SoldParticipationCache soldParticipationCache;
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(new long[0]);
 
     public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth) {
         super(strategy);
         this.auth = auth;
-        this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
     }
 
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
-        return new ParticipationDescriptor(p, LoanCache.get().getLoan(p.getLoanId(), auth));
+        return new ParticipationDescriptor(p, () -> LoanCache.get().getLoan(p.getLoanId(), auth));
     }
 
     @Override
@@ -65,14 +62,6 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .filter(p -> { // never re-purchase what was once sold
-                    final int loanId = p.getLoanId();
-                    final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
-                    if (wasSoldBefore) {
-                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
-                    }
-                    return !wasSoldBefore;
-                })
                 .map(d -> toDescriptor(d, auth))
                 .collect(Collectors.toCollection(ArrayList::new));
         final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());

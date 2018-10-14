@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class WrapperTest {
 
@@ -34,8 +33,8 @@ class WrapperTest {
                 .setAmount(100_000)
                 .build();
         final int invested = 200;
-        final Investment investment = Investment.fresh((MarketplaceLoan) loan, invested).build();
-        final Wrapper w = new Wrapper(investment, loan);
+        final Investment investment = Investment.fresh(loan, invested).build();
+        final Wrapper w = new Wrapper(investment, () -> loan);
         assertSoftly(softly -> {
             softly.assertThat(w.getLoanId()).isEqualTo(loan.getId());
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());

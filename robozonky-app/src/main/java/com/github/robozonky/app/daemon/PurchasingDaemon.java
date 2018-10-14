@@ -27,17 +27,20 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Purchasing;
+import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
 import com.github.robozonky.common.remote.Select;
 
 class PurchasingDaemon extends DaemonOperation {
 
     private final Purchasing purchasing;
+    private final SoldParticipationCache soldParticipationCache;
 
     public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
                             final Supplier<Optional<PurchaseStrategy>> strategy, final PortfolioSupplier portfolio,
                             final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
         this.purchasing = new Purchasing(strategy, auth);
+        this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
     }
 
     @Override
@@ -55,8 +58,16 @@ class PurchasingDaemon extends DaemonOperation {
         final Select s = new Select()
                 .lessThanOrEquals("remainingPrincipal", balance)
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
-        final Collection<Participation> p =
-                authenticated.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
-        purchasing.apply(portfolio, p);
+        final Collection<Participation> applicable = authenticated.call(zonky -> zonky.getAvailableParticipations(s))
+                .filter(p -> { // never re-purchase what was once sold
+                    final int loanId = p.getLoanId();
+                    final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
+                    if (wasSoldBefore) {
+                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
+                    }
+                    return !wasSoldBefore;
+                })
+                .collect(Collectors.toList());
+        purchasing.apply(portfolio, applicable);
     }
 }
