@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MarketplaceCommandLineFragmentTest {
 
@@ -28,14 +28,14 @@ class MarketplaceCommandLineFragmentTest {
     void delayBetweenPrimaryMarketplaceChecks() {
         final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
         final Duration a = f.getPrimaryMarketplaceCheckDelay();
-        assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
+        assertThat(a).isEqualByComparingTo(Duration.ofSeconds(5));
     }
 
     @Test
     void delayBetweenSecondaryMarketplaceChecks() {
         final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
         final Duration a = f.getSecondaryMarketplaceCheckDelay();
-        assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
+        assertThat(a).isEqualByComparingTo(Duration.ofSeconds(5));
     }
 
 }
