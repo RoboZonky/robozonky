@@ -42,16 +42,14 @@ public class Scheduler implements AutoCloseable {
          * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
          * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
          */
-        return Schedulers.INSTANCE.create(2, Duration.ofSeconds(60), THREAD_FACTORY);
+        return Schedulers.INSTANCE.create(2, THREAD_FACTORY);
     });
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Collection<Runnable> submitted = new CopyOnWriteArraySet<>();
     private final AtomicInteger pauseRequests = new AtomicInteger(0);
     private final PausableScheduledExecutorService executor;
-    private final Duration terminationWait;
 
-    Scheduler(final int poolSize, final Duration terminationWait, final ThreadFactory threadFactory) {
-        this.terminationWait = terminationWait;
+    Scheduler(final int poolSize, final ThreadFactory threadFactory) {
         this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
     }
 
@@ -153,14 +151,6 @@ public class Scheduler implements AutoCloseable {
     public void close() {
         Scheduler.LOGGER.trace("Shutting down {}.", this);
         executor.shutdownNow();
-        final long millis = terminationWait.toMillis();
-        Scheduler.LOGGER.debug("Will wait {} ms to shut down {}.", millis, this);
-        try {
-            executor.awaitTermination(millis, TimeUnit.MILLISECONDS);
-        } catch (final InterruptedException ex) {
-            Scheduler.LOGGER.debug("Failed shutting down {}.", this, ex);
-        }finally {
-            Schedulers.INSTANCE.destroy(this);
-        }
+        Schedulers.INSTANCE.destroy(this);
     }
 }
