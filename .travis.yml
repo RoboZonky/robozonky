@@ -22,7 +22,7 @@ os:
 jdk: # OpenJDK releases (non-EA) belong here
   - openjdk8
   - openjdk11
-tages: # order the stages we'll use during this build
+stages: # order the stages we'll use during this build
   - precache
   - test
   - sonar
