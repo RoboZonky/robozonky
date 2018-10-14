@@ -61,7 +61,7 @@ abstract class BaseEntity {
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return toString.get();
     }
 }

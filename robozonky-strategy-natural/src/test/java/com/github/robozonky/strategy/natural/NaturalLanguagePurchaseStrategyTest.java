@@ -40,7 +40,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 class NaturalLanguagePurchaseStrategyTest {
@@ -127,11 +126,10 @@ class NaturalLanguagePurchaseStrategyTest {
         when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        final Participation participation = spy(mockParticipation());
-        doReturn(BigDecimal.valueOf(100000)).when(
-                participation).getRemainingPrincipal();  // not recommended due to balance
+        final Participation participation = mockParticipation();
+        doReturn(BigDecimal.valueOf(100000)).when(participation).getRemainingPrincipal(); // not recommended for balance
         doReturn(Rating.A).when(participation).getRating();
-        final Participation p2 = spy(mockParticipation());
+        final Participation p2 = mockParticipation();
         final int amount = 199; // check amounts under Zonky investment minimum
         doReturn(BigDecimal.valueOf(amount)).when(p2).getRemainingPrincipal();
         doReturn(Rating.A).when(p2).getRating();

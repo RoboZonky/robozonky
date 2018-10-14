@@ -30,11 +30,15 @@ import com.github.robozonky.api.remote.enums.Region;
 
 public class Wrapper {
 
+    private final int loanId;
     private final Supplier<MarketplaceLoan> loan;
     private final String identifier;
     private final int remainingTermInMonths, originalTermInMonths;
     private final BigDecimal remainingAmount;
     private final boolean insuranceActive;
+    private final BigDecimal interestRate;
+    private final Supplier<Purpose> purpose;
+    private final Rating rating;
 
     private static String identify(final int loanId, final String suffix) {
         final String prefix = "Loan #" + loanId;
@@ -42,12 +46,16 @@ public class Wrapper {
     }
 
     public Wrapper(final MarketplaceLoan loan) {
+        this.loanId = loan.getId();
         this.loan = () -> loan;
         this.identifier = identify(loan.getId(), null);
         this.remainingTermInMonths = loan.getTermInMonths();
         this.originalTermInMonths = loan.getTermInMonths();
         this.remainingAmount = null;
         this.insuranceActive = loan.isInsuranceActive();
+        this.interestRate = loan.getInterestRate();
+        this.rating = loan.getRating();
+        this.purpose = loan::getPurpose;
     }
 
     /**
@@ -57,12 +65,16 @@ public class Wrapper {
      * may, in turn, cause some expensive remote operations on background.
      */
     public Wrapper(final Participation participation, final Supplier<MarketplaceLoan> loan) {
+        this.loanId = participation.getLoanId();
         this.loan = loan;
-        this.identifier = identify(participation.getLoanId(), "participation #" + participation.getId());
+        this.identifier = identify(loanId, "participation #" + participation.getId());
         this.remainingTermInMonths = participation.getRemainingInstalmentCount();
         this.originalTermInMonths = participation.getOriginalInstalmentCount();
         this.remainingAmount = participation.getRemainingPrincipal();
         this.insuranceActive = participation.isInsuranceActive();
+        this.interestRate = participation.getInterestRate();
+        this.rating = participation.getRating();
+        this.purpose = participation::getPurpose;
     }
 
     /**
@@ -72,12 +84,16 @@ public class Wrapper {
      * may, in turn, cause some expensive remote operations on background.
      */
     public Wrapper(final Investment investment, final Supplier<MarketplaceLoan> loan) {
+        this.loanId = investment.getLoanId();
         this.loan = loan;
-        this.identifier = identify(investment.getLoanId(), "investment #" + investment.getId());
+        this.identifier = identify(loanId, "investment #" + investment.getId());
         this.remainingTermInMonths = investment.getRemainingMonths();
         this.originalTermInMonths = investment.getOriginalTerm();
         this.remainingAmount = investment.getRemainingPrincipal();
         this.insuranceActive = investment.isInsuranceActive();
+        this.interestRate = investment.getInterestRate();
+        this.rating = investment.getRating();
+        this.purpose = () -> loan.get().getPurpose();
     }
 
     public boolean isInsuranceActive() {
@@ -89,7 +105,7 @@ public class Wrapper {
     }
 
     public int getLoanId() {
-        return getLoan().getId();
+        return loanId;
     }
 
     public Region getRegion() {
@@ -105,15 +121,15 @@ public class Wrapper {
     }
 
     public BigDecimal getInterestRate() {
-        return getLoan().getInterestRate();
+        return interestRate;
     }
 
     public Purpose getPurpose() {
-        return getLoan().getPurpose();
+        return purpose.get();
     }
 
     public Rating getRating() {
-        return getLoan().getRating();
+        return rating;
     }
 
     public int getOriginalTermInMonths() {
