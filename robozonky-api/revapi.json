@@ -5598,6 +5598,191 @@
         "parameterIndex": "1",
         "elementKind": "parameter",
         "justification": "Loans are now loaded on-demand."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.ExecutionCompletedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.ExecutionStartedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.InvestmentDelegatedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.InvestmentMadeEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.InvestmentPurchasedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.InvestmentRejectedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.InvestmentRequestedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.InvestmentSkippedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.InvestmentSoldEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanDefaultedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanDelinquentEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanLostEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanNowDelinquentEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanRecommendedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.LoanRepaidEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.PurchaseRecommendedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.PurchaseRequestedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.PurchasingCompletedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.PurchasingStartedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyCrashedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyEndingEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyInitializedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyStartingEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyTestingEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.SaleOfferedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.SaleRecommendedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.SaleRequestedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.SellingCompletedEvent",
+        "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.SellingStartedEvent",
+        "justification": "Events are converted from classes to interfaces."
       }
     ]
   }
