@@ -113,11 +113,16 @@ public class DriveOverview {
         return getFilesInFolder(driveService, parent.getId());
     }
 
+    private static String getFields(final String... additional) {
+        return Stream.concat(Stream.of("id", "name", "modifiedTime"), Stream.of(additional))
+                .collect(Collectors.joining(","));
+    }
+
     private static Stream<File> getFilesInFolder(final Drive driveService, final String parentId) throws IOException {
         LOGGER.debug("Listing files in folder {}.", parentId);
         return driveService.files().list()
                 .setQ("'" + parentId + "' in parents and trashed = false")
-                .setFields("nextPageToken, files(id, name, modifiedTime, mimeType)")
+                .setFields("nextPageToken, files(" + getFields("mimeType") + ")")
                 .execute()
                 .getFiles()
                 .stream()
@@ -169,7 +174,7 @@ public class DriveOverview {
         fileMetadata.setDescription("RoboZonky aktualizuje obsah tohoto adresáře jednou denně brzy ráno.");
         fileMetadata.setMimeType(MIME_TYPE_FOLDER);
         final File result = driveService.files().create(fileMetadata)
-                .setFields("id,name,modifiedTime")
+                .setFields(getFields())
                 .execute();
         LOGGER.debug("Created a new Google folder '{}'.", result.getId());
         return result;
@@ -246,7 +251,7 @@ public class DriveOverview {
         f.setMimeType(MIME_TYPE_GOOGLE_SPREADSHEET);
         LOGGER.debug("Creating a new Google spreadsheet: {}.", f);
         final File result = driveService.files().create(f, fc)
-                .setFields("id,name,modifiedTime")
+                .setFields(getFields())
                 .execute();
         // and mark the time when the file was last updated
         LOGGER.debug("New Google spreadsheet created: {}.", result.getId());
@@ -264,7 +269,7 @@ public class DriveOverview {
     private File actuallyModifySpreadsheet(final File original, final java.io.File export) throws IOException {
         final FileContent fc = new FileContent(MIME_TYPE_XLS_SPREADSHEET, export);
         return driveService.files().update(original.getId(), null, fc)
-                .setFields("id,name,modifiedTime")
+                .setFields(getFields())
                 .execute();
     }
 
