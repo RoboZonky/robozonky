@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -57,4 +58,18 @@ class UtilTest {
         final Investment i = Investment.fresh(l, 200).build();
         Util.getDelinquentData(i, l, Collections.singleton(d), LocalDate.now());
     }
+
+
+    @Test
+    void isSocketTimeout() {
+        final Throwable t = new SocketTimeoutException("Testing");
+        assertThat(Util.isSocketTimeout(t)).isTrue();
+        final Throwable t2 = new IllegalStateException(t);
+        assertThat(Util.isSocketTimeout(t2)).isTrue();
+        final Throwable t3 = new IllegalStateException();
+        assertThat(Util.isSocketTimeout(t3)).isFalse();
+        assertThat(Util.isSocketTimeout(null)).isFalse();
+    }
+
+
 }

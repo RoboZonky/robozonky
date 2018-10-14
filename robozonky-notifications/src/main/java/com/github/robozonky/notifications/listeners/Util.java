@@ -19,6 +19,7 @@ package com.github.robozonky.notifications.listeners;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
@@ -102,6 +103,16 @@ final class Util {
                 entry("totalShare", portfolioOverview.getShareAtRisk()),
                 entry("balance", portfolioOverview.getCzkAvailable())
         );
+    }
+
+    public static boolean isSocketTimeout(final Throwable ex) {
+        if (ex == null) {
+            return false;
+        } else if (ex instanceof SocketTimeoutException) {
+            return true;
+        } else {
+            return isSocketTimeout(ex.getCause());
+        }
     }
 
     private static BigDecimal getTotalPaid(final Investment i) {
