@@ -16,37 +16,20 @@
 
 package com.github.robozonky.app.events;
 
-import java.math.BigDecimal;
-
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 
-final class SaleRecommendedEventImpl extends AbstractEventImpl implements SaleRecommendedEvent {
-
-    private final Investment investment;
-    private final Loan loan;
-    private final BigDecimal recommendation;
+final class SaleRecommendedEventImpl extends AbstractRecommendationBasedEventImpl<RecommendedInvestment,
+        InvestmentDescriptor, Investment> implements SaleRecommendedEvent {
 
     public SaleRecommendedEventImpl(final RecommendedInvestment recommendation) {
-        this.investment = recommendation.descriptor().item();
-        this.loan = recommendation.descriptor().related();
-        this.recommendation = recommendation.amount();
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
+        super(recommendation);
     }
 
     @Override
     public Investment getInvestment() {
-        return investment;
-    }
-
-    @Override
-    public BigDecimal getRecommendation() {
-        return recommendation;
+        return super.getItem();
     }
 }

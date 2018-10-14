@@ -112,8 +112,8 @@ class PortfolioUpdater implements Runnable,
             final TransactionalPortfolio p = combined.get();
             p.run(); // persist stored information
             return p.getPortfolio();
-        } catch (final Throwable t) {
-            throw new IllegalStateException("Portfolio update failed.", t);
+        } catch (final Exception ex) {
+            throw new IllegalStateException("Portfolio update failed.", ex);
         }
     }
 
