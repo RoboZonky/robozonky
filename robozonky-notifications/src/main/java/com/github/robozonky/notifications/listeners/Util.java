@@ -63,14 +63,16 @@ final class Util {
         return Date.from(offsetDateTime.toInstant());
     }
 
-    public static String identifyLoan(final MarketplaceLoanBased event) {
-        final MarketplaceLoan loan = event.getLoan();
+    private static String identifyLoan(final MarketplaceLoan loan) {
         return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
     }
 
+    public static String identifyLoan(final MarketplaceLoanBased event) {
+        return identifyLoan(event.getLoan());
+    }
+
     public static String identifyLoan(final LoanBased event) {
-        final Loan loan = event.getLoan();
-        return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
+        return identifyLoan(event.getLoan());
     }
 
     public static Map<String, Object> getLoanData(final MarketplaceLoan loan) {

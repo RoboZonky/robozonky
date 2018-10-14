@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,6 @@ public class LoanNoLongerDelinquentEventListener extends AbstractListener<LoanNo
 
     public LoanNoLongerDelinquentEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
-    }
-
-    @Override
-    protected void finish(final LoanNoLongerDelinquentEvent event, final SessionInfo sessionInfo) {
-        super.finish(event, sessionInfo);
-        delinquencyTracker.unsetDelinquent(sessionInfo, event.getInvestment());
     }
 
     @Override

@@ -140,7 +140,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         assertThat(supplier).isNotEmpty();
     }
 
-    static AbstractTargetHandler getHandler(final ConfigStorage storage) {
+    private static AbstractTargetHandler getHandler(final ConfigStorage storage) {
         return spy(new TestingTargetHandler(storage));
     }
 
@@ -155,7 +155,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                                                         final T event) throws Exception {
         BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
-        verify(h, times(1)).send(notNull(), notNull(), notNull(), notNull());
+        verify(h, times(1)).send(eq(SESSION_INFO), notNull(), notNull(), notNull());
     }
 
     @SuppressWarnings("unchecked")

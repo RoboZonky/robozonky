@@ -25,11 +25,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.DelinquencyBased;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.Financial;
 import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.LoanLostEvent;
+import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.MarketplaceInvestmentBased;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -71,6 +75,12 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         if (event instanceof Financial) { // register balance
             final BigDecimal balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
             balanceTracker.setLastKnownBalance(sessionInfo, balance);
+        }
+        if (event instanceof DelinquencyBased) {
+            delinquencyTracker.setDelinquent(sessionInfo, ((DelinquencyBased) event).getInvestment());
+        } else if (event instanceof LoanLostEvent || event instanceof LoanRepaidEvent ||
+                event instanceof LoanNoLongerDelinquentEvent) {
+            delinquencyTracker.unsetDelinquent(sessionInfo, ((InvestmentBased) event).getInvestment());
         }
     }
 

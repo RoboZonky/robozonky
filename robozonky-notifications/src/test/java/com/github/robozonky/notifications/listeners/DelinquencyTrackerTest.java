@@ -116,7 +116,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         l2.handle(evt, SESSION);
         verify(h, times(2)).send(eq(SESSION), any(), any(), any()); // delinquency now registered, send
         l2.handle(evt, SESSION);
-        verify(h, times(2)).send(eq(SESSION), any(), any(), any()); // already unregistered, no send
+        verify(h, times(2)).send(eq(SESSION), any(), any(), any()); // already unregistered, send
     }
 
     private static class MyLoanDelinquent10DaysOrMoreEvent implements LoanDelinquent10DaysOrMoreEvent {
