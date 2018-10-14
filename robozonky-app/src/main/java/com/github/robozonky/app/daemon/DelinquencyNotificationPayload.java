@@ -116,10 +116,8 @@ final class DelinquencyNotificationPayload implements Payload {
                 .distinct()
                 .map(d -> transactional.getTenant().call(z -> z.getInvestment(d)))
                 .flatMap(i -> i.map(Stream::of).orElse(Stream.empty()))
-                .forEach(investment -> {
-                    investment.getPaymentStatus()
-                            .ifPresent(status -> processNoLongerDelinquent(transactional, investment, status));
-                });
+                .forEach(investment -> investment.getPaymentStatus()
+                        .ifPresent(status -> processNoLongerDelinquent(transactional, investment, status)));
     }
 
     static void notify(final Transactional transactional) {

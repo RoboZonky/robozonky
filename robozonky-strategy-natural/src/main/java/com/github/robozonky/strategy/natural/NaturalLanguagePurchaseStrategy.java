@@ -98,9 +98,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
         // recommend amount to invest per strategy
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
-                .flatMap(rating -> { // prioritize marketplace by their ranking's demand
-                    return splitByRating.get(rating).stream().sorted(COMPARATOR);
-                })
+                .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
                 .filter(d -> sizeMatchesStrategy(d.item(), portfolio.getCzkAvailable()))
                 .map(ParticipationDescriptor::recommend) // must do full amount; Zonky enforces

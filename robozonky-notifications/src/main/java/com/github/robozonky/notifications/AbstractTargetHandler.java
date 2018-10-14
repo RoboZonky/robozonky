@@ -17,7 +17,7 @@
 package com.github.robozonky.notifications;
 
 import java.time.Duration;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.OptionalInt;
 
@@ -32,7 +32,7 @@ public abstract class AbstractTargetHandler {
     final ConfigStorage config;
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private final Counter notifications;
-    private final Map<SupportedListener, Counter> specificNotifications = new HashMap<>(0);
+    private final Map<SupportedListener, Counter> specificNotifications = new EnumMap<>(SupportedListener.class);
 
     protected AbstractTargetHandler(final ConfigStorage config, final Target target) {
         this.config = config;

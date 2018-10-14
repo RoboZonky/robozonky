@@ -58,7 +58,7 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
         final String name = sessionName == null ? "RoboZonky" : "RoboZonky '" + sessionName + "'";
         LOGGER.info("===== {} v{} at your service! =====", name, Defaults.ROBOZONKY_VERSION);
         Events.allSessions().fire(roboZonkyInitialized());
-        return Optional.of((result) -> {
+        return Optional.of(result -> {
             final CompletableFuture<Void> waitUntilFired = execute(result);
             try {
                 LOGGER.debug("Waiting for events to be processed.");

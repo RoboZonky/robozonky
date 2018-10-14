@@ -25,7 +25,7 @@ import com.github.robozonky.api.remote.entities.RawLoan;
 final class Util {
 
     private static final Function<Integer, String> LOAN_URL_SUPPLIER =
-            (id) -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
+            id -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
 
     private Util() {
         // no instances

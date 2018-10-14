@@ -58,7 +58,7 @@ public final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     private ZonkyApiToken login() {
-        return apis.oauth((oauth) -> {
+        return apis.oauth(oauth -> {
             final String username = secrets.getUsername();
             LOGGER.trace("Requesting '{}' as '{}', using password.", scope, username);
             return oauth.login(scope, username, secrets.getPassword());
@@ -67,7 +67,7 @@ public final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     private ZonkyApiToken refreshToken(final ZonkyApiToken token) {
         LOGGER.info("Authenticating as '{}', refreshing access token.", secrets.getUsername());
-        return apis.oauth((oauth) -> oauth.refresh(token));
+        return apis.oauth(oauth -> oauth.refresh(token));
     }
 
     private ZonkyApiToken refreshTokenIfNecessary(final ZonkyApiToken token) {

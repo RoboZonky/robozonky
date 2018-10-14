@@ -117,7 +117,7 @@ class RoboZonkyFilter implements ClientRequestFilter,
             clientResponseContext.setStatus(401);
         }
         responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
-                .filter(e -> e.getValue().size() > 0)
+                .filter(e -> !e.getValue().isEmpty())
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0), (a, b) -> a, HashMap::new));
     }
 }

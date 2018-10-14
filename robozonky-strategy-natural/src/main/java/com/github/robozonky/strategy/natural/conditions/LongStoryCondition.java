@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.github.robozonky.strategy.natural.conditions;
 public class LongStoryCondition extends AbstractStoryCondition {
 
     public LongStoryCondition() {
-        super((story) -> {
+        super(story -> {
             final int length = story.length();
             return length > LONG_STORY_THRESHOLD;
         });

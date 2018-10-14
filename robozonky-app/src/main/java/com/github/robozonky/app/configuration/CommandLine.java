@@ -88,7 +88,7 @@ public class CommandLine {
         }
     }
 
-    private static Optional<InvestmentMode> parseUnsafe(final App main) throws ParameterException {
+    private static Optional<InvestmentMode> parseUnsafe(final App main) {
         final CommandLine cli = new CommandLine(main::resumeToFail);
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(CommandLine.getScriptIdentifier())

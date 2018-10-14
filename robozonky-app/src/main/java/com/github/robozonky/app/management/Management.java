@@ -81,7 +81,7 @@ public class Management implements ShutdownHook.Handler {
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
         JmxListenerService.setInstances(Management.loadAll(lifecycle));
-        return Optional.of((result) -> {
+        return Optional.of(result -> {
             Management.unloadAll();
             JmxListenerService.setInstances(Collections.emptyMap());
         });

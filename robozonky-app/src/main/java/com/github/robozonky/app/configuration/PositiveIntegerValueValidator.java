@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package com.github.robozonky.app.configuration;
 import com.beust.jcommander.IValueValidator;
 import com.beust.jcommander.ParameterException;
 
-final public class PositiveIntegerValueValidator implements IValueValidator<Integer> {
+public final class PositiveIntegerValueValidator implements IValueValidator<Integer> {
 
     @Override
-    public void validate(final String name, final Integer value) throws ParameterException {
+    public void validate(final String name, final Integer value) {
         if (value < 0) {
             throw new ParameterException("Parameter " + name + " should be positive (found " + value + ")");
         }

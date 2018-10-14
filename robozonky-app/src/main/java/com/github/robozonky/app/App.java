@@ -77,7 +77,7 @@ public class App implements Runnable {
     }
 
     ReturnCode execute(final InvestmentMode mode) {
-        shutdownHooks.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
+        shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
         Events.allSessions().fire(EventFactory.roboZonkyStarting());
         try {
             lifecycle.getShutdownHooks().forEach(shutdownHooks::register);

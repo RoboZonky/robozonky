@@ -174,7 +174,7 @@ public enum Settings {
     }
 
     public Duration getCaptchaDelay(final Rating r) {
-        return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Long.parseLong(delay)), getCaptchaDelay());
+        return get(getRatingKey(r), delay -> Duration.ofSeconds(Long.parseLong(delay)), getCaptchaDelay());
     }
 
     public Optional<String> getHttpsProxyHostname() {

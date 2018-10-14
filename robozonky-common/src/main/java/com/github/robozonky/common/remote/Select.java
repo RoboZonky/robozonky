@@ -231,9 +231,7 @@ public class Select implements Consumer<RoboZonkyFilter> {
 
     @Override
     public void accept(final RoboZonkyFilter roboZonkyFilter) {
-        conditions.forEach((k, v) -> v.forEach(r -> {
-            roboZonkyFilter.setQueryParam(k, r);
-        }));
+        conditions.forEach((k, v) -> v.forEach(r -> roboZonkyFilter.setQueryParam(k, r)));
     }
 
     @Override

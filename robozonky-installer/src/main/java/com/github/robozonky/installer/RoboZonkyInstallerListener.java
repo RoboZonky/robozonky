@@ -50,7 +50,7 @@ import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_LOCAL_F
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
-    final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
+    static final char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
     private static final Logger LOGGER = LoggerFactory.getLogger(RoboZonkyInstallerListener.class);
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
             CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
@@ -133,7 +133,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             cli.setOption("-d");
         }
         primeKeyStore(keystorePassword);
-        final boolean isZonkoidEnabled = Boolean.valueOf(Variables.IS_ZONKOID_ENABLED.getValue(DATA));
+        final boolean isZonkoidEnabled = Boolean.parseBoolean(Variables.IS_ZONKOID_ENABLED.getValue(DATA));
         if (isZonkoidEnabled) {
             prepareZonkoid(keystorePassword);
             cli.setOption("-x", zonkoidId);
@@ -199,7 +199,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     static CommandLinePart prepareJmx() {
-        final boolean isJmxEnabled = Boolean.valueOf(Variables.IS_JMX_ENABLED.getValue(DATA));
+        final boolean isJmxEnabled = Boolean.parseBoolean(Variables.IS_JMX_ENABLED.getValue(DATA));
         final CommandLinePart clp = new CommandLinePart()
                 .setProperty("com.sun.management.jmxremote", isJmxEnabled ? "true" : "false")
                 // the buffer is effectively a memory leak; we'll reduce its size from 1000 to 10

@@ -175,7 +175,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     }
 
     @Override
-    final public void handle(final T event, final SessionInfo sessionInfo) {
+    public final void handle(final T event, final SessionInfo sessionInfo) {
         try {
             if (!this.shouldNotify(event, sessionInfo)) {
                 LOGGER.debug("Will not notify.");
