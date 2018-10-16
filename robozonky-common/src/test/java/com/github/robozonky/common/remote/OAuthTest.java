@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,13 @@ import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class OAuthTest {
 
@@ -33,6 +38,7 @@ class OAuthTest {
     @Test
     void login() {
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
+        when(api.login(anyString(), anyString(), anyString(), anyString())).thenReturn(mock(ZonkyApiToken.class));
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         final OAuth oauth = new OAuth(wrapper);
         oauth.login(USERNAME, PASSWORD.toCharArray());

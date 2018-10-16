@@ -16,8 +16,11 @@
 
 package com.github.robozonky.common.remote;
 
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import com.github.robozonky.util.BlockingOperation;
 
 class Api<T> {
 
@@ -28,13 +31,19 @@ class Api<T> {
     }
 
     <S> S call(final Function<T, S> function) {
-        return function.apply(proxy);
+        final BlockingOperation<S> operation = new BlockingOperation<>(() -> function.apply(proxy));
+        try {
+            ForkJoinPool.managedBlock(operation);
+            return operation.getResult();
+        } catch (final InterruptedException ex) {
+            throw new IllegalStateException("Failed executing remote operation.", ex);
+        }
     }
 
     void run(final Consumer<T> consumer) {
-        final Function<T, Void> wrapper = t -> {
+        final Function<T, Boolean> wrapper = t -> {
             consumer.accept(t);
-            return null;
+            return Boolean.FALSE; // we need to return something
         };
         call(wrapper);
     }

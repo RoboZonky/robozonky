@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.Refreshable;
 
 class RefreshableBalance extends Refreshable<BigDecimal> {
@@ -32,7 +33,7 @@ class RefreshableBalance extends Refreshable<BigDecimal> {
 
     @Override
     protected String getLatestSource() {
-        return auth.call(zonky -> zonky.getWallet().getAvailableBalance()).toString();
+        return auth.call(Zonky::getWallet).getAvailableBalance().toString();
     }
 
     @Override

@@ -31,8 +31,8 @@ public interface Tenant {
 
     /**
      * Execute an operation using on the Zonky server.
-     * @param operation Operation to execute. Should be as stateless as possible, since it may be executed repeatedly
-     * in response to stale auth token issues.
+     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
+     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      * @param <T> Return type of the operation.
      * @return Whatever the operation returned.
      */
@@ -40,8 +40,8 @@ public interface Tenant {
 
     /**
      * Execute an operation using on the Zonky server.
-     * @param operation Operation to execute. Should be as stateless as possible, since it may be executed repeatedly
-     * in response to stale auth token issues.
+     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
+     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      */
     default void run(final Consumer<Zonky> operation) {
         call(StreamUtil.toFunction(operation));
@@ -49,7 +49,6 @@ public interface Tenant {
 
     /**
      * Check that the tenant can be operated on.
-     *
      * @return False in cases such as when the user's authentication credentials are being refreshed and therefore
      * the present authentication may already be invalid, without the new one being available yet.
      */

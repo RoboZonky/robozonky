@@ -48,7 +48,8 @@ public final class SoldParticipationCache {
     }
 
     private static Set<Integer> getSoldLoans(final Tenant tenant) {
-        return tenant.call(zonky -> zonky.getInvestments(new Select().equals("status", "SOLD")))
+        final Select s = new Select().equals("status", "SOLD");
+        return tenant.call(zonky -> zonky.getInvestments(s))
                 .mapToInt(Investment::getLoanId)
                 .distinct()
                 .boxed()

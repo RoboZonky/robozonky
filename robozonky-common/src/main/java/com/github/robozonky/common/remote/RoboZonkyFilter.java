@@ -91,7 +91,7 @@ class RoboZonkyFilter implements ClientRequestFilter,
     public void filter(final ClientRequestContext clientRequestContext) {
         requestHeaders.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
         clientRequestContext.setUri(rebuild(clientRequestContext.getUri()));
-        logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
+        logger.trace("Request {} {} ({}).", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 
     private String getResponseEntity(final ClientResponseContext clientResponseContext) throws IOException {
