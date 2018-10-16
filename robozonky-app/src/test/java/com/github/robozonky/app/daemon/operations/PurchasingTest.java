@@ -43,6 +43,7 @@ import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -154,16 +155,8 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(zonky, false);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
-        verify(zonky).purchase(eq(mock)); // make sure purchase was called
-        final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(4);
-        assertSoftly(softly -> { // make sure the purchase was not executed
-            softly.assertThat(e).first().isInstanceOf(PurchasingStartedEvent.class);
-            softly.assertThat(e.get(1)).isInstanceOf(PurchaseRecommendedEvent.class);
-            softly.assertThat(e.get(2)).isInstanceOf(PurchaseRequestedEvent.class);
-            softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
-        });
+        assertThatThrownBy(() -> exec.apply(portfolio, Collections.singleton(mock)))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test

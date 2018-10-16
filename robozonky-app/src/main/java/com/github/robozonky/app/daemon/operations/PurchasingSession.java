@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -115,9 +113,8 @@ final class PurchasingSession {
         try {
             authenticated.run(zonky -> zonky.purchase(participation));
             return true;
-        } catch (final NotFoundException | BadRequestException ex) {
-            LOGGER.debug("Zonky 404 during purchasing. Likely someone's beaten us to it.", ex);
-            return false;
+        } catch (final Exception ex) {
+            throw new IllegalStateException("Failed purchasing " + participation);
         }
     }
 

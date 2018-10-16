@@ -64,9 +64,14 @@ public class Investor {
         final InvestOperation o = auth.getSessionInfo().isDryRun() ? DRY_RUN : recommendedLoan -> {
             Investor.LOGGER.debug("Executing investment: {}.", recommendedLoan);
             final Investment i = Investor.convertToInvestment(recommendedLoan);
-            auth.run(zonky -> zonky.invest(i));
-            Investor.LOGGER.debug("Investment succeeded.");
-            return new ZonkyResponse(i.getOriginalPrincipal().intValue());
+            try {
+                auth.run(zonky -> zonky.invest(i));
+                Investor.LOGGER.debug("Investment succeeded.");
+                return new ZonkyResponse(i.getOriginalPrincipal().intValue());
+            } catch (final Exception ex) {
+                throw new IllegalStateException("Failed investing " + recommendedLoan.amount() + " CZK into "
+                                                        + i.getLoanId(), ex);
+            }
         };
         if (provider == null) {
             return new Investor(o);
