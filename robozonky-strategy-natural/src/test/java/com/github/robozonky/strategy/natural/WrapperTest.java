@@ -38,14 +38,13 @@ class WrapperTest {
         final Investment investment = Investment.fresh(loan, invested).build();
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan));
         assertSoftly(softly -> {
-            softly.assertThat(w.getLoanId()).isEqualTo(loan.getId());
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
             softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
             softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
             softly.assertThat(w.getInterestRate()).isEqualTo(loan.getInterestRate());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
-            softly.assertThat(w.getRemainingAmount()).isEqualTo(BigDecimal.valueOf(invested));
+            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(invested));
             softly.assertThat(w.toString()).isNotNull();
         });
     }

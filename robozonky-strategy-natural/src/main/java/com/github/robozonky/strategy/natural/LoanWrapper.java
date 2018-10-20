@@ -17,7 +17,6 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -26,24 +25,18 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 
-final class LoanWrapper implements Wrapper<LoanDescriptor> {
+final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     private final MarketplaceLoan loan;
-    private final LoanDescriptor original;
 
     public LoanWrapper(final LoanDescriptor original) {
-        this.original = original;
+        super(original);
         this.loan = original.item();
     }
 
     @Override
     public boolean isInsuranceActive() {
         return loan.isInsuranceActive();
-    }
-
-    @Override
-    public int getLoanId() {
-        return loan.getId();
     }
 
     @Override
@@ -92,30 +85,8 @@ final class LoanWrapper implements Wrapper<LoanDescriptor> {
     }
 
     @Override
-    public BigDecimal getRemainingAmount() {
+    public BigDecimal getRemainingPrincipal() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public LoanDescriptor getOriginal() {
-        return original;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !Objects.equals(getClass(), o.getClass())) {
-            return false;
-        }
-        final LoanWrapper that = (LoanWrapper) o;
-        return Objects.equals(original, that.original);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(original);
     }
 
     @Override

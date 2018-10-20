@@ -42,8 +42,6 @@ public interface Wrapper<T> {
 
     boolean isInsuranceActive();
 
-    int getLoanId();
-
     Region getRegion();
 
     String getStory();
@@ -62,7 +60,7 @@ public interface Wrapper<T> {
 
     int getOriginalAmount();
 
-    BigDecimal getRemainingAmount();
+    BigDecimal getRemainingPrincipal();
 
     T getOriginal();
 

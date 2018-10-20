@@ -17,7 +17,6 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
@@ -27,88 +26,72 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 
-final class InvestmentWrapper implements Wrapper<InvestmentDescriptor> {
+final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
-    private final InvestmentDescriptor original;
     private final Investment investment;
 
     public InvestmentWrapper(final InvestmentDescriptor original) {
-        this.original = original;
+        super(original);
         this.investment = original.item();
     }
 
+    @Override
     public boolean isInsuranceActive() {
         return investment.isInsuranceActive();
     }
 
     private MarketplaceLoan getLoan() {
-        return original.related();
+        return getOriginal().related();
     }
 
-    public int getLoanId() {
-        return investment.getLoanId();
-    }
-
+    @Override
     public Region getRegion() {
         return getLoan().getRegion();
     }
 
+    @Override
     public String getStory() {
         return getLoan().getStory();
     }
 
+    @Override
     public MainIncomeType getMainIncomeType() {
         return getLoan().getMainIncomeType();
     }
 
+    @Override
     public BigDecimal getInterestRate() {
         return investment.getInterestRate();
     }
 
+    @Override
     public Purpose getPurpose() {
         return getLoan().getPurpose();
     }
 
+    @Override
     public Rating getRating() {
         return investment.getRating();
     }
 
+    @Override
     public int getOriginalTermInMonths() {
         return investment.getOriginalTerm();
     }
 
+    @Override
     public int getRemainingTermInMonths() {
         return investment.getRemainingMonths();
     }
 
+    @Override
     public int getOriginalAmount() {
         return getLoan().getAmount();
     }
 
-    public BigDecimal getRemainingAmount() {
+    @Override
+    public BigDecimal getRemainingPrincipal() {
         return investment.getRemainingPrincipal();
-    }
-
-    @Override
-    public InvestmentDescriptor getOriginal() {
-        return original;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !Objects.equals(getClass(), o.getClass())) {
-            return false;
-        }
-        final InvestmentWrapper that = (InvestmentWrapper) o;
-        return Objects.equals(original, that.original);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(original);
     }
 
     @Override

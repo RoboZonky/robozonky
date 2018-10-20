@@ -38,7 +38,9 @@ public interface MarketplaceFilterCondition extends Predicate<Wrapper<?>> {
      * Describe the condition using eg. range boundaries.
      * @return If present, is a whole sentence. (Starting with capital letter, ending with a full stop.)
      */
-    Optional<String> getDescription();
+    default Optional<String> getDescription() {
+        return Optional.empty();
+    }
 
     boolean test(final Wrapper<?> item);
 

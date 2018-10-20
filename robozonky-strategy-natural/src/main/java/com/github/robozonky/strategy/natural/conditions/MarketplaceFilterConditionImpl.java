@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,11 +23,6 @@ abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondit
 
     // not static as we want to have the specific impl class in the logs
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
-    @Override
-    public Optional<String> getDescription() {
-        return Optional.empty();
-    }
 
     @Override
     public String toString() {

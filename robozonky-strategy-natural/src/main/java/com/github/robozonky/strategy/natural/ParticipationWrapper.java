@@ -17,7 +17,6 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
@@ -27,88 +26,72 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 
-final class ParticipationWrapper implements Wrapper<ParticipationDescriptor> {
+final class ParticipationWrapper extends AbstractWrapper<ParticipationDescriptor> {
 
     private final Participation participation;
-    private final ParticipationDescriptor original;
 
     public ParticipationWrapper(final ParticipationDescriptor descriptor) {
-        this.original = descriptor;
+        super(descriptor);
         this.participation = descriptor.item();
     }
 
+    @Override
     public boolean isInsuranceActive() {
         return participation.isInsuranceActive();
     }
 
     private MarketplaceLoan getLoan() {
-        return original.related();
+        return getOriginal().related();
     }
 
-    public int getLoanId() {
-        return participation.getLoanId();
-    }
-
+    @Override
     public Region getRegion() {
         return getLoan().getRegion();
     }
 
+    @Override
     public String getStory() {
         return getLoan().getStory();
     }
 
+    @Override
     public MainIncomeType getMainIncomeType() {
-        return getLoan().getMainIncomeType();
+        return participation.getIncomeType();
     }
 
+    @Override
     public BigDecimal getInterestRate() {
         return participation.getInterestRate();
     }
 
+    @Override
     public Purpose getPurpose() {
         return participation.getPurpose();
     }
 
+    @Override
     public Rating getRating() {
         return participation.getRating();
     }
 
+    @Override
     public int getOriginalTermInMonths() {
         return participation.getOriginalInstalmentCount();
     }
 
+    @Override
     public int getRemainingTermInMonths() {
         return participation.getRemainingInstalmentCount();
     }
 
+    @Override
     public int getOriginalAmount() {
         return getLoan().getAmount();
     }
 
-    public BigDecimal getRemainingAmount() {
+    @Override
+    public BigDecimal getRemainingPrincipal() {
         return participation.getRemainingPrincipal();
-    }
-
-    @Override
-    public ParticipationDescriptor getOriginal() {
-        return original;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !Objects.equals(getClass(), o.getClass())) {
-            return false;
-        }
-        final ParticipationWrapper that = (ParticipationWrapper) o;
-        return Objects.equals(original, that.original);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(original);
     }
 
     @Override
