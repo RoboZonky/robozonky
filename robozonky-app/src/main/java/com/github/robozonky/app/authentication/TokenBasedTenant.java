@@ -51,7 +51,7 @@ class TokenBasedTenant implements Tenant {
     }
 
     synchronized Restrictions getRestrictions(final Instant now) {
-        final boolean needsUpdate = lastRestrictionsUpdate.plus(Duration.ofMinutes(5)).isBefore(now);
+        final boolean needsUpdate = lastRestrictionsUpdate.plus(Duration.ofHours(1)).isBefore(now);
         if (needsUpdate) {
             restrictions = call(Zonky::getRestrictions);
             lastRestrictionsUpdate = now;
