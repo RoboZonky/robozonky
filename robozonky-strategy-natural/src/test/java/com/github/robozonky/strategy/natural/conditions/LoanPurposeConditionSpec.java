@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 
 class LoanPurposeConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Purpose> {
@@ -28,9 +29,9 @@ class LoanPurposeConditionSpec implements AbstractEnumeratedConditionTest.Condit
     }
 
     @Override
-    public Wrapper getMocked() {
+    public Wrapper<?> getMocked() {
         final Loan loan = Loan.custom().setPurpose(this.getTriggerItem()).build();
-        return new Wrapper(loan);
+        return Wrapper.wrap(new LoanDescriptor(loan));
     }
 
     @Override

@@ -136,7 +136,7 @@ class ParsedStrategyTest {
         assertThat(strategy.getApplicableLoans(Collections.singletonList(ld))).contains(ld);
         // now add a filter and see no loans applicable
         final MarketplaceFilter f = mock(MarketplaceFilter.class);
-        when(f.test(eq(new Wrapper(loan)))).thenReturn(true);
+        when(f.test(eq(Wrapper.wrap(ld)))).thenReturn(true);
         final ParsedStrategy strategy2 = new ParsedStrategy(portfolio, Collections.singleton(f));
         assertThat(strategy2.getApplicableLoans(Collections.singletonList(ld))).isEmpty();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,15 @@ import com.github.robozonky.strategy.natural.Wrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ShortStoryConditionTest {
 
     @Test
     void longerNotOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD + 1, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new ShortStoryCondition().test(l)).isFalse();
@@ -35,7 +36,7 @@ class ShortStoryConditionTest {
 
     @Test
     void shorterOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new ShortStoryCondition().test(l)).isTrue();

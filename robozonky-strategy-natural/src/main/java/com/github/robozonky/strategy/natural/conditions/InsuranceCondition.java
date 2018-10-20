@@ -30,7 +30,7 @@ public class InsuranceCondition extends MarketplaceFilterConditionImpl {
     }
 
     @Override
-    public boolean test(final Wrapper wrapper) {
+    public boolean test(final Wrapper<?> wrapper) {
         return wrapper.isInsuranceActive();
     }
 }

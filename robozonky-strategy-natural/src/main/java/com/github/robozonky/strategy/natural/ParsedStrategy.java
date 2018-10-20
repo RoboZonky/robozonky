@@ -80,11 +80,11 @@ class ParsedStrategy {
         }
     }
 
-    private static boolean matchesFilter(final Wrapper item, final Collection<MarketplaceFilter> filters,
+    private static boolean matchesFilter(final Wrapper<?> item, final Collection<MarketplaceFilter> filters,
                                          final String logMessage) {
         return filters.stream()
                 .filter(f -> f.test(item))
-                .peek(f -> Decisions.report(logger -> logger.debug(logMessage, item.getIdentifier(), f)))
+                .peek(f -> Decisions.report(logger -> logger.debug(logMessage, item, f)))
                 .findFirst()
                 .isPresent();
     }
@@ -94,7 +94,7 @@ class ParsedStrategy {
     }
 
     public boolean needsConfirmation(final LoanDescriptor loan) {
-        return defaults.needsConfirmation(loan.item());
+        return defaults.needsConfirmation(loan);
     }
 
     public long getMinimumBalance() {
@@ -149,33 +149,30 @@ class ParsedStrategy {
         return getInvestmentSize(rating).getMaximumInvestmentInCzk();
     }
 
-    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
+    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> l) {
         if (!isInvestingEnabled()) {
             return Stream.empty();
         }
-        return items.stream().filter(i -> {
-            final Wrapper w = new Wrapper(i.item());
-            return !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
-                                  "{} to be ignored as it matched primary marketplace filter {}.");
-        }).filter(i -> {
-            final Wrapper w = new Wrapper(i.item());
-            return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
-        });
+        return l.parallelStream()
+                .map(Wrapper::wrap)
+                .filter(w -> !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
+                                            "{} to be ignored as it matched primary marketplace filter {}."))
+                .filter(w -> !matchesFilter(w, filters.getSellFilters(),
+                                            "{} to be ignored as it matched sell filter {}."))
+                .map(Wrapper::getOriginal);
     }
 
-    public Stream<ParticipationDescriptor> getApplicableParticipations(
-            final Collection<ParticipationDescriptor> items) {
+    public Stream<ParticipationDescriptor> getApplicableParticipations(final Collection<ParticipationDescriptor> p) {
         if (!isPurchasingEnabled()) {
             return Stream.empty();
         }
-        return items.stream().filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i::related);
-            return !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
-                                  "{} to be ignored as it matched secondary marketplace filter {}.");
-        }).filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i::related);
-            return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
-        });
+        return p.parallelStream()
+                .map(Wrapper::wrap)
+                .filter(w -> !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
+                                            "{} to be ignored as it matched secondary marketplace filter {}."))
+                .filter(w -> !matchesFilter(w, filters.getSellFilters(),
+                                            "{} to be ignored as it matched sell filter {}."))
+                .map(Wrapper::getOriginal);
     }
 
     public boolean isSellingEnabled() {
@@ -190,11 +187,12 @@ class ParsedStrategy {
         return filters.isPrimaryMarketplaceEnabled();
     }
 
-    public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
-        return items.stream().filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i::related);
-            return matchesFilter(w, filters.getSellFilters(), "{} to be sold as it matched sell filter {}.");
-        });
+    public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> i) {
+        return i.parallelStream()
+                .map(Wrapper::wrap)
+                .filter(w -> matchesFilter(w, filters.getSellFilters(),
+                                           "{} to be sold as it matched sell filter {}."))
+                .map(Wrapper::getOriginal);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import java.math.BigDecimal;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RangeConditionTest {
 
     @Test
     void constructor() {
-        final RangeCondition<Wrapper> c = new RangeCondition<>((w) -> 0, 0, 1);
+        final RangeCondition<Wrapper<?>> c = new RangeCondition<>((w) -> 0, 0, 1);
         assertSoftly(softly -> {
             softly.assertThat(c.getMinInclusive()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(c.getMaxInclusive()).isEqualTo(BigDecimal.ONE);
@@ -36,7 +36,7 @@ class RangeConditionTest {
 
     @Test
     void constructorReversed() {
-        final RangeCondition<Wrapper> c = new RangeCondition<>((w) -> 0, 1, 0);
+        final RangeCondition<Wrapper<?>> c = new RangeCondition<>((w) -> 0, 1, 0);
         assertSoftly(softly -> {
             softly.assertThat(c.getMinInclusive()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(c.getMaxInclusive()).isEqualTo(BigDecimal.ONE);

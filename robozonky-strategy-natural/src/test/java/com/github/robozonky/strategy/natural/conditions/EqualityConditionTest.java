@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -43,9 +44,9 @@ class EqualityConditionTest {
                 .map(r -> dynamicTest(r.getCode(), () -> testWorseThan(current, r)));
     }
 
-    private static Wrapper mockLoan(final Rating r) {
+    private static Wrapper<?> mockLoan(final Rating r) {
         final Loan loan = Loan.custom().setRating(r).build();
-        return new Wrapper(loan);
+        return Wrapper.wrap(new LoanDescriptor(loan));
     }
 
     private static void testBetterThan(final Rating current, final Rating r) {

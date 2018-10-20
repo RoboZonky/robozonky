@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 /**
  * Individual condition that may then be aggregated within {@link MarketplaceFilter}.
  */
-public interface MarketplaceFilterCondition extends Predicate<Wrapper> {
+public interface MarketplaceFilterCondition extends Predicate<Wrapper<?>> {
 
     static MarketplaceFilterCondition alwaysAccepting() {
         return AlwaysAcceptingCondition.INSTANCE;
@@ -38,9 +38,11 @@ public interface MarketplaceFilterCondition extends Predicate<Wrapper> {
      * Describe the condition using eg. range boundaries.
      * @return If present, is a whole sentence. (Starting with capital letter, ending with a full stop.)
      */
-    Optional<String> getDescription();
+    default Optional<String> getDescription() {
+        return Optional.empty();
+    }
 
-    boolean test(final Wrapper item);
+    boolean test(final Wrapper<?> item);
 
     MarketplaceFilterCondition invert();
 }
