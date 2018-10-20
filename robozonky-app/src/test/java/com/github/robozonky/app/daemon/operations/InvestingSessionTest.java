@@ -37,7 +37,6 @@ import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -87,11 +86,10 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         });
     }
 
-    private RestrictedInvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
-        final InvestmentStrategy s = (l, p, r) -> l.stream()
+    private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
+        return (l, p, r) -> l.stream()
                 .filter(i -> i.item().getId() == loanToRecommend)
                 .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
-        return new RestrictedInvestmentStrategy(s, new Restrictions());
     }
 
     private Investor getInvestor(final Tenant auth) {

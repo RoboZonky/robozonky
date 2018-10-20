@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -76,8 +75,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd),
-                                                                    new RestrictedPurchaseStrategy(s, new Restrictions()));
+        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd), s);
         assertSoftly(softly -> {
             softly.assertThat(i).isEmpty();
             softly.assertThat(getEventsRequested()).has(new Condition<List<? extends Event>>() {
@@ -113,8 +111,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(z, false);
         final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd),
-                                                                    new RestrictedPurchaseStrategy(s, new Restrictions()));
+        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd), s);
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(5);
         verify(z).purchase(eq(p));

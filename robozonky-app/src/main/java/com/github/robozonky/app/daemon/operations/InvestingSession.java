@@ -26,6 +26,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -61,11 +62,13 @@ final class InvestingSession {
     private final SessionState<LoanDescriptor> discarded, seen;
     private final Portfolio portfolio;
     private final Events events;
+    private final Tenant authenticated;
 
     InvestingSession(final Portfolio portfolio, final Collection<LoanDescriptor> marketplace, final Investor investor,
                      final Tenant tenant) {
         this.events = Events.forSession(tenant.getSessionInfo());
         this.investor = investor;
+        this.authenticated = tenant;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
         this.seen = newSessionState(tenant, marketplace, "seenLoans");
         this.loansStillAvailable = new ArrayList<>(marketplace);
@@ -78,10 +81,9 @@ final class InvestingSession {
         return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
     }
 
-    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,
-                                                final Tenant auth,
+    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor, final Tenant auth,
                                                 final Collection<LoanDescriptor> loans,
-                                                final RestrictedInvestmentStrategy strategy) {
+                                                final InvestmentStrategy strategy) {
         final InvestingSession session = new InvestingSession(portfolio, loans, investor, auth);
         final PortfolioOverview portfolioOverview = portfolio.getOverview();
         final long balance = portfolioOverview.getCzkAvailable().longValue();
@@ -95,10 +97,10 @@ final class InvestingSession {
         return Collections.unmodifiableCollection(result);
     }
 
-    private void invest(final RestrictedInvestmentStrategy strategy) {
+    private void invest(final InvestmentStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.apply(getAvailable(), portfolio.getOverview())
+            invested = strategy.recommend(getAvailable(), portfolio.getOverview(), authenticated.getRestrictions())
                     .peek(r -> events.fire(loanRecommended(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);

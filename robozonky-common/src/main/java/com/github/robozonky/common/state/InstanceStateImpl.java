@@ -67,12 +67,7 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
     @Override
     public Optional<String> getValue(final String key) {
         parent.assertNotDestroyed();
-        final Optional<String> currentVal = current.getValue(sectionName, key);
-        if (currentVal.isPresent()) {
-            return currentVal;
-        } else {
-            return Optional.empty();
-        }
+        return current.getValue(sectionName, key);
     }
 
     @Override

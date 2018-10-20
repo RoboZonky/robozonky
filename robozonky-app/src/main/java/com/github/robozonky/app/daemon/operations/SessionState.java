@@ -77,7 +77,7 @@ final class SessionState<T> {
 
     private Set<Long> read() {
         final long[] result = state.getValues(key)
-                .map(s -> s.mapToLong(Integer::parseInt).toArray())
+                .map(s -> s.mapToLong(Long::parseLong).toArray())
                 .orElse(new long[0]);
         SessionState.LOGGER.trace("'{}' read {}.", key, result);
         return LongStream.of(result).boxed().collect(Collectors.toSet());

@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon.operations;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,8 +62,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
                 .map(d -> toDescriptor(d, auth))
-                .collect(Collectors.toCollection(ArrayList::new));
-        final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
-        return PurchasingSession.purchase(portfolio, auth, participations, s);
+                .collect(Collectors.toList());
+        return PurchasingSession.purchase(portfolio, auth, participations, strategy);
     }
 }

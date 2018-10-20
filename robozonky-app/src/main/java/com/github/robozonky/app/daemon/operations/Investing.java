@@ -67,7 +67,6 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
-        final RestrictedInvestmentStrategy s = new RestrictedInvestmentStrategy(strategy, auth.getRestrictions());
-        return InvestingSession.invest(portfolio, investor, auth, marketplace, s);
+        return InvestingSession.invest(portfolio, investor, auth, marketplace, strategy);
     }
 }

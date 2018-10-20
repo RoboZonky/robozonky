@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.Portfolio;
@@ -62,10 +63,9 @@ final class PurchasingSession {
         this.portfolio = portfolio;
     }
 
-    public static Collection<Investment> purchase(final Portfolio portfolio,
-                                                  final Tenant auth,
+    public static Collection<Investment> purchase(final Portfolio portfolio, final Tenant auth,
                                                   final Collection<ParticipationDescriptor> items,
-                                                  final RestrictedPurchaseStrategy strategy) {
+                                                  final PurchaseStrategy strategy) {
         final PurchasingSession session = new PurchasingSession(portfolio, items, auth);
         final Collection<ParticipationDescriptor> c = session.getAvailable();
         if (c.isEmpty()) {
@@ -78,10 +78,10 @@ final class PurchasingSession {
         return Collections.unmodifiableCollection(result);
     }
 
-    private void purchase(final RestrictedPurchaseStrategy strategy) {
+    private void purchase(final PurchaseStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.apply(getAvailable(), portfolio.getOverview())
+            invested = strategy.recommend(getAvailable(), portfolio.getOverview(), authenticated.getRestrictions())
                     .filter(r -> portfolio.getOverview().getCzkAvailable().compareTo(r.amount()) >= 0)
                     .peek(r -> events.fire(purchaseRecommended(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
