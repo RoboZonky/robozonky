@@ -47,7 +47,7 @@ public class Statistics extends BaseEntity {
         s.expectedPayments = Collections.emptyList();
         s.currentOverview = new CurrentOverview();
         s.overallOverview = new OverallOverview();
-        s.overallPortfolio = new OverallPortfolio();
+        s.overallPortfolio = new OverallPortfolio(0, 0, 0);
         s.superInvestorOverview = SuperInvestorOverview.empty();
         s.timestamp = OffsetDateTime.now();
         return s;

@@ -23,6 +23,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -41,7 +42,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
                                   final Map<Rating, BigDecimal> czkAtRiskPerRating) {
         this.czkAvailable = czkAvailable;
-        this.czkInvested = PortfolioOverviewImpl.sum(czkInvestedPerRating.values());
+        this.czkInvested = sum(czkInvestedPerRating.values());
         if (isZero(this.czkInvested)) {
             this.czkInvestedPerRating = Collections.emptyMap();
             this.czkAtRiskPerRating = Collections.emptyMap();
@@ -61,7 +62,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private static BigDecimal sum(final RiskPortfolio portfolio) {
+    private static BigDecimal sum(final OverallPortfolio portfolio) {
         return portfolio.getDue().add(portfolio.getUnpaid());
     }
 
@@ -69,10 +70,13 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
                                                   final Map<Rating, BigDecimal> adjustments,
                                                   final Map<Rating, BigDecimal> atRisk) {
         final Map<Rating, BigDecimal> amounts = statistics.getRiskPortfolio().stream()
-                .collect(Collectors.toMap(RiskPortfolio::getRating, PortfolioOverviewImpl::sum));
+                .collect(Collectors.toMap(RiskPortfolio::getRating,
+                                          PortfolioOverviewImpl::sum,
+                                          BigDecimal::add, // should not be necessary
+                                          () -> new EnumMap<>(Rating.class)));
         adjustments.forEach((r, v) -> amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(v)));
         final Map<Rating, BigDecimal> amountsAtRisk = new EnumMap<>(Rating.class);
-        atRisk.forEach(amountsAtRisk::put);
+        amountsAtRisk.putAll(atRisk);
         return calculate(balance, amounts, amountsAtRisk);
     }
 
