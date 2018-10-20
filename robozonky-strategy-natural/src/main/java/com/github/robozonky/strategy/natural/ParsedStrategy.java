@@ -153,7 +153,7 @@ class ParsedStrategy {
         if (!isInvestingEnabled()) {
             return Stream.empty();
         }
-        return l.stream()
+        return l.parallelStream()
                 .map(Wrapper::wrap)
                 .filter(w -> !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
                                             "{} to be ignored as it matched primary marketplace filter {}."))
@@ -166,7 +166,7 @@ class ParsedStrategy {
         if (!isPurchasingEnabled()) {
             return Stream.empty();
         }
-        return p.stream()
+        return p.parallelStream()
                 .map(Wrapper::wrap)
                 .filter(w -> !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
                                             "{} to be ignored as it matched secondary marketplace filter {}."))
@@ -188,7 +188,7 @@ class ParsedStrategy {
     }
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> i) {
-        return i.stream()
+        return i.parallelStream()
                 .map(Wrapper::wrap)
                 .filter(w -> matchesFilter(w, filters.getSellFilters(),
                                            "{} to be sold as it matched sell filter {}."))

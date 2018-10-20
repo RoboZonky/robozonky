@@ -19,10 +19,8 @@ package com.github.robozonky.strategy.natural;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Participation;
@@ -33,10 +31,6 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-
 class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     private static final Comparator<ParticipationDescriptor> COMPARATOR = new SecondaryMarketplaceComparator();
@@ -46,12 +40,6 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         this.strategy = p;
     }
 
-    private static Map<Rating, List<ParticipationDescriptor>> sortByRating(
-            final Stream<ParticipationDescriptor> items) {
-        return items.distinct().collect(groupingBy(l -> l.item().getRating(),
-                                                   () -> new EnumMap<>(Rating.class),
-                                                   mapping(Function.identity(), toList())));
-    }
 
     private int[] getRecommendationBoundaries(final Participation participation) {
         final Rating rating = participation.getRating();
@@ -98,7 +86,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         }
         // split available marketplace into buckets per rating
         final Map<Rating, List<ParticipationDescriptor>> splitByRating =
-                sortByRating(strategy.getApplicableParticipations(available));
+                Util.sortByRating(strategy.getApplicableParticipations(available), d -> d.item().getRating());
         // recommend amount to invest per strategy
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))

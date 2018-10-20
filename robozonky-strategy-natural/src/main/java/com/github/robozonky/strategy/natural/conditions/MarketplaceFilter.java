@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -65,7 +64,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return true for filter to return true.
      */
     public void when(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        when = new ArrayList<>(new LinkedHashSet<>(conditions));
+        when = new LinkedHashSet<>(conditions);
     }
 
     /**
@@ -74,7 +73,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return false for filter to return true.
      */
     public void butNotWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        butNotWhen = new ArrayList<>(new LinkedHashSet<>(conditions));
+        butNotWhen = new LinkedHashSet<>(conditions);
     }
 
     @Override
