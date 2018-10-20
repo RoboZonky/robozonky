@@ -168,14 +168,16 @@ class ParsedStrategy {
         if (!isPurchasingEnabled()) {
             return Stream.empty();
         }
-        return items.stream().filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i::related);
-            return !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
-                                  "{} to be ignored as it matched secondary marketplace filter {}.");
-        }).filter(i -> {
-            final Wrapper w = new Wrapper(i.item(), i::related);
-            return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
-        });
+        return items.stream()
+                .filter(i -> {
+                    final Wrapper w = new Wrapper(i.item(), i::related);
+                    return !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
+                                          "{} to be ignored as it matched secondary marketplace filter {}.");
+                }).filter(i -> {
+                    final Wrapper w = new Wrapper(i.item(), i::related);
+                    return !matchesFilter(w, filters.getSellFilters(),
+                                          "{} to be ignored as it matched sell filter {}.");
+                });
     }
 
     public boolean isSellingEnabled() {
