@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -63,13 +64,23 @@ class UtilTest {
     @Test
     void isSocketTimeout() {
         final Throwable t = new SocketTimeoutException("Testing");
-        assertThat(Util.isSocketTimeout(t)).isTrue();
+        assertThat(Util.isNetworkProblem(t)).isTrue();
         final Throwable t2 = new IllegalStateException(t);
-        assertThat(Util.isSocketTimeout(t2)).isTrue();
+        assertThat(Util.isNetworkProblem(t2)).isTrue();
         final Throwable t3 = new IllegalStateException();
-        assertThat(Util.isSocketTimeout(t3)).isFalse();
-        assertThat(Util.isSocketTimeout(null)).isFalse();
+        assertThat(Util.isNetworkProblem(t3)).isFalse();
+        assertThat(Util.isNetworkProblem(null)).isFalse();
     }
 
+    @Test
+    void isSocket() {
+        final Throwable t = new SocketException("Testing");
+        assertThat(Util.isNetworkProblem(t)).isTrue();
+        final Throwable t2 = new IllegalStateException(t);
+        assertThat(Util.isNetworkProblem(t2)).isTrue();
+        final Throwable t3 = new IllegalStateException();
+        assertThat(Util.isNetworkProblem(t3)).isFalse();
+        assertThat(Util.isNetworkProblem(null)).isFalse();
+    }
 
 }

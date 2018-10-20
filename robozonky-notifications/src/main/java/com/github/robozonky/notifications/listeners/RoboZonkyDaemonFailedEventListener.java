@@ -48,7 +48,7 @@ public class RoboZonkyDaemonFailedEventListener extends AbstractListener<RoboZon
      */
     @Override
     boolean shouldNotify(final RoboZonkyDaemonFailedEvent event, final SessionInfo sessionInfo) {
-        return super.shouldNotify(event, sessionInfo) && !Util.isSocketTimeout(event.getCause());
+        return super.shouldNotify(event, sessionInfo) && !Util.isNetworkProblem(event.getCause());
     }
 
     @Override

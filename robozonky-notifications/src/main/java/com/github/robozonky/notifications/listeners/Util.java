@@ -19,6 +19,7 @@ package com.github.robozonky.notifications.listeners;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -107,13 +108,13 @@ final class Util {
         );
     }
 
-    public static boolean isSocketTimeout(final Throwable ex) {
+    public static boolean isNetworkProblem(final Throwable ex) {
         if (ex == null) {
             return false;
-        } else if (ex instanceof SocketTimeoutException) {
+        } else if (ex instanceof SocketTimeoutException || ex instanceof SocketException) {
             return true;
         } else {
-            return isSocketTimeout(ex.getCause());
+            return isNetworkProblem(ex.getCause());
         }
     }
 
