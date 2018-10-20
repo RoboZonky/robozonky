@@ -71,7 +71,8 @@ class PaginatedApi<S, T> {
             ForkJoinPool.managedBlock(operation);
             return operation.getResult();
         } catch (final InterruptedException ex) {
-            throw new IllegalStateException("Failed executing remote operation.", ex);
+            Thread.currentThread().interrupt();
+            return null;
         } finally {
             LOGGER.trace("... done.");
         }
