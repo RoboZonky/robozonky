@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 abstract class AbstractRangeCondition extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
-    private final RangeCondition<Wrapper> rangeCondition;
+    private final RangeCondition<Wrapper<?>> rangeCondition;
 
-    protected AbstractRangeCondition(final Function<Wrapper, Number> targetAccessor, final Number minValueInclusive,
+    protected AbstractRangeCondition(final Function<Wrapper<?>, Number> targetAccessor, final Number minValueInclusive,
                                      final Number maxValueInclusive) {
         this.rangeCondition = new RangeCondition<>(targetAccessor, minValueInclusive, maxValueInclusive);
     }
@@ -37,7 +37,7 @@ abstract class AbstractRangeCondition extends MarketplaceFilterConditionImpl imp
     }
 
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final Wrapper<?> item) {
         return rangeCondition.test(item);
     }
 }

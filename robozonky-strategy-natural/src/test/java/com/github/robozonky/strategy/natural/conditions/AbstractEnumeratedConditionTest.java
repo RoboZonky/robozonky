@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -39,7 +39,7 @@ class AbstractEnumeratedConditionTest {
     }
 
     private static <T> void properAsCollection(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
-        final Wrapper i = spec.getMocked();
+        final Wrapper<?> i = spec.getMocked();
         final AbstractEnumeratedCondition<T> sut = spec.getImplementation();
         assertThat(sut.test(i)).isFalse();
         sut.add(Arrays.asList(spec.getTriggerItem(), spec.getNotTriggerItem()));
@@ -48,7 +48,7 @@ class AbstractEnumeratedConditionTest {
     }
 
     private static <T> void properAsOne(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
-        final Wrapper i = spec.getMocked();
+        final Wrapper<?> i = spec.getMocked();
         final AbstractEnumeratedCondition<T> sut = spec.getImplementation();
         assertThat(sut.test(i)).isFalse();
         sut.add(spec.getTriggerItem());
@@ -72,7 +72,7 @@ class AbstractEnumeratedConditionTest {
 
         AbstractEnumeratedCondition<T> getImplementation();
 
-        Wrapper getMocked();
+        Wrapper<?> getMocked();
 
         T getTriggerItem();
 

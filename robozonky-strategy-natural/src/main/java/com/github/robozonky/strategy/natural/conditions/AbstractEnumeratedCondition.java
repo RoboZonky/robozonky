@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
-    private final Function<Wrapper, T> fieldRetriever;
+    private final Function<Wrapper<?>, T> fieldRetriever;
     private final Collection<T> possibleValues = new HashSet<>(0);
 
-    protected AbstractEnumeratedCondition(final Function<Wrapper, T> fieldRetriever) {
+    protected AbstractEnumeratedCondition(final Function<Wrapper<?>, T> fieldRetriever) {
         this.fieldRetriever = fieldRetriever;
     }
 
@@ -46,7 +46,7 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl impl
     }
 
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final Wrapper<?> item) {
         return new EnumeratedCondition<>(fieldRetriever, possibleValues).test(item);
     }
 }

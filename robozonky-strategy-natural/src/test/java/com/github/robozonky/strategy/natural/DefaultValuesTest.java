@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.strategies.LoanDescriptor;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +33,7 @@ class DefaultValuesTest {
         assertSoftly(softly -> {
             softly.assertThat(sut.getPortfolio()).isSameAs(p);
             softly.assertThat(sut.getInvestmentSize().getMinimumInvestmentInCzk()).isEqualTo(0);
-            softly.assertThat(sut.needsConfirmation(Loan.custom().build())).isFalse();
+            softly.assertThat(sut.needsConfirmation(new LoanDescriptor(Loan.custom().build()))).isFalse();
         });
     }
 

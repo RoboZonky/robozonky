@@ -25,11 +25,11 @@ import com.github.robozonky.strategy.natural.Wrapper;
 abstract class AbstractRelativeRangeCondition extends MarketplaceFilterConditionImpl
         implements MarketplaceFilterCondition {
 
-    private final Function<Wrapper, Number> sumAccessor, partAccessor;
+    private final Function<Wrapper<?>, Number> sumAccessor, partAccessor;
     private final Number minInclusive, maxInclusive;
 
-    protected AbstractRelativeRangeCondition(final Function<Wrapper, Number> sumAccessor,
-                                             final Function<Wrapper, Number> partAccessor,
+    protected AbstractRelativeRangeCondition(final Function<Wrapper<?>, Number> sumAccessor,
+                                             final Function<Wrapper<?>, Number> partAccessor,
                                              final Number minValueInclusive, final Number maxValueInclusive) {
         assertIsInRange(minValueInclusive);
         assertIsInRange(maxValueInclusive);
@@ -62,7 +62,7 @@ abstract class AbstractRelativeRangeCondition extends MarketplaceFilterCondition
     }
 
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final Wrapper<?> item) {
         final BigDecimal realMinInclusive = getActualValue(sumAccessor.apply(item), minInclusive);
         final BigDecimal realMaxInclusive = getActualValue(sumAccessor.apply(item), maxInclusive);
         return new RangeCondition<>(partAccessor, realMinInclusive, realMaxInclusive).test(item);
