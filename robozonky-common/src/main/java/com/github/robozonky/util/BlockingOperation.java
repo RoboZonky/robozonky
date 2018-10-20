@@ -44,7 +44,7 @@ public final class BlockingOperation<T> implements ForkJoinPool.ManagedBlocker {
         try {
             result.set(operation.get());
         } finally {
-            LOGGER.trace("Finished.", this);
+            LOGGER.trace("Finished.");
         }
         return isReleasable();
     }

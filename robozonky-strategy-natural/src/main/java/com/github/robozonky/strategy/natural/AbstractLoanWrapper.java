@@ -16,39 +16,33 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Objects;
+import java.util.function.Supplier;
 
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.Descriptor;
 
-abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
+abstract class AbstractLoanWrapper<T extends Descriptor<?, ?, ?>> extends AbstractWrapper<T> {
 
-    private final T original;
+    private final Supplier<MarketplaceLoan> loan;
 
-    protected AbstractWrapper(final T original) {
-        this.original = original;
+    protected AbstractLoanWrapper(final T original) {
+        super(original);
+        this.loan = original::related;
+    }
+
+    protected MarketplaceLoan getLoan() {
+        return loan.get();
     }
 
     @Override
-    public T getOriginal() {
-        return original;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !Objects.equals(getClass(), o.getClass())) {
-            return false;
-        }
-        final AbstractWrapper<T> that = (AbstractWrapper<T>) o;
-        return Objects.equals(original, that.original);
+    public Region getRegion() {
+        return getLoan().getRegion();
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(original);
+    public String getStory() {
+        return getLoan().getStory();
     }
 
 }

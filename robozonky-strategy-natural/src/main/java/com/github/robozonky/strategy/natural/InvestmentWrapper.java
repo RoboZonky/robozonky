@@ -19,14 +19,12 @@ package com.github.robozonky.strategy.natural;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 
-final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
+final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
 
     private final Investment investment;
 
@@ -38,20 +36,6 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
     @Override
     public boolean isInsuranceActive() {
         return investment.isInsuranceActive();
-    }
-
-    private MarketplaceLoan getLoan() {
-        return getOriginal().related();
-    }
-
-    @Override
-    public Region getRegion() {
-        return getLoan().getRegion();
-    }
-
-    @Override
-    public String getStory() {
-        return getLoan().getStory();
     }
 
     @Override
