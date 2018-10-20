@@ -100,7 +100,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
     public Optional<T> get() {
         Duration backoffTime = Duration.ZERO;
         final Instant startedOn = Instant.now();
-        while (Duration.between(startedOn, Instant.now()).compareTo(cancelAfter) < 0) {
+        do {
             wait(backoffTime);
             final T result = execute(operation).orElse(null);
             final Optional<Duration> newBackoffTime = backoffTimeCalculator.apply(result, backoffTime);
@@ -110,7 +110,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
                 LOGGER.trace("Success.");
                 return Optional.of(result);
             }
-        }
+        } while (startedOn.plus(cancelAfter).isAfter(Instant.now()));
         return Optional.empty();
     }
 

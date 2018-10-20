@@ -35,9 +35,11 @@ class SchedulerTest {
     @Test
     void backgroundRestarts() {
         final Scheduler s = Scheduler.inBackground();
+        assertThat(s.getExecutor()).isNotNull();
         s.close();
+        assertThat(s.getExecutor().isShutdown()).isTrue();
         try (final Scheduler s2 = Scheduler.inBackground()) {
-            assertThat(s).isNotSameAs(s2);
+            assertThat(s).isNotNull().isNotSameAs(s2);
         }
     }
 
