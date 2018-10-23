@@ -74,16 +74,18 @@ public class BlockedAmountProcessor implements PortfolioDependant {
                          * ever finishing the portfolio update. As a result, the robot would not be able to do
                          * anything. Comparatively, being wrong by 0,5 % is not so bad.
                          */
+                        LOGGER.warn("Zonky API mistakenly reports loan #{} as non-existent. " +
+                                            "Consider reporting this to Zonky so that they can fix it.",
+                                    loanId, ex);
+                        if (syntheticByLoanId.containsKey(loanId)) { // we have the loan as synthetic, no need to worry
+                            return Stream.empty();
+                        }
                         final BigDecimal amount = ba.getAmount();
                         divisor.add(amount.longValue());
                         final long shareThatIsWrongPerMille = divisor.getSharePerMille();
-                        LOGGER.warn("Zonky API mistakenly reports loan #{} as non-existent. " +
-                                            "Consider reporting this to Zonky so that they can fix it. " +
-                                            "In the meantime, RoboZonky portfolio structure will be off by {} ‰.",
-                                    loanId, shareThatIsWrongPerMille, ex);
                         if (shareThatIsWrongPerMille >= 5) {
                             throw new IllegalStateException("RoboZonky portfolio structure is too far off.", ex);
-                        } else {
+                        } else { // let this slide as the portfolio is only a little bit off
                             return Stream.empty();
                         }
                     }
