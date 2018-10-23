@@ -22,9 +22,11 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.ws.rs.NotFoundException;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -41,7 +43,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
 
     private final Map<Integer, Blocked> syntheticByLoanId = new ConcurrentHashMap<>(0);
     private final AtomicReference<Map<Rating, BigDecimal>> adjustments = new AtomicReference<>(Collections.emptyMap());
-    private final AtomicReference<Map<Integer, Blocked>> realById = new AtomicReference<>(Collections.emptyMap());
+    private final AtomicReference<Map<Long, Blocked>> realById = new AtomicReference<>(Collections.emptyMap());
 
     public static BlockedAmountProcessor create(final Tenant tenant) {
         final BlockedAmountProcessor result = new BlockedAmountProcessor();
@@ -54,16 +56,40 @@ public class BlockedAmountProcessor implements PortfolioDependant {
         return LazyInitialized.create(() -> BlockedAmountProcessor.create(tenant));
     }
 
-    private Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {
+    private Map<Long, Blocked> readBlockedAmounts(final Tenant tenant) {
+        final long portfolioSize = tenant.call(Zonky::getStatistics).getCurrentOverview().getPrincipalLeft();
+        final LongAdder adder = new LongAdder();
         return tenant.call(Zonky::getBlockedAmounts)
+                .parallel()
                 .peek(ba -> LOGGER.debug("Found: {}.", ba))
                 .filter(ba -> ba.getLoanId() > 0)
-                .collect(Collectors.toMap(BlockedAmount::getId, ba -> {
+                .flatMap(ba -> {
                     final int loanId = ba.getLoanId();
-                    syntheticByLoanId.remove(loanId); // remove synthetic
-                    final Loan l = LoanCache.get().getLoan(loanId, tenant);
-                    return new Blocked(ba.getAmount(), l.getRating()); // replace it with a real item
-                }));
+                    try {
+                        final Loan l = LoanCache.get().getLoan(loanId, tenant);
+                        syntheticByLoanId.remove(loanId); // remove synthetic
+                        return Stream.of(new Blocked(ba, l.getRating()));
+                    } catch (final NotFoundException ex) {
+                        /*
+                         * Zonky has an intermittent caching problem and a failure here would prevent the robot from
+                         * ever finishing the portfolio update. As a result, the robot would not be able to do
+                         * anything. Comparatively, being wrong by 0,5 % is not so bad.
+                         */
+                        final BigDecimal amount = ba.getAmount();
+                        adder.add(amount.longValue());
+                        final long shareThatIsWrongPerMille = (adder.sum() * 1000) / portfolioSize;
+                        LOGGER.warn("Zonky API mistakenly reports loan #{} as non-existent. " +
+                                            "Consider reporting this to Zonky so that they can fix it. " +
+                                            "In the meantime, RoboZonky portfolio structure will be off by {} ‰.",
+                                    loanId, shareThatIsWrongPerMille, ex);
+                        if (shareThatIsWrongPerMille >= 5) {
+                            throw new IllegalStateException("RoboZonky portfolio structure is too far off.", ex);
+                        } else {
+                            return Stream.empty();
+                        }
+                    }
+                })
+                .collect(Collectors.toMap(Blocked::getId, b -> b));
     }
 
     private void reset() {
@@ -111,12 +137,24 @@ public class BlockedAmountProcessor implements PortfolioDependant {
 
     private static final class Blocked {
 
+        private final long id;
         private final BigDecimal amount;
         private final Rating rating;
 
         public Blocked(final BigDecimal amount, final Rating rating) {
+            this.id = -1;
             this.amount = amount.abs();
             this.rating = rating;
+        }
+
+        public Blocked(final BlockedAmount amount, final Rating rating) {
+            this.id = amount.getId();
+            this.amount = amount.getAmount().abs();
+            this.rating = rating;
+        }
+
+        public long getId() {
+            return id;
         }
 
         public BigDecimal getAmount() {
