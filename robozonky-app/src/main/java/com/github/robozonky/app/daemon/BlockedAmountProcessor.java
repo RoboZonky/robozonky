@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.ws.rs.NotFoundException;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -55,15 +56,41 @@ public class BlockedAmountProcessor implements PortfolioDependant {
     }
 
     private Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {
+        final long portfolioSize = tenant.call(Zonky::getStatistics).getCurrentOverview().getPrincipalLeft();
+        final Divisor divisor = new Divisor(portfolioSize);
         return tenant.call(Zonky::getBlockedAmounts)
+                .parallel()
                 .peek(ba -> LOGGER.debug("Found: {}.", ba))
                 .filter(ba -> ba.getLoanId() > 0)
-                .collect(Collectors.toMap(BlockedAmount::getId, ba -> {
+                .flatMap(ba -> {
                     final int loanId = ba.getLoanId();
-                    syntheticByLoanId.remove(loanId); // remove synthetic
-                    final Loan l = LoanCache.get().getLoan(loanId, tenant);
-                    return new Blocked(ba.getAmount(), l.getRating()); // replace it with a real item
-                }));
+                    try {
+                        final Loan l = LoanCache.get().getLoan(loanId, tenant);
+                        syntheticByLoanId.remove(loanId); // remove synthetic
+                        return Stream.of(new Blocked(ba, l.getRating()));
+                    } catch (final NotFoundException ex) {
+                        /*
+                         * Zonky has an intermittent caching problem and a failure here would prevent the robot from
+                         * ever finishing the portfolio update. As a result, the robot would not be able to do
+                         * anything. Comparatively, being wrong by 0,5 % is not so bad.
+                         */
+                        LOGGER.warn("Zonky API mistakenly reports loan #{} as non-existent. " +
+                                            "Consider reporting this to Zonky so that they can fix it.",
+                                    loanId, ex);
+                        if (syntheticByLoanId.containsKey(loanId)) { // we have the loan as synthetic, no need to worry
+                            return Stream.empty();
+                        }
+                        final BigDecimal amount = ba.getAmount();
+                        divisor.add(amount.longValue());
+                        final long shareThatIsWrongPerMille = divisor.getSharePerMille();
+                        if (shareThatIsWrongPerMille >= 5) {
+                            throw new IllegalStateException("RoboZonky portfolio structure is too far off.", ex);
+                        } else { // let this slide as the portfolio is only a little bit off
+                            return Stream.empty();
+                        }
+                    }
+                })
+                .collect(Collectors.toMap(Blocked::getId, b -> b));
     }
 
     private void reset() {
@@ -111,12 +138,24 @@ public class BlockedAmountProcessor implements PortfolioDependant {
 
     private static final class Blocked {
 
+        private final int id;
         private final BigDecimal amount;
         private final Rating rating;
 
         public Blocked(final BigDecimal amount, final Rating rating) {
+            this.id = -1;
             this.amount = amount.abs();
             this.rating = rating;
+        }
+
+        public Blocked(final BlockedAmount amount, final Rating rating) {
+            this.id = amount.getId();
+            this.amount = amount.getAmount().abs();
+            this.rating = rating;
+        }
+
+        public int getId() {
+            return id;
         }
 
         public BigDecimal getAmount() {
