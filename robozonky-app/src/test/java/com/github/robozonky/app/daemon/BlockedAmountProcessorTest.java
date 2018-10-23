@@ -19,6 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.ws.rs.NotFoundException;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -30,7 +31,10 @@ import com.github.robozonky.internal.util.Maps;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 class BlockedAmountProcessorTest extends AbstractZonkyLeveragingTest {
@@ -47,6 +51,17 @@ class BlockedAmountProcessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         final BlockedAmountProcessor p = BlockedAmountProcessor.create(tenant);
         assertThat(p.getAdjustments()).containsExactly(Maps.entry(Rating.D, BigDecimal.TEN));
+    }
+
+    @Test
+    void handles404thrownByZonky() {
+        final BlockedAmount fee = new BlockedAmount(BigDecimal.ONE);
+        final BlockedAmount forLoan = new BlockedAmount(1, BigDecimal.TEN);
+        when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(fee, forLoan));
+        doThrow(new NotFoundException()).when(zonky).getLoan(anyInt());
+        assertThatThrownBy(() -> BlockedAmountProcessor.create(tenant))
+                .isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(NotFoundException.class);
     }
 
     @Test

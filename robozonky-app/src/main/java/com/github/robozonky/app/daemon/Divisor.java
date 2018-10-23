@@ -32,6 +32,9 @@ final class Divisor {
     }
 
     public long getSharePerMille() {
+        if (max < 1) {
+            return Long.MAX_VALUE;
+        }
         return (adder.sum() * 1000) / max;
     }
 

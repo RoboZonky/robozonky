@@ -32,4 +32,12 @@ class DivisorTest {
         assertThat(d.getSharePerMille()).isEqualTo(11);
     }
 
+    @Test
+    void calculateWithZeroBase() {
+        final Divisor d = new Divisor(0);
+        assertThat(d.getSharePerMille()).isEqualTo(Long.MAX_VALUE);
+        d.add(1);
+        assertThat(d.getSharePerMille()).isEqualTo(Long.MAX_VALUE);
+    }
+
 }
