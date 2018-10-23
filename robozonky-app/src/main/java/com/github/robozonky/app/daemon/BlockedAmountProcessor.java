@@ -22,7 +22,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,7 +57,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
 
     private Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {
         final long portfolioSize = tenant.call(Zonky::getStatistics).getCurrentOverview().getPrincipalLeft();
-        final LongAdder adder = new LongAdder();
+        final Divisor divisor = new Divisor(portfolioSize);
         return tenant.call(Zonky::getBlockedAmounts)
                 .parallel()
                 .peek(ba -> LOGGER.debug("Found: {}.", ba))
@@ -76,8 +75,8 @@ public class BlockedAmountProcessor implements PortfolioDependant {
                          * anything. Comparatively, being wrong by 0,5 % is not so bad.
                          */
                         final BigDecimal amount = ba.getAmount();
-                        adder.add(amount.longValue());
-                        final long shareThatIsWrongPerMille = (adder.sum() * 1000) / portfolioSize;
+                        divisor.add(amount.longValue());
+                        final long shareThatIsWrongPerMille = divisor.getSharePerMille();
                         LOGGER.warn("Zonky API mistakenly reports loan #{} as non-existent. " +
                                             "Consider reporting this to Zonky so that they can fix it. " +
                                             "In the meantime, RoboZonky portfolio structure will be off by {} ‰.",
