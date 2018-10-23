@@ -43,7 +43,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
 
     private final Map<Integer, Blocked> syntheticByLoanId = new ConcurrentHashMap<>(0);
     private final AtomicReference<Map<Rating, BigDecimal>> adjustments = new AtomicReference<>(Collections.emptyMap());
-    private final AtomicReference<Map<Long, Blocked>> realById = new AtomicReference<>(Collections.emptyMap());
+    private final AtomicReference<Map<Integer, Blocked>> realById = new AtomicReference<>(Collections.emptyMap());
 
     public static BlockedAmountProcessor create(final Tenant tenant) {
         final BlockedAmountProcessor result = new BlockedAmountProcessor();
@@ -56,7 +56,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
         return LazyInitialized.create(() -> BlockedAmountProcessor.create(tenant));
     }
 
-    private Map<Long, Blocked> readBlockedAmounts(final Tenant tenant) {
+    private Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {
         final long portfolioSize = tenant.call(Zonky::getStatistics).getCurrentOverview().getPrincipalLeft();
         final LongAdder adder = new LongAdder();
         return tenant.call(Zonky::getBlockedAmounts)
@@ -137,7 +137,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
 
     private static final class Blocked {
 
-        private final long id;
+        private final int id;
         private final BigDecimal amount;
         private final Rating rating;
 
@@ -153,7 +153,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
             this.rating = rating;
         }
 
-        public long getId() {
+        public int getId() {
             return id;
         }
 
