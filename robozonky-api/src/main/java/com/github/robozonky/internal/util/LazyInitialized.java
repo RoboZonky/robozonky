@@ -50,12 +50,20 @@ public final class LazyInitialized<T> implements Supplier<T>,
 
     @Override
     public T get() {
-        return value.updateAndGet(old -> {
-            if (old != null) {
-                return old;
-            }
-            return initializer.get();
-        });
+        // first read the value without locking, in case it already exists
+        final T result = value.get();
+        if (result != null) {
+            return result;
+        }
+        // when we know it doesn't exist, lock and set it
+        synchronized (this) {
+            return value.updateAndGet(old -> {
+                if (old != null) {
+                    return old;
+                }
+                return initializer.get();
+            });
+        }
     }
 
     @Override
