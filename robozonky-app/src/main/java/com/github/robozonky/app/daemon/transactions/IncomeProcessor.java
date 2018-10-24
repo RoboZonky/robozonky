@@ -18,6 +18,7 @@ package com.github.robozonky.app.daemon.transactions;
 
 import java.time.LocalDate;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,20 +40,18 @@ public final class IncomeProcessor implements PortfolioDependant {
                 .orElse(-1);
     }
 
-    private static void processTransaction(final TransactionProcessor processor, final Transaction transaction) {
-        processor.accept(transaction);
-    }
-
     private static long processNewTransactions(final TransactionalPortfolio transactional,
                                                final Stream<Transaction> transactions,
                                                final long lastSeenTransactionId) {
+        final Consumer<Transaction> loansRepaid = new LoanRepaidProcessor(transactional);
+        final Consumer<Transaction> participationsSold = new ParticipationSoldProcessor(transactional);
         return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
                 .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
                 .values()
                 .parallelStream() // possibly thousands of transactions, process them in parallel
-                .peek(t -> processTransaction(new LoanRepaidProcessor(transactional), t))
-                .peek(t -> processTransaction(new ParticipationSoldProcessor(transactional), t))
+                .peek(loansRepaid)
+                .peek(participationsSold)
                 .mapToLong(Transaction::getId)
                 .max()
                 .orElse(lastSeenTransactionId);
