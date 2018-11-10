@@ -16,21 +16,11 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.DaemonInvestmentMode;
-import com.github.robozonky.common.secrets.SecretProvider;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class OperatingModeTest extends AbstractZonkyLeveragingTest {
 
+    /*
     private static final String SERVICE = "zonkoid", SERVICE_TOKEN = "123456";
 
     @Test
@@ -98,4 +88,5 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
         assertThat(config).isPresent();
         assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
     }
+    */
 }
