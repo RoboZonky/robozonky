@@ -16,20 +16,17 @@
 
 package com.github.robozonky.cli;
 
-import java.util.stream.Stream;
+enum ExitCode {
 
-import org.junit.jupiter.api.Test;
+    /**
+     * User command recognized and executed.
+     */
+    SUCCESS,
+    /**
+     * Help printed or wrong CLI.
+     */
+    NO_OPERATION,
+    SETUP_FAIL,
+    TEST_FAIL;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-class FeatureTest {
-
-    @Test
-    void describe() {
-        Stream.concat(CommandLine.listFeatures(), Stream.of(new HelpFeature())).forEach(FeatureTest::describe);
-    }
-
-    static void describe(final Feature feature) {
-        assertThat(feature.describe()).as("Non-null description for " + feature).isNotNull();
-    }
 }
