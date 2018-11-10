@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -78,7 +79,7 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     public static Optional<InvestmentMode> parse(final App main) {
         final CommandLine cli = new CommandLine(main::resumeToFail);
         final Optional<InvestmentMode> result = picocli.CommandLine.call(cli, main.getArgs());
-        return result == null ? Optional.empty() : result;
+        return Objects.isNull(result) ? Optional.empty() : result;
     }
 
     public Duration getPrimaryMarketplaceCheckDelay() {

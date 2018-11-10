@@ -18,16 +18,12 @@ package com.github.robozonky.cli;
 
 import java.net.URL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "notification-tester", description = NotificationTestingFeature.DESCRIPTION)
 public final class NotificationTestingFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Send a testing notification using the provided configuration.";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationTestingFeature.class);
 
     @CommandLine.Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
     private String username = null;

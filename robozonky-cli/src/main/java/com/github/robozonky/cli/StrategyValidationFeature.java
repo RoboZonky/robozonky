@@ -25,16 +25,12 @@ import java.util.concurrent.atomic.LongAdder;
 import com.github.robozonky.common.extensions.StrategyLoader;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "strategy-validator", description = StrategyValidationFeature.DESCRIPTION)
 public final class StrategyValidationFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Validate a strategy file.";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StrategyValidationFeature.class);
 
     @CommandLine.Option(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
     private URL location;

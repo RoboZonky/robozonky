@@ -36,11 +36,8 @@ final class Cli implements Callable<ExitCode> {
 
     public static Optional<ExitCode> parse(final String... args) {
         final CommandLine cli = new CommandLine(new Cli());
-        final List<?> o = cli.parseWithHandlers(new CommandLine.RunLast()
-                                                        .useOut(System.out)
-                                                        .useAnsi(CommandLine.Help.Ansi.ON),
+        final List<?> o = cli.parseWithHandlers(new CommandLine.RunLast().useAnsi(CommandLine.Help.Ansi.ON),
                                                 CommandLine.defaultExceptionHandler()
-                                                        .useErr(System.err)
                                                         .useAnsi(CommandLine.Help.Ansi.OFF),
                                                 args);
         if (o == null) {
