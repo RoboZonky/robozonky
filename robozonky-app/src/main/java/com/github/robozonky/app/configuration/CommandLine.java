@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Converts command line into application configuration using {@link picocli.CommandLine}.
  */
-@picocli.CommandLine.Command
+@picocli.CommandLine.Command(name = "robozonky(.sh|.bat)")
 public class CommandLine implements Callable<Optional<InvestmentMode>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
@@ -79,10 +79,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
         final CommandLine cli = new CommandLine(main::resumeToFail);
         final Optional<InvestmentMode> result = picocli.CommandLine.call(cli, main.getArgs());
         return result == null ? Optional.empty() : result;
-    }
-
-    static String getScriptIdentifier() {
-        return System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
     }
 
     public Duration getPrimaryMarketplaceCheckDelay() {
