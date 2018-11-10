@@ -50,6 +50,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
     }
 
     ZonkyPasswordFeature() {
+        // for Picocli
         this.api = new ApiProvider();
     }
 

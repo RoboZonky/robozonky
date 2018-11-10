@@ -41,7 +41,7 @@ public final class NotificationTestingFeature extends AbstractFeature {
     }
 
     NotificationTestingFeature() {
-        // for JCommander
+        // for Picocli
     }
 
     @Override

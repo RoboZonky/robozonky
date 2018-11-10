@@ -55,7 +55,7 @@ public final class StrategyValidationFeature extends AbstractFeature {
     }
 
     StrategyValidationFeature() {
-        // for JCommander
+        // for Picocli
         this.adder = new LongAdder();
     }
 

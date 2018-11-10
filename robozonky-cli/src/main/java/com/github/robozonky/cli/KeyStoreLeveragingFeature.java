@@ -37,7 +37,7 @@ abstract class KeyStoreLeveragingFeature extends AbstractFeature {
     }
 
     protected KeyStoreLeveragingFeature() {
-        // for JCommander
+        // for Picocli
     }
 
     protected KeyStoreHandler getStorage() {

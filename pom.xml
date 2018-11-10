@@ -270,6 +270,12 @@
         <scope>test</scope>
       </dependency>
       <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-params</artifactId>
+        <version>${version.org.junit}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-launcher</artifactId>
         <version>${version.org.junit.platform}</version>

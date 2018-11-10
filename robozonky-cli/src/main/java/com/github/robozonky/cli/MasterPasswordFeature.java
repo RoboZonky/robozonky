@@ -35,7 +35,7 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
     }
 
     MasterPasswordFeature() {
-        // for JCommander
+        // for Picocli
     }
 
     @Override

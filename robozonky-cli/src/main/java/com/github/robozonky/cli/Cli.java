@@ -18,6 +18,7 @@ package com.github.robozonky.cli;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import picocli.CommandLine;
 
@@ -31,31 +32,27 @@ import picocli.CommandLine;
                 ZonkoidPasswordFeature.class,
                 ZonkyPasswordFeature.class
         })
-final class Cli implements Runnable {
+final class Cli implements Callable<ExitCode> {
 
     public static Optional<ExitCode> parse(final String... args) {
         final CommandLine cli = new CommandLine(new Cli());
-        try {
-            final List<?> o = cli.parseWithHandlers(new CommandLine.RunLast()
-                                                            .useOut(System.out)
-                                                            .useAnsi(CommandLine.Help.Ansi.ON),
-                                                    CommandLine.defaultExceptionHandler()
-                                                            .useErr(System.err)
-                                                            .useAnsi(CommandLine.Help.Ansi.OFF),
-                                                    args);
-            if (o == null) {
-                return Optional.of(ExitCode.NO_OPERATION);
-            } else {
-                return Optional.ofNullable((ExitCode) o.get(0));
-            }
-        } catch (final Exception ex) {
-            cli.usage(System.err);
+        final List<?> o = cli.parseWithHandlers(new CommandLine.RunLast()
+                                                        .useOut(System.out)
+                                                        .useAnsi(CommandLine.Help.Ansi.ON),
+                                                CommandLine.defaultExceptionHandler()
+                                                        .useErr(System.err)
+                                                        .useAnsi(CommandLine.Help.Ansi.OFF),
+                                                args);
+        if (o == null) {
             return Optional.of(ExitCode.NO_OPERATION);
+        } else {
+            return Optional.ofNullable((ExitCode) o.get(0));
         }
     }
 
     @Override
-    public void run() {
+    public ExitCode call() {
         CommandLine.usage(this, System.err);
+        return ExitCode.NO_OPERATION;
     }
 }

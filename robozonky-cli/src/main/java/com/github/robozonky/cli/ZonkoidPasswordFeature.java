@@ -44,7 +44,8 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
         this.password = password.clone();
     }
 
-    ZonkoidPasswordFeature() { // for JCommander
+    ZonkoidPasswordFeature() {
+        // for Picocli
         this.id = ZONKOID_ID;
     }
 
