@@ -24,10 +24,6 @@ public class SetupFailedException extends Exception {
         super(cause);
     }
 
-    SetupFailedException(final String message) {
-        super(message);
-    }
-
     SetupFailedException(final String message, final Exception cause) {
         super(message, cause);
     }

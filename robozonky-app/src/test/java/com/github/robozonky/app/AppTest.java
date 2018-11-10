@@ -41,7 +41,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         main.run();
-        verify(main).actuallyExit(eq(ReturnCode.ERROR_WRONG_PARAMETERS.getCode()));
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 
     @Test
@@ -49,7 +49,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App("-h"));
         doNothing().when(main).actuallyExit(anyInt());
         main.run();
-        verify(main).actuallyExit(eq(ReturnCode.OK.getCode()));
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 
     @Test

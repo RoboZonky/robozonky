@@ -58,7 +58,7 @@ public final class Checker {
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.
              */
-            return loans.stream().sorted(Checker.COMPARATOR).findFirst();
+            return loans.stream().min(Checker.COMPARATOR);
         } catch (final Exception t) {
             Checker.LOGGER.warn("Failed obtaining a loan.", t);
             return Optional.empty();

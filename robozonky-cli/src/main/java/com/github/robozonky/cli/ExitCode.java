@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.cli;
 
-import java.util.Optional;
+enum ExitCode {
 
-import com.beust.jcommander.Parameter;
+    /**
+     * User command recognized and executed.
+     */
+    SUCCESS,
+    /**
+     * Help printed or wrong CLI.
+     */
+    NO_OPERATION,
+    SETUP_FAIL,
+    TEST_FAIL;
 
-class ConfirmationCommandLineFragment extends AbstractCommandLineFragment {
-
-    @Parameter(names = {"-x", "--external"},
-            description = "Use external tool to confirm investments.")
-    String confirmationCredentials;
-
-    public Optional<String> getConfirmationCredentials() {
-        return Optional.ofNullable(confirmationCredentials);
-    }
 }

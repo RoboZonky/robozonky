@@ -49,7 +49,7 @@ final class OperatingMode {
     private static Tenant getAuthenticated(final CommandLine cli, final SecretProvider secrets) {
         final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
         final TenantBuilder b = new TenantBuilder();
-        if (cli.getTweaksFragment().isDryRunEnabled()) {
+        if (cli.isDryRunEnabled()) {
             LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
             b.dryRun();
         }
@@ -94,8 +94,8 @@ final class OperatingMode {
                                                        final Investor investor) {
         final StrategyProvider sp = StrategyProvider.createFor(cli.getStrategyLocation());
         final InvestmentMode m = new DaemonInvestmentMode(cli.getName(), shutdownCall, auth, investor, sp,
-                                                          cli.getMarketplace().getPrimaryMarketplaceCheckDelay(),
-                                                          cli.getMarketplace().getSecondaryMarketplaceCheckDelay());
+                                                          cli.getPrimaryMarketplaceCheckDelay(),
+                                                          cli.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);
     }
 
@@ -103,7 +103,7 @@ final class OperatingMode {
         final Tenant tenant = getAuthenticated(cli, secrets);
         configureNotifications(cli, tenant.getSessionInfo());
         // and now initialize the chosen mode of operation
-        return cli.getConfirmationFragment().getConfirmationCredentials()
+        return cli.getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))
                 .map(c -> OperatingMode.getInvestor(tenant, c))
                 .orElse(Optional.of(Investor.build(tenant)))

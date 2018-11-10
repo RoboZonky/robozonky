@@ -19,20 +19,19 @@ package com.github.robozonky.cli;
 import java.io.File;
 import java.util.Optional;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.secrets.SecretProvider;
+import picocli.CommandLine;
 
-@Parameters(commandNames = "zonkoid-credentials", commandDescription = ZonkoidPasswordFeature.DESCRIPTION)
+@CommandLine.Command(name = "zonkoid-credentials", description = ZonkoidPasswordFeature.DESCRIPTION)
 public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Set credentials to access Zonkoid.";
     static final String ZONKOID_ID = "zonkoid";
     private final String id;
-    @Parameter(order = 2, names = {"-p", "--password"}, converter = PasswordConverter.class,
-            description = "Code generated in the Zonkoid mobile application.", required = true, password = true)
+    @CommandLine.Option(names = {"-p", "--password"},
+            description = "Code generated in the Zonkoid mobile application.", required = true, interactive = true)
     private char[] password = null;
 
     public ZonkoidPasswordFeature(final File keystore, final char[] keystoreSecret, final char... password) {
@@ -45,7 +44,8 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
         this.password = password.clone();
     }
 
-    ZonkoidPasswordFeature() { // for JCommander
+    ZonkoidPasswordFeature() {
+        // for Picocli
         this.id = ZONKOID_ID;
     }
 

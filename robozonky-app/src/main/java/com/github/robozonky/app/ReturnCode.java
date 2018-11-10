@@ -25,8 +25,9 @@ public enum ReturnCode {
      */
     OK(0),
     /**
-     * Failure when parsing command line.
+     * Failure when parsing command line. No longer used, use {@link #ERROR_SETUP} instead.
      */
+    @Deprecated
     ERROR_WRONG_PARAMETERS(1),
     /**
      * Failure before the start of investing, most likely login.

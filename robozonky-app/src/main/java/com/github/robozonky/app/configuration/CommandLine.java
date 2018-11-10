@@ -19,57 +19,55 @@ package com.github.robozonky.app.configuration;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
-import com.beust.jcommander.ParametersDelegate;
 import com.github.robozonky.app.App;
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.ShutdownHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Converts command line into application configuration using {@link JCommander}.
+ * Converts command line into application configuration using {@link picocli.CommandLine}.
  */
-public class CommandLine {
+@picocli.CommandLine.Command(name = "robozonky(.sh|.bat)")
+public class CommandLine implements Callable<Optional<InvestmentMode>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
     private final Consumer<Throwable> shutdownCall;
-    @Parameter(names = {"-s", "--strategy"}, required = true,
+    @picocli.CommandLine.Option(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")
     String strategyLocation = "";
-    @ParametersDelegate
-    private MarketplaceCommandLineFragment marketplace = new MarketplaceCommandLineFragment();
-    @ParametersDelegate
-    private AuthenticationCommandLineFragment authenticationFragment = new AuthenticationCommandLineFragment();
-    @ParametersDelegate
-    private TweaksCommandLineFragment tweaksFragment = new TweaksCommandLineFragment();
-    @ParametersDelegate
-    private ConfirmationCommandLineFragment confirmationFragment = new ConfirmationCommandLineFragment();
-    @Parameter(names = {"-h", "--help"}, help = true, description = "Print usage end exit.")
+    @picocli.CommandLine.Option(names = {"-x", "--external"},
+            description = "Use external tool to confirm investments.")
+    String confirmationCredentials;
+    @picocli.CommandLine.Option(names = {"-h", "--help"}, usageHelp = true, description = "Print usage end exit.")
     private boolean help;
-    @Parameter(names = {"-i", "--inform"}, description = "Configure RoboZonky notifications from a given location.")
+    @picocli.CommandLine.Option(names = {"-i", "--inform"},
+            description = "Configure RoboZonky notifications from a given location.")
     private String notificationConfigLocation;
-    @Parameter(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
+    @picocli.CommandLine.Option(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
     private String name = "Unnamed";
+    @picocli.CommandLine.Option(names = {"-p", "--password"}, required = true,
+            description = "Enter Zonky account password or secure storage password.")
+    private String password = null;
+    @picocli.CommandLine.Option(names = {"-d", "--dry"},
+            description = "RoboZonky will simulate investments, but never actually spend money.")
+    private boolean dryRunEnabled = false;
+    @picocli.CommandLine.Option(names = {"-g", "--guarded"},
+            description = "Path to secure file that contains username, password etc.", required = true)
+    private File keystore = null;
+    @picocli.CommandLine.Option(names = {"-w", "--wait-primary", "--wait"},
+            description = "Number of seconds between consecutive checks of primary marketplace.")
+    private int primaryMarketplaceCheckDelay = 5;
+    @picocli.CommandLine.Option(names = {"-ws", "--wait-secondary"},
+            description = "Number of seconds between consecutive checks of secondary marketplace.")
+    private int secondaryMarketplaceCheckDelay = primaryMarketplaceCheckDelay;
 
     public CommandLine(final Consumer<Throwable> shutdownCall) {
         this.shutdownCall = shutdownCall;
-    }
-
-    private static void terminate(final App main, final ParameterException ex) {
-        System.out.println(ex.getMessage()); // error will be shown to users on stdout
-        ex.getJCommander().usage();
-        main.exit(new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null));
-    }
-
-    private static void terminate(final App main, final JCommander jc) {
-        jc.usage();
-        main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
     }
 
     /**
@@ -79,45 +77,29 @@ public class CommandLine {
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
     public static Optional<InvestmentMode> parse(final App main) {
-        try {
-            return CommandLine.parseUnsafe(main);
-        } catch (final ParameterException ex) {
-            CommandLine.LOGGER.debug("Command line parsing ended with parameter exception.", ex);
-            CommandLine.terminate(main, ex);
-            return Optional.empty();
-        }
-    }
-
-    private static Optional<InvestmentMode> parseUnsafe(final App main) {
         final CommandLine cli = new CommandLine(main::resumeToFail);
-        final JCommander.Builder builder = new JCommander.Builder()
-                .programName(CommandLine.getScriptIdentifier())
-                .addObject(cli);
-        final JCommander jc = builder.build();
-        jc.parse(main.getArgs());
-        if (cli.help) { // don't validate since the CLI is likely to be invalid
-            CommandLine.terminate(main, jc);
-            return Optional.empty();
-        }
-        return cli.newApplicationConfiguration();
+        final Optional<InvestmentMode> result = picocli.CommandLine.call(cli, main.getArgs());
+        return Objects.isNull(result) ? Optional.empty() : result;
     }
 
-    static String getScriptIdentifier() {
-        return System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
+    public Duration getPrimaryMarketplaceCheckDelay() {
+        return Duration.ofSeconds(primaryMarketplaceCheckDelay);
     }
 
-    MarketplaceCommandLineFragment getMarketplace() {
-        return marketplace;
+    public Duration getSecondaryMarketplaceCheckDelay() {
+        return Duration.ofSeconds(secondaryMarketplaceCheckDelay);
+    }
+
+    public Optional<String> getConfirmationCredentials() {
+        return Optional.ofNullable(confirmationCredentials);
+    }
+
+    public boolean isDryRunEnabled() {
+        return dryRunEnabled;
     }
 
     String getStrategyLocation() {
         return strategyLocation;
-    }
-
-    private Optional<InvestmentMode> newApplicationConfiguration() {
-        final OperatingMode mode = new OperatingMode(shutdownCall);
-        return SecretProviderFactory.getSecretProvider(authenticationFragment)
-                .flatMap(secrets -> mode.configure(this, secrets));
     }
 
     Optional<URL> getNotificationConfigLocation() {
@@ -133,20 +115,27 @@ public class CommandLine {
             try {
                 return Optional.of(f.getAbsoluteFile().toURI().toURL());
             } catch (final MalformedURLException ex2) {
-                throw new ParameterException("Incorrect format for notification configuration location.");
+                throw new IllegalStateException("Incorrect format for notification configuration location.", ex2);
             }
         }
+    }
+
+    public char[] getPassword() {
+        return password.toCharArray();
+    }
+
+    public Optional<File> getKeystore() {
+        return Optional.ofNullable(keystore);
     }
 
     String getName() {
         return name;
     }
 
-    TweaksCommandLineFragment getTweaksFragment() {
-        return tweaksFragment;
-    }
-
-    ConfirmationCommandLineFragment getConfirmationFragment() {
-        return confirmationFragment;
+    @Override
+    public Optional<InvestmentMode> call() {
+        final OperatingMode mode = new OperatingMode(shutdownCall);
+        return SecretProviderFactory.getSecretProvider(this)
+                .flatMap(secrets -> mode.configure(this, secrets));
     }
 }

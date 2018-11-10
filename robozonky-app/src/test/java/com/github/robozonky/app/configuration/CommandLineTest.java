@@ -46,14 +46,6 @@ class CommandLineTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void properScriptIdentification() {
-        System.setProperty("os.name", "Some Windows System");
-        assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.bat");
-        System.setProperty("os.name", "Any Other System");
-        assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.sh");
-    }
-
-    @Test
     void validDaemonCli() throws IOException, KeyStoreException {
         // prepare keystore
         final String keyStorePassword = "password";
@@ -80,14 +72,14 @@ class CommandLineTest extends AbstractRoboZonkyTest {
     @Test
     void helpCli() {
         final App main = mockedApp("-h");
-        CommandLine.parse(main);
-        verify(main).actuallyExit(eq(ReturnCode.OK.getCode()));
+        main.run();
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 
     @Test
     void invalidCli() {
         final App main = mockedApp();
-        CommandLine.parse(main);
-        verify(main).actuallyExit(eq(ReturnCode.ERROR_WRONG_PARAMETERS.getCode()));
+        main.run();
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 }

@@ -38,7 +38,7 @@ class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
         final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
         result.get().accept(r);
         assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyEndingEvent.class);
-        final ShutdownHook.Result r2 = new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null);
+        final ShutdownHook.Result r2 = new ShutdownHook.Result(ReturnCode.ERROR_SETUP, null);
         result.get().accept(r2);
         assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyCrashedEvent.class);
     }

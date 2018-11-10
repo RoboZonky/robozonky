@@ -22,22 +22,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.atomic.LongAdder;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 import com.github.robozonky.common.extensions.StrategyLoader;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 
-@Parameters(commandNames = "strategy-validator", commandDescription = StrategyValidationFeature.DESCRIPTION)
-public final class StrategyValidationFeature implements Feature {
+@CommandLine.Command(name = "strategy-validator", description = StrategyValidationFeature.DESCRIPTION)
+public final class StrategyValidationFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Validate a strategy file.";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StrategyValidationFeature.class);
-
-    @Parameter(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
+    @CommandLine.Option(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
     private URL location;
     private String text;
     private LongAdder adder = new LongAdder();
@@ -56,7 +51,7 @@ public final class StrategyValidationFeature implements Feature {
     }
 
     StrategyValidationFeature() {
-        // for JCommander
+        // for Picocli
         this.adder = new LongAdder();
     }
 

@@ -19,15 +19,14 @@ package com.github.robozonky.cli;
 import java.io.File;
 import java.io.IOException;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
+import picocli.CommandLine;
 
-@Parameters(commandNames = "master-password", commandDescription = MasterPasswordFeature.DESCRIPTION)
+@CommandLine.Command(name = "master-password", description = MasterPasswordFeature.DESCRIPTION)
 public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Change password of the master keystore.";
-    @Parameter(order = 3, names = {"-n", "--new-secret"}, converter = PasswordConverter.class,
-            description = "Username to use to authenticate with Zonky servers.", required = true, password = true)
+    @CommandLine.Option(names = {"-n", "--new-secret"},
+            description = "Username to use to authenticate with Zonky servers.", required = true, interactive = true)
     private char[] newSecret = null;
 
     public MasterPasswordFeature(final File keystore, final char[] keystoreSecret, final char... newSecret) {
@@ -36,7 +35,7 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
     }
 
     MasterPasswordFeature() {
-        // for JCommander
+        // for Picocli
     }
 
     @Override
