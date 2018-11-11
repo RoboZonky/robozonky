@@ -75,5 +75,10 @@ class StateCleanerTest {
         public SecretProvider getSecrets() {
             return null;
         }
+
+        @Override
+        public void close() {
+
+        }
     }
 }

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.io.IOException;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -72,5 +73,10 @@ final class TransactionalTenant implements Tenant {
     public <T> InstanceState<T> getState(final Class<T> clz) {
         LOGGER.trace("Creating transactional instance state for {}.", clz);
         return new TransactionalInstanceState<>(transactional, parent.getState(clz));
+    }
+
+    @Override
+    public void close() throws IOException {
+        parent.close();
     }
 }

@@ -61,4 +61,9 @@ class TestingTenant implements Tenant {
     public SecretProvider getSecrets() {
         return secretProvider;
     }
+
+    @Override
+    public void close() {
+
+    }
 }

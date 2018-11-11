@@ -96,7 +96,7 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -111,7 +111,7 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isEqualTo(token);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -129,7 +129,7 @@ class ZonkyApiTokenSupplierTest {
                 .isNotNull()
                 .isNotEqualTo(token);
         verify(oAuth).refresh(eq(token));
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -146,7 +146,7 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(t.isAvailable()).isTrue();
     }
 
     @Test
@@ -158,13 +158,13 @@ class ZonkyApiTokenSupplierTest {
                 .thenThrow(IllegalStateException.class);
         final ApiProvider api = mockApi(oAuth);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(t.isAvailable()).isFalse();
         assertThat(t.get()).isNotNull();
         verify(oAuth).login(any(), any(), any());
         assertThat(t.get()).isNotNull();
         verify(oAuth).refresh(any()); // refresh was called
         verify(oAuth, times(2)).login(any(), any(), any()); // password-based login was used again
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(t.isAvailable()).isTrue();
     }
 
     @Test

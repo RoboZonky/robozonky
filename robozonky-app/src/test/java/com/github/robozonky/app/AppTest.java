@@ -111,6 +111,11 @@ class AppTest extends AbstractEventLeveragingTest {
         public ReturnCode apply(Lifecycle lifecycle) {
             return ReturnCode.OK;
         }
+
+        @Override
+        public void close() {
+
+        }
     }
 
     private static class MyFailingInvestmentMode implements InvestmentMode {
@@ -123,6 +128,11 @@ class AppTest extends AbstractEventLeveragingTest {
         @Override
         public ReturnCode apply(Lifecycle lifecycle) {
             throw new IllegalStateException("Testing failure");
+        }
+
+        @Override
+        public void close() {
+
         }
     }
 }

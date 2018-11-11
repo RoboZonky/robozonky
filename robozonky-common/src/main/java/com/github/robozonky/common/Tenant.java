@@ -16,6 +16,7 @@
 
 package com.github.robozonky.common;
 
+import java.io.Closeable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -27,7 +28,7 @@ import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.util.StreamUtil;
 
-public interface Tenant {
+public interface Tenant extends Closeable {
 
     /**
      * Execute an operation using on the Zonky server, using the default scope.

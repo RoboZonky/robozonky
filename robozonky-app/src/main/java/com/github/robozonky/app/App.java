@@ -77,18 +77,22 @@ public class App implements Runnable {
     }
 
     ReturnCode execute(final InvestmentMode mode) {
-        shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
-        Events.allSessions().fire(EventFactory.roboZonkyStarting());
-        try {
-            lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
-            ensureLiveness();
-            shutdownHooks.register(new Management(lifecycle));
-            shutdownHooks.register(new RoboZonkyStartupNotifier(mode.getSessionName()));
-            return mode.apply(lifecycle);
+        try (final InvestmentMode m = mode) {
+            return executeSafe(m);
         } catch (final Throwable t) {
             LOGGER.error("Caught unexpected exception, terminating daemon.", t);
             return ReturnCode.ERROR_UNEXPECTED;
         }
+    }
+
+    private ReturnCode executeSafe(final InvestmentMode m) {
+        shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
+        Events.allSessions().fire(EventFactory.roboZonkyStarting());
+        lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
+        ensureLiveness();
+        shutdownHooks.register(new Management(lifecycle));
+        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionName()));
+        return m.apply(lifecycle);
     }
 
     public void resumeToFail(final Throwable throwable) {

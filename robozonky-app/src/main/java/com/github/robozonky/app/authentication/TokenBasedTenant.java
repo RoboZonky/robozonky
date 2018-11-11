@@ -74,7 +74,7 @@ class TokenBasedTenant implements Tenant {
 
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
-        return !getTokenSupplier(scope).isUpdating();
+        return getTokenSupplier(scope).isAvailable();
     }
 
     @Override
@@ -85,5 +85,10 @@ class TokenBasedTenant implements Tenant {
     @Override
     public SecretProvider getSecrets() {
         return secrets;
+    }
+
+    @Override
+    public void close() { // cancel existing tokens
+        tokens.forEach((k,v ) -> v.close());
     }
 }
