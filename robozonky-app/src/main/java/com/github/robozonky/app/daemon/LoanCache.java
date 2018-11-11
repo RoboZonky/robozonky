@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;

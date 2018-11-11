@@ -19,7 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.Refreshable;
 

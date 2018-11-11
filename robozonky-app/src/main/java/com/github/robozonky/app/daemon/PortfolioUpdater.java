@@ -28,9 +28,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.util.Backoff;
 import com.github.robozonky.util.IoUtil;
 import org.slf4j.Logger;

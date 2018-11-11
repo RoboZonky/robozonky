@@ -19,7 +19,6 @@ package com.github.robozonky.app;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.events.EventFiringListener;
@@ -30,10 +29,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
-
-    protected static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
-                                                                 false),
-            SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
 
     private final MyEventFiringListener listener = new MyEventFiringListener();
 

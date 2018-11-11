@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.authentication;
+package com.github.robozonky.common;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

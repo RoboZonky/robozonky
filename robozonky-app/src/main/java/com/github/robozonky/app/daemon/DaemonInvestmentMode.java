@@ -21,11 +21,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.Payload;

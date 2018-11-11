@@ -22,7 +22,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;

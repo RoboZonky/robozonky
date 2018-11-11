@@ -18,6 +18,7 @@ package com.github.robozonky.app.authentication;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;

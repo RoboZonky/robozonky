@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;

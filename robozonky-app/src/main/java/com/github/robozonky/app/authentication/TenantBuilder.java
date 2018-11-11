@@ -18,6 +18,7 @@ package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
 
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;

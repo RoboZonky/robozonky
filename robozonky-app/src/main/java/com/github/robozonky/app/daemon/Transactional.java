@@ -20,9 +20,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.common.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

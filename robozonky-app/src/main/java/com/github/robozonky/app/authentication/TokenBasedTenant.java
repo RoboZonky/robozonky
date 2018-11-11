@@ -24,6 +24,8 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;

@@ -18,7 +18,8 @@ package com.github.robozonky.app.daemon;
 
 import java.util.function.Function;
 
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import org.junit.jupiter.api.Test;
@@ -53,15 +54,15 @@ class TransactionalTenantTest {
 
     @Test
     void delegateAvailability() {
-        transactional.isAvailable();
-        verify(original).isAvailable();
+        transactional.isAvailable(ZonkyScope.APP);
+        verify(original).isAvailable(eq(ZonkyScope.APP));
     }
 
     @Test
     void delegateCall() {
         final Function<Zonky, Zonky> a = Function.identity();
-        transactional.call(a);
-        verify(original).call(eq(a));
+        transactional.call(a, ZonkyScope.FILES);
+        verify(original).call(eq(a), eq(ZonkyScope.FILES));
     }
 
     @Test

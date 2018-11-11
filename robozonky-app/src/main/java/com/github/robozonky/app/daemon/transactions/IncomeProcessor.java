@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.PortfolioDependant;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 

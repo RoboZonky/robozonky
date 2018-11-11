@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

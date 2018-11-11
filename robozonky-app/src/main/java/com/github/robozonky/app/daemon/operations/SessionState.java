@@ -23,7 +23,7 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

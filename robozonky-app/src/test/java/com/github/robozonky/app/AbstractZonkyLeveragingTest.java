@@ -19,35 +19,24 @@ package com.github.robozonky.app;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Random;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.daemon.RemoteBalance;
 import com.github.robozonky.app.daemon.Transactional;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
@@ -115,44 +104,6 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
             b.setRating(Rating.AAAAA);
         }
         return new LoanDescriptor(b.build());
-    }
-
-    protected static Zonky harmlessZonky(final int availableBalance) {
-        final Zonky zonky = mock(Zonky.class);
-        final BigDecimal balance = BigDecimal.valueOf(availableBalance);
-        when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
-        when(zonky.getRestrictions()).thenReturn(new Restrictions());
-        when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
-        when(zonky.getStatistics()).thenReturn(Statistics.empty());
-        when(zonky.getDevelopments(anyInt())).thenAnswer(i -> Stream.empty());
-        return zonky;
-    }
-
-    protected static Tenant mockTenant(final Zonky zonky) {
-        return mockTenant(zonky, true);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected static Tenant mockTenant(final Zonky zonky, final boolean isDryRun) {
-        final Tenant auth = spy(Tenant.class);
-        when(auth.getSessionInfo()).thenReturn(isDryRun ? SESSION_DRY : SESSION);
-        when(auth.getSecrets()).thenReturn(SecretProvider.inMemory(SESSION.getUsername()));
-        when(auth.getRestrictions()).thenReturn(new Restrictions());
-        when(auth.isAvailable()).thenReturn(true);
-        doAnswer(invocation -> {
-            final Function<Zonky, Object> operation = invocation.getArgument(0);
-            return operation.apply(zonky);
-        }).when(auth).call(any());
-        doAnswer(invocation -> {
-            final Consumer<Zonky> operation = invocation.getArgument(0);
-            operation.accept(zonky);
-            return null;
-        }).when(auth).run(any());
-        return auth;
-    }
-
-    protected static Tenant mockTenant() {
-        return mockTenant(harmlessZonky(10_000));
     }
 
     @AfterEach

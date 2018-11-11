@@ -32,9 +32,9 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 

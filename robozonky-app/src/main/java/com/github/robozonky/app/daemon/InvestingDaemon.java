@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Investing;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 
 class InvestingDaemon extends DaemonOperation {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.authentication;
+package com.github.robozonky.common;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 

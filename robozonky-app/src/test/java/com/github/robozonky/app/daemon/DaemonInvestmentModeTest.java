@@ -26,9 +26,9 @@ import java.util.concurrent.TimeoutException;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.common.Tenant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
