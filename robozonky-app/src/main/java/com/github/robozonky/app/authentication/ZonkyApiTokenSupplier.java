@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
@@ -45,12 +46,12 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     private final AtomicReference<ZonkyApiToken> token = new AtomicReference<>();
 
     ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
-        this(ZonkyApiToken.SCOPE_APP_WEB_STRING, apis, secrets, refreshAfter);
+        this(ZonkyScope.APP, apis, secrets, refreshAfter);
     }
 
-    public ZonkyApiTokenSupplier(final String scope, final ApiProvider apis, final SecretProvider secrets,
+    public ZonkyApiTokenSupplier(final ZonkyScope scope, final ApiProvider apis, final SecretProvider secrets,
                                  final Duration refreshAfter) {
-        this.scope = scope;
+        this.scope = scope.getId();
         this.apis = apis;
         this.secrets = secrets;
         // fit refresh interval between 1 and 4 minutes

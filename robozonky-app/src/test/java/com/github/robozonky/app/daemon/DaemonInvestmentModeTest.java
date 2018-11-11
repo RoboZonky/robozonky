@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -42,6 +43,8 @@ import static org.mockito.Mockito.verify;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
+    private static final Duration ONE_SECOND = Duration.ofSeconds(1);
+
     private final Lifecycle lifecycle = new Lifecycle();
 
     @Test
@@ -49,10 +52,10 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Tenant a = mockTenant(harmlessZonky(10_000), true);
         final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try {
-            final StrategyProvider p = mock(StrategyProvider.class);
-            final DaemonInvestmentMode d = spy(new DaemonInvestmentMode("", t -> {
-            }, a, b, p, Duration.ofSeconds(1), Duration.ofSeconds(1)));
+        final StrategyProvider p = mock(StrategyProvider.class);
+        final String name = UUID.randomUUID().toString();
+        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(name, a, b, p, ONE_SECOND, ONE_SECOND))) {
+            assertThat(d.getSessionName()).isEqualTo(name);
             doNothing().when(d).scheduleJob(any(), any(), any(),
                                             any()); // otherwise jobs will run, which may try to log into Zonky
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
@@ -64,6 +67,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         } finally {
             e.shutdownNow();
         }
+        verify(a).close();
     }
 
     @AfterEach

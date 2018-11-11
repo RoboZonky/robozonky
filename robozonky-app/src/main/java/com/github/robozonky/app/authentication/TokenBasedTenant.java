@@ -46,7 +46,7 @@ class TokenBasedTenant implements Tenant {
         this.secrets = secrets;
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
-        this.supplier = scope -> new ZonkyApiTokenSupplier(scope.getId(), apis, secrets, refreshAfter);
+        this.supplier = scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, refreshAfter);
     }
 
     @Override
@@ -89,6 +89,6 @@ class TokenBasedTenant implements Tenant {
 
     @Override
     public void close() { // cancel existing tokens
-        tokens.forEach((k,v ) -> v.close());
+        tokens.forEach((k, v) -> v.close());
     }
 }

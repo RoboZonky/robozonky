@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.App;
@@ -55,10 +56,12 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final String username = "someone@somewhere.cz";
         SecretProvider.keyStoreBased(ksh, username, "something".toCharArray());
         // run the app
-        final App main = new App("-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i", "somewhere.txt",
+        final String name = UUID.randomUUID().toString();
+        final App main = new App("-n", name, "-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i", "somewhere.txt",
                                  "-s", "somewhere");
         final Optional<InvestmentMode> cfg = CommandLine.parse(main);
         assertThat(cfg).isPresent();
+        assertThat(cfg.get().getSessionName()).isEqualTo(name);
         assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }
 

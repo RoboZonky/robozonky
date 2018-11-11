@@ -66,6 +66,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.shutdownCall = shutdownCall;
     }
 
+    DaemonInvestmentMode(final String sessionName, final Tenant tenant, final Investor investor,
+                         final StrategyProvider strategyProvider, final Duration primaryMarketplaceCheckPeriod,
+                         final Duration secondaryMarketplaceCheckPeriod) {
+        this(sessionName, t -> {
+        }, tenant, investor, strategyProvider, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
+    }
+
     static void runSafe(final Events events, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
         try {
             runnable.run();
