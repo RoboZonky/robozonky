@@ -64,6 +64,6 @@ class TestingTenant implements Tenant {
 
     @Override
     public void close() {
-
+        // no need to do anything here
     }
 }
