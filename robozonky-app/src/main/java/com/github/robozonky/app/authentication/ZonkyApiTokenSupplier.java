@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.remote;
+package com.github.robozonky.app.authentication;
 
 import java.io.Closeable;
 import java.time.Duration;
@@ -24,6 +24,8 @@ import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +33,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Will keep permanent user authentication running in the background.
  */
-public final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
-                                                    Closeable {
+final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
+                                             Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
     private final String scope;

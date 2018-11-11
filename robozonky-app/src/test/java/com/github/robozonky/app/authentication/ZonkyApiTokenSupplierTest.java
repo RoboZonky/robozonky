@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.remote;
+package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,6 +26,9 @@ import java.util.function.Supplier;
 import javax.ws.rs.BadRequestException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.OAuth;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;

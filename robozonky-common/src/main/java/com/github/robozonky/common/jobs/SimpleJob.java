@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.common.jobs;
 
-import com.github.robozonky.common.jobs.Payload;
-import org.junit.jupiter.api.Test;
+public interface SimpleJob extends Job {
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
-class VersionDetectionPayloadTest {
-
-    @Test
-    void test() {
-        final Runnable mock = mock(Runnable.class);
-        final Payload p = new VersionDetectionPayload(mock);
-        verify(mock, never()).run();
-        p.accept(null);
-        verify(mock).run();
-    }
-
+    /**
+     * The task to run.
+     * @return
+     */
+    SimplePayload payload();
 }

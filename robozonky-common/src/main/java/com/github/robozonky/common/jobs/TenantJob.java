@@ -16,31 +16,11 @@
 
 package com.github.robozonky.common.jobs;
 
-import java.time.Duration;
+public interface TenantJob extends Job {
 
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
-class JobTest {
-
-    @Test
-    void defaultMethods() {
-        final Job j = new Job() {
-            @Override
-            public Duration repeatEvery() {
-                return null;
-            }
-
-            @Override
-            public Payload payload() {
-                return null;
-            }
-        };
-        assertSoftly(softly -> {
-           softly.assertThat(j.killIn()).isEqualTo(Duration.ofMinutes(1));
-           softly.assertThat(j.startIn()).isGreaterThan(Duration.ZERO);
-        });
-    }
-
+    /**
+     * The task to run.
+     * @return
+     */
+    TenantPayload payload();
 }

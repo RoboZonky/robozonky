@@ -53,7 +53,8 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             final StrategyProvider p = mock(StrategyProvider.class);
             final DaemonInvestmentMode d = spy(new DaemonInvestmentMode("", t -> {
             }, a, b, p, Duration.ofSeconds(1), Duration.ofSeconds(1)));
-            doNothing().when(d).scheduleJob(any(), any()); // otherwise jobs will run, which may try to log into Zonky
+            doNothing().when(d).scheduleJob(any(), any(), any(),
+                                            any()); // otherwise jobs will run, which may try to log into Zonky
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock

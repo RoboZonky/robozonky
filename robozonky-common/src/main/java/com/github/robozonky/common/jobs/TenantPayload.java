@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.common.jobs;
 
-import com.github.robozonky.common.jobs.Payload;
-import com.github.robozonky.common.secrets.SecretProvider;
+import java.util.function.Consumer;
 
-final class VersionDetectionPayload implements Payload {
+import com.github.robozonky.common.Tenant;
 
-    private final Runnable monitor;
+@FunctionalInterface
+public interface TenantPayload extends Consumer<Tenant>, Payload {
 
-    public VersionDetectionPayload() {
-        this(new UpdateMonitor());
-    }
-
-    VersionDetectionPayload(final Runnable monitor) {
-        this.monitor = monitor;
-    }
-
-    @Override
-    public void accept(final SecretProvider secretProvider) {
-        monitor.run();
-    }
 }

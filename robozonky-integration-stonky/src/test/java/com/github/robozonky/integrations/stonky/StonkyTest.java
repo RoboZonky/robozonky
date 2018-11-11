@@ -21,11 +21,8 @@ import java.util.function.Consumer;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.drive.model.File;
@@ -48,13 +45,9 @@ import static org.mockito.Mockito.when;
 
 class StonkyTest extends AbstractRoboZonkyTest {
 
-    private static final SecretProvider SECRET_PROVIDER = SecretProvider.inMemory("someone@somewhere.cz");
-    private static final SessionInfo SESSION_INFO = new SessionInfo(SECRET_PROVIDER.getUsername());
-
     private final MultiRequestMockHttpTransport transport = new MultiRequestMockHttpTransport();
-    private final OAuth oauth = mock(OAuth.class);
     private final Zonky zonky = mock(Zonky.class);
-    private final ApiProvider api = mockApiProvider(oauth, zonky);
+    private final Tenant tenant = mockTenant(zonky);
 
     private ClientAndServer server;
     private String serverUrl;
@@ -73,17 +66,15 @@ class StonkyTest extends AbstractRoboZonkyTest {
     @Test
     void noCredential() {
         final CredentialProvider credential = CredentialProvider.mock(false);
-        final Stonky stonky = new Stonky(transport, credential, api);
-        final Optional<String> result = stonky.apply(SECRET_PROVIDER);
+        final Stonky stonky = new Stonky(transport, credential);
+        final Optional<String> result = stonky.apply(mockTenant(zonky));
         assertThat(result).isEmpty();
-        verify(api).close();
     }
 
     @BeforeEach
     void emptyExports() {
         server.when(new HttpRequest()).respond(new HttpResponse()); // just return something to be downloaded
         final Response response = mock(Response.class);
-        when(oauth.login(any(), any(), any())).thenAnswer(i -> mock(ZonkyApiToken.class));
         when(response.getStatus()).thenReturn(302);
         when(response.getHeaderString(any())).thenReturn("http://" + serverUrl + "/file");
         doReturn(response).when(zonky).downloadWalletExport();
@@ -103,10 +94,9 @@ class StonkyTest extends AbstractRoboZonkyTest {
                 return null; // this is not allowed when the above is true
             }
         };
-        final Stonky stonky = new Stonky(transport, credential, api);
-        final Optional<String> result = stonky.apply(SECRET_PROVIDER);
+        final Stonky stonky = new Stonky(transport, credential);
+        final Optional<String> result = stonky.apply(mockTenant(zonky));
         assertThat(result).isEmpty();
-        verify(api).close();
     }
 
     private File getFolder(final String name) {
@@ -119,7 +109,7 @@ class StonkyTest extends AbstractRoboZonkyTest {
     class WithCredential {
 
         private final CredentialProvider credential = CredentialProvider.mock(true);
-        private final File stonkyFolder = getFolder(DriveOverview.getFolderName(SESSION_INFO));
+        private final File stonkyFolder = getFolder(DriveOverview.getFolderName(tenant.getSessionInfo()));
         private FilesInFolderResponseHandler stonkyFolderContent;
         private File copyOfStonkyMaster;
 
@@ -167,8 +157,8 @@ class StonkyTest extends AbstractRoboZonkyTest {
 
         @Test
         void passes() {
-            final Stonky stonky = new Stonky(transport, credential, api);
-            final Optional<String> result = stonky.apply(SECRET_PROVIDER);
+            final Stonky stonky = new Stonky(transport, credential);
+            final Optional<String> result = stonky.apply(mockTenant(zonky));
             assertThat(result).contains(copyOfStonkyMaster.getId());
             verify(zonky).downloadInvestmentsExport();
             verify(zonky).downloadWalletExport();

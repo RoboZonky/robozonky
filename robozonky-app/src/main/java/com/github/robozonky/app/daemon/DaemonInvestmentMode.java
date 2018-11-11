@@ -29,6 +29,10 @@ import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.SimplePayload;
+import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
@@ -87,6 +91,10 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return Duration.ofMillis(result);
     }
 
+    private static String payloadId(final Payload payload) {
+        return payload.toString();
+    }
+
     private Skippable toSkippable(final DaemonOperation daemonOperation) {
         return new Skippable(daemonOperation, this::isUpdating);
     }
@@ -107,26 +115,40 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return !tenant.isAvailable() || portfolio.isInitializing();
     }
 
-    void scheduleJob(final Job job, final Scheduler executor) {
-        LOGGER.debug("Scheduling batch jobs.");
-        final Payload payload = job.payload();
-        final String payloadId = payload.toString();
-        final Runnable runnable = () -> {
+    private Runnable toSafeRunnable(final Job job, final Runnable payload, final String payloadId) {
+        return () -> {
             LOGGER.debug("Running payload {} ({}).", payloadId, job);
-            runSafe(Events.forSession(tenant.getSessionInfo()), () -> payload.accept(tenant.getSecrets()),
-                    shutdownCall);
+            runSafe(Events.forSession(tenant.getSessionInfo()), payload, shutdownCall);
             LOGGER.debug("Finished payload {} ({}).", payloadId, job);
         };
+    }
+
+    private void scheduleSimpleJob(final SimpleJob job, final Scheduler executor) {
+        final SimplePayload payload = job.payload();
+        final Runnable runnable = toSafeRunnable(job, payload, payloadId(payload));
+        scheduleJob(job, runnable, payloadId(payload), executor);
+    }
+
+    void scheduleJob(final Job job, final Runnable payload, final String payloadId, final Scheduler executor) {
         final Duration maxRunTime = getMaxJobRuntime(job);
         final Duration cancelIn = job.startIn().plusMillis(maxRunTime.toMillis());
         LOGGER.debug("Scheduling payload {} ({}). Max run time: {}. Cancel in: {}.", payloadId, job, maxRunTime,
                      cancelIn);
-        executor.submit(runnable, job.repeatEvery(), job.startIn());
-        // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
+        executor.submit(payload, job.repeatEvery(), job.startIn());
+    }
+
+    private void scheduleTenantJob(final TenantJob job, final Scheduler executor) {
+        final TenantPayload payload = job.payload();
+        final Runnable runnable = toSafeRunnable(job, () -> payload.accept(tenant), payloadId(payload));
+        scheduleJob(job, runnable, payloadId(payload), executor);
     }
 
     private void scheduleJobs(final Scheduler executor) {
-        JobServiceLoader.load().forEach(job -> scheduleJob(job, executor));
+        // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
+        LOGGER.debug("Scheduling simple batch jobs.");
+        JobServiceLoader.loadSimpleJobs().forEach(job -> scheduleSimpleJob(job, executor));
+        LOGGER.debug("Scheduling tenant-based batch jobs.");
+        JobServiceLoader.loadTenantJobs().forEach(job -> scheduleTenantJob(job, executor));
     }
 
     @Override

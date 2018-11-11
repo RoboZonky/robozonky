@@ -18,12 +18,12 @@ package com.github.robozonky.app.version;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.Job;
-import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.SimplePayload;
 
-public class VersionDetectionJob implements Job {
+public class VersionDetectionJob implements SimpleJob {
 
-    private final Payload payload = new VersionDetectionPayload();
+    private final SimplePayload payload = new UpdateMonitor();
 
     @Override
     public Duration startIn() {
@@ -36,7 +36,7 @@ public class VersionDetectionJob implements Job {
     }
 
     @Override
-    public Payload payload() {
+    public SimplePayload payload() {
         return payload;
     }
 }
