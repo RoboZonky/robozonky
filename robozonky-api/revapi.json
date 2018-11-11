@@ -5783,6 +5783,16 @@
         "code": "java.method.removed",
         "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.notifications.SellingStartedEvent",
         "justification": "Events are converted from classes to interfaces."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String com.github.robozonky.api.remote.entities.ZonkyApiToken::marshal(com.github.robozonky.api.remote.entities.ZonkyApiToken) throws javax.xml.bind.JAXBException",
+        "justification": "No longer necessary."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.entities.ZonkyApiToken::unmarshal(java.io.Reader) throws javax.xml.bind.JAXBException",
+        "justification": "No longer necessary."
       }
     ]
   }
