@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.util.Scheduler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -92,12 +93,14 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
+        final Scheduler s = Scheduler.inBackground();
         try {
             final ReturnCode result = main.execute(new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } finally { // clean up, shutting down executors etc.
             main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
         }
+        assertThat(s.isClosed()).isTrue();
     }
 
     private static class MyInvestmentMode implements InvestmentMode {

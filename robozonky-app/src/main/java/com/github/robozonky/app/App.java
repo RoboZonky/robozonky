@@ -26,6 +26,7 @@ import com.github.robozonky.app.events.EventFactory;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +78,8 @@ public class App implements Runnable {
     }
 
     ReturnCode execute(final InvestmentMode mode) {
-        try (final InvestmentMode m = mode) {
-            return executeSafe(m);
+        try {
+            return IoUtil.tryFunction(() -> mode, this::executeSafe);
         } catch (final Throwable t) {
             LOGGER.error("Caught unexpected exception, terminating daemon.", t);
             return ReturnCode.ERROR_UNEXPECTED;
