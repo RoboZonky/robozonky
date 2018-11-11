@@ -71,9 +71,9 @@ enum Export {
                                                       final Supplier<ZonkyApiToken> webScoped,
                                                       final Supplier<ZonkyApiToken> fileScoped) {
         final Backoff<URL> waitWhileExportRunning =
-                Backoff.exponential(() -> apiProvider.call(download::apply, fileScoped), Duration.ofSeconds(1),
+                Backoff.exponential(() -> apiProvider.call(download, fileScoped), Duration.ofSeconds(1),
                                     Duration.ofHours(1));
-        return CompletableFuture.runAsync(() -> apiProvider.run(trigger::accept, webScoped))
+        return CompletableFuture.runAsync(() -> apiProvider.run(trigger, webScoped))
                 .thenApplyAsync(v -> waitWhileExportRunning.get())
                 .thenApplyAsync(url -> url.flatMap(Util::download));
     }

@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 final class SessionState<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);
+    private static final long[] NO_LONGS = new long[0];
     private final Collection<Long> items;
     private final ToLongFunction<T> idSupplier;
     private final String key;
@@ -78,7 +79,7 @@ final class SessionState<T> {
     private Set<Long> read() {
         final long[] result = state.getValues(key)
                 .map(s -> s.mapToLong(Long::parseLong).toArray())
-                .orElse(new long[0]);
+                .orElse(NO_LONGS);
         SessionState.LOGGER.trace("'{}' read {}.", key, result);
         return LongStream.of(result).boxed().collect(Collectors.toSet());
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 class OffsetDateTimeAdapter extends XmlAdapter<String, OffsetDateTime> {
 
     @Override
-    public OffsetDateTime unmarshal(final String s) throws Exception {
+    public OffsetDateTime unmarshal(final String s) {
         return OffsetDateTime.parse(s);
     }
 
     @Override
-    public String marshal(final OffsetDateTime offsetDateTime) throws Exception {
+    public String marshal(final OffsetDateTime offsetDateTime) {
         return offsetDateTime.toString();
     }
 }

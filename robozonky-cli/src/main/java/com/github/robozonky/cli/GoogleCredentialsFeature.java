@@ -36,7 +36,7 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
     private final HttpTransport transport;
     private final LazyInitialized<CredentialProvider> credentialProvider;
     @CommandLine.Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
-    private String username = null;
+    private String username;
     @CommandLine.Option(names = {"-h", "--callback-host"}, description = "Host to listen for OAuth response from " +
             "Google.")
     private String host = "localhost";

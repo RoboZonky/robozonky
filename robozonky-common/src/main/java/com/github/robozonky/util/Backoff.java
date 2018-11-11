@@ -108,7 +108,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
                 backoffTime = newBackoffTime.get();
             } else {
                 LOGGER.trace("Success.");
-                return Optional.of(result);
+                return Optional.ofNullable(result);
             }
         } while (startedOn.plus(cancelAfter).isAfter(Instant.now()));
         return Optional.empty();

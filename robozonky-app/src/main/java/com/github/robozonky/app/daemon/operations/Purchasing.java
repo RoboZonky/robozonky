@@ -33,8 +33,9 @@ import com.github.robozonky.util.NumberUtil;
 
 public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
 
+    private static final long[] NO_LONGS = new long[0];
     private final Tenant auth;
-    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(new long[0]);
+    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
     public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth) {
         super(strategy);

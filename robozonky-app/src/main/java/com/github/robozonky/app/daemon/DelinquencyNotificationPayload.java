@@ -88,7 +88,6 @@ final class DelinquencyNotificationPayload implements Payload {
                     final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), transactional.getTenant());
                     return loanNoLongerDelinquent(investment, loan);
                 }));
-                return;
         }
     }
 

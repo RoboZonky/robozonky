@@ -84,7 +84,7 @@ public class CommandLinePart {
     }
 
     public String convertOptions() {
-        return this.getOptionItems().stream().collect(Collectors.joining(" "));
+        return String.join(" ", this.getOptionItems());
     }
 
     public void storeOptions(final File cliFile) throws IOException {

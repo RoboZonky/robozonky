@@ -43,7 +43,7 @@ enum ExtensionsManager {
         this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
         final Collection<URL> urls =
                 FileUtil.filesToUrls(extensionsFolder.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar")));
-        return new URLClassLoader(urls.toArray(new URL[urls.size()]));
+        return new URLClassLoader(urls.toArray(new URL[0]));
     }
 
     ClassLoader retrieveExtensionClassLoader(final String folderName) {

@@ -39,11 +39,11 @@ final class Util {
         // no instances
     }
 
-    private static final String toBoolean(final String string) {
+    private static String toBoolean(final String string) {
         return Boolean.valueOf(string).toString();
     }
 
-    private static final String toInt(final String string) {
+    private static String toInt(final String string) {
         if (string == null) {
             return "-1";
         }
@@ -95,7 +95,7 @@ final class Util {
     }
 
     public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
-        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[v.size()])));
+        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[0])));
     }
 
     static void processCommandLine(final CommandLinePart commandLine, final Properties settings,

@@ -31,9 +31,10 @@ import com.github.robozonky.util.NumberUtil;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
+    private static final long[] NO_LONGS = new long[0];
     private final Tenant auth;
     private final Investor investor;
-    private final AtomicReference<long[]> actionableWhenLastChecked = new AtomicReference<>(new long[0]);
+    private final AtomicReference<long[]> actionableWhenLastChecked = new AtomicReference<>(NO_LONGS);
 
     public Investing(final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
                      final Tenant auth) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,9 @@ class VersionIdentifier {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("VersionIdentifier{");
-        sb.append("stable='").append(stable).append('\'');
-        sb.append(", unstable='").append(unstable).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "VersionIdentifier{"
+                + "stable='" + stable + '\'' +
+                ", unstable='" + unstable + '\'' +
+                '}';
     }
 }
