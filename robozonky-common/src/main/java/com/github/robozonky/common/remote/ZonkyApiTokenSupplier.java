@@ -42,7 +42,7 @@ public final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     private final AtomicBoolean isUpdating = new AtomicBoolean(false);
     private volatile ZonkyApiToken token = null;
 
-    public ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
+    ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
         this(ZonkyApiToken.SCOPE_APP_WEB_STRING, apis, secrets, refreshAfter);
     }
 

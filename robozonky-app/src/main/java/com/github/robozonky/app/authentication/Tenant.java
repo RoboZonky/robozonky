@@ -30,29 +30,61 @@ import com.github.robozonky.util.StreamUtil;
 public interface Tenant {
 
     /**
-     * Execute an operation using on the Zonky server.
+     * Execute an operation using on the Zonky server, using the default scope.
      * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
      * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      * @param <T> Return type of the operation.
      * @return Whatever the operation returned.
      */
-    <T> T call(Function<Zonky, T> operation);
+    default <T> T call(final Function<Zonky, T> operation) {
+        return call(operation, ZonkyScope.getDefault());
+    }
 
     /**
      * Execute an operation using on the Zonky server.
      * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
      * nothing else, since the underlying code will block the thread for the entire duration of that operation.
+     * @param scope The scope of access to request with the Zonky server.
+     * @param <T> Return type of the operation.
+     * @return Whatever the operation returned.
+     */
+    <T> T call(Function<Zonky, T> operation, ZonkyScope scope);
+
+    /**
+     * Execute an operation using on the Zonky server, using the default scope.
+     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
+     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      */
     default void run(final Consumer<Zonky> operation) {
-        call(StreamUtil.toFunction(operation));
+        run(operation, ZonkyScope.getDefault());
+    }
+
+    /**
+     * Execute an operation using on the Zonky server.
+     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
+     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
+     * @param scope The scope of access to request with the Zonky server.
+     */
+    default void run(final Consumer<Zonky> operation, final ZonkyScope scope) {
+        call(StreamUtil.toFunction(operation), scope);
+    }
+
+    /**
+     * Check that the tenant can be operated on, using the default scope.
+     * @return False in cases such as when the user's authentication credentials are being refreshed and therefore
+     * the present authentication may already be invalid, without the new one being available yet.
+     */
+    default boolean isAvailable() {
+        return isAvailable(ZonkyScope.getDefault());
     }
 
     /**
      * Check that the tenant can be operated on.
+     * @param scope The scope of access with the Zonky server.
      * @return False in cases such as when the user's authentication credentials are being refreshed and therefore
      * the present authentication may already be invalid, without the new one being available yet.
      */
-    boolean isAvailable();
+    boolean isAvailable(ZonkyScope scope);
 
     Restrictions getRestrictions();
 

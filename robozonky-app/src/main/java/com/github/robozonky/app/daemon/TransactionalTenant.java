@@ -21,6 +21,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.authentication.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.state.InstanceState;
@@ -34,9 +35,8 @@ import org.slf4j.LoggerFactory;
 final class TransactionalTenant implements Tenant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTenant.class);
-
-    private Transactional transactional;
     private final Tenant parent;
+    private final Transactional transactional;
 
     public TransactionalTenant(final Transactional transactional, final Tenant parent) {
         this.transactional = transactional;
@@ -44,13 +44,13 @@ final class TransactionalTenant implements Tenant {
     }
 
     @Override
-    public <T> T call(final Function<Zonky, T> operation) {
-        return parent.call(operation);
+    public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
+        return parent.call(operation, scope);
     }
 
     @Override
-    public boolean isAvailable() {
-        return parent.isAvailable();
+    public boolean isAvailable(final ZonkyScope scope) {
+        return parent.isAvailable(scope);
     }
 
     @Override

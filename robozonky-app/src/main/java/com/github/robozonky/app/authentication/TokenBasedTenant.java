@@ -18,6 +18,8 @@ package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -29,11 +31,12 @@ import com.github.robozonky.common.secrets.SecretProvider;
 
 class TokenBasedTenant implements Tenant {
 
-    private final ZonkyApiTokenSupplier tokenSupplier;
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
     private final SecretProvider secrets;
 
+    private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
+    private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
     private Instant lastRestrictionsUpdate = Instant.EPOCH;
     private Restrictions restrictions = null;
 
@@ -42,7 +45,7 @@ class TokenBasedTenant implements Tenant {
         this.secrets = secrets;
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
-        this.tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets, refreshAfter);
+        this.supplier = scope -> new ZonkyApiTokenSupplier(scope.getId(), apis, secrets, refreshAfter);
     }
 
     @Override
@@ -59,14 +62,18 @@ class TokenBasedTenant implements Tenant {
         return restrictions;
     }
 
-    @Override
-    public <T> T call(final Function<Zonky, T> operation) {
-        return apis.call(operation, tokenSupplier);
+    private ZonkyApiTokenSupplier getTokenSupplier(final ZonkyScope scope) {
+        return tokens.computeIfAbsent(scope, supplier);
     }
 
     @Override
-    public boolean isAvailable() {
-        return !tokenSupplier.isUpdating();
+    public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
+        return apis.call(operation, getTokenSupplier(scope));
+    }
+
+    @Override
+    public boolean isAvailable(final ZonkyScope scope) {
+        return !getTokenSupplier(scope).isUpdating();
     }
 
     @Override
