@@ -52,6 +52,7 @@ class MainControlTest {
             }
         });
         mainControl.valueUnset(null);
+        assertThat(mainControl.getApiVersion()).isEmpty();
         assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                 .isInstanceOf(TimeoutException.class);  // nothing will happen
         mainControl.valueSet("1.0.0");

@@ -26,11 +26,9 @@ import java.util.concurrent.TimeoutException;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.Tenant;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,8 +54,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final String name = UUID.randomUUID().toString();
         try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(name, a, b, p, ONE_SECOND, ONE_SECOND))) {
             assertThat(d.getSessionName()).isEqualTo(name);
-            doNothing().when(d).scheduleJob(any(), any(), any(),
-                                            any()); // otherwise jobs will run, which may try to log into Zonky
+            doNothing().when(d).scheduleJob(any(), any(), any()); // otherwise jobs will run and try to log into Zonky
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
@@ -70,9 +67,4 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         verify(a).close();
     }
 
-    @AfterEach
-    void cleanup() {
-        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
-        lifecycle.getShutdownHooks().forEach(h -> h.get().ifPresent(s -> s.accept(r)));
-    }
 }

@@ -66,6 +66,7 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void triggersEvents() {
+        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
@@ -83,6 +84,7 @@ class AppTest extends AbstractEventLeveragingTest {
             softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
             softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
         });
+        assertThat(s.isClosed()).isTrue();
     }
 
     /**
@@ -90,10 +92,10 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void failsCorrectly() {
+        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
-        final Scheduler s = Scheduler.inBackground();
         try {
             final ReturnCode result = main.execute(new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);

@@ -16,12 +16,11 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,43 +35,41 @@ public class Lifecycle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Lifecycle.class);
 
-    private final ShutdownEnabler shutdownEnabler;
-    private final DaemonShutdownHook shutdownHook;
     private final CountDownLatch circuitBreaker;
-    private final ShutdownHook.Handler cleanup;
     private final MainControl livenessCheck;
+    private final LazyInitialized<DaemonShutdownHook> shutdownHook;
     private volatile Throwable terminationCause = null;
 
+    /**
+     * For testing purposes only.
+     */
     public Lifecycle() {
-        this(new CountDownLatch(1));
+        this(new ShutdownHook());
+    }
+
+    public Lifecycle(final ShutdownHook hooks) {
+        this(new CountDownLatch(1), hooks);
     }
 
     Lifecycle(final CountDownLatch circuitBreaker) {
-        this(new MainControl(), circuitBreaker);
+        this(circuitBreaker, new ShutdownHook());
+    }
+
+    private Lifecycle(final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
+        this(new MainControl(), circuitBreaker, hooks);
     }
 
     Lifecycle(final MainControl mc) {
-        this(mc, null);
+        this(mc, null, new ShutdownHook());
     }
 
-    Lifecycle(final MainControl mc, final CountDownLatch circuitBreaker) {
+    private Lifecycle(final MainControl mc, final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
         this.circuitBreaker = circuitBreaker;
-        this.shutdownEnabler = new ShutdownEnabler();
-        this.shutdownHook = new DaemonShutdownHook(this, shutdownEnabler);
         this.livenessCheck = mc;
-        this.cleanup = LivenessCheck.setup(livenessCheck);
-    }
-
-    public Optional<String> getZonkyApiVersion() {
-        return livenessCheck.getApiVersion();
-    }
-
-    /**
-     * Will block until RoboZonky is back online.
-     * @return True if now online, false if interrupted.
-     */
-    public boolean waitUntilOnline() {
-        return waitUntilOnline(livenessCheck);
+        final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
+        this.shutdownHook = LazyInitialized.create(() -> new DaemonShutdownHook(this, shutdownEnabler));
+        hooks.register(LivenessCheck.setup(livenessCheck));
+        hooks.register(shutdownEnabler);
     }
 
     /**
@@ -89,26 +86,29 @@ public class Lifecycle {
         }
     }
 
+    public Optional<String> getZonkyApiVersion() {
+        return livenessCheck.getApiVersion();
+    }
+
+    /**
+     * Will block until RoboZonky is back online.
+     * @return True if now online, false if interrupted.
+     */
+    public boolean waitUntilOnline() {
+        return waitUntilOnline(livenessCheck);
+    }
+
     /**
      * Suspend thread until either one of {@link #resumeToFail(Throwable)} or {@link #resumeToShutdown()} is called.
      */
     public void suspend() {
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
+        Runtime.getRuntime().addShutdownHook(shutdownHook.get());
         LOGGER.debug("Pausing main thread.");
         try {
             circuitBreaker.await();
         } catch (final InterruptedException ex) {
             LOGGER.warn("Terminating robot unexpectedly.", ex);
         }
-    }
-
-    /**
-     * To register with the application in order to ensure proper functionality of this class. Register in the order
-     * given.
-     * @return
-     */
-    public Collection<ShutdownHook.Handler> getShutdownHooks() {
-        return Arrays.asList(cleanup, shutdownEnabler);
     }
 
     /**

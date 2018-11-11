@@ -39,7 +39,7 @@ public class App implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
     private final ShutdownHook shutdownHooks = new ShutdownHook();
-    private final Lifecycle lifecycle = new Lifecycle();
+    private final Lifecycle lifecycle = new Lifecycle(shutdownHooks);
     private final String[] args;
 
     public App(final String... args) {
@@ -89,7 +89,6 @@ public class App implements Runnable {
     private ReturnCode executeSafe(final InvestmentMode m) {
         shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
         Events.allSessions().fire(EventFactory.roboZonkyStarting());
-        lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
         ensureLiveness();
         shutdownHooks.register(new Management(lifecycle));
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionName()));
