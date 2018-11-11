@@ -43,6 +43,7 @@ class ApiVersionTest {
             softly.assertThat(v.getBuildVersion()).isEqualTo("0.77.0");
             softly.assertThat(v.getBuildTime()).isBefore(OffsetDateTime.now());
             softly.assertThat(v.getTags()).containsOnly("0.77.0");
+            softly.assertThat(v.getCurrentApiTime()).isBeforeOrEqualTo(OffsetDateTime.now());
         });
     }
 }

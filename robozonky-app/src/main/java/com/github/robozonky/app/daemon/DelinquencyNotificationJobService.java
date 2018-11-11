@@ -19,15 +19,21 @@ package com.github.robozonky.app.daemon;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.JobService;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.TenantJob;
 
 public class DelinquencyNotificationJobService implements JobService {
 
-    private static final Job JOB = new DelinquencyNotificationJob();
+    private static final TenantJob JOB = new DelinquencyNotificationJob();
 
     @Override
-    public Collection<Job> getJobs() {
+    public Collection<SimpleJob> getSimpleJobs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Collection<TenantJob> getTenantJobs() {
         return Collections.singleton(JOB);
     }
 }

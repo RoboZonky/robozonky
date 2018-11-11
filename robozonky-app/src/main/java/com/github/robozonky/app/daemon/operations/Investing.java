@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.util.NumberUtil;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {

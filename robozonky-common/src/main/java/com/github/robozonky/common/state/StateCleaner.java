@@ -20,14 +20,14 @@ import java.time.OffsetDateTime;
 import java.util.Set;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.common.jobs.Payload;
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.jobs.TenantPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toSet;
 
-final class StateCleaner implements Payload {
+final class StateCleaner implements TenantPayload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateCleaner.class);
 
@@ -49,8 +49,8 @@ final class StateCleaner implements Payload {
     }
 
     @Override
-    public void accept(final SecretProvider secretProvider) {
-        final String username = secretProvider.getUsername();
+    public void accept(final Tenant tenant) {
+        final String username = tenant.getSessionInfo().getUsername();
         final TenantState state = TenantState.of(new SessionInfo(username));
         final StateStorage storage = state.getStateStorage();
         LOGGER.debug("Starting state cleanup for '{}'.", username);

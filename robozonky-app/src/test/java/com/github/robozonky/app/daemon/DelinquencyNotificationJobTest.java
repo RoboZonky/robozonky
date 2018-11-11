@@ -18,7 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.TenantJob;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -27,11 +27,10 @@ class DelinquencyNotificationJobTest {
 
     @Test
     void test() {
-        final Job job = new DelinquencyNotificationJob();
+        final TenantJob job = new DelinquencyNotificationJob();
         assertSoftly(softly -> {
-           softly.assertThat(job.payload()).isInstanceOf(DelinquencyNotificationPayload.class);
-           softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofHours(12));
+            softly.assertThat(job.payload()).isInstanceOf(DelinquencyNotificationPayload.class);
+            softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofHours(12));
         });
     }
-
 }

@@ -19,15 +19,21 @@ package com.github.robozonky.app.version;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.JobService;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.TenantJob;
 
 public final class VersionDetectionJobService implements JobService {
 
-    private final Job job = new VersionDetectionJob();
+    private final SimpleJob job = new VersionDetectionJob();
 
     @Override
-    public Collection<Job> getJobs() {
+    public Collection<SimpleJob> getSimpleJobs() {
         return Collections.singleton(job);
+    }
+
+    @Override
+    public Collection<TenantJob> getTenantJobs() {
+        return Collections.emptySet();
     }
 }

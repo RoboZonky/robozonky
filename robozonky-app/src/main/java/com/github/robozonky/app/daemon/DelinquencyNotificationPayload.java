@@ -26,11 +26,9 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.authentication.TenantBuilder;
-import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,7 @@ import static java.util.stream.Collectors.toList;
  * Updates delinquency information based on the information about loans that are either currently delinquent or no
  * longer active. Will fire events on new delinquencies, defaults and/or loans no longer delinquent.
  */
-final class DelinquencyNotificationPayload implements Payload {
+final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyNotificationPayload.class);
     private static final String DELINQUENT_KEY = "delinquent", DEFAULTED_KEY = "defaulted";
@@ -146,9 +144,7 @@ final class DelinquencyNotificationPayload implements Payload {
     }
 
     @Override
-    public void accept(final SecretProvider secretProvider) {
-        final Tenant tenant = new TenantBuilder().withSecrets(secretProvider).build();
-        final Transactional t = new Transactional(tenant);
-        notify(t);
+    public void accept(final Tenant tenant) {
+        notify(new Transactional(tenant));
     }
 }

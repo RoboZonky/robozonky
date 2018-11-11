@@ -24,5 +24,7 @@ import java.util.ServiceLoader;
  */
 public interface JobService {
 
-    Collection<Job> getJobs();
+    Collection<SimpleJob> getSimpleJobs();
+
+    Collection<TenantJob> getTenantJobs();
 }

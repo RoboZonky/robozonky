@@ -26,6 +26,7 @@ import com.github.robozonky.app.events.EventFactory;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class App implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
     private final ShutdownHook shutdownHooks = new ShutdownHook();
-    private final Lifecycle lifecycle = new Lifecycle();
+    private final Lifecycle lifecycle = new Lifecycle(shutdownHooks);
     private final String[] args;
 
     public App(final String... args) {
@@ -77,18 +78,21 @@ public class App implements Runnable {
     }
 
     ReturnCode execute(final InvestmentMode mode) {
-        shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
-        Events.allSessions().fire(EventFactory.roboZonkyStarting());
         try {
-            lifecycle.getShutdownHooks().forEach(shutdownHooks::register);
-            ensureLiveness();
-            shutdownHooks.register(new Management(lifecycle));
-            shutdownHooks.register(new RoboZonkyStartupNotifier(mode.getSessionName()));
-            return mode.apply(lifecycle);
+            return IoUtil.tryFunction(() -> mode, this::executeSafe);
         } catch (final Throwable t) {
             LOGGER.error("Caught unexpected exception, terminating daemon.", t);
             return ReturnCode.ERROR_UNEXPECTED;
         }
+    }
+
+    private ReturnCode executeSafe(final InvestmentMode m) {
+        shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
+        Events.allSessions().fire(EventFactory.roboZonkyStarting());
+        ensureLiveness();
+        shutdownHooks.register(new Management(lifecycle));
+        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionName()));
+        return m.apply(lifecycle);
     }
 
     public void resumeToFail(final Throwable throwable) {

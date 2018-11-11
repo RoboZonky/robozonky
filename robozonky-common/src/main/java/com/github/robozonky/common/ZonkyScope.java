@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.state;
+package com.github.robozonky.common;
 
-import java.time.Duration;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
+public enum ZonkyScope {
 
-final class StateCleanerJob implements TenantJob {
+    APP(ZonkyApiToken.SCOPE_APP_WEB_STRING),
+    FILES(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
 
-    @Override
-    public Duration startIn() {
-        return Duration.ZERO;
+    private String id;
+
+    ZonkyScope(final String id) {
+        this.id = id;
     }
 
-    @Override
-    public Duration repeatEvery() {
-        return Duration.ofDays(1);
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public TenantPayload payload() {
-        return new StateCleaner();
+    static ZonkyScope getDefault() {
+        return APP;
     }
 }

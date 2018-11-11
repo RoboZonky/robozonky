@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Purchasing;
 import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 
 class PurchasingDaemon extends DaemonOperation {

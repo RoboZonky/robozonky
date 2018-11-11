@@ -28,9 +28,9 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.common.Tenant;
 
 import static com.github.robozonky.app.events.EventFactory.investmentPurchased;
 import static com.github.robozonky.app.events.EventFactory.investmentPurchasedLazy;

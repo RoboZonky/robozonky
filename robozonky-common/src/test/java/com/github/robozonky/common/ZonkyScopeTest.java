@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.jobs;
+package com.github.robozonky.common;
 
-import java.time.Duration;
-
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.assertThat;
 
-class JobTest {
+class ZonkyScopeTest {
 
     @Test
-    void defaultMethods() {
-        final Job j = new Job() {
-            @Override
-            public Duration repeatEvery() {
-                return null;
-            }
-
-            @Override
-            public Payload payload() {
-                return null;
-            }
-        };
-        assertSoftly(softly -> {
-           softly.assertThat(j.killIn()).isEqualTo(Duration.ofMinutes(1));
-           softly.assertThat(j.startIn()).isGreaterThan(Duration.ZERO);
-        });
+    void defaults() {
+        assertThat(ZonkyScope.getDefault()).isEqualTo(ZonkyScope.APP);
+        assertThat(ZonkyScope.APP.getId()).isEqualTo(ZonkyApiToken.SCOPE_APP_WEB_STRING);
+        assertThat(ZonkyScope.FILES.getId()).isEqualTo(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
     }
 
 }

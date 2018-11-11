@@ -25,11 +25,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.ThrowingFunction;
 import com.github.robozonky.util.ThrowingSupplier;
@@ -138,7 +134,4 @@ public final class Util {
         }
     }
 
-    static ZonkyApiTokenSupplier getToken(final ApiProvider api, final SecretProvider secrets, final String scope) {
-        return new ZonkyApiTokenSupplier(scope, api, secrets, Settings.INSTANCE.getTokenRefreshPeriod());
-    }
 }

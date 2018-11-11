@@ -26,9 +26,11 @@ class StonkyJobServiceTest {
     @Test
     void hasJustOneJob() {
         final JobService s = new StonkyJobService();
-        assertThat(s.getJobs())
+        assertThat(s.getTenantJobs())
                 .hasSize(1)
                 .first()
                 .isInstanceOf(StonkyJob.class);
+        assertThat(s.getSimpleJobs())
+                .isEmpty();
     }
 }

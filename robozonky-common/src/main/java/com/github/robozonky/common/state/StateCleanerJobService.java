@@ -19,13 +19,19 @@ package com.github.robozonky.common.state;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.JobService;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.TenantJob;
 
 public final class StateCleanerJobService implements JobService {
 
     @Override
-    public Collection<Job> getJobs() {
+    public Collection<SimpleJob> getSimpleJobs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Collection<TenantJob> getTenantJobs() {
         return Collections.singleton(new StateCleanerJob());
     }
 }

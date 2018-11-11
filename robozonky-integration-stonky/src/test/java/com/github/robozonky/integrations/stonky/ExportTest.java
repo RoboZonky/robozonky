@@ -22,9 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.ws.rs.core.Response;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
@@ -71,10 +69,8 @@ class ExportTest extends AbstractRoboZonkyTest {
 
     @Test
     void triggersWalletDownload() throws ExecutionException, InterruptedException {
-        final OAuth auth = mock(OAuth.class);
-        final ApiProvider api = mockApiProvider(auth, zonky);
-        final CompletableFuture<Optional<File>> c = Export.WALLET.download(api, () -> mock(ZonkyApiToken.class),
-                                                                           () -> mock(ZonkyApiToken.class));
+        final Tenant tenant = mockTenant(zonky);
+        final CompletableFuture<Optional<File>> c = Export.WALLET.download(tenant);
         c.get();
         assertThat(c.get()).isPresent();
         verify(zonky).downloadWalletExport();
@@ -82,10 +78,8 @@ class ExportTest extends AbstractRoboZonkyTest {
 
     @Test
     void triggersInvestmentsDownload() throws ExecutionException, InterruptedException {
-        final OAuth auth = mock(OAuth.class);
-        final ApiProvider api = mockApiProvider(auth, zonky);
-        final CompletableFuture<Optional<File>> c = Export.INVESTMENTS.download(api, () -> mock(ZonkyApiToken.class),
-                                                                                () -> mock(ZonkyApiToken.class));
+        final Tenant tenant = mockTenant(zonky);
+        final CompletableFuture<Optional<File>> c = Export.INVESTMENTS.download(tenant);
         assertThat(c.get()).isPresent();
         verify(zonky).downloadInvestmentsExport();
     }

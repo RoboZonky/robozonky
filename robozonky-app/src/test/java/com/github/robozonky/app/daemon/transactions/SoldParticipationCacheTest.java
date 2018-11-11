@@ -16,8 +16,8 @@
 
 package com.github.robozonky.app.daemon.transactions;
 
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.authentication.TenantBuilder;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 

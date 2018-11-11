@@ -38,6 +38,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import com.github.robozonky.common.jobs.SimplePayload;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
@@ -51,7 +52,7 @@ import org.xml.sax.SAXException;
  * Retrieve latest released version from Maven Central. By default will check
  * https://repo1.maven.org/maven2/com/github/robozonky/robozonky/maven-metadata.xml.
  */
-final class UpdateMonitor extends Refreshable<VersionIdentifier> {
+final class UpdateMonitor extends Refreshable<VersionIdentifier> implements SimplePayload {
 
     private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");

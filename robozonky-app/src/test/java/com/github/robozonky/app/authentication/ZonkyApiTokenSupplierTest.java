@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.remote;
+package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,6 +26,9 @@ import java.util.function.Supplier;
 import javax.ws.rs.BadRequestException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.OAuth;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -93,7 +97,7 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -108,7 +112,7 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isEqualTo(token);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -126,7 +130,7 @@ class ZonkyApiTokenSupplierTest {
                 .isNotNull()
                 .isNotEqualTo(token);
         verify(oAuth).refresh(eq(token));
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -143,7 +147,7 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(t.isAvailable()).isTrue();
     }
 
     @Test
@@ -155,13 +159,13 @@ class ZonkyApiTokenSupplierTest {
                 .thenThrow(IllegalStateException.class);
         final ApiProvider api = mockApi(oAuth);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(t.isAvailable()).isFalse();
         assertThat(t.get()).isNotNull();
         verify(oAuth).login(any(), any(), any());
         assertThat(t.get()).isNotNull();
         verify(oAuth).refresh(any()); // refresh was called
         verify(oAuth, times(2)).login(any(), any(), any()); // password-based login was used again
-        assertThat(t.isUpdating()).isFalse();
+        assertThat(t.isAvailable()).isTrue();
     }
 
     @Test
@@ -178,7 +182,7 @@ class ZonkyApiTokenSupplierTest {
         t.get();
         verify(oAuth).login(any(), any(), any());
         t.close();
-        verify(zonky).logout();
+        verify(zonky, only()).logout();
     }
 
     @Test

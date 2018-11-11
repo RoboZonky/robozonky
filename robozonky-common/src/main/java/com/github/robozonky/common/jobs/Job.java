@@ -43,9 +43,4 @@ public interface Job {
         return Duration.ofMinutes(1);
     }
 
-    /**
-     * The task to run.
-     * @return
-     */
-    Payload payload();
 }

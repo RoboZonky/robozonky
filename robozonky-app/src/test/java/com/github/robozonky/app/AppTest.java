@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.util.Scheduler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +66,7 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void triggersEvents() {
+        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
@@ -82,6 +84,7 @@ class AppTest extends AbstractEventLeveragingTest {
             softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
             softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
         });
+        assertThat(s.isClosed()).isTrue();
     }
 
     /**
@@ -89,6 +92,7 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void failsCorrectly() {
+        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
@@ -98,6 +102,7 @@ class AppTest extends AbstractEventLeveragingTest {
         } finally { // clean up, shutting down executors etc.
             main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
         }
+        assertThat(s.isClosed()).isTrue();
     }
 
     private static class MyInvestmentMode implements InvestmentMode {
@@ -111,6 +116,11 @@ class AppTest extends AbstractEventLeveragingTest {
         public ReturnCode apply(Lifecycle lifecycle) {
             return ReturnCode.OK;
         }
+
+        @Override
+        public void close() {
+
+        }
     }
 
     private static class MyFailingInvestmentMode implements InvestmentMode {
@@ -123,6 +133,11 @@ class AppTest extends AbstractEventLeveragingTest {
         @Override
         public ReturnCode apply(Lifecycle lifecycle) {
             throw new IllegalStateException("Testing failure");
+        }
+
+        @Override
+        public void close() {
+
         }
     }
 }

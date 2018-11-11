@@ -16,11 +16,6 @@
 
 package com.github.robozonky.common.jobs;
 
-import java.util.function.Consumer;
-
-import com.github.robozonky.common.secrets.SecretProvider;
-
-@FunctionalInterface
-public interface Payload extends Consumer<SecretProvider> {
+public interface Payload {
 
 }

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.test;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -25,58 +24,46 @@ import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.common.state.InstanceState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * {@link #getState(Class)} returns {@link TransactionalInstanceState} instead of the default {@link InstanceState}
- * implementation. Every other method delegated to the default {@link Tenant} implementation.
- */
-final class TransactionalTenant implements Tenant {
+class TestingTenant implements Tenant {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTenant.class);
-    private final Tenant parent;
-    private final Transactional transactional;
+    private final Zonky zonky;
+    private final SessionInfo sessionInfo;
+    private final SecretProvider secretProvider;
 
-    public TransactionalTenant(final Transactional transactional, final Tenant parent) {
-        this.transactional = transactional;
-        this.parent = parent;
+    public TestingTenant(final SessionInfo sessionInfo, final Zonky zonky) {
+        this.sessionInfo = sessionInfo;
+        this.secretProvider = SecretProvider.inMemory(sessionInfo.getUsername());
+        this.zonky = zonky;
     }
 
     @Override
     public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
-        return parent.call(operation, scope);
+        return operation.apply(zonky);
     }
 
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
-        return parent.isAvailable(scope);
+        return true;
     }
 
     @Override
     public Restrictions getRestrictions() {
-        return parent.getRestrictions();
+        return new Restrictions();
     }
 
     @Override
     public SessionInfo getSessionInfo() {
-        return parent.getSessionInfo();
+        return sessionInfo;
     }
 
     @Override
     public SecretProvider getSecrets() {
-        return parent.getSecrets();
+        return secretProvider;
     }
 
     @Override
-    public <T> InstanceState<T> getState(final Class<T> clz) {
-        LOGGER.trace("Creating transactional instance state for {}.", clz);
-        return new TransactionalInstanceState<>(transactional, parent.getState(clz));
-    }
-
-    @Override
-    public void close() throws IOException {
-        parent.close();
+    public void close() {
+        // no need to do anything here
     }
 }

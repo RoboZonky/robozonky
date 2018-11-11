@@ -24,7 +24,9 @@ class JobServiceLoaderTest {
 
     @Test
     void defaultContents() {
-        assertThat(JobServiceLoader.load())
+        assertThat(JobServiceLoader.loadTenantJobs())
                 .hasSize(1); // state cleaner job service
+        assertThat(JobServiceLoader.loadSimpleJobs())
+                .isEmpty(); // no job service
     }
 }

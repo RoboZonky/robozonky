@@ -18,12 +18,12 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.Job;
-import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.common.jobs.TenantPayload;
 
-class DelinquencyNotificationJob implements Job {
+class DelinquencyNotificationJob implements TenantJob {
 
-    private final Payload payload = new DelinquencyNotificationPayload();
+    private final TenantPayload payload = new DelinquencyNotificationPayload();
 
     @Override
     public Duration repeatEvery() {
@@ -31,7 +31,7 @@ class DelinquencyNotificationJob implements Job {
     }
 
     @Override
-    public Payload payload() {
+    public TenantPayload payload() {
         return payload;
     }
 }

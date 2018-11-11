@@ -14,27 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.state;
+package com.github.robozonky.common.jobs;
 
-import java.time.Duration;
+public interface SimpleJob extends Job {
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
-
-final class StateCleanerJob implements TenantJob {
-
-    @Override
-    public Duration startIn() {
-        return Duration.ZERO;
-    }
-
-    @Override
-    public Duration repeatEvery() {
-        return Duration.ofDays(1);
-    }
-
-    @Override
-    public TenantPayload payload() {
-        return new StateCleaner();
-    }
+    /**
+     * The task to run.
+     * @return
+     */
+    SimplePayload payload();
 }
