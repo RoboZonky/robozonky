@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 HERE=$(dirname "$0")
 if [ -f ${HERE}/Dist/bin/robozonky-app-${project.version}.jar ]; then
     HERE=$HERE/Dist
