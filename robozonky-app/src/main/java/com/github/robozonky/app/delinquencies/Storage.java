@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
-import java.time.Duration;
+import java.util.Set;
+import java.util.stream.LongStream;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import org.junit.jupiter.api.Test;
+interface Storage {
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+    boolean isKnown(final long investmentId);
 
-class DelinquencyNotificationJobTest {
+    boolean add(final long investmentId);
 
-    @Test
-    void test() {
-        final TenantJob job = new DelinquencyNotificationJob();
-        assertSoftly(softly -> {
-            softly.assertThat(job.payload()).isInstanceOf(DelinquencyNotificationPayload.class);
-            softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofHours(12));
-        });
-    }
+    boolean remove(final long investmentId);
+
+    void persist();
+
+    LongStream complement(final Set<Long> investmentIds);
+
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
 import java.util.Collection;
 import java.util.Collections;
