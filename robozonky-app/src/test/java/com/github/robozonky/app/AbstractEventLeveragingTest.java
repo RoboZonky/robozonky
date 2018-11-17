@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.events.EventFiringListener;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,6 +62,11 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     public void stopListeningForEvents() {
         Events.forSession(SESSION).removeListener(listener);
         readPreexistingEvents();
+    }
+
+    @AfterEach
+    public void unregisterAllShutdownHooks() { // so that PITest can shut down all child processes
+        Lifecycle.clearShutdownHooks();
     }
 
     private static class MyEventFiringListener implements EventFiringListener {

@@ -17,7 +17,7 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
     && tar -C $BINARY_DIRECTORY -xvf $ROBOZONKY_TAR_XZ \
     && chmod +x /tmp/robozonky/robozonky.sh
 
-# ... then restart from a minimal image, copy built binary from previous stage and install latest JRE.
+# ... then restart from a minimal image and copy built binary from previous stage
 FROM adoptopenjdk/openjdk11:alpine-slim
 LABEL maintainer="The RoboZonky Project (www.robozonky.cz)"
 ENV INSTALL_DIRECTORY=/opt/robozonky \

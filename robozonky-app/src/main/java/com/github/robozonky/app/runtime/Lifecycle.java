@@ -16,7 +16,9 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import com.github.robozonky.app.ShutdownHook;
@@ -39,6 +41,16 @@ public class Lifecycle {
     private final MainControl livenessCheck;
     private final LazyInitialized<DaemonShutdownHook> shutdownHook;
     private volatile Throwable terminationCause = null;
+
+    private static final Set<Thread> HOOKS = new HashSet<>(0);
+
+    /**
+     * For testing purposes. PITest mutations would start these and not kill them, leading to stuck processes.
+     */
+    public static void clearShutdownHooks() {
+        HOOKS.forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
+        HOOKS.clear();
+    }
 
     /**
      * For testing purposes only.
@@ -102,7 +114,9 @@ public class Lifecycle {
      * Suspend thread until either one of {@link #resumeToFail(Throwable)} or {@link #resumeToShutdown()} is called.
      */
     public void suspend() {
+        final Thread t = shutdownHook.get();
         Runtime.getRuntime().addShutdownHook(shutdownHook.get());
+        HOOKS.add(t);
         LOGGER.debug("Pausing main thread.");
         try {
             circuitBreaker.await();

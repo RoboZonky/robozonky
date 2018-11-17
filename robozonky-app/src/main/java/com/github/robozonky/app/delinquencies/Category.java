@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
@@ -36,10 +36,11 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.app.daemon.LoanCache;
+import com.github.robozonky.app.daemon.Transactional;
 import com.github.robozonky.app.events.EventFactory;
 import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ import static java.util.stream.Collectors.toList;
  * Keeps active delinquencies over a given threshold. When a new delinquency over a particular threshold arrives, an
  * event is sent. When a delinquency is no longer among active, it is silently removed.
  */
-enum DelinquencyCategory {
+enum Category {
 
     NEW(0),
     MILD(10),
@@ -62,23 +63,11 @@ enum DelinquencyCategory {
      */
     DEFAULTED(-1);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Category.class);
     private final int thresholdInDays;
 
-    DelinquencyCategory(final int thresholdInDays) {
+    Category(final int thresholdInDays) {
         this.thresholdInDays = thresholdInDays;
-    }
-
-    private static boolean isOverThreshold(final Investment d, final int threshold) {
-        return d.getDaysPastDue() >= threshold;
-    }
-
-    private static IntStream fromIdString(final Stream<String> idString) {
-        return idString.mapToInt(Integer::parseInt);
-    }
-
-    private static Stream<String> toIdString(final int... ids) {
-        return IntStream.of(ids).distinct().sorted().mapToObj(Integer::toString);
     }
 
     private static EventSupplier getEventSupplierConstructor(final int threshold) {
@@ -135,10 +124,6 @@ enum DelinquencyCategory {
         return e;
     }
 
-    private static String getFieldName(final int dayThreshold) {
-        return "notified" + dayThreshold + "plus";
-    }
-
     private static List<Development> getDevelopments(final Tenant auth, final int loanId,
                                                      final LocalDate delinquentSince) {
         final LocalDate lastNonDelinquentDay = delinquentSince.minusDays(1);
@@ -149,41 +134,26 @@ enum DelinquencyCategory {
         return developments;
     }
 
-    /**
-     * @return Number of days at minimum for a delinquency to belong to this category.
-     */
     public int getThresholdInDays() {
         return thresholdInDays;
+    }
+
+    public EnumSet<Category> getLesser() {
+        final Set<Category> result = Arrays.stream(Category.values())
+                .filter(category -> category.thresholdInDays < this.thresholdInDays && category.thresholdInDays >= 0)
+                .collect(Collectors.toSet());
+        return result.isEmpty() ? EnumSet.noneOf(Category.class) : EnumSet.copyOf(result);
     }
 
     /**
      * Update internal state trackers and send events if necessary.
      * @param transactional Portfolio to update.
-     * @param delinquents Active delinquencies - ie. payments that are, right now, overdue.
-     * @return IDs of loans that are being tracked in this category.
+     * @param investment Investment to process.
      */
-    public int[] update(final Transactional transactional, final Collection<Investment> delinquents) {
+    public void process(final Transactional transactional, final Investment investment) {
         LOGGER.debug("Updating {}.", this);
         final Tenant tenant = transactional.getTenant();
-        final InstanceState<DelinquencyCategory> transactionalState = tenant.getState(DelinquencyCategory.class);
-        final String fieldName = getFieldName(thresholdInDays);
-        final Set<Integer> keepThese = transactionalState.getValues(fieldName)
-                .map(DelinquencyCategory::fromIdString)
-                .orElse(IntStream.empty())
-                .filter(id -> delinquents.stream().anyMatch(d -> d.getLoanId() == id)) // remove no longer delinquent
-                .boxed()
-                .collect(Collectors.toSet());
-        LOGGER.trace("Keeping {}.", keepThese);
-        final IntStream addThese = delinquents.stream()
-                .parallel() // there is potentially a lot of these, and each involves several REST requests
-                .filter(d -> !keepThese.contains(d.getLoanId())) // this delinquency is newly over the threshold
-                .filter(d -> isOverThreshold(d, thresholdInDays))
-                .peek(d -> transactional.fire(getEvent(tenant, d, thresholdInDays)))
-                .mapToInt(Investment::getLoanId);
-        final int[] storeThese = IntStream.concat(keepThese.stream().mapToInt(i -> i), addThese).toArray();
-        transactionalState.update(b -> b.put(fieldName, toIdString(storeThese)));
-        LOGGER.trace("Update over, stored {}.", storeThese);
-        return storeThese;
+        transactional.fire(getEvent(tenant, investment, thresholdInDays));
     }
 
     @FunctionalInterface

@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
 import java.time.Duration;
 
 import com.github.robozonky.common.jobs.TenantJob;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DelinquencyNotificationJobTest {
 
     @Test
-    void test() {
+    void defaults() {
         final TenantJob job = new DelinquencyNotificationJob();
-        assertSoftly(softly -> {
-            softly.assertThat(job.payload()).isInstanceOf(DelinquencyNotificationPayload.class);
-            softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofHours(12));
-        });
+        assertThat(job.repeatEvery()).isEqualTo(Duration.ofHours(12));
+        assertThat(job.payload()).isInstanceOf(DelinquencyNotificationPayload.class);
     }
+
 }
