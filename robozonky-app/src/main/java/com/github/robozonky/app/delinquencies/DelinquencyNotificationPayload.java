@@ -16,9 +16,13 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -35,7 +39,6 @@ import static com.github.robozonky.app.events.EventFactory.loanLost;
 import static com.github.robozonky.app.events.EventFactory.loanLostLazy;
 import static com.github.robozonky.app.events.EventFactory.loanNoLongerDelinquent;
 import static com.github.robozonky.app.events.EventFactory.loanNoLongerDelinquentLazy;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * Updates delinquency information based on the information about loans that are either currently delinquent or no
@@ -44,6 +47,16 @@ import static java.util.stream.Collectors.toMap;
 final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyNotificationPayload.class);
+
+    private final Function<Tenant, Registry> registryFunction;
+
+    public DelinquencyNotificationPayload() {
+        this(Registry::new);
+    }
+
+    DelinquencyNotificationPayload(final Function<Tenant, Registry> registryFunction) {
+        this.registryFunction = registryFunction;
+    }
 
     private static boolean isDefaulted(final Investment i) {
         return i.getPaymentStatus().map(s -> s == PaymentStatus.PAID_OFF).orElse(false);
@@ -86,8 +99,8 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         final int daysPastDue = currentDelinquent.getDaysPastDue();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
-                .filter(c -> c.getThresholdInDays() >= daysPastDue)
-                .findFirst();
+                .filter(c -> c.getThresholdInDays() <= daysPastDue)
+                .max(Comparator.comparing(Category::getThresholdInDays));
         if (firstNextCategory.isPresent()) {
             final Category category = firstNextCategory.get();
             LOGGER.debug("Investment #{} placed to category {}.", investmentId, category);
@@ -112,46 +125,47 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         }
     }
 
-    private static void process(final Transactional transactional) {
+    private static Stream<Investment> getDefaulted(final Set<Investment> investments) {
+        return investments.parallelStream().filter(DelinquencyNotificationPayload::isDefaulted);
+    }
+
+    private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
+        return investments.parallelStream()
+                .filter(i -> i.getDaysPastDue() > 0)
+                .filter(i -> !isDefaulted(i));
+    }
+
+    private void process(final Transactional transactional) {
         final Tenant tenant = transactional.getTenant();
-        final Map<Long, Investment> currentDelinquents = tenant.call(Zonky::getDelinquentInvestments)
+        final Set<Investment> delinquents = tenant.call(Zonky::getDelinquentInvestments)
                 .parallel() // possibly many pages' worth of results; fetch in parallel
-                .collect(toMap(Investment::getId, i -> i));
-        final int count = currentDelinquents.size();
+                .collect(Collectors.toSet());
+        final int count = delinquents.size();
         LOGGER.debug("There are {} delinquent investments to process.", count);
-        final Registry registry = new Registry(tenant);
+        final Registry registry = registryFunction.apply(tenant);
         if (registry.isInitialized()) {
-            registry.complement(currentDelinquents.values())
+            registry.complement(delinquents)
                     .parallelStream()
                     .forEach(i -> {
                         registry.remove(i);
                         processNoLongerDelinquent(i, transactional);
                     });
-            currentDelinquents.values().parallelStream()
-                    .filter(DelinquencyNotificationPayload::isDefaulted)
-                    .forEach(currentDelinquent -> processDefaulted(transactional, registry, currentDelinquent));
-            currentDelinquents.values().parallelStream()
-                    .filter(i -> !isDefaulted(i))
-                    .forEach(currentDelinquent -> processDelinquent(transactional, registry, currentDelinquent));
+            // potentially thousands of items, with relatively heavy logic behind them
+            getDefaulted(delinquents).forEach(d -> processDefaulted(transactional, registry, d));
+            getNonDefaulted(delinquents).forEach(d -> processDelinquent(transactional, registry, d));
         } else {
-            currentDelinquents.values().parallelStream()
-                    .filter(DelinquencyNotificationPayload::isDefaulted)
-                    .forEach(currentDelinquent -> registry.addCategory(currentDelinquent, Category.DEFAULTED));
-            currentDelinquents.values().parallelStream()
-                    .filter(i -> !isDefaulted(i))
-                    .forEach(currentDelinquent -> {
-                        final int dayPastDue = currentDelinquent.getDaysPastDue();
-                        for (final Category cat: Category.values()) {
-                            if (cat.getThresholdInDays() < dayPastDue) {
-                                continue;
-                            }
-                            registry.addCategory(currentDelinquent, Category.DEFAULTED);
-                        }
-                        LOGGER.debug("No category found for investment #{}.", currentDelinquent.getId());
-                    });
+            getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
+            getNonDefaulted(delinquents).forEach(d -> {
+                for (final Category cat : Category.values()) {
+                    if (cat.getThresholdInDays() > d.getDaysPastDue() || cat.getThresholdInDays() < 0) {
+                        continue;
+                    }
+                    registry.addCategory(d, cat);
+                }
+                LOGGER.debug("No category found for investment #{}.", d.getId());
+            });
         }
         registry.persist();
-        transactional.run();
     }
 
     @Override
