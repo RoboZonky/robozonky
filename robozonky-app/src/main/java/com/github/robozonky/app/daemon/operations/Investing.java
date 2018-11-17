@@ -32,14 +32,12 @@ import com.github.robozonky.util.NumberUtil;
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
     private static final long[] NO_LONGS = new long[0];
-    private final Tenant auth;
     private final Investor investor;
     private final AtomicReference<long[]> actionableWhenLastChecked = new AtomicReference<>(NO_LONGS);
 
     public Investing(final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
                      final Tenant auth) {
-        super(strategy);
-        this.auth = auth;
+        super(auth, strategy);
         this.investor = investor;
     }
 
@@ -52,7 +50,7 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
 
     @Override
     protected boolean isBalanceUnderMinimum(final int current) {
-        return current < auth.getRestrictions().getMinimumInvestmentAmount();
+        return current < getTenant().getRestrictions().getMinimumInvestmentAmount();
     }
 
     @Override
@@ -68,6 +66,6 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
-        return InvestingSession.invest(portfolio, investor, auth, marketplace, strategy);
+        return InvestingSession.invest(portfolio, investor, getTenant(), marketplace, strategy);
     }
 }

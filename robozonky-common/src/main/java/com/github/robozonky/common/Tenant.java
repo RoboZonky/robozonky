@@ -87,6 +87,8 @@ public interface Tenant extends Closeable {
      */
     boolean isAvailable(ZonkyScope scope);
 
+    RemoteBalance getBalance();
+
     Restrictions getRestrictions();
 
     SessionInfo getSessionInfo();

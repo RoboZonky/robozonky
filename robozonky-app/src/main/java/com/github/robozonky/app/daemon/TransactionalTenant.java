@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
@@ -52,6 +53,11 @@ final class TransactionalTenant implements Tenant {
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
         return parent.isAvailable(scope);
+    }
+
+    @Override
+    public RemoteBalance getBalance() {
+        return parent.getBalance();
     }
 
     @Override

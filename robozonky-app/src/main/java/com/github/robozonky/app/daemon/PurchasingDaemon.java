@@ -50,7 +50,7 @@ class PurchasingDaemon extends DaemonOperation {
 
     @Override
     protected void execute(final Portfolio portfolio, final Tenant authenticated) {
-        final long balance = portfolio.getRemoteBalance().get().longValue();
+        final long balance = authenticated.getBalance().get().longValue();
         if (balance <= 0) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, 0);
             return;

@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.enums.Rating;
@@ -24,19 +23,10 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 class PortfolioTest extends AbstractZonkyLeveragingTest {
-
-    @Test
-    void closing() throws IOException {
-        final RemoteBalance b = mock(RemoteBalance.class);
-        final Portfolio p = Portfolio.create(mockTenant(), BlockedAmountProcessor::new, po -> b);
-        p.close();
-        verify(b).close();
-    }
 
     @Test
     void propagates() {

@@ -33,7 +33,7 @@ class PortfolioOverviewImplTest {
     @Test
     void emptyPortfolio() {
         final BigDecimal balance = BigDecimal.TEN;
-        final PortfolioOverview po = PortfolioOverviewImpl.calculate(balance, Statistics.empty(),
+        final PortfolioOverview po = PortfolioOverviewImpl.calculate(() -> balance, Statistics.empty(),
                                                                      Collections.emptyMap(), Collections.emptyMap());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
@@ -57,7 +57,7 @@ class PortfolioOverviewImplTest {
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final BigDecimal adj = BigDecimal.TEN;
         final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
-        final PortfolioOverview po = PortfolioOverviewImpl.calculate(BigDecimal.ZERO, Statistics.empty(), in, in);
+        final PortfolioOverview po = PortfolioOverviewImpl.calculate(() -> BigDecimal.ZERO, Statistics.empty(), in, in);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);

@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -40,6 +41,7 @@ class TokenBasedTenant implements Tenant {
     private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
     private Instant lastRestrictionsUpdate = Instant.EPOCH;
     private Restrictions restrictions = null;
+    private RemoteBalance balance;
 
     TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
                      final boolean isDryRun, final Duration refreshAfter) {
@@ -47,6 +49,7 @@ class TokenBasedTenant implements Tenant {
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
         this.supplier = scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, refreshAfter);
+        this.balance = new RemoteBalanceImpl(this);
     }
 
     @Override
@@ -75,6 +78,11 @@ class TokenBasedTenant implements Tenant {
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
         return getTokenSupplier(scope).isAvailable();
+    }
+
+    @Override
+    public RemoteBalance getBalance() {
+        return balance;
     }
 
     @Override

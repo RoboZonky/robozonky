@@ -53,7 +53,7 @@ class InvestingDaemon extends DaemonOperation {
     @Override
     protected void execute(final Portfolio portfolio, final Tenant authenticated) {
         // don't query anything unless we have enough money to invest
-        final long balance = portfolio.getRemoteBalance().get().longValue();
+        final long balance = authenticated.getBalance().get().longValue();
         final int minimum = authenticated.getRestrictions().getMinimumInvestmentAmount();
         if (balance < minimum) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);

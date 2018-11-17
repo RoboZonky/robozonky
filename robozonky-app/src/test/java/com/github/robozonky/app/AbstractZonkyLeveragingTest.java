@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Random;
 
@@ -28,7 +27,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.Portfolio;
-import com.github.robozonky.app.daemon.RemoteBalance;
 import com.github.robozonky.app.daemon.Transactional;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
@@ -42,10 +40,6 @@ import static org.mockito.Mockito.when;
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
-
-    protected static RemoteBalance mockBalance(final Zonky zonky) {
-        return new MockedBalance(zonky);
-    }
 
     protected static MyInvestment mockMyInvestment() {
         return mockMyInvestment(OffsetDateTime.now());
@@ -111,28 +105,4 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         LoanCache.get().clean();
     }
 
-    private static final class MockedBalance implements RemoteBalance {
-
-        private final Zonky zonky;
-        private BigDecimal difference = BigDecimal.ZERO;
-
-        public MockedBalance(final Zonky zonky) {
-            this.zonky = zonky;
-        }
-
-        @Override
-        public void update(final BigDecimal change) {
-            difference = difference.add(change);
-        }
-
-        @Override
-        public BigDecimal get() {
-            return zonky.getWallet().getAvailableBalance().add(difference);
-        }
-
-        @Override
-        public void close() {
-
-        }
-    }
 }
