@@ -17,18 +17,69 @@
 package com.github.robozonky.app.delinquencies;
 
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
-interface Storage {
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.state.InstanceState;
 
-    boolean isKnown(final long investmentId);
+final class Storage {
 
-    boolean add(final long investmentId);
+    private final InstanceState<Storage> state;
+    private final String key;
+    private final Set<Long> originalContents;
+    private final Set<Long> toAdd = new TreeSet<>();
+    private final Set<Long> toRemove = new TreeSet<>();
 
-    boolean remove(final long investmentId);
+    public Storage(final Tenant tenant, final String key) {
+        this.state = tenant.getState(Storage.class);
+        this.key = key;
+        this.originalContents = state.getValues(key)
+                .orElse(Stream.empty())
+                .map(Long::parseLong)
+                .collect(Collectors.toSet());
+    }
 
-    void persist();
+    public synchronized boolean isKnown(final long investmentId) {
+        return originalContents.contains(investmentId);
+    }
 
-    LongStream complement(final Set<Long> investmentIds);
+    public synchronized boolean add(final long investmentId) {
+        toRemove.remove(investmentId);
+        if (originalContents.contains(investmentId)) {
+            return false;
+        } else {
+            return toAdd.add(investmentId);
+        }
+    }
 
+    public synchronized boolean remove(final long investmentId) {
+        toAdd.remove(investmentId);
+        if (originalContents.contains(investmentId)) {
+            return toRemove.add(investmentId);
+        } else {
+            return false;
+        }
+    }
+
+    public synchronized void persist() {
+        if (toAdd.isEmpty() && toRemove.isEmpty()) {
+            return;
+        }
+        originalContents.addAll(toAdd);
+        originalContents.removeAll(toRemove);
+        final Stream<String> result = originalContents.stream()
+                .distinct()
+                .sorted()
+                .map(String::valueOf);
+        state.update(m -> m.put(key, result));
+    }
+
+    public synchronized LongStream complement(final Set<Long> investmentIds) {
+        return originalContents.stream()
+                .filter(i -> !investmentIds.contains(i))
+                .mapToLong(i -> i);
+    }
 }

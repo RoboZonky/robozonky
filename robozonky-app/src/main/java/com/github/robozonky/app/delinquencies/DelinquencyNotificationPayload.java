@@ -120,18 +120,36 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         final int count = currentDelinquents.size();
         LOGGER.debug("There are {} delinquent investments to process.", count);
         final Registry registry = new Registry(tenant);
-        registry.complement(currentDelinquents.values())
-                .parallelStream()
-                .forEach(i -> {
-                    registry.remove(i);
-                    processNoLongerDelinquent(i, transactional);
-                });
-        currentDelinquents.values().parallelStream()
-                .filter(DelinquencyNotificationPayload::isDefaulted)
-                .forEach(currentDelinquent -> processDefaulted(transactional, registry, currentDelinquent));
-        currentDelinquents.values().parallelStream()
-                .filter(i -> !isDefaulted(i))
-                .forEach(currentDelinquent -> processDelinquent(transactional, registry, currentDelinquent));
+        if (registry.isInitialized()) {
+            registry.complement(currentDelinquents.values())
+                    .parallelStream()
+                    .forEach(i -> {
+                        registry.remove(i);
+                        processNoLongerDelinquent(i, transactional);
+                    });
+            currentDelinquents.values().parallelStream()
+                    .filter(DelinquencyNotificationPayload::isDefaulted)
+                    .forEach(currentDelinquent -> processDefaulted(transactional, registry, currentDelinquent));
+            currentDelinquents.values().parallelStream()
+                    .filter(i -> !isDefaulted(i))
+                    .forEach(currentDelinquent -> processDelinquent(transactional, registry, currentDelinquent));
+        } else {
+            currentDelinquents.values().parallelStream()
+                    .filter(DelinquencyNotificationPayload::isDefaulted)
+                    .forEach(currentDelinquent -> registry.addCategory(currentDelinquent, Category.DEFAULTED));
+            currentDelinquents.values().parallelStream()
+                    .filter(i -> !isDefaulted(i))
+                    .forEach(currentDelinquent -> {
+                        final int dayPastDue = currentDelinquent.getDaysPastDue();
+                        for (final Category cat: Category.values()) {
+                            if (cat.getThresholdInDays() < dayPastDue) {
+                                continue;
+                            }
+                            registry.addCategory(currentDelinquent, Category.DEFAULTED);
+                        }
+                        LOGGER.debug("No category found for investment #{}.", currentDelinquent.getId());
+                    });
+        }
         registry.persist();
         transactional.run();
     }

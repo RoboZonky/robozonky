@@ -27,15 +27,26 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
-class StorageImplTest extends AbstractRoboZonkyTest {
+class StorageTest extends AbstractRoboZonkyTest {
 
     private final Zonky zonky = harmlessZonky(10_000);
     private final Tenant tenant = mockTenant(zonky);
 
     @Test
+    void persists() {
+        final String uid = UUID.randomUUID().toString();
+        final long id = 1;
+        final Storage s = new Storage(tenant, uid);
+        s.add(id);
+        s.persist();
+        final Storage s2 = new Storage(tenant, uid);
+        assertThat(s2.isKnown(id)).isTrue();
+    }
+
+    @Test
     void doesNotAddTwice() {
         final long id = 1;
-        final StorageImpl s = new StorageImpl(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
         assertThat(s.add(id)).isTrue();
         assertThat(s.add(id)).isFalse();
         assertThat(s.remove(id)).isFalse(); // the original did not contain this id
@@ -46,7 +57,7 @@ class StorageImplTest extends AbstractRoboZonkyTest {
     @Test
     void complementsWhenEmpty() {
         final long id = 1;
-        final StorageImpl s = new StorageImpl(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
         assertThat(s.complement(Collections.emptySet())).isEmpty();
         assertThat(s.complement(Collections.singleton(id))).isEmpty();
     }
@@ -54,7 +65,7 @@ class StorageImplTest extends AbstractRoboZonkyTest {
     @Test
     void complementsWhenHasValue() {
         final long id = 1;
-        final StorageImpl s = new StorageImpl(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
         s.add(id);
         s.persist();
         // start the test
@@ -66,7 +77,7 @@ class StorageImplTest extends AbstractRoboZonkyTest {
     @Test
     void doesNotRemoveTwice() {
         final long id = 1;
-        final StorageImpl s = new StorageImpl(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
         s.add(id);
         s.persist();
         // now start the test
@@ -80,7 +91,7 @@ class StorageImplTest extends AbstractRoboZonkyTest {
     @Test
     void onlyChangesWhenPersisted() {
         final long id = 1;
-        final StorageImpl s = new StorageImpl(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
         assumeThat(s.isKnown(id)).isFalse();
         s.add(id);
         assertThat(s.isKnown(id)).isFalse();

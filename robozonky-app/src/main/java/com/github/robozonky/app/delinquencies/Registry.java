@@ -37,7 +37,7 @@ final class Registry {
     public Registry(final Tenant tenant) {
         this.tenant = tenant;
         final Map<Category, Storage> tmp = new EnumMap<>(Category.class);
-        Arrays.stream(Category.values()).forEach(cat -> tmp.put(cat, new StorageImpl(tenant, getId(cat))));
+        Arrays.stream(Category.values()).forEach(cat -> tmp.put(cat, new Storage(tenant, getId(cat))));
         this.storages = Collections.unmodifiableMap(tmp);
     }
 
@@ -53,6 +53,10 @@ final class Registry {
         return investment.getId();
     }
 
+    public boolean isInitialized() {
+        return tenant.getState(Storage.class).isInitialized();
+    }
+
     public Collection<Investment> complement(final Collection<Investment> investments) {
         final Set<Long> idsToComplement = investments.stream().map(Registry::getId).collect(Collectors.toSet());
         return storages.get(Category.NEW).complement(idsToComplement)
@@ -64,10 +68,11 @@ final class Registry {
 
     public EnumSet<Category> getCategories(final Investment investment) {
         final long id = getId(investment);
-        return storages.entrySet().stream()
+        final Set<Category> result = storages.entrySet().stream()
                 .filter(e -> e.getValue().isKnown(id))
                 .map(Map.Entry::getKey)
-                .collect(Collectors.collectingAndThen(Collectors.toSet(), EnumSet::copyOf));
+                .collect(Collectors.toSet());
+        return result.isEmpty() ? EnumSet.noneOf(Category.class) : EnumSet.copyOf(result);
     }
 
     private void addToCategory(final Category category, final long id) {

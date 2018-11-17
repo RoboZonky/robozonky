@@ -142,7 +142,7 @@ enum Category {
         final Set<Category> result = Arrays.stream(Category.values())
                 .filter(category -> category.thresholdInDays < this.thresholdInDays && category.thresholdInDays >= 0)
                 .collect(Collectors.toSet());
-        return EnumSet.copyOf(result);
+        return result.isEmpty() ? EnumSet.noneOf(Category.class) : EnumSet.copyOf(result);
     }
 
     /**
