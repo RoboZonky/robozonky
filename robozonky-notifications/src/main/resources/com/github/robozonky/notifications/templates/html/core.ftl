@@ -69,8 +69,9 @@
         </#if>
       </ul>
       <p>
-        <small>Vygeneroval <em>${data.session.userAgent}</em> dne ${timestamp?date} v ${timestamp?time}. Dotazy
-        pokládejte <a href="https://groups.google.com/forum/#!forum/robozonky-users">v uživatelské skupině</a>.</small>
+        <small>Vygeneroval <em>${data.session.userAgent}</em> dne ${timestamp?date} v ${timestamp?time}. Platnost
+        uvedených dat k ${data.conception?time} dne ${data.conception?date}. Dotazy pokládejte
+        <a href="https://groups.google.com/forum/#!forum/robozonky-users">v uživatelské skupině</a>.</small>
       </p>
     </footer>
 </body>

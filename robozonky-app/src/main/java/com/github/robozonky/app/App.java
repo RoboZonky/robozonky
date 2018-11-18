@@ -22,8 +22,8 @@ import java.util.Optional;
 
 import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
-import com.github.robozonky.app.events.EventFactory;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.util.IoUtil;

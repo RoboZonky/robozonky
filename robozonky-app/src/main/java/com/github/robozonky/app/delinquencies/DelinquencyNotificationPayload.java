@@ -35,10 +35,10 @@ import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.robozonky.app.events.EventFactory.loanLost;
-import static com.github.robozonky.app.events.EventFactory.loanLostLazy;
-import static com.github.robozonky.app.events.EventFactory.loanNoLongerDelinquent;
-import static com.github.robozonky.app.events.EventFactory.loanNoLongerDelinquentLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanLost;
+import static com.github.robozonky.app.events.impl.EventFactory.loanLostLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquent;
+import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquentLazy;
 
 /**
  * Updates delinquency information based on the information about loans that are either currently delinquent or no

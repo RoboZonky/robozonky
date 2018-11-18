@@ -27,6 +27,7 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
+import com.github.robozonky.app.events.impl.EventFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,7 +74,7 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
         events.injectEventListener(l);
         events.fire(s);
         verify(e).requested(any());
-        verify(e).queued(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
+        verify(e).ready(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
         verify(e).fired(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
         verify(l).handle(s, SESSION);
     }

@@ -26,8 +26,8 @@ import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
 
-import static com.github.robozonky.app.events.EventFactory.loanRepaid;
-import static com.github.robozonky.app.events.EventFactory.loanRepaidLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanRepaid;
+import static com.github.robozonky.app.events.impl.EventFactory.loanRepaidLazy;
 
 class LoanRepaidProcessor extends TransactionProcessor {
 

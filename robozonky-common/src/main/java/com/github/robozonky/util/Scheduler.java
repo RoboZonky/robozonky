@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public class Scheduler implements AutoCloseable {
 
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzBackground"));
+    public static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzBackground"));
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final LazyInitialized<Scheduler> BACKGROUND_SCHEDULER = LazyInitialized.create(() -> {
         LOGGER.debug("Instantiating new background scheduler.");

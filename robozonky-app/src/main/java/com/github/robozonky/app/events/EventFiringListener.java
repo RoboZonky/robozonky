@@ -33,11 +33,11 @@ public interface EventFiringListener {
 
     /**
      * Called after {@link #requested(LazyEvent)} and before {@link #fired(Event, Class)}. The event was already
-     * initialized and was scheduled for being sent to the {@link EventListener}.
+     * initialized and is about to be sent to the {@link EventListener}.
      * @param event The event that was instantiated from the original {@link LazyEvent}.
      * @param listener
      */
-    <T extends Event> void queued(T event, Class<? extends EventListener<T>> listener);
+    <T extends Event> void ready(T event, Class<? extends EventListener<T>> listener);
 
     /**
      * Event was processed and delivered to the {@link EventListener}.

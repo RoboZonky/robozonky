@@ -29,7 +29,7 @@ import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.events.EventFactory;
+import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.SoftAssertions;

@@ -26,6 +26,19 @@ import java.time.OffsetDateTime;
  */
 public interface Event {
 
+    /**
+     *
+     * @return When the event instance was created.
+     */
     OffsetDateTime getCreatedOn();
+
+    /**
+     *
+     * @return When the event instance was requested to be created. Unless the event was instantiated lazily, will be
+     * the same as {@link #getCreatedOn()}.
+     */
+    default OffsetDateTime getConceivedOn() {
+        return getCreatedOn();
+    }
 
 }
