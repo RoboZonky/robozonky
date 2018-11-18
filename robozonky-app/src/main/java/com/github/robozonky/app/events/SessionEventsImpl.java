@@ -134,7 +134,7 @@ final class SessionEventsImpl implements SessionEvents {
         final Class<? extends Event> eventType = event.getEventType();
         final List<EventListenerSupplier<? extends Event>> s = suppliers.computeIfAbsent(eventType, key -> {
             final Class<? extends Event> impl = getImplementingEvent(eventType);
-            LOGGER.debug("Event {} implements {}.", eventType, impl);
+            LOGGER.trace("Event {} implements {}.", eventType, impl);
             return new ArrayList<>(ListenerServiceLoader.load(impl));
         });
         // send the event to all listeners, execute on the background
