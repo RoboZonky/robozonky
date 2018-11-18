@@ -27,9 +27,9 @@ import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.robozonky.app.events.EventFactory.roboZonkyCrashed;
-import static com.github.robozonky.app.events.EventFactory.roboZonkyEnding;
-import static com.github.robozonky.app.events.EventFactory.roboZonkyInitialized;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyCrashed;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyEnding;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyInitialized;
 
 /**
  * Will send {@link RoboZonkyInitializedEvent} immediately and {@link RoboZonkyEndingEvent} when it's time to shut down

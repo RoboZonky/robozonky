@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * Contains all the logic used for creating {@link com.github.robozonky.api.notifications.Event} instances and
- * distributing them to {@link com.github.robozonky.api.notifications.EventListener}s. Refer to
- * {@link com.github.robozonky.app.events.impl.EventFactory} in order to create
- * {@link com.github.robozonky.api.notifications.Event} instances. Call
- * {@link com.github.robozonky.app.events.Events#fire(com.github.robozonky.app.events.LazyEvent)} to fire them.
- */
-package com.github.robozonky.app.events;
+package com.github.robozonky.app.events.impl;
+
+import java.util.Optional;
+
+import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
+
+final class RoboZonkyCrashedEventImpl extends AbstractEventImpl implements RoboZonkyCrashedEvent {
+
+    private final Throwable cause;
+
+    public RoboZonkyCrashedEventImpl(final Throwable cause) {
+        this.cause = cause;
+    }
+
+    @Override
+    public Optional<Throwable> getCause() {
+        return Optional.ofNullable(this.cause);
+    }
+}

@@ -36,15 +36,15 @@ import com.github.robozonky.common.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.robozonky.app.events.EventFactory.executionCompleted;
-import static com.github.robozonky.app.events.EventFactory.executionStarted;
-import static com.github.robozonky.app.events.EventFactory.investmentDelegated;
-import static com.github.robozonky.app.events.EventFactory.investmentMade;
-import static com.github.robozonky.app.events.EventFactory.investmentMadeLazy;
-import static com.github.robozonky.app.events.EventFactory.investmentRejected;
-import static com.github.robozonky.app.events.EventFactory.investmentRequested;
-import static com.github.robozonky.app.events.EventFactory.investmentSkipped;
-import static com.github.robozonky.app.events.EventFactory.loanRecommended;
+import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.executionStarted;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentDelegated;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentRejected;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentRequested;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentSkipped;
+import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into

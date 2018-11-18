@@ -21,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.app.events.impl.EventFactory;
 
 public interface Events {
 
@@ -39,7 +40,7 @@ public interface Events {
      */
     @SuppressWarnings("unchecked")
     default CompletableFuture<Void> fire(final Event event) {
-        return fire(new LazyEventImpl<>((Class<Event>) event.getClass(), () -> event));
+        return fire(EventFactory.async((Class<Event>) event.getClass(), () -> event));
     }
 
     /**

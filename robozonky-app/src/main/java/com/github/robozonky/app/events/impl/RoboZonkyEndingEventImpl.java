@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-/**
- * Contains all the logic used for creating {@link com.github.robozonky.api.notifications.Event} instances and
- * distributing them to {@link com.github.robozonky.api.notifications.EventListener}s. Refer to
- * {@link com.github.robozonky.app.events.impl.EventFactory} in order to create
- * {@link com.github.robozonky.api.notifications.Event} instances. Call
- * {@link com.github.robozonky.app.events.Events#fire(com.github.robozonky.app.events.LazyEvent)} to fire them.
- */
-package com.github.robozonky.app.events;
+package com.github.robozonky.app.events.impl;
+
+import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
+
+final class RoboZonkyEndingEventImpl extends AbstractEventImpl implements RoboZonkyEndingEvent {
+
+}

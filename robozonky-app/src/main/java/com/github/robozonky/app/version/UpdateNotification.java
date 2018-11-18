@@ -28,8 +28,8 @@ import com.github.robozonky.util.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.robozonky.app.events.EventFactory.roboZonkyExperimentalUpdateDetected;
-import static com.github.robozonky.app.events.EventFactory.roboZonkyUpdateDetected;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyExperimentalUpdateDetected;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyUpdateDetected;
 
 /**
  * When notified of a change in versions by {@link UpdateMonitor}, this class will determine whether or not these

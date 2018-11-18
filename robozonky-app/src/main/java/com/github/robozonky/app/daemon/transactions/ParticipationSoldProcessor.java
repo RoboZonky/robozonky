@@ -25,8 +25,8 @@ import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
 
-import static com.github.robozonky.app.events.EventFactory.investmentSold;
-import static com.github.robozonky.app.events.EventFactory.investmentSoldLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentSold;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentSoldLazy;
 
 class ParticipationSoldProcessor extends TransactionProcessor {
 

@@ -32,12 +32,12 @@ import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.Tenant;
 
-import static com.github.robozonky.app.events.EventFactory.investmentPurchased;
-import static com.github.robozonky.app.events.EventFactory.investmentPurchasedLazy;
-import static com.github.robozonky.app.events.EventFactory.purchaseRecommended;
-import static com.github.robozonky.app.events.EventFactory.purchaseRequested;
-import static com.github.robozonky.app.events.EventFactory.purchasingCompleted;
-import static com.github.robozonky.app.events.EventFactory.purchasingStarted;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
+import static com.github.robozonky.app.events.impl.EventFactory.purchaseRequested;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.

@@ -39,7 +39,7 @@ import com.github.robozonky.util.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.robozonky.app.events.EventFactory.roboZonkyDaemonFailed;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 
 public class DaemonInvestmentMode implements InvestmentMode {
 

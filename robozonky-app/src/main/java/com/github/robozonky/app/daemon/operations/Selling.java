@@ -33,7 +33,7 @@ import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.daemon.PortfolioDependant;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
-import com.github.robozonky.app.events.EventFactory;
+import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import org.slf4j.Logger;
