@@ -22,8 +22,17 @@ import javax.xml.bind.annotation.XmlElement;
 public class Restrictions extends BaseEntity {
 
     private OffsetDateTime requestDate, withdrawalDate;
-    private boolean cannotInvest = true, cannotAccessSmp = true;
+    private boolean cannotInvest, cannotAccessSmp;
     private int minimumInvestmentAmount = 200, maximumInvestmentAmount = 5_000, investmentStep = 200;
+
+    public Restrictions(final boolean permissive) {
+        this.cannotAccessSmp = !permissive;
+        this.cannotInvest = !permissive;
+    }
+
+    public Restrictions() {
+        this(false);
+    }
 
     /**
      * Date of Zonky receiving the investor-initiated contract termination.

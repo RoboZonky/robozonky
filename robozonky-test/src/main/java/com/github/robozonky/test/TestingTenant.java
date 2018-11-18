@@ -57,7 +57,7 @@ class TestingTenant implements Tenant {
 
     @Override
     public Restrictions getRestrictions() {
-        return new Restrictions();
+        return zonky.getRestrictions();
     }
 
     @Override

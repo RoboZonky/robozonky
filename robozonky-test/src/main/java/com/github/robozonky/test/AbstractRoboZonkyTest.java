@@ -65,7 +65,7 @@ public abstract class AbstractRoboZonkyTest {
         final Zonky zonky = mock(Zonky.class);
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
-        when(zonky.getRestrictions()).thenReturn(new Restrictions());
+        when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
         when(zonky.getDevelopments(anyInt())).thenAnswer(i -> Stream.empty());
