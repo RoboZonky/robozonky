@@ -15,4 +15,5 @@ Tuto zprávu dostáváte, protože je tak Váš robot nakonfigurován. Neodpoví
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users
 
-Vygeneroval ${data.session.userAgent} dne ${timestamp?date} v ${timestamp?time}.
+Vygeneroval ${data.session.userAgent} dne ${timestamp?date} v ${timestamp?time}. Platnost uvedených dat k
+${data.conception?time} dne ${data.conception?date}.

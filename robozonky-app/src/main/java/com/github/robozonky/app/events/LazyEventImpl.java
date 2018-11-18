@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.events;
 
+import java.time.OffsetDateTime;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.notifications.Event;
@@ -32,9 +33,11 @@ final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
 
     public LazyEventImpl(final Class<T> eventType, final Supplier<T> eventSupplier) {
         this.eventType = eventType;
+        final OffsetDateTime conceivedOn = OffsetDateTime.now();
         this.supplier = LazyInitialized.create(() -> {
             LOGGER.trace("Instantiating {}.", eventType);
             final T result = eventSupplier.get();
+            ((AbstractEventImpl)result).setConceivedOn(conceivedOn); // make the event aware of when it was requested
             LOGGER.trace("Instantiated to {}.", result);
             return result;
         });
