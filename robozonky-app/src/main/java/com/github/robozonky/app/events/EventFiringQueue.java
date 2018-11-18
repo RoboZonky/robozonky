@@ -62,8 +62,17 @@ final class EventFiringQueue {
         }
     }
 
+    private void ensureConsumerIsAlive() {
+        final Thread t = FIRING_THREAD.get();
+        if (!t.isAlive()) {
+            LOGGER.debug("Consumer thread {} not alive, restarting.", t.getName());
+            FIRING_THREAD.reset();
+            ensureConsumerIsAlive();
+        }
+    }
+
     private synchronized void queue(final Runnable runnable, final long id) {
-        FIRING_THREAD.get(); // lazy creation of the thread that will be emptying the queue
+        ensureConsumerIsAlive(); // lazy creation of the thread that will be emptying the queue
         try {
             QUEUE.put(runnable);
         } catch (final InterruptedException ex) {
