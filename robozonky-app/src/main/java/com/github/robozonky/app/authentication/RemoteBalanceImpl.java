@@ -44,14 +44,14 @@ final class RemoteBalanceImpl implements RemoteBalance {
     }
 
     @Override
-    public synchronized void update(final BigDecimal change, final boolean clearWithNextReload) {
+    public void update(final BigDecimal change, final boolean clearWithNextReload) {
         LOGGER.debug("Requested update of {} CZK that {} ephemeral.", change, clearWithNextReload ? "is" : "is not");
         final AtomicReference<BigDecimal> toUpdate = clearWithNextReload ? ephemeralUpdates : persistentUpdates;
         toUpdate.updateAndGet(old -> old.add(change));
     }
 
     @Override
-    public synchronized BigDecimal get() {
+    public BigDecimal get() {
         final BigDecimal online = wallet.get().map(Wallet::getAvailableBalance).orElseGet(() -> {
             clearUpdates();
             return BigDecimal.ZERO;
