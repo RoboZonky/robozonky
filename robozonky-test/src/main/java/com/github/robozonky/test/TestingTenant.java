@@ -20,6 +20,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
@@ -30,11 +31,13 @@ class TestingTenant implements Tenant {
     private final Zonky zonky;
     private final SessionInfo sessionInfo;
     private final SecretProvider secretProvider;
+    private final RemoteBalance balance;
 
     public TestingTenant(final SessionInfo sessionInfo, final Zonky zonky) {
         this.sessionInfo = sessionInfo;
         this.secretProvider = SecretProvider.inMemory(sessionInfo.getUsername());
         this.zonky = zonky;
+        this.balance = AbstractRoboZonkyTest.mockBalance(zonky);
     }
 
     @Override
@@ -48,8 +51,13 @@ class TestingTenant implements Tenant {
     }
 
     @Override
+    public RemoteBalance getBalance() {
+        return balance;
+    }
+
+    @Override
     public Restrictions getRestrictions() {
-        return new Restrictions();
+        return zonky.getRestrictions();
     }
 
     @Override

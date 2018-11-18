@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
@@ -59,6 +60,11 @@ class StateCleanerTest {
         @Override
         public boolean isAvailable(final ZonkyScope scope) {
             return false;
+        }
+
+        @Override
+        public RemoteBalance getBalance() {
+            return null;
         }
 
         @Override

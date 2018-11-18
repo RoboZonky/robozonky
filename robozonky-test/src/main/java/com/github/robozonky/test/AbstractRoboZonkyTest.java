@@ -28,6 +28,7 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
@@ -64,12 +65,17 @@ public abstract class AbstractRoboZonkyTest {
         final Zonky zonky = mock(Zonky.class);
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
-        when(zonky.getRestrictions()).thenReturn(new Restrictions());
+        when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
         when(zonky.getDevelopments(anyInt())).thenAnswer(i -> Stream.empty());
         return zonky;
     }
+
+    public static RemoteBalance mockBalance(final Zonky zonky) {
+        return new MockedBalance(zonky);
+    }
+
 
     protected static Tenant mockTenant(final Zonky zonky) {
         return mockTenant(zonky, true);

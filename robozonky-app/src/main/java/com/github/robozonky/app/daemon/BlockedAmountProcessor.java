@@ -55,7 +55,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
         return LazyInitialized.create(() -> BlockedAmountProcessor.create(tenant));
     }
 
-    private Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {
+    private synchronized Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {
         final long portfolioSize = tenant.call(Zonky::getStatistics).getCurrentOverview().getPrincipalLeft();
         final Divisor divisor = new Divisor(portfolioSize);
         return tenant.call(Zonky::getBlockedAmounts)
@@ -95,25 +95,20 @@ public class BlockedAmountProcessor implements PortfolioDependant {
 
     private void reset() {
         adjustments.set(null);
+        LOGGER.trace("Reset.");
     }
 
-    void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
+    synchronized void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
         syntheticByLoanId.put(loanId, new Blocked(amount, rating));
         reset();
     }
 
-    private Map<Rating, BigDecimal> calculateAdjustments() {
+    private synchronized Map<Rating, BigDecimal> calculateAdjustments() {
         return Stream.concat(realById.get().values().stream(), syntheticByLoanId.values().stream())
                 .collect(Collectors.groupingBy(Blocked::getRating,
                                                () -> new EnumMap<>(Rating.class),
                                                Collectors.reducing(BigDecimal.ZERO, Blocked::getAmount,
                                                                    BigDecimal::add)));
-    }
-
-    private BigDecimal calculateUnprocessedBlockedBalance() {
-        return Stream.concat(realById.get().values().stream(), syntheticByLoanId.values().stream())
-                .map(Blocked::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     Map<Rating, BigDecimal> getAdjustments() {
@@ -128,11 +123,8 @@ public class BlockedAmountProcessor implements PortfolioDependant {
     }
 
     @Override
-    public void accept(final TransactionalPortfolio transactional) {
-        final BigDecimal before = calculateUnprocessedBlockedBalance();
+    public synchronized void accept(final TransactionalPortfolio transactional) {
         realById.set(readBlockedAmounts(transactional.getTenant()));
-        final BigDecimal after = calculateUnprocessedBlockedBalance();
-        transactional.getPortfolio().getRemoteBalance().update(after.subtract(before));
         reset();
     }
 

@@ -34,12 +34,10 @@ import com.github.robozonky.util.NumberUtil;
 public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
 
     private static final long[] NO_LONGS = new long[0];
-    private final Tenant auth;
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
     public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth) {
-        super(strategy);
-        this.auth = auth;
+        super(auth, strategy);
     }
 
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
@@ -62,8 +60,8 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .map(d -> toDescriptor(d, auth))
+                .map(d -> toDescriptor(d, getTenant()))
                 .collect(Collectors.toList());
-        return PurchasingSession.purchase(portfolio, auth, participations, strategy);
+        return PurchasingSession.purchase(portfolio, getTenant(), participations, strategy);
     }
 }

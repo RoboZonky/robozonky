@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.OverallPortfolio;
@@ -28,18 +29,23 @@ import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
 
-    private final BigDecimal czkAvailable;
+    private static Logger LOGGER = LoggerFactory.getLogger(PortfolioOverviewImpl.class);
+
+    private final Supplier<BigDecimal> czkAvailable;
     private final BigDecimal czkInvested;
     private final BigDecimal czkAtRisk;
     private final Map<Rating, BigDecimal> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> czkAtRiskPerRating;
 
-    private PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
+    private PortfolioOverviewImpl(final Supplier<BigDecimal> czkAvailable,
+                                  final Map<Rating, BigDecimal> czkInvestedPerRating,
                                   final Map<Rating, BigDecimal> czkAtRiskPerRating) {
         this.czkAvailable = czkAvailable;
         this.czkInvested = sum(czkInvestedPerRating.values());
@@ -66,9 +72,12 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         return portfolio.getDue().add(portfolio.getUnpaid());
     }
 
-    public static PortfolioOverviewImpl calculate(final BigDecimal balance, final Statistics statistics,
+    public static PortfolioOverviewImpl calculate(final Supplier<BigDecimal> balance, final Statistics statistics,
                                                   final Map<Rating, BigDecimal> adjustments,
                                                   final Map<Rating, BigDecimal> atRisk) {
+        LOGGER.debug("Risk portfolio from Zonky: {}.", statistics.getRiskPortfolio());
+        LOGGER.debug("Adjustments: {}.", adjustments);
+        LOGGER.debug("At risk: {}.", atRisk);
         final Map<Rating, BigDecimal> amounts = statistics.getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating,
                                           PortfolioOverviewImpl::sum,
@@ -80,14 +89,15 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         return calculate(balance, amounts, amountsAtRisk);
     }
 
-    private static PortfolioOverviewImpl calculate(final BigDecimal balance, final Map<Rating, BigDecimal> amounts,
+    private static PortfolioOverviewImpl calculate(final Supplier<BigDecimal> balance,
+                                                   final Map<Rating, BigDecimal> amounts,
                                                    final Map<Rating, BigDecimal> atRiskAmounts) {
         return new PortfolioOverviewImpl(balance, amounts, atRiskAmounts);
     }
 
     @Override
     public BigDecimal getCzkAvailable() {
-        return this.czkAvailable;
+        return this.czkAvailable.get();
     }
 
     @Override
@@ -139,11 +149,11 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     @Override
     public String toString() {
         return "PortfolioOverviewImpl{" +
-                "czkAtRisk=" + czkAtRisk +
-                ", czkAtRiskPerRating=" + czkAtRiskPerRating +
-                ", czkAvailable=" + czkAvailable +
+                "czkAvailable=" + czkAvailable.get() +
                 ", czkInvested=" + czkInvested +
                 ", czkInvestedPerRating=" + czkInvestedPerRating +
+                ", czkAtRisk=" + czkAtRisk +
+                ", czkAtRiskPerRating=" + czkAtRiskPerRating +
                 '}';
     }
 }

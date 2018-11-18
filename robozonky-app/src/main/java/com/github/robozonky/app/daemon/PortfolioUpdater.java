@@ -32,7 +32,6 @@ import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.util.Backoff;
-import com.github.robozonky.util.IoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,17 +125,15 @@ class PortfolioUpdater implements Runnable,
     public void run() {
         LOGGER.info("Updating internal data structures. May take a long time for large portfolios.");
         try { // close the old portfolio
-            IoUtil.tryConsumer(current::get, old -> {
-                final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(old), Duration.ofSeconds(1),
-                                                                       retryFor);
-                final Optional<Portfolio> maybeNew = backoff.get();
-                if (maybeNew.isPresent()) {
-                    current.set(maybeNew.get());
-                    LOGGER.info("Update finished.");
-                } else {
-                    terminate(backoff.getLastException().orElse(null));
-                }
-            });
+            final Backoff<Portfolio> backoff =
+                    Backoff.exponential(() -> runIt(current.get()), Duration.ofSeconds(1), retryFor);
+            final Optional<Portfolio> maybeNew = backoff.get();
+            if (maybeNew.isPresent()) {
+                current.set(maybeNew.get());
+                LOGGER.info("Update finished.");
+            } else {
+                terminate(backoff.getLastException().orElse(null));
+            }
         } catch (final Exception ex) {
             terminate(ex);
         }

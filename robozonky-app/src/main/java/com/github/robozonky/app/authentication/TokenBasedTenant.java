@@ -17,13 +17,13 @@
 package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -32,14 +32,15 @@ import com.github.robozonky.common.secrets.SecretProvider;
 
 class TokenBasedTenant implements Tenant {
 
+    private static final Restrictions FULLY_RESTRICTED = new Restrictions();
+
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
     private final SecretProvider secrets;
-
     private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
     private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
-    private Instant lastRestrictionsUpdate = Instant.EPOCH;
-    private Restrictions restrictions = null;
+    private final RemoteBalance balance;
+    private final ExpiringRestrictions restrictions;
 
     TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
                      final boolean isDryRun, final Duration refreshAfter) {
@@ -47,20 +48,13 @@ class TokenBasedTenant implements Tenant {
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
         this.supplier = scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, refreshAfter);
+        this.balance = new RemoteBalanceImpl(this);
+        this.restrictions = new ExpiringRestrictions(this);
     }
 
     @Override
     public Restrictions getRestrictions() {
-        return getRestrictions(Instant.now());
-    }
-
-    synchronized Restrictions getRestrictions(final Instant now) {
-        final boolean needsUpdate = lastRestrictionsUpdate.plus(Duration.ofHours(1)).isBefore(now);
-        if (needsUpdate) {
-            restrictions = call(Zonky::getRestrictions);
-            lastRestrictionsUpdate = now;
-        }
-        return restrictions;
+        return restrictions.get().orElse(FULLY_RESTRICTED);
     }
 
     private ZonkyApiTokenSupplier getTokenSupplier(final ZonkyScope scope) {
@@ -75,6 +69,11 @@ class TokenBasedTenant implements Tenant {
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
         return getTokenSupplier(scope).isAvailable();
+    }
+
+    @Override
+    public RemoteBalance getBalance() {
+        return balance;
     }
 
     @Override

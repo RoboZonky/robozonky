@@ -27,18 +27,25 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>, Collection<Investment>> {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Tenant tenant;
     private final Supplier<Optional<S>> strategyProvider;
     private final AtomicBoolean marketplaceCheckPending = new AtomicBoolean(false);
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
 
-    protected StrategyExecutor(final Supplier<Optional<S>> strategy) {
+    protected StrategyExecutor(final Tenant tenant, Supplier<Optional<S>> strategy) {
+        this.tenant = tenant;
         this.strategyProvider = strategy;
+    }
+
+    protected Tenant getTenant() {
+        return tenant;
     }
 
     protected abstract boolean isBalanceUnderMinimum(final int currentBalance);
@@ -51,12 +58,12 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
      */
     protected abstract boolean hasMarketplaceUpdates(final Collection<T> marketplace);
 
-    private boolean skipStrategyEvaluation(final Portfolio portfolio, final Collection<T> marketplace) {
+    private boolean skipStrategyEvaluation(final Collection<T> marketplace) {
         if (marketplace.isEmpty()) {
             LOGGER.debug("Asleep as the marketplace is empty.");
             return true;
         }
-        final BigDecimal currentBalance = portfolio.getRemoteBalance().get();
+        final BigDecimal currentBalance = tenant.getBalance().get();
         if (isBalanceUnderMinimum(currentBalance.intValue())) {
             LOGGER.debug("Asleep due to balance being less than minimum.");
             return true;
@@ -90,7 +97,7 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
 
     private Collection<Investment> invest(final Portfolio portfolio, final S strategy,
                                           final Collection<T> marketplace) {
-        if (skipStrategyEvaluation(portfolio, marketplace)) {
+        if (skipStrategyEvaluation(marketplace)) {
             return Collections.emptyList();
         }
         LOGGER.trace("Processing {} items from the marketplace.", marketplace.size());
