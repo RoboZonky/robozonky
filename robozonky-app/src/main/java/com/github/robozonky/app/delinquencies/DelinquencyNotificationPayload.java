@@ -99,6 +99,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         final int daysPastDue = currentDelinquent.getDaysPastDue();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
+                .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
                 .filter(c -> c.getThresholdInDays() <= daysPastDue)
                 .max(Comparator.comparing(Category::getThresholdInDays));
         if (firstNextCategory.isPresent()) {
@@ -119,7 +120,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             LOGGER.debug("Investment #{} already tracked as defaulted.", investmentId);
         } else {
             final Category category = Category.DEFAULTED;
-            LOGGER.debug("Investment #{} placed to category {}.", investmentId, category);
+            LOGGER.debug("Investment #{} defaulted.", investmentId);
             category.process(transactional, currentDelinquent);
             registry.addCategory(currentDelinquent, category);
         }
