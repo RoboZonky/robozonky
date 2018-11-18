@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class Restrictions extends BaseEntity {
 
     private OffsetDateTime requestDate, withdrawalDate;
-    private boolean cannotInvest = false, cannotAccessSmp = false;
+    private boolean cannotInvest = true, cannotAccessSmp = true;
     private int minimumInvestmentAmount = 200, maximumInvestmentAmount = 5_000, investmentStep = 200;
 
     /**

@@ -35,7 +35,12 @@ final class RemoteBalanceImpl implements RemoteBalance {
     private final AtomicReference<BigDecimal> persistentUpdates = new AtomicReference<>(BigDecimal.ZERO);
 
     public RemoteBalanceImpl(final Tenant tenant) {
-        this.wallet = new ExpiringWallet(tenant, () -> ephemeralUpdates.set(BigDecimal.ZERO));
+        this.wallet = new ExpiringWallet(tenant, this::clearUpdates);
+    }
+
+    private void clearUpdates() {
+        LOGGER.debug("Clearing ephemeral updates.");
+        ephemeralUpdates.set(BigDecimal.ZERO);
     }
 
     @Override
@@ -47,8 +52,10 @@ final class RemoteBalanceImpl implements RemoteBalance {
 
     @Override
     public synchronized BigDecimal get() {
-        final BigDecimal online = wallet.get().map(Wallet::getAvailableBalance).orElse(BigDecimal.ZERO);
+        final BigDecimal online = wallet.get().map(Wallet::getAvailableBalance).orElseGet(() -> {
+            clearUpdates();
+            return BigDecimal.ZERO;
+        });
         return online.add(ephemeralUpdates.get()).add(persistentUpdates.get());
     }
-
 }

@@ -37,12 +37,18 @@ public abstract class Expiring<T> implements Supplier<Optional<T>> {
         this.runWhenUpdated = runWhenUpdated;
     }
 
+    protected Expiring(final Duration expireAfter) {
+        this(expireAfter, () -> {
+            // do nothing
+        });
+    }
+
     protected abstract Optional<T> retrieve();
 
     @Override
     public Optional<T> get() {
         final Tuple<T> result = value.updateAndGet(old -> {
-            if (old == null || old.getRetrievedOn().plus(expireAfter).isBefore(Instant.now())) {
+            if (old == null || !old.getRetrievedOn().plus(expireAfter).isAfter(Instant.now())) {
                 LOGGER.trace("Retrieving new value.");
                 return retrieve().map(v -> {
                     LOGGER.debug("Retrieved new value: {}.", v);

@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.authentication;
 
-import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Optional;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.util.Refreshable;
+import com.github.robozonky.util.Expiring;
 
-class RefreshableBalance extends Refreshable<BigDecimal> {
+final class ExpiringRestrictions extends Expiring<Restrictions> {
 
-    private final Tenant auth;
+    private final Tenant tenant;
 
-    public RefreshableBalance(final Tenant authenticated) {
-        this.auth = authenticated;
+    public ExpiringRestrictions(final Tenant tenant) {
+        super(Duration.ofHours(1));
+        this.tenant = tenant;
     }
 
     @Override
-    protected String getLatestSource() {
-        return auth.call(Zonky::getWallet).getAvailableBalance().toString();
-    }
-
-    @Override
-    protected Optional<BigDecimal> transform(final String source) {
-        return Optional.of(new BigDecimal(source));
+    protected Optional<Restrictions> retrieve() {
+        try {
+            return Optional.of(tenant.call(Zonky::getRestrictions));
+        } catch (final Exception ex) {
+            LOGGER.debug("Failed reading Restrictions from Zonky.", ex);
+            return Optional.empty();
+        }
     }
 }
