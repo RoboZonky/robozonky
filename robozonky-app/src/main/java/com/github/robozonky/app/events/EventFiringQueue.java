@@ -38,9 +38,9 @@ final class EventFiringQueue {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventFiringQueue.class);
     private final AtomicLong counter = new AtomicLong(0);
-    private final BlockingQueue<Runnable> QUEUE = new LinkedBlockingQueue<>();
-    private final LazyInitialized<Thread> FIRING_THREAD = LazyInitialized.create(() -> {
-        final Thread t = Scheduler.THREAD_FACTORY.newThread(new EventFiringRunnable(QUEUE));
+    private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+    private final LazyInitialized<Thread> firingThread = LazyInitialized.create(() -> {
+        final Thread t = Scheduler.THREAD_FACTORY.newThread(new EventFiringRunnable(queue));
         t.start();
         LOGGER.debug("Started event firing thread {}.", t.getName());
         return t;
@@ -63,10 +63,10 @@ final class EventFiringQueue {
     }
 
     private void ensureConsumerIsAlive() {
-        final Thread t = FIRING_THREAD.get();
+        final Thread t = firingThread.get();
         if (!t.isAlive()) {
             LOGGER.debug("Consumer thread {} not alive, restarting.", t.getName());
-            FIRING_THREAD.reset();
+            firingThread.reset();
             ensureConsumerIsAlive();
         }
     }
@@ -74,7 +74,7 @@ final class EventFiringQueue {
     private synchronized void queue(final Runnable runnable, final long id) {
         ensureConsumerIsAlive(); // lazy creation of the thread that will be emptying the queue
         try {
-            QUEUE.put(runnable);
+            queue.put(runnable);
         } catch (final InterruptedException ex) {
             LOGGER.debug("Interrupted while queuing event {}.", id, ex);
             Thread.currentThread().interrupt();
