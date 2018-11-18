@@ -34,7 +34,6 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
-import com.github.robozonky.util.Scheduler;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +43,9 @@ final class SessionEventsImpl implements SessionEvents {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionEventsImpl.class);
     private static final Map<String, SessionEventsImpl> BY_TENANT = new ConcurrentHashMap<>(0);
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
-    private final Set<EventFiringListener> listeners = new LinkedHashSet<>(0);
+    private final Set<EventFiringListener> debugListeners = new LinkedHashSet<>(0);
     private final SessionInfo sessionInfo;
-    private EventListener<? extends Event> injectedListener;
+    private EventListener<? extends Event> injectedDebugListener;
 
     private SessionEventsImpl(final SessionInfo sessionInfo) {
         this.sessionInfo = sessionInfo;
@@ -75,39 +74,48 @@ final class SessionEventsImpl implements SessionEvents {
                 .orElseThrow(() -> new IllegalStateException("Not an event:" + original));
     }
 
-    private static CompletableFuture<Void> runAsync(final Runnable future) {
-        return CompletableFuture.runAsync(future, Scheduler.inBackground().getExecutor());
-    }
-
+    /**
+     * Takes a set of {@link Runnable}s and queues them to be fired on a background thread, in the guaranteed order of
+     * appearance.
+     * @param futures Each item in the stream represents a singular event to be fired.
+     * @return When complete, all listeners have been notified of all the events.
+     */
     @SuppressWarnings("rawtypes")
     private static CompletableFuture<Void> runAsync(final Stream<Runnable> futures) {
-        final CompletableFuture[] results = futures.map(SessionEventsImpl::runAsync).toArray(CompletableFuture[]::new);
+        final CompletableFuture[] results = futures.map(EventFiringQueue.INSTANCE::fire)
+                .toArray(CompletableFuture[]::new);
         return CompletableFuture.allOf(results);
     }
 
+    /**
+     * Represents the payload that will be handed over to {@link #runAsync(Stream)}.
+     * @param lazyEvent The event which will be instantiated and sent to the listener.
+     * @param listener The listener to receive the event.
+     * @param <T> Type of the event.
+     */
     @SuppressWarnings("unchecked")
     private <T extends Event> void fire(final LazyEvent<T> lazyEvent, final EventListener<T> listener) {
         final Class<EventListener<T>> listenerType = (Class<EventListener<T>>) listener.getClass();
         try {
             final T event = lazyEvent.get(); // possibly incurring performance penalties
-            listeners.forEach(l -> l.queued(event, listenerType));
+            debugListeners.forEach(l -> l.ready(event, listenerType));
             listener.handle(event, sessionInfo);
-            listeners.forEach(l -> l.fired(event, listenerType));
+            debugListeners.forEach(l -> l.fired(event, listenerType));
         } catch (final Exception ex) {
-            listeners.forEach(l -> l.failed(lazyEvent, listenerType, ex));
+            debugListeners.forEach(l -> l.failed(lazyEvent, listenerType, ex));
         }
     }
 
     @Override
     public boolean addListener(final EventFiringListener listener) {
         LOGGER.debug("Adding listener {} for {}.", listener, sessionInfo);
-        return listeners.add(listener);
+        return debugListeners.add(listener);
     }
 
     @Override
     public boolean removeListener(final EventFiringListener listener) {
         LOGGER.debug("Removing listener {} for {}.", listener, sessionInfo);
-        return listeners.remove(listener);
+        return debugListeners.remove(listener);
     }
 
     /**
@@ -115,14 +123,14 @@ final class SessionEventsImpl implements SessionEvents {
      * @param listener
      */
     void injectEventListener(final EventListener<? extends Event> listener) {
-        this.injectedListener = listener;
+        this.injectedDebugListener = listener;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public CompletableFuture<Void> fire(final LazyEvent<? extends Event> event) {
         // loan all listeners
-        listeners.forEach(l -> l.requested(event));
+        debugListeners.forEach(l -> l.requested(event));
         final Class<? extends Event> eventType = event.getEventType();
         final List<EventListenerSupplier<? extends Event>> s = suppliers.computeIfAbsent(eventType, key -> {
             final Class<? extends Event> impl = getImplementingEvent(eventType);
@@ -132,9 +140,9 @@ final class SessionEventsImpl implements SessionEvents {
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream().map(Supplier::get)
                 .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()));
-        final Stream<EventListener> withInjected = injectedListener == null ?
+        final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :
-                Stream.concat(Stream.of(injectedListener), registered);
+                Stream.concat(Stream.of(injectedDebugListener), registered);
         return runAsync(withInjected.map(l -> () -> fire(event, l)));
     }
 }

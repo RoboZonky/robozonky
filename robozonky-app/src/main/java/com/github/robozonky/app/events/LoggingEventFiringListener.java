@@ -38,7 +38,7 @@ class LoggingEventFiringListener implements EventFiringListener {
     }
 
     @Override
-    public <T extends Event> void queued(final T event, final Class<? extends EventListener<T>> listener) {
+    public <T extends Event> void ready(final T event, final Class<? extends EventListener<T>> listener) {
         LOGGER.trace("Queued {} to {} for {}.", event, listener, sessionInfo);
     }
 

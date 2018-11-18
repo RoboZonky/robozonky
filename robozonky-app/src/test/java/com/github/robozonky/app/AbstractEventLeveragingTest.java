@@ -41,8 +41,8 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         return listener.getEventsRequested();
     }
 
-    protected List<Event> getEventsQueued() {
-        return listener.getEventsQueued();
+    protected List<Event> getEventsReady() {
+        return listener.getEventsReady();
     }
 
     protected List<Event> getEventsFailed() {
@@ -74,7 +74,7 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         private final List<Event> eventsFired = new ArrayList<>(0);
         private final List<Event> eventsRequested = new ArrayList<>(0);
         private final List<Event> eventsFailed = new ArrayList<>(0);
-        private final List<Event> eventsQueued = new ArrayList<>(0);
+        private final List<Event> eventsReady = new ArrayList<>(0);
 
         @Override
         public void requested(final LazyEvent<? extends Event> event) {
@@ -82,8 +82,8 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         }
 
         @Override
-        public <T extends Event> void queued(final T event, final Class<? extends EventListener<T>> listener) {
-            eventsQueued.add(event);
+        public <T extends Event> void ready(final T event, final Class<? extends EventListener<T>> listener) {
+            eventsReady.add(event);
         }
 
         @Override
@@ -109,15 +109,15 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
             return eventsFailed;
         }
 
-        public List<Event> getEventsQueued() {
-            return eventsQueued;
+        public List<Event> getEventsReady() {
+            return eventsReady;
         }
 
         public void clear() {
             eventsFired.clear();
             eventsRequested.clear();
             eventsFailed.clear();
-            eventsQueued.clear();
+            eventsReady.clear();
         }
     }
 }

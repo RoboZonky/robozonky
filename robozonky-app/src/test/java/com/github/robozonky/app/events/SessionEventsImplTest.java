@@ -73,7 +73,7 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
         events.injectEventListener(l);
         events.fire(s);
         verify(e).requested(any());
-        verify(e).queued(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
+        verify(e).ready(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
         verify(e).fired(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
         verify(l).handle(s, SESSION);
     }
