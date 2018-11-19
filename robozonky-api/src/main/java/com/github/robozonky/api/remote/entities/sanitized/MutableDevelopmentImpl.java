@@ -27,6 +27,7 @@ import com.github.robozonky.internal.util.ToStringBuilder;
 
 final class MutableDevelopmentImpl implements DevelopmentBuilder {
 
+    private int loanId;
     private String publicNote;
     private DevelopmentType type;
     private OffsetDateTime dateFrom, dateTo;
@@ -43,6 +44,12 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
         if (original.getDateTo() != null) {
             this.dateTo = DateDescriptor.toOffsetDateTime(original.getDateTo());
         }
+    }
+
+    @Override
+    public DevelopmentBuilder setLoanId(final int loanId) {
+        this.loanId = loanId;
+        return this;
     }
 
     @Override
@@ -67,6 +74,11 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
     public DevelopmentBuilder setDateTo(final OffsetDateTime dateTo) {
         this.dateTo = dateTo;
         return this;
+    }
+
+    @Override
+    public int getLoanId() {
+        return loanId;
     }
 
     @Override

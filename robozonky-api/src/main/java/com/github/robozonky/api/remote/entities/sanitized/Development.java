@@ -36,6 +36,8 @@ public interface Development {
         return new MutableDevelopmentImpl(original);
     }
 
+    int getLoanId();
+
     DevelopmentType getType();
 
     Optional<String> getPublicNote();
