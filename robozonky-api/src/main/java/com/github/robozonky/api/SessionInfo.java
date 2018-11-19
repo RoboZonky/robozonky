@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -28,10 +29,6 @@ public final class SessionInfo {
 
     public SessionInfo(final String userName) {
         this(userName, null);
-    }
-
-    public SessionInfo(final String userName, final boolean isDryRun) {
-        this(userName, null, isDryRun);
     }
 
     public SessionInfo(final String userName, final String name) {
@@ -74,5 +71,27 @@ public final class SessionInfo {
                 ", name='" + name + '\'' +
                 ", userName='" + userName + '\'' +
                 '}';
+    }
+
+    /**
+     * Within the context of a single app run, sessions with the same username represent the same session.
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final SessionInfo that = (SessionInfo) o;
+        return Objects.equals(userName, that.userName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName);
     }
 }

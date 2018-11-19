@@ -83,12 +83,12 @@ public final class Checker {
                 .orElse(false);
     }
 
-    static boolean notifications(final String username, final URL configurationLocation) {
-        ListenerServiceLoader.registerConfiguration(username, configurationLocation);
-        return Checker.notifications(username, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
+    static boolean notifications(final SessionInfo sessionInfo, final URL configurationLocation) {
+        ListenerServiceLoader.registerConfiguration(sessionInfo, configurationLocation);
+        return Checker.notifications(sessionInfo, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
 
-    static boolean notifications(final String username,
+    static boolean notifications(final SessionInfo sessionInfo,
                                  final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
                 .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()))
@@ -96,7 +96,6 @@ public final class Checker {
         if (listeners.isEmpty()) {
             return false;
         } else {
-            final SessionInfo sessionInfo = new SessionInfo(username);
             final RoboZonkyTestingEvent evt = OffsetDateTime::now;
             listeners.forEach(l -> l.handle(evt, sessionInfo));
             return true;

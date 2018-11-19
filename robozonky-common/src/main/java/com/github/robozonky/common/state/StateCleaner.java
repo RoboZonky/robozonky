@@ -19,7 +19,6 @@ package com.github.robozonky.common.state;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import org.slf4j.Logger;
@@ -51,7 +50,7 @@ final class StateCleaner implements TenantPayload {
     @Override
     public void accept(final Tenant tenant) {
         final String username = tenant.getSessionInfo().getUsername();
-        final TenantState state = TenantState.of(new SessionInfo(username));
+        final TenantState state = TenantState.of(tenant.getSessionInfo());
         final StateStorage storage = state.getStateStorage();
         LOGGER.debug("Starting state cleanup for '{}'.", username);
         synchronized (storage) { // write operations synchronized for the tenant across the application

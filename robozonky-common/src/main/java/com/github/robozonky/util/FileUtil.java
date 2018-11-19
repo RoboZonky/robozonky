@@ -21,10 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -50,7 +48,7 @@ public final class FileUtil {
         }
     }
 
-    public static Collection<URL> filesToUrls(final File... jars) {
+    public static Stream<URL> filesToUrls(final File... jars) {
         if (jars == null) {
             throw new IllegalArgumentException("Null");
         }
@@ -62,7 +60,6 @@ public final class FileUtil {
                         FileUtil.LOGGER.debug("Skipping file: '{}'.", f, e);
                         return Optional.empty();
                     }
-                }).flatMap(o -> o.map(u -> Stream.of((URL) u)).orElse(Stream.empty()))
-                .collect(Collectors.toSet());
+                }).flatMap(o -> o.map(u -> Stream.of((URL) u)).orElse(Stream.empty()));
     }
 }

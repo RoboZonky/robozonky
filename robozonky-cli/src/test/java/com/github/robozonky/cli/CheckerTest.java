@@ -20,7 +20,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -43,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CheckerTest {
 
     private static final char[] SECRET = new char[0];
+    private static final SessionInfo SESSION_INFO = new SessionInfo(UUID.randomUUID().toString());
     @Mock
     private EventListener<RoboZonkyTestingEvent> l;
 
@@ -100,12 +103,12 @@ class CheckerTest {
 
     @Test
     void notificationsEmptyOnInput() {
-        assertThat(Checker.notifications("", Collections.emptyList())).isFalse();
+        assertThat(Checker.notifications(SESSION_INFO, Collections.emptyList())).isFalse();
     }
 
     @Test
     void notificationsEmptyByDefault() throws MalformedURLException {
-        assertThat(Checker.notifications("", new URL("file:///something"))).isFalse();
+        assertThat(Checker.notifications(SESSION_INFO, new URL("file:///something"))).isFalse();
     }
 
     @BeforeEach
@@ -117,7 +120,7 @@ class CheckerTest {
     @Test
     void notificationsProper() {
         final EventListenerSupplier<RoboZonkyTestingEvent> r = () -> Optional.of(l);
-        assertThat(Checker.notifications("", Collections.singletonList(r))).isTrue();
+        assertThat(Checker.notifications(SESSION_INFO, Collections.singletonList(r))).isTrue();
         Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
     }
 }

@@ -17,31 +17,32 @@
 package com.github.robozonky.common.state;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.util.TextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class TenantState {
 
-    private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TenantState.class);
+    private static final Map<SessionInfo, TenantState> TENANT_STATE_MAP = new ConcurrentHashMap<>(0);
     private final FileBackedStateStorage stateStorage;
 
-    TenantState(final String username) { // no external instances
-        this.stateStorage = new FileBackedStateStorage(getFile(username));
+    TenantState(final SessionInfo sessionInfo) { // no external instances
+        this.stateStorage = new FileBackedStateStorage(getFile(sessionInfo.getUsername()));
+        LOGGER.debug("Created new tenant state for {}: {}.", sessionInfo, this);
     }
 
     public static TenantState of(final SessionInfo session) {
-        return Holder.of(session);
+        return TENANT_STATE_MAP.computeIfAbsent(session, TenantState::new);
     }
 
-    public static Collection<String> getKnownTenants() {
-        return Holder.getKnownTenants();
-    }
-
-    StateStorage getStateStorage() {
-        return stateStorage;
+    public static Stream<SessionInfo> getKnownTenants() {
+        return TENANT_STATE_MAP.keySet().stream();
     }
 
     private static File getFile(final String username) {
@@ -50,28 +51,22 @@ public final class TenantState {
         return new File(filename);
     }
 
+    /**
+     * For testing purposes only.
+     */
     public static void destroyAll() {
-        Holder.destroy();
+        getKnownTenants().map(TenantState::of).forEach(t -> {
+            LOGGER.debug("Destroying state for {}.", t);
+            t.stateStorage.destroy();
+        });
+        TENANT_STATE_MAP.clear();
     }
 
-    void assertNotDestroyed() {
-        if (isDestroyed()) {
-            throw new IllegalStateException("Already destroyed.");
-        }
+    StateStorage getStateStorage() {
+        return stateStorage;
     }
 
     public <T> InstanceState<T> in(final Class<T> cls) {
-        assertNotDestroyed();
         return new InstanceStateImpl<>(this, cls.getName(), stateStorage);
-    }
-
-    boolean isDestroyed() {
-        return isDestroyed.get();
-    }
-
-    void destroy() {
-        Holder.destroy(this);
-        stateStorage.destroy();
-        isDestroyed.set(true);
     }
 }

@@ -16,13 +16,14 @@
 
 package com.github.robozonky.common.state;
 
+import java.util.UUID;
+
 import com.github.robozonky.api.SessionInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class TenantStateTest {
 
@@ -37,40 +38,11 @@ class TenantStateTest {
     @Test
     void correctInstanceManagement() {
         final TenantState ts = TenantState.of(SESSION);
-        assertThat(TenantState.getKnownTenants()).containsOnly(SESSION.getUsername());
-        final TenantState ts2 = TenantState.of(new SessionInfo(SESSION.getUsername()));
-        TenantState.destroyAll();
-        assertSoftly(softly -> {
-            softly.assertThat(ts).isSameAs(ts2);
-            softly.assertThat(ts.isDestroyed()).isTrue();
-            softly.assertThat(ts2.isDestroyed()).isTrue();
-            softly.assertThat(TenantState.getKnownTenants()).isEmpty();
-        });
-        final TenantState ts3 = TenantState.of(SESSION);
-        ts3.destroy();
-        assertSoftly(softly -> {
-            softly.assertThat(ts3)
-                    .isNotSameAs(ts)
-                    .isNotSameAs(ts2);
-            softly.assertThat(ts3.isDestroyed()).isTrue();
-        });
-        final TenantState ts4 = TenantState.of(SESSION);
-        assertSoftly(softly -> softly.assertThat(ts4)
-                .isNotSameAs(ts)
-                .isNotSameAs(ts2)
-                .isNotSameAs(ts3));
+        assertThat(TenantState.getKnownTenants()).containsOnly(SESSION);
+        final TenantState ts2 = TenantState.of(SESSION);
+        assertThat(ts2).isSameAs(ts);
+        final TenantState ts3 = TenantState.of(new SessionInfo(UUID.randomUUID().toString()));
+        assertThat(ts3).isNotSameAs(ts);
     }
 
-    @Test
-    void destroysProperly() {
-        final TenantState s = new TenantState("someone@robozonky.cz");
-        final InstanceState<TenantStateTest> cats = s.in(TenantStateTest.class);
-        assertThat(cats).isNotNull();
-        cats.reset(); // will succeed
-        s.destroy();
-        assertSoftly(softly -> { // can not succeed once destroyed
-            softly.assertThatThrownBy(() -> s.in(TenantStateTest.class)).isInstanceOf(IllegalStateException.class);
-            softly.assertThatThrownBy(cats::reset).isInstanceOf(IllegalStateException.class);
-        });
-    }
 }

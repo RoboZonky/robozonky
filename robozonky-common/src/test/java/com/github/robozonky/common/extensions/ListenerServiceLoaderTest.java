@@ -18,7 +18,6 @@ package com.github.robozonky.common.extensions;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +56,6 @@ class ListenerServiceLoaderTest {
 
     @Test
     void correctLoading() {
-        final RoboZonkyStartingEvent e = OffsetDateTime::now;
         final ListenerService s1 = mock(ListenerService.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> returned = () -> Optional.of(l);
         doAnswer(i -> Stream.of(returned)).when(s1).findListeners(eq(RoboZonkyStartingEvent.class));

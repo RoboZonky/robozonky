@@ -5793,6 +5793,11 @@
         "code": "java.method.removed",
         "old": "method com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.entities.ZonkyApiToken::unmarshal(java.io.Reader) throws javax.xml.bind.JAXBException",
         "justification": "No longer necessary."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void com.github.robozonky.api.SessionInfo::<init>(java.lang.String, boolean)",
+        "justification": "Was not used anywhere."
       }
     ]
   }

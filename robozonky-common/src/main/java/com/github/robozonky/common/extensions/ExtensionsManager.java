@@ -19,7 +19,6 @@ package com.github.robozonky.common.extensions;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
 import java.util.ServiceLoader;
 
 import com.github.robozonky.internal.util.LazyInitialized;
@@ -41,9 +40,10 @@ enum ExtensionsManager {
 
     ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
         this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
-        final Collection<URL> urls =
-                FileUtil.filesToUrls(extensionsFolder.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar")));
-        return new URLClassLoader(urls.toArray(new URL[0]));
+        final URL[] urls =
+                FileUtil.filesToUrls(extensionsFolder.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar")))
+                        .toArray(URL[]::new);
+        return new URLClassLoader(urls);
     }
 
     ClassLoader retrieveExtensionClassLoader(final String folderName) {

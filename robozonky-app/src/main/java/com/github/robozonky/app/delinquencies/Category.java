@@ -20,11 +20,9 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
@@ -138,11 +136,9 @@ enum Category {
         return thresholdInDays;
     }
 
-    public EnumSet<Category> getLesser() {
-        final Set<Category> result = Arrays.stream(Category.values())
-                .filter(category -> category.thresholdInDays < this.thresholdInDays && category.thresholdInDays >= 0)
-                .collect(Collectors.toSet());
-        return result.isEmpty() ? EnumSet.noneOf(Category.class) : EnumSet.copyOf(result);
+    public Stream<Category> getLesser() {
+        return Arrays.stream(Category.values())
+                .filter(category -> category.thresholdInDays < this.thresholdInDays && category.thresholdInDays >= 0);
     }
 
     /**

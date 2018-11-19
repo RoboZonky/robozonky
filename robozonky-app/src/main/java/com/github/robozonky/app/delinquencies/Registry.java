@@ -83,7 +83,7 @@ final class Registry {
         final long id = getId(investment);
         final Set<Category> categories = category == Category.DEFAULTED ?
                 storages.keySet() :
-                EnumSet.of(category, category.getLesser().toArray(new Category[0]));
+                EnumSet.of(category, category.getLesser().toArray(Category[]::new));
         categories.forEach(cat -> addToCategory(cat, id));
     }
 

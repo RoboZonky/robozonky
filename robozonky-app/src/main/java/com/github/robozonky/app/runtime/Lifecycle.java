@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.internal.util.LazyInitialized;
@@ -36,21 +37,11 @@ import org.slf4j.LoggerFactory;
 public class Lifecycle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Lifecycle.class);
-
+    private static final Set<Thread> HOOKS = new HashSet<>(0);
     private final CountDownLatch circuitBreaker;
     private final MainControl livenessCheck;
     private final LazyInitialized<DaemonShutdownHook> shutdownHook;
-    private volatile Throwable terminationCause = null;
-
-    private static final Set<Thread> HOOKS = new HashSet<>(0);
-
-    /**
-     * For testing purposes. PITest mutations would start these and not kill them, leading to stuck processes.
-     */
-    public static void clearShutdownHooks() {
-        HOOKS.forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
-        HOOKS.clear();
-    }
+    private final AtomicReference<Throwable> terminationCause = new AtomicReference<>();
 
     /**
      * For testing purposes only.
@@ -82,6 +73,14 @@ public class Lifecycle {
         this.shutdownHook = LazyInitialized.create(() -> new DaemonShutdownHook(this, shutdownEnabler));
         hooks.register(LivenessCheck.setup(livenessCheck));
         hooks.register(shutdownEnabler);
+    }
+
+    /**
+     * For testing purposes. PITest mutations would start these and not kill them, leading to stuck processes.
+     */
+    public static void clearShutdownHooks() {
+        HOOKS.forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
+        HOOKS.clear();
     }
 
     /**
@@ -139,7 +138,7 @@ public class Lifecycle {
      */
     public void resumeToFail(final Throwable t) {
         LOGGER.debug("Asking application to die through {}.", this);
-        terminationCause = t;
+        terminationCause.set(t);
         circuitBreaker.countDown();
     }
 
@@ -148,6 +147,6 @@ public class Lifecycle {
      * @return Present if {@link #resumeToFail(Throwable)} had been called previously.
      */
     public Optional<Throwable> getTerminationCause() {
-        return Optional.ofNullable(terminationCause);
+        return Optional.ofNullable(terminationCause.get());
     }
 }
