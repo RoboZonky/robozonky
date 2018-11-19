@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
@@ -24,6 +25,12 @@ public class LoanNoLongerDelinquentEventListener extends AbstractListener<LoanNo
 
     public LoanNoLongerDelinquentEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
+    }
+
+    @Override
+    boolean shouldNotify(final LoanNoLongerDelinquentEvent event, final SessionInfo sessionInfo) {
+        return super.shouldNotify(event, sessionInfo) && delinquencyTracker.isDelinquent(sessionInfo,
+                                                                                         event.getInvestment());
     }
 
     @Override
