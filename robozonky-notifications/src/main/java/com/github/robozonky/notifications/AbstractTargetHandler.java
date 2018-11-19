@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import org.slf4j.Logger;
@@ -81,16 +82,35 @@ public abstract class AbstractTargetHandler {
                                                                                   getHourlyLimit(key)));
     }
 
-    boolean isEnabled() {
+    boolean isEnabledInSettings() {
         return config.readBoolean(target, "enabled", false);
     }
 
+    private boolean isEnabledInSettings(final SupportedListener listener) {
+        final String propName = getCompositePropertyName(listener, "enabled");
+        return this.isEnabledInSettings() && config.readBoolean(target, propName, false);
+    }
+
+    private boolean enableNoLongerDelinquentNotifications() {
+        /*
+         * "no longer delinquent" will only be triggered in case a loan was previously marked as delinquent - those are
+         * "companion" notifications, the first making no sense without the second. therefore we enable it in case
+         * any of the others is enabled as well. it can not be disabled.
+         */
+        return Stream.of(SupportedListener.LOAN_NOW_DELINQUENT, SupportedListener.LOAN_DELINQUENT_10_PLUS,
+                  SupportedListener.LOAN_DELINQUENT_30_PLUS, SupportedListener.LOAN_DELINQUENT_60_PLUS,
+                  SupportedListener.LOAN_DELINQUENT_90_PLUS)
+                .anyMatch(this::isEnabled);
+    }
+
     boolean isEnabled(final SupportedListener listener) {
-        if (listener == SupportedListener.TESTING) {
+        final boolean noLongerDelinquentEnabled = listener == SupportedListener.LOAN_NO_LONGER_DELINQUENT &&
+                enableNoLongerDelinquentNotifications();
+        if (noLongerDelinquentEnabled || listener == SupportedListener.TESTING) {
+            // testing is always enabled so that notification testing in the installer has something to work with
             return true;
         } else {
-            final String propName = getCompositePropertyName(listener, "enabled");
-            return this.isEnabled() && config.readBoolean(target, propName, false);
+            return isEnabledInSettings(listener);
         }
     }
 

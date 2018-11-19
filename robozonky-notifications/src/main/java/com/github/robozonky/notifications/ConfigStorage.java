@@ -58,9 +58,11 @@ public class ConfigStorage {
     }
 
     public boolean readBoolean(final Target target, final String propertyName, final boolean defaultValue) {
-        return read(target, propertyName)
-                .map(Boolean::valueOf)
-                .orElse(defaultValue);
+        return readBoolean(target, propertyName).orElse(defaultValue);
+    }
+
+    public Optional<Boolean> readBoolean(final Target target, final String propertyName) {
+        return read(target, propertyName).map(Boolean::valueOf);
     }
 
     public OptionalInt readInt(final Target target, final String propertyName) {
