@@ -29,10 +29,10 @@ public final class SoldParticipationCache {
     private static final Map<SessionInfo, SoldParticipationCache> INSTANCES = new WeakHashMap<>(0);
 
     private final Set<Integer> listedSoldLocally = new CopyOnWriteArraySet<>();
-    private final ExpiringRemoteSoldList listedSoldRemotely;
+    private final ExpiringRemoteSoldSet listedSoldRemotely;
 
     private SoldParticipationCache(final Tenant tenant) {
-        this.listedSoldRemotely = new ExpiringRemoteSoldList(tenant);
+        this.listedSoldRemotely = new ExpiringRemoteSoldSet(tenant);
     }
 
     private static SoldParticipationCache newCache(final Tenant tenant) {
@@ -48,7 +48,7 @@ public final class SoldParticipationCache {
     }
 
     public boolean wasOnceSold(final int loanId) {
-        return listedSoldLocally.contains(loanId) || listedSoldRemotely.get().map(s -> s.contains(loanId)).orElse(
-                false);
+        return listedSoldLocally.contains(loanId)
+                || listedSoldRemotely.get().map(s -> s.contains(loanId)).orElse(false);
     }
 }

@@ -27,11 +27,11 @@ import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.util.Expiring;
 
-final class ExpiringRemoteSoldList extends Expiring<Set<Integer>> {
+final class ExpiringRemoteSoldSet extends Expiring<Set<Integer>> {
 
     private final Supplier<Set<Integer>> refresher;
 
-    public ExpiringRemoteSoldList(final Tenant tenant) {
+    public ExpiringRemoteSoldSet(final Tenant tenant) {
         super(Duration.ofMinutes(5));
         this.refresher = () -> getSoldLoans(tenant);
     }
