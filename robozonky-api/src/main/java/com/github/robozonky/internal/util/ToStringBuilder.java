@@ -19,10 +19,11 @@ package com.github.robozonky.internal.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +37,7 @@ public final class ToStringBuilder {
         final String[] fieldExclusions = Stream.concat(Stream.of("password"), Arrays.stream(excludeFields))
                 .distinct()
                 .toArray(String[]::new);
-        this.builder = new ToStringBuilder.CustomReflectionToStringBuilder(o)
-                .setExcludeFieldNames(fieldExclusions);
+        this.builder = new CustomReflectionToStringBuilder(o).setExcludeFieldNames(fieldExclusions);
     }
 
     public static LazyInitialized<String> createFor(final Object o, final String... excludeFields) {
@@ -61,7 +61,7 @@ public final class ToStringBuilder {
         private static final int MAX_STRING_LENGTH = 70;
 
         // ignore passwords and loggers
-        private static final List<Class<?>> IGNORED_TYPES = Arrays.asList(char[].class, Logger.class);
+        private static final Set<Class<?>> IGNORED_TYPES = new HashSet<>(Arrays.asList(char[].class, Logger.class));
 
         public CustomReflectionToStringBuilder(final Object o) {
             super(o);
@@ -69,21 +69,20 @@ public final class ToStringBuilder {
 
         @Override
         protected boolean accept(final Field field) {
-            return super.accept(field) && !Modifier.isStatic(field.getModifiers()) &&
-                    IGNORED_TYPES.stream().noneMatch(type -> Objects.equals(field.getType(), type));
+            return super.accept(field)
+                    && !Modifier.isStatic(field.getModifiers())
+                    && !IGNORED_TYPES.contains(field.getType());
         }
 
         @Override
         protected Object getValue(final Field field) throws IllegalAccessException {
             final Object value = super.getValue(field);
-            if (value != null && Objects.equals(field.getType(), String.class)) { // long strings will get truncated
+            if (value instanceof String) { // long strings will get truncated
                 final String stringValue = (String) value;
-                final int length = ToStringBuilder.CustomReflectionToStringBuilder.MAX_STRING_LENGTH;
-                if (stringValue.length() > length) {
-                    return stringValue.substring(0, length) + "...";
-                }
+                return StringUtils.abbreviate(stringValue, MAX_STRING_LENGTH);
+            } else {
+                return value;
             }
-            return value;
         }
     }
 }

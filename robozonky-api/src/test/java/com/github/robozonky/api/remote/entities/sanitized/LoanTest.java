@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -125,6 +126,16 @@ class LoanTest {
         @Test
         void mainIncomeType() {
             standard(b, b::setMainIncomeType, b::getMainIncomeType, MainIncomeType.EMPLOYMENT);
+        }
+
+        @Test
+        void borrowerNicknames() {
+            standard(b, b::setKnownBorrowerNicknames, b::getKnownBorrowerNicknames, Collections.singleton("someone"));
+        }
+
+        @Test
+        void emptyBorrowerNicknames() {
+            standard(b, b::setKnownBorrowerNicknames, b::getKnownBorrowerNicknames, Collections.emptySet());
         }
 
         @Test

@@ -91,6 +91,21 @@ class DevelopmentTest {
             });
         }
 
+        private <T> void integer(final DevelopmentBuilder builder, final Function<Integer, DevelopmentBuilder> setter,
+                                 final Supplier<Integer> getter, final int value) {
+            assertThat(getter.get()).as("False before setting.").isLessThanOrEqualTo(0);
+            final DevelopmentBuilder newBuilder = setter.apply(value);
+            assertSoftly(softly -> {
+                softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);
+                softly.assertThat(getter.get()).as("Correct value was set.").isEqualTo(value);
+            });
+        }
+
+        @Test
+        void loanId() {
+            integer(db, db::setLoanId, db::getLoanId, 1);
+        }
+
         @Test
         void publicNote() {
             optional(db, db::setPublicNote, db::getPublicNote, "something");
