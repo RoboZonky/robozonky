@@ -22,15 +22,15 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.ConfirmationProviderService;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.StreamUtil;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ConfirmationProviderLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmationProviderLoader.class);
-    private static final LazyInitialized<ServiceLoader<ConfirmationProviderService>> LOADER =
+    private static final Lazy<ServiceLoader<ConfirmationProviderService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ConfirmationProviderService.class);
 
     private ConfirmationProviderLoader() {

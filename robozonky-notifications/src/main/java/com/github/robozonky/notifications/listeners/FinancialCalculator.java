@@ -30,8 +30,8 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.Maps;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ final class FinancialCalculator {
     private static final BigDecimal ONE_PERCENT = new BigDecimal("0.01"), FIVE_PERCENT = new BigDecimal("0.05"),
             TEN_PERCENT = new BigDecimal("0.1"), FIFTEEN_PERCENT = new BigDecimal("0.15"),
             TWENTY_PERCENT = new BigDecimal("0.2");
-    private static final LazyInitialized<Map<Rating, BigDecimal>> FEES = LazyInitialized.create(() -> {
+    private static final Lazy<Map<Rating, BigDecimal>> FEES = Lazy.of(() -> {
         final Map<Rating, BigDecimal> result = new EnumMap<>(Rating.class);
         result.put(Rating.AAAAA, new BigDecimal("0.002"));
         result.put(Rating.AAAA, new BigDecimal("0.005"));
@@ -89,7 +89,7 @@ final class FinancialCalculator {
         /* For the institutional investor ("zonky"), total will cause int overflow. Cap the value be max integer value,
          * since the only place where it will be used in this method doesn't use more than the order of millions.
          */
-        final int totalCapped = (totalInvested > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int)totalInvested + 1;
+        final int totalCapped = (totalInvested > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) totalInvested + 1;
         final SortedMap<Integer, BigDecimal> applicableDiscounts = FEE_DISCOUNTS.headMap(totalCapped);
         if (applicableDiscounts.isEmpty()) {
             return BigDecimal.ZERO;

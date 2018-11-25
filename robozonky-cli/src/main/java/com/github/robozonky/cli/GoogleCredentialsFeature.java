@@ -22,11 +22,11 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.integrations.stonky.CredentialProvider;
 import com.github.robozonky.integrations.stonky.DriveOverview;
 import com.github.robozonky.integrations.stonky.Util;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.sheets.v4.Sheets;
+import io.vavr.Lazy;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "google-sheets-credentials", description = GoogleCredentialsFeature.DESCRIPTION)
@@ -34,7 +34,7 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Obtain authorization for RoboZonky to access Google Sheets.";
     private final HttpTransport transport;
-    private final LazyInitialized<CredentialProvider> credentialProvider;
+    private final Lazy<CredentialProvider> credentialProvider;
     @CommandLine.Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
     private String username;
     @CommandLine.Option(names = {"-h", "--callback-host"}, description = "Host to listen for OAuth response from " +
@@ -48,7 +48,7 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
                              final CredentialProvider credentialProvider) {
         this.username = username;
         this.transport = transport;
-        this.credentialProvider = LazyInitialized.create(() -> credentialProvider == null ?
+        this.credentialProvider = Lazy.of(() -> credentialProvider == null ?
                 CredentialProvider.live(transport, host, port) :
                 credentialProvider);
     }

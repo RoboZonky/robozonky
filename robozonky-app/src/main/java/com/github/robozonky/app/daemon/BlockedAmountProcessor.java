@@ -32,7 +32,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.internal.util.LazyInitialized;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class BlockedAmountProcessor implements PortfolioDependant {
     }
 
     public static Supplier<BlockedAmountProcessor> createLazy(final Tenant tenant) {
-        return LazyInitialized.create(() -> BlockedAmountProcessor.create(tenant));
+        return Lazy.of(() -> BlockedAmountProcessor.create(tenant));
     }
 
     private synchronized Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant) {

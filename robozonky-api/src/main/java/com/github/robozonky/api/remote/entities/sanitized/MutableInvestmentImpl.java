@@ -34,8 +34,8 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MutableInvestmentImpl.class);
     private static final Random RANDOM = new Random(0L);
     private final AtomicReference<OffsetDateTime> investmentDate = new AtomicReference<>();
-    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
     private long id;
     private int loanId, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;

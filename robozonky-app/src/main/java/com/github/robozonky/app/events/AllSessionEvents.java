@@ -19,14 +19,14 @@ package com.github.robozonky.app.events;
 import java.util.concurrent.CompletableFuture;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.internal.util.LazyInitialized;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class AllSessionEvents implements Events {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllSessionEvents.class);
-    private static final LazyInitialized<AllSessionEvents> INSTANCE = LazyInitialized.create(AllSessionEvents::new);
+    private static final Lazy<AllSessionEvents> INSTANCE = Lazy.of(AllSessionEvents::new);
 
     private AllSessionEvents() {
         // no external instances

@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import io.vavr.Lazy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
@@ -40,8 +41,8 @@ public final class ToStringBuilder {
         this.builder = new CustomReflectionToStringBuilder(o).setExcludeFieldNames(fieldExclusions);
     }
 
-    public static LazyInitialized<String> createFor(final Object o, final String... excludeFields) {
-        return LazyInitialized.create(() -> {
+    public static Lazy<String> createFor(final Object o, final String... excludeFields) {
+        return Lazy.of(() -> {
             try {
                 return new ToStringBuilder(o, excludeFields).toString();
             } catch (final Exception ex) {

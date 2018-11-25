@@ -16,6 +16,7 @@
 
 package com.github.robozonky.internal.util;
 
+import io.vavr.Lazy;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -27,7 +28,7 @@ class ToStringBuilderTest {
     // will be ignored by default
     private static final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilderTest.class);
     // will be ignored since specifically excluded
-    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
 
     @Test
     void check() {

@@ -22,8 +22,8 @@ import java.util.Optional;
 import com.github.robozonky.api.remote.entities.DateDescriptor;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.enums.DevelopmentType;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 
 final class MutableDevelopmentImpl implements DevelopmentBuilder {
 
@@ -31,7 +31,7 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
     private String publicNote;
     private DevelopmentType type;
     private OffsetDateTime dateFrom, dateTo;
-    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
 
     MutableDevelopmentImpl() {
 

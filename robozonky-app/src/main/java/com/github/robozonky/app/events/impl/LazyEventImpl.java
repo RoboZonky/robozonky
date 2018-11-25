@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.app.events.LazyEvent;
-import com.github.robozonky.internal.util.LazyInitialized;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +30,12 @@ final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LazyEventImpl.class);
 
     private final Class<T> eventType;
-    private final LazyInitialized<T> supplier;
+    private final Lazy<T> supplier;
 
     public LazyEventImpl(final Class<T> eventType, final Supplier<T> eventSupplier) {
         this.eventType = eventType;
         final OffsetDateTime conceivedOn = OffsetDateTime.now();
-        this.supplier = LazyInitialized.create(() -> {
+        this.supplier = Lazy.of(() -> {
             LOGGER.trace("Instantiating {}.", eventType);
             final T result = eventSupplier.get();
             ((AbstractEventImpl)result).setConceivedOn(conceivedOn); // make the event aware of when it was requested

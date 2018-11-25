@@ -20,8 +20,8 @@ import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ abstract class AbstractEventImpl implements Event {
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private final OffsetDateTime creationDateTime = OffsetDateTime.now();
-    private final LazyInitialized<String> toString;
+    private final Lazy<String> toString;
     private OffsetDateTime conceptionDateTime = creationDateTime;
 
     protected AbstractEventImpl(final String... toStringIgnoredFields) {
@@ -57,7 +57,7 @@ abstract class AbstractEventImpl implements Event {
     public void setConceivedOn(final OffsetDateTime offsetDateTime) {
         LOGGER.debug("Setting conception time of {}, creation time remains {}.", offsetDateTime, creationDateTime);
         conceptionDateTime = offsetDateTime;
-        toString.reset(); // toString() will have changed by this
+        // FIXME toString.reset(); // toString() will have changed by this
     }
 
     @Override

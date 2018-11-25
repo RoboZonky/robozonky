@@ -23,8 +23,8 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.Scheduler;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ final class EventFiringQueue {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventFiringQueue.class);
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-    private final LazyInitialized<Thread> firingThread = LazyInitialized.create(() -> {
+    private final Lazy<Thread> firingThread = Lazy.of(() -> {
         final Thread t = Scheduler.THREAD_FACTORY.newThread(new EventFiringRunnable(queue));
         t.start();
         LOGGER.debug("Started event firing thread {}.", t.getName());
@@ -66,7 +66,7 @@ final class EventFiringQueue {
         final Thread t = firingThread.get();
         if (!t.isAlive()) {
             LOGGER.debug("Consumer thread {} not alive, restarting.", t.getName());
-            firingThread.reset();
+            // FIXME firingThread.reset();
             ensureConsumerIsAlive();
         }
     }
