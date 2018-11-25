@@ -31,7 +31,7 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
     private String publicNote;
     private DevelopmentType type;
     private OffsetDateTime dateFrom, dateTo;
-    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     MutableDevelopmentImpl() {
 

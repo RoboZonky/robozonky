@@ -23,15 +23,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import io.vavr.Lazy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ToStringBuilder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilder.class);
     private final ReflectionToStringBuilder builder;
 
     private ToStringBuilder(final Object o, final String... excludeFields) {
@@ -41,15 +38,8 @@ public final class ToStringBuilder {
         this.builder = new CustomReflectionToStringBuilder(o).setExcludeFieldNames(fieldExclusions);
     }
 
-    public static Lazy<String> createFor(final Object o, final String... excludeFields) {
-        return Lazy.of(() -> {
-            try {
-                return new ToStringBuilder(o, excludeFields).toString();
-            } catch (final Exception ex) {
-                LOGGER.debug("Error creating toString().", ex);
-                return "ERROR";
-            }
-        });
+    public static String createFor(final Object o, final String... excludeFields) {
+        return new ToStringBuilder(o, excludeFields).toString();
     }
 
     @Override

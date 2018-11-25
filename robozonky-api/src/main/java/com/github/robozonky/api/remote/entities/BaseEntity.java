@@ -38,7 +38,7 @@ abstract class BaseEntity {
     @XmlTransient
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     @XmlTransient
-    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     private boolean hasBeenCalledBefore(final String key) {
         final String id = this.getClass().getCanonicalName() + ":" + key;

@@ -28,7 +28,7 @@ class ToStringBuilderTest {
     // will be ignored by default
     private static final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilderTest.class);
     // will be ignored since specifically excluded
-    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     @Test
     void check() {

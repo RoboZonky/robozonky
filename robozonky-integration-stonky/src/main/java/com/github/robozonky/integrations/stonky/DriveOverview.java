@@ -47,7 +47,8 @@ public class DriveOverview {
     private final SessionInfo sessionInfo;
     private final Drive driveService;
     private final Sheets sheetService;
-    private final Lazy<String> toString = ToStringBuilder.createFor(this, "sessionInfo", "driveService", "toString");
+    private final Lazy<String> toString =
+            Lazy.of(() -> ToStringBuilder.createFor(this, "sessionInfo", "driveService", "toString"));
     private volatile File folder;
     private volatile File people;
     private volatile File wallet;

@@ -44,7 +44,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MutableInvestmentImpl.class);
     private static final Random RANDOM = new Random(0L);
     private final AtomicReference<OffsetDateTime> investmentDate = new AtomicReference<>();
-    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
     private long id;
     private int loanId, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;

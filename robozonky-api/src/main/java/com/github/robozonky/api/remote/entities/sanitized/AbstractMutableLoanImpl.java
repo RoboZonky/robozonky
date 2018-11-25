@@ -55,7 +55,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private URL url;
     private MyInvestment myInvestment;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
-    private final Lazy<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     AbstractMutableLoanImpl() {
         this.id = RANDOM.nextInt(Integer.MAX_VALUE); // simplifies tests which do not need to IDs themselves
