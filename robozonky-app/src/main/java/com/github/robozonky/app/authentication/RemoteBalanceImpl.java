@@ -17,12 +17,14 @@
 package com.github.robozonky.app.authentication;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
-import com.github.robozonky.util.Expiring;
+import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,16 +32,16 @@ final class RemoteBalanceImpl implements RemoteBalance {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteBalanceImpl.class);
 
-    private final Expiring<Wallet> wallet;
+    private final Reloadable<Wallet> wallet;
     private final AtomicReference<BigDecimal> ephemeralUpdates = new AtomicReference<>(BigDecimal.ZERO);
     private final AtomicReference<BigDecimal> persistentUpdates = new AtomicReference<>(BigDecimal.ZERO);
 
     public RemoteBalanceImpl(final Tenant tenant) {
-        this.wallet = new ExpiringWallet(tenant, this::clearUpdates);
+        this.wallet = Reloadable.of(() -> tenant.call(Zonky::getWallet), Duration.ofMinutes(5), this::clearUpdates);
     }
 
-    private void clearUpdates() {
-        LOGGER.debug("Clearing ephemeral updates.");
+    private void clearUpdates(final Wallet latest) {
+        LOGGER.debug("Clearing ephemeral updates for {} CZK.", latest);
         ephemeralUpdates.set(BigDecimal.ZERO);
     }
 
@@ -52,10 +54,13 @@ final class RemoteBalanceImpl implements RemoteBalance {
 
     @Override
     public BigDecimal get() {
-        final BigDecimal online = wallet.get().map(Wallet::getAvailableBalance).orElseGet(() -> {
-            clearUpdates();
-            return BigDecimal.ZERO;
-        });
+        final BigDecimal online = wallet.get()
+                .map(Wallet::getBalance)
+                .getOrElseGet(ex -> {
+                    LOGGER.info("Failed retrieving Zonky balance, using zero.", ex);
+                    return BigDecimal.ZERO;
+                });
+        LOGGER.debug("New remote balance is {} CZK", online);
         return online.add(ephemeralUpdates.get()).add(persistentUpdates.get());
     }
 }

@@ -16,23 +16,38 @@
 
 package com.github.robozonky.app.daemon.transactions;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.remote.Select;
+import com.github.robozonky.util.Reloadable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SoldParticipationCache {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoldParticipationCache.class);
     private static final Map<SessionInfo, SoldParticipationCache> INSTANCES = new WeakHashMap<>(0);
 
     private final Set<Integer> listedSoldLocally = new CopyOnWriteArraySet<>();
-    private final ExpiringRemoteSoldSet listedSoldRemotely;
+    private final Reloadable<Set<Integer>> listedSoldRemotely;
 
     private SoldParticipationCache(final Tenant tenant) {
-        this.listedSoldRemotely = new ExpiringRemoteSoldSet(tenant);
+        this.listedSoldRemotely = Reloadable.of(() -> {
+            final Select s = new Select().equals("status", "SOLD");
+            return tenant.call(zonky -> zonky.getInvestments(s))
+                    .mapToInt(Investment::getLoanId)
+                    .distinct()
+                    .boxed()
+                    .collect(Collectors.toSet());
+        }, Duration.ofMinutes(5));
     }
 
     private static SoldParticipationCache newCache(final Tenant tenant) {
@@ -48,7 +63,10 @@ public final class SoldParticipationCache {
     }
 
     public boolean wasOnceSold(final int loanId) {
-        return listedSoldLocally.contains(loanId)
-                || listedSoldRemotely.get().map(s -> s.contains(loanId)).orElse(false);
+        return listedSoldLocally.contains(loanId) ||
+                listedSoldRemotely.get().map(s -> s.contains(loanId)).getOrElseGet(ex -> {
+                    LOGGER.info("Failed retrieving sold loans from Zonky.", ex);
+                    return false;
+                });
     }
 }
