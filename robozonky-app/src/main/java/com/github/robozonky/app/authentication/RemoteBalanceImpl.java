@@ -55,7 +55,7 @@ final class RemoteBalanceImpl implements RemoteBalance {
     @Override
     public BigDecimal get() {
         final BigDecimal online = wallet.get()
-                .map(Wallet::getBalance)
+                .map(Wallet::getAvailableBalance)
                 .getOrElseGet(ex -> {
                     clearUpdates(null);
                     LOGGER.info("Failed retrieving Zonky balance, using zero.", ex);
