@@ -59,13 +59,18 @@ public class Scheduler implements AutoCloseable {
         return threadGroup;
     }
 
+    private static Scheduler actuallyGetBackgroundScheduler() {
+        return BACKGROUND_SCHEDULER.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
+    }
+
     public static Scheduler inBackground() {
-        final Scheduler s = BACKGROUND_SCHEDULER.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
-        if (!s.isClosed()) {
+        final Scheduler s = actuallyGetBackgroundScheduler();
+        if (s.isClosed()) {
+            BACKGROUND_SCHEDULER.clear();
+            return actuallyGetBackgroundScheduler();
+        } else {
             return s;
         }
-        BACKGROUND_SCHEDULER.clear();
-        return inBackground();
     }
 
     public ScheduledFuture submit(final Runnable toSchedule) {
