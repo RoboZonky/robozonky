@@ -275,6 +275,11 @@
         <version>3.11.1</version>
       </dependency>
       <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-vavr</artifactId>
+        <version>0.0.1</version>
+      </dependency>
+      <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-netty</artifactId>
         <version>5.4.1</version>

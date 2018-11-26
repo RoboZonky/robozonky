@@ -100,6 +100,7 @@ final class ReloadableImpl<T> implements ManuallyReloadable<T>,
 
         @Override
         public void markReloaded() {
+            needsReload.set(false);
             LOGGER.trace("Marked reloaded on {}.", this);
         }
 
