@@ -27,6 +27,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.util.NumberUtil;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
@@ -42,7 +43,7 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     }
 
     private static boolean isActionable(final LoanDescriptor loanDescriptor) {
-        final OffsetDateTime now = OffsetDateTime.now();
+        final OffsetDateTime now = DateUtil.offsetNow();
         return loanDescriptor.getLoanCaptchaProtectionEndDateTime()
                 .map(d -> d.isBefore(now))
                 .orElse(true);

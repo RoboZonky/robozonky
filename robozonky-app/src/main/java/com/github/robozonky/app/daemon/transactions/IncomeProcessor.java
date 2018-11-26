@@ -28,6 +28,7 @@ import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.internal.util.DateUtil;
 
 public final class IncomeProcessor implements PortfolioDependant {
 
@@ -67,7 +68,7 @@ public final class IncomeProcessor implements PortfolioDependant {
         // transactions from overnight processing have timestamps from the midnight of previous day
         final LocalDate lastUpdate = state.getLastUpdated()
                 .map(u -> u.minusDays(1).toLocalDate())
-                .orElse(LocalDate.now().minusWeeks(1));
+                .orElse(DateUtil.localNow().toLocalDate().minusWeeks(1));
         final Select sinceLastUpdate = new Select().greaterThanOrEquals("transaction.transactionDate", lastUpdate);
         final Tenant tenant = transactional.getTenant();
         final Stream<Transaction> transactions = tenant.call(z -> z.getTransactions(sinceLastUpdate));

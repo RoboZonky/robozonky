@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +100,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
     @Override
     public Optional<T> get() {
         Duration backoffTime = Duration.ZERO;
-        final Instant startedOn = Instant.now();
+        final Instant startedOn = DateUtil.now();
         do {
             wait(backoffTime);
             final T result = execute(operation).orElse(null);
@@ -110,7 +111,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
                 LOGGER.trace("Success.");
                 return Optional.ofNullable(result);
             }
-        } while (startedOn.plus(cancelAfter).isAfter(Instant.now()));
+        } while (startedOn.plus(cancelAfter).isAfter(DateUtil.now()));
         return Optional.empty();
     }
 

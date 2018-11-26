@@ -16,12 +16,10 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.time.OffsetDateTime;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.common.state.TenantState;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.notifications.Target;
 
 class DelinquencyTracker {
@@ -42,7 +40,7 @@ class DelinquencyTracker {
         }
         TenantState.of(sessionInfo)
                 .in(DelinquencyTracker.class)
-                .update(b -> b.put(toId(investment), OffsetDateTime.now(Defaults.ZONE_ID).toString()));
+                .update(b -> b.put(toId(investment), DateUtil.offsetNow().toString()));
     }
 
     public void unsetDelinquent(final SessionInfo sessionInfo, final Investment investment) {

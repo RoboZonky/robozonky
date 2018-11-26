@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.util.Scheduler;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class LoanCache {
     }
 
     private static boolean isExpired(final Pair<Loan, Instant> p) {
-        final Instant deadline = Instant.now().minus(EVICT_AFTER);
+        final Instant deadline = DateUtil.now().minus(EVICT_AFTER);
         return p.getTwo().isBefore(deadline);
     }
 
@@ -97,7 +98,7 @@ public class LoanCache {
     }
 
     private void addLoan(final int loanId, final Loan loan) {
-        runLocked(() -> cache.get().put(loanId, new Pair<>(loan, Instant.now())));
+        runLocked(() -> cache.get().put(loanId, new Pair<>(loan, DateUtil.now())));
     }
 
     public Loan getLoan(final int loanId, final Tenant tenant) {

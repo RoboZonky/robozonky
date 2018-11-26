@@ -26,6 +26,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.github.robozonky.internal.util.DateUtil;
+
 /**
  * OAuth access token for Zonky API.
  * <p>
@@ -54,7 +56,7 @@ public class ZonkyApiToken extends BaseEntity {
      * This is not part of the Zonky API, but it will be useful inside RoboZonky.
      */
     @XmlElement(name = "obtained_on")
-    private OffsetDateTime obtainedOn = OffsetDateTime.now();
+    private OffsetDateTime obtainedOn = DateUtil.offsetNow();
 
     ZonkyApiToken() {
         // fox JAXB
@@ -65,11 +67,11 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn) {
-        this(accessToken, refreshToken, expiresIn, OffsetDateTime.now(), REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
+        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,final String scope) {
-        this(accessToken, refreshToken, expiresIn, OffsetDateTime.now(), REFRESH_TOKEN_STRING, scope);
+        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, scope);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,

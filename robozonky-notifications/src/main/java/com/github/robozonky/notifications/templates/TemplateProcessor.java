@@ -18,12 +18,12 @@ package com.github.robozonky.notifications.templates;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.templates.html.HtmlTemplate;
 import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
@@ -56,7 +56,7 @@ public enum TemplateProcessor {
                            final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
         final Map<String, Object> data = Maps.ofEntries(
-                entry("timestamp", Date.from(Instant.now())),
+                entry("timestamp", Date.from(DateUtil.now())),
                 entry("robozonkyUrl", Defaults.ROBOZONKY_URL),
                 entry("embed", embeddedTemplate),
                 entry("data", embeddedData));

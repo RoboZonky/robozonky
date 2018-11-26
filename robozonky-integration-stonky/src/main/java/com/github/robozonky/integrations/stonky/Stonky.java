@@ -33,6 +33,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.DateUtil;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
@@ -142,7 +143,7 @@ class Stonky implements Function<Tenant, Optional<String>> {
             LOGGER.debug("Making a backup of the existing spreadsheet.");
             final Instant lastModified = Instant.EPOCH.plus(Duration.ofMillis(s.getModifiedTime().getValue()));
             final LocalDate d = lastModified.atZone(Defaults.ZONE_ID).toLocalDate();
-            if (d.isBefore(LocalDate.now())) {
+            if (d.isBefore(DateUtil.localNow().toLocalDate())) {
                 Util.copyFile(driveService, s, o.getFolder(), d + " " + s.getName());
             }
             final Spreadsheet result = sheetsService.spreadsheets().get(s.getId()).execute();

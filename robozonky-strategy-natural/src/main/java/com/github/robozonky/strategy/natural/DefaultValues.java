@@ -16,10 +16,10 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.time.LocalDate;
 import java.time.Period;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 class DefaultValues {
@@ -56,7 +56,7 @@ class DefaultValues {
         if (exitProperties == null) {
             return false;
         } else {
-            return exitProperties.getSelloffStart().isBefore(LocalDate.now());
+            return exitProperties.getSelloffStart().isBefore(DateUtil.localNow().toLocalDate());
         }
     }
 
@@ -64,7 +64,8 @@ class DefaultValues {
         if (exitProperties == null) {
             return -1;
         } else {
-            return Math.max(0, Period.between(LocalDate.now(), exitProperties.getAccountTermination()).toTotalMonths());
+            return Math.max(0, Period.between(DateUtil.localNow().toLocalDate(),
+                                              exitProperties.getAccountTermination()).toTotalMonths());
         }
     }
 

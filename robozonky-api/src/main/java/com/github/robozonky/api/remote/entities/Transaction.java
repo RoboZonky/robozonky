@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
+import com.github.robozonky.internal.util.DateUtil;
 
 public class Transaction extends BaseEntity {
 
@@ -51,7 +52,7 @@ public class Transaction extends BaseEntity {
         this.amount = amount;
         this.category = category;
         this.orientation = orientation;
-        this.transactionDate = OffsetDateTime.now();
+        this.transactionDate = DateUtil.offsetNow();
         this.customMessage = "";
         this.loanId = loan.getId();
         loan.getMyInvestment().ifPresent(i -> this.investmentId = i.getId());
@@ -71,7 +72,7 @@ public class Transaction extends BaseEntity {
         this.amount = amount;
         this.category = category;
         this.orientation = orientation;
-        this.transactionDate = OffsetDateTime.now();
+        this.transactionDate = DateUtil.offsetNow();
         this.customMessage = "";
         this.loanId = investment.getLoanId();
         this.investmentId = investment.getId();

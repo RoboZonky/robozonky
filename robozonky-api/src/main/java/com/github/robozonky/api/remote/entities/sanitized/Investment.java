@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.util.DateUtil;
 
 /**
  * This class is an adapted version of {@link RawInvestment}, with some computed fields added and others removed. Most
@@ -77,7 +78,7 @@ public interface Investment {
         return Investment.fresh(loan, amount)
                 .setId(participation.getInvestmentId())
                 .setRemainingMonths(participation.getRemainingInstalmentCount())
-                .setInvestmentDate(OffsetDateTime.now())
+                .setInvestmentDate(DateUtil.offsetNow())
                 .build();
     }
 

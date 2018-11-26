@@ -43,6 +43,7 @@ import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.Maps;
 
 import static com.github.robozonky.internal.util.Maps.entry;
@@ -123,7 +124,7 @@ final class Util {
     }
 
     private static long getMonthsElapsed(final Investment i) {
-        return Period.between(i.getInvestmentDate().toLocalDate(), LocalDate.now()).toTotalMonths();
+        return Period.between(i.getInvestmentDate().toLocalDate(), DateUtil.localNow().toLocalDate()).toTotalMonths();
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final MarketplaceLoan l) {

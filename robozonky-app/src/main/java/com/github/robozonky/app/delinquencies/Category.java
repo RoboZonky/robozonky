@@ -39,6 +39,7 @@ import com.github.robozonky.app.daemon.Transactional;
 import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +112,7 @@ enum Category {
     private static LazyEvent<? extends Event> getEvent(final Tenant tenant, final Investment investment,
                                                        final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final LocalDate since = LocalDate.now().minusDays(investment.getDaysPastDue());
+        final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getDaysPastDue());
         final int loanId = investment.getLoanId();
         final Collection<Development> developments = getDevelopments(tenant, loanId, since);
         final Loan loan = LoanCache.get().getLoan(loanId, tenant);

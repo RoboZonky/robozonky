@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Random;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.internal.util.DateUtil;
 
 public class BlockedAmount extends BaseEntity {
 
@@ -48,7 +49,7 @@ public class BlockedAmount extends BaseEntity {
         this.loanId = loanId;
         this.amount = loanAmount;
         this.category = category;
-        this.dateStart = OffsetDateTime.now();
+        this.dateStart = DateUtil.offsetNow();
     }
 
     private BlockedAmount() {
