@@ -34,12 +34,11 @@ import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.TenantState;
+import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
 import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -53,13 +52,11 @@ import static org.mockito.Mockito.when;
  * This is a suggested parent class for all RoboZonky tests using this module. It will make sure to clear shared state
  * before and after each state, so that tests don't have unexpected and well-hidden dependencies.
  */
-public abstract class AbstractRoboZonkyTest {
+public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest {
 
     protected static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
                                                                  false),
             SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRoboZonkyTest.class);
 
     protected static Zonky harmlessZonky(final int availableBalance) {
         final Zonky zonky = mock(Zonky.class);
@@ -147,6 +144,6 @@ public abstract class AbstractRoboZonkyTest {
     @AfterEach
     protected void deleteState() {
         TenantState.destroyAll();
-        AbstractRoboZonkyTest.LOGGER.info("Destroyed state.");
+        LOGGER.info("Destroyed state.");
     }
 }
