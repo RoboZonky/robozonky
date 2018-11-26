@@ -61,7 +61,6 @@ final class RemoteBalanceImpl implements RemoteBalance {
                     LOGGER.info("Failed retrieving Zonky balance, using zero.", ex);
                     return BigDecimal.ZERO;
                 });
-        LOGGER.debug("New remote balance is {} CZK", online);
         return online.add(ephemeralUpdates.get()).add(persistentUpdates.get());
     }
 }

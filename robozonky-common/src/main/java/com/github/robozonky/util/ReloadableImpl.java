@@ -79,7 +79,7 @@ final class ReloadableImpl<T> implements ManuallyReloadable<T>,
             value.set(v);
             needsReload.markReloaded();
             runWhenReloaded.accept(v);
-            LOGGER.trace("Reloaded {}.", this);
+            LOGGER.debug("Reloaded {}, new value is {}.", this, v);
         });
     }
 
