@@ -20,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
 import com.github.robozonky.util.ManuallyReloadable;
 import com.github.robozonky.util.Reloadable;
@@ -36,7 +37,7 @@ abstract class AbstractEventImpl implements Event {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    private final OffsetDateTime creationDateTime = OffsetDateTime.now();
+    private final OffsetDateTime creationDateTime = DateUtil.offsetNow();
     private final ManuallyReloadable<String> toString;
     private OffsetDateTime conceptionDateTime = creationDateTime;
 

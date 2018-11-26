@@ -50,6 +50,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +154,7 @@ public class Zonky {
              */
             final Supplier<LocalDate> expectedPayment = () -> i.getNextPaymentDate()
                     .map(OffsetDateTime::toLocalDate)
-                    .orElse(LocalDate.now().minusDays(i.getDaysPastDue()));
+                    .orElse(DateUtil.localNow().toLocalDate()).minusDays(i.getDaysPastDue());
             final LocalDate lastPayment = getTransactions(i)
                     .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
                     .map(Transaction::getTransactionDate)

@@ -24,6 +24,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.github.robozonky.internal.util.DateUtil;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,12 +125,13 @@ final class ReloadableImpl<T> implements ManuallyReloadable<T>,
         @Override
         public boolean getAsBoolean() {
             final Instant lastReloadedInstant = lastReloaded.get();
-            return lastReloadedInstant == null || lastReloadedInstant.plus(reloadAfter).isBefore(Instant.now());
+            return lastReloadedInstant == null ||
+                    lastReloadedInstant.plus(reloadAfter).isBefore(DateUtil.now());
         }
 
         @Override
         public void markReloaded() {
-            lastReloaded.set(Instant.now());
+            lastReloaded.set(DateUtil.now());
             LOGGER.trace("Marked reloaded on {}.", this);
         }
 

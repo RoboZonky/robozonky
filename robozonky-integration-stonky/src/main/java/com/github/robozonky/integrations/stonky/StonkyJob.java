@@ -17,7 +17,6 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 
@@ -25,6 +24,7 @@ import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.jobs.TenantJob;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.DateUtil;
 
 final class StonkyJob implements TenantJob {
 
@@ -44,8 +44,11 @@ final class StonkyJob implements TenantJob {
     @Override
     public Duration startIn() {
         final Duration random = TenantJob.super.startIn();
-        final ZonedDateTime triggerOn = LocalDate.now().plusDays(1).atStartOfDay(Defaults.ZONE_ID).plus(random);
-        return Duration.between(ZonedDateTime.now(), triggerOn);
+        final ZonedDateTime triggerOn = DateUtil.localNow().toLocalDate()
+                .plusDays(1)
+                .atStartOfDay(Defaults.ZONE_ID)
+                .plus(random);
+        return Duration.between(DateUtil.zonedNow(), triggerOn);
     }
 
     @Override

@@ -17,7 +17,6 @@
 package com.github.robozonky.cli;
 
 import java.net.URL;
-import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -35,6 +34,7 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public final class Checker {
         if (listeners.isEmpty()) {
             return false;
         } else {
-            final RoboZonkyTestingEvent evt = OffsetDateTime::now;
+            final RoboZonkyTestingEvent evt = DateUtil::offsetNow;
             listeners.forEach(l -> l.handle(evt, sessionInfo));
             return true;
         }

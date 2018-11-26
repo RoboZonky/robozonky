@@ -21,6 +21,7 @@ import java.util.Set;
 
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.jobs.TenantPayload;
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ final class StateCleaner implements TenantPayload {
     private final OffsetDateTime threshold;
 
     public StateCleaner() {
-        this(OffsetDateTime.now().minusMonths(3));
+        this(DateUtil.offsetNow().minusMonths(3));
     }
 
     StateCleaner(final OffsetDateTime threshold) {

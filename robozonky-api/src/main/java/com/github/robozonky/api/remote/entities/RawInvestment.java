@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.util.DateUtil;
 
 /**
  * It is not recommended to use this class directly as Zonky will return various null references for fields at various
@@ -41,8 +42,9 @@ public class RawInvestment extends BaseInvestment {
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
     private String loanName, nickname, firstName, surname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
-    private OffsetDateTime investmentDate = OffsetDateTime.now(), nextPaymentDate = investmentDate.plusMonths(1),
-            activeTo;
+    private OffsetDateTime investmentDate = DateUtil.offsetNow();
+    private OffsetDateTime nextPaymentDate = investmentDate.plusMonths(1);
+    private OffsetDateTime activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
             duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
             smpFee, paidPenalty = BigDecimal.ZERO;

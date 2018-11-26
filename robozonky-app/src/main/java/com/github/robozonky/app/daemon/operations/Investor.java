@@ -25,6 +25,7 @@ import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +91,7 @@ public class Investor {
         if (alreadySeenBefore) {
             Investor.LOGGER.debug("Loan seen before.");
             final boolean protectedByCaptcha = r.descriptor().getLoanCaptchaProtectionEndDateTime()
-                    .map(date -> OffsetDateTime.now().isBefore(date))
+                    .map(date -> DateUtil.offsetNow().isBefore(date))
                     .orElse(false);
             if (!protectedByCaptcha && !confirmationRequired) {
                 /*
@@ -124,7 +125,7 @@ public class Investor {
         final Optional<OffsetDateTime> captchaEndDateTime =
                 r.descriptor().getLoanCaptchaProtectionEndDateTime();
         final boolean isCaptchaProtected = captchaEndDateTime.isPresent() &&
-                captchaEndDateTime.get().isAfter(OffsetDateTime.now());
+                captchaEndDateTime.get().isAfter(DateUtil.offsetNow());
         final boolean confirmationSupported = this.provider != null;
         if (!isCaptchaProtected) {
             return this.investLocallyFailingOnCaptcha(r);

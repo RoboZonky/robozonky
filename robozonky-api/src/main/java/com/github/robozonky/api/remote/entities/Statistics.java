@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.internal.util.DateUtil;
+
 public class Statistics extends BaseEntity {
 
     private static final AtomicReference<Statistics> EMPTY = new AtomicReference<>();
@@ -56,7 +58,7 @@ public class Statistics extends BaseEntity {
             s.overallOverview = new OverallOverview();
             s.overallPortfolio = new OverallPortfolio(0, 0, 0);
             s.superInvestorOverview = SuperInvestorOverview.empty();
-            s.timestamp = OffsetDateTime.now();
+            s.timestamp = DateUtil.offsetNow();
             return s;
         });
     }
