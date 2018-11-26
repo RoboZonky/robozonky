@@ -25,13 +25,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.ToStringBuilder;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +47,8 @@ public class DriveOverview {
     private final SessionInfo sessionInfo;
     private final Drive driveService;
     private final Sheets sheetService;
-    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "sessionInfo", "driveService",
-                                                                               "toString");
+    private final Lazy<String> toString =
+            Lazy.of(() -> ToStringBuilder.createFor(this, "sessionInfo", "driveService", "toString"));
     private volatile File folder;
     private volatile File people;
     private volatile File wallet;

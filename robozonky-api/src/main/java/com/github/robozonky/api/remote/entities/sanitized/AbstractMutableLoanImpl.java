@@ -32,8 +32,8 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private URL url;
     private MyInvestment myInvestment;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
-    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     AbstractMutableLoanImpl() {
         this.id = RANDOM.nextInt(Integer.MAX_VALUE); // simplifies tests which do not need to IDs themselves

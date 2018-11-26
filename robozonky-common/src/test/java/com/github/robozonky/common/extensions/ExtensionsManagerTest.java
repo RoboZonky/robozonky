@@ -22,7 +22,7 @@ import java.util.ServiceLoader;
 import java.util.UUID;
 
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.internal.util.LazyInitialized;
+import io.vavr.Lazy;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +39,7 @@ class ExtensionsManagerTest {
 
     @Test
     void noExtensionsWithFolderPresent() {
-        final LazyInitialized<ServiceLoader<ListenerService>> result =
+        final Lazy<ServiceLoader<ListenerService>> result =
                 ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
         assertThat(result.get()).isNotNull();
     }

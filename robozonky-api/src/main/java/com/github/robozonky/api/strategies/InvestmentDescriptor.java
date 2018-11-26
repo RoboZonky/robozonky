@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.internal.util.LazyInitialized;
+import io.vavr.Lazy;
 
 /**
  * Carries metadata regarding a {@link MarketplaceLoan}.
@@ -32,7 +32,7 @@ import com.github.robozonky.internal.util.LazyInitialized;
 public final class InvestmentDescriptor implements Descriptor<RecommendedInvestment, InvestmentDescriptor, Investment> {
 
     private final Investment investment;
-    private final LazyInitialized<Loan> related;
+    private final Lazy<Loan> related;
 
     /**
      *
@@ -42,7 +42,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
      */
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related) {
         this.investment = investment;
-        this.related = LazyInitialized.create(related);
+        this.related = Lazy.of(related);
     }
 
     @Override

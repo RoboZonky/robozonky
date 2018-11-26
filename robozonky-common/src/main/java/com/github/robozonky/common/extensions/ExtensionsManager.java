@@ -21,8 +21,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ServiceLoader;
 
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.FileUtil;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +62,8 @@ enum ExtensionsManager {
      * loader initialization throws an exception, the parent class will fail to load and we will get a
      * NoClassDefFoundError which gives us no information as to why it happened.
      */
-    public <T> LazyInitialized<ServiceLoader<T>> getServiceLoader(final Class<T> serviceClass) {
-        return LazyInitialized.create(() -> getServiceLoader(serviceClass, "extensions"));
+    public <T> Lazy<ServiceLoader<T>> getServiceLoader(final Class<T> serviceClass) {
+        return Lazy.of(() -> getServiceLoader(serviceClass, "extensions"));
     }
 
     <T> ServiceLoader<T> getServiceLoader(final Class<T> serviceClass, final String folderName) {

@@ -24,15 +24,15 @@ import java.util.stream.Stream;
 import com.github.robozonky.common.jobs.JobService;
 import com.github.robozonky.common.jobs.SimpleJob;
 import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.StreamUtil;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class JobServiceLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobServiceLoader.class);
-    private static final LazyInitialized<ServiceLoader<JobService>> LOADER =
+    private static final Lazy<ServiceLoader<JobService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(JobService.class);
 
     private JobServiceLoader() {

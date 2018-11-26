@@ -22,8 +22,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ abstract class BaseEntity {
     @XmlTransient
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     @XmlTransient
-    private final LazyInitialized<String> toString = ToStringBuilder.createFor(this, "toString");
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     private boolean hasBeenCalledBefore(final String key) {
         final String id = this.getClass().getCanonicalName() + ":" + key;

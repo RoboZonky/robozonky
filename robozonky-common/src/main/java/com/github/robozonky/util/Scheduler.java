@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.internal.util.LazyInitialized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ public class Scheduler implements AutoCloseable {
 
     public static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzBackground"));
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    private static final LazyInitialized<Scheduler> BACKGROUND_SCHEDULER = LazyInitialized.create(() -> {
+    private static final ManuallyReloadable<Scheduler> BACKGROUND_SCHEDULER = Reloadable.of(() -> {
         LOGGER.debug("Instantiating new background scheduler.");
         /*
          * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
@@ -60,13 +59,18 @@ public class Scheduler implements AutoCloseable {
         return threadGroup;
     }
 
+    private static Scheduler actuallyGetBackgroundScheduler() {
+        return BACKGROUND_SCHEDULER.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
+    }
+
     public static Scheduler inBackground() {
-        final Scheduler s = BACKGROUND_SCHEDULER.get();
+        final Scheduler s = actuallyGetBackgroundScheduler();
         if (s.isClosed()) {
-            BACKGROUND_SCHEDULER.reset();
-            return BACKGROUND_SCHEDULER.get();
+            BACKGROUND_SCHEDULER.clear();
+            return actuallyGetBackgroundScheduler();
+        } else {
+            return s;
         }
-        return s;
     }
 
     public ScheduledFuture submit(final Runnable toSchedule) {

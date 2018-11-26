@@ -29,9 +29,13 @@ import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.util.Reloadable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class TokenBasedTenant implements Tenant {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedTenant.class);
     private static final Restrictions FULLY_RESTRICTED = new Restrictions();
 
     private final SessionInfo sessionInfo;
@@ -40,7 +44,7 @@ class TokenBasedTenant implements Tenant {
     private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
     private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
     private final RemoteBalance balance;
-    private final ExpiringRestrictions restrictions;
+    private final Reloadable<Restrictions> restrictions;
 
     TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
                      final boolean isDryRun, final Duration refreshAfter) {
@@ -49,12 +53,15 @@ class TokenBasedTenant implements Tenant {
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
         this.supplier = scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, refreshAfter);
         this.balance = new RemoteBalanceImpl(this);
-        this.restrictions = new ExpiringRestrictions(this);
+        this.restrictions = Reloadable.of(() -> this.call(Zonky::getRestrictions), Duration.ofHours(1));
     }
 
     @Override
     public Restrictions getRestrictions() {
-        return restrictions.get().orElse(FULLY_RESTRICTED);
+        return restrictions.get().getOrElseGet(ex -> {
+            LOGGER.info("Failed retrieving Zonky restrictions, disabling all operations.", ex);
+            return FULLY_RESTRICTED;
+        });
     }
 
     private ZonkyApiTokenSupplier getTokenSupplier(final ZonkyScope scope) {

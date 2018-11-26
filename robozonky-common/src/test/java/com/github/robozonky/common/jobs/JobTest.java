@@ -14,29 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util;
+package com.github.robozonky.common.jobs;
 
-import io.vavr.Lazy;
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class ToStringBuilderTest {
-
-    // will be ignored by default
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilderTest.class);
-    // will be ignored since specifically excluded
-    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
+class JobTest {
 
     @Test
-    void check() {
-        final String s = toString.get();
+    void defaults() {
+        final Job j = new MyJob();
         assertSoftly(softly -> {
-            softly.assertThat(s).contains(this.getClass().getCanonicalName());
-            softly.assertThat(s).doesNotContain("toString");
-            softly.assertThat(s).doesNotContain("LOGGER");
+            softly.assertThat(j.startIn()).isGreaterThan(Duration.ZERO);
+            softly.assertThat(j.repeatEvery()).isEqualTo(Duration.ZERO);
+            softly.assertThat(j.killIn()).isGreaterThan(Duration.ZERO);
         });
     }
+
+    private static final class MyJob implements Job {
+
+        @Override
+        public Duration repeatEvery() {
+            return Duration.ZERO;
+        }
+    }
+
 }

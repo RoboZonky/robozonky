@@ -20,8 +20,9 @@ import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.internal.util.ToStringBuilder;
+import com.github.robozonky.util.ManuallyReloadable;
+import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +37,13 @@ abstract class AbstractEventImpl implements Event {
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private final OffsetDateTime creationDateTime = OffsetDateTime.now();
-    private final LazyInitialized<String> toString;
+    private final ManuallyReloadable<String> toString;
     private OffsetDateTime conceptionDateTime = creationDateTime;
 
     protected AbstractEventImpl(final String... toStringIgnoredFields) {
         final String[] ignored = Stream.concat(Stream.of("toString"), Stream.of(toStringIgnoredFields))
                 .toArray(String[]::new);
-        this.toString = ToStringBuilder.createFor(this, ignored);
+        this.toString = Reloadable.of(() -> ToStringBuilder.createFor(this, ignored));
     }
 
     public OffsetDateTime getCreatedOn() {
@@ -57,11 +58,11 @@ abstract class AbstractEventImpl implements Event {
     public void setConceivedOn(final OffsetDateTime offsetDateTime) {
         LOGGER.debug("Setting conception time of {}, creation time remains {}.", offsetDateTime, creationDateTime);
         conceptionDateTime = offsetDateTime;
-        toString.reset(); // toString() will have changed by this
+        toString.clear(); // toString() will have changed by this
     }
 
     @Override
     public final String toString() {
-        return toString.get();
+        return toString.get().getOrElse("ERROR");
     }
 }

@@ -25,8 +25,8 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.github.robozonky.util.StreamUtil;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public final class StrategyLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyLoader.class);
-    private static final LazyInitialized<ServiceLoader<StrategyService>> LOADER =
+    private static final Lazy<ServiceLoader<StrategyService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(StrategyService.class);
 
     private StrategyLoader() {
