@@ -5808,6 +5808,11 @@
         "code": "java.method.addedToInterface",
         "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T>>>::setLoanId(int)",
         "justification": "Zonky API 0.120"
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.time.ZonedDateTime com.github.robozonky.api.strategies.PortfolioOverview::getTimestamp()",
+        "justification": "PortfolioOverview now knows when it was created."
       }
     ]
   }

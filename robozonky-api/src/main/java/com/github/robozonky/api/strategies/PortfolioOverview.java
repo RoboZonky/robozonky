@@ -17,6 +17,7 @@
 package com.github.robozonky.api.strategies;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 import com.github.robozonky.api.remote.enums.Rating;
 
@@ -77,4 +78,10 @@ public interface PortfolioOverview {
      * @return Share of the given rating on overall investments.
      */
     BigDecimal getAtRiskShareOnInvestment(final Rating r);
+
+    /**
+     *
+     * @return When this instance was created.
+     */
+    ZonedDateTime getTimestamp();
 }

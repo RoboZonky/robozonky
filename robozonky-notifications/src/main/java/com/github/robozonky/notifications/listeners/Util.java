@@ -24,6 +24,7 @@ import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -63,6 +64,10 @@ final class Util {
 
     private static Date toDate(final OffsetDateTime offsetDateTime) {
         return Date.from(offsetDateTime.toInstant());
+    }
+
+    private static Date toDate(final ZonedDateTime zonedDateTime) {
+        return Date.from(zonedDateTime.toInstant());
     }
 
     private static String identifyLoan(final MarketplaceLoan loan) {
@@ -105,7 +110,8 @@ final class Util {
                 entry("total", portfolioOverview.getCzkInvested()),
                 entry("totalRisk", portfolioOverview.getCzkAtRisk()),
                 entry("totalShare", portfolioOverview.getShareAtRisk()),
-                entry("balance", portfolioOverview.getCzkAvailable())
+                entry("balance", portfolioOverview.getCzkAvailable()),
+                entry("timestamp", toDate(portfolioOverview.getTimestamp()))
         );
     }
 

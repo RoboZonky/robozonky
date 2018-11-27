@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -29,6 +30,7 @@ import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PortfolioOverviewImpl.class);
 
+    private final ZonedDateTime timestamp = DateUtil.zonedNow();
     private final Supplier<BigDecimal> czkAvailable;
     private final BigDecimal czkInvested;
     private final BigDecimal czkAtRisk;
@@ -147,6 +150,11 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     }
 
     @Override
+    public ZonedDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
     public String toString() {
         return "PortfolioOverviewImpl{" +
                 "czkAvailable=" + czkAvailable.get() +
@@ -154,6 +162,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
                 ", czkInvestedPerRating=" + czkInvestedPerRating +
                 ", czkAtRisk=" + czkAtRisk +
                 ", czkAtRiskPerRating=" + czkAtRiskPerRating +
-                '}';
+                ", timestamp=" + timestamp +
+                "}";
     }
 }

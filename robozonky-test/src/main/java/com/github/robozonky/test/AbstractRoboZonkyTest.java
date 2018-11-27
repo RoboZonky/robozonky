@@ -17,6 +17,7 @@
 package com.github.robozonky.test;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -124,6 +125,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(po.getShareAtRisk()).thenReturn(BigDecimal.ZERO);
         when(po.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         when(po.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getTimestamp()).thenReturn(ZonedDateTime.now());
         return po;
     }
 

@@ -1,6 +1,6 @@
 Nový zůstatek na Zonky účtu je ${data.portfolio.balance?string.currency}.
 
-Aktuální struktura portfolia:
+Struktura portfolia k ${data.portfolio.timestamp?time?iso_utc_ms_nz}:
 <#list data.ratings as rating>
 <#assign code = rating.getCode()>
 <#assign abs = data.portfolio.absoluteShare[code]>

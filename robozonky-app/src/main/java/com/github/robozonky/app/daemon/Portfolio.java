@@ -55,6 +55,7 @@ public class Portfolio {
         LOGGER.debug("Simulating charge for loan #{} ({}), {} CZK.", loanId, rating, amount);
         blockedAmounts.get().simulateCharge(loanId, rating, amount);
         tenant.getBalance().update(amount.negate(), !tenant.getSessionInfo().isDryRun());
+        portfolioOverview.set(null);
     }
 
     public void amountsAtRiskUpdated(final Map<Rating, BigDecimal> newAmountsAtRisk) {
@@ -65,14 +66,14 @@ public class Portfolio {
 
     public PortfolioOverview getOverview() {
         return portfolioOverview.updateAndGet(old -> {
-            if (old == null) {
-                final PortfolioOverview current = PortfolioOverviewImpl.calculate(tenant.getBalance(), statistics,
-                                                                                  blockedAmounts.get().getAdjustments(),
-                                                                                  amountsAtRisk.get());
-                LOGGER.debug("Calculated: {}.", current);
-                return current;
+            if (old != null) {
+                return old;
             }
-            return old;
+            final PortfolioOverview current = PortfolioOverviewImpl.calculate(tenant.getBalance(), statistics,
+                                                                              blockedAmounts.get().getAdjustments(),
+                                                                              amountsAtRisk.get());
+            LOGGER.debug("Calculated: {}.", current);
+            return current;
         });
     }
 }
