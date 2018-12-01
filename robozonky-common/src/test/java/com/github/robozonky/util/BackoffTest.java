@@ -16,10 +16,11 @@
 
 package com.github.robozonky.util;
 
-import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Optional;
+import java.util.function.Supplier;
 
+import io.vavr.control.Either;
+import org.assertj.vavr.api.VavrAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -38,7 +39,7 @@ class BackoffTest {
     private static final int DURATION = 1000;
 
     @Mock
-    private Backoff.Operation<String> operation;
+    private Supplier<String> operation;
 
     @Test
     void exponentialAlwaysFailing() {
@@ -48,11 +49,10 @@ class BackoffTest {
         when(operation.get()).thenThrow(new IllegalStateException());
         final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
                                                 () -> Backoff.exponential(operation, ofMillis(1), maxDuration));
-        final Optional<String> result = b.get();
+        final Either<String, Throwable> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure result was not successful
-        assertThat(result).isEmpty();
-        assertThat(b.getLastException()).containsInstanceOf(IllegalStateException.class);
+        VavrAssertions.assertThat(result).containsRightInstanceOf(IllegalStateException.class);
         // make sure the operation took at least the expected duration
         assertThat(took).isGreaterThan(maxDuration);
         // make sure the operation was tried the expected number of times, the sum of n^2 for n=[0, ...)
@@ -67,11 +67,10 @@ class BackoffTest {
         // succeeding immediately
         final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
                                                 () -> Backoff.exponential(() -> resulting, ofMillis(1), maxDuration));
-        final Optional<String> result = b.get();
+        final Either<String, Throwable> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure we get the propert result
-        assertThat(result).contains(resulting);
-        assertThat(b.getLastException()).isEmpty();
+        VavrAssertions.assertThat(result).containsLeftSame(resulting);
         // make sure the operation took less than the max duration
         assertThat(took).isLessThan(maxDuration);
     }
@@ -79,22 +78,16 @@ class BackoffTest {
     @Test
     void initialBackOffTimeCalculation() {
         final Duration initial = Duration.ofSeconds(123);
-        final Optional<Duration> backoff = Backoff.calculateBackoffTime(null, Duration.ZERO, initial);
-        assertThat(backoff).contains(initial);
+        final Duration backoff = Backoff.calculateBackoffTime(Duration.ZERO, initial);
+        assertThat(backoff).isEqualTo(initial);
     }
 
     @Test
     void continuedBackOffTimeCalculation() {
         final Duration initial = Duration.ofSeconds(123);
-        final Optional<Duration> backoff = Backoff.calculateBackoffTime(null, Duration.ofSeconds(1), initial);
-        assertThat(backoff).contains(Duration.ofSeconds(2));
+        final Duration backoff = Backoff.calculateBackoffTime(Duration.ofSeconds(1), initial);
+        assertThat(backoff).isEqualTo(Duration.ofSeconds(2));
     }
 
-    @Test
-    void noMoreBackoff() {
-        final Duration initial = Duration.ofSeconds(123);
-        final Optional<Duration> backoff = Backoff.calculateBackoffTime(BigDecimal.TEN, Duration.ofSeconds(1), initial);
-        assertThat(backoff).isEmpty();
-    }
 }
 

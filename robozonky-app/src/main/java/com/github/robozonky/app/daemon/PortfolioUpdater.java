@@ -31,6 +31,7 @@ import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.util.Backoff;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +115,7 @@ class PortfolioUpdater implements Runnable,
         }
     }
 
-    private void terminate(final Exception cause) {
+    private void terminate(final Throwable cause) {
         current.set(null);
         shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.", cause));
     }
@@ -125,12 +126,12 @@ class PortfolioUpdater implements Runnable,
         try { // close the old portfolio
             final Backoff<Portfolio> backoff =
                     Backoff.exponential(() -> runIt(current.get()), Duration.ofSeconds(1), retryFor);
-            final Optional<Portfolio> maybeNew = backoff.get();
-            if (maybeNew.isPresent()) {
-                current.set(maybeNew.get());
+            final Either<Portfolio, Throwable> maybeNew = backoff.get();
+            if (maybeNew.isLeft()) {
+                current.set(maybeNew.getLeft());
                 LOGGER.info("Update finished.");
             } else {
-                terminate(backoff.getLastException().orElse(null));
+                terminate(maybeNew.right().get());
             }
         } catch (final Exception ex) {
             terminate(ex);
