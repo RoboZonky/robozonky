@@ -54,6 +54,7 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
         final CommandLine cli = mock(CommandLine.class);
         final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         when(cli.getConfirmationCredentials()).thenReturn(Optional.of(UUID.randomUUID().toString()));
+        when(cli.getStrategyLocation()).thenReturn("file:///tmp/something");
         final OperatingMode mode = new OperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
@@ -66,6 +67,7 @@ class OperatingModeTest extends AbstractZonkyLeveragingTest {
         final CommandLine cli = mock(CommandLine.class);
         final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
         when(cli.getConfirmationCredentials()).thenReturn(Optional.of(SERVICE));
+        when(cli.getStrategyLocation()).thenReturn("file:///tmp/something");
         final OperatingMode mode = new OperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);

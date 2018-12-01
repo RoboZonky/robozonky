@@ -18,9 +18,7 @@ package com.github.robozonky.app.daemon.operations;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -36,9 +34,8 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     private final Investor investor;
     private final AtomicReference<long[]> actionableWhenLastChecked = new AtomicReference<>(NO_LONGS);
 
-    public Investing(final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
-                     final Tenant auth) {
-        super(auth, strategy);
+    public Investing(final Investor investor, final Tenant auth) {
+        super(auth, auth::getInvestmentStrategy);
         this.investor = investor;
     }
 

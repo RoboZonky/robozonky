@@ -17,11 +17,15 @@
 package com.github.robozonky.common;
 
 import java.io.Closeable;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.state.InstanceState;
@@ -94,6 +98,12 @@ public interface Tenant extends Closeable {
     SessionInfo getSessionInfo();
 
     SecretProvider getSecrets();
+
+    Optional<InvestmentStrategy> getInvestmentStrategy();
+
+    Optional<SellStrategy> getSellStrategy();
+
+    Optional<PurchaseStrategy> getPurchaseStrategy();
 
     default <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);

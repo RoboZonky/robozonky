@@ -28,10 +28,16 @@ public final class TenantBuilder {
     private String name = null;
     private boolean dryRun = false;
     private SecretProvider secrets = null;
+    private StrategyProvider strategyProvider = StrategyProvider.empty();
     private ApiProvider api;
 
     public TenantBuilder withSecrets(final SecretProvider secrets) {
         this.secrets = secrets;
+        return this;
+    }
+
+    public TenantBuilder withStrategy(final String strategyLocation) {
+        this.strategyProvider = StrategyProvider.createFor(strategyLocation);
         return this;
     }
 
@@ -52,12 +58,12 @@ public final class TenantBuilder {
 
     public Tenant build(final Duration tokenRefresh) {
         if (secrets == null) {
-            throw new IllegalStateException("Secret provider must be specified.");
+            throw new IllegalStateException("Secret provider must be provided.");
         }
         if (api == null) {
-            return new TokenBasedTenant(new ApiProvider(), secrets, name, dryRun, tokenRefresh);
+            return new TokenBasedTenant(new ApiProvider(), secrets, strategyProvider, name, dryRun, tokenRefresh);
         } else {
-            return new TokenBasedTenant(api, secrets, name, dryRun, tokenRefresh);
+            return new TokenBasedTenant(api, secrets, strategyProvider, name, dryRun, tokenRefresh);
         }
     }
 

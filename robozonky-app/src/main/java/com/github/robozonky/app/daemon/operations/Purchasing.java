@@ -17,9 +17,7 @@
 package com.github.robozonky.app.daemon.operations;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
@@ -36,8 +34,8 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     private static final long[] NO_LONGS = new long[0];
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
-    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth) {
-        super(auth, strategy);
+    public Purchasing(final Tenant auth) {
+        super(auth, auth::getPurchaseStrategy);
     }
 
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {

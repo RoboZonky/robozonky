@@ -18,9 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
@@ -38,9 +36,8 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
-        final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
-        }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
+        }, a, () -> Optional.of(portfolio), Duration.ZERO);
         d.run();
         verify(z, times(1)).getAvailableParticipations(any());
     }
@@ -50,9 +47,8 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Tenant a = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
-        final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
-        }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
+        }, a, () -> Optional.of(portfolio), Duration.ZERO);
         d.run();
         verify(z, never()).getAvailableParticipations(any());
     }

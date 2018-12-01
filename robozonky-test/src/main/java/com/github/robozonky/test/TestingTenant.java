@@ -16,10 +16,14 @@
 
 package com.github.robozonky.test;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
@@ -68,6 +72,21 @@ class TestingTenant implements Tenant {
     @Override
     public SecretProvider getSecrets() {
         return secretProvider;
+    }
+
+    @Override
+    public Optional<InvestmentStrategy> getInvestmentStrategy() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<SellStrategy> getSellStrategy() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<PurchaseStrategy> getPurchaseStrategy() {
+        return Optional.empty();
     }
 
     @Override

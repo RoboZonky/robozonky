@@ -52,24 +52,20 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final String sessionName;
 
     public DaemonInvestmentMode(final String sessionName, final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                                final Investor investor, final StrategyProvider strategyProvider,
-                                final Duration primaryMarketplaceCheckPeriod,
+                                final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.sessionName = sessionName;
-        this.portfolio = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
+        this.portfolio = PortfolioUpdater.create(shutdownCall, tenant);
         this.tenant = tenant;
-        this.investing = new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest,
-                                             portfolio, primaryMarketplaceCheckPeriod);
-        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolio,
-                                               secondaryMarketplaceCheckPeriod);
+        this.investing = new InvestingDaemon(shutdownCall, tenant, investor, portfolio, primaryMarketplaceCheckPeriod);
+        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, portfolio, secondaryMarketplaceCheckPeriod);
         this.shutdownCall = shutdownCall;
     }
 
     DaemonInvestmentMode(final String sessionName, final Tenant tenant, final Investor investor,
-                         final StrategyProvider strategyProvider, final Duration primaryMarketplaceCheckPeriod,
-                         final Duration secondaryMarketplaceCheckPeriod) {
+                         final Duration primaryMarketplaceCheckPeriod, final Duration secondaryMarketplaceCheckPeriod) {
         this(sessionName, t -> {
-        }, tenant, investor, strategyProvider, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
+        }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
     }
 
     static void runSafe(final Events events, final Runnable runnable, final Consumer<Throwable> shutdownCall) {

@@ -19,10 +19,14 @@ package com.github.robozonky.app.authentication;
 import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
@@ -45,10 +49,12 @@ class TokenBasedTenant implements Tenant {
     private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
     private final RemoteBalance balance;
     private final Reloadable<Restrictions> restrictions;
+    private final StrategyProvider strategyProvider;
 
-    TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
-                     final boolean isDryRun, final Duration refreshAfter) {
+    TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final StrategyProvider strategyProvider,
+                     final String sessionName, final boolean isDryRun, final Duration refreshAfter) {
         this.secrets = secrets;
+        this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
         this.supplier = scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, refreshAfter);
@@ -91,6 +97,21 @@ class TokenBasedTenant implements Tenant {
     @Override
     public SecretProvider getSecrets() {
         return secrets;
+    }
+
+    @Override
+    public Optional<InvestmentStrategy> getInvestmentStrategy() {
+        return strategyProvider.getToInvest();
+    }
+
+    @Override
+    public Optional<SellStrategy> getSellStrategy() {
+        return strategyProvider.getToSell();
+    }
+
+    @Override
+    public Optional<PurchaseStrategy> getPurchaseStrategy() {
+        return strategyProvider.getToPurchase();
     }
 
     @Override

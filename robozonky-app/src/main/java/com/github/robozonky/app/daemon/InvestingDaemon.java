@@ -18,12 +18,9 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.daemon.operations.Investing;
 import com.github.robozonky.app.daemon.operations.Investor;
@@ -38,11 +35,10 @@ class InvestingDaemon extends DaemonOperation {
     private static final Select SELECT = new Select().greaterThan("remainingInvestment", 0);
     private final Investing investing;
 
-    public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                           final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
+    public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth, final Investor investor,
                            final PortfolioSupplier portfolio, final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
-        this.investing = new Investing(investor, strategy, auth);
+        this.investing = new Investing(investor, auth);
     }
 
     @Override

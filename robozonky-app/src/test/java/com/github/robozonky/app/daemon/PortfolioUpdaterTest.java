@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
@@ -46,7 +45,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void creation() {
-        final PortfolioUpdater instance = PortfolioUpdater.create(t, mockTenant(), Optional::empty);
+        final PortfolioUpdater instance = PortfolioUpdater.create(t, mockTenant());
         assertSoftly(softly -> {
             softly.assertThat(instance.isInitializing()).isTrue(); // by default it's true
             softly.assertThat(instance.getRegisteredDependants()).hasSize(4); // expected contents

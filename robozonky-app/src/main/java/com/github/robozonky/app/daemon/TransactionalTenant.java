@@ -17,10 +17,14 @@
 package com.github.robozonky.app.daemon;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
@@ -73,6 +77,21 @@ final class TransactionalTenant implements Tenant {
     @Override
     public SecretProvider getSecrets() {
         return parent.getSecrets();
+    }
+
+    @Override
+    public Optional<InvestmentStrategy> getInvestmentStrategy() {
+        return parent.getInvestmentStrategy();
+    }
+
+    @Override
+    public Optional<SellStrategy> getSellStrategy() {
+        return parent.getSellStrategy();
+    }
+
+    @Override
+    public Optional<PurchaseStrategy> getPurchaseStrategy() {
+        return parent.getPurchaseStrategy();
     }
 
     @Override

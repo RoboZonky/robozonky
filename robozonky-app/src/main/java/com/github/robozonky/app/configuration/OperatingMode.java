@@ -24,7 +24,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
-import com.github.robozonky.app.daemon.StrategyProvider;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.Tenant;
@@ -54,6 +53,7 @@ final class OperatingMode {
             b.dryRun();
         }
         return b.withSecrets(secrets)
+                .withStrategy(cli.getStrategyLocation())
                 .named(cli.getName())
                 .build(duration);
     }
@@ -92,8 +92,7 @@ final class OperatingMode {
 
     private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
                                                        final Investor investor) {
-        final StrategyProvider sp = StrategyProvider.createFor(cli.getStrategyLocation());
-        final InvestmentMode m = new DaemonInvestmentMode(cli.getName(), shutdownCall, auth, investor, sp,
+        final InvestmentMode m = new DaemonInvestmentMode(cli.getName(), shutdownCall, auth, investor,
                                                           cli.getPrimaryMarketplaceCheckDelay(),
                                                           cli.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);

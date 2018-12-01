@@ -35,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -50,17 +49,16 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Tenant a = mockTenant(harmlessZonky(10_000), true);
         final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        final StrategyProvider p = mock(StrategyProvider.class);
         final String name = UUID.randomUUID().toString();
-        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(name, a, b, p, ONE_SECOND, ONE_SECOND))) {
+        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(name, a, b, ONE_SECOND, ONE_SECOND))) {
             assertThat(d.getSessionName()).isEqualTo(name);
             doNothing().when(d).scheduleJob(any(), any(), any()); // otherwise jobs will run and try to log into Zonky
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
-            verify(p).getToInvest();
-            verify(p).getToPurchase();
+            verify(a).getInvestmentStrategy();
+            verify(a).getPurchaseStrategy();
         } finally {
             e.shutdownNow();
         }

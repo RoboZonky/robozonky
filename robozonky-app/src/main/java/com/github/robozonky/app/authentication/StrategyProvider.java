@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.authentication;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -31,7 +31,7 @@ import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StrategyProvider implements Refreshable.RefreshListener<String> {
+final class StrategyProvider implements Refreshable.RefreshListener<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyProvider.class);
 
@@ -49,6 +49,10 @@ public class StrategyProvider implements Refreshable.RefreshListener<String> {
         strategy.registerListener(sp);
         Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
         return sp;
+    }
+
+    public static StrategyProvider empty() { // for testing purposes only
+        return new StrategyProvider();
     }
 
     private static <T> T set(final AtomicReference<T> ref, final Supplier<Optional<T>> provider, final String desc) {
