@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon.operations;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.Tenant;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,6 +126,55 @@ final class InvestingSession {
         return Collections.unmodifiableList(investmentsMadeNow);
     }
 
+    private boolean successfulInvestment(final RecommendedLoan recommendation, final BigDecimal amount) {
+        final int confirmedAmount = amount.intValue();
+        final MarketplaceLoan l = recommendation.descriptor().item();
+        final Investment i = Investment.fresh(l, confirmedAmount);
+        markSuccessfulInvestment(i);
+        discard(recommendation.descriptor()); // never show again
+        events.fire(investmentMadeLazy(() -> investmentMade(i, l, portfolio.getOverview())));
+        return true;
+    }
+
+    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation, final InvestmentFailure reason) {
+        final String providerId = investor.getConfirmationProvider().map(ConfirmationProvider::getId).orElse("-");
+        final LoanDescriptor loan = recommendation.descriptor();
+        switch (reason) {
+            case FAILED:
+                discard(loan);
+                break;
+            case REJECTED:
+                if (investor.getConfirmationProvider().isPresent()) {
+                    events.fire(investmentRejected(recommendation, providerId));
+                    // rejected through a confirmation provider => forget
+                    discard(loan);
+                } else {
+                    // rejected due to no confirmation provider => make available for direct investment later
+                    events.fire(investmentSkipped(recommendation));
+                    final int loanId = loan.item().getId();
+                    InvestingSession.LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
+                    skip(loan);
+                }
+                break;
+            case DELEGATED:
+                final Event e = investmentDelegated(recommendation, providerId);
+                events.fire(e);
+                if (recommendation.isConfirmationRequired()) {
+                    // confirmation required, delegation successful => forget
+                    discard(loan);
+                } else {
+                    // confirmation not required, delegation successful => make available for direct investment later
+                    skip(loan);
+                }
+                break;
+            case SEEN_BEFORE: // still protected by CAPTCHA
+                break;
+            default:
+                throw new IllegalStateException("Not possible.");
+        }
+        return false;
+    }
+
     /**
      * Request {@link ControlApi} to invest in a given loan, leveraging the {@link ConfirmationProvider}.
      * @param recommendation Loan to invest into.
@@ -140,48 +191,10 @@ final class InvestingSession {
         }
         events.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
-        final ZonkyResponse response = investor.invest(recommendation, seenBefore);
+        final Either<BigDecimal, InvestmentFailure> response = investor.invest(recommendation, seenBefore);
         InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        final String providerId = investor.getConfirmationProvider().map(ConfirmationProvider::getId).orElse("-");
-        switch (response.getType()) {
-            case REJECTED:
-                return investor.getConfirmationProvider().map(c -> {
-                    events.fire(investmentRejected(recommendation, providerId));
-                    // rejected through a confirmation provider => forget
-                    discard(loan);
-                    return false;
-                }).orElseGet(() -> {
-                    // rejected due to no confirmation provider => make available for direct investment later
-                    events.fire(investmentSkipped(recommendation));
-                    InvestingSession.LOGGER.debug(
-                            "Loan #{} protected by CAPTCHA, will check back later.", loanId);
-                    skip(loan);
-                    return false;
-                });
-            case DELEGATED:
-                final Event e = investmentDelegated(recommendation, providerId);
-                events.fire(e);
-                if (recommendation.isConfirmationRequired()) {
-                    // confirmation required, delegation successful => forget
-                    discard(loan);
-                } else {
-                    // confirmation not required, delegation successful => make available for direct investment later
-                    skip(loan);
-                }
-                return false;
-            case INVESTED:
-                final int confirmedAmount = response.getConfirmedAmount().getAsInt();
-                final MarketplaceLoan l = recommendation.descriptor().item();
-                final Investment i = Investment.fresh(l, confirmedAmount);
-                markSuccessfulInvestment(i);
-                discard(recommendation.descriptor()); // never show again
-                events.fire(investmentMadeLazy(() -> investmentMade(i, l, portfolio.getOverview())));
-                return true;
-            case SEEN_BEFORE: // still protected by CAPTCHA
-                return false;
-            default:
-                throw new IllegalStateException("Not possible.");
-        }
+        return response.fold(amount -> successfulInvestment(recommendation, amount),
+                             reason -> unsuccessfulInvestment(recommendation, reason));
     }
 
     private void markSuccessfulInvestment(final Investment i) {

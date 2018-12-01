@@ -17,18 +17,13 @@
 package com.github.robozonky.app.daemon.operations;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.remote.ControlApi;
 
-enum ZonkyResponseType {
+enum InvestmentFailure {
 
     /**
      * Already seen and handled in a previous run, no action is being performed.
      */
     SEEN_BEFORE,
-    /**
-     * Investment confirmed by {@link ControlApi}.
-     */
-    INVESTED,
     /**
      * Investment taken over by the selected {@link ConfirmationProvider}.
      */
@@ -36,6 +31,11 @@ enum ZonkyResponseType {
     /**
      * Investment rejected by the selected {@link ConfirmationProvider}, or required CAPTCHA.
      */
-    REJECTED
+    REJECTED,
+    /**
+     * When the investment was triggered but Zonky responded with an error. Most likely caused by the loan becoming
+     * fully invested by other investors since last checked.
+     */
+    FAILED
 
 }

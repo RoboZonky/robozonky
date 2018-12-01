@@ -36,6 +36,7 @@ import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,7 +119,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(z);
         final Investor investor = mock(Investor.class);
         when(investor.getConfirmationProvider()).thenReturn(Optional.of(mock(ConfirmationProvider.class)));
-        when(investor.invest(any(), anyBoolean())).thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
+        when(investor.invest(any(), anyBoolean())).thenReturn(Either.right(InvestmentFailure.REJECTED));
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         when(z.getLoan(eq(loan.getId()))).thenReturn(loan);
         final Investing exec = new Investing(investor, ALL_ACCEPTING, auth);

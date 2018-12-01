@@ -46,6 +46,7 @@ import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -174,8 +175,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(z);
         final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.right(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, Collections.emptySet(), p, auth);
@@ -200,8 +200,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.right(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
@@ -228,8 +227,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.right(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
@@ -256,8 +254,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.right(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.empty()).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
@@ -283,8 +280,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(oldBalance);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(amountToInvest))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.left(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, Collections.emptySet(), p, auth);

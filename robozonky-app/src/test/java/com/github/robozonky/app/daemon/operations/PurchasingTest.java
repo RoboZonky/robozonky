@@ -43,7 +43,6 @@ import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -155,8 +154,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(zonky, false);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        assertThatThrownBy(() -> exec.apply(portfolio, Collections.singleton(mock)))
-                .isInstanceOf(IllegalStateException.class);
+        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
     }
 
     @Test

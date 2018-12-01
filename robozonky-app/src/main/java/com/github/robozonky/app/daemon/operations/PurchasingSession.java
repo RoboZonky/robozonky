@@ -31,6 +31,8 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.Tenant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
@@ -46,6 +48,8 @@ import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarte
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
  */
 final class PurchasingSession {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PurchasingSession.class);
 
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
@@ -106,26 +110,28 @@ final class PurchasingSession {
         return Collections.unmodifiableList(investmentsMadeNow);
     }
 
-    private void actualPurchase(final Participation participation) {
+    private boolean actualPurchase(final Participation participation) {
         try {
             authenticated.run(zonky -> zonky.purchase(participation));
+            return true;
         } catch (final Exception ex) {
-            throw new IllegalStateException("Failed purchasing " + participation);
+            LOGGER.debug("Failed purchasing {}. Likely someone's beaten us to it.", ex);
+            return false;
         }
     }
 
-    boolean purchase(final RecommendedParticipation recommendation) {
+    private boolean purchase(final RecommendedParticipation recommendation) {
         events.fire(purchaseRequested(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan loan = recommendation.descriptor().related();
-        if (!authenticated.getSessionInfo().isDryRun()) {
-            actualPurchase(participation);
-        }
+        final boolean succeeded = authenticated.getSessionInfo().isDryRun() || actualPurchase(participation);
         final Investment i = Investment.fresh(participation, loan, recommendation.amount());
-        markSuccessfulPurchase(i);
         discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
-        events.fire(investmentPurchasedLazy(() -> investmentPurchased(i, loan, portfolio.getOverview())));
-        return true;
+        if (succeeded) {
+            markSuccessfulPurchase(i);
+            events.fire(investmentPurchasedLazy(() -> investmentPurchased(i, loan, portfolio.getOverview())));
+        }
+        return succeeded;
     }
 
     private void markSuccessfulPurchase(final Investment i) {
