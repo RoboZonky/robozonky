@@ -69,8 +69,8 @@
             <a href="https://groups.google.com/forum/#!forum/robozonky-users">v uživatelské skupině</a></small></li>
       </ul>
       <p>
-        <small>Vygeneroval <em>${data.session.userAgent}</em> v čase ${timestamp?datetime?iso_utc_ms} na základě
-        systémové události vytvořené v čase ${data.conception?datetime?iso_utc_ms}.</small>
+        <small>Vygeneroval <em>${data.session.userAgent}</em> v čase ${timestamp?datetime?iso_local_ms} na základě
+        systémové události vytvořené v čase ${data.conception?datetime?iso_local_ms}.</small>
       </p>
     </footer>
 </body>

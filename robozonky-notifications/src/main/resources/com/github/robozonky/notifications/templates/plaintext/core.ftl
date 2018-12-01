@@ -15,5 +15,5 @@ Tuto zprávu dostáváte, protože je tak Váš robot nakonfigurován. Neodpoví
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users
 
-Vygeneroval ${data.session.userAgent} v čase ${timestamp?datetime?iso_utc_ms} na základě systémové události vytvořené v
-čase ${data.conception?datetime?iso_utc_ms}.
+Vygeneroval ${data.session.userAgent} v čase ${timestamp?datetime?iso_local_ms} na základě systémové události vytvořené v
+čase ${data.conception?datetime?iso_local_ms}.
