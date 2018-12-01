@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,6 @@ class RefreshableTest {
     private Refreshable.RefreshListener<String> l;
 
     @Test
-    void immutable() {
-        final Refreshable<Void> r = Refreshable.createImmutable();
-        r.run();
-        assertThat(r.get()).isEmpty();
-    }
-
-    @Test
     void mutableNoRefresh() {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
@@ -72,18 +65,19 @@ class RefreshableTest {
     @Test
     void registersListeners() {
         final String s = UUID.randomUUID().toString();
-        final Refreshable<String> r = Refreshable.createImmutable(s);
+        final String transformed = transform(s);
+        final Refreshable<String> r = new TestingRefreshable(s);
         r.run();
         assertThat(r.registerListener(l)).isTrue();
-        verify(l).valueSet(eq(s));
+        verify(l).valueSet(eq(transformed));
         assertThat(r.registerListener(l)).isFalse(); // repeat registration
-        verify(l, times(1)).valueSet(eq(s));
+        verify(l, times(1)).valueSet(eq(transformed));
         assertThat(r.unregisterListener(l)).isTrue();
-        verify(l).valueUnset(eq(s));
+        verify(l).valueUnset(eq(transformed));
         assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
-        verify(l, times(1)).valueUnset(eq(s));
+        verify(l, times(1)).valueUnset(eq(transformed));
         assertThat(r.registerListener(l)).isTrue(); // re-registration
-        verify(l, times(2)).valueSet(eq(s));
+        verify(l, times(2)).valueSet(eq(transformed));
     }
 
     @Test

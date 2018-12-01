@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,24 +62,6 @@ public abstract class Refreshable<T> implements Runnable,
         for (final Refreshable.RefreshListener<T> l : listeners) {
             this.registerListener(l);
         }
-    }
-
-    /**
-     * Create an instance of this class that will always return empty resource.
-     * @return The returned instance's {@link #get()} will always return {@link Optional#empty()}.
-     */
-    public static Refreshable<Void> createImmutable() {
-        return Refreshable.createImmutable(null);
-    }
-
-    /**
-     * Create an instance of this class that will never refresh the given resource.
-     * @param toReturn Instance will always return this object.
-     * @param <I> Type of object to return.
-     * @return The returned instance will never change it's {@link #get()}.
-     */
-    public static <I> Refreshable<I> createImmutable(final I toReturn) {
-        return new ImmutableRefreshable<>(toReturn);
     }
 
     /**
@@ -238,26 +220,6 @@ public abstract class Refreshable<T> implements Runnable,
          */
         default void valueChanged(final T oldValue, final T newValue) {
             valueSet(newValue);
-        }
-    }
-
-    private static final class ImmutableRefreshable<I> extends Refreshable<I> {
-
-        private final I toReturn;
-
-        public ImmutableRefreshable(final I toReturn) {
-            super(toReturn == null ? "null" : toReturn.toString());
-            this.toReturn = toReturn;
-        }
-
-        @Override
-        protected String getLatestSource() {
-            return "";
-        }
-
-        @Override
-        protected Optional<I> transform(final String source) {
-            return Optional.ofNullable(toReturn);
         }
     }
 
