@@ -18,9 +18,13 @@ package com.github.robozonky.app.configuration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.App;
@@ -35,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -70,6 +75,30 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final App main = mockedApp("-g", "a", "-p", "p", "-i", "somewhere.txt", "-s", "somewhere");
         final Optional<InvestmentMode> cfg = CommandLine.parse(main);
         assertThat(cfg).isEmpty();
+    }
+
+    private static Path getPath(final InputStream resource) throws IOException {
+        final File f = File.createTempFile("robozonky-", ".tmp");
+        f.delete();
+        final Path p = f.toPath();
+        Files.copy(resource, p);
+        return p;
+    }
+
+    @Test
+    void quotedAtFile() throws IOException {
+        final CommandLine cli = new CommandLine(mock(Consumer.class));
+        picocli.CommandLine.call(cli, "@" + getPath(getClass().getResourceAsStream("quoted.cli")));
+        assertThat(cli.getKeystore()).contains(new File("C:\\Program Files\\RoboZonky\\robozonky.keystore"));
+        assertThat(cli.getName()).isEqualTo("Testing Name");
+    }
+
+    @Test
+    void unquotedAtFile() throws IOException {
+        final CommandLine cli = new CommandLine(mock(Consumer.class));
+        picocli.CommandLine.call(cli, "@" + getPath(getClass().getResourceAsStream("unquoted.cli")));
+        assertThat(cli.getKeystore()).contains(new File("C:\\Program Files\\RoboZonky\\robozonky.keystore"));
+        assertThat(cli.getName()).isEqualTo("Testing Name");
     }
 
     @Test
