@@ -28,7 +28,7 @@ import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Backoff<T> implements Supplier<Either<T, Throwable>> {
+public class Backoff<T> implements Supplier<Either<Throwable, T>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Backoff.class);
     private final Supplier<T> operation;
@@ -76,28 +76,28 @@ public class Backoff<T> implements Supplier<Either<T, Throwable>> {
         }
     }
 
-    private static <O> Either<O, Throwable> execute(final Supplier<O> operation) {
+    private static <O> Either<Throwable, O> execute(final Supplier<O> operation) {
         LOGGER.trace("Will execute {}.", operation);
-        return Try.ofSupplier(operation).map(Either::<O, Throwable>left)
+        return Try.ofSupplier(operation).map(Either::<Throwable, O>right)
                 .recover(t -> {
                     LOGGER.debug("Operation failed.", t);
-                    return Either.right(t);
+                    return Either.left(t);
                 }).get();
     }
 
     @Override
-    public Either<T, Throwable> get() {
+    public Either<Throwable, T> get() {
         Duration backoffTime = Duration.ZERO;
         final Instant startedOn = DateUtil.now();
         do {
             wait(backoffTime);
-            final Either<T, Throwable> result = execute(operation);
-            if (result.isLeft()) {
+            final Either<Throwable, T> result = execute(operation);
+            if (result.isRight()) {
                 LOGGER.trace("Success.");
-                return Either.left(result.getLeft());
+                return Either.right(result.get());
             } else if (startedOn.plus(cancelAfter).isBefore(DateUtil.now())) {
                 LOGGER.trace("Expired.");
-                return Either.right(result.right().get());
+                return Either.left(result.getLeft());
             }
             // need to try again
             backoffTime = backoffTimeCalculator.apply(backoffTime);

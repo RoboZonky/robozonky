@@ -191,10 +191,10 @@ final class InvestingSession {
         }
         events.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
-        final Either<BigDecimal, InvestmentFailure> response = investor.invest(recommendation, seenBefore);
+        final Either<InvestmentFailure, BigDecimal> response = investor.invest(recommendation, seenBefore);
         InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        return response.fold(amount -> successfulInvestment(recommendation, amount),
-                             reason -> unsuccessfulInvestment(recommendation, reason));
+        return response.fold(reason -> unsuccessfulInvestment(recommendation, reason),
+                             amount -> successfulInvestment(recommendation, amount));
     }
 
     private void markSuccessfulInvestment(final Investment i) {

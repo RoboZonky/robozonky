@@ -126,12 +126,12 @@ class PortfolioUpdater implements Runnable,
         try { // close the old portfolio
             final Backoff<Portfolio> backoff =
                     Backoff.exponential(() -> runIt(current.get()), Duration.ofSeconds(1), retryFor);
-            final Either<Portfolio, Throwable> maybeNew = backoff.get();
-            if (maybeNew.isLeft()) {
-                current.set(maybeNew.getLeft());
+            final Either<Throwable, Portfolio> maybeNew = backoff.get();
+            if (maybeNew.isRight()) {
+                current.set(maybeNew.get());
                 LOGGER.info("Update finished.");
             } else {
-                terminate(maybeNew.right().get());
+                terminate(maybeNew.getLeft());
             }
         } catch (final Exception ex) {
             terminate(ex);

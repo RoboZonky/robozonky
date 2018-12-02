@@ -105,12 +105,12 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
                             confirmation == InvestorTest.Remote.CONFIRMED).get();
     }
 
-    private static boolean isValidForLoansSeenBefore(final Either<BigDecimal, InvestmentFailure> responseType) {
+    private static boolean isValidForLoansSeenBefore(final Either<InvestmentFailure, BigDecimal> responseType) {
         // previously delegated means it can still be on the marketplace when checked next time
         if (responseType == null) {
             return false;
         }
-        return responseType.fold(amount -> false, response -> response == InvestmentFailure.DELEGATED);
+        return responseType.fold(response -> response == InvestmentFailure.DELEGATED, amount -> false);
     }
 
     @TestFactory
@@ -118,42 +118,42 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         return Stream.of(
                 forPossibility(InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
                                InvestorTest.Remote.UNCONFIRMED, null,
-                               Either.right(InvestmentFailure.REJECTED)),
+                               Either.left(InvestmentFailure.REJECTED)),
                 forPossibility(InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
                                InvestorTest.Remote.UNCONFIRMED, null,
-                               Either.left(InvestorTest.CONFIRMED_AMOUNT_BIG)),
+                               Either.right(InvestorTest.CONFIRMED_AMOUNT_BIG)),
                 // confirming proxy, response positive
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ACK,
-                               Either.right(InvestmentFailure.DELEGATED)),
+                               Either.left(InvestmentFailure.DELEGATED)),
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ACK,
-                               Either.right(InvestmentFailure.DELEGATED)),
+                               Either.left(InvestmentFailure.DELEGATED)),
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ACK,
-                               Either.right(InvestmentFailure.DELEGATED)),
+                               Either.left(InvestmentFailure.DELEGATED)),
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ACK,
-                               Either.left(InvestorTest.CONFIRMED_AMOUNT_BIG)),
+                               Either.right(InvestorTest.CONFIRMED_AMOUNT_BIG)),
                 // confirming proxy, response negative
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.NAK,
-                               Either.right(InvestmentFailure.REJECTED)),
+                               Either.left(InvestmentFailure.REJECTED)),
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.NAK,
-                               Either.right(InvestmentFailure.REJECTED)),
+                               Either.left(InvestmentFailure.REJECTED)),
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.NAK,
-                               Either.right(InvestmentFailure.REJECTED)),
+                               Either.left(InvestmentFailure.REJECTED)),
                 forPossibility(InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.NAK,
-                               Either.left(InvestorTest.CONFIRMED_AMOUNT_BIG))
+                               Either.right(InvestorTest.CONFIRMED_AMOUNT_BIG))
         );
     }
 
     private DynamicNode forPossibility(final ProxyType proxyType, final Captcha captcha,
                                        final Remote confirmation, final RemoteResponse confirmationResponse,
-                                       final Either<BigDecimal, InvestmentFailure> expectedResponse) {
+                                       final Either<InvestmentFailure, BigDecimal> expectedResponse) {
         final RecommendedLoan recommendedLoan = getRecommendation(confirmation, captcha);
         final DynamicTest seenBefore = dynamicTest("seen before",
                                                    () -> testBeforeSeen(proxyType, confirmationResponse,
@@ -193,38 +193,38 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         }
     }
 
-    private void test(final ProxyType proxyType, final Either<BigDecimal, InvestmentFailure> responseType,
+    private void test(final ProxyType proxyType, final Either<InvestmentFailure, BigDecimal> responseType,
                       final RecommendedLoan r, final RemoteResponse confirmationResponse, final boolean seenBefore) {
         final Zonky api = mock(Zonky.class);
         final Investor p = getZonkyProxy(proxyType, confirmationResponse, mockTenant(api, false));
-        final Either<BigDecimal, InvestmentFailure> result = p.invest(r, seenBefore);
+        final Either<InvestmentFailure, BigDecimal> result = p.invest(r, seenBefore);
         assertSoftly(softly -> {
             if (proxyType == InvestorTest.ProxyType.CONFIRMING) {
                 softly.assertThat(p.getConfirmationProvider()).isPresent();
             } else {
                 softly.assertThat(p.getConfirmationProvider()).isEmpty();
             }
-            if (responseType.isLeft()) {
+            if (responseType.isRight()) {
                 verify(api).invest(any());
-                softly.assertThat(result.left().get()).isEqualTo(InvestorTest.CONFIRMED_AMOUNT_BIG);
+                softly.assertThat(result.get()).isEqualTo(InvestorTest.CONFIRMED_AMOUNT_BIG);
             } else {
                 verify(api, never()).invest(any());
-                if (responseType.right().get() == InvestmentFailure.DELEGATED && seenBefore) {
-                    softly.assertThat(result.right().get()).isEqualTo(InvestmentFailure.SEEN_BEFORE);
+                if (responseType.getLeft() == InvestmentFailure.DELEGATED && seenBefore) {
+                    softly.assertThat(result.getLeft()).isEqualTo(InvestmentFailure.SEEN_BEFORE);
                 } else {
-                    softly.assertThat(result.right().get()).isEqualTo(responseType.right().get());
+                    softly.assertThat(result.getLeft()).isEqualTo(responseType.getLeft());
                 }
             }
         });
     }
 
     private void testNeverSeen(final ProxyType proxyType, final RemoteResponse confirmationResponse,
-                               final Either<BigDecimal, InvestmentFailure> responseType, final RecommendedLoan r) {
+                               final Either<InvestmentFailure, BigDecimal> responseType, final RecommendedLoan r) {
         test(proxyType, responseType, r, confirmationResponse, false);
     }
 
     private void testBeforeSeen(final ProxyType proxyType, final RemoteResponse confirmationResponse,
-                                final Either<BigDecimal, InvestmentFailure> responseType, final RecommendedLoan r) {
+                                final Either<InvestmentFailure, BigDecimal> responseType, final RecommendedLoan r) {
         test(proxyType, responseType, r, confirmationResponse, true);
     }
 

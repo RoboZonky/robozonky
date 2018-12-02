@@ -72,7 +72,7 @@ class PaginatedApi<S, T> {
             return operation.getResult();
         } catch (final InterruptedException ex) {
             Thread.currentThread().interrupt();
-            return null;
+            throw new IllegalStateException("Interrupted.", ex);
         } finally {
             LOGGER.trace("... done.");
         }

@@ -72,6 +72,6 @@ enum Export {
                                     Duration.ofHours(1));
         return CompletableFuture.runAsync(() -> tenant.run(trigger, ZonkyScope.APP))
                 .thenApplyAsync(v -> waitWhileExportRunning.get())
-                .thenApplyAsync(urlOrError -> urlOrError.fold(Util::download, r -> Optional.empty()));
+                .thenApplyAsync(urlOrError -> urlOrError.fold(r -> Optional.empty(), Util::download));
     }
 }

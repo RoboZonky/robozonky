@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import io.vavr.control.Try;
+import io.vavr.control.Either;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -36,15 +36,15 @@ class ReloadableTest {
     void manually() {
         final Consumer<String> mock = mock(Consumer.class);
         final ManuallyReloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), mock);
-        final Try<String> result = r.get();
-        assertThat(result).containsInstanceOf(String.class);
+        final Either<Throwable, String> result = r.get();
+        assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());
         final String value = result.get();
-        assertThat(r.get()).contains(value); // new call, no change
+        assertThat(r.get()).containsOnRight(value); // new call, no change
         verify(mock, times(1)).accept(any()); // still called just once
         r.clear();
-        final Try<String> result2 = r.get();  // will reload now
-        assertThat(result2).containsInstanceOf(String.class);
+        final Either<Throwable, String> result2 = r.get();  // will reload now
+        assertThat(result2).containsRightInstanceOf(String.class);
         verify(mock, times(2)).accept(any()); // called for the second time now
         Assertions.assertThat(result2.get()).isNotEqualTo(value);
     }
@@ -53,11 +53,11 @@ class ReloadableTest {
     void timeBased() {
         final Consumer<String> mock = mock(Consumer.class);
         final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), Duration.ofSeconds(5), mock);
-        final Try<String> result = r.get();
-        assertThat(result).containsInstanceOf(String.class);
+        final Either<Throwable, String> result = r.get();
+        assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());
         final String value = result.get();
-        assertThat(r.get()).contains(value); // new call, no change
+        assertThat(r.get()).containsOnRight(value); // new call, no change
         verify(mock, times(1)).accept(any()); // still called just once
     }
 

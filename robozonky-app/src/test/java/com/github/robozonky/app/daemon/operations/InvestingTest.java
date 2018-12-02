@@ -118,7 +118,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         when(auth.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Investor investor = mock(Investor.class);
         when(investor.getConfirmationProvider()).thenReturn(Optional.of(mock(ConfirmationProvider.class)));
-        when(investor.invest(any(), anyBoolean())).thenReturn(Either.right(InvestmentFailure.REJECTED));
+        when(investor.invest(any(), anyBoolean())).thenReturn(Either.left(InvestmentFailure.REJECTED));
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         when(z.getLoan(eq(loan.getId()))).thenReturn(loan);
         final Investing exec = new Investing(investor, auth);

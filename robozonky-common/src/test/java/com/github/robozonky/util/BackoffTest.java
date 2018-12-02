@@ -49,10 +49,10 @@ class BackoffTest {
         when(operation.get()).thenThrow(new IllegalStateException());
         final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
                                                 () -> Backoff.exponential(operation, ofMillis(1), maxDuration));
-        final Either<String, Throwable> result = b.get();
+        final Either<Throwable, String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure result was not successful
-        VavrAssertions.assertThat(result).containsRightInstanceOf(IllegalStateException.class);
+        VavrAssertions.assertThat(result).containsLeftInstanceOf(IllegalStateException.class);
         // make sure the operation took at least the expected duration
         assertThat(took).isGreaterThan(maxDuration);
         // make sure the operation was tried the expected number of times, the sum of n^2 for n=[0, ...)
@@ -67,10 +67,10 @@ class BackoffTest {
         // succeeding immediately
         final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
                                                 () -> Backoff.exponential(() -> resulting, ofMillis(1), maxDuration));
-        final Either<String, Throwable> result = b.get();
+        final Either<Throwable, String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure we get the propert result
-        VavrAssertions.assertThat(result).containsLeftSame(resulting);
+        VavrAssertions.assertThat(result).containsRightSame(resulting);
         // make sure the operation took less than the max duration
         assertThat(took).isLessThan(maxDuration);
     }

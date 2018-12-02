@@ -36,7 +36,7 @@ public class Investor {
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
     private static final InvestOperation DRY_RUN = recommendedLoan -> {
         LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", recommendedLoan);
-        return Either.left(recommendedLoan.amount());
+        return Either.right(recommendedLoan.amount());
     };
     private final InvestOperation investOperation;
     private final RequestId requestId;
@@ -63,17 +63,18 @@ public class Investor {
         return build(auth, null);
     }
 
-    private static Either<BigDecimal, InvestmentFailure> invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
+    private static Either<InvestmentFailure, BigDecimal> invest(final Tenant auth,
+                                                                final RecommendedLoan recommendedLoan) {
         LOGGER.debug("Executing investment: {}.", recommendedLoan);
         final Investment i = convertToInvestment(recommendedLoan);
         try {
             auth.run(zonky -> zonky.invest(i));
             LOGGER.debug("Investment succeeded.");
-            return Either.left(recommendedLoan.amount());
+            return Either.right(recommendedLoan.amount());
         } catch (final Exception ex) {
             LOGGER.debug("Failed investing {} CZK into loan #{}. Likely already full in the meantime.",
                          recommendedLoan.amount(), i.getLoanId(), ex);
-            return Either.right(InvestmentFailure.FAILED);
+            return Either.left(InvestmentFailure.FAILED);
         }
     }
 
@@ -93,7 +94,7 @@ public class Investor {
         return Optional.ofNullable(provider);
     }
 
-    public Either<BigDecimal, InvestmentFailure> invest(final RecommendedLoan r, final boolean alreadySeenBefore) {
+    public Either<InvestmentFailure, BigDecimal> invest(final RecommendedLoan r, final boolean alreadySeenBefore) {
         final boolean confirmationRequired = r.isConfirmationRequired();
         if (alreadySeenBefore) {
             LOGGER.debug("Loan seen before.");
@@ -111,7 +112,7 @@ public class Investor {
                  * this must mean that the previous response was DELEGATED and the user did not respond in the
                  * meantime. we therefore keep the investment as delegated.
                  */
-                return Either.right(InvestmentFailure.SEEN_BEFORE);
+                return Either.left(InvestmentFailure.SEEN_BEFORE);
             }
         } else if (confirmationRequired) {
             if (this.provider == null) {
@@ -124,11 +125,11 @@ public class Investor {
         }
     }
 
-    private Either<BigDecimal, InvestmentFailure> investLocallyFailingOnCaptcha(final RecommendedLoan r) {
+    private Either<InvestmentFailure, BigDecimal> investLocallyFailingOnCaptcha(final RecommendedLoan r) {
         return investOperation.apply(r);
     }
 
-    private Either<BigDecimal, InvestmentFailure> investOrDelegateOnCaptcha(final RecommendedLoan r) {
+    private Either<InvestmentFailure, BigDecimal> investOrDelegateOnCaptcha(final RecommendedLoan r) {
         final Optional<OffsetDateTime> captchaEndDateTime =
                 r.descriptor().getLoanCaptchaProtectionEndDateTime();
         final boolean isCaptchaProtected = captchaEndDateTime.isPresent() &&
@@ -140,25 +141,25 @@ public class Investor {
             return this.delegateOrReject(r);
         }
         LOGGER.warn("CAPTCHA protected, no support for delegation. Not investing: {}.", r);
-        return Either.right(InvestmentFailure.REJECTED);
+        return Either.left(InvestmentFailure.REJECTED);
     }
 
-    private Either<BigDecimal, InvestmentFailure> delegateOrReject(final RecommendedLoan r) {
+    private Either<InvestmentFailure, BigDecimal> delegateOrReject(final RecommendedLoan r) {
         LOGGER.debug("Asking to confirm investment: {}.", r);
         final boolean delegationSucceeded = this.provider.requestConfirmation(this.requestId,
                                                                               r.descriptor().item().getId(),
                                                                               r.amount().intValue());
         if (delegationSucceeded) {
             LOGGER.debug("Investment confirmed delegated, not investing: {}.", r);
-            return Either.right(InvestmentFailure.DELEGATED);
+            return Either.left(InvestmentFailure.DELEGATED);
         } else {
             LOGGER.debug("Investment not confirmed delegated, not investing: {}.", r);
-            return Either.right(InvestmentFailure.REJECTED);
+            return Either.left(InvestmentFailure.REJECTED);
         }
     }
 
     @FunctionalInterface
-    private interface InvestOperation extends Function<RecommendedLoan, Either<BigDecimal, InvestmentFailure>> {
+    private interface InvestOperation extends Function<RecommendedLoan, Either<InvestmentFailure, BigDecimal>> {
 
     }
 }

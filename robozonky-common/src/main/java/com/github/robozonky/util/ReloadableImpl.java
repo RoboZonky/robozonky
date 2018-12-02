@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.robozonky.internal.util.DateUtil;
+import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,10 +69,10 @@ final class ReloadableImpl<T> implements ManuallyReloadable<T>,
     }
 
     @Override
-    public synchronized Try<T> get() {
+    public synchronized Either<Throwable, T> get() {
         if (!needsReload.getAsBoolean()) {
             LOGGER.trace("Not reloading {}.", this);
-            return Try.success(value.get());
+            return Either.right(value.get());
         }
         LOGGER.trace("Reloading {}.", this);
         return Try.ofSupplier(supplier).peek(v -> {
@@ -80,7 +81,7 @@ final class ReloadableImpl<T> implements ManuallyReloadable<T>,
             needsReload.markReloaded();
             runWhenReloaded.accept(v);
             LOGGER.debug("Reloaded {}, new value is {}.", this, v);
-        });
+        }).toEither();
     }
 
     private interface ReloadDetecion extends BooleanSupplier {

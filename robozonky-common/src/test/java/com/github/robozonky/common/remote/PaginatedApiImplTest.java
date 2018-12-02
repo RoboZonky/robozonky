@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -45,6 +46,15 @@ class PaginatedApiImplTest<S, T> {
         p.execute(f, sel, filter);
         verify(sel).accept(filter);
         verify(p).execute(eq(f), any(RoboZonkyFilter.class));
+    }
+
+    @Test
+    void checkSimple() {
+        final Function<T, S> f = o -> null;
+        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, null));
+        doReturn(null).when(p).execute(eq(f), any());
+        p.execute(f);
+        verify(p).execute(eq(f), isNotNull());
     }
 
     @Test

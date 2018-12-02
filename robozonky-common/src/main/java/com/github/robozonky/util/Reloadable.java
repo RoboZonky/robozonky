@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import io.vavr.control.Try;
+import io.vavr.control.Either;
 
 public interface Reloadable<T> {
 
@@ -41,5 +41,5 @@ public interface Reloadable<T> {
         return new ReloadableImpl(supplier, reloadAfter);
     }
 
-    Try<T> get();
+    Either<Throwable, T> get();
 }

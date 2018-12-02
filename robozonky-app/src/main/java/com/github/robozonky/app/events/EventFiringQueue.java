@@ -41,6 +41,7 @@ final class EventFiringQueue {
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
     private final ManuallyReloadable<Thread> firingThread = Reloadable.of(() -> {
+        LOGGER.debug("Creating new thread.");
         final Thread t = Scheduler.THREAD_FACTORY.newThread(new EventFiringRunnable(queue));
         t.start();
         LOGGER.debug("Started event firing thread {}.", t.getName());
@@ -64,9 +65,12 @@ final class EventFiringQueue {
     }
 
     private void ensureConsumerIsAlive() {
-        final Thread t = firingThread.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
-        if (!t.isAlive()) {
-            LOGGER.debug("Consumer thread {} not alive, restarting.", t.getName());
+        final boolean isReady = firingThread.get().fold(t -> {
+            LOGGER.debug("Failed retrieving event firing thread.", t);
+            return false;
+        }, Thread::isAlive);
+        if (!isReady) {
+            LOGGER.debug("Consumer thread not alive, restarting.");
             firingThread.clear();
             ensureConsumerIsAlive();
         }
