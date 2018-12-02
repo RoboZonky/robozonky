@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,14 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.math.BigDecimal;
-
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.RawInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired immediately before {@link ControlApi#invest(RawInvestment)} call is made or, in case of dry run,
  * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentMadeEvent}.
  */
-public final class InvestmentRequestedEvent extends Event implements LoanBased,
-                                                                     Recommending {
+public interface InvestmentRequestedEvent extends MarketplaceLoanBased,
+                                                  Recommending {
 
-    private final Loan loan;
-    private final BigDecimal recommendation;
-
-    public InvestmentRequestedEvent(final RecommendedLoan recommendation) {
-        this.loan = recommendation.descriptor().item();
-        this.recommendation = recommendation.amount();
-    }
-
-    public Loan getLoan() {
-        return loan;
-    }
-
-    public BigDecimal getRecommendation() {
-        return recommendation;
-    }
 }

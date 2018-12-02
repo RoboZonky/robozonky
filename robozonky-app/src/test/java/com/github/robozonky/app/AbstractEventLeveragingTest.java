@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,108 @@
 
 package com.github.robozonky.app;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.app.events.EventFiringListener;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
-    private final Collection<Event> previouslyExistingEvents = new LinkedHashSet<>(0);
+    private final MyEventFiringListener listener = new MyEventFiringListener();
+
+    protected List<Event> getEventsFired() {
+        return listener.getEventsFired();
+    }
+
+    protected List<Event> getEventsRequested() {
+        return listener.getEventsRequested();
+    }
+
+    protected List<Event> getEventsReady() {
+        return listener.getEventsReady();
+    }
+
+    protected List<Event> getEventsFailed() {
+        return listener.getEventsFailed();
+    }
+
+    protected void readPreexistingEvents() {
+        listener.clear();
+    }
 
     @BeforeEach
-    public void enableEventDebug() {
-        System.setProperty(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE.getName(), "true");
+    public void startListeningForEvents() { // initialize session and create a listener
+        Events.forSession(SESSION).addListener(listener);
     }
 
     @AfterEach
-    public void clear() {
-        Events.getFired().clear();
-        Events.INSTANCE.registries.clear();
+    public void stopListeningForEvents() {
+        Events.forSession(SESSION).removeListener(listener);
+        readPreexistingEvents();
     }
 
-    protected List<Event> getNewEvents() {
-        return Events.getFired().stream()
-                .filter(e -> !previouslyExistingEvents.contains(e))
-                .collect(Collectors.toList());
+    @AfterEach
+    public void unregisterAllShutdownHooks() { // so that PITest can shut down all child processes
+        Lifecycle.clearShutdownHooks();
     }
 
-    @BeforeEach
-    public void readPreexistingEvents() {
-        previouslyExistingEvents.addAll(Events.getFired());
+    private static class MyEventFiringListener implements EventFiringListener {
+
+        private final List<Event> eventsFired = new ArrayList<>(0);
+        private final List<Event> eventsRequested = new ArrayList<>(0);
+        private final List<Event> eventsFailed = new ArrayList<>(0);
+        private final List<Event> eventsReady = new ArrayList<>(0);
+
+        @Override
+        public void requested(final LazyEvent<? extends Event> event) {
+            eventsRequested.add(event.get());
+        }
+
+        @Override
+        public <T extends Event> void ready(final T event, final Class<? extends EventListener<T>> listener) {
+            eventsReady.add(event);
+        }
+
+        @Override
+        public <T extends Event> void fired(final T event, final Class<? extends EventListener<T>> listener) {
+            eventsFired.add(event);
+        }
+
+        @Override
+        public <T extends Event> void failed(final LazyEvent<? extends Event> event,
+                                             final Class<? extends EventListener<T>> listener, final Exception ex) {
+            eventsFailed.add(event.get());
+        }
+
+        public List<Event> getEventsFired() {
+            return eventsFired;
+        }
+
+        public List<Event> getEventsRequested() {
+            return eventsRequested;
+        }
+
+        public List<Event> getEventsFailed() {
+            return eventsFailed;
+        }
+
+        public List<Event> getEventsReady() {
+            return eventsReady;
+        }
+
+        public void clear() {
+            eventsFired.clear();
+            eventsRequested.clear();
+            eventsFailed.clear();
+            eventsReady.clear();
+        }
     }
 }

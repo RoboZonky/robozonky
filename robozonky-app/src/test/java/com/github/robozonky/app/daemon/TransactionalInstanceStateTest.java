@@ -16,12 +16,15 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.stream.Stream;
+
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.state.InstanceState;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class TransactionalInstanceStateTest extends AbstractZonkyLeveragingTest {
 
@@ -29,9 +32,9 @@ class TransactionalInstanceStateTest extends AbstractZonkyLeveragingTest {
     @Test
     void delegatesKeys() {
         final InstanceState<String> parent = mock(InstanceState.class);
+        when(parent.getKeys()).thenReturn(Stream.empty());
         final TransactionalInstanceState<String> s = new TransactionalInstanceState<>(createTransactional(), parent);
-        s.getKeys();
-        verify(parent).getKeys();
+        assertThat(s.getKeys()).isSameAs(parent.getKeys());
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,13 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.math.BigDecimal;
-
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired immediately after {@link ConfirmationProvider} rejected a given investment.
  */
-public final class InvestmentRejectedEvent extends Event implements LoanBased,
-                                                                    Recommending {
+public interface InvestmentRejectedEvent extends MarketplaceLoanBased,
+                                                 Recommending {
 
-    private final Loan loan;
-    private final BigDecimal recommendation;
-    private final String confirmationProviderId;
-
-    public InvestmentRejectedEvent(final RecommendedLoan recommendation, final String confirmationProviderId) {
-        this.loan = recommendation.descriptor().item();
-        this.recommendation = recommendation.amount();
-        this.confirmationProviderId = confirmationProviderId;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
-    }
-
-    @Override
-    public BigDecimal getRecommendation() {
-        return recommendation;
-    }
-
-    public String getConfirmationProviderId() {
-        return confirmationProviderId;
-    }
+    String getConfirmationProviderId();
 }

@@ -18,7 +18,7 @@ package com.github.robozonky.app.version;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.SimpleJob;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -27,11 +27,11 @@ class VersionDetectionJobTest {
 
     @Test
     void test() {
-        final Job job = new VersionDetectionJob();
+        final SimpleJob job = new VersionDetectionJob();
         assertSoftly(softly -> {
             softly.assertThat(job.startIn()).isEqualTo(Duration.ZERO);
             softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofDays(1));
-            softly.assertThat(job.payload()).isInstanceOf(VersionDetectionPayload.class);
+            softly.assertThat(job.payload()).isInstanceOf(UpdateMonitor.class);
         });
     }
 

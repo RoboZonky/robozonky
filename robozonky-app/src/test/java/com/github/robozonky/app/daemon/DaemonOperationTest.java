@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -49,16 +49,16 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void exceptional() {
-        final Tenant a = mock(Tenant.class);
+        final Tenant a = mockTenant();
         doThrow(IllegalStateException.class).when(a).run(any());
         final DaemonOperation d = new CustomOperation(a, null);
         d.run();
-        assertThat(this.getNewEvents()).first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+        assertThat(getEventsRequested()).first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
     }
 
     @Test
     void standard() {
-        final Tenant a = mock(Tenant.class);
+        final Tenant a = mockTenant();
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
         verify(operation).accept(any(), eq(a));
@@ -67,7 +67,7 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void error() {
-        final Tenant a = mock(Tenant.class);
+        final Tenant a = mockTenant();
         final BiConsumer<Portfolio, Tenant> operation = (p, api) -> {
             throw new Error();
         };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,7 @@ import java.util.Optional;
 /**
  * Fired before the application forcibly terminates due to an error.
  */
-public final class RoboZonkyCrashedEvent extends Event {
+public interface RoboZonkyCrashedEvent extends Event {
 
-    private final Throwable cause;
-
-    public RoboZonkyCrashedEvent(final Throwable cause) {
-        this.cause = cause;
-    }
-
-    public Optional<Throwable> getCause() {
-        return Optional.ofNullable(this.cause);
-    }
+    Optional<Throwable> getCause();
 }

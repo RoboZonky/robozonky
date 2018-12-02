@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,7 +29,6 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,33 +50,6 @@ class LoanTest {
     @DisplayName("Sanitization works.")
     void sanitizing() {
         assertThat(Loan.sanitized(mocked)).isNotNull();
-    }
-
-    @Nested
-    @DisplayName("Existing Loan")
-    class LoanUpdatingTest {
-
-        private Loan loan;
-
-        @BeforeEach
-        void prepareLoan() {
-            loan = Loan.sanitize(mocked)
-                    .build();
-        }
-
-        @Test
-        @DisplayName("is properly updated.")
-        void updatesValuesThatMayChangeInTheMarketplace() {
-            final MarketplaceLoan l = MarketplaceLoan.sanitize(mocked)
-                    .setAmount(100000) // will not be updated
-                    .setRemainingInvestment(1000) // will be updated
-                    .build();
-            Loan.updateFromMarketplace(loan, l);
-            assertSoftly(softly -> {
-                softly.assertThat(loan.getAmount()).isNotEqualTo(l.getAmount());
-                softly.assertThat(loan.getRemainingInvestment()).isEqualTo(l.getRemainingInvestment());
-            });
-        }
     }
 
     @Nested
@@ -153,6 +126,16 @@ class LoanTest {
         @Test
         void mainIncomeType() {
             standard(b, b::setMainIncomeType, b::getMainIncomeType, MainIncomeType.EMPLOYMENT);
+        }
+
+        @Test
+        void borrowerNicknames() {
+            standard(b, b::setKnownBorrowerNicknames, b::getKnownBorrowerNicknames, Collections.singleton("someone"));
+        }
+
+        @Test
+        void emptyBorrowerNicknames() {
+            standard(b, b::setKnownBorrowerNicknames, b::getKnownBorrowerNicknames, Collections.emptySet());
         }
 
         @Test

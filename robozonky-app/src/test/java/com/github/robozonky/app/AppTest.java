@@ -22,6 +22,9 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.app.configuration.InvestmentMode;
+import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.util.Scheduler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +42,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         main.run();
-        verify(main).actuallyExit(eq(ReturnCode.ERROR_WRONG_PARAMETERS.getCode()));
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 
     @Test
@@ -47,7 +50,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App("-h"));
         doNothing().when(main).actuallyExit(anyInt());
         main.run();
-        verify(main).actuallyExit(eq(ReturnCode.OK.getCode()));
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 
     @Test
@@ -63,23 +66,25 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void triggersEvents() {
+        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
         try {
-            main.execute(lifecycle -> ReturnCode.OK);
+            main.execute(new MyInvestmentMode());
         } finally { // clean up, shutting down executors etc.
             main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
         }
         verify(main).ensureLiveness();
         verify(main).actuallyExit(ReturnCode.OK.getCode());
-        final List<Event> events = getNewEvents();
+        final List<Event> events = getEventsRequested();
         assertThat(events).hasSize(3);
         assertSoftly(softly -> {
             softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
             softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
             softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
         });
+        assertThat(s.isClosed()).isTrue();
     }
 
     /**
@@ -87,16 +92,52 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void failsCorrectly() {
+        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
         try {
-            final ReturnCode result = main.execute(lifecycle -> {
-                throw new IllegalStateException("Testing failure");
-            });
+            final ReturnCode result = main.execute(new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } finally { // clean up, shutting down executors etc.
             main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
+        }
+        assertThat(s.isClosed()).isTrue();
+    }
+
+    private static class MyInvestmentMode implements InvestmentMode {
+
+        @Override
+        public String getSessionName() {
+            return "";
+        }
+
+        @Override
+        public ReturnCode apply(Lifecycle lifecycle) {
+            return ReturnCode.OK;
+        }
+
+        @Override
+        public void close() {
+
+        }
+    }
+
+    private static class MyFailingInvestmentMode implements InvestmentMode {
+
+        @Override
+        public String getSessionName() {
+            return "";
+        }
+
+        @Override
+        public ReturnCode apply(Lifecycle lifecycle) {
+            throw new IllegalStateException("Testing failure");
+        }
+
+        @Override
+        public void close() {
+
         }
     }
 }

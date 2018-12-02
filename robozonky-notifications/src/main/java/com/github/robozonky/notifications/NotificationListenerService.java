@@ -69,8 +69,7 @@ public final class NotificationListenerService implements ListenerService {
     }
 
     private Stream<RefreshableConfigStorage> getTenantConfigurations() {
-        return TenantState.getKnownTenants().stream()
-                .map(SessionInfo::new)
+        return TenantState.getKnownTenants()
                 .map(this::getTenantConfigurations)
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
     }

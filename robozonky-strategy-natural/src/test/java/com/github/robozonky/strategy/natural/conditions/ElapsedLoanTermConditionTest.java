@@ -48,7 +48,7 @@ class ElapsedLoanTermConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
@@ -57,7 +57,7 @@ class ElapsedLoanTermConditionTest {
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(0);
         final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
@@ -65,7 +65,7 @@ class ElapsedLoanTermConditionTest {
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(2);
         final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();

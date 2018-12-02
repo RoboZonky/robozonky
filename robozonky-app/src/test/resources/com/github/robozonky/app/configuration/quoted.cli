@@ -1,0 +1,9 @@
+-n
+"Testing Name"
+-p
+"9c884c2f-9b40-4019-b560-e893f1c8f17b"
+-d
+-g
+"C:\Program Files\RoboZonky\robozonky.keystore"
+-s
+"https://gist.githubusercontent.com/triceo/e0b0853579531eb027129ce1e116115d/raw/robozonky-strategy-new.cfg"

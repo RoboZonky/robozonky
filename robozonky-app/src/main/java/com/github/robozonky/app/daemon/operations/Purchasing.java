@@ -16,37 +16,30 @@
 
 package com.github.robozonky.app.daemon.operations;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.Portfolio;
-import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.util.NumberUtil;
 
 public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
 
-    private final Tenant auth;
-    private final SoldParticipationCache soldParticipationCache;
-    private final AtomicReference<int[]> lastChecked = new AtomicReference<>(new int[0]);
+    private static final long[] NO_LONGS = new long[0];
+    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
-    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth) {
-        super(strategy);
-        this.auth = auth;
-        this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
+    public Purchasing(final Tenant auth) {
+        super(auth, auth::getPurchaseStrategy);
     }
 
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
-        return new ParticipationDescriptor(p, LoanCache.get().getLoan(p.getLoanId(), auth));
+        return new ParticipationDescriptor(p, () -> LoanCache.get().getLoan(p.getLoanId(), auth));
     }
 
     @Override
@@ -56,8 +49,8 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
 
     @Override
     protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
-        final int[] idsFromMarketplace = marketplace.stream().mapToInt(Participation::getId).toArray();
-        final int[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
+        final long[] idsFromMarketplace = marketplace.stream().mapToLong(Participation::getId).toArray();
+        final long[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
         return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
     }
 
@@ -65,16 +58,8 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .map(p -> toDescriptor(p, auth))
-                .filter(d -> { // never re-purchase what was once sold
-                    final int loanId = d.item().getLoanId();
-                    final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
-                    if (wasSoldBefore) {
-                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
-                    }
-                    return !wasSoldBefore;
-                }).collect(Collectors.toCollection(ArrayList::new));
-        final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
-        return PurchasingSession.purchase(portfolio, auth, participations, s);
+                .map(d -> toDescriptor(d, getTenant()))
+                .collect(Collectors.toList());
+        return PurchasingSession.purchase(portfolio, getTenant(), participations, strategy);
     }
 }

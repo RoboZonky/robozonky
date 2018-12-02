@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
-import com.github.robozonky.app.Events;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 class UpdateNotificationTest extends AbstractEventLeveragingTest {
 
@@ -47,7 +48,7 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
         final UpdateNotification n = new UpdateNotification(currentVersion);
         // check that the event is fired
         n.valueSet(newVersionIdentifier);
-        final Collection<Event> eventsOriginallyFired = Events.getFired();
+        final Collection<Event> eventsOriginallyFired = this.getEventsRequested();
         assertThat(eventsOriginallyFired).hasSize(1)
                 .first()
                 .isInstanceOf(RoboZonkyUpdateDetectedEvent.class);
@@ -57,7 +58,7 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
                 .matches(e -> Objects.equals(((RoboZonkyUpdateDetectedEvent) e).getNewVersion(), newVersion));
         // check that the event is not fired again since there is no change in new version
         n.valueSet(newVersionIdentifier);
-        assertThat(Events.getFired()).hasSize(1);
+        assertThat(this.getEventsRequested()).hasSize(1);
     }
 
     @Test
@@ -68,7 +69,7 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
         final UpdateNotification n = new UpdateNotification(currentVersion);
         // check that the event is fired
         n.valueSet(newVersionIdentifier);
-        final Collection<Event> eventsOriginallyFired = Events.getFired();
+        final Collection<Event> eventsOriginallyFired = this.getEventsRequested();
         assertThat(eventsOriginallyFired).hasSize(1)
                 .first()
                 .isInstanceOf(RoboZonkyExperimentalUpdateDetectedEvent.class);
@@ -79,7 +80,7 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
                                              newVersion));
         // check that the event is not fired again since there is no change in new version
         n.valueSet(newVersionIdentifier);
-        assertThat(Events.getFired()).hasSize(1);
+        assertThat(this.getEventsRequested()).hasSize(1);
     }
 
     @Test
@@ -90,10 +91,10 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
         final UpdateNotification n = new UpdateNotification(currentVersion);
         // check that the event is not fired
         n.valueSet(newVersionIdentifier);
-        final Collection<Event> eventsOriginallyFired = Events.getFired();
+        final Collection<Event> eventsOriginallyFired = this.getEventsRequested();
         assertThat(eventsOriginallyFired).isEmpty();
         // check that the event is still not fired when we submit the current version again
         n.valueSet(new VersionIdentifier(currentVersion));
-        assertThat(Events.getFired()).isEmpty();
+        assertThat(this.getEventsRequested()).isEmpty();
     }
 }

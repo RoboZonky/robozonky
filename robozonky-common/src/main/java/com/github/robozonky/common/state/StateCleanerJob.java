@@ -18,10 +18,10 @@ package com.github.robozonky.common.state;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.Job;
-import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.common.jobs.TenantPayload;
 
-final class StateCleanerJob implements Job {
+final class StateCleanerJob implements TenantJob {
 
     @Override
     public Duration startIn() {
@@ -34,7 +34,7 @@ final class StateCleanerJob implements Job {
     }
 
     @Override
-    public Payload payload() {
+    public TenantPayload payload() {
         return new StateCleaner();
     }
 }

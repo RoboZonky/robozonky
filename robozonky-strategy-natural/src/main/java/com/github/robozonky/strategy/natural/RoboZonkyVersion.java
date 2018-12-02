@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package com.github.robozonky.strategy.natural;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
 
     private static final Comparator<RoboZonkyVersion> COMPARATOR = Comparator.comparing(RoboZonkyVersion::getMajor)
             .thenComparing(RoboZonkyVersion::getMinor)
             .thenComparing(RoboZonkyVersion::getMicro);
+    private static final Pattern SINGLE_DOT_PATTERN = Pattern.compile("\\Q.\\E");
 
     private final int major, minor, micro;
 
@@ -44,7 +46,7 @@ class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
         }
         final int dashIndex = version.indexOf('-');
         final String regular = dashIndex > 0 ? version.substring(0, dashIndex) : version;
-        return Arrays.stream(regular.split("\\Q.\\E"))
+        return Arrays.stream(SINGLE_DOT_PATTERN.split(regular))
                 .mapToInt(Integer::parseInt)
                 .toArray();
     }

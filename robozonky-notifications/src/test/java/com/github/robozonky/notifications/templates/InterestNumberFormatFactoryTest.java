@@ -84,6 +84,33 @@ class InterestNumberFormatFactoryTest {
     }
 
     @Test
+    void formattingEnglishZero() throws TemplateValueFormatException, TemplateModelException {
+        final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
+                                                                                Environment.getCurrentEnvironment());
+        final TemplateNumberModel m = () -> BigDecimal.ZERO;
+        final Object result = f.formatToPlainText(m);
+        assertThat(result).isEqualTo("0.00%");
+    }
+
+    @Test
+    void formattingEnglishRoundingUp() throws TemplateValueFormatException, TemplateModelException {
+        final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
+                                                                                Environment.getCurrentEnvironment());
+        final TemplateNumberModel m = () -> new BigDecimal("0.00049");
+        final Object result = f.formatToPlainText(m);
+        assertThat(result).isEqualTo("0.05%");
+    }
+
+    @Test
+    void formattingEnglishRoundingDown() throws TemplateValueFormatException, TemplateModelException {
+        final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
+                                                                                Environment.getCurrentEnvironment());
+        final TemplateNumberModel m = () -> new BigDecimal("0.00051");
+        final Object result = f.formatToPlainText(m);
+        assertThat(result).isEqualTo("0.05%");
+    }
+
+    @Test
     void formal() throws TemplateValueFormatException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
                                                                                 Environment.getCurrentEnvironment());

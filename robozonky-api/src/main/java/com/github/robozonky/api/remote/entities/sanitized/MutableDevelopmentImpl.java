@@ -22,13 +22,16 @@ import java.util.Optional;
 import com.github.robozonky.api.remote.entities.DateDescriptor;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.enums.DevelopmentType;
-import com.github.robozonky.internal.api.ToStringBuilder;
+import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 
 final class MutableDevelopmentImpl implements DevelopmentBuilder {
 
+    private int loanId;
     private String publicNote;
     private DevelopmentType type;
     private OffsetDateTime dateFrom, dateTo;
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     MutableDevelopmentImpl() {
 
@@ -41,6 +44,12 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
         if (original.getDateTo() != null) {
             this.dateTo = DateDescriptor.toOffsetDateTime(original.getDateTo());
         }
+    }
+
+    @Override
+    public DevelopmentBuilder setLoanId(final int loanId) {
+        this.loanId = loanId;
+        return this;
     }
 
     @Override
@@ -68,6 +77,11 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
     }
 
     @Override
+    public int getLoanId() {
+        return loanId;
+    }
+
+    @Override
     public DevelopmentType getType() {
         return type;
     }
@@ -89,6 +103,6 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
 
     @Override
     public final String toString() {
-        return new ToStringBuilder(this).toString();
+        return toString.get();
     }
 }

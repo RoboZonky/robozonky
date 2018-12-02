@@ -16,11 +16,12 @@
 
 package com.github.robozonky.common.state;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
+
+import com.github.robozonky.internal.util.DateUtil;
 
 final class StateModifierImpl<T> implements StateModifier<T>,
                                             Callable<Boolean> {
@@ -53,7 +54,7 @@ final class StateModifierImpl<T> implements StateModifier<T>,
         final String sectionName = instanceState.getSectionName();
         final StateStorage backend = instanceState.getStorage();
         actions.forEach(a -> a.accept(backend, sectionName));
-        backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), OffsetDateTime.now().toString());
+        backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), DateUtil.offsetNow().toString());
         return backend.store();
     }
 }

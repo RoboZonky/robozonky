@@ -48,7 +48,7 @@ class RelativeElapsedLoanTermConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(0, 100);
@@ -57,7 +57,7 @@ class RelativeElapsedLoanTermConditionTest {
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(0);
         final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(1, 100);
@@ -66,7 +66,7 @@ class RelativeElapsedLoanTermConditionTest {
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(0, 20);

@@ -17,56 +17,76 @@
 package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.common.RemoteBalance;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.util.Reloadable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class TokenBasedTenant implements Tenant {
 
-    private final ZonkyApiTokenSupplier tokenSupplier;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedTenant.class);
+    private static final Restrictions FULLY_RESTRICTED = new Restrictions();
+
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
     private final SecretProvider secrets;
+    private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
+    private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
+    private final RemoteBalance balance;
+    private final Reloadable<Restrictions> restrictions;
+    private final StrategyProvider strategyProvider;
 
-    private Instant lastRestrictionsUpdate = Instant.EPOCH;
-    private Restrictions restrictions = null;
-
-    TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
-                     final boolean isDryRun, final Duration refreshAfter) {
+    TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final StrategyProvider strategyProvider,
+                     final String sessionName, final boolean isDryRun, final Duration refreshAfter) {
         this.secrets = secrets;
+        this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
-        this.tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets, refreshAfter);
+        this.supplier = scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, refreshAfter);
+        this.balance = new RemoteBalanceImpl(this);
+        this.restrictions = Reloadable.of(() -> this.call(Zonky::getRestrictions), Duration.ofHours(1));
     }
 
     @Override
     public Restrictions getRestrictions() {
-        return getRestrictions(Instant.now());
+        return restrictions.get().getOrElseGet(ex -> {
+            LOGGER.info("Failed retrieving Zonky restrictions, disabling all operations.", ex);
+            return FULLY_RESTRICTED;
+        });
     }
 
-    synchronized Restrictions getRestrictions(final Instant now) {
-        final boolean needsUpdate = lastRestrictionsUpdate.plus(Duration.ofMinutes(5)).isBefore(now);
-        if (needsUpdate) {
-            restrictions = call(Zonky::getRestrictions);
-            lastRestrictionsUpdate = now;
-        }
-        return restrictions;
-    }
-
-    @Override
-    public <T> T call(final Function<Zonky, T> operation) {
-        return apis.call(operation, tokenSupplier);
+    private ZonkyApiTokenSupplier getTokenSupplier(final ZonkyScope scope) {
+        return tokens.computeIfAbsent(scope, supplier);
     }
 
     @Override
-    public boolean isAvailable() {
-        return !tokenSupplier.isUpdating();
+    public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
+        return apis.call(operation, getTokenSupplier(scope));
+    }
+
+    @Override
+    public boolean isAvailable(final ZonkyScope scope) {
+        return getTokenSupplier(scope).isAvailable();
+    }
+
+    @Override
+    public RemoteBalance getBalance() {
+        return balance;
     }
 
     @Override
@@ -77,5 +97,25 @@ class TokenBasedTenant implements Tenant {
     @Override
     public SecretProvider getSecrets() {
         return secrets;
+    }
+
+    @Override
+    public Optional<InvestmentStrategy> getInvestmentStrategy() {
+        return strategyProvider.getToInvest();
+    }
+
+    @Override
+    public Optional<SellStrategy> getSellStrategy() {
+        return strategyProvider.getToSell();
+    }
+
+    @Override
+    public Optional<PurchaseStrategy> getPurchaseStrategy() {
+        return strategyProvider.getToPurchase();
+    }
+
+    @Override
+    public void close() { // cancel existing tokens
+        tokens.forEach((k, v) -> v.close());
     }
 }

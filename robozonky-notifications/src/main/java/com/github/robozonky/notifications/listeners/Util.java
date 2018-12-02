@@ -19,9 +19,12 @@ package com.github.robozonky.notifications.listeners;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -33,12 +36,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.Maps;
 
 import static com.github.robozonky.internal.util.Maps.entry;
@@ -60,12 +66,23 @@ final class Util {
         return Date.from(offsetDateTime.toInstant());
     }
 
-    public static String identifyLoan(final LoanBased event) {
-        final Loan loan = event.getLoan();
+    private static Date toDate(final ZonedDateTime zonedDateTime) {
+        return Date.from(zonedDateTime.toInstant());
+    }
+
+    private static String identifyLoan(final MarketplaceLoan loan) {
         return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
     }
 
-    public static Map<String, Object> getLoanData(final Loan loan) {
+    public static String identifyLoan(final MarketplaceLoanBased event) {
+        return identifyLoan(event.getLoan());
+    }
+
+    public static String identifyLoan(final LoanBased event) {
+        return identifyLoan(event.getLoan());
+    }
+
+    public static Map<String, Object> getLoanData(final MarketplaceLoan loan) {
         return Maps.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()),
@@ -93,8 +110,19 @@ final class Util {
                 entry("total", portfolioOverview.getCzkInvested()),
                 entry("totalRisk", portfolioOverview.getCzkAtRisk()),
                 entry("totalShare", portfolioOverview.getShareAtRisk()),
-                entry("balance", portfolioOverview.getCzkAvailable())
+                entry("balance", portfolioOverview.getCzkAvailable()),
+                entry("timestamp", toDate(portfolioOverview.getTimestamp()))
         );
+    }
+
+    public static boolean isNetworkProblem(final Throwable ex) {
+        if (ex == null) {
+            return false;
+        } else if (ex instanceof SocketTimeoutException || ex instanceof SocketException) {
+            return true;
+        } else {
+            return isNetworkProblem(ex.getCause());
+        }
     }
 
     private static BigDecimal getTotalPaid(final Investment i) {
@@ -102,10 +130,10 @@ final class Util {
     }
 
     private static long getMonthsElapsed(final Investment i) {
-        return Period.between(i.getInvestmentDate().toLocalDate(), LocalDate.now()).toTotalMonths();
+        return Period.between(i.getInvestmentDate().toLocalDate(), DateUtil.localNow().toLocalDate()).toTotalMonths();
     }
 
-    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
+    public static Map<String, Object> getLoanData(final Investment i, final MarketplaceLoan l) {
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", Util.toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());

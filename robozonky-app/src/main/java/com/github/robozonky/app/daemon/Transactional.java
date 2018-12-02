@@ -20,8 +20,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.common.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class Transactional implements Runnable {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private final Tenant tenant;
-    private final Queue<Event> eventsToFire = new ConcurrentLinkedQueue<>();
+    private final Queue<Object> eventsToFire = new ConcurrentLinkedQueue<>();
     private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
 
     public Transactional(final Tenant tenant) {
@@ -64,18 +65,32 @@ public class Transactional implements Runnable {
         eventsToFire.add(event);
     }
 
+    public void fire(final LazyEvent<? extends Event> event) {
+        LOGGER.trace("Lazy event stored within transaction: {}.", event);
+        eventsToFire.add(event);
+    }
+
     /**
      * Fire events and update state. Clears internal state, so that the next {@link #run()} call would not do anything
      * unless {@link #fire(Event)} or state updates are performed inbetween.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void run() {
         LOGGER.debug("Replaying transaction.");
         while (!stateUpdates.isEmpty()) {
             stateUpdates.poll().run();
         }
+        final Events events = Events.forSession(getTenant().getSessionInfo());
         while (!eventsToFire.isEmpty()) {
-            Events.fire(eventsToFire.poll());
+            final Object evt = eventsToFire.poll();
+            if (evt instanceof LazyEvent) {
+                events.fire((LazyEvent)evt);
+            } else if (evt instanceof Event) {
+                events.fire((Event)evt);
+            } else {
+                throw new IllegalStateException("Can not happen.");
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ public class RawDevelopment extends BaseEntity {
     private DevelopmentType businessCode;
     private String publicNote;
     private Object metadata;
+    private int loanId;
     private DateDescriptor dateFrom, dateTo;
 
     @XmlElement
@@ -44,6 +45,10 @@ public class RawDevelopment extends BaseEntity {
         return publicNote;
     }
 
+    @XmlElement
+    public int getLoanId() {
+        return loanId;
+    }
 
     @XmlElement
     public Object getMetadata() {

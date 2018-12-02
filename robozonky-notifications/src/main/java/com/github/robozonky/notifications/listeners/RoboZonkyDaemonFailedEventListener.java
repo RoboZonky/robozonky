@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.robozonky.notifications.listeners;
 import java.util.Collections;
 import java.util.Map;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
@@ -37,6 +38,17 @@ public class RoboZonkyDaemonFailedEventListener extends AbstractListener<RoboZon
     @Override
     String getTemplateFileName() {
         return "daemon-failed.ftl";
+    }
+
+    /**
+     * Won't bother users with network connection errors, since in those cases the e-mail probably won't be sent anyway.
+     * @param event
+     * @param sessionInfo
+     * @return
+     */
+    @Override
+    boolean shouldNotify(final RoboZonkyDaemonFailedEvent event, final SessionInfo sessionInfo) {
+        return super.shouldNotify(event, sessionInfo) && !Util.isNetworkProblem(event.getCause());
     }
 
     @Override

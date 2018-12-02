@@ -21,7 +21,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 public class RemainingAmountCondition extends AbstractRangeCondition {
 
     public RemainingAmountCondition(final int fromInclusive, final int toInclusive) {
-        super(Wrapper::getRemainingAmount, fromInclusive, toInclusive);
+        super(Wrapper::getRemainingPrincipal, fromInclusive, toInclusive);
         if (fromInclusive < 0 || toInclusive < 0) {
             throw new IllegalArgumentException("Either values need to be 0 or more.");
         }

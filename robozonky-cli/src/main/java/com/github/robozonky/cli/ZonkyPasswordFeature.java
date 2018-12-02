@@ -19,22 +19,21 @@ package com.github.robozonky.cli;
 import java.io.File;
 import java.util.Optional;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
+import picocli.CommandLine;
 
-@Parameters(commandNames = "zonky-credentials", commandDescription = ZonkyPasswordFeature.DESCRIPTION)
+@CommandLine.Command(name = "zonky-credentials", description = ZonkyPasswordFeature.DESCRIPTION)
 public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Set credentials to access Zonky servers.";
     private final ApiProvider api;
-    @Parameter(order = 2, names = {"-u", "--username"},
+    @CommandLine.Option(names = {"-u", "--username"},
             description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
-    @Parameter(order = 3, names = {"-p", "--password"}, converter = PasswordConverter.class,
-            description = "Username to use to authenticate with Zonky servers.", required = true, password = true)
+    @CommandLine.Option(names = {"-p", "--password"},
+            description = "Password to use to authenticate with Zonky servers.", required = true, interactive = true)
     private char[] password = null;
 
     public ZonkyPasswordFeature(final File keystore, final char[] keystoreSecret, final String username,
@@ -51,6 +50,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
     }
 
     ZonkyPasswordFeature() {
+        // for Picocli
         this.api = new ApiProvider();
     }
 

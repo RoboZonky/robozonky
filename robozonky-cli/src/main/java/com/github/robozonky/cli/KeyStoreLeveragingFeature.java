@@ -18,16 +18,16 @@ package com.github.robozonky.cli;
 
 import java.io.File;
 
-import com.beust.jcommander.Parameter;
 import com.github.robozonky.common.secrets.KeyStoreHandler;
+import picocli.CommandLine;
 
-abstract class KeyStoreLeveragingFeature implements Feature {
+abstract class KeyStoreLeveragingFeature extends AbstractFeature {
 
-    @Parameter(order = 0, names = {"-k", "--keystore"}, description = "The keystore to hold the secrets.",
+    @CommandLine.Option(names = {"-k", "--keystore"}, description = "The keystore to hold the secrets.",
             required = true)
     private File keystore = new File("robozonky.keystore");
-    @Parameter(order = 1, names = {"-s", "--secret"}, description = "Secret to use to access the keystore.",
-            converter = PasswordConverter.class, required = true, password = true)
+    @CommandLine.Option(names = {"-s", "--secret"}, description = "Secret to use to access the keystore.",
+            required = true, interactive = true)
     private char[] secret = null;
     private KeyStoreHandler storage;
 
@@ -37,7 +37,7 @@ abstract class KeyStoreLeveragingFeature implements Feature {
     }
 
     protected KeyStoreLeveragingFeature() {
-        // for JCommander
+        // for Picocli
     }
 
     protected KeyStoreHandler getStorage() {

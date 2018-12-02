@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.github.robozonky.internal.api.ToStringBuilder;
+import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,8 @@ abstract class BaseEntity {
     private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
     @XmlTransient
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    @XmlTransient
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     private boolean hasBeenCalledBefore(final String key) {
         final String id = this.getClass().getCanonicalName() + ":" + key;
@@ -58,7 +61,7 @@ abstract class BaseEntity {
     }
 
     @Override
-    public final String toString() {
-        return new ToStringBuilder(this).toString();
+    public String toString() {
+        return toString.get();
     }
 }

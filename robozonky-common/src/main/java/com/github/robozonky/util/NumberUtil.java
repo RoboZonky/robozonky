@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.robozonky.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public class NumberUtil {
 
@@ -30,8 +30,8 @@ public class NumberUtil {
         return amount.setScale(2, RoundingMode.HALF_EVEN).doubleValue();
     }
 
-    public static boolean hasAdditions(final int[] original, final int... current) {
-        return IntStream.of(current).anyMatch(i -> IntStream.of(original).noneMatch(j -> i == j));
+    public static boolean hasAdditions(final long[] original, final long... current) {
+        return LongStream.of(current).anyMatch(i -> LongStream.of(original).noneMatch(j -> i == j));
     }
 
 }

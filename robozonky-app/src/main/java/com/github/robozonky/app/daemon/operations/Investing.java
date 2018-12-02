@@ -18,32 +18,29 @@ package com.github.robozonky.app.daemon.operations;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.util.NumberUtil;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
-    private final Tenant auth;
+    private static final long[] NO_LONGS = new long[0];
     private final Investor investor;
-    private final AtomicReference<int[]> actionableWhenLastChecked = new AtomicReference<>(new int[0]);
+    private final AtomicReference<long[]> actionableWhenLastChecked = new AtomicReference<>(NO_LONGS);
 
-    public Investing(final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
-                     final Tenant auth) {
-        super(strategy);
-        this.auth = auth;
+    public Investing(final Investor investor, final Tenant auth) {
+        super(auth, auth::getInvestmentStrategy);
         this.investor = investor;
     }
 
     private static boolean isActionable(final LoanDescriptor loanDescriptor) {
-        final OffsetDateTime now = OffsetDateTime.now();
+        final OffsetDateTime now = DateUtil.offsetNow();
         return loanDescriptor.getLoanCaptchaProtectionEndDateTime()
                 .map(d -> d.isBefore(now))
                 .orElse(true);
@@ -51,23 +48,22 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
 
     @Override
     protected boolean isBalanceUnderMinimum(final int current) {
-        return current < auth.getRestrictions().getMinimumInvestmentAmount();
+        return current < getTenant().getRestrictions().getMinimumInvestmentAmount();
     }
 
     @Override
     protected boolean hasMarketplaceUpdates(final Collection<LoanDescriptor> marketplace) {
-        final int[] actionableLoansNow = marketplace.stream()
+        final long[] actionableLoansNow = marketplace.stream()
                 .filter(Investing::isActionable)
-                .mapToInt(l -> l.item().getId())
+                .mapToLong(l -> l.item().getId())
                 .toArray();
-        final int[] lastCheckedActionableLoans = actionableWhenLastChecked.getAndSet(actionableLoansNow);
+        final long[] lastCheckedActionableLoans = actionableWhenLastChecked.getAndSet(actionableLoansNow);
         return NumberUtil.hasAdditions(lastCheckedActionableLoans, actionableLoansNow);
     }
 
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
-        final RestrictedInvestmentStrategy s = new RestrictedInvestmentStrategy(strategy, auth.getRestrictions());
-        return InvestingSession.invest(portfolio, investor, auth, marketplace, s);
+        return InvestingSession.invest(portfolio, investor, getTenant(), marketplace, strategy);
     }
 }

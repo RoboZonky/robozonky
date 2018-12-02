@@ -47,7 +47,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
         return Optional.ofNullable(CACHE.get().get(strategy));
     }
 
-    private synchronized static ParsedStrategy parseOrCached(final String strategy) {
+    private static synchronized ParsedStrategy parseOrCached(final String strategy) {
         return getCached(strategy).orElseGet(() -> {
             LOGGER.trace("Parsing started.");
             final ParsedStrategy parsed = parseWithAntlr(CharStreams.fromString(strategy));
@@ -84,16 +84,16 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     @Override
     public Optional<InvestmentStrategy> toInvest(final String strategy) {
-        return getStrategy(strategy, (s) -> s.isInvestingEnabled() ? new NaturalLanguageInvestmentStrategy(s) : null);
+        return getStrategy(strategy, s -> s.isInvestingEnabled() ? new NaturalLanguageInvestmentStrategy(s) : null);
     }
 
     @Override
     public Optional<SellStrategy> toSell(final String strategy) {
-        return getStrategy(strategy, (s) -> s.isSellingEnabled() ? new NaturalLanguageSellStrategy(s) : null);
+        return getStrategy(strategy, s -> s.isSellingEnabled() ? new NaturalLanguageSellStrategy(s) : null);
     }
 
     @Override
     public Optional<PurchaseStrategy> toPurchase(final String strategy) {
-        return getStrategy(strategy, (s) -> s.isPurchasingEnabled() ? new NaturalLanguagePurchaseStrategy(s) : null);
+        return getStrategy(strategy, s -> s.isPurchasingEnabled() ? new NaturalLanguagePurchaseStrategy(s) : null);
     }
 }

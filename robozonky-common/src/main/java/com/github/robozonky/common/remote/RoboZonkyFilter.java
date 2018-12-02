@@ -19,9 +19,9 @@ package com.github.robozonky.common.remote;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -46,8 +46,8 @@ class RoboZonkyFilter implements ClientRequestFilter,
 
     // not static, so that filters extending this one get the proper logger class
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Map<String, Object[]> queryParams = new HashMap<>(0);
-    private final Map<String, String> requestHeaders = new HashMap<>(0);
+    private final Map<String, Object[]> queryParams = new TreeMap<>();
+    private final Map<String, String> requestHeaders = new TreeMap<>();
     private Map<String, String> responseHeaders = Collections.emptyMap();
 
     public RoboZonkyFilter() {
@@ -117,7 +117,7 @@ class RoboZonkyFilter implements ClientRequestFilter,
             clientResponseContext.setStatus(401);
         }
         responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
-                .filter(e -> e.getValue().size() > 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0), (a, b) -> a, HashMap::new));
+                .filter(e -> !e.getValue().isEmpty())
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0), (a, b) -> a, TreeMap::new));
     }
 }

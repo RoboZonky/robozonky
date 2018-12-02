@@ -16,7 +16,9 @@
 
 package com.github.robozonky.cli;
 
-public interface Feature {
+import java.util.concurrent.Callable;
+
+public interface Feature extends Callable<ExitCode> {
 
     String describe();
 

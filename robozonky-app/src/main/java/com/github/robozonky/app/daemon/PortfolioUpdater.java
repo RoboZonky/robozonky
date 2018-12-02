@@ -27,12 +27,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.util.Backoff;
-import com.github.robozonky.util.IoUtil;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,14 +64,13 @@ class PortfolioUpdater implements Runnable,
         }, tenant, blockedAmounts, Duration.ofHours(1));
     }
 
-    public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                                          final Supplier<Optional<SellStrategy>> sp) {
+    public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth) {
         final Supplier<BlockedAmountProcessor> blockedAmounts = BlockedAmountProcessor.createLazy(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, blockedAmounts);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
         updater.registerDependant(new AmountsAtRiskSummarizer());
         // attempt to sell participations; a transaction update later may already pick up some sales
-        updater.registerDependant(new Selling(sp));
+        updater.registerDependant(new Selling(auth::getSellStrategy));
         // update currentlyUsedPortfolio with blocked amounts coming from Zonky
         updater.registerDependant(po -> blockedAmounts.get().accept(po));
         // send notifications based on new transactions coming from Zonky
@@ -112,12 +110,12 @@ class PortfolioUpdater implements Runnable,
             final TransactionalPortfolio p = combined.get();
             p.run(); // persist stored information
             return p.getPortfolio();
-        } catch (final Throwable t) {
-            throw new IllegalStateException("Portfolio update failed.", t);
+        } catch (final Exception ex) {
+            throw new IllegalStateException("Portfolio update failed.", ex);
         }
     }
 
-    private void terminate(final Exception cause) {
+    private void terminate(final Throwable cause) {
         current.set(null);
         shutdownCall.accept(new IllegalStateException("Portfolio initialization failed.", cause));
     }
@@ -126,17 +124,15 @@ class PortfolioUpdater implements Runnable,
     public void run() {
         LOGGER.info("Updating internal data structures. May take a long time for large portfolios.");
         try { // close the old portfolio
-            IoUtil.tryConsumer(current::get, old -> {
-                final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(old), Duration.ofSeconds(1),
-                                                                       retryFor);
-                final Optional<Portfolio> maybeNew = backoff.get();
-                if (maybeNew.isPresent()) {
-                    current.set(maybeNew.get());
-                    LOGGER.info("Update finished.");
-                } else {
-                    terminate(backoff.getLastException().orElse(null));
-                }
-            });
+            final Backoff<Portfolio> backoff =
+                    Backoff.exponential(() -> runIt(current.get()), Duration.ofSeconds(1), retryFor);
+            final Either<Throwable, Portfolio> maybeNew = backoff.get();
+            if (maybeNew.isRight()) {
+                current.set(maybeNew.get());
+                LOGGER.info("Update finished.");
+            } else {
+                terminate(maybeNew.getLeft());
+            }
         } catch (final Exception ex) {
             terminate(ex);
         }

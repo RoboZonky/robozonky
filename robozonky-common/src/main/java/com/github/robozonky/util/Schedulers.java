@@ -39,12 +39,8 @@ public enum Schedulers {
         return scheduler;
     }
 
-    public Scheduler create(final Integer parallelism) {
-        return create(parallelism, Executors.defaultThreadFactory());
-    }
-
     public Scheduler create() {
-        return create(1);
+        return create(1, Executors.defaultThreadFactory());
     }
 
     boolean destroy(final Scheduler scheduler) {

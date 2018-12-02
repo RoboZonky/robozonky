@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RecommendedInvestmentTest {
+
+    private static final Loan LOAN = Loan.custom().build();
 
     private static Investment mockInvestment(final BigDecimal remainingPrincipal) {
         final InvestmentBuilder i = Investment.custom();
@@ -38,7 +41,7 @@ class RecommendedInvestmentTest {
     void equals() {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
-        final InvestmentDescriptor d = new InvestmentDescriptor(i);
+        final InvestmentDescriptor d = new InvestmentDescriptor(i, () -> LOAN);
         final RecommendedInvestment r = new RecommendedInvestment(d, remainingPrincipal);
         assertSoftly(softly -> {
             softly.assertThat(r).isNotEqualTo(null);
@@ -51,7 +54,7 @@ class RecommendedInvestmentTest {
             softly.assertThat(r2).isEqualTo(r);
         });
         final RecommendedInvestment r3 =
-                new RecommendedInvestment(new InvestmentDescriptor(mockInvestment(remainingPrincipal)),
+                new RecommendedInvestment(new InvestmentDescriptor(mockInvestment(remainingPrincipal), () -> LOAN),
                                           remainingPrincipal);
         assertThat(r).isNotEqualTo(r3);
     }

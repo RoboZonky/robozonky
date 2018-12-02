@@ -20,21 +20,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.remote.ZonkyApiTokenSupplier;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class UtilTest extends AbstractRoboZonkyTest {
 
@@ -49,19 +38,4 @@ class UtilTest extends AbstractRoboZonkyTest {
         assertThat(Util.download(url)).isEmpty();
     }
 
-    @Test
-    void logsOut() {
-        final OAuth oAuth = mock(OAuth.class);
-        when(oAuth.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
-        final Zonky zonky = mock(Zonky.class);
-        final ApiProvider api = mockApiProvider(oAuth, zonky);
-        final SecretProvider secretProvider = SecretProvider.inMemory("someone@somewhere.cz");
-        final ZonkyApiTokenSupplier token = Util.getToken(api, secretProvider,
-                                                          ZonkyApiToken.SCOPE_APP_WEB_STRING);
-        final ZonkyApiToken actual = token.get();
-        assertThat(actual).isNotNull();
-        verify(oAuth).login(eq(ZonkyApiToken.SCOPE_APP_WEB_STRING), eq(secretProvider.getUsername()), any());
-        token.close();
-        verify(zonky).logout();
-    }
 }

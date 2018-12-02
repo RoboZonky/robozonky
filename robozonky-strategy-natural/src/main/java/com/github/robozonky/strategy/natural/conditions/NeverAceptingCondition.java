@@ -31,7 +31,7 @@ enum NeverAceptingCondition implements MarketplaceFilterCondition {
     }
 
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final Wrapper<?> item) {
         return false;
     }
 

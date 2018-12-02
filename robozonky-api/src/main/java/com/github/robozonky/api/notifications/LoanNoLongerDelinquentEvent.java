@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,10 @@
 package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.RawInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 /**
  * Fired immediately after an {@link RawInvestment} is identified as no longer delinquent.
  */
-public final class LoanNoLongerDelinquentEvent extends Event implements InvestmentBased {
+public interface LoanNoLongerDelinquentEvent extends InvestmentBased {
 
-    private final Investment investment;
-    private final Loan loan;
-
-    public LoanNoLongerDelinquentEvent(final Investment investment, final Loan loan) {
-        this.investment = investment;
-        this.loan = loan;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
-    }
-
-    @Override
-    public Investment getInvestment() {
-        return investment;
-    }
 }

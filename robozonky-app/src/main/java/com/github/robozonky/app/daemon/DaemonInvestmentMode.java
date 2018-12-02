@@ -16,25 +16,30 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
-import com.github.robozonky.common.jobs.Payload;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.SimplePayload;
+import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 
 public class DaemonInvestmentMode implements InvestmentMode {
 
@@ -44,26 +49,31 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final PortfolioUpdater portfolio;
     private final Tenant tenant;
     private final Consumer<Throwable> shutdownCall;
+    private final String sessionName;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                                final Investor investor, final StrategyProvider strategyProvider,
-                                final Duration primaryMarketplaceCheckPeriod,
+    public DaemonInvestmentMode(final String sessionName, final Consumer<Throwable> shutdownCall, final Tenant tenant,
+                                final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolio = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
+        this.sessionName = sessionName;
+        this.portfolio = PortfolioUpdater.create(shutdownCall, tenant);
         this.tenant = tenant;
-        this.investing = new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest,
-                                             portfolio, primaryMarketplaceCheckPeriod);
-        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolio,
-                                               secondaryMarketplaceCheckPeriod);
+        this.investing = new InvestingDaemon(shutdownCall, tenant, investor, portfolio, primaryMarketplaceCheckPeriod);
+        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, portfolio, secondaryMarketplaceCheckPeriod);
         this.shutdownCall = shutdownCall;
     }
 
-    static void runSafe(final Runnable runnable, final Consumer<Throwable> shutdownCall) {
+    DaemonInvestmentMode(final String sessionName, final Tenant tenant, final Investor investor,
+                         final Duration primaryMarketplaceCheckPeriod, final Duration secondaryMarketplaceCheckPeriod) {
+        this(sessionName, t -> {
+        }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
+    }
+
+    static void runSafe(final Events events, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
         try {
             runnable.run();
         } catch (final Exception ex) {
             LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            Events.fire(new RoboZonkyDaemonFailedEvent(ex));
+            events.fire(roboZonkyDaemonFailed(ex));
         } catch (final Error t) {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);
@@ -89,13 +99,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     private void scheduleDaemons(final Scheduler executor) {
-        LOGGER.debug("Scheduling portfolio updates." );
+        LOGGER.debug("Scheduling portfolio updates.");
         executor.run(portfolio); // first run the update
         // schedule hourly refresh
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(portfolio, oneHour, oneHour);
         // run investing and purchasing daemons
-        LOGGER.debug("Scheduling daemon threads." );
+        LOGGER.debug("Scheduling daemon threads.");
         executor.submit(toSkippable(investing), investing.getRefreshInterval());
         executor.submit(toSkippable(purchasing), purchasing.getRefreshInterval(), Duration.ofMillis(250));
     }
@@ -104,25 +114,39 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return !tenant.isAvailable() || portfolio.isInitializing();
     }
 
-    void scheduleJob(final Job job, final Scheduler executor) {
-        LOGGER.debug("Scheduling batch jobs." );
-        final Payload payload = job.payload();
-        final String payloadId = payload.toString();
-        final Runnable runnable = () -> {
-            LOGGER.debug("Running payload {} ({}).", payloadId, job);
-            runSafe(() -> payload.accept(tenant.getSecrets()), shutdownCall);
-            LOGGER.debug("Finished payload {} ({}).", payloadId, job);
+    private void scheduleSimpleJob(final SimpleJob job, final Scheduler executor) {
+        final SimplePayload payload = job.payload();
+        scheduleJob(job, payload, executor);
+    }
+
+    void scheduleJob(final Job job, final Runnable runnable, final Scheduler executor) {
+        final Runnable payload = () -> {
+            LOGGER.debug("Running job {}.", job);
+            runSafe(Events.forSession(tenant.getSessionInfo()), runnable, shutdownCall);
+            LOGGER.debug("Finished job {}.", job);
         };
         final Duration maxRunTime = getMaxJobRuntime(job);
         final Duration cancelIn = job.startIn().plusMillis(maxRunTime.toMillis());
-        LOGGER.debug("Scheduling payload {} ({}). Max run time: {}. Cancel in: {}.", payloadId, job, maxRunTime,
-                     cancelIn);
-        executor.submit(runnable, job.repeatEvery(), job.startIn());
-        // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
+        LOGGER.debug("Scheduling job {}. Max run time: {}. Cancel in: {}.", job, maxRunTime, cancelIn);
+        executor.submit(payload, job.repeatEvery(), job.startIn());
+    }
+
+    private void scheduleTenantJob(final TenantJob job, final Scheduler executor) {
+        final TenantPayload payload = job.payload();
+        scheduleJob(job, () -> payload.accept(tenant), executor);
     }
 
     private void scheduleJobs(final Scheduler executor) {
-        JobServiceLoader.load().forEach(job -> scheduleJob(job, executor));
+        // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
+        LOGGER.debug("Scheduling simple batch jobs.");
+        JobServiceLoader.loadSimpleJobs().forEach(job -> scheduleSimpleJob(job, executor));
+        LOGGER.debug("Scheduling tenant-based batch jobs.");
+        JobServiceLoader.loadTenantJobs().forEach(job -> scheduleTenantJob(job, executor));
+    }
+
+    @Override
+    public String getSessionName() {
+        return sessionName;
     }
 
     @Override
@@ -137,5 +161,10 @@ public class DaemonInvestmentMode implements InvestmentMode {
             // signal the end of standard operation
             return ReturnCode.OK;
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        tenant.close();
     }
 }

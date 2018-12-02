@@ -18,32 +18,29 @@ package com.github.robozonky.cli;
 
 import java.util.function.Function;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.integrations.stonky.CredentialProvider;
 import com.github.robozonky.integrations.stonky.DriveOverview;
 import com.github.robozonky.integrations.stonky.Util;
-import com.github.robozonky.internal.util.LazyInitialized;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.sheets.v4.Sheets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.vavr.Lazy;
+import picocli.CommandLine;
 
-@Parameters(commandNames = "google-sheets-credentials", commandDescription = GoogleCredentialsFeature.DESCRIPTION)
-public final class GoogleCredentialsFeature implements Feature {
+@CommandLine.Command(name = "google-sheets-credentials", description = GoogleCredentialsFeature.DESCRIPTION)
+public final class GoogleCredentialsFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Obtain authorization for RoboZonky to access Google Sheets.";
-    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleCredentialsFeature.class);
     private final HttpTransport transport;
-    private final LazyInitialized<CredentialProvider> credentialProvider;
-    @Parameter(names = {"-u", "--username"}, description = "Zonky username.", required = true)
-    private String username = null;
-    @Parameter(names = {"-h", "--callback-host"}, description = "Host to listen for OAuth response from Google.")
+    private final Lazy<CredentialProvider> credentialProvider;
+    @CommandLine.Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
+    private String username;
+    @CommandLine.Option(names = {"-h", "--callback-host"}, description = "Host to listen for OAuth response from " +
+            "Google.")
     private String host = "localhost";
-    @Parameter(names = {"-p", "--callback-port"},
+    @CommandLine.Option(names = {"-p", "--callback-port"},
             description = "Port on the host to listen for OAuth response from Google. 0 will auto-detect a free one.")
     private int port = 0;
 
@@ -51,7 +48,7 @@ public final class GoogleCredentialsFeature implements Feature {
                              final CredentialProvider credentialProvider) {
         this.username = username;
         this.transport = transport;
-        this.credentialProvider = LazyInitialized.create(() -> credentialProvider == null ?
+        this.credentialProvider = Lazy.of(() -> credentialProvider == null ?
                 CredentialProvider.live(transport, host, port) :
                 credentialProvider);
     }

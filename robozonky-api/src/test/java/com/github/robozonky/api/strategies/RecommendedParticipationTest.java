@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,17 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RecommendedParticipationTest {
+
+    private static final Loan LOAN = Loan.custom().build();
 
     private static Participation mockParticipation() {
         final Participation p = mock(Participation.class);
@@ -37,7 +41,7 @@ class RecommendedParticipationTest {
     @Test
     void equals() {
         final Participation p = mockParticipation();
-        final ParticipationDescriptor d = new ParticipationDescriptor(p);
+        final ParticipationDescriptor d = new ParticipationDescriptor(p, () -> LOAN);
         final RecommendedParticipation r = new RecommendedParticipation(d);
         assertSoftly(softly -> {
             softly.assertThat(r).isNotEqualTo(null);
@@ -50,7 +54,7 @@ class RecommendedParticipationTest {
             softly.assertThat(r2).isEqualTo(r);
         });
         final RecommendedParticipation r3 =
-                new RecommendedParticipation(new ParticipationDescriptor(mockParticipation()));
+                new RecommendedParticipation(new ParticipationDescriptor(mockParticipation(), () -> LOAN));
         assertThat(r).isNotEqualTo(r3);
     }
 }

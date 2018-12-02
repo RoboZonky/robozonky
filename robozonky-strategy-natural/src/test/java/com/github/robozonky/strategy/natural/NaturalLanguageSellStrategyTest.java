@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class NaturalLanguageSellStrategyTest {
                 .setId(1)
                 .setAmount(100_000)
                 .build();
-        return new InvestmentDescriptor(investment, l);
+        return new InvestmentDescriptor(investment, () -> l);
     }
 
     private final Investment mockInvestment() {

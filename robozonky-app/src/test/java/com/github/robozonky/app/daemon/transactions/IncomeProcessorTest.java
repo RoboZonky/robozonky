@@ -28,10 +28,10 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
@@ -101,6 +101,6 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
         transactional.run(); // persist
         verify(zonky, times(1)).getTransactions((Select) any());
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("3"); // new maximum
-        assertThat(getNewEvents()).hasSize(2);
+        assertThat(getEventsRequested()).hasSize(2);
     }
 }

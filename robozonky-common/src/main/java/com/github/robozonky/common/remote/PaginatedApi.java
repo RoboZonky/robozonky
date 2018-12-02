@@ -17,10 +17,12 @@
 package com.github.robozonky.common.remote;
 
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.util.BlockingOperation;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,10 +64,15 @@ class PaginatedApi<S, T> {
     }
 
     <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter) {
+        LOGGER.trace("Executing...");
         final T proxy = ProxyFactory.newProxy(client, filter, api, url);
         try {
-            LOGGER.trace("Executing...");
-            return function.apply(proxy);
+            final BlockingOperation<Q> operation = new BlockingOperation<>(() -> function.apply(proxy));
+            ForkJoinPool.managedBlock(operation);
+            return operation.getResult();
+        } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted.", ex);
         } finally {
             LOGGER.trace("... done.");
         }

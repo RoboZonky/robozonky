@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.jobs.TenantJob;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,9 +30,10 @@ class StateCleanerJobServiceTest {
     @Test
     void provide() {
         final StateCleanerJobService s = new StateCleanerJobService();
-        final List<Job> jobs = new ArrayList<>(s.getJobs());
+        final List<TenantJob> jobs = new ArrayList<>(s.getTenantJobs());
         assertThat(jobs).hasSize(1);
-        final Job job = jobs.get(0);
+        assertThat(s.getSimpleJobs()).isEmpty();
+        final TenantJob job = jobs.get(0);
         assertThat(job.startIn()).isEqualTo(Duration.ZERO);
         assertThat(job.repeatEvery()).isEqualTo(Duration.ofDays(1));
         assertThat(job.payload()).isInstanceOf(StateCleaner.class);

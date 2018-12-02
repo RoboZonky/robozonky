@@ -1,4 +1,4 @@
-<h2>Aktuální situace na <@zonky /> účtu</h2>
+<h2>Situace na <@zonky /> účtu k ${data.portfolio.timestamp?time?iso_local_ms_nz}</h2>
 <table>
   <thead>
     <tr>

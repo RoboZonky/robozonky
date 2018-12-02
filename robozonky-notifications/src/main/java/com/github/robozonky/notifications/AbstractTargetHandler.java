@@ -17,9 +17,10 @@
 package com.github.robozonky.notifications;
 
 import java.time.Duration;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import org.slf4j.Logger;
@@ -30,9 +31,9 @@ public abstract class AbstractTargetHandler {
     private static final String HOURLY_LIMIT = "hourlyMaxEmails";
     protected final Target target;
     final ConfigStorage config;
-    private final Logger LOGGER = LoggerFactory.getLogger(AbstractTargetHandler.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private final Counter notifications;
-    private final Map<SupportedListener, Counter> specificNotifications = new HashMap<>(0);
+    private final Map<SupportedListener, Counter> specificNotifications = new EnumMap<>(SupportedListener.class);
 
     protected AbstractTargetHandler(final ConfigStorage config, final Target target) {
         this.config = config;
@@ -81,20 +82,40 @@ public abstract class AbstractTargetHandler {
                                                                                   getHourlyLimit(key)));
     }
 
-    boolean isEnabled() {
+    boolean isEnabledInSettings() {
         return config.readBoolean(target, "enabled", false);
     }
 
+    private boolean isEnabledInSettings(final SupportedListener listener) {
+        final String propName = getCompositePropertyName(listener, "enabled");
+        return this.isEnabledInSettings() && config.readBoolean(target, propName, false);
+    }
+
+    private boolean enableNoLongerDelinquentNotifications() {
+        /*
+         * "no longer delinquent" will only be triggered in case a loan was previously marked as delinquent - those are
+         * "companion" notifications, the first making no sense without the second. therefore we enable it in case
+         * any of the others is enabled as well. it can not be disabled.
+         */
+        return Stream.of(SupportedListener.LOAN_NOW_DELINQUENT, SupportedListener.LOAN_DELINQUENT_10_PLUS,
+                  SupportedListener.LOAN_DELINQUENT_30_PLUS, SupportedListener.LOAN_DELINQUENT_60_PLUS,
+                  SupportedListener.LOAN_DELINQUENT_90_PLUS)
+                .anyMatch(this::isEnabled);
+    }
+
     boolean isEnabled(final SupportedListener listener) {
-        if (listener == SupportedListener.TESTING) {
+        final boolean noLongerDelinquentEnabled = listener == SupportedListener.LOAN_NO_LONGER_DELINQUENT &&
+                enableNoLongerDelinquentNotifications();
+        if (noLongerDelinquentEnabled || listener == SupportedListener.TESTING) {
+            // testing is always enabled so that notification testing in the installer has something to work with
             return true;
         } else {
-            final String propName = getCompositePropertyName(listener, "enabled");
-            return this.isEnabled() && config.readBoolean(target, propName, false);
+            return isEnabledInSettings(listener);
         }
     }
 
     public void offer(final Submission s) throws Exception {
+        LOGGER.trace("Received submission.");
         final SupportedListener listener = s.getSupportedListener();
         final SessionInfo session = s.getSessionInfo();
         if (!shouldNotify(listener, session)) {
@@ -102,9 +123,12 @@ public abstract class AbstractTargetHandler {
             return;
         }
         final Map<String, Object> data = s.getData();
+        LOGGER.trace("Triggering.");
         send(session, s.getSubject(), s.getMessage(data), s.getFallbackMessage(data));
+        LOGGER.trace("Triggered.");
         getSpecificCounter(listener).increase(session);
         notifications.increase(session);
+        LOGGER.trace("Finished.");
     }
 
     public abstract void send(final SessionInfo sessionInfo, final String subject,

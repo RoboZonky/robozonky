@@ -18,41 +18,42 @@ package com.github.robozonky.app.daemon.transactions;
 
 import java.time.LocalDate;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.PortfolioDependant;
 import com.github.robozonky.app.daemon.TransactionalPortfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.internal.util.DateUtil;
 
 public final class IncomeProcessor implements PortfolioDependant {
 
     static final String STATE_KEY = "lastSeenTransactionId";
     private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
 
-    private static int processAllTransactions(final Stream<Transaction> transactions) {
-        return transactions.mapToInt(Transaction::getId)
+    private static long processAllTransactions(final Stream<Transaction> transactions) {
+        return transactions.mapToLong(Transaction::getId)
                 .max()
                 .orElse(-1);
     }
 
-    private static void processTransaction(final TransactionProcessor processor, final Transaction transaction) {
-        processor.accept(transaction);
-    }
-
-    private static int processNewTransactions(final TransactionalPortfolio transactional, final Stream<Transaction> transactions,
-                                              final int lastSeenTransactionId) {
+    private static long processNewTransactions(final TransactionalPortfolio transactional,
+                                               final Stream<Transaction> transactions,
+                                               final long lastSeenTransactionId) {
+        final Consumer<Transaction> loansRepaid = new LoanRepaidProcessor(transactional);
+        final Consumer<Transaction> participationsSold = new ParticipationSoldProcessor(transactional);
         return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
                 .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
                 .values()
                 .parallelStream() // possibly thousands of transactions, process them in parallel
-                .peek(t -> processTransaction(new LoanRepaidProcessor(transactional), t))
-                .peek(t -> processTransaction(new ParticipationSoldProcessor(transactional), t))
-                .mapToInt(Transaction::getId)
+                .peek(loansRepaid)
+                .peek(participationsSold)
+                .mapToLong(Transaction::getId)
                 .max()
                 .orElse(lastSeenTransactionId);
     }
@@ -61,17 +62,17 @@ public final class IncomeProcessor implements PortfolioDependant {
     public void accept(final TransactionalPortfolio transactional) {
         final InstanceState<IncomeProcessor> state =
                 transactional.getTenant().getState(IncomeProcessor.class);
-        final int lastSeenTransactionId = state.getValue(STATE_KEY)
+        final long lastSeenTransactionId = state.getValue(STATE_KEY)
                 .map(Integer::valueOf)
                 .orElse(-1);
         // transactions from overnight processing have timestamps from the midnight of previous day
         final LocalDate lastUpdate = state.getLastUpdated()
                 .map(u -> u.minusDays(1).toLocalDate())
-                .orElse(LocalDate.now().minusWeeks(1));
+                .orElse(DateUtil.localNow().toLocalDate().minusWeeks(1));
         final Select sinceLastUpdate = new Select().greaterThanOrEquals("transaction.transactionDate", lastUpdate);
         final Tenant tenant = transactional.getTenant();
         final Stream<Transaction> transactions = tenant.call(z -> z.getTransactions(sinceLastUpdate));
-        final int newLastSeenTransactionId = lastSeenTransactionId >= 0 ?
+        final long newLastSeenTransactionId = lastSeenTransactionId >= 0 ?
                 processNewTransactions(transactional, transactions, lastSeenTransactionId) :
                 processAllTransactions(transactions);
         state.update(m -> m.put(STATE_KEY, String.valueOf(newLastSeenTransactionId)));

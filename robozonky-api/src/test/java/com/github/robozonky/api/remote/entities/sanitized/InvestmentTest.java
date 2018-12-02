@@ -27,7 +27,6 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -80,7 +79,7 @@ class InvestmentTest {
     void freshFromParticipation() {
         final Loan l = Loan.custom().build();
         final Participation p = mock(Participation.class);
-        when(p.getInvestmentId()).thenReturn(1);
+        when(p.getInvestmentId()).thenReturn(1L);
         when(p.getRemainingInstalmentCount()).thenReturn(2);
         final Investment i = Investment.fresh(p, l, BigDecimal.valueOf(1000));
         assertSoftly(softly -> {
@@ -143,6 +142,11 @@ class InvestmentTest {
         }
 
         @Test
+        void daysPastDue() {
+            integer(b, b::setDaysPastDue, b::getDaysPastDue, 1);
+        }
+
+        @Test
         void originalTerm() {
             integer(b, b::setOriginalTerm, b::getOriginalTerm, 1);
         }
@@ -200,11 +204,6 @@ class InvestmentTest {
         @Test
         void nextPaymentDate() {
             optional(b, b::setNextPaymentDate, b::getNextPaymentDate, OffsetDateTime.now());
-        }
-
-        @Test
-        void rating() {
-            standard(b, b::setRating, b::getRating, Rating.D);
         }
 
         @Test

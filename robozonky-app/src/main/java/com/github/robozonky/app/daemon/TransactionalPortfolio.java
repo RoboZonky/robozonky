@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 
 public class TransactionalPortfolio extends Transactional implements Runnable {
 

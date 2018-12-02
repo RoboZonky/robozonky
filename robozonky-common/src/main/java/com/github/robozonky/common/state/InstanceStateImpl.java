@@ -35,7 +35,6 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
 
     private void execute(final StateModifierImpl<T> modifier) {
         synchronized (parent) {
-            parent.assertNotDestroyed();
             modifier.call();
         }
     }
@@ -66,18 +65,11 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
 
     @Override
     public Optional<String> getValue(final String key) {
-        parent.assertNotDestroyed();
-        final Optional<String> currentVal = current.getValue(sectionName, key);
-        if (currentVal.isPresent()) {
-            return currentVal;
-        } else {
-            return Optional.empty();
-        }
+        return current.getValue(sectionName, key);
     }
 
     @Override
     public Stream<String> getKeys() {
-        parent.assertNotDestroyed();
         return current.getKeys(sectionName)
                 .filter(s -> !Objects.equals(s, Constants.LAST_UPDATED_KEY.getValue()));
     }

@@ -39,11 +39,11 @@ final class Util {
         // no instances
     }
 
-    private static final String toBoolean(final String string) {
+    private static String toBoolean(final String string) {
         return Boolean.valueOf(string).toString();
     }
 
-    private static final String toInt(final String string) {
+    private static String toInt(final String string) {
         if (string == null) {
             return "-1";
         }
@@ -76,7 +76,6 @@ final class Util {
         p.setProperty("email.loanRepaid.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.loanLost.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.loanDefaulted.enabled", isInvestmentEmailEnabled);
-        p.setProperty("email.loanNoLongerDelinquent.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
         p.setProperty("email.balanceTracker.targetBalance", "200");
         p.setProperty("email.roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));
@@ -95,7 +94,7 @@ final class Util {
     }
 
     public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
-        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[v.size()])));
+        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[0])));
     }
 
     static void processCommandLine(final CommandLinePart commandLine, final Properties settings,

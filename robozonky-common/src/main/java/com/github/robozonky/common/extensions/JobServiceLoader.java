@@ -16,35 +16,42 @@
 
 package com.github.robozonky.common.extensions;
 
+import java.util.Collection;
 import java.util.ServiceLoader;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.common.jobs.JobService;
-import com.github.robozonky.internal.util.LazyInitialized;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.TenantJob;
 import com.github.robozonky.util.StreamUtil;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class JobServiceLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobServiceLoader.class);
-    private static final LazyInitialized<ServiceLoader<JobService>> LOADER =
+    private static final Lazy<ServiceLoader<JobService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(JobService.class);
 
     private JobServiceLoader() {
         // no instances
     }
 
-    static Stream<Job> load(final Iterable<JobService> loader) {
+    static <T> Stream<T> load(final Iterable<JobService> loader, Function<JobService, Collection<T>> jobProvider) {
         JobServiceLoader.LOGGER.debug("Looking up batch jobs.");
         return StreamUtil.toStream(loader)
                 .peek(cp -> JobServiceLoader.LOGGER.trace("Evaluating job service '{}'.", cp.getClass()))
-                .flatMap(cp -> cp.getJobs().stream());
+                .flatMap(cp -> jobProvider.apply(cp).stream());
     }
 
-    public static Stream<Job> load() {
-        return JobServiceLoader.load(JobServiceLoader.LOADER.get());
+    public static Stream<SimpleJob> loadSimpleJobs() {
+        return JobServiceLoader.load(JobServiceLoader.LOADER.get(), JobService::getSimpleJobs);
+    }
+
+    public static Stream<TenantJob> loadTenantJobs() {
+        return JobServiceLoader.load(JobServiceLoader.LOADER.get(), JobService::getTenantJobs);
     }
 }
 

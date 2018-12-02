@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
@@ -32,10 +31,11 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,9 +52,6 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (a, p, r) -> Stream.empty(),
             ALL_ACCEPTING_STRATEGY = (a, p, r) -> a.stream().map(d -> d.recommend(200).get());
-    private static final Supplier<Optional<InvestmentStrategy>> NONE_ACCEPTING =
-            () -> Optional.of(NONE_ACCEPTING_STRATEGY),
-            ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY);
 
     @Test
     void noStrategy() {
@@ -64,13 +61,13 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .setAmount(2)
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Investing exec = new Investing(null, Optional::empty, null);
+        final Investing exec = new Investing(null, mockTenant());
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
         // check events
-        final List<Event> events = this.getNewEvents();
+        final List<Event> events = getEventsRequested();
         assertThat(events).isEmpty();
     }
 
@@ -78,9 +75,10 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
     void noItems() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Tenant auth = mockTenant(z);
+        when(auth.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final Investor builder = Investor.build(auth);
-        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
+        final Investing exec = new Investing(builder, auth);
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
     }
 
@@ -97,10 +95,11 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = harmlessZonky(9000);
         final Tenant auth = mockTenant(z);
+        when(auth.getInvestmentStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_STRATEGY));
         final Investor builder = Investor.build(auth);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         when(z.getLoan(eq(loanId))).thenReturn(loan);
-        final Investing exec = new Investing(builder, NONE_ACCEPTING, auth);
+        final Investing exec = new Investing(builder, auth);
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
     }
 
@@ -116,17 +115,18 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = harmlessZonky(9000);
         final Tenant auth = mockTenant(z);
+        when(auth.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Investor investor = mock(Investor.class);
         when(investor.getConfirmationProvider()).thenReturn(Optional.of(mock(ConfirmationProvider.class)));
-        when(investor.invest(any(), anyBoolean())).thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
+        when(investor.invest(any(), anyBoolean())).thenReturn(Either.left(InvestmentFailure.REJECTED));
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         when(z.getLoan(eq(loan.getId()))).thenReturn(loan);
-        final Investing exec = new Investing(investor, ALL_ACCEPTING, auth);
+        final Investing exec = new Investing(investor, auth);
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
         verify(investor, times(1)).invest(any(), anyBoolean()); // call to invest
         verify(z, never()).invest(any()); // does not propagate to Zonky
         // now try again, the same loan should now be discarded and therefore not even attempted
-        final Investing exec2 = new Investing(investor, ALL_ACCEPTING, auth);
+        final Investing exec2 = new Investing(investor, auth);
         assertThat(exec2.apply(portfolio, Collections.singleton(ld))).isEmpty();
         verify(investor, times(1)).invest(any(), anyBoolean()); // call to invest
     }
@@ -143,9 +143,10 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final int loanId = loan.getId(); // will be random, to avoid problems with caching
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant auth = mockTenant(z);
+        when(auth.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Investor builder = Investor.build(auth);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
+        final Investing exec = new Investing(builder, auth);
         final Collection<Investment> result = exec.apply(portfolio, Collections.singleton(ld));
         verify(z, never()).invest(any()); // dry run
         assertThat(result)

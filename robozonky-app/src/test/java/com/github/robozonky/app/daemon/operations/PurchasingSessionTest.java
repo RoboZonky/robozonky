@@ -25,16 +25,15 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
@@ -72,15 +71,14 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                             .map(ParticipationDescriptor::recommend)
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd),
-                                                                    new RestrictedPurchaseStrategy(s, new Restrictions()));
+        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd), s);
         assertSoftly(softly -> {
             softly.assertThat(i).isEmpty();
-            softly.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
+            softly.assertThat(getEventsRequested()).has(new Condition<List<? extends Event>>() {
                 @Override
                 public boolean matches(final List<? extends Event> events) {
                     return events.stream().noneMatch(e -> e instanceof PurchaseRequestedEvent);
@@ -112,11 +110,10 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Tenant auth = mockTenant(z, false);
         final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd),
-                                                                    new RestrictedPurchaseStrategy(s, new Restrictions()));
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
+        final Collection<Investment> i = PurchasingSession.purchase(portfolio, auth, Collections.singleton(pd), s);
         assertThat(i).hasSize(1);
-        assertThat(this.getNewEvents()).hasSize(5);
+        assertThat(getEventsRequested()).hasSize(5);
         verify(z).purchase(eq(p));
     }
 }

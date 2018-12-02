@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.util.FinancialCalculator;
 
 public class InvestmentPurchasedEventListener extends AbstractListener<InvestmentPurchasedEvent> {
 
@@ -45,9 +44,9 @@ public class InvestmentPurchasedEventListener extends AbstractListener<Investmen
     protected Map<String, Object> getData(final InvestmentPurchasedEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = super.getData(event);
-        result.put("yield", FinancialCalculator.expectedInterestAfterFees(i, event.getPortfolioOverview()));
-        final BigDecimal interestRate =
-                FinancialCalculator.expectedInterestRateAfterFees(i, event.getPortfolioOverview());
+        final long invested = event.getPortfolioOverview().getCzkInvested().longValue();
+        result.put("yield", FinancialCalculator.expectedInterestAfterFees(i, invested));
+        final BigDecimal interestRate = FinancialCalculator.expectedInterestRateAfterFees(i, invested);
         result.put("relativeYield", interestRate);
         return result;
     }

@@ -16,21 +16,17 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.io.Reader;
-import java.io.StringWriter;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Objects;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.github.robozonky.internal.util.DateUtil;
 
 /**
  * OAuth access token for Zonky API.
@@ -60,7 +56,7 @@ public class ZonkyApiToken extends BaseEntity {
      * This is not part of the Zonky API, but it will be useful inside RoboZonky.
      */
     @XmlElement(name = "obtained_on")
-    private OffsetDateTime obtainedOn = OffsetDateTime.now();
+    private OffsetDateTime obtainedOn = DateUtil.offsetNow();
 
     ZonkyApiToken() {
         // fox JAXB
@@ -71,11 +67,11 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn) {
-        this(accessToken, refreshToken, expiresIn, OffsetDateTime.now(), REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
+        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,final String scope) {
-        this(accessToken, refreshToken, expiresIn, OffsetDateTime.now(), REFRESH_TOKEN_STRING, scope);
+        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, scope);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
@@ -91,20 +87,6 @@ public class ZonkyApiToken extends BaseEntity {
         this.type = type;
         this.scope = scope;
         this.obtainedOn = obtainedOn;
-    }
-
-    public static ZonkyApiToken unmarshal(final Reader token) throws JAXBException {
-        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
-        final Unmarshaller u = ctx.createUnmarshaller();
-        return (ZonkyApiToken) u.unmarshal(token);
-    }
-
-    public static String marshal(final ZonkyApiToken token) throws JAXBException {
-        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
-        final Marshaller m = ctx.createMarshaller();
-        final StringWriter w = new StringWriter();
-        m.marshal(token, w);
-        return w.toString();
     }
 
     public char[] getAccessToken() {

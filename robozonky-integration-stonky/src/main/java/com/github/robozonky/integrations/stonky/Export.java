@@ -24,11 +24,10 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import javax.ws.rs.core.Response;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
@@ -67,14 +66,12 @@ enum Export {
         }
     }
 
-    public CompletableFuture<Optional<File>> download(final ApiProvider apiProvider,
-                                                      final Supplier<ZonkyApiToken> webScoped,
-                                                      final Supplier<ZonkyApiToken> fileScoped) {
+    public CompletableFuture<Optional<File>> download(final Tenant tenant) {
         final Backoff<URL> waitWhileExportRunning =
-                Backoff.exponential(() -> apiProvider.call(download::apply, fileScoped), Duration.ofSeconds(1),
+                Backoff.exponential(() -> tenant.call(download, ZonkyScope.FILES), Duration.ofSeconds(1),
                                     Duration.ofHours(1));
-        return CompletableFuture.runAsync(() -> apiProvider.run(trigger::accept, webScoped))
+        return CompletableFuture.runAsync(() -> tenant.run(trigger, ZonkyScope.APP))
                 .thenApplyAsync(v -> waitWhileExportRunning.get())
-                .thenApplyAsync(url -> url.flatMap(Util::download));
+                .thenApplyAsync(urlOrError -> urlOrError.fold(r -> Optional.empty(), Util::download));
     }
 }

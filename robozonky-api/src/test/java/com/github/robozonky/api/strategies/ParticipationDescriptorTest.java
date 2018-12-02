@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ParticipationDescriptorTest {
 
@@ -35,42 +37,44 @@ class ParticipationDescriptorTest {
         return p;
     }
 
+    private static final Loan LOAN = Loan.custom().build();
+
     @Test
     void recommend() {
-        final Participation p = ParticipationDescriptorTest.mockParticipation(BigDecimal.TEN);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p);
+        final Participation p = mockParticipation(BigDecimal.TEN);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
         final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal());
         assertThat(r).isPresent();
         assertSoftly(softly -> {
             softly.assertThat(r.get().amount()).isEqualTo(p.getRemainingPrincipal());
+            softly.assertThat(r.get().descriptor().related()).isSameAs(LOAN);
             softly.assertThat(r.get().descriptor()).isEqualTo(pd);
         });
     }
 
     @Test
     void recommendWrong() {
-        final Participation p = ParticipationDescriptorTest.mockParticipation(BigDecimal.TEN);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p);
+        final Participation p = mockParticipation(BigDecimal.TEN);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
         final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal().subtract(BigDecimal.ONE));
         assertThat(r).isEmpty();
     }
 
     @Test
     void equals() {
-        final Participation p = ParticipationDescriptorTest.mockParticipation(BigDecimal.TEN);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p);
+        final Participation p = mockParticipation(BigDecimal.TEN);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
         assertSoftly(softly -> {
             softly.assertThat(pd).isNotEqualTo(null);
             softly.assertThat(pd).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(pd).isEqualTo(pd);
         });
-        final ParticipationDescriptor pd2 = new ParticipationDescriptor(p);
+        final ParticipationDescriptor pd2 = new ParticipationDescriptor(p, () -> LOAN);
         assertSoftly(softly -> {
             softly.assertThat(pd).isEqualTo(pd2);
             softly.assertThat(pd2).isEqualTo(pd);
         });
-        final ParticipationDescriptor pd3 = new ParticipationDescriptor(
-                ParticipationDescriptorTest.mockParticipation(BigDecimal.ONE));
+        final ParticipationDescriptor pd3 = new ParticipationDescriptor(mockParticipation(BigDecimal.ONE), () -> LOAN);
         assertSoftly(softly -> {
             softly.assertThat(pd).isNotEqualTo(pd3);
         });

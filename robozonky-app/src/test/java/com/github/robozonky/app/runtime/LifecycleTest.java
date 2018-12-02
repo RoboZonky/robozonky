@@ -31,8 +31,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class LifecycleTest {
 
@@ -79,13 +83,12 @@ class LifecycleTest {
 
     @Test
     void create() {
-        final Lifecycle h = new Lifecycle();
+        final ShutdownHook hooks = spy(ShutdownHook.class);
+        final Lifecycle h = new Lifecycle(hooks);
         assertSoftly(softly -> {
             softly.assertThat(h.getZonkyApiVersion()).isEmpty();
             softly.assertThat(h.getTerminationCause()).isEmpty();
-            softly.assertThat(h.getShutdownHooks())
-                    .hasSize(2)
-                    .hasOnlyElementsOfType(ShutdownHook.Handler.class);
         });
+        verify(hooks, times(2)).register(any()); // 2 shutdown hooks have been registered
     }
 }

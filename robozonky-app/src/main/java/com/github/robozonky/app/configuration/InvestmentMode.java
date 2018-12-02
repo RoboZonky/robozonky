@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package com.github.robozonky.app.configuration;
 
+import java.io.Closeable;
 import java.util.function.Function;
 
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 
-@FunctionalInterface
-public interface InvestmentMode extends Function<Lifecycle, ReturnCode> {
+public interface InvestmentMode extends Function<Lifecycle, ReturnCode>,
+                                        Closeable {
+
+    String getSessionName();
 
 }

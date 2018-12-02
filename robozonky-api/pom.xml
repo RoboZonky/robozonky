@@ -39,18 +39,6 @@
       <groupId>org.jboss.spec.javax.xml.bind</groupId>
       <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
     </dependency>
-    <dependency> <!-- JAXB support -->
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-core</artifactId>
-    </dependency>
-    <dependency> <!-- Also required -->
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-    </dependency>
     <dependency> <!-- Annotations for Jackson -->
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -58,6 +46,10 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vavr</groupId>
+      <artifactId>vavr</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -95,32 +87,19 @@
       <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
-        <version>0.10.1</version>
+        <version>0.10.5</version>
         <dependencies>
           <dependency>
             <groupId>org.revapi</groupId>
             <artifactId>revapi-java</artifactId>
-            <version>0.16.0</version>
+            <version>0.18.1</version>
           </dependency>
         </dependencies>
         <configuration>
           <versionFormat>[1-9]+\.[0-9]+\.[0-9]+</versionFormat>
-          <analysisConfiguration><![CDATA[
-            {
-              "revapi": {
-                "java": {
-                  "filter": {
-                    "packages": {
-                      "regex": true,
-                      "exclude": ["com\\.github\\.robozonky\\.internal(\\..+)?"]
-                    }
-                  }
-                },
-                "ignore": [
-                ]
-              }
-            }
-          ]]></analysisConfiguration>
+          <analysisConfigurationFiles>
+            <file>${project.basedir}/revapi.json</file>
+          </analysisConfigurationFiles>
         </configuration>
         <executions>
           <execution>
@@ -135,12 +114,12 @@
         <artifactId>pitest-maven</artifactId>
         <configuration>
           <targetClasses> <!-- this is a hack to be able to exclude entities, but include its sanitized subpackage -->
-            <param>com.github.robozonky.internal.*</param>
             <param>com.github.robozonky.api.confirmations.*</param>
+            <param>com.github.robozonky.api.notifications.*</param>
             <param>com.github.robozonky.api.remote.enums.*</param>
             <param>com.github.robozonky.api.remote.entities.sanitized.*</param>
             <param>com.github.robozonky.api.strategies.*</param>
-            <!-- notifications are also excluded as those are mostly getters -->
+            <param>com.github.robozonky.internal.*</param>
           </targetClasses>
         </configuration>
       </plugin>

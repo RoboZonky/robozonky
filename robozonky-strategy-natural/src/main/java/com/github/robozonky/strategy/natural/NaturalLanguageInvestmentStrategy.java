@@ -18,12 +18,9 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -42,10 +39,6 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         this.strategy = p;
     }
 
-    private static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
-        return Collections.unmodifiableMap(loans.distinct().collect(Collectors.groupingBy(l -> l.item().getRating())));
-    }
-
     private boolean needsConfirmation(final LoanDescriptor loanDescriptor) {
         return strategy.needsConfirmation(loanDescriptor);
     }
@@ -57,25 +50,24 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
-        final Map<Rating, Collection<LoanDescriptor>> splitByRating =
-                NaturalLanguageInvestmentStrategy.sortLoansByRating(strategy.getApplicableLoans(loans));
-        // prepare map of ratings and their shares
-        final Map<Rating, BigDecimal> relevantPortfolio = splitByRating.keySet().stream()
-                .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
+        final Map<Rating, List<LoanDescriptor>> splitByRating = Util.sortByRating(strategy.getApplicableLoans(loans),
+                                                                                  d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
         final BigDecimal balance = portfolio.getCzkAvailable();
         final InvestmentSizeRecommender recommender = new InvestmentSizeRecommender(strategy, restrictions);
-        return Util.rankRatingsByDemand(strategy, relevantPortfolio)
+        return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
-                .map(d -> { // recommend amount to invest per strategy
+                .flatMap(d -> { // recommend amount to invest per strategy
                     final int recommendedAmount = recommender.apply(d.item(), balance.intValue());
                     if (recommendedAmount > 0) {
-                        return d.recommend(recommendedAmount, needsConfirmation(d));
+                        return d.recommend(recommendedAmount, needsConfirmation(d))
+                                .map(Stream::of)
+                                .orElse(Stream.empty());
                     } else {
-                        return Optional.<RecommendedLoan>empty();
+                        return Stream.empty();
                     }
-                }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
+                });
     }
 }

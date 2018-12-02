@@ -16,52 +16,6 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
+public interface LoanDefaultedEvent extends DelinquencyBased {
 
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-
-public final class LoanDefaultedEvent extends Event implements DelinquencyBased {
-
-    private final Investment investment;
-    private final Loan loan;
-    private final Collection<Development> collectionActions;
-    private final LocalDate delinquentSince;;
-
-    @Deprecated
-    public LoanDefaultedEvent(final Investment investment, final Loan loan) {
-        this(investment, loan, LocalDate.from(Instant.EPOCH), Collections.emptyList());
-    }
-
-    public LoanDefaultedEvent(final Investment investment, final Loan loan, final LocalDate since,
-                              final Collection<Development> collectionActions) {
-        this.investment = investment;
-        this.loan = loan;
-        this.delinquentSince = since;
-        this.collectionActions = Collections.unmodifiableCollection(collectionActions);
-    }
-
-    @Override
-    public Investment getInvestment() {
-        return investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
-    }
-
-    @Override
-    public LocalDate getDelinquentSince() {
-        return delinquentSince;
-    }
-
-    @Override
-    public Collection<Development> getCollectionActions() {
-        return collectionActions;
-    }
 }

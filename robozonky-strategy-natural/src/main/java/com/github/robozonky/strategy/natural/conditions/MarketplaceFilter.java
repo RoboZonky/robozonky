@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -65,7 +64,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return true for filter to return true.
      */
     public void when(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        when = new ArrayList<>(new LinkedHashSet<>(conditions));
+        when = new LinkedHashSet<>(conditions);
     }
 
     /**
@@ -74,7 +73,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return false for filter to return true.
      */
     public void butNotWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        butNotWhen = new ArrayList<>(new LinkedHashSet<>(conditions));
+        butNotWhen = new LinkedHashSet<>(conditions);
     }
 
     @Override
@@ -88,7 +87,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @return True when all {@link #when} true AND 1+ {@link #butNotWhen} false.
      */
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final Wrapper<?> item) {
         final Predicate<MarketplaceFilterCondition> f = c -> c.test(item);
         return when.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
     }

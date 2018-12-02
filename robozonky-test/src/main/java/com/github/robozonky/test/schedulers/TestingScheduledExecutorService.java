@@ -38,70 +38,7 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestingScheduledExecutorService.class);
 
-    @Override
-    public ScheduledFuture<?> schedule(final Runnable runnable, final long l, final TimeUnit timeUnit) {
-        return scheduleWithFixedDelay(runnable, l, 0, timeUnit);
-    }
-
-    @Override
-    public <V> ScheduledFuture<V> schedule(final Callable<V> callable, final long l, final TimeUnit timeUnit) {
-        return (ScheduledFuture<V>)submit(callable);
-    }
-
-    @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(final Runnable runnable, final long l, final long l1,
-                                                  final TimeUnit timeUnit) {
-        return submit(runnable);
-    }
-
-    @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable runnable, final long l, final long l1,
-                                                     final TimeUnit timeUnit) {
-        return submit(runnable);
-    }
-
-    @Override
-    public void shutdown() {
-        // no need to do anything
-    }
-
-    @Override
-    public List<Runnable> shutdownNow() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean isShutdown() {
-        return false;
-    }
-
-    @Override
-    public boolean isTerminated() {
-        return false;
-    }
-
-    @Override
-    public boolean awaitTermination(final long l, final TimeUnit timeUnit) {
-        throw new UnsupportedOperationException();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> Future<T> submit(final Callable<T> callable) {
-        try {
-            callable.call();
-            return (Future<T>)getFuture();
-        } catch (final Exception ex) {
-            LOGGER.warn("Callable failed.", ex);
-            return null;
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> ScheduledFuture<T> submit(final Runnable runnable, final T t) {
-        return (ScheduledFuture<T>)submit(runnable);
-    }
+    private boolean wasShutdown = false;
 
     private static ScheduledFuture<?> getFuture() {
         return new ScheduledFuture<Object>() {
@@ -143,6 +80,72 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
     }
 
     @Override
+    public ScheduledFuture<?> schedule(final Runnable runnable, final long l, final TimeUnit timeUnit) {
+        return scheduleWithFixedDelay(runnable, l, 0, timeUnit);
+    }
+
+    @Override
+    public <V> ScheduledFuture<V> schedule(final Callable<V> callable, final long l, final TimeUnit timeUnit) {
+        return (ScheduledFuture<V>) submit(callable);
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(final Runnable runnable, final long l, final long l1,
+                                                  final TimeUnit timeUnit) {
+        return submit(runnable);
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable runnable, final long l, final long l1,
+                                                     final TimeUnit timeUnit) {
+        return submit(runnable);
+    }
+
+    @Override
+    public void shutdown() {
+        this.wasShutdown = true;
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+        shutdown();
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isShutdown() {
+        return wasShutdown;
+    }
+
+    @Override
+    public boolean isTerminated() {
+        return wasShutdown;
+    }
+
+    @Override
+    public boolean awaitTermination(final long l, final TimeUnit timeUnit) {
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> Future<T> submit(final Callable<T> callable) {
+        try {
+            callable.call();
+            return (Future<T>) getFuture();
+        } catch (final Exception ex) {
+            LOGGER.warn("Callable failed.", ex);
+            return null;
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> ScheduledFuture<T> submit(final Runnable runnable, final T t) {
+        return (ScheduledFuture<T>) submit(runnable);
+    }
+
+    @Override
     public ScheduledFuture<?> submit(final Runnable runnable) {
         execute(runnable);
         return getFuture();
@@ -160,8 +163,7 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
     }
 
     @Override
-    public <T> T invokeAny(
-            final Collection<? extends Callable<T>> collection) {
+    public <T> T invokeAny(final Collection<? extends Callable<T>> collection) {
         throw new UnsupportedOperationException();
     }
 

@@ -25,22 +25,21 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 class JobTest {
 
     @Test
-    void defaultMethods() {
-        final Job j = new Job() {
-            @Override
-            public Duration repeatEvery() {
-                return null;
-            }
-
-            @Override
-            public Payload payload() {
-                return null;
-            }
-        };
+    void defaults() {
+        final Job j = new MyJob();
         assertSoftly(softly -> {
-           softly.assertThat(j.killIn()).isEqualTo(Duration.ofMinutes(1));
-           softly.assertThat(j.startIn()).isGreaterThan(Duration.ZERO);
+            softly.assertThat(j.startIn()).isGreaterThan(Duration.ZERO);
+            softly.assertThat(j.repeatEvery()).isEqualTo(Duration.ZERO);
+            softly.assertThat(j.killIn()).isGreaterThan(Duration.ZERO);
         });
+    }
+
+    private static final class MyJob implements Job {
+
+        @Override
+        public Duration repeatEvery() {
+            return Duration.ZERO;
+        }
     }
 
 }

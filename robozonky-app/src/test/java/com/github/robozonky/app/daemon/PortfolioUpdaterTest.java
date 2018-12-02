@@ -17,12 +17,11 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -45,7 +45,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void creation() {
-        final PortfolioUpdater instance = PortfolioUpdater.create(t, mockTenant(), Optional::empty);
+        final PortfolioUpdater instance = PortfolioUpdater.create(t, mockTenant());
         assertSoftly(softly -> {
             softly.assertThat(instance.isInitializing()).isTrue(); // by default it's true
             softly.assertThat(instance.getRegisteredDependants()).hasSize(4); // expected contents
@@ -56,12 +56,12 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     void updatingDependants() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final PortfolioDependant dependant = tp -> tp.fire(new RoboZonkyTestingEvent());
+        final PortfolioDependant dependant = tp -> tp.fire(roboZonkyTesting());
         final PortfolioUpdater instance = new PortfolioUpdater(a, BlockedAmountProcessor.createLazy(a));
         instance.registerDependant(dependant);
         instance.run();
         // make sure that the dependants were called with the proper value of Portfolio
-        assertThat(getNewEvents()).first().isInstanceOf(RoboZonkyTestingEvent.class);
+        assertThat(getEventsRequested()).first().isInstanceOf(RoboZonkyTestingEvent.class);
         assertThat(instance.isInitializing()).isFalse(); // it's false when update finished
     }
 
@@ -72,7 +72,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, BlockedAmountProcessor.createLazy(a),
                                                                Duration.ofSeconds(2));
         instance.registerDependant(tp -> { // fire event
-            tp.fire(new RoboZonkyTestingEvent());
+            tp.fire(roboZonkyTesting());
         });
         instance.registerDependant(tp -> { // fail
             throw new IllegalStateException("Testing exception");
@@ -81,7 +81,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         assertSoftly(softly -> {
             softly.assertThat(instance.get()).isEmpty();
             softly.assertThat(instance.isInitializing()).isTrue();
-            softly.assertThat(getNewEvents()).isEmpty();
+            softly.assertThat(getEventsRequested()).isEmpty();
         });
         verify(t).accept(notNull());
     }

@@ -18,26 +18,25 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Purchasing;
+import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 
 class PurchasingDaemon extends DaemonOperation {
 
     private final Purchasing purchasing;
+    private final SoldParticipationCache soldParticipationCache;
 
     public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                            final Supplier<Optional<PurchaseStrategy>> strategy, final PortfolioSupplier portfolio,
-                            final Duration refreshPeriod) {
+                            final PortfolioSupplier portfolio, final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
-        this.purchasing = new Purchasing(strategy, auth);
+        this.purchasing = new Purchasing(auth);
+        this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
     }
 
     @Override
@@ -47,7 +46,7 @@ class PurchasingDaemon extends DaemonOperation {
 
     @Override
     protected void execute(final Portfolio portfolio, final Tenant authenticated) {
-        final long balance = portfolio.getRemoteBalance().get().longValue();
+        final long balance = authenticated.getBalance().get().longValue();
         if (balance <= 0) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, 0);
             return;
@@ -55,8 +54,16 @@ class PurchasingDaemon extends DaemonOperation {
         final Select s = new Select()
                 .lessThanOrEquals("remainingPrincipal", balance)
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
-        final Collection<Participation> p =
-                authenticated.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
-        purchasing.apply(portfolio, p);
+        final Collection<Participation> applicable = authenticated.call(zonky -> zonky.getAvailableParticipations(s))
+                .filter(p -> { // never re-purchase what was once sold
+                    final int loanId = p.getLoanId();
+                    final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
+                    if (wasSoldBefore) {
+                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
+                    }
+                    return !wasSoldBefore;
+                })
+                .collect(Collectors.toList());
+        purchasing.apply(portfolio, applicable);
     }
 }

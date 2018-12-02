@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,6 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.time.LocalDate;
-import java.util.Collection;
+public interface LoanDelinquent90DaysOrMoreEvent extends LoanDelinquentEvent {
 
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-
-public final class LoanDelinquent90DaysOrMoreEvent extends LoanDelinquentEvent {
-
-    public LoanDelinquent90DaysOrMoreEvent(final Investment investment, final Loan loan, final LocalDate since,
-                                           final Collection<Development> collectionActions) {
-        super(investment, loan, since, 90, collectionActions);
-    }
 }

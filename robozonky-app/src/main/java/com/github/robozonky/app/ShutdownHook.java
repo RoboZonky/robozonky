@@ -92,7 +92,7 @@ public class ShutdownHook {
         Optional<Consumer<ShutdownHook.Result>> get();
     }
 
-    public final static class Result {
+    public static final class Result {
 
         private final ReturnCode returnCode;
         private final Throwable cause;

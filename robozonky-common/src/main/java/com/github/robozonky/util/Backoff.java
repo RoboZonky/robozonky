@@ -19,43 +19,40 @@ package com.github.robozonky.util;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
+import com.github.robozonky.internal.util.DateUtil;
+import io.vavr.control.Either;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Backoff<T> implements Supplier<Optional<T>> {
+public class Backoff<T> implements Supplier<Either<Throwable, T>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Backoff.class);
-    private final Operation<T> operation;
-    private final BackoffTimeCalculator<T> backoffTimeCalculator;
+    private final Supplier<T> operation;
+    private final BackoffTimeCalculator backoffTimeCalculator;
     private final Duration cancelAfter;
-    private Exception lastException = null;
 
-    static <T> Optional<Duration> calculateBackoffTime(final T value, final Duration original, final Duration initial) {
-        if (value == null) {
-            if (Objects.equals(original, Duration.ZERO)) {
-                return Optional.of(initial);
-            } else {
-                return Optional.of(Duration.ofNanos(original.toNanos() * 2));
-            }
-        } else { // no more backing off is needed
-            return Optional.empty();
-        }
-    }
-
-    public Backoff(final Operation<T> operation, final BackoffTimeCalculator<T> backoffTimeCalculator,
-                   final Duration cancelAfter) {
+    private Backoff(final Supplier<T> operation, final BackoffTimeCalculator backoffTimeCalculator,
+                    final Duration cancelAfter) {
         this.operation = operation;
         this.backoffTimeCalculator = backoffTimeCalculator;
         this.cancelAfter = cancelAfter;
     }
 
+    static Duration calculateBackoffTime(final Duration original, final Duration initial) {
+        if (Objects.equals(original, Duration.ZERO)) {
+            return initial;
+        } else {
+            return Duration.ofNanos(original.toNanos() * 2);
+        }
+    }
+
     /**
      * Implements exponential backoff over a given operation.
-     * @param operation Operation to execute.
+     * @param operation Operation to execute. Null is not a permitted return value of the {@link Supplier}.
      * @param initialBackoffTime The minimal non-zero value of the backoff time to start the back-off with following up
      * on failed execution of the operation.
      * @param cancelAfter When the total time spent within the algorithm exceeds this, it will be terminated.
@@ -63,10 +60,10 @@ public class Backoff<T> implements Supplier<Optional<T>> {
      * @return Return value of the operation, or empty if not reached in time.
      * @see <a href="https://en.wikipedia.org/wiki/Exponential_backoff">Exponential backoff on Wikipedia</a>
      */
-    public static <O> Backoff<O> exponential(final Operation<O> operation, final Duration initialBackoffTime,
+    public static <O> Backoff<O> exponential(final Supplier<O> operation, final Duration initialBackoffTime,
                                              final Duration cancelAfter) {
-        final BackoffTimeCalculator<O> exponential =
-                (value, originalBackoffTime) -> calculateBackoffTime(value, originalBackoffTime, initialBackoffTime);
+        final BackoffTimeCalculator exponential = (originalBackoffTime) -> calculateBackoffTime(originalBackoffTime,
+                                                                                                initialBackoffTime);
         return new Backoff<>(operation, exponential, cancelAfter);
     }
 
@@ -79,64 +76,43 @@ public class Backoff<T> implements Supplier<Optional<T>> {
         }
     }
 
-    private synchronized <O> Optional<O> execute(final Supplier<O> operation) {
+    private static <O> Either<Throwable, O> execute(final Supplier<O> operation) {
         LOGGER.trace("Will execute {}.", operation);
-        try {
-            final Optional<O> result = Optional.ofNullable(operation.get());
-            this.lastException = null;
-            return result;
-        } catch (final Exception ex) {
-            LOGGER.debug("Operation failed.", ex);
-            this.lastException = ex;
-            return Optional.empty();
-        }
-    }
-
-    public synchronized Optional<Exception> getLastException() {
-        return Optional.ofNullable(lastException);
+        return Try.ofSupplier(operation).map(Either::<Throwable, O>right)
+                .recover(t -> {
+                    LOGGER.debug("Operation failed.", t);
+                    return Either.left(t);
+                }).get();
     }
 
     @Override
-    public Optional<T> get() {
+    public Either<Throwable, T> get() {
         Duration backoffTime = Duration.ZERO;
-        final Instant startedOn = Instant.now();
-        while (Duration.between(startedOn, Instant.now()).compareTo(cancelAfter) < 0) {
+        final Instant startedOn = DateUtil.now();
+        do {
             wait(backoffTime);
-            final T result = execute(operation).orElse(null);
-            final Optional<Duration> newBackoffTime = backoffTimeCalculator.apply(result, backoffTime);
-            if (newBackoffTime.isPresent()) {
-                backoffTime = newBackoffTime.get();
-            } else {
+            final Either<Throwable, T> result = execute(operation);
+            if (result.isRight()) {
                 LOGGER.trace("Success.");
-                return Optional.of(result);
+                return Either.right(result.get());
+            } else if (startedOn.plus(cancelAfter).isBefore(DateUtil.now())) {
+                LOGGER.trace("Expired.");
+                return Either.left(result.getLeft());
             }
-        }
-        return Optional.empty();
+            // need to try again
+            backoffTime = backoffTimeCalculator.apply(backoffTime);
+        } while (true);
     }
 
     @FunctionalInterface
-    public interface Operation<T> extends Supplier<T> {
+    private interface BackoffTimeCalculator extends UnaryOperator<Duration> {
 
         /**
-         * Execute the operation, if unsuccessful, the backoff will be applied to.
-         * @return Value returned by the operation, to be consumed by
-         * {@link BackoffTimeCalculator#apply(Object, Duration)}. It is recommended that it only be null in case of the
-         * operation failing.
-         */
-        @Override
-        T get();
-    }
-
-    @FunctionalInterface
-    public interface BackoffTimeCalculator<T> extends BiFunction<T, Duration, Optional<Duration>> {
-
-        /**
-         * Calculate new backoff time based on the previous result of executing {@link Operation}.
-         * @param t Return value of the immediately preceding execution of the operation.
+         * Calculate new backoff time based on the previous backoff time.
          * @param duration The last back-off time. Will equal {@link Duration#ZERO} if this was the first run.
-         * @return New back off time or empty if the value is acceptable.
+         * @return New back off time.
          */
         @Override
-        Optional<Duration> apply(T t, Duration duration);
+        Duration apply(Duration duration);
     }
 }

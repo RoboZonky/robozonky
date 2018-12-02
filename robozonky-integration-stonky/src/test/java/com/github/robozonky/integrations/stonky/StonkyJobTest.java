@@ -21,8 +21,9 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class StonkyJobTest {
+class StonkyJobTest extends AbstractRoboZonkyTest {
 
     @Test
     void instantiateStonky() {
@@ -57,9 +58,9 @@ class StonkyJobTest {
     @SuppressWarnings("unchecked")
     @Test
     void callsStonky() {
-        final Consumer<SecretProvider> c = mock(Consumer.class);
+        final Consumer<Tenant> c = mock(Consumer.class);
         final StonkyJob instance = new StonkyJob(c);
-        final SecretProvider s = SecretProvider.inMemory("someone@somewhere.cz");
+        final Tenant s = mockTenant();
         instance.payload().accept(s);
         verify(c).accept(eq(s));
     }

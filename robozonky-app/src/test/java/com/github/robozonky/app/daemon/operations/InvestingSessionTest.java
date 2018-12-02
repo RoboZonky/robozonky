@@ -37,16 +37,16 @@ import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +58,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
@@ -76,9 +75,9 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void constructor() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
-        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
+        final LoanDescriptor ld = mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession it = new InvestingSession(portfolio, new LinkedHashSet<>(lds), getInvestor(auth), auth);
@@ -88,11 +87,10 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         });
     }
 
-    private RestrictedInvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
-        final InvestmentStrategy s = (l, p, r) -> l.stream()
+    private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
+        return (l, p, r) -> l.stream()
                 .filter(i -> i.item().getId() == loanToRecommend)
                 .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
-        return new RestrictedInvestmentStrategy(s, new Restrictions());
     }
 
     private Investor getInvestor(final Tenant auth) {
@@ -102,20 +100,19 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void makeInvestment() {
         // setup APIs
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(200);
+        final Zonky z = harmlessZonky(200);
         // run test
         final int amount = 200;
-        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptorWithoutCaptcha();
+        final LoanDescriptor ld = mockLoanDescriptorWithoutCaptcha();
         final int loanId = ld.item().getId();
-        when(z.getLoan(eq(loanId))).thenReturn(ld.item());
         final Tenant auth = mockTenant(z);
-        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
+        final Collection<LoanDescriptor> lds = Arrays.asList(ld, mockLoanDescriptor());
         final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
         final Collection<Investment> i = InvestingSession.invest(portfolio, getInvestor(auth), auth, lds,
                                                                  mockStrategy(loanId, amount));
         // check that one investment was made
         assertThat(i).hasSize(1);
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(5);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(ExecutionStartedEvent.class);
@@ -129,41 +126,41 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void underBalance() {
         // setup APIs
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(199);
+        final Zonky z = harmlessZonky(199);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         // run test
         final InvestingSession it = new InvestingSession(portfolio, Collections.emptySet(), getInvestor(auth), auth);
-        final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
+        final Optional<RecommendedLoan> recommendation = mockLoanDescriptor()
                 .recommend(BigDecimal.valueOf(200));
         final boolean result = it.invest(recommendation.get());
         // verify result
         assertThat(result).isFalse();
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).isEmpty();
     }
 
     @Test
     void underAmount() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
+        final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
         final RecommendedLoan recommendation =
-                AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(200).get();
+                mockLoanDescriptor().recommend(200).get();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, Collections.singleton(recommendation.descriptor()), getInvestor(auth),
                                                         auth);
         final boolean result = t.invest(recommendation);
         // verify result
         assertThat(result).isFalse();
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).isEmpty();
     }
 
     @Test
     void investmentFailed() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
-        final RecommendedLoan r = AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(200).get();
+        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = mock(Investor.class);
         doThrow(thrown).when(p).invest(eq(r), anyBoolean());
@@ -174,12 +171,11 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentRejected() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
-        final RecommendedLoan r = AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(200).get();
+        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, Collections.emptySet(), p, auth);
@@ -189,7 +185,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -199,13 +195,12 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentDelegated() {
-        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
+        final LoanDescriptor ld = mockLoanDescriptor();
         final RecommendedLoan r = ld.recommend(200).get();
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
@@ -216,7 +211,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -226,14 +221,13 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentDelegatedButExpectedConfirmed() {
-        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
+        final LoanDescriptor ld = mockLoanDescriptor();
         final RecommendedLoan r = ld.recommend(200, true).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
@@ -243,7 +237,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -253,15 +247,14 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentIgnoredWhenNoConfirmationProviderAndCaptcha() {
-        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
+        final LoanDescriptor ld = mockLoanDescriptor();
         final RecommendedLoan r = ld.recommend(200).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         // setup APIs
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.empty()).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
@@ -271,7 +264,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
         // validate event
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
@@ -283,13 +276,11 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void investmentSuccessful() {
         final int oldBalance = 10_000;
         final int amountToInvest = 200;
-        final RecommendedLoan r = AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(amountToInvest).get();
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(oldBalance);
-        when(z.getLoan(eq(r.descriptor().item().getId()))).thenReturn(r.descriptor().item());
+        final RecommendedLoan r = mockLoanDescriptor().recommend(amountToInvest).get();
+        final Zonky z = harmlessZonky(oldBalance);
         final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(new ZonkyResponse(amountToInvest))
-                .when(p).invest(eq(r), anyBoolean());
+        doReturn(Either.right(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final InvestingSession t = new InvestingSession(portfolio, Collections.emptySet(), p, auth);
@@ -302,7 +293,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(investments).hasSize(1);
         assertThat(investments.get(0).getOriginalPrincipal().intValue()).isEqualTo(amountToInvest);
         // validate event sequence
-        final List<Event> newEvents = this.getNewEvents();
+        final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);

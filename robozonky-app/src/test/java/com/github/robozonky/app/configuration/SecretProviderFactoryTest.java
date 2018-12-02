@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import static org.mockito.Mockito.when;
 
 class SecretProviderFactoryTest {
 
-    private static AuthenticationCommandLineFragment mockCli(final File file, final char... password) {
-        final AuthenticationCommandLineFragment delegate = mock(AuthenticationCommandLineFragment.class);
+    private static CommandLine mockCli(final File file, final char... password) {
+        final CommandLine delegate = mock(CommandLine.class);
         when(delegate.getKeystore()).thenReturn(Optional.ofNullable(file));
         when(delegate.getPassword()).thenReturn(password);
         return delegate;
@@ -39,24 +39,21 @@ class SecretProviderFactoryTest {
     void nonexistentKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
         tmp.delete();
-        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(tmp,
-                                                                                        "password".toCharArray());
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(tmp, "password".toCharArray());
         assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
     }
 
     @Test
     void wrongFormatKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore"); // empty key store
-        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(tmp,
-                                                                                        "password".toCharArray());
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(tmp, "password".toCharArray());
         assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
     }
 
     @Test
     void noFallback() {
         final String password = "pass";
-        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(null,
-                                                                                        password.toCharArray());
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, password.toCharArray());
         assertThatThrownBy(() -> SecretProviderFactory.getSecretProvider(cli))
                 .isInstanceOf(IllegalStateException.class);
     }

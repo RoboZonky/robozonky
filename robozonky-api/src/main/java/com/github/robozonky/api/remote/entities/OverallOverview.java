@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +20,29 @@ import javax.xml.bind.annotation.XmlElement;
 
 public class OverallOverview extends BaseOverview {
 
-    private int feesAmount, netIncome, principalLost, feesDiscount;
+    private long feesAmount, netIncome, principalLost, feesDiscount;
 
     OverallOverview() {
         // for JAXB
     }
 
     @XmlElement
-    public int getFeesAmount() {
+    public long getFeesAmount() {
         return feesAmount;
     }
 
     @XmlElement
-    public int getFeesDiscount() {
+    public long getFeesDiscount() {
         return feesDiscount;
     }
 
     @XmlElement
-    public int getNetIncome() {
+    public long getNetIncome() {
         return netIncome;
     }
 
     @XmlElement
-    public int getPrincipalLost() {
+    public long getPrincipalLost() {
         return principalLost;
     }
 }

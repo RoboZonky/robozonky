@@ -59,18 +59,18 @@
       <ul>
         <li><small>Tuto zprávu dostáváte, protože je tak <@robozonky /> nakonfigurován. Neodpovídejte na ni.</small></li>
         <#if data.session.isDryRun>
-           <li>
-                <small><@robozonky /> běží ve zkušebním režimu. Uvedené informace slouží jen pro demonstraci
-                nastavení a nemusí být platné ani úplné!</small>
-            </li>
+            <li><small><@robozonky /> běží ve zkušebním režimu. Uvedené informace slouží jen pro demonstraci nastavení a
+                nemusí být platné ani úplné!</small></li>
         <#else>
-           <li><small>Údaje v této zprávě jsou pouze informativního charakteru a mohou obsahovat chyby. Směrodatná data
-           poskytuje výhradně <@zonky /> dashboard.</small></li>
+            <li><small>Údaje v této zprávě jsou pouze informativního charakteru a mohou obsahovat chyby. Směrodatná data
+                poskytuje výhradně <@zonky /> dashboard.</small></li>
         </#if>
+        <li><small>Dotazy pokládejte
+            <a href="https://groups.google.com/forum/#!forum/robozonky-users">v uživatelské skupině</a></small></li>
       </ul>
       <p>
-        <small>Vygeneroval <em>${data.session.userAgent}</em> dne ${timestamp?date} v ${timestamp?time}. Dotazy
-        pokládejte <a href="https://groups.google.com/forum/#!forum/robozonky-users">v uživatelské skupině</a>.</small>
+        <small>Vygeneroval <em>${data.session.userAgent}</em> v čase ${timestamp?datetime?iso_local_ms} na základě
+        systémové události vytvořené v čase ${data.conception?datetime?iso_local_ms}.</small>
       </p>
     </footer>
 </body>

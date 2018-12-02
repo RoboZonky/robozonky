@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package com.github.robozonky.strategy.natural.conditions;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class LoanTermConditionTest {
 
@@ -43,7 +44,7 @@ class LoanTermConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         assertThat(condition.test(l)).isTrue();
@@ -51,7 +52,7 @@ class LoanTermConditionTest {
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(0);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
@@ -59,7 +60,7 @@ class LoanTermConditionTest {
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(2);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();

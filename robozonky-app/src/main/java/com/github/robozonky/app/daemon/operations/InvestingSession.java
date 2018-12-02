@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon.operations;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,24 +24,29 @@ import java.util.List;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
-import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.common.Tenant;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.executionStarted;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentDelegated;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentRejected;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentRequested;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentSkipped;
+import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
@@ -57,16 +63,18 @@ final class InvestingSession {
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
     private final Portfolio portfolio;
-    private PortfolioOverview portfolioOverview;
+    private final Events events;
+    private final Tenant authenticated;
 
     InvestingSession(final Portfolio portfolio, final Collection<LoanDescriptor> marketplace, final Investor investor,
                      final Tenant tenant) {
+        this.events = Events.forSession(tenant.getSessionInfo());
         this.investor = investor;
+        this.authenticated = tenant;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
         this.seen = newSessionState(tenant, marketplace, "seenLoans");
         this.loansStillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
-        this.portfolioOverview = portfolio.getOverview();
     }
 
     private static SessionState<LoanDescriptor> newSessionState(final Tenant tenant,
@@ -75,28 +83,27 @@ final class InvestingSession {
         return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
     }
 
-    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,
-                                                final Tenant auth,
+    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor, final Tenant auth,
                                                 final Collection<LoanDescriptor> loans,
-                                                final RestrictedInvestmentStrategy strategy) {
+                                                final InvestmentStrategy strategy) {
         final InvestingSession session = new InvestingSession(portfolio, loans, investor, auth);
-        final PortfolioOverview portfolioOverview = session.portfolioOverview;
-        final int balance = portfolioOverview.getCzkAvailable().intValue();
-        Events.fire(new ExecutionStartedEvent(loans, portfolioOverview));
+        final PortfolioOverview portfolioOverview = portfolio.getOverview();
+        final long balance = portfolioOverview.getCzkAvailable().longValue();
+        session.events.fire(executionStarted(loans, portfolioOverview));
         if (balance >= auth.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
             session.invest(strategy);
         }
         final Collection<Investment> result = session.getResult();
         // make sure we get fresh portfolio reference here
-        Events.fire(new ExecutionCompletedEvent(result, session.portfolioOverview));
+        session.events.fire(executionCompleted(result, portfolio.getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
-    private void invest(final RestrictedInvestmentStrategy strategy) {
+    private void invest(final InvestmentStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.apply(getAvailable(), portfolioOverview)
-                    .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
+            invested = strategy.recommend(getAvailable(), portfolio.getOverview(), authenticated.getRestrictions())
+                    .peek(r -> events.fire(loanRecommended(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -119,6 +126,55 @@ final class InvestingSession {
         return Collections.unmodifiableList(investmentsMadeNow);
     }
 
+    private boolean successfulInvestment(final RecommendedLoan recommendation, final BigDecimal amount) {
+        final int confirmedAmount = amount.intValue();
+        final MarketplaceLoan l = recommendation.descriptor().item();
+        final Investment i = Investment.fresh(l, confirmedAmount);
+        markSuccessfulInvestment(i);
+        discard(recommendation.descriptor()); // never show again
+        events.fire(investmentMadeLazy(() -> investmentMade(i, l, portfolio.getOverview())));
+        return true;
+    }
+
+    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation, final InvestmentFailure reason) {
+        final String providerId = investor.getConfirmationProvider().map(ConfirmationProvider::getId).orElse("-");
+        final LoanDescriptor loan = recommendation.descriptor();
+        switch (reason) {
+            case FAILED:
+                discard(loan);
+                break;
+            case REJECTED:
+                if (investor.getConfirmationProvider().isPresent()) {
+                    events.fire(investmentRejected(recommendation, providerId));
+                    // rejected through a confirmation provider => forget
+                    discard(loan);
+                } else {
+                    // rejected due to no confirmation provider => make available for direct investment later
+                    events.fire(investmentSkipped(recommendation));
+                    final int loanId = loan.item().getId();
+                    InvestingSession.LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
+                    skip(loan);
+                }
+                break;
+            case DELEGATED:
+                final Event e = investmentDelegated(recommendation, providerId);
+                events.fire(e);
+                if (recommendation.isConfirmationRequired()) {
+                    // confirmation required, delegation successful => forget
+                    discard(loan);
+                } else {
+                    // confirmation not required, delegation successful => make available for direct investment later
+                    skip(loan);
+                }
+                break;
+            case SEEN_BEFORE: // still protected by CAPTCHA
+                break;
+            default:
+                throw new IllegalStateException("Not possible.");
+        }
+        return false;
+    }
+
     /**
      * Request {@link ControlApi} to invest in a given loan, leveraging the {@link ConfirmationProvider}.
      * @param recommendation Loan to invest into.
@@ -128,61 +184,22 @@ final class InvestingSession {
         LOGGER.debug("Will attempt to invest in {}.", recommendation);
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
-        if (portfolioOverview.getCzkAvailable().compareTo(recommendation.amount()) < 0) {
+        if (portfolio.getOverview().getCzkAvailable().compareTo(recommendation.amount()) < 0) {
             // should not be allowed by the calling code
             LOGGER.debug("Balance was less than recommendation.");
             return false;
         }
-        Events.fire(new InvestmentRequestedEvent(recommendation));
+        events.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
-        final ZonkyResponse response = investor.invest(recommendation, seenBefore);
+        final Either<InvestmentFailure, BigDecimal> response = investor.invest(recommendation, seenBefore);
         InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        final String providerId = investor.getConfirmationProvider().map(ConfirmationProvider::getId).orElse("-");
-        switch (response.getType()) {
-            case REJECTED:
-                return investor.getConfirmationProvider().map(c -> {
-                    Events.fire(new InvestmentRejectedEvent(recommendation, providerId));
-                    // rejected through a confirmation provider => forget
-                    discard(loan);
-                    return false;
-                }).orElseGet(() -> {
-                    // rejected due to no confirmation provider => make available for direct investment later
-                    Events.fire(new InvestmentSkippedEvent(recommendation));
-                    InvestingSession.LOGGER.debug(
-                            "Loan #{} protected by CAPTCHA, will check back later.", loanId);
-                    skip(loan);
-                    return false;
-                });
-            case DELEGATED:
-                final Event e = new InvestmentDelegatedEvent(recommendation, providerId);
-                Events.fire(e);
-                if (recommendation.isConfirmationRequired()) {
-                    // confirmation required, delegation successful => forget
-                    discard(loan);
-                } else {
-                    // confirmation not required, delegation successful => make available for direct investment later
-                    skip(loan);
-                }
-                return false;
-            case INVESTED:
-                final int confirmedAmount = response.getConfirmedAmount().getAsInt();
-                final Investment i = Investment.fresh(recommendation.descriptor().item(),
-                                                      confirmedAmount);
-                markSuccessfulInvestment(i);
-                discard(recommendation.descriptor()); // never show again
-                Events.fire(new InvestmentMadeEvent(i, loan.item(), portfolioOverview));
-                return true;
-            case SEEN_BEFORE: // still protected by CAPTCHA
-                return false;
-            default:
-                throw new IllegalStateException("Not possible.");
-        }
+        return response.fold(reason -> unsuccessfulInvestment(recommendation, reason),
+                             amount -> successfulInvestment(recommendation, amount));
     }
 
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
-        portfolioOverview = portfolio.getOverview();
     }
 
     private void discard(final LoanDescriptor loan) {

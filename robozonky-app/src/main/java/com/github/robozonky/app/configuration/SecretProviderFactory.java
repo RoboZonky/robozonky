@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ final class SecretProviderFactory {
      * @param cli Command line interface coming from the application.
      * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
      */
-    public static Optional<SecretProvider> getSecretProvider(final AuthenticationCommandLineFragment cli) {
+    public static Optional<SecretProvider> getSecretProvider(final CommandLine cli) {
         final char[] password = cli.getPassword();
         return cli.getKeystore().map(keystore -> {
             try {

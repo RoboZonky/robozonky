@@ -27,29 +27,32 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class SchedulerTest {
 
-    private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
+    private static final Runnable RUNNABLE = mock(Runnable.class);
 
     @Test
     void backgroundRestarts() {
         final Scheduler s = Scheduler.inBackground();
+        assertThat(s.getExecutor()).isNotNull();
         s.close();
+        assertThat(s.getExecutor().isShutdown()).isTrue();
         try (final Scheduler s2 = Scheduler.inBackground()) {
-            assertThat(s).isNotSameAs(s2);
+            assertThat(s).isNotNull().isNotSameAs(s2);
         }
     }
 
     @Test
     void submit() {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
-            final ScheduledFuture<?> f = s.submit(REFRESHABLE);
+            assertThat(s.isSubmitted(RUNNABLE)).isFalse();
+            final ScheduledFuture<?> f = s.submit(RUNNABLE);
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(Scheduler.inBackground()).isNotNull();
                 softly.assertThat((Future<?>) f).isNotNull();
-                softly.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
+                softly.assertThat(s.isSubmitted(RUNNABLE)).isTrue();
             });
         }
     }
@@ -57,10 +60,10 @@ class SchedulerTest {
     @Test
     void run() throws InterruptedException, ExecutionException, TimeoutException {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            final Future<?> f = s.run(REFRESHABLE);
+            final Future<?> f = s.run(RUNNABLE);
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat((Future<?>) f).isNotNull();
-                softly.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
+                softly.assertThat(s.isSubmitted(RUNNABLE)).isFalse();
             });
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }
@@ -69,10 +72,10 @@ class SchedulerTest {
     @Test
     void runWithDelay() throws InterruptedException, ExecutionException, TimeoutException {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            final Future<?> f = s.run(REFRESHABLE, Duration.ofSeconds(1));
+            final Future<?> f = s.run(RUNNABLE, Duration.ofSeconds(1));
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat((Future<?>) f).isNotNull();
-                softly.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
+                softly.assertThat(s.isSubmitted(RUNNABLE)).isFalse();
             });
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }

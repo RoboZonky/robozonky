@@ -16,9 +16,13 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.io.IOException;
 import java.util.function.Function;
 
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.RemoteBalance;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import org.junit.jupiter.api.Test;
@@ -28,9 +32,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class TransactionalTenantTest {
+class TransactionalTenantTest extends AbstractZonkyLeveragingTest {
 
-    private final Tenant original = mock(Tenant.class);
+    private final Tenant original = mockTenant();
     private final Tenant transactional = new TransactionalTenant(mock(TransactionalPortfolio.class), original);
 
     @Test
@@ -53,21 +57,43 @@ class TransactionalTenantTest {
 
     @Test
     void delegateAvailability() {
-        transactional.isAvailable();
-        verify(original).isAvailable();
+        transactional.isAvailable(ZonkyScope.APP);
+        verify(original).isAvailable(eq(ZonkyScope.APP));
     }
 
     @Test
     void delegateCall() {
         final Function<Zonky, Zonky> a = Function.identity();
-        transactional.call(a);
-        verify(original).call(eq(a));
+        transactional.call(a, ZonkyScope.FILES);
+        verify(original).call(eq(a), eq(ZonkyScope.FILES));
     }
 
     @Test
     void transactionalState() {
         final InstanceState<String> state = transactional.getState(String.class);
         assertThat(state).isInstanceOf(TransactionalInstanceState.class);
+    }
+
+    @Test
+    void delegateStrategies() {
+        assertThat(transactional.getInvestmentStrategy()).isEmpty();
+        verify(original).getInvestmentStrategy();
+        assertThat(transactional.getPurchaseStrategy()).isEmpty();
+        verify(original).getPurchaseStrategy();
+        assertThat(transactional.getSellStrategy()).isEmpty();
+        verify(original).getSellStrategy();
+    }
+
+    @Test
+    void delegateBalance() {
+        final RemoteBalance b = original.getBalance();
+        assertThat(transactional.getBalance()).isSameAs(b);
+    }
+
+    @Test
+    void delegateClose() throws IOException {
+        transactional.close();
+        verify(original).close();
     }
 
 }

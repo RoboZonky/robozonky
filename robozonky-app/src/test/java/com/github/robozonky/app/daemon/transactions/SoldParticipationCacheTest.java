@@ -16,14 +16,16 @@
 
 package com.github.robozonky.app.daemon.transactions;
 
-import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.TenantBuilder;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SoldParticipationCacheTest {
+class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void persistent() {
@@ -43,6 +45,17 @@ class SoldParticipationCacheTest {
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         final SoldParticipationCache instance2 = SoldParticipationCache.forTenant(tenant2);
         assertThat(instance2).isNotSameAs(instance);
+    }
+
+    @Test
+    void retrieves() {
+        final SecretProvider sp = SecretProvider.inMemory("someone@somewhere.cz");
+        final Zonky zonky = harmlessZonky(10_000);
+        final Tenant tenant = mockTenant(zonky);
+        final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
+        assertThat(instance.wasOnceSold(1)).isFalse();
+        instance.markAsSold(1);
+        assertThat(instance.wasOnceSold(1)).isTrue();
     }
 
 }

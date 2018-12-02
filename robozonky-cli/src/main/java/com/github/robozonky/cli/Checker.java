@@ -34,6 +34,7 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public final class Checker {
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.
              */
-            return loans.stream().sorted(Checker.COMPARATOR).findFirst();
+            return loans.stream().min(Checker.COMPARATOR);
         } catch (final Exception t) {
             Checker.LOGGER.warn("Failed obtaining a loan.", t);
             return Optional.empty();
@@ -82,12 +83,12 @@ public final class Checker {
                 .orElse(false);
     }
 
-    static boolean notifications(final String username, final URL configurationLocation) {
-        ListenerServiceLoader.registerConfiguration(username, configurationLocation);
-        return Checker.notifications(username, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
+    static boolean notifications(final SessionInfo sessionInfo, final URL configurationLocation) {
+        ListenerServiceLoader.registerConfiguration(sessionInfo, configurationLocation);
+        return Checker.notifications(sessionInfo, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
 
-    static boolean notifications(final String username,
+    static boolean notifications(final SessionInfo sessionInfo,
                                  final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
                 .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()))
@@ -95,8 +96,7 @@ public final class Checker {
         if (listeners.isEmpty()) {
             return false;
         } else {
-            final SessionInfo sessionInfo = new SessionInfo(username);
-            final RoboZonkyTestingEvent evt = new RoboZonkyTestingEvent();
+            final RoboZonkyTestingEvent evt = DateUtil::offsetNow;
             listeners.forEach(l -> l.handle(evt, sessionInfo));
             return true;
         }

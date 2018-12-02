@@ -18,7 +18,6 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -26,8 +25,8 @@ import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -57,14 +56,13 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         when(z.getAvailableLoans(notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final Tenant a = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
         final InvestmentStrategy is = mock(InvestmentStrategy.class);
-        final Supplier<Optional<InvestmentStrategy>> s = () -> Optional.of(is);
+        when(a.getInvestmentStrategy()).thenReturn(Optional.of(is));
+        final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
         final InvestingDaemon d = new InvestingDaemon(t -> {
-        }, a, Investor.build(a), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));
+        }, a, Investor.build(a), () -> Optional.of(portfolio), Duration.ofSeconds(1));
         d.run();
         verify(z).getAvailableLoans(notNull());
-        verify(z).getLoan(ml.getId());
         verify(is).recommend(any(), any(), any());
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
@@ -74,9 +72,8 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(199);
         final Tenant a = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
-        final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(t -> {
-        }, a, Investor.build(a), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));
+        }, a, Investor.build(a), () -> Optional.of(portfolio), Duration.ofSeconds(1));
         d.run();
         verify(z, never()).getAvailableLoans(notNull());
     }

@@ -29,9 +29,10 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.internal.util.LazyInitialized;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.util.Scheduler;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class LoanCache {
 
     private static final int INITIAL_CACHE_SIZE = 20;
     private static final Duration EVICT_AFTER = Duration.ofHours(1);
-    private static final LazyInitialized<LoanCache> INSTANCE = LazyInitialized.create(LoanCache::new);
+    private static final Lazy<LoanCache> INSTANCE = Lazy.of(LoanCache::new);
     private final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
     private final Lock updateLock = new ReentrantLock(true);
     private final AtomicReference<Map<Integer, Pair<Loan, Instant>>> cache = new AtomicReference<>();
@@ -55,7 +56,7 @@ public class LoanCache {
     }
 
     private static boolean isExpired(final Pair<Loan, Instant> p) {
-        final Instant deadline = Instant.now().minus(EVICT_AFTER);
+        final Instant deadline = DateUtil.now().minus(EVICT_AFTER);
         return p.getTwo().isBefore(deadline);
     }
 
@@ -86,7 +87,7 @@ public class LoanCache {
         }
     }
 
-    public Optional<Loan> getLoan(final int loanId) {
+    Optional<Loan> getLoan(final int loanId) {
         final Pair<Loan, Instant> result = callLocked(() -> cache.get().get(loanId));
         if (result == null || isExpired(result)) {
             LOGGER.trace("Cache miss for loan #{}.", loanId);
@@ -97,13 +98,17 @@ public class LoanCache {
     }
 
     private void addLoan(final int loanId, final Loan loan) {
-        runLocked(() -> cache.get().put(loanId, new Pair<>(loan, Instant.now())));
+        runLocked(() -> cache.get().put(loanId, new Pair<>(loan, DateUtil.now())));
     }
 
     public Loan getLoan(final int loanId, final Tenant tenant) {
         return getLoan(loanId).orElseGet(() -> {
             final Loan l = tenant.call(api -> api.getLoan(loanId));
-            addLoan(loanId, l);
+            if (l.getRemainingInvestment() > 0) {  // prevent caching information which will soon be outdated
+                LOGGER.debug("Not adding loan {} to cache as it is not yet fully invested.", l);
+            } else {
+                addLoan(loanId, l);
+            }
             return l;
         });
     }

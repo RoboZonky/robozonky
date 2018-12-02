@@ -74,6 +74,14 @@ class FileUtilTest {
     }
 
     @Test
+    void lookupSomethingPureWrong() {
+        final String old = System.getProperty("user.dir");
+        System.setProperty("user.dir", UUID.randomUUID().toString());
+        assertThat(FileUtil.findFolder(UUID.randomUUID().toString())).isEmpty();
+        System.setProperty("user.dir", old);
+    }
+
+    @Test
     void lookupExistingFileAsFolder() {
         assertThat(FileUtil.findFolder("pom.xml")).isEmpty();
     }

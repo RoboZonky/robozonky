@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,125 +17,51 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.strategies.InvestmentDescriptor;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
 
-public class Wrapper {
+public interface Wrapper<T> {
 
-    private final Loan loan;
-    private final String identifier;
-    private final int remainingTermInMonths, originalTermInMonths;
-    private final BigDecimal remainingAmount;
-    private final boolean insuranceActive;
-
-    private static String identify(final int loanId, final String suffix) {
-        final String prefix = "Loan #" + loanId;
-        return suffix == null ? prefix : prefix + " (" + suffix + ")";
+    static Wrapper<LoanDescriptor> wrap(final LoanDescriptor descriptor) {
+        return new LoanWrapper(descriptor);
     }
 
-    public Wrapper(final Loan loan) {
-        this.loan = loan;
-        this.identifier = identify(loan.getId(), null);
-        this.remainingTermInMonths = loan.getTermInMonths();
-        this.originalTermInMonths = loan.getTermInMonths();
-        this.remainingAmount = null;
-        this.insuranceActive = loan.isInsuranceActive();
+    static Wrapper<InvestmentDescriptor> wrap(final InvestmentDescriptor descriptor) {
+        return new InvestmentWrapper(descriptor);
     }
 
-    public Wrapper(final Participation participation, final Loan loan) {
-        this.loan = loan;
-        this.identifier = identify(loan.getId(), "participation #" + participation.getId());
-        this.remainingTermInMonths = participation.getRemainingInstalmentCount();
-        this.originalTermInMonths = participation.getOriginalInstalmentCount();
-        this.remainingAmount = participation.getRemainingPrincipal();
-        this.insuranceActive = participation.isInsuranceActive();
+    static Wrapper<ParticipationDescriptor> wrap(final ParticipationDescriptor descriptor) {
+        return new ParticipationWrapper(descriptor);
     }
 
-    public Wrapper(final Investment investment, final Loan loan) {
-        this.loan = loan;
-        this.identifier = identify(loan.getId(), "investment #" + investment.getId());
-        this.remainingTermInMonths = investment.getRemainingMonths();
-        this.originalTermInMonths = investment.getOriginalTerm();
-        this.remainingAmount = investment.getRemainingPrincipal();
-        this.insuranceActive = investment.isInsuranceActive();
-    }
+    boolean isInsuranceActive();
 
-    public boolean isInsuranceActive() {
-        return insuranceActive;
-    }
+    Region getRegion();
 
-    public int getLoanId() {
-        return loan.getId();
-    }
+    String getStory();
 
-    public Region getRegion() {
-        return loan.getRegion();
-    }
+    MainIncomeType getMainIncomeType();
 
-    public String getStory() {
-        return loan.getStory();
-    }
+    BigDecimal getInterestRate();
 
-    public MainIncomeType getMainIncomeType() {
-        return loan.getMainIncomeType();
-    }
+    Purpose getPurpose();
 
-    public BigDecimal getInterestRate() {
-        return loan.getInterestRate();
-    }
+    Rating getRating();
 
-    public Purpose getPurpose() {
-        return loan.getPurpose();
-    }
+    int getOriginalTermInMonths();
 
-    public Rating getRating() {
-        return loan.getRating();
-    }
+    int getRemainingTermInMonths();
 
-    public int getOriginalTermInMonths() {
-        return originalTermInMonths;
-    }
+    int getOriginalAmount();
 
-    public int getRemainingTermInMonths() {
-        return remainingTermInMonths;
-    }
+    BigDecimal getRemainingPrincipal();
 
-    public int getOriginalAmount() {
-        return loan.getAmount();
-    }
+    T getOriginal();
 
-    public BigDecimal getRemainingAmount() {
-        if (remainingAmount == null) {
-            throw new IllegalStateException("Cannot request remaining amount here.");
-        }
-        return remainingAmount;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !Objects.equals(getClass(), o.getClass())) {
-            return false;
-        }
-        final Wrapper wrapper = (Wrapper) o;
-        return Objects.equals(identifier, wrapper.identifier);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(identifier);
-    }
 }

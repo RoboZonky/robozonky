@@ -153,14 +153,6 @@ public enum Settings {
         return get(key.getName());
     }
 
-    /**
-     * When set to true, this is essentially a controlled memory leak. Generally only useful for testing.
-     * @return
-     */
-    public boolean isDebugEventStorageEnabled() {
-        return get(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE);
-    }
-
     public boolean isDebugHttpResponseLoggingEnabled() {
         return get(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING);
     }
@@ -182,7 +174,7 @@ public enum Settings {
     }
 
     public Duration getCaptchaDelay(final Rating r) {
-        return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Long.parseLong(delay)), getCaptchaDelay());
+        return get(getRatingKey(r), delay -> Duration.ofSeconds(Long.parseLong(delay)), getCaptchaDelay());
     }
 
     public Optional<String> getHttpsProxyHostname() {
@@ -219,7 +211,6 @@ public enum Settings {
 
     public enum Key {
 
-        DEBUG_ENABLE_EVENT_STORAGE("robozonky.debug.enable_event_storage"),
         DEBUG_ENABLE_HTTP_RESPONSE_LOGGING("robozonky.debug.enable_http_response_logging"),
         DEFAULTS_TOKEN_REFRESH("robozonky.default.token_refresh_seconds"),
         DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),

@@ -31,7 +31,7 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
 
     T setAmountInvested(BigDecimal amountInvested);
 
-    T setId(int id);
+    T setId(long id);
 
     T setInterestRate(BigDecimal interestRate);
 

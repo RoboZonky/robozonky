@@ -18,8 +18,13 @@ package com.github.robozonky.app.configuration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.App;
@@ -34,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -46,14 +52,6 @@ class CommandLineTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void properScriptIdentification() {
-        System.setProperty("os.name", "Some Windows System");
-        assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.bat");
-        System.setProperty("os.name", "Any Other System");
-        assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.sh");
-    }
-
-    @Test
     void validDaemonCli() throws IOException, KeyStoreException {
         // prepare keystore
         final String keyStorePassword = "password";
@@ -63,10 +61,12 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final String username = "someone@somewhere.cz";
         SecretProvider.keyStoreBased(ksh, username, "something".toCharArray());
         // run the app
-        final App main = new App("-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i", "somewhere.txt",
+        final String name = UUID.randomUUID().toString();
+        final App main = new App("-n", name, "-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i", "somewhere.txt",
                                  "-s", "somewhere");
         final Optional<InvestmentMode> cfg = CommandLine.parse(main);
         assertThat(cfg).isPresent();
+        assertThat(cfg.get().getSessionName()).isEqualTo(name);
         assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }
 
@@ -77,17 +77,41 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         assertThat(cfg).isEmpty();
     }
 
+    private static Path getPath(final InputStream resource) throws IOException {
+        final File f = File.createTempFile("robozonky-", ".tmp");
+        f.delete();
+        final Path p = f.toPath();
+        Files.copy(resource, p);
+        return p;
+    }
+
+    @Test
+    void quotedAtFile() throws IOException {
+        final CommandLine cli = new CommandLine(mock(Consumer.class));
+        picocli.CommandLine.call(cli, "@" + getPath(getClass().getResourceAsStream("quoted.cli")));
+        assertThat(cli.getKeystore()).contains(new File("C:\\Program Files\\RoboZonky\\robozonky.keystore"));
+        assertThat(cli.getName()).isEqualTo("Testing Name");
+    }
+
+    @Test
+    void unquotedAtFile() throws IOException {
+        final CommandLine cli = new CommandLine(mock(Consumer.class));
+        picocli.CommandLine.call(cli, "@" + getPath(getClass().getResourceAsStream("unquoted.cli")));
+        assertThat(cli.getKeystore()).contains(new File("C:\\Program Files\\RoboZonky\\robozonky.keystore"));
+        assertThat(cli.getName()).isEqualTo("Testing Name");
+    }
+
     @Test
     void helpCli() {
         final App main = mockedApp("-h");
-        CommandLine.parse(main);
-        verify(main).actuallyExit(eq(ReturnCode.OK.getCode()));
+        main.run();
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 
     @Test
     void invalidCli() {
         final App main = mockedApp();
-        CommandLine.parse(main);
-        verify(main).actuallyExit(eq(ReturnCode.ERROR_WRONG_PARAMETERS.getCode()));
+        main.run();
+        verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
 }

@@ -22,6 +22,8 @@ import com.github.robozonky.api.remote.enums.DevelopmentType;
 
 public interface MutableDevelopment<T extends MutableDevelopment<T>> extends Development {
 
+    T setLoanId(final int loanId);
+
     T setType(final DevelopmentType type);
 
     T setPublicNote(final String publicNote);

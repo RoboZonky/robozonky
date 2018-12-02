@@ -23,9 +23,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -48,7 +50,6 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -57,6 +58,7 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -95,13 +97,9 @@ import static org.mockito.Mockito.verify;
 
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
-    private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
-    private static final PortfolioOverview MAX_PORTFOLIO = createPortfolio(Integer.MAX_VALUE);
+    private static final RoboZonkyTestingEvent EVENT = OffsetDateTime::now;
+    private static final PortfolioOverview MAX_PORTFOLIO = mockPortfolioOverview(Integer.MAX_VALUE);
     private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
-
-    private static PortfolioOverview createPortfolio(final int balance) {
-        return PortfolioOverview.calculate(BigDecimal.valueOf(balance), Collections.emptyMap());
-    }
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,
                                                                  final AbstractTargetHandler p) {
@@ -142,7 +140,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         assertThat(supplier).isNotEmpty();
     }
 
-    static AbstractTargetHandler getHandler(final ConfigStorage storage) {
+    private static AbstractTargetHandler getHandler(final ConfigStorage storage) {
         return spy(new TestingTargetHandler(storage));
     }
 
@@ -157,7 +155,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                                                         final T event) throws Exception {
         BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
-        verify(h, times(1)).send(notNull(), notNull(), notNull(), notNull());
+        verify(h, times(1)).send(eq(SESSION_INFO), notNull(), notNull(), notNull());
     }
 
     @SuppressWarnings("unchecked")
@@ -226,48 +224,33 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         // create events for listeners
         return Stream.of(
                 forListener(SupportedListener.INVESTMENT_DELEGATED,
-                            new InvestmentDelegatedEvent(recommendation, "random")),
-                forListener(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, loan, MAX_PORTFOLIO)),
-                forListener(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, loan, MAX_PORTFOLIO)),
-                forListener(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation)),
-                forListener(SupportedListener.INVESTMENT_REJECTED,
-                            new InvestmentRejectedEvent(recommendation, "random")),
-                forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, new LoanNoLongerDelinquentEvent(i, loan)),
-                forListener(SupportedListener.LOAN_DEFAULTED,
-                            new LoanDefaultedEvent(i, loan, LocalDate.now(), Collections.emptyList())),
-                forListener(SupportedListener.LOAN_LOST, new LoanLostEvent(i, loan)),
-                forListener(SupportedListener.LOAN_NOW_DELINQUENT,
-                            new LoanNowDelinquentEvent(i, loan, LocalDate.now(), Collections.emptyList())),
-                forListener(SupportedListener.LOAN_DELINQUENT_10_PLUS,
-                            new LoanDelinquent10DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(11),
-                                                                Collections.emptyList())),
-                forListener(SupportedListener.LOAN_DELINQUENT_30_PLUS,
-                            new LoanDelinquent30DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(31),
-                                                                Collections.emptyList())),
-                forListener(SupportedListener.LOAN_DELINQUENT_60_PLUS,
-                            new LoanDelinquent60DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(61),
-                                                                Collections.emptyList())),
-                forListener(SupportedListener.LOAN_DELINQUENT_90_PLUS,
-                            new LoanDelinquent90DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(91),
-                                                                Collections.emptyList())),
-                forListener(SupportedListener.LOAN_REPAID, new LoanRepaidEvent(i, loan, MAX_PORTFOLIO)),
-                forListener(SupportedListener.BALANCE_ON_TARGET,
-                            new ExecutionStartedEvent(Collections.emptyList(), MAX_PORTFOLIO)),
+                            new MyInvestmentDelegatedEvent(recommendation, loan)),
+                forListener(SupportedListener.INVESTMENT_MADE, new MyInvestmentMadeEvent(loan, i)),
+                forListener(SupportedListener.INVESTMENT_SOLD, new MyInvestmentSoldEvent(loan, i)),
+                forListener(SupportedListener.INVESTMENT_SKIPPED, new MyInvestmentSkippedEvent(recommendation, loan)),
+                forListener(SupportedListener.INVESTMENT_REJECTED, new MyInvestmentRejectedEvent(recommendation, loan)),
+                forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, new MyLoanNoLongerDelinquentEvent(loan, i)),
+                forListener(SupportedListener.LOAN_DEFAULTED, new MyLoanDefaultedEvent(loan, i)),
+                forListener(SupportedListener.LOAN_LOST, new MyLoanLostEvent(loan, i)),
+                forListener(SupportedListener.LOAN_NOW_DELINQUENT, new MyLoanNowDelinquent(loan, i)),
+                forListener(SupportedListener.LOAN_DELINQUENT_10_PLUS, new MyLoanDelinquent10Plus(loan, i)),
+                forListener(SupportedListener.LOAN_DELINQUENT_30_PLUS, new MyLoanDelinquent30Plus(loan, i)),
+                forListener(SupportedListener.LOAN_DELINQUENT_60_PLUS, new MyLoanDelinquent60Plus(loan, i)),
+                forListener(SupportedListener.LOAN_DELINQUENT_90_PLUS, new MyLoanDelinquent90Plus(loan, i)),
+                forListener(SupportedListener.LOAN_REPAID, new MyLoanRepaidEvent(loan, i)),
+                forListener(SupportedListener.BALANCE_ON_TARGET, new MyExecutionStartedEvent(MAX_PORTFOLIO)),
                 forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
-                            new ExecutionStartedEvent(Collections.emptyList(), createPortfolio(0))),
-                forListener(SupportedListener.CRASHED, new RoboZonkyCrashedEvent(new RuntimeException())),
-                forListener(SupportedListener.REMOTE_OPERATION_FAILED,
-                            new RemoteOperationFailedEvent(new RuntimeException())),
-                forListener(SupportedListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException())),
-                forListener(SupportedListener.INITIALIZED, new RoboZonkyInitializedEvent()),
-                forListener(SupportedListener.ENDING, new RoboZonkyEndingEvent()),
-                forListener(SupportedListener.TESTING, new RoboZonkyTestingEvent()),
-                forListener(SupportedListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3")),
+                            new MyExecutionStartedEvent(mockPortfolioOverview(0))),
+                forListener(SupportedListener.CRASHED, new MyRoboZonkyCrashedEvent()),
+                forListener(SupportedListener.DAEMON_FAILED, new MyRoboZonkyDaemonFailedEvent()),
+                forListener(SupportedListener.INITIALIZED, (RoboZonkyInitializedEvent) OffsetDateTime::now),
+                forListener(SupportedListener.ENDING, (RoboZonkyEndingEvent) OffsetDateTime::now),
+                forListener(SupportedListener.TESTING, (RoboZonkyTestingEvent) OffsetDateTime::now),
+                forListener(SupportedListener.UPDATE_DETECTED, new MyRoboZonkyUpdateDetectedEvent()),
                 forListener(SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
-                            new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1")),
-                forListener(SupportedListener.INVESTMENT_PURCHASED,
-                            new InvestmentPurchasedEvent(i, loan, MAX_PORTFOLIO)),
-                forListener(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, loan))
+                            new MyRoboZonkyExperimentalUpdateDetectedEvent()),
+                forListener(SupportedListener.INVESTMENT_PURCHASED, new MyInvestmentPurchasedEvent(loan, i)),
+                forListener(SupportedListener.SALE_OFFERED, new MySaleOfferedEvent(i, loan))
         );
     }
 
@@ -298,6 +281,613 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         String getTemplateFileName() {
             return "testing.ftl";
+        }
+    }
+
+    private static class MyExecutionStartedEvent implements ExecutionStartedEvent {
+
+        private final PortfolioOverview portfolioOverview;
+
+        public MyExecutionStartedEvent(final PortfolioOverview portfolioOverview) {
+            this.portfolioOverview = portfolioOverview;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public PortfolioOverview getPortfolioOverview() {
+            return portfolioOverview;
+        }
+
+        @Override
+        public Collection<LoanDescriptor> getLoanDescriptors() {
+            return Collections.emptyList();
+        }
+    }
+
+    private static class MyRoboZonkyExperimentalUpdateDetectedEvent implements RoboZonkyExperimentalUpdateDetectedEvent {
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public String getNewVersion() {
+            return "1.3.0-beta-1";
+        }
+    }
+
+    private static class MyRoboZonkyUpdateDetectedEvent implements RoboZonkyUpdateDetectedEvent {
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public String getNewVersion() {
+            return "1.2.3";
+        }
+    }
+
+    private static class MyRoboZonkyDaemonFailedEvent implements RoboZonkyDaemonFailedEvent {
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Throwable getCause() {
+            return new RuntimeException();
+        }
+    }
+
+    private static class MyRoboZonkyCrashedEvent implements RoboZonkyCrashedEvent {
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Optional<Throwable> getCause() {
+            return Optional.of(new RuntimeException());
+        }
+    }
+
+    private static class MyInvestmentDelegatedEvent implements InvestmentDelegatedEvent {
+
+        private final RecommendedLoan recommendation;
+        private final Loan loan;
+
+        public MyInvestmentDelegatedEvent(RecommendedLoan recommendation, Loan loan) {
+            this.recommendation = recommendation;
+            this.loan = loan;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public BigDecimal getRecommendation() {
+            return recommendation.amount();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public String getConfirmationProviderId() {
+            return "random";
+        }
+    }
+
+    private static class MyInvestmentPurchasedEvent implements InvestmentPurchasedEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyInvestmentPurchasedEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public PortfolioOverview getPortfolioOverview() {
+            return MAX_PORTFOLIO;
+        }
+    }
+
+    private static class MySaleOfferedEvent implements SaleOfferedEvent {
+
+        private final Investment i;
+        private final Loan loan;
+
+        public MySaleOfferedEvent(final Investment i, final Loan loan) {
+            this.i = i;
+            this.loan = loan;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+    }
+
+    private static class MyInvestmentRejectedEvent implements InvestmentRejectedEvent {
+
+        private final RecommendedLoan recommendation;
+        private final Loan loan;
+
+        public MyInvestmentRejectedEvent(final RecommendedLoan recommendation, final Loan loan) {
+            this.recommendation = recommendation;
+            this.loan = loan;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public BigDecimal getRecommendation() {
+            return recommendation.amount();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public String getConfirmationProviderId() {
+            return "random";
+        }
+    }
+
+    private static class MyInvestmentSkippedEvent implements InvestmentSkippedEvent {
+
+        private final RecommendedLoan recommendation;
+        private final Loan loan;
+
+        public MyInvestmentSkippedEvent(final RecommendedLoan recommendation, final Loan loan) {
+            this.recommendation = recommendation;
+            this.loan = loan;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public BigDecimal getRecommendation() {
+            return recommendation.amount();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+    }
+
+    private static class MyInvestmentMadeEvent implements InvestmentMadeEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyInvestmentMadeEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public PortfolioOverview getPortfolioOverview() {
+            return MAX_PORTFOLIO;
+        }
+    }
+
+    private static class MyInvestmentSoldEvent implements InvestmentSoldEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyInvestmentSoldEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public PortfolioOverview getPortfolioOverview() {
+            return MAX_PORTFOLIO;
+        }
+    }
+
+    private static class MyLoanNoLongerDelinquentEvent implements LoanNoLongerDelinquentEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanNoLongerDelinquentEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+    }
+
+    private static class MyLoanDefaultedEvent implements LoanDefaultedEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanDefaultedEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public LocalDate getDelinquentSince() {
+            return LocalDate.now();
+        }
+
+        @Override
+        public Collection<Development> getCollectionActions() {
+            return Collections.emptyList();
+        }
+    }
+
+    private static class MyLoanDelinquent10Plus implements LoanDelinquent10DaysOrMoreEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanDelinquent10Plus(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public LocalDate getDelinquentSince() {
+            return LocalDate.now();
+        }
+
+        @Override
+        public Collection<Development> getCollectionActions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 10;
+        }
+    }
+
+    private static class MyLoanDelinquent30Plus implements LoanDelinquent30DaysOrMoreEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanDelinquent30Plus(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public LocalDate getDelinquentSince() {
+            return LocalDate.now();
+        }
+
+        @Override
+        public Collection<Development> getCollectionActions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 30;
+        }
+    }
+
+    private static class MyLoanDelinquent60Plus implements LoanDelinquent60DaysOrMoreEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanDelinquent60Plus(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public LocalDate getDelinquentSince() {
+            return LocalDate.now();
+        }
+
+        @Override
+        public Collection<Development> getCollectionActions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 60;
+        }
+    }
+
+    private static class MyLoanDelinquent90Plus implements LoanDelinquent90DaysOrMoreEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanDelinquent90Plus(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public LocalDate getDelinquentSince() {
+            return LocalDate.now();
+        }
+
+        @Override
+        public Collection<Development> getCollectionActions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 90;
+        }
+    }
+
+    private static class MyLoanNowDelinquent implements LoanNowDelinquentEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanNowDelinquent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public LocalDate getDelinquentSince() {
+            return LocalDate.now();
+        }
+
+        @Override
+        public Collection<Development> getCollectionActions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public int getThresholdInDays() {
+            return 0;
+        }
+    }
+
+    private static class MyLoanRepaidEvent implements LoanRepaidEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanRepaidEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public PortfolioOverview getPortfolioOverview() {
+            return MAX_PORTFOLIO;
+        }
+    }
+
+    private static class MyLoanLostEvent implements LoanLostEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyLoanLostEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
         }
     }
 }

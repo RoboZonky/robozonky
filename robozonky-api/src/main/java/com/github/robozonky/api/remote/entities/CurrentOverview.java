@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 public class CurrentOverview extends BaseOverview {
 
-    private int principalLeft, principalLeftToPay, principalLeftDue, interestPlanned, interestLeft, interestLeftToPay,
+    private long principalLeft, principalLeftToPay, principalLeftDue, interestPlanned, interestLeft, interestLeftToPay,
             interestLeftDue;
 
     CurrentOverview() {
@@ -28,37 +28,37 @@ public class CurrentOverview extends BaseOverview {
     }
 
     @XmlElement
-    public int getPrincipalLeft() {
+    public long getPrincipalLeft() {
         return principalLeft;
     }
 
     @XmlElement
-    public int getPrincipalLeftToPay() {
+    public long getPrincipalLeftToPay() {
         return principalLeftToPay;
     }
 
     @XmlElement
-    public int getPrincipalLeftDue() {
+    public long getPrincipalLeftDue() {
         return principalLeftDue;
     }
 
     @XmlElement
-    public int getInterestPlanned() {
+    public long getInterestPlanned() {
         return interestPlanned;
     }
 
     @XmlElement
-    public int getInterestLeft() {
+    public long getInterestLeft() {
         return interestLeft;
     }
 
     @XmlElement
-    public int getInterestLeftToPay() {
+    public long getInterestLeftToPay() {
         return interestLeftToPay;
     }
 
     @XmlElement
-    public int getInterestLeftDue() {
+    public long getInterestLeftDue() {
         return interestLeftDue;
     }
 }

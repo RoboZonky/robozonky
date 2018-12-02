@@ -42,24 +42,24 @@ class RemainingAmountConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
-        when(l.getRemainingAmount()).thenReturn(BigDecimal.ZERO);
+        final Wrapper<?> l = mock(Wrapper.class);
+        when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
         final MarketplaceFilterConditionImpl condition = new RemainingAmountCondition(0, 0);
         assertThat(condition.test(l)).isTrue();
     }
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
-        when(l.getRemainingAmount()).thenReturn(BigDecimal.ZERO);
+        final Wrapper<?> l = mock(Wrapper.class);
+        when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
         final MarketplaceFilterConditionImpl condition = new RemainingAmountCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
-        when(l.getRemainingAmount()).thenReturn(BigDecimal.valueOf(2));
+        final Wrapper<?> l = mock(Wrapper.class);
+        when(l.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(2));
         final MarketplaceFilterConditionImpl condition = new RemainingAmountCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
     }

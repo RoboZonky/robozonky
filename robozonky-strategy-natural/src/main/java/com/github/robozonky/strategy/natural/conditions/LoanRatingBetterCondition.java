@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class LoanRatingBetterCondition extends MarketplaceFilterConditionImpl {
     }
 
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final Wrapper<?> item) {
         return item.getRating().compareTo(worstPossibleRating) < 0;
     }
 }

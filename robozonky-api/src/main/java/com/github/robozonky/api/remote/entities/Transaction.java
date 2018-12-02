@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
+import com.github.robozonky.internal.util.DateUtil;
 
 public class Transaction extends BaseEntity {
 
@@ -35,7 +36,8 @@ public class Transaction extends BaseEntity {
     @XmlElement
     private OffsetDateTime transactionDate;
     private String customMessage;
-    private int id, loanId, investmentId;
+    private long id, investmentId;
+    private int loanId;
     private String loanName;
     private String nickName;
 
@@ -44,13 +46,13 @@ public class Transaction extends BaseEntity {
         this(0, loan, amount, category, orientation);
     }
 
-    public Transaction(final int id, final Loan loan, final BigDecimal amount, final TransactionCategory category,
+    public Transaction(final long id, final Loan loan, final BigDecimal amount, final TransactionCategory category,
                        final TransactionOrientation orientation) {
         this.id = id;
         this.amount = amount;
         this.category = category;
         this.orientation = orientation;
-        this.transactionDate = OffsetDateTime.now();
+        this.transactionDate = DateUtil.offsetNow();
         this.customMessage = "";
         this.loanId = loan.getId();
         loan.getMyInvestment().ifPresent(i -> this.investmentId = i.getId());
@@ -64,13 +66,13 @@ public class Transaction extends BaseEntity {
         this(0, investment, amount, category, orientation);
     }
 
-    public Transaction(final int id, final Investment investment, final BigDecimal amount,
+    public Transaction(final long id, final Investment investment, final BigDecimal amount,
                        final TransactionCategory category, final TransactionOrientation orientation) {
         this.id = id;
         this.amount = amount;
         this.category = category;
         this.orientation = orientation;
-        this.transactionDate = OffsetDateTime.now();
+        this.transactionDate = DateUtil.offsetNow();
         this.customMessage = "";
         this.loanId = investment.getLoanId();
         this.investmentId = investment.getId();
@@ -113,7 +115,7 @@ public class Transaction extends BaseEntity {
     }
 
     @XmlElement
-    public int getInvestmentId() {
+    public long getInvestmentId() {
         return investmentId;
     }
 
@@ -133,7 +135,7 @@ public class Transaction extends BaseEntity {
     }
 
     @XmlElement
-    public int getId() {
+    public long getId() {
         return id;
     }
 

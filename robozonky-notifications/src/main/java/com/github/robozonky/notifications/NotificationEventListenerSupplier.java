@@ -61,7 +61,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
         final Map<Target, EventListener<T>> result = new EnumMap<>(Target.class);
         for (final Target target : Target.values()) {
             final AbstractTargetHandler handler = getTargetHandler(newValue, target);
-            if (!handler.isEnabled()) {
+            if (!handler.isEnabledInSettings()) {
                 LOGGER.debug("Notifications are disabled: {}.", target.getId());
                 continue;
             }

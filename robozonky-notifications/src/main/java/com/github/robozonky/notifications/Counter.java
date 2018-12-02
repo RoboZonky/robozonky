@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.state.TenantState;
+import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,13 +71,13 @@ final class Counter {
     }
 
     private Stream<OffsetDateTime> filterValidTimestamps(final Set<OffsetDateTime> timestamps) {
-        final OffsetDateTime now = OffsetDateTime.now();
+        final OffsetDateTime now = DateUtil.offsetNow();
         return timestamps.stream().filter(timestamp -> timestamp.plus(period).isAfter(now));
     }
 
     public void increase(final SessionInfo sessionInfo) {
         final Set<OffsetDateTime> stamps = getTimestamps(sessionInfo);
-        stamps.add(OffsetDateTime.now());
+        stamps.add(DateUtil.offsetNow());
         store(sessionInfo, id, stamps);
     }
 

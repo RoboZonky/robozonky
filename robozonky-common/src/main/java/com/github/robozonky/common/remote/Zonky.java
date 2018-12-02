@@ -50,6 +50,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.util.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class Zonky {
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function) {
-        return Zonky.getStream(api, function, Settings.INSTANCE.getDefaultApiPageSize());
+        return getStream(api, function, Settings.INSTANCE.getDefaultApiPageSize());
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
@@ -93,7 +94,7 @@ public class Zonky {
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
                                               final Select select) {
-        return Zonky.getStream(api, function, select, Settings.INSTANCE.getDefaultApiPageSize());
+        return getStream(api, function, select, Settings.INSTANCE.getDefaultApiPageSize());
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
@@ -132,7 +133,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<BlockedAmount> getBlockedAmounts() {
-        return Zonky.getStream(walletApi, WalletApi::items);
+        return getStream(walletApi, WalletApi::items);
     }
 
     /**
@@ -153,7 +154,7 @@ public class Zonky {
              */
             final Supplier<LocalDate> expectedPayment = () -> i.getNextPaymentDate()
                     .map(OffsetDateTime::toLocalDate)
-                    .orElse(LocalDate.now().minusDays(i.getDaysPastDue()));
+                    .orElse(DateUtil.localNow().toLocalDate()).minusDays(i.getDaysPastDue());
             final LocalDate lastPayment = getTransactions(i)
                     .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
                     .map(Transaction::getTransactionDate)
@@ -164,7 +165,7 @@ public class Zonky {
             LOGGER.debug("Date for investment #{} (loan #{}) was determined to be {}.", i.getId(), i.getLoanId(), d);
             return d;
         };
-        return Zonky.getStream(portfolioApi, PortfolioApi::items, select)
+        return getStream(portfolioApi, PortfolioApi::items, select)
                 .map(raw -> Investment.sanitized(raw, investmentDateSupplier));
     }
 
@@ -179,7 +180,7 @@ public class Zonky {
         return Loan.sanitized(loanApi.execute(api -> api.item(id)));
     }
 
-    public Optional<Investment> getInvestment(final int id) {
+    public Optional<Investment> getInvestment(final long id) {
         final Select s = new Select().equals("id", id);
         return getInvestments(s).findFirst();
     }
@@ -195,7 +196,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<MarketplaceLoan> getAvailableLoans(final Select select) {
-        return Zonky.getStream(loanApi, LoanApi::items, select).map(MarketplaceLoan::sanitized);
+        return getStream(loanApi, LoanApi::items, select).map(MarketplaceLoan::sanitized);
     }
 
     /**
@@ -204,7 +205,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded, filtered.
      */
     public Stream<Transaction> getTransactions(final Select select) {
-        return Zonky.getStream(transactions, TransactionApi::items, select);
+        return getStream(transactions, TransactionApi::items, select);
     }
 
     /**
@@ -219,11 +220,11 @@ public class Zonky {
 
     /**
      * Retrieve loan collections information via {@link CollectionsApi}.
-     * @param loan Loan in question.
+     * @param loanId Loan in question.
      * @return All items from the remote API, lazy-loaded.
      */
-    public Stream<Development> getDevelopments(final Loan loan) {
-        return Zonky.getStream(collectionsApi, a -> a.items(loan.getId())).map(Development::sanitized);
+    public Stream<Development> getDevelopments(final int loanId) {
+        return getStream(collectionsApi, a -> a.items(loanId)).map(Development::sanitized);
     }
 
     /**
@@ -232,7 +233,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Participation> getAvailableParticipations(final Select select) {
-        return Zonky.getStream(participationApi, ParticipationApi::items, select);
+        return getStream(participationApi, ParticipationApi::items, select);
     }
 
     public void requestWalletExport() {

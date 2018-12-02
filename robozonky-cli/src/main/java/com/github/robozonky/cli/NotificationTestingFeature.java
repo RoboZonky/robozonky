@@ -18,21 +18,18 @@ package com.github.robozonky.cli;
 
 import java.net.URL;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.robozonky.api.SessionInfo;
+import picocli.CommandLine;
 
-@Parameters(commandNames = "notification-tester", commandDescription = NotificationTestingFeature.DESCRIPTION)
-public final class NotificationTestingFeature implements Feature {
+@CommandLine.Command(name = "notification-tester", description = NotificationTestingFeature.DESCRIPTION)
+public final class NotificationTestingFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Send a testing notification using the provided configuration.";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationTestingFeature.class);
-
-    @Parameter(names = {"-u", "--username"}, description = "Zonky username.", required = true)
+    @CommandLine.Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
     private String username = null;
-    @Parameter(names = {"-l", "--location"}, description = "URL leading to the configuration.", required = true)
+    @CommandLine.Option(names = {"-l", "--location"}, description = "URL leading to the configuration.",
+            required = true)
     private URL location;
 
     public NotificationTestingFeature(final String username, final URL location) {
@@ -41,7 +38,7 @@ public final class NotificationTestingFeature implements Feature {
     }
 
     NotificationTestingFeature() {
-        // for JCommander
+        // for Picocli
     }
 
     @Override
@@ -56,7 +53,7 @@ public final class NotificationTestingFeature implements Feature {
 
     @Override
     public void test() throws TestFailedException {
-        final boolean success = Checker.notifications(username, location);
+        final boolean success = Checker.notifications(new SessionInfo(username), location);
         if (success) {
             LOGGER.info("Notifications should have been sent now.");
         } else {

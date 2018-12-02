@@ -28,9 +28,9 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.daemon.BlockedAmountProcessor;
 import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -54,23 +54,20 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     void rechecksMarketplaceIfBalanceIncreased() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
-        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth), x -> mockBalance(zonky));
+        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
         // prepare the executor, have it fail when executing the investment operation
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new AlwaysFreshNeverInvesting();
+        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new AlwaysFreshNeverInvesting(auth);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> spied = spy(e);
         when(spied.hasMarketplaceUpdates(any())).thenReturn(false); // marketplace never has any updates
         assertThat(spied.apply(p, marketplace)).isEmpty(); // fresh balance, check marketplace
-        System.out.println("A");
         verify(spied).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
         assertThat(spied.apply(p, marketplace)).isEmpty(); // nothing changed, still only ran once
-        System.out.println("B");
         verify(spied, times(1)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(100_000))); // increase remote balance
         assertThat(spied.apply(p, marketplace)).isEmpty(); // should have checked marketplace
-        System.out.println("C");
         verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
     }
 
@@ -79,15 +76,15 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
         final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting());
+        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting(auth));
         assertThat(e.apply(p, Collections.emptyList())).isEmpty();
         verify(e, never()).execute(any(), any(), any());
     }
 
     private static class AlwaysFreshNeverInvesting extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
-        public AlwaysFreshNeverInvesting() {
-            super(StrategyExecutorTest.ALL_ACCEPTING);
+        public AlwaysFreshNeverInvesting(final Tenant tenant) {
+            super(tenant, StrategyExecutorTest.ALL_ACCEPTING);
         }
 
         @Override

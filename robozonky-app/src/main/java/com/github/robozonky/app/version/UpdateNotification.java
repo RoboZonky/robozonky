@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,14 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.robozonky.app.Events;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyExperimentalUpdateDetected;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyUpdateDetected;
 
 /**
  * When notified of a change in versions by {@link UpdateMonitor}, this class will determine whether or not these
@@ -72,18 +75,18 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
     }
 
     private void updateStableVersion(final String newVersion) {
-        updateVersion(newVersion, lastKnownStableVersion, (v) -> {
+        updateVersion(newVersion, lastKnownStableVersion, v -> {
             UpdateNotification.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to {}.",
                                            newVersion);
-            Events.fire(new RoboZonkyUpdateDetectedEvent(newVersion));
+            Events.allSessions().fire(roboZonkyUpdateDetected(newVersion));
         });
     }
 
     private void updateUnstableVersion(final String newVersion) {
-        updateVersion(newVersion, lastKnownUnstableVersion, (v) -> {
+        updateVersion(newVersion, lastKnownUnstableVersion, v -> {
             UpdateNotification.LOGGER.info("Experimental version of RoboZonky is available. Try {} at your own risk.",
                                            newVersion);
-            Events.fire(new RoboZonkyExperimentalUpdateDetectedEvent(newVersion));
+            Events.allSessions().fire(roboZonkyExperimentalUpdateDetected(newVersion));
         });
     }
 
