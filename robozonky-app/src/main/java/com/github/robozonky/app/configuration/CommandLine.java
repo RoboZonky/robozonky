@@ -68,6 +68,9 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
 
     public CommandLine(final Consumer<Throwable> shutdownCall) {
         this.shutdownCall = shutdownCall;
+        // for backwards compatibility with RoboZonky 4.x, which used JCommander
+        System.setProperty("picocli.trimQuotes", "true");
+        System.setProperty("picocli.useSimplifiedAtFiles", "true");
     }
 
     /**
@@ -77,9 +80,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
     public static Optional<InvestmentMode> parse(final App main) {
-        // for backwards compatibility with RoboZonky 4.x, which used JCommander
-        System.setProperty("picocli.trimQuotes", "true");
-        System.setProperty("picocli.useSimplifiedAtFiles", "true");
         // parse the arguments
         final CommandLine cli = new CommandLine(main::resumeToFail);
         final Optional<InvestmentMode> result = picocli.CommandLine.call(cli, main.getArgs());
