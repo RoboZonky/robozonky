@@ -357,14 +357,19 @@
             </goals>
             <configuration>
               <rules>
-                <requireJavaVersion>
-                  <version>[${java.version},)</version>
-                </requireJavaVersion>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>commons-logging</exclude>  <!-- Is replaced with SLF4J. -->
+                  </excludes>
+                </bannedDependencies>
                 <dependencyConvergence/>
                 <reactorModuleConvergence>
                   <message>The reactor is not valid.</message>
                   <ignoreModuleDependencies>true</ignoreModuleDependencies>
                 </reactorModuleConvergence>
+                <requireJavaVersion>
+                  <version>[${java.version},)</version>
+                </requireJavaVersion>
                 <requireReleaseDeps> <!-- No SNAPSHOT dependencies, except for our own for development purposes. -->
                   <message>No snapshots allowed.</message>
                   <failWhenParentIsSnapshot>false</failWhenParentIsSnapshot>
