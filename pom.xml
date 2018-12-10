@@ -317,7 +317,12 @@
         <artifactId>logback-classic</artifactId>
         <version>1.2.3</version>
       </dependency>
-      <!-- Address dependency hell. Otherwise the classpath test in robozonky-distribution-full fails. -->
+      <!-- For the sake of dependency convergence. -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${version.org.junit}</version>
+      </dependency>
       <dependency>
         <groupId>javax.xml.bind</groupId>
         <artifactId>jaxb-api</artifactId>
@@ -327,6 +332,11 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>20.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -350,6 +360,7 @@
                 <requireJavaVersion>
                   <version>[${java.version},)</version>
                 </requireJavaVersion>
+                <dependencyConvergence/>
               </rules>
             </configuration>
           </execution>
