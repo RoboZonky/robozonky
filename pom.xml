@@ -362,9 +362,17 @@
                 </requireJavaVersion>
                 <dependencyConvergence/>
                 <reactorModuleConvergence>
-                  <message>The reactor is not valid</message>
+                  <message>The reactor is not valid.</message>
                   <ignoreModuleDependencies>true</ignoreModuleDependencies>
                 </reactorModuleConvergence>
+                <requireReleaseDeps> <!-- No SNAPSHOT dependencies, except for our own for development purposes. -->
+                  <message>No snapshots allowed.</message>
+                  <failWhenParentIsSnapshot>false</failWhenParentIsSnapshot>
+                  <excludes>
+                    <exclude>com.github.robozonky:*</exclude>
+                    <exclude>com.github.robozonky.distribution:*</exclude>
+                  </excludes>
+                </requireReleaseDeps>
               </rules>
             </configuration>
           </execution>
