@@ -52,12 +52,15 @@
     <version.org.apache.maven>3.5.4</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
     <surefire.version>2.22.1</surefire.version>
+    <version.com.google.apis>1.25.0</version.com.google.apis>
     <version.org.antlr>4.7.1</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
     <version.org.jboss.resteasy>3.6.2.Final</version.org.jboss.resteasy>
     <version.org.junit5>3.2</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
+    <version.org.mockito>2.23.3</version.org.mockito>
+    <version.org.mock-server>5.4.1</version.org.mock-server>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
     <version.com.sun.mail>1.6.2</version.com.sun.mail>
@@ -185,6 +188,11 @@
       </dependency>
       <dependency>
         <groupId>com.sun.mail</groupId>
+        <artifactId>mailapi</artifactId>
+        <version>${version.com.sun.mail}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.mail</groupId>
         <artifactId>smtp</artifactId>
         <version>${version.com.sun.mail}</version>
       </dependency>
@@ -240,7 +248,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>3.8.1</version>
+        <version>3.8.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -251,6 +259,47 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.6</version>
+      </dependency>
+      <!-- Google. -->
+      <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client</artifactId>
+        <version>${version.com.google.apis}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.http-client</groupId>
+        <artifactId>google-http-client-jackson2</artifactId>
+        <version>${version.com.google.apis}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.oauth-client</groupId>
+        <artifactId>google-oauth-client</artifactId>
+        <version>${version.com.google.apis}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.oauth-client</groupId>
+        <artifactId>google-oauth-client-java6</artifactId>
+        <version>${version.com.google.apis}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.oauth-client</groupId>
+        <artifactId>google-oauth-client-jetty</artifactId>
+        <version>${version.com.google.apis}</version>
+      </dependency>
+      <dependency> <!-- added explicitly here, as we use it for testing -->
+        <groupId>com.google.http-client</groupId>
+        <artifactId>google-http-client</artifactId>
+        <version>${version.com.google.apis}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.apis</groupId>
+        <artifactId>google-api-services-sheets</artifactId>
+        <version>v4-rev543-${version.com.google.apis}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.apis</groupId>
+        <artifactId>google-api-services-drive</artifactId>
+        <version>v3-rev130-${version.com.google.apis}</version>
       </dependency>
       <!-- Testing. -->
       <dependency>
@@ -271,9 +320,19 @@
         <version>${version.org.junit.platform}</version>
       </dependency>
       <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-engine</artifactId>
+        <version>${version.org.junit.platform}</version>
+      </dependency>
+      <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-junit-jupiter</artifactId>
-        <version>2.23.3</version>
+        <version>${version.org.mockito}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${version.org.mockito}</version>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
@@ -288,7 +347,29 @@
       <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-netty</artifactId>
-        <version>5.4.1</version>
+        <version>${version.org.mock-server}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.mock-server</groupId>
+        <artifactId>mockserver-client-java</artifactId>
+        <version>${version.org.mock-server}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.mock-server</groupId>
+        <artifactId>mockserver-core</artifactId>
+        <version>${version.org.mock-server}</version>
         <exclusions>
           <exclusion>
             <groupId>junit</groupId>
@@ -317,7 +398,17 @@
         <artifactId>logback-classic</artifactId>
         <version>1.2.3</version>
       </dependency>
-      <!-- Address dependency hell. Otherwise the classpath test in robozonky-distribution-full fails. -->
+      <!-- For the sake of used/unused dependency analysis and convergence. -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${version.org.junit}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-commons</artifactId>
+        <version>${version.org.junit.platform}</version>
+      </dependency>
       <dependency>
         <groupId>javax.xml.bind</groupId>
         <artifactId>jaxb-api</artifactId>
@@ -328,12 +419,54 @@
         <artifactId>guava</artifactId>
         <version>20.0</version>
       </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-gpg-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M2</version>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <banDuplicatePomDependencyVersions/>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>commons-logging</exclude>  <!-- Is replaced with SLF4J. -->
+                  </excludes>
+                </bannedDependencies>
+                <dependencyConvergence/>
+                <reactorModuleConvergence>
+                  <ignoreModuleDependencies>true</ignoreModuleDependencies>
+                </reactorModuleConvergence>
+                <requireJavaVersion>
+                  <version>[${java.version},)</version>
+                </requireJavaVersion>
+                <requireReleaseDeps> <!-- No SNAPSHOT dependencies, except for our own for development purposes. -->
+                  <failWhenParentIsSnapshot>false</failWhenParentIsSnapshot>
+                  <excludes>
+                    <exclude>com.github.robozonky:*</exclude>
+                    <exclude>com.github.robozonky.distribution:*</exclude>
+                  </excludes>
+                </requireReleaseDeps>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.pitest</groupId>
@@ -396,6 +529,33 @@
               <goal>integration-test</goal>
               <goal>verify</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>declare-all-dependencies</id>
+            <goals>
+              <goal>analyze-only</goal>
+            </goals>
+            <configuration>
+              <failOnWarning>true</failOnWarning>
+              <ignoredUnusedDeclaredDependencies> <!-- Mostly service-loaded stuff, APIs, also some of our own. -->
+                <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>ch.qos.logback</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.slf4j</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.jboss.spec.javax.xml.bind</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.jboss.spec.javay.ws.rs</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
+              </ignoredUnusedDeclaredDependencies>
+              <ignoredUsedUndeclaredDependencies>
+                <ignoredUsedUndeclaredDependency>ch.qos.logback</ignoredUsedUndeclaredDependency>
+              </ignoredUsedUndeclaredDependencies>
+            </configuration>
           </execution>
         </executions>
       </plugin>

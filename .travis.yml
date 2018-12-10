@@ -55,11 +55,11 @@ matrix:
     install: # do nothing
       - mvn clean
     script:
-      - mvn --batch-mode test -Dassembly.skipAssembly -Dgpg.skip
+      - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip
 cache:
   directories:
   - $HOME/.m2
 install: # freshly build all required modules
-  - mvn --batch-mode -pl $MODULE -am clean install -DskipTests -Dgpg.skip
+  - mvn --batch-mode -pl $MODULE -am clean install -DskipTests -Denforcer.skip -Dgpg.skip
 script: # by default, run all tests incl. PITest, skipping all assemblies
-  - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
+  - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
