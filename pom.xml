@@ -443,6 +443,7 @@
             </goals>
             <configuration>
               <rules>
+                <banDuplicatePomDependencyVersions/>
                 <bannedDependencies>
                   <excludes>
                     <exclude>commons-logging</exclude>  <!-- Is replaced with SLF4J. -->
