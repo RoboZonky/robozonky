@@ -649,6 +649,11 @@
               <artifactId>junit-platform-launcher</artifactId>
               <version>${version.org.junit.platform}</version>
             </dependency>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-engine</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
           </dependencies>
         </plugin>
         <plugin>
@@ -662,6 +667,11 @@
             <dependency>
               <groupId>org.junit.platform</groupId>
               <artifactId>junit-platform-launcher</artifactId>
+              <version>${version.org.junit.platform}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-engine</artifactId>
               <version>${version.org.junit.platform}</version>
             </dependency>
           </dependencies>
