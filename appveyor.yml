@@ -36,9 +36,9 @@ install:
   - cmd: mvn --version
   - cmd: java -version
 build_script: # no tests, just build
-  - mvn --batch-mode -pl %MODULE% -am install -DskipTests -Dgpg.skip
+  - mvn --batch-mode -pl %MODULE% -am install -DskipTests -Denforcer.skip -Dgpg.skip
 test_script: # all tests, no assembly
-  - mvn --batch-mode -pl %MODULE% install -Dassembly.skipAssembly -Dgpg.skip
+  - mvn --batch-mode -pl %MODULE% install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
 on_finish:
 # upload test results via rest-api; order by name, numbers numerically
 - ps: |
