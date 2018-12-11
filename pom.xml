@@ -482,8 +482,8 @@
         <configuration>
           <skip>${skipTests}</skip>
           <timestampedReports>false</timestampedReports>
-          <coverageThreshold>85</coverageThreshold>
-          <mutationThreshold>85</mutationThreshold>
+          <coverageThreshold>90</coverageThreshold>
+          <mutationThreshold>90</mutationThreshold>
           <targetClasses>
             <param>com.github.robozonky.*</param>
           </targetClasses>
