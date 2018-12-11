@@ -141,7 +141,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public InvestmentBuilder setAmountInvested(final BigDecimal amountInvested) {
+    public InvestmentBuilder setOriginalPrincipal(final BigDecimal amountInvested) {
         this.originalPrincipal = amountInvested;
         return this;
     }

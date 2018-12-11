@@ -17,25 +17,32 @@
 package com.github.robozonky.internal.util;
 
 import io.vavr.Lazy;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class ToStringBuilderTest {
 
-    // will be ignored by default
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilderTest.class);
+    // will be ignored as it's static
+    private static final char CHAR = '*';
     // will be ignored since specifically excluded
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
+    // will be ignored as it's one of the ignored types
+    private final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilderTest.class);
+    // will be concatenated as it's too long
+    private final String abbreviated = StringUtils.repeat(CHAR, 100);
 
     @Test
     void check() {
         final String s = toString.get();
         assertSoftly(softly -> {
             softly.assertThat(s).contains(this.getClass().getCanonicalName());
+            softly.assertThat(s).contains("abbreviated=" + abbreviated.substring(0, 70 - 3) + "...");
             softly.assertThat(s).doesNotContain("toString");
+            softly.assertThat(s).doesNotContain("CHAR");
             softly.assertThat(s).doesNotContain("LOGGER");
         });
     }

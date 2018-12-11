@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -212,8 +213,13 @@ class InvestmentTest {
         }
 
         @Test
+        void rating() {
+            standard(b, b::setRating, b::getRating, Rating.D);
+        }
+
+        @Test
         void originalPrincipal() {
-            standard(b, b::setAmountInvested, b::getOriginalPrincipal, BigDecimal.ONE);
+            standard(b, b::setOriginalPrincipal, b::getOriginalPrincipal, BigDecimal.ONE);
         }
 
         @Test
@@ -250,6 +256,7 @@ class InvestmentTest {
         void interestRate() {
             standard(b, b::setInterestRate, b::getInterestRate, BigDecimal.ONE);
         }
+
     }
 }
 
