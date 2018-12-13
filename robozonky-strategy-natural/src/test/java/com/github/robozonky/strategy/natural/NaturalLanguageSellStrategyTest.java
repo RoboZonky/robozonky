@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Stream;
 
@@ -26,13 +27,14 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
-import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
 class NaturalLanguageSellStrategyTest {
 
@@ -56,14 +58,26 @@ class NaturalLanguageSellStrategyTest {
 
     @Test
     void noLoansApplicable() {
-        final MarketplaceFilter filter = MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting());
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
+        final ParsedStrategy p = spy(new ParsedStrategy(DefaultPortfolio.PROGRESSIVE));
+        doReturn(Stream.empty()).when(p).getApplicableInvestments(any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(p.getMinimumBalance()));
-        when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         final Stream<RecommendedInvestment> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void someLoansApplicable() {
+        final ParsedStrategy p = spy(new ParsedStrategy(DefaultPortfolio.PROGRESSIVE));
+        doAnswer(e -> {
+            final Collection<InvestmentDescriptor> i = e.getArgument(0);
+            return i.stream();
+        }).when(p).getApplicableInvestments(any());
+        final SellStrategy s = new NaturalLanguageSellStrategy(p);
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        final Stream<RecommendedInvestment> result =
+                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
+        assertThat(result).hasSize(1);
     }
 }

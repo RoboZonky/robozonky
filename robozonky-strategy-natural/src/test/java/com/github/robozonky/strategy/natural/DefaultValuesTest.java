@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.time.LocalDate;
+
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import org.junit.jupiter.api.Test;
@@ -60,5 +62,14 @@ class DefaultValuesTest {
         final DefaultPortfolio p = DefaultPortfolio.EMPTY;
         final DefaultValues sut = new DefaultValues(p);
         assertThatThrownBy(() -> sut.setTargetPortfolioSize(0)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void setExitStrategy() {
+        final ExitProperties p = new ExitProperties(LocalDate.now().plusMonths(1));
+        final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
+        assertThat(v.getMonthsBeforeExit()).isEqualTo(-1);
+        v.setExitProperties(p);
+        assertThat(v.getMonthsBeforeExit()).isEqualTo(1);
     }
 }
