@@ -60,6 +60,19 @@ class EntityCollectionPageSourceTest {
     }
 
     @Test
+    void negativePageWorksAsFirstPage() {
+        final List<Integer> allResults = FUNCTION.apply(null);
+        final List<Integer> subpage = allResults.subList(0, PAGE_SIZE);
+        when(api.execute(eq(FUNCTION), eq(SELECT), eq(0), eq(PAGE_SIZE)))
+                .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
+        final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);
+        final LongConsumer consumer = mock(LongConsumer.class);
+        final List<Integer> result = source.fetch(-1, 1, consumer);
+        assertThat(result).containsExactly(subpage.toArray(new Integer[PAGE_SIZE]));
+        verify(consumer).accept(eq((long) allResults.size()));
+    }
+
+    @Test
     void secondPage() {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(PAGE_SIZE, 2 * PAGE_SIZE);

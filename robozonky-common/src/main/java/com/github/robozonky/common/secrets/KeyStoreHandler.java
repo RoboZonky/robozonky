@@ -26,16 +26,14 @@ import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import com.github.robozonky.util.IoUtil;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,14 +129,13 @@ public class KeyStoreHandler {
         }
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
-        return IoUtil.tryFunction(() -> new FileInputStream(keyStoreFile), fis -> {
-            try {
-                ks.load(fis, password);
-                return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(), false);
-            } catch (final CertificateException | NoSuchAlgorithmException ex) {
-                throw new IllegalStateException(ex);
-            }
-        });
+        return Try.withResources(() -> new FileInputStream(keyStoreFile))
+                .of(fis -> {
+                    ks.load(fis, password);
+                    return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(),
+                                               false);
+                })
+                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 
     /**
@@ -148,16 +145,16 @@ public class KeyStoreHandler {
      * @return True if stored in the key store.
      */
     public boolean set(final String alias, final char[] value) {
-        try {
+        return Try.of(() -> {
             final SecretKey secret = this.keyFactory.generateSecret(new PBEKeySpec(value));
             final KeyStore.Entry skEntry = new KeyStore.SecretKeyEntry(secret);
             this.keyStore.setEntry(alias, skEntry, this.protectionParameter);
             this.dirty.set(true);
             return true;
-        } catch (final KeyStoreException | InvalidKeySpecException ex) {
-            KeyStoreHandler.LOGGER.debug("Failed storing '{}'.", alias, ex);
+        }).getOrElseGet(t -> {
+            KeyStoreHandler.LOGGER.debug("Failed storing '{}'.", alias, t);
             return false;
-        }
+        });
     }
 
     /**
@@ -166,20 +163,19 @@ public class KeyStoreHandler {
      * @return Present if the alias is present in the key store.
      */
     public Optional<char[]> get(final String alias) {
-        try {
+        return Try.of(() -> {
             final KeyStore.SecretKeyEntry skEntry =
                     (KeyStore.SecretKeyEntry) this.keyStore.getEntry(alias, this.protectionParameter);
             if (skEntry == null) {
-                return Optional.empty();
+                return Optional.<char[]>empty();
             }
             final PBEKeySpec keySpec = (PBEKeySpec) this.keyFactory.getKeySpec(skEntry.getSecretKey(),
                                                                                PBEKeySpec.class);
             return Optional.of(keySpec.getPassword());
-        } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException |
-                UnrecoverableEntryException ex) {
-            KeyStoreHandler.LOGGER.debug("Unrecoverable entry '{}'.", alias, ex);
+        }).getOrElseGet(t -> {
+            KeyStoreHandler.LOGGER.debug("Unrecoverable entry '{}'.", alias, t);
             return Optional.empty();
-        }
+        });
     }
 
     /**
@@ -188,14 +184,14 @@ public class KeyStoreHandler {
      * @return True if there is now no entry with a given key.
      */
     public boolean delete(final String alias) {
-        try {
+        return Try.of(() -> {
             this.keyStore.deleteEntry(alias);
             this.dirty.set(true);
             return true;
-        } catch (final KeyStoreException ex) {
-            KeyStoreHandler.LOGGER.debug("Entry '{}' not deleted.", alias, ex);
+        }).getOrElseGet(t -> {
+            KeyStoreHandler.LOGGER.debug("Entry '{}' not deleted.", alias, t);
             return false;
-        }
+        });
     }
 
     /**
@@ -209,9 +205,8 @@ public class KeyStoreHandler {
     /**
      * Persist whatever operations that have been made using this API. Unless this method is called, no other methods
      * have effect.
-     * @throws IOException If saving the key store failed.
      */
-    public void save() throws IOException {
+    public void save() {
         save(this.password);
     }
 
@@ -219,17 +214,15 @@ public class KeyStoreHandler {
      * Persist whatever operations that have been made using this API. Unless this method is called, no other methods
      * have effect.
      * @param secret Password to persist the changes with.
-     * @throws IOException If saving the key store failed.
      */
-    public void save(final char... secret) throws IOException {
+    public void save(final char... secret) {
         this.password = secret.clone();
-        IoUtil.tryConsumer(() -> new BufferedOutputStream(new FileOutputStream(this.keyStoreFile)), os -> {
-            try {
-                this.keyStore.store(os, secret);
-                this.dirty.set(false);
-            } catch (final KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
-                throw new IllegalStateException(ex);
-            }
-        });
+        Try.withResources(() -> new BufferedOutputStream(new FileOutputStream(this.keyStoreFile)))
+                .of(os -> {
+                    this.keyStore.store(os, secret);
+                    this.dirty.set(false);
+                    return null;
+                })
+                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 }

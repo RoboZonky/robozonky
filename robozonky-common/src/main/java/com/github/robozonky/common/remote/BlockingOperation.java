@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.remote;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BlockingOperation<T> implements ForkJoinPool.ManagedBlocker {
+final class BlockingOperation<T> implements ForkJoinPool.ManagedBlocker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockingOperation.class);
 

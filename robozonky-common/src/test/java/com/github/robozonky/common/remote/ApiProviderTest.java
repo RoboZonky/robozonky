@@ -58,4 +58,15 @@ class ApiProviderTest {
         assertThat(p.isClosed()).isTrue();
     }
 
+    @Test
+    void marketplace() {
+        final ApiProvider p = spy(new ApiProvider());
+        try (final ApiProvider provider = p) {
+            final Zonky result = provider.call(Function.identity(), ApiProviderTest::mockToken);
+            assertThat(result).isNotNull();
+        }
+        verify(p).close();
+        assertThat(p.isClosed()).isTrue();
+    }
+
 }

@@ -19,9 +19,9 @@ package com.github.robozonky.common.extensions;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.ServiceLoader;
 
-import com.github.robozonky.util.FileUtil;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +38,15 @@ enum ExtensionsManager {
 
     private final Logger LOGGER = LoggerFactory.getLogger(ExtensionsManager.class);
 
+    private static boolean isJarFile(final File f) {
+        return f.isFile() && f.getPath().toLowerCase().endsWith(".jar");
+    }
+
     ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
         this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
-        final URL[] urls =
-                FileUtil.filesToUrls(extensionsFolder.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar")))
-                        .toArray(URL[]::new);
+        final File[] jars = extensionsFolder.listFiles(ExtensionsManager::isJarFile);
+        this.LOGGER.debug("JARS found: '{}'.", Arrays.toString(jars));
+        final URL[] urls = FileUtil.filesToUrls(jars).toArray(URL[]::new);
         return new URLClassLoader(urls);
     }
 

@@ -20,9 +20,12 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.github.robozonky.util.BlockingOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Api<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Api.class);
 
     private final T proxy;
 
@@ -30,21 +33,28 @@ class Api<T> {
         this.proxy = proxy;
     }
 
-    <S> S call(final Function<T, S> function) {
-        final BlockingOperation<S> operation = new BlockingOperation<>(() -> function.apply(proxy));
+    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy) {
+        LOGGER.trace("Executing...");
+        final BlockingOperation<Z> operation = new BlockingOperation<>(() -> function.apply(proxy));
         try {
             ForkJoinPool.managedBlock(operation);
-            return operation.getResult();
         } catch (final InterruptedException ex) {
+            LOGGER.debug("Remote operation interrupted.", ex);
             Thread.currentThread().interrupt();
-            return null;
+        } finally {
+            LOGGER.trace("... done.");
         }
+        return operation.getResult();
+    }
+
+    <S> S call(final Function<T, S> function) {
+        return call(function, proxy);
     }
 
     void run(final Consumer<T> consumer) {
         final Function<T, Boolean> wrapper = t -> {
             consumer.accept(t);
-            return Boolean.FALSE; // we need to return something
+            return false; // we need to return something
         };
         call(wrapper);
     }

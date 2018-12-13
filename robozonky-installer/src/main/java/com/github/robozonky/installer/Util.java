@@ -23,11 +23,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.IoUtil;
 import com.izforge.izpack.api.data.InstallData;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +51,14 @@ final class Util {
         return String.valueOf(Integer.parseInt(string));
     }
 
-    public static void writeOutProperties(final Properties properties, final File target) throws IOException {
-        IoUtil.tryConsumer(() -> Files.newBufferedWriter(target.toPath(), Defaults.CHARSET),
-                               w -> properties.store(w, Defaults.ROBOZONKY_USER_AGENT));
-        LOGGER.debug("Written properties to {}.", target);
+    public static void writeOutProperties(final Properties properties, final File target) {
+        Try.withResources(() -> Files.newBufferedWriter(target.toPath(), Defaults.CHARSET))
+                .of(w -> {
+                    properties.store(w, Defaults.ROBOZONKY_USER_AGENT);
+                    LOGGER.debug("Written properties to {}.", target);
+                    return null;
+                })
+                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 
     public static Properties configureEmailNotifications(final InstallData data) {

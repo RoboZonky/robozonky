@@ -61,4 +61,13 @@ class ReloadableTest {
         verify(mock, times(1)).accept(any()); // still called just once
     }
 
+    @Test
+    void timeBasedNoConsumer() {
+        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), Duration.ofSeconds(5));
+        final Either<Throwable, String> result = r.get();
+        assertThat(result).containsRightInstanceOf(String.class);
+        final String value = result.get();
+        assertThat(r.get()).containsOnRight(value); // new call, no change
+    }
+
 }

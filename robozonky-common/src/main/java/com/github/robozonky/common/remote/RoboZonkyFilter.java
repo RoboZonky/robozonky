@@ -31,7 +31,6 @@ import javax.ws.rs.core.UriBuilder;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.util.InterceptingInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

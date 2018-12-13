@@ -80,4 +80,18 @@ class SchedulerTest {
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }
     }
+
+    @Test
+    void createsNewOnClose() {
+        final Scheduler s = Scheduler.inBackground();
+        assertThat(s).isNotNull();
+        assertThat(s.isClosed()).isFalse();
+        s.close();
+        final Scheduler s2 = Scheduler.inBackground();
+        assertThat(s2).isNotNull();
+        assertThat(s2).isNotSameAs(s);
+        assertThat(s2.isClosed()).isFalse();
+        final Scheduler s3 = Scheduler.inBackground();
+        assertThat(s3).isSameAs(s2);
+    }
 }

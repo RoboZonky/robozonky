@@ -38,7 +38,7 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                                              Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
-    private final String scope;
+    private final ZonkyScope scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;
     private final Duration refresh;
@@ -51,7 +51,7 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     public ZonkyApiTokenSupplier(final ZonkyScope scope, final ApiProvider apis, final SecretProvider secrets,
                                  final Duration refreshAfter) {
-        this.scope = scope.getId();
+        this.scope = scope;
         this.apis = apis;
         this.secrets = secrets;
         // fit refresh interval between 1 and 4 minutes

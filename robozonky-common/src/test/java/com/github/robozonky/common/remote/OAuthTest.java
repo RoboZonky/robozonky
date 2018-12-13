@@ -41,11 +41,10 @@ class OAuthTest {
         when(api.login(anyString(), anyString(), anyString(), anyString())).thenReturn(mock(ZonkyApiToken.class));
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         final OAuth oauth = new OAuth(wrapper);
-        oauth.login(USERNAME, PASSWORD.toCharArray());
+        final ZonkyApiToken token = oauth.login(USERNAME, PASSWORD.toCharArray());
+        assertThat(token).isNotNull();
         verify(api, times(1))
-                .login(eq(USERNAME), eq(PASSWORD),
-                       eq("password"),
-                       eq("SCOPE_APP_WEB"));
+                .login(eq(USERNAME), eq(PASSWORD), eq(PASSWORD), eq("SCOPE_APP_WEB"));
     }
 
     @Test

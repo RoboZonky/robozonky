@@ -45,4 +45,18 @@ class TenantStateTest {
         assertThat(ts3).isNotSameAs(ts);
     }
 
+    @Test
+    void destroyWorks() {
+        final TenantState ts = TenantState.of(SESSION);
+        final InstanceState<TenantStateTest> is = ts.in(TenantStateTest.class);
+        is.update(m -> m.put("a", "b"));
+        TenantState.destroyAll();
+        assertThat(is.getValue("a")).isEmpty();
+    }
+
+    @Test
+    void encode() {
+        final String hashed = TenantState.encode("The quick brown fox jumps over the lazy dog.");
+        assertThat(hashed).isEqualTo("e4d909c290d0fb1ca068ffaddf22cbd0");
+    }
 }

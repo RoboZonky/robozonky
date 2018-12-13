@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -97,6 +98,13 @@ class RefreshableTest {
         r.run();
         verify(l, times(1))
                 .valueUnset(RefreshableTest.transform(otherValue));
+    }
+
+    @Test
+    void refreshListenerDefaultMethod() {
+        final Refreshable.RefreshListener<String> l = spy(Refreshable.RefreshListener.class);
+        l.valueChanged("a", "b");
+        verify(l).valueSet(eq("b"));
     }
 
     private static final class TestingRefreshable extends Refreshable<String> {

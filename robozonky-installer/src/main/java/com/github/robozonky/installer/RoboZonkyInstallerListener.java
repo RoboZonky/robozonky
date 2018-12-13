@@ -217,7 +217,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         props.setProperty("com.sun.management.jmxremote.port", port);
         try {
             Util.writeOutProperties(props, JMX_PROPERTIES_FILE);
-        } catch (final IOException ex) {
+        } catch (final Exception ex) {
             throw new IllegalStateException("Failed writing JMX configuration.", ex);
         }
         // configure JMX to read the props file
