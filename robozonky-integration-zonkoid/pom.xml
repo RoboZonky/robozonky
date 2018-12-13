@@ -52,6 +52,10 @@
       <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.vavr</groupId>
+      <artifactId>vavr</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
