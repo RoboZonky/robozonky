@@ -41,5 +41,7 @@ class BalanceTrackerTest extends AbstractRoboZonkyTest {
         final BigDecimal newerBalance = BigDecimal.valueOf(100);
         b.setLastKnownBalance(SESSION, newerBalance);
         assertThat(b.getLastKnownBalance(SESSION)).isPresent().hasValue(newerBalance);
+        BalanceTracker.reset(SESSION);
+        assertThat(b.getLastKnownBalance(SESSION)).isEmpty();
     }
 }

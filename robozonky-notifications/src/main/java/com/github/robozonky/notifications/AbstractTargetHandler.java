@@ -18,6 +18,7 @@ package com.github.robozonky.notifications;
 
 import java.time.Duration;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
@@ -32,17 +33,22 @@ public abstract class AbstractTargetHandler {
     protected final Target target;
     final ConfigStorage config;
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
-    private final Counter notifications;
-    private final Map<SupportedListener, Counter> specificNotifications = new EnumMap<>(SupportedListener.class);
+    private final Map<SessionInfo, Counter> notifications = new HashMap<>(0);
+    private final Map<SupportedListener, Map<SessionInfo, Counter>> specificNotifications =
+            new EnumMap<>(SupportedListener.class);
 
     protected AbstractTargetHandler(final ConfigStorage config, final Target target) {
         this.config = config;
         this.target = target;
-        this.notifications = new Counter("global", getHourlyLimit(), Duration.ofHours(1));
     }
 
     private static String getCompositePropertyName(final SupportedListener listener, final String property) {
         return listener.getLabel() + "." + property;
+    }
+
+    private synchronized Counter getCounter(final SessionInfo sessionInfo) {
+        return notifications.computeIfAbsent(sessionInfo,
+                                             s -> new Counter(s, "global", getHourlyLimit(), Duration.ofHours(1)));
     }
 
     public Target getTarget() {
@@ -64,12 +70,12 @@ public abstract class AbstractTargetHandler {
 
     private boolean allowGlobal(final SupportedListener listener, final SessionInfo sessionInfo) {
         final boolean override = listener.overrideGlobalGag();
-        return override || notifications.allow(sessionInfo);
+        return override || getCounter(sessionInfo).allow();
     }
 
     private boolean shouldNotify(final SupportedListener listener, final SessionInfo sessionInfo) {
         final boolean global = allowGlobal(listener, sessionInfo);
-        return global && getSpecificCounter(listener).allow(sessionInfo);
+        return global && getSpecificCounter(sessionInfo, listener).allow();
     }
 
     private int getHourlyLimit() {
@@ -77,9 +83,10 @@ public abstract class AbstractTargetHandler {
         return (val < 0) ? Integer.MAX_VALUE : val;
     }
 
-    private synchronized Counter getSpecificCounter(final SupportedListener listener) {
-        return specificNotifications.computeIfAbsent(listener, key -> new Counter(this.getClass().getSimpleName(),
-                                                                                  getHourlyLimit(key)));
+    private synchronized Counter getSpecificCounter(final SessionInfo sessionInfo, final SupportedListener listener) {
+        return specificNotifications.computeIfAbsent(listener, key -> new HashMap<>(1))
+                .computeIfAbsent(sessionInfo, s -> new Counter(s, this.getClass().getSimpleName(),
+                                                               getHourlyLimit(listener)));
     }
 
     boolean isEnabledInSettings() {
@@ -98,8 +105,8 @@ public abstract class AbstractTargetHandler {
          * any of the others is enabled as well. it can not be disabled.
          */
         return Stream.of(SupportedListener.LOAN_NOW_DELINQUENT, SupportedListener.LOAN_DELINQUENT_10_PLUS,
-                  SupportedListener.LOAN_DELINQUENT_30_PLUS, SupportedListener.LOAN_DELINQUENT_60_PLUS,
-                  SupportedListener.LOAN_DELINQUENT_90_PLUS)
+                         SupportedListener.LOAN_DELINQUENT_30_PLUS, SupportedListener.LOAN_DELINQUENT_60_PLUS,
+                         SupportedListener.LOAN_DELINQUENT_90_PLUS)
                 .anyMatch(this::isEnabled);
     }
 
@@ -126,8 +133,8 @@ public abstract class AbstractTargetHandler {
         LOGGER.trace("Triggering.");
         send(session, s.getSubject(), s.getMessage(data), s.getFallbackMessage(data));
         LOGGER.trace("Triggered.");
-        getSpecificCounter(listener).increase(session);
-        notifications.increase(session);
+        getSpecificCounter(session, listener).increase();
+        getCounter(session).increase();
         LOGGER.trace("Finished.");
     }
 
