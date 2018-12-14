@@ -95,10 +95,22 @@ class StrategySettingsValidatorTest {
     }
 
     @Test
-    void allOk() throws IOException {
+    void fileOk() throws IOException {
         final File f = File.createTempFile("robozonky-", ".cfg");
         Files.write(f.toPath(), "Robot má udržovat konzervativní portfolio.".getBytes(Defaults.CHARSET));
         final InstallData d = StrategySettingsValidatorTest.mockInstallData(f);
+        // execute sut
+        final DataValidator validator = new StrategySettingsValidator();
+        final DataValidator.Status result = validator.validateData(d);
+        // execute test
+        assertThat(result).isEqualTo(DataValidator.Status.OK);
+    }
+
+    @Test
+    void urlOk() throws IOException {
+        final File f = File.createTempFile("robozonky-", ".cfg");
+        Files.write(f.toPath(), "Robot má udržovat konzervativní portfolio.".getBytes(Defaults.CHARSET));
+        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI().toURL());
         // execute sut
         final DataValidator validator = new StrategySettingsValidator();
         final DataValidator.Status result = validator.validateData(d);

@@ -20,7 +20,7 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class AbstractValidatorTest {
 
@@ -28,11 +28,6 @@ class AbstractValidatorTest {
 
         @Override
         public String getErrorMessageId() {
-            return null;
-        }
-
-        @Override
-        public String getWarningMessageId() {
             return null;
         }
 
@@ -46,5 +41,6 @@ class AbstractValidatorTest {
     void doesNotThrow() {
         final AbstractValidator v = new TestValidator();
         assertThat(v.validateData(null)).isEqualTo(DataValidator.Status.ERROR);
+        assertThat(v.getWarningMessageId()).isEmpty();
     }
 }

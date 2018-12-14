@@ -29,9 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class EmailSettingsValidatorTest {
 
@@ -91,6 +93,7 @@ class EmailSettingsValidatorTest {
         final DataValidator validator = new EmailSettingsValidator();
         final DataValidator.Status result = validator.validateData(data);
         assertThat(result).isEqualTo(DataValidator.Status.OK);
+        assertThat(EMAIL.getReceivedMessages()).hasSize(1);
     }
 
     @Test
