@@ -63,22 +63,20 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void loadLoan() {
-        setClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));
+        final Instant instant = Instant.now();
+        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final LoanCache c = new LoanCache();
-        final int loanId = 1;
-        final Loan loan = Loan.custom()
-                .setId(loanId)
-                .build();
+        final Loan loan = Loan.custom().build();
+        final int loanId = loan.getId();
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant t = mockTenant(z);
         assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // return the freshly retrieved loan
         verify(z).getLoan(eq(loanId));
-        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // this time from the cache
+        assertThat(c.getLoan(loanId)).contains(loan);
         verify(z, times(1)).getLoan(eq(loanId));
         // and now test eviction
-        setClock(Clock.fixed(Instant.now().plus(Duration.ofHours(1)), Defaults.ZONE_ID));
-        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // return the freshly retrieved loan
-        verify(z, times(2)).getLoan(eq(loanId));
+        setClock(Clock.fixed(instant.plus(Duration.ofHours(1)), Defaults.ZONE_ID));
+        assertThat(c.getLoan(loanId)).isEmpty();
     }
 }
