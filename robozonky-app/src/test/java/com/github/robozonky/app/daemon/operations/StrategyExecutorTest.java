@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -46,7 +48,9 @@ import static org.mockito.Mockito.when;
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     private static final InvestmentStrategy ALL_ACCEPTING_STRATEGY =
-            (a, p, r) -> a.stream().map(d -> d.recommend(200).get());
+            (a, p, r) -> a.stream()
+                    .map(d -> d.recommend(200))
+                    .flatMap(q -> q.map(Stream::of).orElse(Stream.empty()));
     private static final Supplier<Optional<InvestmentStrategy>> ALL_ACCEPTING =
             () -> Optional.of(ALL_ACCEPTING_STRATEGY);
 
@@ -101,7 +105,9 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         @Override
         protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                                  final Collection<LoanDescriptor> marketplace) {
-            return Collections.emptyList();
+            return strategy.recommend(marketplace, portfolio.getOverview(), getTenant().getRestrictions())
+                    .map(r -> Investment.fresh(r.descriptor().item(), r.amount().intValue()))
+                    .collect(Collectors.toList());
         }
     }
 }

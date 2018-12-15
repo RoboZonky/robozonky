@@ -126,6 +126,6 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
     public Collection<Investment> apply(final Portfolio portfolio, final Collection<T> marketplace) {
         return strategyProvider.get()
                 .map(strategy -> invest(portfolio, strategy, marketplace))
-                .orElseGet(Collections::emptyList);
+                .orElse(Collections.emptyList());
     }
 }
