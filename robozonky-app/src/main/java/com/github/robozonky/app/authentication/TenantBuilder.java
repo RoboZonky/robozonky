@@ -67,7 +67,7 @@ public final class TenantBuilder {
         final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier =
                 scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, tokenRefresh);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
-        return new TokenBasedTenant(sessionInfo, api, strategyProvider, tokenSupplier);
+        return new TokenBasedTenant(sessionInfo, apis, strategyProvider, tokenSupplier);
     }
 
     public Tenant build() {
