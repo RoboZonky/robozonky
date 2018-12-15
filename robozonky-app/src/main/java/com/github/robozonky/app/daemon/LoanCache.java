@@ -89,6 +89,7 @@ public class LoanCache {
 
     Optional<Loan> getLoan(final int loanId) {
         final Pair<Loan, Instant> result = callLocked(() -> cache.get().get(loanId));
+        LOGGER.debug("Found {}.", result);
         if (result == null || isExpired(result)) {
             LOGGER.trace("Cache miss for loan #{}.", loanId);
             return Optional.empty();
@@ -137,6 +138,14 @@ public class LoanCache {
 
         public B getTwo() {
             return two;
+        }
+
+        @Override
+        public String toString() {
+            return "Pair{" +
+                    "one=" + one +
+                    ", two=" + two +
+                    '}';
         }
     }
 }
