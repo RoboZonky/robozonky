@@ -47,7 +47,6 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
                 .build();
         assertThat(t.getRestrictions()).isNotNull();
         assertThat(t.isAvailable()).isFalse();
-        assertThat(t.getSecrets()).isEqualTo(s);
         verify(o).login(any(), eq(s.getUsername()), eq(s.getPassword()));
         verify(z).getRestrictions();
     }
@@ -63,7 +62,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
         final SessionInfo i = t.getSessionInfo();
         assertSoftly(softly -> {
             softly.assertThat(i.getUsername()).isEqualTo(s.getUsername());
-            softly.assertThat(i.getName()).contains("name");
+            softly.assertThat(i.getName()).isEqualTo("RoboZonky 'name'");
             softly.assertThat(i.isDryRun()).isTrue();
         });
     }
@@ -77,7 +76,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
         final SessionInfo i = t.getSessionInfo();
         assertSoftly(softly -> {
             softly.assertThat(i.getUsername()).isEqualTo(s.getUsername());
-            softly.assertThat(i.getName()).isEmpty();
+            softly.assertThat(i.getName()).isEqualTo("RoboZonky");
             softly.assertThat(i.isDryRun()).isFalse();
         });
     }

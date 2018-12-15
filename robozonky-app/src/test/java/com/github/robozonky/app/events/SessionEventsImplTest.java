@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -77,6 +78,18 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
         verify(e).ready(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
         verify(e).fired(s, (Class<EventListener<RoboZonkyTestingEvent>>)l.getClass());
         verify(l).handle(s, SESSION);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void callsListenersOnError() {
+        final RoboZonkyTestingEvent s = EventFactory.roboZonkyTesting();
+        final SessionEventsImpl events = (SessionEventsImpl)Events.forSession(SESSION);
+        final EventListener<RoboZonkyTestingEvent> l = mock(EventListener.class);
+        doThrow(IllegalStateException.class).when(l).handle(any(), any());
+        events.injectEventListener(l);
+        events.fire(s);
+        assertThat(this.getEventsFailed()).isNotEmpty();
     }
 
     @Test

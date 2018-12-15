@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStoreException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -66,7 +67,6 @@ class CommandLineTest extends AbstractRoboZonkyTest {
                                  "-s", "somewhere");
         final Optional<InvestmentMode> cfg = CommandLine.parse(main);
         assertThat(cfg).isPresent();
-        assertThat(cfg.get().getSessionName()).isEqualTo(name);
         assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }
 
@@ -113,5 +113,16 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final App main = mockedApp();
         main.run();
         verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
+    }
+
+    @Test
+    void getters() {
+        final CommandLine cli = new CommandLine(t -> {});
+        assertThat(cli.getKeystore()).isEmpty();
+        assertThat(cli.getNotificationConfigLocation()).isEmpty();
+        assertThat(cli.getName()).isEqualTo("Unnamed");
+        assertThat(cli.isDryRunEnabled()).isFalse();
+        assertThat(cli.getPrimaryMarketplaceCheckDelay()).isEqualTo(Duration.ofSeconds(5));
+        assertThat(cli.getSecondaryMarketplaceCheckDelay()).isEqualTo(Duration.ofSeconds(5));
     }
 }

@@ -29,8 +29,8 @@ public abstract class AbstractMinimalRoboZonkyTest {
     private final AtomicReference<Clock> original = new AtomicReference<>();
 
     protected void setClock(final Clock clock) {
-        LOGGER.debug("Setting custom system clock.");
-        original.set(DateUtil.getSystemClock());
+        LOGGER.debug("Setting custom system clock: {}.", clock);
+        original.compareAndSet(null, DateUtil.getSystemClock()); // first call stores the original
         DateUtil.setSystemClock(clock);
     }
 
@@ -39,7 +39,7 @@ public abstract class AbstractMinimalRoboZonkyTest {
         final Clock stored = original.getAndSet(null);
         if (stored != null) {
             DateUtil.setSystemClock(stored);
-            LOGGER.debug("Setting original system clock.");
+            LOGGER.debug("Setting original system clock: {}.", stored);
         }
     }
 

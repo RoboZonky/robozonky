@@ -113,11 +113,11 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     @Override
     public synchronized void close() {
-        final ZonkyApiToken beforeClosing = token.getAndSet(null);
-        if (beforeClosing == null || beforeClosing.willExpireIn(Duration.ZERO)) {
+        final ZonkyApiToken toClose = token.getAndSet(null);
+        if (toClose == null || toClose.willExpireIn(Duration.ZERO)) {
             return;
         }
         LOGGER.debug("Logging '{}' out of Zonky ({}).", secrets.getUsername(), scope);
-        apis.run(Zonky::logout, () -> beforeClosing);
+        apis.run(Zonky::logout, () -> toClose);
     }
 }

@@ -18,7 +18,7 @@ package com.github.robozonky.api;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SessionInfoTest {
 
@@ -28,7 +28,17 @@ class SessionInfoTest {
         assertSoftly(softly -> {
             softly.assertThat(s.getUsername()).isEqualTo("someone@somewhere.cz");
             softly.assertThat(s.isDryRun()).isTrue();
-            softly.assertThat(s.getName()).isEmpty();
+            softly.assertThat(s.getName()).isEqualTo("RoboZonky");
+        });
+    }
+
+    @Test
+    void constructorNamed() {
+        final SessionInfo s = new SessionInfo("someone@somewhere.cz", "Test");
+        assertSoftly(softly -> {
+            softly.assertThat(s.getUsername()).isEqualTo("someone@somewhere.cz");
+            softly.assertThat(s.isDryRun()).isTrue();
+            softly.assertThat(s.getName()).isEqualTo("RoboZonky 'Test'");
         });
     }
 }

@@ -23,21 +23,25 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.util.NumberUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>, Collection<Investment>> {
 
+    private static final long[] NO_LONGS = new long[0];
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final Tenant tenant;
     private final Supplier<Optional<S>> strategyProvider;
     private final AtomicBoolean marketplaceCheckPending = new AtomicBoolean(false);
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
+    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
     protected StrategyExecutor(final Tenant tenant, Supplier<Optional<S>> strategy) {
         this.tenant = tenant;
@@ -50,13 +54,7 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
 
     protected abstract boolean isBalanceUnderMinimum(final int currentBalance);
 
-    /**
-     * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
-     * marketplace changed since the last time this method was called.
-     * @param marketplace Present contents of the marketplace.
-     * @return Returning true triggers evaluation of the strategy.
-     */
-    protected abstract boolean hasMarketplaceUpdates(final Collection<T> marketplace);
+    protected abstract long identify(final T descriptor);
 
     private boolean skipStrategyEvaluation(final Collection<T> marketplace) {
         if (marketplace.isEmpty()) {
@@ -76,7 +74,7 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
         if (balanceChangedMeaningfully) {
             LOGGER.debug("Waking up due to a balance increase.");
             return false;
-        } else if (hasMarketplaceUpdates(marketplace)) {
+        } else if (hasMarketplaceUpdates(marketplace, this::identify)) {
             LOGGER.debug("Waking up due to a change in marketplace.");
             return false;
         } else {
@@ -94,6 +92,18 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
      */
     protected abstract Collection<Investment> execute(final Portfolio portfolio, final S strategy,
                                                       final Collection<T> marketplace);
+
+    /**
+     * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
+     * marketplace changed since the last time this method was called.
+     * @param marketplace Present contents of the marketplace.
+     * @return Returning true triggers evaluation of the strategy.
+     */
+    private boolean hasMarketplaceUpdates(final Collection<T> marketplace, final Function<T, Long> idSupplier) {
+        final long[] idsFromMarketplace = marketplace.stream().mapToLong(idSupplier::apply).toArray();
+        final long[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
+        return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
+    }
 
     private Collection<Investment> invest(final Portfolio portfolio, final S strategy,
                                           final Collection<T> marketplace) {

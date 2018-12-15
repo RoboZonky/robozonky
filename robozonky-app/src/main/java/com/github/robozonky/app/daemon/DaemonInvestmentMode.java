@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
@@ -29,13 +31,10 @@ import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
-import com.github.robozonky.common.jobs.SimpleJob;
-import com.github.robozonky.common.jobs.SimplePayload;
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,17 +43,15 @@ import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonF
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
+    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(() -> newThreadGroup("rzDaemon"));
     private final DaemonOperation investing, purchasing;
     private final PortfolioUpdater portfolio;
     private final Tenant tenant;
     private final Consumer<Throwable> shutdownCall;
-    private final String sessionName;
 
-    public DaemonInvestmentMode(final String sessionName, final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                                final Investor investor, final Duration primaryMarketplaceCheckPeriod,
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant, final Investor investor,
+                                final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.sessionName = sessionName;
         this.portfolio = PortfolioUpdater.create(shutdownCall, tenant);
         this.tenant = tenant;
         this.investing = new InvestingDaemon(shutdownCall, tenant, investor, portfolio, primaryMarketplaceCheckPeriod);
@@ -62,9 +59,9 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.shutdownCall = shutdownCall;
     }
 
-    DaemonInvestmentMode(final String sessionName, final Tenant tenant, final Investor investor,
-                         final Duration primaryMarketplaceCheckPeriod, final Duration secondaryMarketplaceCheckPeriod) {
-        this(sessionName, t -> {
+    DaemonInvestmentMode(final Tenant tenant, final Investor investor, final Duration primaryMarketplaceCheckPeriod,
+                         final Duration secondaryMarketplaceCheckPeriod) {
+        this(t -> {
         }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
     }
 
@@ -114,11 +111,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return !tenant.isAvailable() || portfolio.isInitializing();
     }
 
-    private void scheduleSimpleJob(final SimpleJob job, final Scheduler executor) {
-        final SimplePayload payload = job.payload();
-        scheduleJob(job, payload, executor);
-    }
-
     void scheduleJob(final Job job, final Runnable runnable, final Scheduler executor) {
         final Runnable payload = () -> {
             LOGGER.debug("Running job {}.", job);
@@ -131,36 +123,33 @@ public class DaemonInvestmentMode implements InvestmentMode {
         executor.submit(payload, job.repeatEvery(), job.startIn());
     }
 
-    private void scheduleTenantJob(final TenantJob job, final Scheduler executor) {
-        final TenantPayload payload = job.payload();
-        scheduleJob(job, () -> payload.accept(tenant), executor);
-    }
-
     private void scheduleJobs(final Scheduler executor) {
         // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
         LOGGER.debug("Scheduling simple batch jobs.");
-        JobServiceLoader.loadSimpleJobs().forEach(job -> scheduleSimpleJob(job, executor));
+        JobServiceLoader.loadSimpleJobs().forEach(j -> scheduleJob(j, j.payload(), executor));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
-        JobServiceLoader.loadTenantJobs().forEach(job -> scheduleTenantJob(job, executor));
+        JobServiceLoader.loadTenantJobs().forEach(j -> scheduleJob(j, () -> j.payload().accept(tenant), executor));
+        LOGGER.debug("Job scheduling over.");
     }
 
     @Override
-    public String getSessionName() {
-        return sessionName;
+    public SessionInfo getSessionInfo() {
+        return tenant.getSessionInfo();
     }
 
     @Override
     public ReturnCode apply(final Lifecycle lifecycle) {
         scheduleJobs(Scheduler.inBackground());
-        try (final Scheduler executor = Schedulers.INSTANCE.create(1, THREAD_FACTORY)) {
-            // schedule the tasks
-            scheduleDaemons(executor);
-            // block until request to stop the app is received
-            lifecycle.suspend();
-            LOGGER.trace("Request to stop received.");
-            // signal the end of standard operation
-            return ReturnCode.OK;
-        }
+        return Try.withResources(() -> Schedulers.INSTANCE.create(1, THREAD_FACTORY))
+                .of(executor -> {
+                    // schedule the tasks
+                    scheduleDaemons(executor);
+                    // block until request to stop the app is received
+                    lifecycle.suspend();
+                    LOGGER.trace("Request to stop received.");
+                    // signal the end of standard operation
+                    return ReturnCode.OK;
+                }).getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 
     @Override

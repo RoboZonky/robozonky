@@ -91,7 +91,7 @@ public class App implements Runnable {
         Events.allSessions().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
         shutdownHooks.register(new Management(lifecycle));
-        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionName()));
+        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         return m.apply(lifecycle);
     }
 

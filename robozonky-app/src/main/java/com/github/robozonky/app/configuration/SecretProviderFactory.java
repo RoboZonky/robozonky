@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.io.IOException;
-import java.security.KeyStoreException;
 import java.util.Optional;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
@@ -44,7 +42,7 @@ final class SecretProviderFactory {
             try {
                 final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
                 return Optional.of(SecretProvider.keyStoreBased(ksh));
-            } catch (final IOException | KeyStoreException ex) {
+            } catch (final Exception ex) {
                 SecretProviderFactory.LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.<SecretProvider>empty();
             }

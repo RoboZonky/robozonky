@@ -61,14 +61,15 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         // prepare the executor, have it fail when executing the investment operation
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new AlwaysFreshNeverInvesting(auth);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> spied = spy(e);
-        when(spied.hasMarketplaceUpdates(any())).thenReturn(false); // marketplace never has any updates
         assertThat(spied.apply(p, marketplace)).isEmpty(); // fresh balance, check marketplace
         verify(spied).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
-        assertThat(spied.apply(p, marketplace)).isEmpty(); // nothing changed, still only ran once
-        verify(spied, times(1)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(p, marketplace)).isEmpty(); // marketplace first processed
+        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(p, marketplace)).isEmpty(); // nothing changed, no check
+        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(100_000))); // increase remote balance
         assertThat(spied.apply(p, marketplace)).isEmpty(); // should have checked marketplace
-        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        verify(spied, times(3)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
     }
 
     @Test
@@ -93,8 +94,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        protected boolean hasMarketplaceUpdates(final Collection<LoanDescriptor> marketplace) {
-            return false;
+        protected long identify(final LoanDescriptor descriptor) {
+            return descriptor.item().getId();
         }
 
         @Override

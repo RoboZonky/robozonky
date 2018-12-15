@@ -16,6 +16,9 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
@@ -24,6 +27,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +63,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void loadLoan() {
+        setClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));
         final LoanCache c = new LoanCache();
         final int loanId = 1;
         final Loan loan = Loan.custom()
@@ -71,5 +76,9 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         verify(z).getLoan(eq(loanId));
         assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // this time from the cache
         verify(z, times(1)).getLoan(eq(loanId));
+        // and now test eviction
+        setClock(Clock.fixed(Instant.now().plus(Duration.ofHours(1)), Defaults.ZONE_ID));
+        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // return the freshly retrieved loan
+        verify(z, times(2)).getLoan(eq(loanId));
     }
 }

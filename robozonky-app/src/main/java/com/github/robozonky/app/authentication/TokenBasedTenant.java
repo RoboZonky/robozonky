@@ -32,7 +32,6 @@ import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,20 +43,18 @@ class TokenBasedTenant implements Tenant {
 
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
-    private final SecretProvider secrets;
     private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
     private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
     private final RemoteBalance balance;
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
 
-    TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final StrategyProvider strategyProvider,
-                     final String sessionName, final boolean isDryRun, final Duration refreshAfter) {
-        this.secrets = secrets;
+    TokenBasedTenant(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
+                     final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
-        this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
-        this.supplier = scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, refreshAfter);
+        this.sessionInfo = sessionInfo;
+        this.supplier = tokenSupplier;
         this.balance = new RemoteBalanceImpl(this);
         this.restrictions = Reloadable.of(() -> this.call(Zonky::getRestrictions), Duration.ofHours(1));
     }
@@ -92,11 +89,6 @@ class TokenBasedTenant implements Tenant {
     @Override
     public SessionInfo getSessionInfo() {
         return sessionInfo;
-    }
-
-    @Override
-    public SecretProvider getSecrets() {
-        return secrets;
     }
 
     @Override

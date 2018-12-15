@@ -21,11 +21,17 @@ import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
+
+    @BeforeEach
+    void reset() {
+        SoldParticipationCache.resetAll();
+    }
 
     @Test
     void persistent() {
@@ -49,7 +55,6 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void retrieves() {
-        final SecretProvider sp = SecretProvider.inMemory("someone@somewhere.cz");
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);

@@ -18,6 +18,7 @@ package com.github.robozonky.app;
 
 import java.util.List;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -108,8 +109,8 @@ class AppTest extends AbstractEventLeveragingTest {
     private static class MyInvestmentMode implements InvestmentMode {
 
         @Override
-        public String getSessionName() {
-            return "";
+        public SessionInfo getSessionInfo() {
+            return SESSION;
         }
 
         @Override
@@ -126,8 +127,8 @@ class AppTest extends AbstractEventLeveragingTest {
     private static class MyFailingInvestmentMode implements InvestmentMode {
 
         @Override
-        public String getSessionName() {
-            return "";
+        public SessionInfo getSessionInfo() {
+            return SESSION;
         }
 
         @Override

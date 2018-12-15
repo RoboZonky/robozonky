@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -29,6 +28,8 @@ import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.TenantJob;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
@@ -49,9 +51,8 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Tenant a = mockTenant(harmlessZonky(10_000), true);
         final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        final String name = UUID.randomUUID().toString();
-        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(name, a, b, ONE_SECOND, ONE_SECOND))) {
-            assertThat(d.getSessionName()).isEqualTo(name);
+        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a, b, ONE_SECOND, ONE_SECOND))) {
+            assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
             doNothing().when(d).scheduleJob(any(), any(), any()); // otherwise jobs will run and try to log into Zonky
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
@@ -59,6 +60,9 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             verify(a).getInvestmentStrategy();
             verify(a).getPurchaseStrategy();
+            // call all the jobs we know about
+            verify(d, times(1)).scheduleJob(any(SimpleJob.class), any(), any());
+            verify(d, times(3)).scheduleJob(any(TenantJob.class), any(), any());
         } finally {
             e.shutdownNow();
         }

@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import com.github.robozonky.app.daemon.operations.Investing;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
+import com.github.robozonky.internal.util.DateUtil;
 
 class InvestingDaemon extends DaemonOperation {
 
@@ -46,6 +48,13 @@ class InvestingDaemon extends DaemonOperation {
         return !authenticated.getRestrictions().isCannotInvest();
     }
 
+    private static boolean isActionable(final LoanDescriptor loanDescriptor) {
+        final OffsetDateTime now = DateUtil.offsetNow();
+        return loanDescriptor.getLoanCaptchaProtectionEndDateTime()
+                .map(d -> d.isBefore(now))
+                .orElse(true);
+    }
+
     @Override
     protected void execute(final Portfolio portfolio, final Tenant authenticated) {
         // don't query anything unless we have enough money to invest
@@ -59,6 +68,7 @@ class InvestingDaemon extends DaemonOperation {
         final Collection<LoanDescriptor> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
                 .map(LoanDescriptor::new)
+                .filter(InvestingDaemon::isActionable)
                 .collect(Collectors.toList());
         investing.apply(portfolio, loans);
     }

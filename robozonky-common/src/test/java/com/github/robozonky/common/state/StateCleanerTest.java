@@ -29,7 +29,6 @@ import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -79,11 +78,6 @@ class StateCleanerTest {
         @Override
         public SessionInfo getSessionInfo() {
             return SESSION_INFO;
-        }
-
-        @Override
-        public SecretProvider getSecrets() {
-            return null;
         }
 
         @Override

@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -42,8 +43,8 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
 
     private final String sessionName;
 
-    public RoboZonkyStartupNotifier(final String sessionName) {
-        this.sessionName = sessionName;
+    public RoboZonkyStartupNotifier(final SessionInfo session) {
+        this.sessionName = session.getName();
     }
 
     private static CompletableFuture<Void> execute(final ShutdownHook.Result result) {
@@ -55,8 +56,7 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
 
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
-        final String name = sessionName == null ? "RoboZonky" : "RoboZonky '" + sessionName + "'";
-        LOGGER.info("===== {} v{} at your service! =====", name, Defaults.ROBOZONKY_VERSION);
+        LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
         Events.allSessions().fire(roboZonkyInitialized());
         return Optional.of(result -> {
             final CompletableFuture<Void> waitUntilFired = execute(result);
@@ -66,7 +66,7 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
             } catch (final Exception ex) {
                 LOGGER.debug("Exception while waiting for the final event being processed.", ex);
             } finally {
-                LOGGER.info("===== {} out. =====", name);
+                LOGGER.info("===== {} out. =====", sessionName);
             }
         });
     }

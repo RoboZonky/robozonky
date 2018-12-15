@@ -16,28 +16,11 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-
 class StonkyIT extends AbstractRoboZonkyTest {
-
-    @Test
-    @EnabledIfEnvironmentVariable(named = "ZONKY_USERNAME", matches = ".+")
-    void execute() {
-        final String username = System.getenv("ZONKY_USERNAME");
-        final String password = System.getenv("ZONKY_PASSWORD");
-        final SecretProvider secretProvider = SecretProvider.inMemory(username, password.toCharArray());
-        final Tenant t = mockTenant();
-        doReturn(secretProvider).when(t).getSecrets();
-        final Stonky stonky = new Stonky();
-        assertThat(stonky.apply(t)).isPresent();
-    }
 
     @Test
     @EnabledIfEnvironmentVariable(named = "CREDENTIALS_JSON", matches = ".+")

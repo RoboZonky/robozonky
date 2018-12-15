@@ -39,8 +39,7 @@ class TransactionalTenantTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void delegatesRestrictions() {
-        transactional.getRestrictions();
-        verify(original).getRestrictions();
+        assertThat(transactional.getRestrictions()).isSameAs(original.getRestrictions());
     }
 
     @Test
@@ -50,15 +49,8 @@ class TransactionalTenantTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void delegateSecrets() {
-        transactional.getSecrets();
-        verify(original).getSecrets();
-    }
-
-    @Test
     void delegateAvailability() {
-        transactional.isAvailable(ZonkyScope.APP);
-        verify(original).isAvailable(eq(ZonkyScope.APP));
+        assertThat(transactional.isAvailable(ZonkyScope.APP)).isSameAs(original.isAvailable(ZonkyScope.APP));
     }
 
     @Test

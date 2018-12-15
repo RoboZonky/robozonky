@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Map;
 
@@ -27,8 +28,16 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class PortfolioOverviewImplTest {
+
+    @Test
+    void timestamp() {
+        final PortfolioOverview po = PortfolioOverviewImpl.calculate(() -> BigDecimal.TEN, Statistics.empty(),
+                                                                     Collections.emptyMap(), Collections.emptyMap());
+        assertThat(po.getTimestamp()).isBeforeOrEqualTo(ZonedDateTime.now());
+    }
 
     @Test
     void emptyPortfolio() {

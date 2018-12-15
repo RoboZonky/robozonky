@@ -24,6 +24,7 @@ import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class StrategyProviderTest {
@@ -100,6 +101,14 @@ class StrategyProviderTest {
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
         });
+    }
+
+    @Test
+    void empty() {
+        final StrategyProvider s = StrategyProvider.empty();
+        assertThat(s.getToInvest()).isEmpty();
+        assertThat(s.getToPurchase()).isEmpty();
+        assertThat(s.getToSell()).isEmpty();
     }
 
 }

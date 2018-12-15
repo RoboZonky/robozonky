@@ -58,7 +58,7 @@ public final class SoldParticipationCache {
         return INSTANCES.computeIfAbsent(tenant.getSessionInfo(), key -> newCache(tenant));
     }
 
-    void markAsSold(final int loanId) {
+    public void markAsSold(final int loanId) {
         listedSoldLocally.add(loanId);
     }
 
@@ -68,5 +68,12 @@ public final class SoldParticipationCache {
                     LOGGER.info("Failed retrieving sold loans from Zonky.", ex);
                     return false;
                 });
+    }
+
+    /**
+     * For testing purposes only.
+     */
+    static void resetAll() {
+        INSTANCES.clear();
     }
 }
