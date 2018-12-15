@@ -42,6 +42,7 @@ final class EventFiringRunnable implements Runnable {
                 queue.take().run();
             } catch (final InterruptedException ex) {
                 LOGGER.debug("Interrupted while waiting for an event to fire.", ex);
+                Thread.currentThread().interrupt();
                 repeat = false;
             }
         } while (repeat);

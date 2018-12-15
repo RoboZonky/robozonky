@@ -23,8 +23,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.ToLongFunction;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.daemon.Portfolio;
@@ -99,8 +99,8 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
      * @param marketplace Present contents of the marketplace.
      * @return Returning true triggers evaluation of the strategy.
      */
-    private boolean hasMarketplaceUpdates(final Collection<T> marketplace, final Function<T, Long> idSupplier) {
-        final long[] idsFromMarketplace = marketplace.stream().mapToLong(idSupplier::apply).toArray();
+    private boolean hasMarketplaceUpdates(final Collection<T> marketplace, final ToLongFunction<T> idSupplier) {
+        final long[] idsFromMarketplace = marketplace.stream().mapToLong(idSupplier::applyAsLong).toArray();
         final long[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
         return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
     }

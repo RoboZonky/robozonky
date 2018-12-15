@@ -45,7 +45,8 @@ enum ExtensionsManager {
     ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
         this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
         final File[] jars = extensionsFolder.listFiles(ExtensionsManager::isJarFile);
-        this.LOGGER.debug("JARS found: '{}'.", Arrays.toString(jars));
+        final String jarString = Arrays.toString(jars);
+        this.LOGGER.debug("JARS found: '{}'.", jarString);
         final URL[] urls = FileUtil.filesToUrls(jars).toArray(URL[]::new);
         return new URLClassLoader(urls);
     }
