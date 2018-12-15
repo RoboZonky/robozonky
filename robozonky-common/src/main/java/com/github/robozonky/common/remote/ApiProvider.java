@@ -40,6 +40,7 @@ import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.util.StreamUtil;
+import io.vavr.Lazy;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,22 +53,18 @@ public class ApiProvider implements AutoCloseable {
     public static final String ZONKY_URL = "https://api.zonky.cz";
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiProvider.class);
     /**
-     * Clients are heavyweight objects where both creation and destruction potentially takes a lot of time. They should
-     * be reused as much as possible.
-     */
-    private final ResteasyClient client;
-    /**
      * Instances of the Zonky API are kept for as long as the token supplier is kept by the GC. This guarantees that,
      * for the lifetime of the token supplier, the expensive API-retrieving operations wouldn't be executed twice.
      */
     private final Map<Supplier<ZonkyApiToken>, Zonky> authenticated = new WeakHashMap<>(0);
+    /**
+     * Clients are heavyweight objects where both creation and destruction potentially takes a lot of time. They should
+     * be reused as much as possible.
+     */
+    private final Lazy<ResteasyClient> client;
 
     public ApiProvider() {
-        this(ProxyFactory.newResteasyClient());
-    }
-
-    private ApiProvider(final ResteasyClient client) {
-        this.client = client;
+        this.client = Lazy.of(ProxyFactory::newResteasyClient);
     }
 
     static <T> Api<T> obtainNormal(final T proxy) {
@@ -84,16 +81,16 @@ public class ApiProvider implements AutoCloseable {
      */
     <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
                                                                              final Supplier<ZonkyApiToken> token) {
-        return new PaginatedApi<>(api, ZONKY_URL, token, client);
+        return new PaginatedApi<>(api, ZONKY_URL, token, client.get());
     }
 
     <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token) {
-        final T proxy = ProxyFactory.newProxy(client, new AuthenticatedFilter(token), api, ZONKY_URL);
+        final T proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api, ZONKY_URL);
         return obtainNormal(proxy);
     }
 
     private OAuth oauth() {
-        final ZonkyOAuthApi proxy = ProxyFactory.newProxy(client, new AuthenticationFilter(), ZonkyOAuthApi.class,
+        final ZonkyOAuthApi proxy = ProxyFactory.newProxy(client.get(), new AuthenticationFilter(), ZonkyOAuthApi.class,
                                                           ZONKY_URL);
         return new OAuth(obtainNormal(proxy));
     }
@@ -113,7 +110,7 @@ public class ApiProvider implements AutoCloseable {
      * @return Loans existing in the marketplace at the time this method was called.
      */
     public Collection<RawLoan> marketplace() {
-        final EntityCollectionApi<RawLoan> proxy = ProxyFactory.newProxy(client, LoanApi.class, ZONKY_URL);
+        final EntityCollectionApi<RawLoan> proxy = ProxyFactory.newProxy(client.get(), LoanApi.class, ZONKY_URL);
         final Api<? extends EntityCollectionApi<RawLoan>> api = obtainNormal(proxy);
         return api.call(EntityCollectionApi::items);
     }
@@ -207,10 +204,10 @@ public class ApiProvider implements AutoCloseable {
 
     @Override
     public void close() {
-        client.close();
+        client.get().close();
     }
 
     public boolean isClosed() {
-        return client.isClosed();
+        return client.get().isClosed();
     }
 }
