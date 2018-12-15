@@ -18,46 +18,25 @@ package com.github.robozonky.util;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 /**
  * Thread factory giving threads RoboZonky-specific names, assigning them to RoboZonky-specific {@link ThreadGroup}s.
  * No other changes are made, although in the future we may decide to alter thread priorities here.
- * <p>
- * {@link ThreadGroup}s are autoamtically destroyed when all their threads are stopped. For testing purposes, this is
- * very inconvenient. Therefore, when such a situation is detected, the code will create a new thread group supplied by
- * {@link RoboZonkyThreadFactory#RoboZonkyThreadFactory(Supplier)}.
  */
 public class RoboZonkyThreadFactory implements ThreadFactory {
 
     private final AtomicInteger nextThreadNumber = new AtomicInteger(1);
-    private final ManuallyReloadable<ThreadGroup> reloadableThreadGroup;
+    private final ThreadGroup threadGroup;
 
-    public static ThreadGroup createDaemonThreadGroup(final String name) {
-        final ThreadGroup threadGroup = new ThreadGroup(name);
-        threadGroup.setDaemon(true); // no thread from this group shall block shutdown
-        return threadGroup;
-    }
-
-    public RoboZonkyThreadFactory(final Supplier<ThreadGroup> group) {
-        this.reloadableThreadGroup = Reloadable.of(group::get);
-    }
-
-    private synchronized ThreadGroup getThreadGroup() {
-        final ThreadGroup tg = reloadableThreadGroup.get().getOrNull();
-        if (tg == null || tg.isDestroyed()) {
-            reloadableThreadGroup.clear();
-            return getThreadGroup();
-        }
-        return tg;
+    public RoboZonkyThreadFactory(final ThreadGroup group) {
+        this.threadGroup = group;
     }
 
     @Override
     public Thread newThread(final Runnable runnable) {
-        final ThreadGroup threadGroup = getThreadGroup();
         final String name = threadGroup.getName() + "-" + nextThreadNumber.getAndIncrement();
         final Thread thread = new Thread(threadGroup, runnable, name);
-        thread.setDaemon(threadGroup.isDaemon());
+        thread.setDaemon(true);
         return thread;
     }
 }

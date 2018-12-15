@@ -56,8 +56,9 @@ public class LoanCache {
     }
 
     private static boolean isExpired(final Pair<Loan, Instant> p) {
-        final Instant deadline = DateUtil.now().minus(EVICT_AFTER);
-        return p.getTwo().isBefore(deadline);
+        final Instant now = DateUtil.now();
+        final Instant expiration = p.getTwo().plus(EVICT_AFTER);
+        return expiration.isBefore(now);
     }
 
     private void evict() {
@@ -89,7 +90,6 @@ public class LoanCache {
 
     Optional<Loan> getLoan(final int loanId) {
         final Pair<Loan, Instant> result = callLocked(() -> cache.get().get(loanId));
-        LOGGER.debug("Found {}.", result);
         if (result == null || isExpired(result)) {
             LOGGER.trace("Cache miss for loan #{}.", loanId);
             return Optional.empty();

@@ -43,8 +43,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonF
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
-    private static final ThreadFactory THREAD_FACTORY =
-            new RoboZonkyThreadFactory(() -> RoboZonkyThreadFactory.createDaemonThreadGroup("rzDaemon"));
+    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     private final DaemonOperation investing, purchasing;
     private final PortfolioUpdater portfolio;
     private final Tenant tenant;

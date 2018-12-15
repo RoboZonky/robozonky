@@ -76,7 +76,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         assertThat(c.getLoan(loanId)).contains(loan);
         verify(z, times(1)).getLoan(eq(loanId));
         // and now test eviction
-        setClock(Clock.fixed(instant.plus(Duration.ofHours(1)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(instant.plus(Duration.ofHours(2)), Defaults.ZONE_ID));
         assertThat(c.getLoan(loanId)).isEmpty();
     }
 }

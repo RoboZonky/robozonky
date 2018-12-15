@@ -24,8 +24,8 @@ class RoboZonkyThreadFactoryTest {
 
     @Test
     void daemon() {
-        final ThreadGroup tg = RoboZonkyThreadFactory.createDaemonThreadGroup("testing");
-        final RoboZonkyThreadFactory f = new RoboZonkyThreadFactory(() -> tg);
+        final ThreadGroup tg = new ThreadGroup("testing");
+        final RoboZonkyThreadFactory f = new RoboZonkyThreadFactory(tg);
         final Thread t = f.newThread(() -> {
         });
         assertThat(t.isDaemon()).isTrue();
