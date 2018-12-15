@@ -33,6 +33,12 @@ public class RoboZonkyThreadFactory implements ThreadFactory {
     private final AtomicInteger nextThreadNumber = new AtomicInteger(1);
     private final ManuallyReloadable<ThreadGroup> reloadableThreadGroup;
 
+    public static ThreadGroup createDaemonThreadGroup(final String name) {
+        final ThreadGroup threadGroup = new ThreadGroup(name);
+        threadGroup.setDaemon(true); // no thread from this group shall block shutdown
+        return threadGroup;
+    }
+
     public RoboZonkyThreadFactory(final Supplier<ThreadGroup> group) {
         this.reloadableThreadGroup = Reloadable.of(group::get);
     }
@@ -51,7 +57,6 @@ public class RoboZonkyThreadFactory implements ThreadFactory {
         final ThreadGroup threadGroup = getThreadGroup();
         final String name = threadGroup.getName() + "-" + nextThreadNumber.getAndIncrement();
         final Thread thread = new Thread(threadGroup, runnable, name);
-        thread.setPriority(threadGroup.getMaxPriority()); // use the max priority allowed by the group
         thread.setDaemon(threadGroup.isDaemon());
         return thread;
     }

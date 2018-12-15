@@ -43,7 +43,8 @@ import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonF
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(() -> newThreadGroup("rzDaemon"));
+    private static final ThreadFactory THREAD_FACTORY =
+            new RoboZonkyThreadFactory(() -> RoboZonkyThreadFactory.createDaemonThreadGroup("rzDaemon"));
     private final DaemonOperation investing, purchasing;
     private final PortfolioUpdater portfolio;
     private final Tenant tenant;
@@ -75,13 +76,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);
         }
-    }
-
-    private static ThreadGroup newThreadGroup(final String name) {
-        final ThreadGroup threadGroup = new ThreadGroup(name);
-        threadGroup.setMaxPriority(Thread.NORM_PRIORITY + 1); // these threads should be a bit more important
-        threadGroup.setDaemon(true); // no thread from this group shall block shutdown
-        return threadGroup;
     }
 
     private static Duration getMaxJobRuntime(final Job job) {

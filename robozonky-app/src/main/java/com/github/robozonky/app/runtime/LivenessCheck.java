@@ -54,9 +54,7 @@ class LivenessCheck extends Refreshable<String> {
     }
 
     private static ThreadFactory getThreadFactory() {
-        final ThreadGroup tg = new ThreadGroup("rzLiveness");
-        tg.setDaemon(true);
-        return new RoboZonkyThreadFactory(() -> tg);
+        return new RoboZonkyThreadFactory(() -> RoboZonkyThreadFactory.createDaemonThreadGroup("rzLiveness"));
     }
 
     public static ShutdownHook.Handler setup(final MainControl mainThreadControl) {
