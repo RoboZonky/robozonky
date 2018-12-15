@@ -41,13 +41,13 @@ class EventFiringQueueTest {
         final Runnable r = mock(Runnable.class);
         final Runnable r2 = mock(Runnable.class);
         q.fire(r);
-        q.fire(r2).join();
+        q.fire(r2);
         currentRunnable.get().stop(); // terminate the background thread, ensuring everything was fired
         verify(r, times(1)).run();
         verify(r2, times(1)).run();
         // restarts on a dead thread
         final Runnable r3 = mock(Runnable.class);
-        q.fire(r3).join();
+        q.fire(r3);
         final EventFiringRunnable next = currentRunnable.get();
         assertThat(next.isStopped()).isFalse();
         next.stop(); // terminate the background thread, ensuring everything was fired
