@@ -17,7 +17,6 @@
 package com.github.robozonky.app.events;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,36 +29,21 @@ final class EventFiringRunnable implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventFiringRunnable.class);
 
     private final BlockingQueue<Runnable> queue;
-    private final AtomicBoolean shouldListen = new AtomicBoolean(true);
 
     public EventFiringRunnable(final BlockingQueue<Runnable> queue) {
         this.queue = queue;
     }
 
-    /**
-     * For testing purposes only.
-     * @throws InterruptedException
-     */
-    void stop() throws InterruptedException {
-        shouldListen.set(false);
-        queue.put(() -> {
-            // does nothing, but ensures that the queue still finishes reading everything
-        });
-    }
-
-    boolean isStopped() {
-        return !shouldListen.get();
-    }
-
     @Override
     public void run() {
+        boolean repeat = true;
         do {
             try {
                 queue.take().run();
             } catch (final InterruptedException ex) {
                 LOGGER.debug("Interrupted while waiting for an event to fire.", ex);
-                shouldListen.set(false);
+                repeat = false;
             }
-        } while (shouldListen.get() || !queue.isEmpty());
+        } while (repeat);
     }
 }

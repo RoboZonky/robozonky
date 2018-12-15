@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 class EventFiringQueueTest {
 
     @Test
-    void test() throws InterruptedException {
+    void test() {
         final AtomicReference<EventFiringRunnable> currentRunnable = new AtomicReference<>();
         final Function<BlockingQueue<Runnable>, EventFiringRunnable> supplier = q -> {
             final EventFiringRunnable r = new EventFiringRunnable(q);
@@ -40,8 +40,7 @@ class EventFiringQueueTest {
         final Runnable r = mock(Runnable.class);
         final Runnable r2 = mock(Runnable.class);
         q.fire(r);
-        q.fire(r2);
-        currentRunnable.get().stop(); // terminate the background thread, ensuring everything was fired
+        q.fire(r2).join();
         verify(r, times(1)).run();
         verify(r2, times(1)).run();
     }
