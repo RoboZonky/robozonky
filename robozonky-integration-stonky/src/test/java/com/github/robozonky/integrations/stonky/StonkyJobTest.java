@@ -39,6 +39,11 @@ class StonkyJobTest extends AbstractRoboZonkyTest {
     }
 
     @Test
+    void killsIn30minutes() {
+        assertThat(new StonkyJob().killIn()).isEqualTo(Duration.ofMinutes(30));
+    }
+
+    @Test
     void refreshesDaily() {
         assertThat(new StonkyJob().repeatEvery()).isEqualTo(Duration.ofDays(1));
     }

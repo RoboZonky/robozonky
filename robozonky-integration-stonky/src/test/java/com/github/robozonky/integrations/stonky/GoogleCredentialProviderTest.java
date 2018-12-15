@@ -38,6 +38,12 @@ class GoogleCredentialProviderTest {
     }
 
     @Test
+    void doesNotExistByDefault2() {
+        final CredentialProvider c = CredentialProvider.live(transport, "localhost", 8080);
+        assertThat(c.credentialExists(SESSION_INFO)).isFalse();
+    }
+
+    @Test
     void invalidApiKey() {
         final CredentialProvider c = new GoogleCredentialProvider(transport, "localhost", 0, () -> EMPTY);
         assertThatThrownBy(() -> c.credentialExists(SESSION_INFO)).isInstanceOf(IllegalStateException.class);
