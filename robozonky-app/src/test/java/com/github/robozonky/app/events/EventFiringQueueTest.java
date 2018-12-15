@@ -22,7 +22,6 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,14 +44,6 @@ class EventFiringQueueTest {
         currentRunnable.get().stop(); // terminate the background thread, ensuring everything was fired
         verify(r, times(1)).run();
         verify(r2, times(1)).run();
-        // restarts on a dead thread
-        final Runnable r3 = mock(Runnable.class);
-        q.fire(r3);
-        final EventFiringRunnable next = currentRunnable.get();
-        assertThat(next.isStopped()).isFalse();
-        next.stop(); // terminate the background thread, ensuring everything was fired
-        verify(r3, times(1)).run();
-        assertThat(next.isStopped()).isTrue();
     }
 
 }
