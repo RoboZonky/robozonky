@@ -47,10 +47,10 @@ final class RemoteData {
 
     public static RemoteData load(final Tenant tenant) {
         LOGGER.debug("Loading the latest Zonky portfolio information.");
-        final Wallet wallet = tenant.call(Zonky::getWallet);
+        final Map<Rating, BigDecimal> atRisk = Util.getAmountsAtRisk(tenant); // goes first as it will take some time
         final Statistics statistics = tenant.call(Zonky::getStatistics);
         final Map<Integer, Blocked> blocked = Util.readBlockedAmounts(tenant, statistics);
-        final Map<Rating, BigDecimal> atRisk = Util.getAmountsAtRisk(tenant);
+        final Wallet wallet = tenant.call(Zonky::getWallet); // goes last as it's a very short call
         LOGGER.debug("Finished.");
         return new RemoteData(wallet, statistics, blocked, atRisk);
     }
@@ -69,5 +69,15 @@ final class RemoteData {
 
     public Map<Rating, BigDecimal> getAtRisk() {
         return Collections.unmodifiableMap(atRisk);
+    }
+
+    @Override
+    public String toString() {
+        return "RemoteData{" +
+                "atRisk=" + atRisk +
+                ", blocked=" + blocked +
+                ", statistics=" + statistics +
+                ", wallet=" + wallet +
+                '}';
     }
 }
