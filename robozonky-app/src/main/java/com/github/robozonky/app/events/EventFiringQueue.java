@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import com.github.robozonky.util.ManuallyReloadable;
 import com.github.robozonky.util.Reloadable;
@@ -40,16 +41,25 @@ final class EventFiringQueue {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventFiringQueue.class);
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-    private final ManuallyReloadable<Thread> firingThread = Reloadable.of(() -> {
-        LOGGER.debug("Creating new thread.");
-        final Thread t = Scheduler.THREAD_FACTORY.newThread(new EventFiringRunnable(queue));
-        t.start();
-        LOGGER.debug("Started event firing thread {}.", t.getName());
-        return t;
-    });
+    private final ManuallyReloadable<Thread> firingThread;
 
     private EventFiringQueue() {
-        // no external instances
+        this(EventFiringRunnable::new);
+    }
+
+    /**
+     * Only use for testing purposes.
+     * @param threadSupplier
+     */
+    EventFiringQueue(final Function<BlockingQueue<Runnable>, EventFiringRunnable> threadSupplier) {
+        firingThread = Reloadable.of(() -> {
+            final Runnable r = threadSupplier.apply(queue);
+            LOGGER.debug("Creating new thread with {}.", r);
+            final Thread t = Scheduler.THREAD_FACTORY.newThread(r);
+            t.start();
+            LOGGER.debug("Started event firing thread {}.", t.getName());
+            return t;
+        });
     }
 
     private static void await(final CyclicBarrier barrier, final long id) {

@@ -92,7 +92,7 @@ final class OperatingMode {
 
     private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
                                                        final Investor investor) {
-        final InvestmentMode m = new DaemonInvestmentMode(cli.getName(), shutdownCall, auth, investor,
+        final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, investor,
                                                           cli.getPrimaryMarketplaceCheckDelay(),
                                                           cli.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);

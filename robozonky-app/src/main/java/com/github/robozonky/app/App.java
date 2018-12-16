@@ -26,8 +26,8 @@ import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Scheduler;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,20 +78,23 @@ public class App implements Runnable {
     }
 
     ReturnCode execute(final InvestmentMode mode) {
-        try {
-            return IoUtil.tryFunction(() -> mode, this::executeSafe);
-        } catch (final Throwable t) {
-            LOGGER.error("Caught unexpected exception, terminating daemon.", t);
-            return ReturnCode.ERROR_UNEXPECTED;
-        }
+        return Try.withResources(() -> mode)
+                .of(this::executeSafe)
+                .getOrElseGet(t -> {
+                    LOGGER.error("Caught unexpected exception, terminating daemon.", t);
+                    return ReturnCode.ERROR_UNEXPECTED;
+                });
     }
 
     private ReturnCode executeSafe(final InvestmentMode m) {
-        shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
+        shutdownHooks.register(() -> {
+            final Scheduler s = Scheduler.inBackground(); // get it at the start, so we close the right thing at the end
+            return Optional.of(r -> s.close());
+        });
         Events.allSessions().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
         shutdownHooks.register(new Management(lifecycle));
-        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionName()));
+        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         return m.apply(lifecycle);
     }
 

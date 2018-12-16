@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,8 +41,8 @@ import javax.xml.xpath.XPathFactory;
 
 import com.github.robozonky.common.jobs.SimplePayload;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
+import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -147,20 +148,20 @@ final class UpdateMonitor extends Refreshable<VersionIdentifier> implements Simp
     }
 
     @Override
-    protected String getLatestSource() throws Exception {
-        return IoUtil.tryFunction(() -> UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
-                                                                          this.mavenCentralHostname),
-                                     s -> IOUtils.toString(s, Defaults.CHARSET));
+    protected String getLatestSource() {
+        return Try.withResources(() -> UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                         this.mavenCentralHostname))
+                .of(s -> IOUtils.toString(s, Defaults.CHARSET))
+                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 
     @Override
     protected Optional<VersionIdentifier> transform(final String source) {
-        try {
-            return IoUtil.tryFunction(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
-                                         s -> Optional.of(UpdateMonitor.parseVersionString(s)));
-        } catch (final Exception ex) {
-            LOGGER.debug("Failed parsing source.", ex);
-            return Optional.empty();
-        }
+        return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)))
+                .of(s -> Optional.of(UpdateMonitor.parseVersionString(s)))
+                .getOrElseGet(ex -> {
+                    LOGGER.debug("Failed parsing source.", ex);
+                    return Optional.empty();
+                });
     }
 }

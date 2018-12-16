@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.daemon.operations.Purchasing;
 import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
 import com.github.robozonky.common.Tenant;
@@ -39,6 +40,10 @@ class PurchasingDaemon extends DaemonOperation {
         this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
     }
 
+    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
+        return new ParticipationDescriptor(p, () -> LoanCache.get().getLoan(p.getLoanId(), auth));
+    }
+
     @Override
     protected boolean isEnabled(final Tenant authenticated) {
         return !authenticated.getRestrictions().isCannotAccessSmp();
@@ -54,16 +59,16 @@ class PurchasingDaemon extends DaemonOperation {
         final Select s = new Select()
                 .lessThanOrEquals("remainingPrincipal", balance)
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
-        final Collection<Participation> applicable = authenticated.call(zonky -> zonky.getAvailableParticipations(s))
-                .filter(p -> { // never re-purchase what was once sold
-                    final int loanId = p.getLoanId();
-                    final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
-                    if (wasSoldBefore) {
-                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
-                    }
-                    return !wasSoldBefore;
-                })
-                .collect(Collectors.toList());
+        final Collection<ParticipationDescriptor> applicable =
+                authenticated.call(zonky -> zonky.getAvailableParticipations(s))
+                        .filter(p -> { // never re-purchase what was once sold
+                            final int loanId = p.getLoanId();
+                            final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
+                            LOGGER.debug("Loan #{} already sold before, ignoring: {}.", loanId, wasSoldBefore);
+                            return !wasSoldBefore;
+                        })
+                        .map(p -> toDescriptor(p, authenticated))
+                        .collect(Collectors.toList());
         purchasing.apply(portfolio, applicable);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.extensions;
 
 import java.io.File;
 import java.io.IOException;

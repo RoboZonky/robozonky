@@ -135,31 +135,17 @@ class FilterSupplier {
         final boolean exitStrategyTriggered = defaults.getMonthsBeforeExit() != lastCheckedMonthsBeforeExit;
         final boolean needsReinit = !wasCheckedOnce || sellOffTriggered || exitStrategyTriggered;
         if (!needsReinit) {
+            LOGGER.debug("Not reinitializing.");
             return;
         }
+        LOGGER.debug("Exit strategy triggered: {}.", exitStrategyTriggered);
+        LOGGER.debug("Sell-off triggered: {}.", sellOffTriggered);
         this.wasCheckedOnce = true;
         this.lastCheckedMonthsBeforeExit = defaults.getMonthsBeforeExit();
         this.lastCheckedSellOffStarted = defaults.isSelloffStarted();
         this.primaryMarketplaceFilters = refreshPrimaryMarketplaceFilters();
         this.secondaryMarketplaceFilters = refreshSecondaryMarketplaceFilters();
         this.sellFilters = refreshSellFilters();
-        final boolean exitActive = lastCheckedMonthsBeforeExit > -1;
-        if (sellOffTriggered) {
-            if (lastCheckedSellOffStarted) {
-                LOGGER.info("Exit sell-off in effect. No new loans will be invested, full portfolio is up for sale.");
-            } else if (exitActive) {
-                LOGGER.info("Exit sell-off no longer in effect, exit strategy still active.");
-            } else {
-                LOGGER.info("Returning from exit strategy, resuming normal operation.");
-            }
-        } else if (exitStrategyTriggered) { // no need to notify of this if already notified of the big sell-off
-            if (exitActive) {
-                LOGGER.info("Exit strategy is active. New loans and participations over {} months will be ignored.",
-                            lastCheckedMonthsBeforeExit);
-            } else {
-                LOGGER.info("Returning from exit strategy, resuming normal operation.");
-            }
-        }
     }
 
     private Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> filters) {

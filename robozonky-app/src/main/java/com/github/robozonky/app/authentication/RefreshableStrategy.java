@@ -20,10 +20,11 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
+import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 
 class RefreshableStrategy extends Refreshable<String> {
@@ -51,8 +52,10 @@ class RefreshableStrategy extends Refreshable<String> {
     }
 
     @Override
-    protected String getLatestSource() throws Exception {
-        return IoUtil.tryFunction(url::openStream, s -> IOUtils.toString(s, Defaults.CHARSET));
+    protected String getLatestSource() {
+        return Try.withResources(url::openStream)
+                .of(s -> IOUtils.toString(s, Defaults.CHARSET))
+                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 
     @Override

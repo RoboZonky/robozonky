@@ -55,7 +55,7 @@ class EmailHandlerTest {
         h.offer(new Submission() {
             @Override
             public SessionInfo getSessionInfo() {
-                return new SessionInfo("someone@somewhere.cz");
+                return new SessionInfo("someone@somewhere.cz", "Test");
             }
 
             @Override
@@ -86,7 +86,9 @@ class EmailHandlerTest {
         assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
         assertThat(m.getSubject()).isNotNull().isEqualTo(subject);
-        assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
+        assertThat(m.getFrom()[0].toString())
+                .contains("user@seznam.cz")
+                .contains("RoboZonky 'Test'");
     }
 
     @BeforeEach

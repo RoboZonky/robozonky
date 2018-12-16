@@ -17,10 +17,8 @@
 package com.github.robozonky.internal.util;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +50,7 @@ public final class ToStringBuilder {
         private static final int MAX_STRING_LENGTH = 70;
 
         // ignore passwords and loggers
-        private static final Set<Class<?>> IGNORED_TYPES = new HashSet<>(Arrays.asList(char[].class, Logger.class));
+        private static final Collection<Class<?>> IGNORED_TYPES = Arrays.asList(char[].class, Logger.class);
 
         public CustomReflectionToStringBuilder(final Object o) {
             super(o);
@@ -60,9 +58,7 @@ public final class ToStringBuilder {
 
         @Override
         protected boolean accept(final Field field) {
-            return super.accept(field)
-                    && !Modifier.isStatic(field.getModifiers())
-                    && !IGNORED_TYPES.contains(field.getType());
+            return super.accept(field) && !IGNORED_TYPES.contains(field.getType());
         }
 
         @Override

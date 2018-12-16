@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.api.notifications;
 
-import java.io.IOException;
+import java.time.OffsetDateTime;
 
-@FunctionalInterface
-public interface ThrowingFunction<S, T> {
+import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
+import org.junit.jupiter.api.Test;
 
-    T apply(S argument) throws IOException;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class EventTest extends AbstractMinimalRoboZonkyTest {
+
+    @Test
+    void conceptionSameAsCreation() {
+        final OffsetDateTime now = OffsetDateTime.now();
+        final Event event = () -> now;
+        assertThat(event.getConceivedOn()).isEqualTo(event.getCreatedOn());
+    }
+
 }

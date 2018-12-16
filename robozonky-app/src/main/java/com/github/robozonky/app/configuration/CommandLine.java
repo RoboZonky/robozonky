@@ -86,19 +86,19 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
         return Objects.isNull(result) ? Optional.empty() : result;
     }
 
-    public Duration getPrimaryMarketplaceCheckDelay() {
+    Duration getPrimaryMarketplaceCheckDelay() {
         return Duration.ofSeconds(primaryMarketplaceCheckDelay);
     }
 
-    public Duration getSecondaryMarketplaceCheckDelay() {
+    Duration getSecondaryMarketplaceCheckDelay() {
         return Duration.ofSeconds(secondaryMarketplaceCheckDelay);
     }
 
-    public Optional<String> getConfirmationCredentials() {
+    Optional<String> getConfirmationCredentials() {
         return Optional.ofNullable(confirmationCredentials);
     }
 
-    public boolean isDryRunEnabled() {
+    boolean isDryRunEnabled() {
         return dryRunEnabled;
     }
 
@@ -124,11 +124,11 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
         }
     }
 
-    public char[] getPassword() {
+    char[] getPassword() {
         return password.toCharArray();
     }
 
-    public Optional<File> getKeystore() {
+    Optional<File> getKeystore() {
         return Optional.ofNullable(keystore);
     }
 

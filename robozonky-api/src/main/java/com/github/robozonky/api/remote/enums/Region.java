@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public enum Region implements BaseEnum {
     }
 
     /**
-     * Purely for display purposes.
+     * Purely for display purposes. It may seem unused from Java code, but may still be used from Freemarker templates.
      * @return
      */
     public String getRichCode() {

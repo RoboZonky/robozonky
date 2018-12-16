@@ -110,6 +110,7 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public String getScope() {
+        // TODO convert to ZonkyScope?
         return scope;
     }
 

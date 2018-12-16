@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.daemon.operations;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,7 +33,9 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.operations.Selling;
+import com.github.robozonky.app.daemon.BlockedAmountProcessor;
+import com.github.robozonky.app.daemon.Portfolio;
+import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
@@ -122,11 +124,12 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Investment i = mockInvestment(loan);
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
-        when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
+        when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
         final Tenant tenant = mockTenant(zonky, isDryRun);
         final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
         final TransactionalPortfolio transactionalPortfolio = new TransactionalPortfolio(portfolio, tenant);
-        new Selling(ALL_ACCEPTING).accept(transactionalPortfolio);
+        final Selling s = new Selling(ALL_ACCEPTING);
+        s.accept(transactionalPortfolio);
         transactionalPortfolio.run(); // finish the transaction
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(5);
@@ -138,6 +141,11 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.get(4)).isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
+        verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+        // try to sell the same thing again, make sure it doesn't happen
+        readPreexistingEvents();
+        s.accept(transactionalPortfolio);
+        transactionalPortfolio.run(); // finish the transaction
         verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
     }
 

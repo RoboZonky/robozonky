@@ -61,20 +61,18 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         if (balance.doubleValue() < price) {
             Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; over balance.",
                                                     id, participationId));
-            return false;
         } else if (minimumRecommendation > price) {
             Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; below minimum.",
                                                     id, participationId));
-            return false;
         } else if (price > maximumRecommendation) {
             Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; over maximum.",
                                                     id, participationId));
-            return false;
         } else {
             Decisions.report(logger -> logger.debug("Final recommendation: buy loan #{} (participation #{}).", id,
                                                     participationId));
             return true;
         }
+        return false;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.github.robozonky.common.secrets;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -65,7 +64,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
             final boolean result = this.ksh.set(alias, value);
             this.ksh.save();
             return result;
-        } catch (final IOException ex) {
+        } catch (final Exception ex) {
             KeyStoreSecretProvider.LOGGER.warn("Failed saving keystore.", ex);
             return false;
         }

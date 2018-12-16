@@ -17,6 +17,8 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
@@ -247,5 +249,11 @@ class LoanTest {
         void userId() {
             integer(b, b::setUserId, b::getUserId, 1);
         }
+
+        @Test
+        void url() throws MalformedURLException {
+            standard(b, b::setUrl, b::getUrl, new URL("http://www.zonky.cz/"));
+        }
+
     }
 }

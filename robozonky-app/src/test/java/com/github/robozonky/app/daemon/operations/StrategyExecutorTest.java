@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -46,7 +48,9 @@ import static org.mockito.Mockito.when;
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     private static final InvestmentStrategy ALL_ACCEPTING_STRATEGY =
-            (a, p, r) -> a.stream().map(d -> d.recommend(200).get());
+            (a, p, r) -> a.stream()
+                    .map(d -> d.recommend(200))
+                    .flatMap(q -> q.map(Stream::of).orElse(Stream.empty()));
     private static final Supplier<Optional<InvestmentStrategy>> ALL_ACCEPTING =
             () -> Optional.of(ALL_ACCEPTING_STRATEGY);
 
@@ -61,14 +65,15 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         // prepare the executor, have it fail when executing the investment operation
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new AlwaysFreshNeverInvesting(auth);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> spied = spy(e);
-        when(spied.hasMarketplaceUpdates(any())).thenReturn(false); // marketplace never has any updates
         assertThat(spied.apply(p, marketplace)).isEmpty(); // fresh balance, check marketplace
         verify(spied).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
-        assertThat(spied.apply(p, marketplace)).isEmpty(); // nothing changed, still only ran once
-        verify(spied, times(1)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(p, marketplace)).isEmpty(); // marketplace first processed
+        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(p, marketplace)).isEmpty(); // nothing changed, no check
+        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(100_000))); // increase remote balance
         assertThat(spied.apply(p, marketplace)).isEmpty(); // should have checked marketplace
-        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        verify(spied, times(3)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
     }
 
     @Test
@@ -93,14 +98,16 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        protected boolean hasMarketplaceUpdates(final Collection<LoanDescriptor> marketplace) {
-            return false;
+        protected long identify(final LoanDescriptor descriptor) {
+            return descriptor.item().getId();
         }
 
         @Override
         protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                                  final Collection<LoanDescriptor> marketplace) {
-            return Collections.emptyList();
+            return strategy.recommend(marketplace, portfolio.getOverview(), getTenant().getRestrictions())
+                    .map(r -> Investment.fresh(r.descriptor().item(), r.amount().intValue()))
+                    .collect(Collectors.toList());
         }
     }
 }

@@ -24,6 +24,7 @@ import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -35,14 +36,15 @@ class TenantTest {
     void defaultMethods() {
         final Tenant t = spy(Tenant.class);
         when(t.getSessionInfo()).thenReturn(new SessionInfo("someone@somewhere.cz"));
-        t.isAvailable();
+        when(t.isAvailable(any())).thenReturn(true);
+        assertThat(t.isAvailable()).isTrue();
         verify(t).isAvailable(eq(ZonkyScope.getDefault()));
         final Function<Zonky, String> f = z -> "";
         t.call(f);
         verify(t).call(eq(f));
         final Consumer<Zonky> c = z -> {};
         t.run(c);
-        verify(t).run(eq(c));
+        verify(t).run(eq(c), any());
         assertThat(t.getState(TenantTest.class)).isNotNull();
     }
 

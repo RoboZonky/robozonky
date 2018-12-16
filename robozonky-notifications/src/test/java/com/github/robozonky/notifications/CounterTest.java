@@ -23,7 +23,8 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class CounterTest extends AbstractRoboZonkyTest {
 
@@ -32,16 +33,19 @@ class CounterTest extends AbstractRoboZonkyTest {
     @Test
     void testTiming() throws InterruptedException {
         final int seconds = 1;
-        final Counter c = new Counter(UUID.randomUUID().toString(), 1, Duration.ofSeconds(seconds));
-        assertThat(c.allow(SESSION)).isTrue();
-        c.increase(SESSION);
-        assertThat(c.allow(SESSION)).isFalse();
+        final String id = UUID.randomUUID().toString();
+        final Counter c = new Counter(SESSION, id, 1, Duration.ofSeconds(seconds));
+        assertThat(c.allow()).isTrue();
+        c.increase();
+        // make sure value was persisted
+        final Counter c2 = new Counter(SESSION, id, 1, Duration.ofSeconds(seconds));
+        assertThat(c2.allow()).isFalse();
         int millis = 0;
         boolean isAllowed = false;
         while (millis < seconds * 5 * 1000) { // spend the absolute minimum time waiting
             Thread.sleep(1);
             millis += 1;
-            isAllowed = c.allow(SESSION);
+            isAllowed = c2.allow();
             if (isAllowed) {
                 break;
             }

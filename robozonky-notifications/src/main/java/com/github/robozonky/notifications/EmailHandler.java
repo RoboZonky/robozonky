@@ -17,7 +17,6 @@
 package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.slf4j.Logger;
@@ -69,7 +68,6 @@ final class EmailHandler extends AbstractTargetHandler {
 
     private HtmlEmail createNewEmail(final SessionInfo session) throws EmailException {
         final HtmlEmail email = new HtmlEmail();
-        email.setCharset(Defaults.CHARSET.displayName());
         email.setHostName(getSmtpHostname());
         email.setSmtpPort(getSmtpPort());
         email.setStartTLSRequired(isStartTlsRequired());
@@ -81,8 +79,7 @@ final class EmailHandler extends AbstractTargetHandler {
         } else {
             LOGGER.debug("Will contact SMTP server anonymously.");
         }
-        final String sessionName = session.getName().map(n -> "RoboZonky '" + n + "'").orElse("RoboZonky");
-        email.setFrom(getSender(), sessionName);
+        email.setFrom(getSender(), session.getName());
         email.addTo(getRecipient());
         return email;
     }

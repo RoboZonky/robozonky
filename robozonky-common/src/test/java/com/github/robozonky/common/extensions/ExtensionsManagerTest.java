@@ -60,16 +60,11 @@ class ExtensionsManagerTest {
     }
 
     @Test
-    void loadJarsFromFolderWithJars() {
-        final File f = ExtensionsManagerTest.getFolder("target");
-        assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
-                .isInstanceOf(URLClassLoader.class);
-    }
-
-    @Test
     void loadJarsFromFolderWithNoJars() {
         final File f = ExtensionsManagerTest.getFolder("src");
-        assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
-                .isInstanceOf(URLClassLoader.class);
+        final ClassLoader classLoader = ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f);
+        assertThat(classLoader).isInstanceOf(URLClassLoader.class);
+        final URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
+        assertThat(urlClassLoader.getURLs()).isEmpty();
     }
 }

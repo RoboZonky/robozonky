@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.extensions;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -25,10 +25,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class FileUtil {
+final class FileUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
@@ -38,14 +39,14 @@ public final class FileUtil {
 
     public static Optional<File> findFolder(final String folderName) {
         final Path root = new File(System.getProperty("user.dir")).toPath();
-        try (final Stream<Path> s = Files.find(root, 1, (path, attr) -> attr.isDirectory())) {
-            return s.map(Path::toFile)
-                    .filter(f -> Objects.equals(f.getName(), folderName))
-                    .findFirst();
-        } catch (final Exception ex) {
-            FileUtil.LOGGER.warn("Exception while walking file tree.", ex);
-            return Optional.empty();
-        }
+        return Try.withResources(() -> Files.find(root, 1, (path, attr) -> attr.isDirectory()))
+                .of(s -> s.map(Path::toFile)
+                        .filter(f -> Objects.equals(f.getName(), folderName))
+                        .findFirst())
+                .getOrElseGet(ex -> {
+                    FileUtil.LOGGER.warn("Exception while walking file tree.", ex);
+                    return Optional.empty();
+                });
     }
 
     public static Stream<URL> filesToUrls(final File... jars) {
@@ -58,8 +59,8 @@ public final class FileUtil {
                         return Optional.of(f.toURI().toURL());
                     } catch (final MalformedURLException e) {
                         FileUtil.LOGGER.debug("Skipping file: '{}'.", f, e);
-                        return Optional.empty();
+                        return Optional.<URL>empty();
                     }
-                }).flatMap(o -> o.map(u -> Stream.of((URL) u)).orElse(Stream.empty()));
+                }).flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
     }
 }

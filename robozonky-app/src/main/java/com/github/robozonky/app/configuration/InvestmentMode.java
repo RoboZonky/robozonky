@@ -19,12 +19,13 @@ package com.github.robozonky.app.configuration;
 import java.io.Closeable;
 import java.util.function.Function;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 
 public interface InvestmentMode extends Function<Lifecycle, ReturnCode>,
                                         Closeable {
 
-    String getSessionName();
+    SessionInfo getSessionInfo();
 
 }

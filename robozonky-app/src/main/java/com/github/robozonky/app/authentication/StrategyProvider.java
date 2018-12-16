@@ -31,7 +31,7 @@ import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class StrategyProvider implements Refreshable.RefreshListener<String> {
+class StrategyProvider implements Refreshable.RefreshListener<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyProvider.class);
 

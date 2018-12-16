@@ -25,20 +25,20 @@ import io.vavr.control.Either;
 public interface Reloadable<T> {
 
     static <V> ManuallyReloadable<V> of(final Supplier<V> supplier, final Consumer<V> runWhenLoaded) {
-        return new ReloadableImpl(supplier, runWhenLoaded);
+        return new ReloadableImpl<>(supplier, runWhenLoaded);
     }
 
     static <V> ManuallyReloadable<V> of(final Supplier<V> supplier) {
-        return new ReloadableImpl(supplier);
+        return new ReloadableImpl<>(supplier);
     }
 
     static <V> TimeBasedReloadable<V> of(final Supplier<V> supplier, final Duration reloadAfter,
                                          final Consumer<V> runWhenLoaded) {
-        return new ReloadableImpl(supplier, reloadAfter, runWhenLoaded);
+        return new ReloadableImpl<>(supplier, reloadAfter, runWhenLoaded);
     }
 
     static <V> TimeBasedReloadable<V> of(final Supplier<V> supplier, final Duration reloadAfter) {
-        return new ReloadableImpl(supplier, reloadAfter);
+        return new ReloadableImpl<>(supplier, reloadAfter);
     }
 
     Either<Throwable, T> get();

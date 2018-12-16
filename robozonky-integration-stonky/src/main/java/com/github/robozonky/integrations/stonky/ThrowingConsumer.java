@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.integrations.stonky;
 
 import java.io.IOException;
 
 @FunctionalInterface
-public interface ThrowingSupplier<T> {
+public interface ThrowingConsumer<T> {
 
-    T get() throws IOException;
+    void accept(T arg) throws IOException;
 }

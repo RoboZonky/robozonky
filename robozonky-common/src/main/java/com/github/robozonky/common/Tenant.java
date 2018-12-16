@@ -27,7 +27,6 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.util.StreamUtil;
@@ -96,8 +95,6 @@ public interface Tenant extends Closeable {
     Restrictions getRestrictions();
 
     SessionInfo getSessionInfo();
-
-    SecretProvider getSecrets();
 
     Optional<InvestmentStrategy> getInvestmentStrategy();
 

@@ -19,6 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -35,8 +36,7 @@ public class Portfolio {
     private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
 
     private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
-    private final AtomicReference<Map<Rating, BigDecimal>> amountsAtRisk = new AtomicReference<>(
-            Collections.emptyMap());
+    private final AtomicReference<Map<Rating, BigDecimal>> atRisk = new AtomicReference<>(Collections.emptyMap());
     private final Statistics statistics;
     private final Tenant tenant;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
@@ -59,9 +59,11 @@ public class Portfolio {
     }
 
     public void amountsAtRiskUpdated(final Map<Rating, BigDecimal> newAmountsAtRisk) {
-        LOGGER.debug("New amounts at risk: {}.", newAmountsAtRisk);
-        amountsAtRisk.set(newAmountsAtRisk);
-        portfolioOverview.set(null);
+        if (!Objects.equals(atRisk.get(), newAmountsAtRisk)) {
+            LOGGER.debug("New amounts at risk: {}.", newAmountsAtRisk);
+            atRisk.set(newAmountsAtRisk);
+            portfolioOverview.set(null);
+        }
     }
 
     public PortfolioOverview getOverview() {
@@ -71,7 +73,7 @@ public class Portfolio {
             }
             final PortfolioOverview current = PortfolioOverviewImpl.calculate(tenant.getBalance(), statistics,
                                                                               blockedAmounts.get().getAdjustments(),
-                                                                              amountsAtRisk.get());
+                                                                              atRisk.get());
             LOGGER.debug("Calculated: {}.", current);
             return current;
         });

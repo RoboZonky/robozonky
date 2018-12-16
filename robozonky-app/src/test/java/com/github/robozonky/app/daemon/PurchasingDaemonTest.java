@@ -16,18 +16,29 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
 
@@ -40,6 +51,34 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
         }, a, () -> Optional.of(portfolio), Duration.ZERO);
         d.run();
         verify(z, times(1)).getAvailableParticipations(any());
+    }
+
+    @Test
+    void ignoringSoldBefore() {
+        final int loanId = 1;
+        final Participation p = mock(Participation.class);
+        when(p.getLoanId()).thenReturn(loanId);
+        final Participation p2 = mock(Participation.class);
+        when(p2.getLoanId()).thenReturn(loanId + 1);
+        when(p2.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getAvailableParticipations(any())).thenReturn(Stream.of(p, p2));
+        when(z.getLoan(anyInt())).thenAnswer(i -> Loan.custom()
+                .setId(i.getArgument(0))
+                .setRating(Rating.D)
+                .build());
+        final Tenant a = mockTenant(z);
+        when(a.getSessionInfo()).thenReturn(SESSION); // no dry run
+        when(a.getPurchaseStrategy()).thenReturn(Optional.of((available, portfolio, restrictions) -> available.stream()
+                .map(ParticipationDescriptor::recommend)
+                .flatMap(s -> s.map(Stream::of).orElse(Stream.empty())))); // recommend all participations
+        SoldParticipationCache.forTenant(a).markAsSold(loanId);
+        final Portfolio portfolio = Portfolio.create(a, BlockedAmountProcessor.createLazy(a));
+        final PurchasingDaemon d = new PurchasingDaemon(t -> {
+        }, a, () -> Optional.of(portfolio), Duration.ZERO);
+        d.run();
+        verify(z, never()).purchase(eq(p));
+        verify(z).purchase(eq(p2));
     }
 
     @Test

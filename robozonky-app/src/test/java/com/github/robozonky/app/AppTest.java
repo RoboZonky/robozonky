@@ -18,6 +18,7 @@ package com.github.robozonky.app;
 
 import java.util.List;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -66,12 +67,11 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void triggersEvents() {
-        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
         try {
-            main.execute(new MyInvestmentMode());
+            assertThat(main.execute(new MyInvestmentMode())).isEqualTo(ReturnCode.OK);
         } finally { // clean up, shutting down executors etc.
             main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
         }
@@ -84,7 +84,6 @@ class AppTest extends AbstractEventLeveragingTest {
             softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
             softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
         });
-        assertThat(s.isClosed()).isTrue();
     }
 
     /**
@@ -92,7 +91,6 @@ class AppTest extends AbstractEventLeveragingTest {
      */
     @Test
     void failsCorrectly() {
-        final Scheduler s = Scheduler.inBackground();
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
@@ -100,20 +98,21 @@ class AppTest extends AbstractEventLeveragingTest {
             final ReturnCode result = main.execute(new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } finally { // clean up, shutting down executors etc.
-            main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
+            final Scheduler s = Scheduler.inBackground();
+            main.exit(new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, null));
+            assertThat(s.isClosed()).isTrue();
         }
-        assertThat(s.isClosed()).isTrue();
     }
 
     private static class MyInvestmentMode implements InvestmentMode {
 
         @Override
-        public String getSessionName() {
-            return "";
+        public SessionInfo getSessionInfo() {
+            return SESSION;
         }
 
         @Override
-        public ReturnCode apply(Lifecycle lifecycle) {
+        public ReturnCode apply(final Lifecycle lifecycle) {
             return ReturnCode.OK;
         }
 
@@ -126,12 +125,12 @@ class AppTest extends AbstractEventLeveragingTest {
     private static class MyFailingInvestmentMode implements InvestmentMode {
 
         @Override
-        public String getSessionName() {
-            return "";
+        public SessionInfo getSessionInfo() {
+            return SESSION;
         }
 
         @Override
-        public ReturnCode apply(Lifecycle lifecycle) {
+        public ReturnCode apply(final Lifecycle lifecycle) {
             throw new IllegalStateException("Testing failure");
         }
 

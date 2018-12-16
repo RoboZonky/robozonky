@@ -58,10 +58,10 @@ public final class SessionInfo {
     }
 
     /**
-     * @return Name of the robot session currently running, if given.
+     * @return Name of the robot session currently running.
      */
-    public Optional<String> getName() {
-        return Optional.ofNullable(name);
+    public String getName() {
+        return Optional.ofNullable(name).map(n -> "RoboZonky '" + n + '\'').orElse("RoboZonky");
     }
 
     @Override

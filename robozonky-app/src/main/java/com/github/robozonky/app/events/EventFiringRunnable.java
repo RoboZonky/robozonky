@@ -36,13 +36,15 @@ final class EventFiringRunnable implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (true) {
+        boolean repeat = true;
+        do {
+            try {
                 queue.take().run();
+            } catch (final InterruptedException ex) {
+                LOGGER.debug("Interrupted while waiting for an event to fire.", ex);
+                Thread.currentThread().interrupt();
+                repeat = false;
             }
-        } catch (final InterruptedException ex) {
-            LOGGER.debug("Interrupted while waiting for an event to fire.", ex);
-            Thread.currentThread().interrupt();
-        }
+        } while (repeat);
     }
 }

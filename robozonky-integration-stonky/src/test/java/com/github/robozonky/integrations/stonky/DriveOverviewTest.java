@@ -39,6 +39,11 @@ class DriveOverviewTest {
     private final Credential credential = new MockGoogleCredential.Builder().build();
 
     @Test
+    void folderName() {
+        assertThat(DriveOverview.getFolderName(SESSION_INFO)).isNotEmpty();
+    }
+
+    @Test
     void emptyGoogleDrive() throws IOException {
         final MultiRequestMockHttpTransport transport = new MultiRequestMockHttpTransport();
         transport.addReponseHandler(new FilesInFolderResponseHandler("root"));

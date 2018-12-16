@@ -17,29 +17,17 @@
 package com.github.robozonky.app.daemon.operations;
 
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
-import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
-import com.github.robozonky.util.NumberUtil;
 
-public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
-
-    private static final long[] NO_LONGS = new long[0];
-    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
+public class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
 
     public Purchasing(final Tenant auth) {
         super(auth, auth::getPurchaseStrategy);
-    }
-
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
-        return new ParticipationDescriptor(p, () -> LoanCache.get().getLoan(p.getLoanId(), auth));
     }
 
     @Override
@@ -48,18 +36,13 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     }
 
     @Override
-    protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
-        final long[] idsFromMarketplace = marketplace.stream().mapToLong(Participation::getId).toArray();
-        final long[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
-        return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
+    protected long identify(final ParticipationDescriptor descriptor) {
+        return descriptor.item().getId();
     }
 
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
-                                             final Collection<Participation> marketplace) {
-        final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .map(d -> toDescriptor(d, getTenant()))
-                .collect(Collectors.toList());
-        return PurchasingSession.purchase(portfolio, getTenant(), participations, strategy);
+                                             final Collection<ParticipationDescriptor> marketplace) {
+        return PurchasingSession.purchase(portfolio, getTenant(), marketplace, strategy);
     }
 }

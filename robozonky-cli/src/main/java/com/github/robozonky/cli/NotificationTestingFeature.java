@@ -54,10 +54,9 @@ public final class NotificationTestingFeature extends AbstractFeature {
     @Override
     public void test() throws TestFailedException {
         final boolean success = Checker.notifications(new SessionInfo(username), location);
-        if (success) {
-            LOGGER.info("Notifications should have been sent now.");
-        } else {
+        if (!success) {
             throw new TestFailedException("No notifications have been sent. Check log for possible problems.");
         }
+        LOGGER.info("Notifications should have been sent now.");
     }
 }

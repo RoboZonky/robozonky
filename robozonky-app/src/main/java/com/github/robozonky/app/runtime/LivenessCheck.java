@@ -28,10 +28,10 @@ import java.util.stream.Collectors;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.IoUtil;
 import com.github.robozonky.util.Refreshable;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Schedulers;
+import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -54,9 +54,7 @@ class LivenessCheck extends Refreshable<String> {
     }
 
     private static ThreadFactory getThreadFactory() {
-        final ThreadGroup tg = new ThreadGroup("rzLiveness");
-        tg.setDaemon(true);
-        return new RoboZonkyThreadFactory(tg);
+        return new RoboZonkyThreadFactory(new ThreadGroup("rzLiveness"));
     }
 
     public static ShutdownHook.Handler setup(final MainControl mainThreadControl) {
@@ -72,20 +70,22 @@ class LivenessCheck extends Refreshable<String> {
 
     @Override
     protected String getLatestSource() {
-        try {
-            return IoUtil.tryFunction(() -> new URL(url).openStream(), s -> {
-                final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
-                        .collect(Collectors.joining(System.lineSeparator()));
-                LOGGER.trace("API info coming from Zonky: {}.", source);
-                final ApiVersion version = ApiVersion.read(source);
-                // need to send parsed version, since the object itself changes every time due to currentApiTime field
-                return version.getBuildVersion();
-            });
-        } catch (final Exception ex) {
-            // don't propagate this exception as it is likely to happen and the calling code would WARN about it
-            LOGGER.debug("Zonky servers are likely unavailable.", ex);
-            return null; // will fail during transform()
-        }
+        // need to send parsed version, since the object itself changes every time due to currentApiTime field
+        return Try.withResources(() -> new URL(url).openStream())
+                .of(s -> {
+                    final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
+                            .collect(Collectors.joining(System.lineSeparator()));
+                    LOGGER.trace("API info coming from Zonky: {}.", source);
+                    final ApiVersion version = ApiVersion.read(source);
+                    // need to send parsed version, since the object itself changes every time due to
+                    // currentApiTime field
+                    return version.getBuildVersion();
+                })
+                .getOrElseGet(ex -> {
+                    // don't propagate this exception as it is likely to happen and the calling code would WARN about it
+                    LOGGER.debug("Zonky servers are likely unavailable.", ex);
+                    return null; // will fail during transform()
+                });
     }
 
     @Override

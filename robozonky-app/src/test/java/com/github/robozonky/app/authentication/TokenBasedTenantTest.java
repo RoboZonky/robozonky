@@ -17,9 +17,13 @@
 package com.github.robozonky.app.authentication;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
@@ -70,4 +74,17 @@ class TokenBasedTenantTest extends AbstractRoboZonkyTest {
         verify(a).login(any(), any(), any());
         verify(z).logout();
     }
+
+    @Test
+    void strategies() {
+        final StrategyProvider s = mock(StrategyProvider.class);
+        when(s.getToInvest()).thenReturn(Optional.of(mock(InvestmentStrategy.class)));
+        when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
+        when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
+        final TokenBasedTenant t = new TokenBasedTenant(null, null, s, null);
+        assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
+        assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
+        assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);
+    }
+
 }

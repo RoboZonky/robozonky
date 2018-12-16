@@ -89,14 +89,14 @@ class ZonkyTest {
 
     private static Zonky mockZonkyWallet(final PaginatedApi<BlockedAmount, WalletApi> wa) {
         final ApiProvider apiProvider = mockApiProvider();
-        when(apiProvider.obtainPaginated(eq(WalletApi.class), any(), any())).thenReturn(wa);
+        when(apiProvider.obtainPaginated(eq(WalletApi.class), any())).thenReturn(wa);
         return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
                                                                             final Class<T> blueprint,
                                                                             final PaginatedApi<S, T> api) {
-        when(apiProvider.obtainPaginated(eq(blueprint), any(), any())).thenReturn(api);
+        when(apiProvider.obtainPaginated(eq(blueprint), any())).thenReturn(api);
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
@@ -162,6 +162,7 @@ class ZonkyTest {
             softly.assertThat(z.getBlockedAmounts()).isEmpty();
             softly.assertThat(z.getInvestments(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getInvestment(1)).isEmpty();
+            softly.assertThat(z.getDelinquentInvestments()).isEmpty();
             softly.assertThat(z.getAvailableParticipations(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getTransactions(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getDevelopments(1)).isEmpty();

@@ -23,10 +23,16 @@ import java.util.UUID;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import com.github.robozonky.common.secrets.SecretProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ZonkoidPasswordFeatureTest {
 
@@ -39,7 +45,7 @@ class ZonkoidPasswordFeatureTest {
     }
 
     @Test
-    void openProperExisting() throws IOException, SetupFailedException, KeyStoreException {
+    void openProperExistingFailing() throws IOException, SetupFailedException, KeyStoreException, TestFailedException {
         final File f = newTempFile();
         final String pwd = UUID.randomUUID().toString();
         SecretProvider.keyStoreBased(KeyStoreHandler.create(f, KEYSTORE_PASSWORD.toCharArray()), "user"); // prep
@@ -47,6 +53,26 @@ class ZonkoidPasswordFeatureTest {
         feature.setup();
         final SecretProvider s = SecretProvider.keyStoreBased(KeyStoreHandler.open(f, KEYSTORE_PASSWORD.toCharArray()));
         assertThat(s.getSecret(ZonkoidPasswordFeature.ZONKOID_ID)).contains(pwd.toCharArray());
+        assertThatThrownBy(feature::test).isInstanceOf(TestFailedException.class);
+    }
+
+    @BeforeEach
+    void resetMocks() {
+        Mockito.reset(TestingZonkoidProviderService.INSTANCE); // this is static, so needs to be reset before each test
+    }
+
+    @Test
+    void openProperExistingSuccess() throws IOException, SetupFailedException, KeyStoreException, TestFailedException {
+        final File f = newTempFile();
+        final String pwd = UUID.randomUUID().toString();
+        SecretProvider.keyStoreBased(KeyStoreHandler.create(f, KEYSTORE_PASSWORD.toCharArray()), "user"); // prep
+        final Feature feature = new ZonkoidPasswordFeature(f, KEYSTORE_PASSWORD.toCharArray(), pwd.toCharArray());
+        feature.setup();
+        final SecretProvider s = SecretProvider.keyStoreBased(KeyStoreHandler.open(f, KEYSTORE_PASSWORD.toCharArray()));
+        assertThat(s.getSecret(ZonkoidPasswordFeature.ZONKOID_ID)).contains(pwd.toCharArray());
+        when(TestingZonkoidProviderService.INSTANCE.requestConfirmation(any(), anyInt(), anyInt())).thenReturn(true);
+        feature.test();
+        verify(TestingZonkoidProviderService.INSTANCE).requestConfirmation(any(), anyInt(), anyInt());
     }
 
     @Test

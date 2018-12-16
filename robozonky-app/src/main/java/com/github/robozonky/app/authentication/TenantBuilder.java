@@ -17,8 +17,11 @@
 package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
+import java.util.function.Function;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
@@ -60,11 +63,11 @@ public final class TenantBuilder {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
         }
-        if (api == null) {
-            return new TokenBasedTenant(new ApiProvider(), secrets, strategyProvider, name, dryRun, tokenRefresh);
-        } else {
-            return new TokenBasedTenant(api, secrets, strategyProvider, name, dryRun, tokenRefresh);
-        }
+        final ApiProvider apis = api == null ? new ApiProvider() : api;
+        final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier =
+                scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, tokenRefresh);
+        final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
+        return new TokenBasedTenant(sessionInfo, apis, strategyProvider, tokenSupplier);
     }
 
     public Tenant build() {

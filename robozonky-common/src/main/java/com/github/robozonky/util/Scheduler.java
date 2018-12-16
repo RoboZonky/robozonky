@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public class Scheduler implements AutoCloseable {
 
-    public static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzBackground"));
+    public static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final ManuallyReloadable<Scheduler> BACKGROUND_SCHEDULER = Reloadable.of(() -> {
         LOGGER.debug("Instantiating new background scheduler.");
@@ -50,13 +50,6 @@ public class Scheduler implements AutoCloseable {
 
     Scheduler(final int poolSize, final ThreadFactory threadFactory) {
         this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
-    }
-
-    private static ThreadGroup newThreadGroup(final String name) {
-        final ThreadGroup threadGroup = new ThreadGroup(name);
-        threadGroup.setMaxPriority(Thread.NORM_PRIORITY - 1); // these threads are supposed to be less important
-        threadGroup.setDaemon(true); // all of these threads are daemons (won't block shutdown)
-        return threadGroup;
     }
 
     private static Scheduler actuallyGetBackgroundScheduler() {

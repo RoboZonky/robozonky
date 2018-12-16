@@ -5813,6 +5813,27 @@
         "code": "java.method.addedToInterface",
         "new": "method java.time.ZonedDateTime com.github.robozonky.api.strategies.PortfolioOverview::getTimestamp()",
         "justification": "PortfolioOverview now knows when it was created."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.enums.PaymentStatuses com.github.robozonky.api.remote.enums.PaymentStatus::getDone()",
+        "justification": "Unused."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setAmountInvested(java.math.BigDecimal)",
+        "justification": "Method renamed for consistency between getter and setter."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setOriginalPrincipal(java.math.BigDecimal)",
+        "justification": "Method renamed for consistency between getter and setter."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.util.Optional<java.lang.String> com.github.robozonky.api.SessionInfo::getName()",
+        "new": "method java.lang.String com.github.robozonky.api.SessionInfo::getName()",
+        "justification": "Session name now always exists."
       }
     ]
   }

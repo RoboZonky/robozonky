@@ -17,12 +17,15 @@
 package com.github.robozonky.common.state;
 
 import java.io.File;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.util.TextUtil;
+import com.github.robozonky.internal.api.Defaults;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +48,16 @@ public final class TenantState {
         return TENANT_STATE_MAP.keySet().stream();
     }
 
+    static String encode(final String secret) {
+        return Try.of(() -> {
+            final MessageDigest mdEnc = MessageDigest.getInstance("MD5");
+            mdEnc.update(secret.getBytes(Defaults.CHARSET));
+            return new BigInteger(1, mdEnc.digest()).toString(16);
+        }).getOrElse(secret);
+    }
+
     private static File getFile(final String username) {
-        final String encoded = TextUtil.md5(username).orElse(username);
+        final String encoded = encode(username);
         final String filename = "robozonky-" + encoded + ".state";
         return new File(filename);
     }

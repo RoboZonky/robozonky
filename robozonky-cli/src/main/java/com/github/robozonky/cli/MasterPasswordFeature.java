@@ -17,7 +17,6 @@
 package com.github.robozonky.cli;
 
 import java.io.File;
-import java.io.IOException;
 
 import picocli.CommandLine;
 
@@ -48,7 +47,7 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
         super.setup();
         try {
             this.getStorage().save(newSecret);
-        } catch (final IOException ex) {
+        } catch (final Exception ex) {
             throw new SetupFailedException(ex);
         }
     }

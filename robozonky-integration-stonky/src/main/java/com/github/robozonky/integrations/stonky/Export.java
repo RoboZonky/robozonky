@@ -17,7 +17,6 @@
 package com.github.robozonky.integrations.stonky;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
@@ -30,6 +29,7 @@ import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.util.Backoff;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,31 +47,28 @@ enum Export {
         this.download = api -> download(api, delegate);
     }
 
-    private static URL download(final Zonky zonky, final Function<Zonky, Response> delegate) {
-        final Response response = delegate.apply(zonky);
-        try {
-            final int status = response.getStatus();
-            LOGGER.debug("Download endpoint returned HTTP {}.", status);
-            if (status == 302) {
-                try {
+    private URL download(final Zonky zonky, final Function<Zonky, Response> delegate) {
+        return Try.withResources(() -> delegate.apply(zonky))
+                .of(response -> {
+                    final int status = response.getStatus();
+                    LOGGER.debug("Download endpoint returned HTTP {}.", status);
+                    if (status != 302) {
+                        return null;
+                    }
                     final String s = response.getHeaderString("Location");
                     return new URL(s);
-                } catch (final MalformedURLException ex) {
-                    LOGGER.warn("Proper HTTP response, improper redirect location.", ex);
-                }
-            }
-            return null;
-        } finally { // not using try-with-resources, as that'd generate several untestable PITest mutations
-            response.close();
-        }
+                }).getOrElseThrow(t -> new IllegalStateException("Failed downloading " + this, t));
     }
 
-    public CompletableFuture<Optional<File>> download(final Tenant tenant) {
-        final Backoff<URL> waitWhileExportRunning =
-                Backoff.exponential(() -> tenant.call(download, ZonkyScope.FILES), Duration.ofSeconds(1),
-                                    Duration.ofHours(1));
+    public CompletableFuture<Optional<File>> download(final Tenant tenant, final Duration backoffTime) {
+        final Backoff<URL> waitWhileExportRunning = Backoff.exponential(() -> tenant.call(download, ZonkyScope.FILES),
+                                                                        Duration.ofSeconds(1), backoffTime);
         return CompletableFuture.runAsync(() -> tenant.run(trigger, ZonkyScope.APP))
                 .thenApplyAsync(v -> waitWhileExportRunning.get())
                 .thenApplyAsync(urlOrError -> urlOrError.fold(r -> Optional.empty(), Util::download));
+    }
+
+    public CompletableFuture<Optional<File>> download(final Tenant tenant) {
+        return download(tenant, Duration.ofHours(1));
     }
 }

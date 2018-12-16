@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,6 @@ public enum PaymentStatus {
     public static PaymentStatuses getDelinquent() {
         return PaymentStatuses.of(PaymentStatus.DUE,
                                   PaymentStatus.PAID_OFF);
-    }
-
-    /**
-     * @return Values of this enum that correspond to investments that have no expected future instalments.
-     */
-    public static PaymentStatuses getDone() {
-        return PaymentStatuses.of(PaymentStatus.CANCELED, PaymentStatus.WRITTEN_OFF, PaymentStatus.PAID,
-                                  PaymentStatus.IN_WITHDRAWAL);
     }
 
     /**

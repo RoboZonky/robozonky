@@ -217,7 +217,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         props.setProperty("com.sun.management.jmxremote.port", port);
         try {
             Util.writeOutProperties(props, JMX_PROPERTIES_FILE);
-        } catch (final IOException ex) {
+        } catch (final Exception ex) {
             throw new IllegalStateException("Failed writing JMX configuration.", ex);
         }
         // configure JMX to read the props file
@@ -285,16 +285,13 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                 google.runGoogleCredentialCheck();
                 LOGGER.debug("Credential check over.");
                 // copy credentials to the correct directory
-                final String dirName = GOOGLE_LOCAL_FOLDER.getValue()
-                        .orElseThrow(() -> new IllegalStateException("Not possible."));
-                final File source = new File(dirName);
-                if (!source.isDirectory()) {
-                    throw new IllegalStateException("Google credentials folder was not created.");
-                }
-                final File target = new File(INSTALL_PATH, dirName);
+                final File source = GOOGLE_LOCAL_FOLDER.getValue()
+                        .map(File::new)
+                        .filter(File::isDirectory)
+                        .orElseThrow(() -> new IllegalStateException("Google credentials folder is not proper."));
+                final File target = new File(INSTALL_PATH, source.getName());
                 LOGGER.debug("Will copy {} to {}.", source, target);
-                FileUtils.copyDirectory(source, target);
-                FileUtils.deleteDirectory(source);
+                FileUtils.moveDirectory(source, target);
             }
             return cli;
         } catch (final Exception ex) {

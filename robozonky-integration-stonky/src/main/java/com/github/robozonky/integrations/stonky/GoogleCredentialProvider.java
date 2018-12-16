@@ -23,10 +23,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.util.IoUtil;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -37,6 +37,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,10 +84,11 @@ final class GoogleCredentialProvider implements CredentialProvider {
                 .build();
     }
 
-    private GoogleClientSecrets createClientSecrets() throws IOException {
+    private GoogleClientSecrets createClientSecrets() {
         final byte[] key = secrets.get();
-        return IoUtil.tryFunction(() -> new ByteArrayInputStream(key),
-                                     s -> GoogleClientSecrets.load(Util.JSON_FACTORY, new InputStreamReader(s)));
+        return Try.withResources(() -> new ByteArrayInputStream(key))
+                .of(s -> GoogleClientSecrets.load(Util.JSON_FACTORY, new InputStreamReader(s)))
+                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 
     @Override

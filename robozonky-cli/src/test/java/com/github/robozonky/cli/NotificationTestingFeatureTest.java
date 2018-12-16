@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.cli;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class TextUtilTest {
+class NotificationTestingFeatureTest {
 
     @Test
-    void md5() {
-        final String hashed = TextUtil.md5("The quick brown fox jumps over the lazy dog.").orElse("");
-        assertThat(hashed).isEqualTo("e4d909c290d0fb1ca068ffaddf22cbd0");
+    void noNotifications() throws MalformedURLException, SetupFailedException {
+        final String username = UUID.randomUUID().toString();
+        final URL url = new URL("http://localhost");
+        final Feature f = new NotificationTestingFeature(username, url);
+        f.setup();
+        assertThatThrownBy(f::test).isInstanceOf(TestFailedException.class);
     }
 
 }

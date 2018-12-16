@@ -26,9 +26,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.IoUtil;
-import com.github.robozonky.util.ThrowingFunction;
-import com.github.robozonky.util.ThrowingSupplier;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -36,6 +33,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.sheets.v4.Sheets;
+import io.vavr.control.Try;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,13 +112,12 @@ public final class Util {
     }
 
     static Optional<File> download(final URL url) {
-        LOGGER.debug("Will download file from {}.", url);
-        try {
-            return IoUtil.tryFunction(url::openStream, Util::download);
-        } catch (final Exception ex) {
-            LOGGER.warn("Failed downloading file.", ex);
-            return Optional.empty();
-        }
+        return Try.withResources(url::openStream)
+                .of(Util::download)
+                .getOrElseGet(t -> {
+                    LOGGER.warn("Failed downloading file.", t);
+                    return Optional.empty();
+                });
     }
 
     static Optional<File> download(final InputStream stream) {
@@ -133,5 +130,4 @@ public final class Util {
             return Optional.empty();
         }
     }
-
 }

@@ -120,13 +120,13 @@ public abstract class Refreshable<T> implements Runnable,
 
     private void storeResult(final T result) {
         final T previous = cachedResult.getAndSet(result);
-        if (Objects.equals(previous, result)) {
+        if (Objects.equals(previous, result)) { // both values equal or null
             LOGGER.trace("Value not changed: {}.", this);
             return;
         }
-        if (previous == null && result != null) { // value newly available
+        if (previous == null) { // value newly available
             this.listeners.forEach(l -> l.valueSet(result));
-        } else if (previous != null && result == null) { // value lost
+        } else if (result == null) { // value lost
             this.listeners.forEach(l -> l.valueUnset(previous));
         } else { // value changed
             this.listeners.forEach(l -> l.valueChanged(previous, result));

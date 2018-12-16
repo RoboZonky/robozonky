@@ -66,14 +66,13 @@ public class Selling implements PortfolioDependant {
         final Tenant tenant = transactional.getTenant();
         transactional.fire(EventFactory.saleRequested(r));
         final Investment i = r.descriptor().item();
-        if (tenant.getSessionInfo().isDryRun()) {
-            LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
-            sold.put(i); // make sure dry run never tries to sell this again in this instance
-        } else {
-            LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
+        final boolean isRealRun = !tenant.getSessionInfo().isDryRun();
+        LOGGER.debug("Will send sell request for loan #{}: {}.", i.getLoanId(), isRealRun);
+        if (isRealRun) {
             tenant.run(z -> z.sell(i));
             LOGGER.trace("Request over.");
         }
+        sold.put(i); // make sure dry run never tries to sell this again in this instance
         transactional.fire(EventFactory.saleOffered(i, r.descriptor().related()));
         return Optional.of(i);
     }
@@ -83,9 +82,12 @@ public class Selling implements PortfolioDependant {
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
         final Tenant tenant = transactional.getTenant();
-        final SessionState<Investment> sold = new SessionState<>(tenant, Investment::getLoanId, "soldInvestments");
-        final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
+        final Set<Investment> marketplace = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .parallel()
+                .collect(Collectors.toSet());
+        final SessionState<Investment> sold = new SessionState<>(tenant, marketplace, Investment::getLoanId,
+                                                                 "soldInvestments");
+        final Set<InvestmentDescriptor> eligible = marketplace.stream()
                 .filter(i -> !sold.contains(i)) // to make dry run function properly
                 .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());

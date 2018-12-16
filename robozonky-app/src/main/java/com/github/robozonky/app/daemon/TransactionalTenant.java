@@ -29,7 +29,6 @@ import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,11 +71,6 @@ final class TransactionalTenant implements Tenant {
     @Override
     public SessionInfo getSessionInfo() {
         return parent.getSessionInfo();
-    }
-
-    @Override
-    public SecretProvider getSecrets() {
-        return parent.getSecrets();
     }
 
     @Override

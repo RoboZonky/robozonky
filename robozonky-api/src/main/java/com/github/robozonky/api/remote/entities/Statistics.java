@@ -20,14 +20,27 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.internal.util.DateUtil;
+import io.vavr.Lazy;
 
 public class Statistics extends BaseEntity {
 
-    private static final AtomicReference<Statistics> EMPTY = new AtomicReference<>();
+    private static final Lazy<Statistics> EMPTY = Lazy.of(() -> {
+        final Statistics s = new Statistics();
+        s.currentProfitability = BigDecimal.ZERO;
+        s.expectedProfitability = BigDecimal.ZERO;
+        s.cashFlow = Collections.emptyList();
+        s.riskPortfolio = Collections.emptyList();
+        s.expectedPayments = Collections.emptyList();
+        s.currentOverview = new CurrentOverview();
+        s.overallOverview = new OverallOverview();
+        s.overallPortfolio = new OverallPortfolio(0, 0, 0);
+        s.superInvestorOverview = SuperInvestorOverview.empty();
+        s.timestamp = DateUtil.offsetNow();
+        return s;
+    });
 
     private BigDecimal currentProfitability, expectedProfitability;
     private CurrentOverview currentOverview;
@@ -44,23 +57,7 @@ public class Statistics extends BaseEntity {
     }
 
     public static Statistics empty() {
-        return EMPTY.updateAndGet(old -> {
-            if (old != null) {
-                return old;
-            }
-            final Statistics s = new Statistics();
-            s.currentProfitability = BigDecimal.ZERO;
-            s.expectedProfitability = BigDecimal.ZERO;
-            s.cashFlow = Collections.emptyList();
-            s.riskPortfolio = Collections.emptyList();
-            s.expectedPayments = Collections.emptyList();
-            s.currentOverview = new CurrentOverview();
-            s.overallOverview = new OverallOverview();
-            s.overallPortfolio = new OverallPortfolio(0, 0, 0);
-            s.superInvestorOverview = SuperInvestorOverview.empty();
-            s.timestamp = DateUtil.offsetNow();
-            return s;
-        });
+        return EMPTY.get();
     }
 
     private static <T> List<T> unmodifiableOrEmpty(final List<T> possiblyNull) {

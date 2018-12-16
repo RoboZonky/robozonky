@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.remote;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import com.github.robozonky.internal.api.Defaults;
 
-public class InterceptingInputStream extends InputStream {
+class InterceptingInputStream extends InputStream {
 
     private static final int MAX_ENTITY_SIZE = 1024;
 

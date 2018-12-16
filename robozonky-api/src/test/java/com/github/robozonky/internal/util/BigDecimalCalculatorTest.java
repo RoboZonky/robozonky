@@ -26,22 +26,50 @@ class BigDecimalCalculatorTest {
 
     @Test
     void multiplication() {
-        assertThat(BigDecimalCalculator.times(2, 3)).isEqualTo(new BigDecimal("6"));
+        final BigDecimal result = BigDecimalCalculator.times(2, 3);
+        assertThat(result).isEqualTo(new BigDecimal("6"));
     }
 
     @Test
     void division() {
-        assertThat(BigDecimalCalculator.divide(3, 2)).isEqualTo(new BigDecimal("1.5"));
+        final BigDecimal result = BigDecimalCalculator.divide(3, 2);
+        assertThat(result).isEqualTo(new BigDecimal("1.5"));
     }
 
     @Test
     void addition() {
-        assertThat(BigDecimalCalculator.plus(0, 1.0)).isEqualTo(BigDecimal.ONE);
+        final BigDecimal result = BigDecimalCalculator.plus(0, 1.0);
+        assertThat(result).isEqualTo(BigDecimal.ONE);
+    }
+
+    @Test
+    void subtractionWithBigDecimalAsSecondArg() {
+        final BigDecimal result = BigDecimalCalculator.minus(0.0, BigDecimal.ONE);
+        assertThat(result).isEqualTo(BigDecimal.ONE.negate());
+    }
+
+    @Test
+    void multiplicationWithBigDecimalAsSecondArg() {
+        final BigDecimal result = BigDecimalCalculator.times(2, BigDecimal.valueOf(3));
+        assertThat(result).isEqualTo(new BigDecimal("6"));
+    }
+
+    @Test
+    void divisionWithBigDecimalAsSecondArg() {
+        final BigDecimal result = BigDecimalCalculator.divide(3, BigDecimal.valueOf(2));
+        assertThat(result).isEqualTo(new BigDecimal("1.5"));
+    }
+
+    @Test
+    void additionWithBigDecimalAsSecondArg() {
+        final BigDecimal result = BigDecimalCalculator.plus(0, BigDecimal.ONE);
+        assertThat(result).isEqualTo(BigDecimal.ONE);
     }
 
     @Test
     void subtraction() {
-        assertThat(BigDecimalCalculator.minus(0.0, 1)).isEqualTo(BigDecimal.ONE.negate());
+        final BigDecimal result = BigDecimalCalculator.minus(0.0, 1);
+        assertThat(result).isEqualTo(BigDecimal.ONE.negate());
     }
 
     @Test

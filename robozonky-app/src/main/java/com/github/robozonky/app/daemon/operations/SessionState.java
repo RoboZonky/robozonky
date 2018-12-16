@@ -106,4 +106,12 @@ final class SessionState<T> {
     public synchronized boolean contains(final T item) {
         return items.contains(idSupplier.applyAsLong(item));
     }
+
+    @Override
+    public String toString() {
+        return "SessionState{" +
+                "items=" + items +
+                ", key='" + key + '\'' +
+                '}';
+    }
 }

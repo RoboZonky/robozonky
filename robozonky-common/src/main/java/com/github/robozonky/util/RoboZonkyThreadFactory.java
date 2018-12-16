@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RoboZonkyThreadFactory implements ThreadFactory {
 
-    private final ThreadGroup threadGroup;
     private final AtomicInteger nextThreadNumber = new AtomicInteger(1);
+    private final ThreadGroup threadGroup;
 
     public RoboZonkyThreadFactory(final ThreadGroup group) {
         this.threadGroup = group;
@@ -36,8 +36,7 @@ public class RoboZonkyThreadFactory implements ThreadFactory {
     public Thread newThread(final Runnable runnable) {
         final String name = threadGroup.getName() + "-" + nextThreadNumber.getAndIncrement();
         final Thread thread = new Thread(threadGroup, runnable, name);
-        thread.setPriority(threadGroup.getMaxPriority()); // use the max priority allowed by the group
-        thread.setDaemon(threadGroup.isDaemon());
+        thread.setDaemon(true);
         return thread;
     }
 }
