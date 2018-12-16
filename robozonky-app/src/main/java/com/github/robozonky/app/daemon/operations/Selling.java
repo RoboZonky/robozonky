@@ -98,6 +98,6 @@ public class Selling implements Runnable {
      */
     @Override
     public void run() {
-        tenant.getSellStrategy().ifPresent(s -> sell(s));
+        tenant.getSellStrategy().ifPresent(this::sell);
     }
 }

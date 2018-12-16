@@ -63,7 +63,7 @@ final class ReloadableImpl<T> implements Reloadable<T> {
     }
 
     @Override
-    public void clear() {
+    public synchronized void clear() {
         needsReload.forceReload();
     }
 
