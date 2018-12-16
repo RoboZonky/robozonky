@@ -135,7 +135,7 @@ class FilterSupplier {
         final boolean exitStrategyTriggered = defaults.getMonthsBeforeExit() != lastCheckedMonthsBeforeExit;
         final boolean needsReinit = !wasCheckedOnce || sellOffTriggered || exitStrategyTriggered;
         if (!needsReinit) {
-            LOGGER.debug("Not reinitializing.");
+            LOGGER.trace("Not reinitializing.");
             return;
         }
         LOGGER.debug("Exit strategy triggered: {}.", exitStrategyTriggered);
