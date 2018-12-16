@@ -18,6 +18,7 @@ package com.github.robozonky.test;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -71,7 +72,17 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     public static RemotePortfolio mockPortfolio(final Zonky zonky) {
-        return mock(RemotePortfolio.class);
+        final AtomicReference<BigDecimal> change = new AtomicReference<>(BigDecimal.ZERO);
+        final RemotePortfolio p = mock(RemotePortfolio.class);
+        doAnswer(i -> {
+            final BigDecimal amount = i.getArgument(2);
+            change.updateAndGet(old -> old.add(amount));
+            return null;
+        }).when(p).simulateCharge(anyInt(), any(), any());
+        final Supplier<BigDecimal> balance = () -> zonky.getWallet().getBalance().subtract(change.get());
+        when(p.getBalance()).thenAnswer(i -> balance.get());
+        when(p.getOverview()).thenAnswer(i -> mockPortfolioOverview(balance.get().intValue()));
+        return p;
     }
 
     protected static Tenant mockTenant(final Zonky zonky) {
