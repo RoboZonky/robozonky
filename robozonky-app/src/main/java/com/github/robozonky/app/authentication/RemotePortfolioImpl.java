@@ -61,6 +61,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     private void refresh(final RemoteData data) {
+        LOGGER.debug("New remote data: {}.", data);
         // force overview recalculation
         portfolioOverview.clear();
         // remove synthetic charges that are replaced by actual remote blocked amounts
@@ -68,7 +69,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
                 .filter(e -> !real.containsKey(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        LOGGER.debug("New synthetics: {}", updatedSynthetics);
+        LOGGER.debug("New synthetics: {}.", updatedSynthetics);
     }
 
     @Override
@@ -88,7 +89,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
     @Override
     public BigDecimal getBalance() {
         final BigDecimal allBlocked = sum(syntheticByLoanId.get().values());
-        return getRemoteData().getWallet().getBalance().subtract(allBlocked);
+        return getRemoteData().getWallet().getAvailableBalance().subtract(allBlocked);
     }
 
     @Override
