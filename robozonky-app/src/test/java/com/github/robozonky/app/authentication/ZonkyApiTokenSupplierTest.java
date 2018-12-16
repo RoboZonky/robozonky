@@ -160,7 +160,6 @@ class ZonkyApiTokenSupplierTest {
                 .thenThrow(IllegalStateException.class);
         final ApiProvider api = mockApi(oAuth);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        assertThat(t.isAvailable()).isFalse();
         assertThat(t.get()).isNotNull();
         verify(oAuth).login(any(), any(), any());
         assertThat(t.get()).isNotNull();

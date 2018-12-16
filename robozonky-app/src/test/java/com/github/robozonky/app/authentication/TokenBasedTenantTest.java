@@ -50,7 +50,7 @@ class TokenBasedTenantTest extends AbstractRoboZonkyTest {
         final Zonky z = mock(Zonky.class);
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build()) {
-            assertThat(tenant.isAvailable()).isFalse();
+            assertThat(tenant.isAvailable()).isTrue();
         } catch (final IOException e) {
             fail(e);
         }

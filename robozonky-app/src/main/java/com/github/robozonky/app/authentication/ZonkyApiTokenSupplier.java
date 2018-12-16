@@ -95,7 +95,7 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     public boolean isAvailable() {
-        return !(token.get() == null || isUpdating.get());
+        return !isUpdating.get();
     }
 
     /*
