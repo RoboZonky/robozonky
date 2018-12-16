@@ -21,7 +21,6 @@ import java.util.Collection;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 
 public class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
@@ -41,8 +40,8 @@ public class Purchasing extends StrategyExecutor<ParticipationDescriptor, Purcha
     }
 
     @Override
-    protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
+    protected Collection<Investment> execute(final PurchaseStrategy strategy,
                                              final Collection<ParticipationDescriptor> marketplace) {
-        return PurchasingSession.purchase(portfolio, getTenant(), marketplace, strategy);
+        return PurchasingSession.purchase(getTenant(), marketplace, strategy);
     }
 }

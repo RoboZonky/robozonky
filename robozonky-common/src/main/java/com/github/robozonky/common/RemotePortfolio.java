@@ -17,17 +17,21 @@
 package com.github.robozonky.common;
 
 import java.math.BigDecimal;
-import java.util.function.Supplier;
+import java.util.Map;
 
-/**
- * Available balance register which periodically updates from the remote Zonky API.
- */
-public interface RemoteBalance extends Supplier<BigDecimal> {
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
-    /**
-     * Request an update of balance from the remote API.
-     * @param change May be used within the context of a dry run to reflect a pretend operation.
-     * @param clearWithNextReload Whether this amount should be removed during the next remote update.
-     */
-    void update(BigDecimal change, boolean clearWithNextReload);
+public interface RemotePortfolio {
+
+    void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount);
+
+    BigDecimal getBalance();
+
+    Map<Rating, BigDecimal> getTotal();
+
+    Map<Rating, BigDecimal> getAtRisk();
+
+    PortfolioOverview getOverview();
+
 }

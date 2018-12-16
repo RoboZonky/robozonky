@@ -90,7 +90,7 @@ public interface Tenant extends Closeable {
      */
     boolean isAvailable(ZonkyScope scope);
 
-    RemoteBalance getBalance();
+    RemotePortfolio getPortfolio();
 
     Restrictions getRestrictions();
 

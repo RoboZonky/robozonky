@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.authentication;
 
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.LongAdder;
 
-/**
- * Represents a supplier of {@link Portfolio}, allowing for cases where the {@link Portfolio} update has failed and
- * therefore there is no instance to supply.
- */
-@FunctionalInterface
-interface PortfolioSupplier extends Supplier<Optional<Portfolio>> {
+final class Divisor {
+
+    private final long max;
+    private final LongAdder adder = new LongAdder();
+
+    public Divisor(final long max) {
+        this.max = max;
+    }
+
+    public void add(final long number) {
+        adder.add(number);
+    }
+
+    public long getSharePerMille() {
+        if (max < 1) {
+            return Long.MAX_VALUE;
+        }
+        return (adder.sum() * 1000) / max;
+    }
 
 }

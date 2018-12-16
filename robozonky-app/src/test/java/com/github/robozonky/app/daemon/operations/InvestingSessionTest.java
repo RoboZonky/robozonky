@@ -42,8 +42,6 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.BlockedAmountProcessor;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import io.vavr.control.Either;
@@ -57,7 +55,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
@@ -73,24 +70,23 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         }
     };
 
+    private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
+        return (l, p, r) -> l.stream()
+                .filter(i -> i.item().getId() == loanToRecommend)
+                .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
+    }
+
     @Test
     void constructor() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant auth = mockTenant(z);
         final LoanDescriptor ld = mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession it = new InvestingSession(portfolio, new LinkedHashSet<>(lds), getInvestor(auth), auth);
+        final InvestingSession it = new InvestingSession(new LinkedHashSet<>(lds), getInvestor(auth), auth);
         assertSoftly(softly -> {
             softly.assertThat(it.getAvailable()).containsExactly(ld);
             softly.assertThat(it.getResult()).isEmpty();
         });
-    }
-
-    private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
-        return (l, p, r) -> l.stream()
-                .filter(i -> i.item().getId() == loanToRecommend)
-                .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
     }
 
     private Investor getInvestor(final Tenant auth) {
@@ -107,8 +103,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = ld.item().getId();
         final Tenant auth = mockTenant(z);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, mockLoanDescriptor());
-        final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
-        final Collection<Investment> i = InvestingSession.invest(portfolio, getInvestor(auth), auth, lds,
+        final Collection<Investment> i = InvestingSession.invest(getInvestor(auth), auth, lds,
                                                                  mockStrategy(loanId, amount));
         // check that one investment was made
         assertThat(i).hasSize(1);
@@ -128,9 +123,8 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         // setup APIs
         final Zonky z = harmlessZonky(199);
         final Tenant auth = mockTenant(z);
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         // run test
-        final InvestingSession it = new InvestingSession(portfolio, Collections.emptySet(), getInvestor(auth), auth);
+        final InvestingSession it = new InvestingSession(Collections.emptySet(), getInvestor(auth), auth);
         final Optional<RecommendedLoan> recommendation = mockLoanDescriptor()
                 .recommend(BigDecimal.valueOf(200));
         final boolean result = it.invest(recommendation.get());
@@ -146,9 +140,8 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(z);
         final RecommendedLoan recommendation =
                 mockLoanDescriptor().recommend(200).get();
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession t = new InvestingSession(portfolio, Collections.singleton(recommendation.descriptor()), getInvestor(auth),
-                                                        auth);
+        final InvestingSession t = new InvestingSession(Collections.singleton(recommendation.descriptor()),
+                                                        getInvestor(auth), auth);
         final boolean result = t.invest(recommendation);
         // verify result
         assertThat(result).isFalse();
@@ -164,8 +157,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = mock(Investor.class);
         doThrow(thrown).when(p).invest(eq(r), anyBoolean());
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession t = new InvestingSession(portfolio, Collections.emptySet(), p, auth);
+        final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
         assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
     }
 
@@ -177,8 +169,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Investor p = mock(Investor.class);
         doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession t = new InvestingSession(portfolio, Collections.emptySet(), p, auth);
+        final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -203,8 +194,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession t = new InvestingSession(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
+        final InvestingSession t = new InvestingSession(new LinkedHashSet<>(availableLoans), p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -229,8 +219,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Investor p = mock(Investor.class);
         doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession t = new InvestingSession(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
+        final InvestingSession t = new InvestingSession(new LinkedHashSet<>(availableLoans), p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -256,8 +245,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Investor p = mock(Investor.class);
         doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.empty()).when(p).getConfirmationProvider();
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession t = new InvestingSession(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
+        final InvestingSession t = new InvestingSession(new LinkedHashSet<>(availableLoans), p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -282,8 +270,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Investor p = mock(Investor.class);
         doReturn(Either.right(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        final InvestingSession t = new InvestingSession(portfolio, Collections.emptySet(), p, auth);
+        final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isTrue();

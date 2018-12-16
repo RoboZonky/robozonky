@@ -30,20 +30,18 @@ abstract class DaemonOperation implements Runnable {
 
     private final Duration refreshInterval;
     private final Tenant api;
-    private final PortfolioSupplier portfolio;
     private final Consumer<Throwable> shutdownCall;
 
     protected DaemonOperation(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                              final PortfolioSupplier portfolio, final Duration refreshInterval) {
+                              final Duration refreshInterval) {
         this.shutdownCall = shutdownCall;
         this.api = auth;
-        this.portfolio = portfolio;
         this.refreshInterval = refreshInterval;
     }
 
     protected abstract boolean isEnabled(final Tenant authenticated);
 
-    protected abstract void execute(final Portfolio portfolio, final Tenant authenticated);
+    protected abstract void execute(final Tenant authenticated);
 
     public Duration getRefreshInterval() {
         return this.refreshInterval;
@@ -54,9 +52,7 @@ abstract class DaemonOperation implements Runnable {
         DaemonInvestmentMode.runSafe(Events.forSession(api.getSessionInfo()), () -> {
             LOGGER.trace("Starting.");
             if (isEnabled(api)) {
-                final Portfolio p = portfolio.get()
-                        .orElseThrow(() -> new IllegalStateException("Portfolio not properly initialized."));
-                execute(p, api);
+                execute(api);
             } else {
                 LOGGER.info("Access to marketplace disabled by Zonky.");
             }

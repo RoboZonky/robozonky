@@ -17,8 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -35,7 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +40,7 @@ import static org.mockito.Mockito.verify;
 class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Mock
-    private BiConsumer<Portfolio, Tenant> operation;
+    private Consumer<Tenant> operation;
     @Mock
     private Consumer<Throwable> shutdown;
 
@@ -61,14 +58,14 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         final Tenant a = mockTenant();
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
-        verify(operation).accept(any(), eq(a));
+        verify(operation).accept(eq(a));
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 
     @Test
     void error() {
         final Tenant a = mockTenant();
-        final BiConsumer<Portfolio, Tenant> operation = (p, api) -> {
+        final Consumer<Tenant> operation = api -> {
             throw new Error();
         };
         final DaemonOperation d = new CustomOperation(a, operation, shutdown);
@@ -78,16 +75,16 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     private static final class CustomOperation extends DaemonOperation {
 
-        private final BiConsumer<Portfolio, Tenant> operation;
+        private final Consumer<Tenant> operation;
 
-        CustomOperation(final Tenant auth, final BiConsumer<Portfolio, Tenant> operation) {
+        CustomOperation(final Tenant auth, final Consumer<Tenant> operation) {
             this(auth, operation, t -> {
             });
         }
 
-        CustomOperation(final Tenant auth, final BiConsumer<Portfolio, Tenant> operation,
+        CustomOperation(final Tenant auth, final Consumer<Tenant> operation,
                         final Consumer<Throwable> shutdownHook) {
-            super(shutdownHook, auth, () -> Optional.of(mock(Portfolio.class)), Duration.ofSeconds(1));
+            super(shutdownHook, auth, Duration.ofSeconds(1));
             this.operation = operation;
         }
 
@@ -97,8 +94,8 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        protected void execute(final Portfolio portfolio, final Tenant authenticated) {
-            operation.accept(portfolio, authenticated);
+        protected void execute(final Tenant authenticated) {
+            operation.accept(authenticated);
         }
     }
 }

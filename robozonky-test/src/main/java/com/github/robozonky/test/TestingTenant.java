@@ -24,7 +24,7 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.RemoteBalance;
+import com.github.robozonky.common.RemotePortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
@@ -33,12 +33,12 @@ class TestingTenant implements Tenant {
 
     private final Zonky zonky;
     private final SessionInfo sessionInfo;
-    private final RemoteBalance balance;
+    private final RemotePortfolio portfolio;
 
     public TestingTenant(final SessionInfo sessionInfo, final Zonky zonky) {
         this.sessionInfo = sessionInfo;
         this.zonky = zonky;
-        this.balance = AbstractRoboZonkyTest.mockBalance(zonky);
+        this.portfolio = AbstractRoboZonkyTest.mockPortfolio(zonky);
     }
 
     @Override
@@ -52,8 +52,8 @@ class TestingTenant implements Tenant {
     }
 
     @Override
-    public RemoteBalance getBalance() {
-        return balance;
+    public RemotePortfolio getPortfolio() {
+        return portfolio;
     }
 
     @Override

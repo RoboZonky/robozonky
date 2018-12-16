@@ -30,9 +30,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.BlockedAmountProcessor;
-import com.github.robozonky.app.daemon.Portfolio;
-import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicTest;
@@ -60,8 +57,8 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
             final String name = category + " " +
                     (successExpected ? "is" : "is not") +
                     " a participation sale.";
-            final TransactionalPortfolio transactional = createTransactionalPortfolio();
-            final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
+            final Tenant tenant = mockTenant();
+            final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(tenant);
             final DynamicTest test = DynamicTest.dynamicTest(name, () -> {
                 assertThat(processor.isApplicable(transfer)).isEqualTo(successExpected);
             });
@@ -83,11 +80,8 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
                 .build();
         when(zonky.getInvestmentByLoanId(eq(loan.getId()))).thenReturn(Optional.of(investment));
         final Tenant tenant = mockTenant(zonky);
-        final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-        final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
-        final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(transactional);
+        final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(tenant);
         processor.processApplicable(transfer);
-        transactional.run(); // make sure the transaction is processed so that events could be fired
         assertThat(getEventsRequested()).first().isInstanceOf(InvestmentSoldEvent.class);
         assertThat(SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId)).isTrue();
     }

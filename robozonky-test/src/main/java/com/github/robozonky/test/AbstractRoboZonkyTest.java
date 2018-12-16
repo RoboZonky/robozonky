@@ -29,7 +29,7 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.common.RemoteBalance;
+import com.github.robozonky.common.RemotePortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
@@ -70,10 +70,9 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         return zonky;
     }
 
-    public static RemoteBalance mockBalance(final Zonky zonky) {
-        return new MockedBalance(zonky);
+    public static RemotePortfolio mockPortfolio(final Zonky zonky) {
+        return mock(RemotePortfolio.class);
     }
-
 
     protected static Tenant mockTenant(final Zonky zonky) {
         return mockTenant(zonky, true);

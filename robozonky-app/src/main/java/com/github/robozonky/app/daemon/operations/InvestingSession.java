@@ -31,8 +31,8 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.common.Tenant;
 import io.vavr.control.Either;
 import org.slf4j.Logger;
@@ -62,19 +62,17 @@ final class InvestingSession {
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
-    private final Portfolio portfolio;
-    private final Events events;
-    private final Tenant authenticated;
+    private final SessionEvents events;
+    private final Tenant tenant;
 
-    InvestingSession(final Portfolio portfolio, final Collection<LoanDescriptor> marketplace, final Investor investor,
+    InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor,
                      final Tenant tenant) {
         this.events = Events.forSession(tenant.getSessionInfo());
         this.investor = investor;
-        this.authenticated = tenant;
+        this.tenant = tenant;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
         this.seen = newSessionState(tenant, marketplace, "seenLoans");
         this.loansStillAvailable = new ArrayList<>(marketplace);
-        this.portfolio = portfolio;
     }
 
     private static SessionState<LoanDescriptor> newSessionState(final Tenant tenant,
@@ -83,26 +81,26 @@ final class InvestingSession {
         return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
     }
 
-    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor, final Tenant auth,
+    public static Collection<Investment> invest(final Investor investor, final Tenant tenant,
                                                 final Collection<LoanDescriptor> loans,
                                                 final InvestmentStrategy strategy) {
-        final InvestingSession session = new InvestingSession(portfolio, loans, investor, auth);
-        final PortfolioOverview portfolioOverview = portfolio.getOverview();
+        final InvestingSession session = new InvestingSession(loans, investor, tenant);
+        final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         final long balance = portfolioOverview.getCzkAvailable().longValue();
         session.events.fire(executionStarted(loans, portfolioOverview));
-        if (balance >= auth.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
+        if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
             session.invest(strategy);
         }
         final Collection<Investment> result = session.getResult();
         // make sure we get fresh portfolio reference here
-        session.events.fire(executionCompleted(result, portfolio.getOverview()));
+        session.events.fire(executionCompleted(result, tenant.getPortfolio().getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
     private void invest(final InvestmentStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.recommend(getAvailable(), portfolio.getOverview(), authenticated.getRestrictions())
+            invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
                     .peek(r -> events.fire(loanRecommended(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -132,7 +130,7 @@ final class InvestingSession {
         final Investment i = Investment.fresh(l, confirmedAmount);
         markSuccessfulInvestment(i);
         discard(recommendation.descriptor()); // never show again
-        events.fire(investmentMadeLazy(() -> investmentMade(i, l, portfolio.getOverview())));
+        events.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
         return true;
     }
 
@@ -184,7 +182,7 @@ final class InvestingSession {
         LOGGER.debug("Will attempt to invest in {}.", recommendation);
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
-        if (portfolio.getOverview().getCzkAvailable().compareTo(recommendation.amount()) < 0) {
+        if (tenant.getPortfolio().getOverview().getCzkAvailable().compareTo(recommendation.amount()) < 0) {
             // should not be allowed by the calling code
             LOGGER.debug("Balance was less than recommendation.");
             return false;
@@ -199,7 +197,7 @@ final class InvestingSession {
 
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
+        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
     }
 
     private void discard(final LoanDescriptor loan) {

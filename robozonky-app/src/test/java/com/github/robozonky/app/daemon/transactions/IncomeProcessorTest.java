@@ -28,9 +28,6 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.BlockedAmountProcessor;
-import com.github.robozonky.app.daemon.Portfolio;
-import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
@@ -47,18 +44,15 @@ import static org.mockito.Mockito.when;
 
 class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
 
-    private final IncomeProcessor processor = new IncomeProcessor();
     private final Zonky zonky = harmlessZonky(10_000);
     private final Tenant tenant = mockTenant(zonky);
-    private final Portfolio portfolio = Portfolio.create(tenant, BlockedAmountProcessor.createLazy(tenant));
-    private final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
+    private final IncomeProcessor processor = new IncomeProcessor(tenant);
     private final InstanceState<IncomeProcessor> state =
             TenantState.of(tenant.getSessionInfo()).in(IncomeProcessor.class);
 
     @Test
     public void doesNotQueryAtFirstAttempt() {
-        processor.accept(transactional);
-        transactional.run(); // persist
+        processor.run();
         final Select s = new
                 Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusWeeks(1));
         verify(zonky, times(1)).getTransactions(eq(s));
@@ -68,8 +62,7 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
     @Test
     public void queriesAndKeepsPreviousMaxWhenNothingFound() {
         state.update(m -> m.put(IncomeProcessor.STATE_KEY, "1"));
-        processor.accept(transactional);
-        transactional.run(); // persist
+        processor.run();
         final Select s = new
                 Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusDays(1));
         verify(zonky, times(1)).getTransactions(eq(s));
@@ -97,8 +90,7 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(l3.getId()))).thenReturn(l3);
         when(zonky.getInvestmentByLoanId(eq(l2.getId()))).thenReturn(Optional.of(i2));
         when(zonky.getInvestmentByLoanId(eq(l3.getId()))).thenReturn(Optional.of(i3));
-        processor.accept(transactional);
-        transactional.run(); // persist
+        processor.run();
         verify(zonky, times(1)).getTransactions((Select) any());
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("3"); // new maximum
         assertThat(getEventsRequested()).hasSize(2);

@@ -33,9 +33,8 @@ class PurchasingDaemon extends DaemonOperation {
     private final Purchasing purchasing;
     private final SoldParticipationCache soldParticipationCache;
 
-    public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                            final PortfolioSupplier portfolio, final Duration refreshPeriod) {
-        super(shutdownCall, auth, portfolio, refreshPeriod);
+    public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth, final Duration refreshPeriod) {
+        super(shutdownCall, auth, refreshPeriod);
         this.purchasing = new Purchasing(auth);
         this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
     }
@@ -50,8 +49,8 @@ class PurchasingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected void execute(final Portfolio portfolio, final Tenant authenticated) {
-        final long balance = authenticated.getBalance().get().longValue();
+    protected void execute(final Tenant authenticated) {
+        final long balance = authenticated.getPortfolio().getBalance().longValue();
         if (balance <= 0) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, 0);
             return;
@@ -69,6 +68,6 @@ class PurchasingDaemon extends DaemonOperation {
                         })
                         .map(p -> toDescriptor(p, authenticated))
                         .collect(Collectors.toList());
-        purchasing.apply(portfolio, applicable);
+        purchasing.apply(applicable);
     }
 }

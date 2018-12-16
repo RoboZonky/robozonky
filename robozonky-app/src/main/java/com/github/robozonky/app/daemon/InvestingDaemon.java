@@ -38,14 +38,9 @@ class InvestingDaemon extends DaemonOperation {
     private final Investing investing;
 
     public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth, final Investor investor,
-                           final PortfolioSupplier portfolio, final Duration refreshPeriod) {
-        super(shutdownCall, auth, portfolio, refreshPeriod);
+                           final Duration refreshPeriod) {
+        super(shutdownCall, auth, refreshPeriod);
         this.investing = new Investing(investor, auth);
-    }
-
-    @Override
-    protected boolean isEnabled(final Tenant authenticated) {
-        return !authenticated.getRestrictions().isCannotInvest();
     }
 
     private static boolean isActionable(final LoanDescriptor loanDescriptor) {
@@ -56,9 +51,14 @@ class InvestingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected void execute(final Portfolio portfolio, final Tenant authenticated) {
+    protected boolean isEnabled(final Tenant authenticated) {
+        return !authenticated.getRestrictions().isCannotInvest();
+    }
+
+    @Override
+    protected void execute(final Tenant authenticated) {
         // don't query anything unless we have enough money to invest
-        final long balance = authenticated.getBalance().get().longValue();
+        final long balance = authenticated.getPortfolio().getBalance().longValue();
         final int minimum = authenticated.getRestrictions().getMinimumInvestmentAmount();
         if (balance < minimum) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
@@ -70,6 +70,6 @@ class InvestingDaemon extends DaemonOperation {
                 .map(LoanDescriptor::new)
                 .filter(InvestingDaemon::isActionable)
                 .collect(Collectors.toList());
-        investing.apply(portfolio, loans);
+        investing.apply(loans);
     }
 }

@@ -28,8 +28,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.common.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,40 +53,36 @@ final class PurchasingSession {
 
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
-    private final Tenant authenticated;
-    private final Portfolio portfolio;
+    private final Tenant tenant;
     private final SessionState<ParticipationDescriptor> discarded;
-    private final Events events;
+    private final SessionEvents events;
 
-    PurchasingSession(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace,
-                      final Tenant tenant) {
+    PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final Tenant tenant) {
         this.events = Events.forSession(tenant.getSessionInfo());
-        this.authenticated = tenant;
+        this.tenant = tenant;
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = new ArrayList<>(marketplace);
-        this.portfolio = portfolio;
     }
 
-    public static Collection<Investment> purchase(final Portfolio portfolio, final Tenant auth,
-                                                  final Collection<ParticipationDescriptor> items,
+    public static Collection<Investment> purchase(final Tenant auth, final Collection<ParticipationDescriptor> items,
                                                   final PurchaseStrategy strategy) {
-        final PurchasingSession session = new PurchasingSession(portfolio, items, auth);
+        final PurchasingSession session = new PurchasingSession(items, auth);
         final Collection<ParticipationDescriptor> c = session.getAvailable();
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        session.events.fire(purchasingStarted(c, portfolio.getOverview()));
+        session.events.fire(purchasingStarted(c, auth.getPortfolio().getOverview()));
         session.purchase(strategy);
         final Collection<Investment> result = session.getResult();
-        session.events.fire(purchasingCompleted(result, portfolio.getOverview()));
+        session.events.fire(purchasingCompleted(result, auth.getPortfolio().getOverview()));
         return Collections.unmodifiableCollection(result);
     }
 
     private void purchase(final PurchaseStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.recommend(getAvailable(), portfolio.getOverview(), authenticated.getRestrictions())
-                    .filter(r -> portfolio.getOverview().getCzkAvailable().compareTo(r.amount()) >= 0)
+            invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
+                    .filter(r -> tenant.getPortfolio().getOverview().getCzkAvailable().compareTo(r.amount()) >= 0)
                     .peek(r -> events.fire(purchaseRecommended(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -112,7 +108,7 @@ final class PurchasingSession {
 
     private boolean actualPurchase(final Participation participation) {
         try {
-            authenticated.run(zonky -> zonky.purchase(participation));
+            tenant.run(zonky -> zonky.purchase(participation));
             return true;
         } catch (final Exception ex) {
             LOGGER.debug("Failed purchasing {}. Likely someone's beaten us to it.", ex);
@@ -123,19 +119,19 @@ final class PurchasingSession {
     private boolean purchase(final RecommendedParticipation recommendation) {
         events.fire(purchaseRequested(recommendation));
         final Participation participation = recommendation.descriptor().item();
-        final Loan loan = recommendation.descriptor().related();
-        final boolean succeeded = authenticated.getSessionInfo().isDryRun() || actualPurchase(participation);
-        final Investment i = Investment.fresh(participation, loan, recommendation.amount());
+        final Loan l = recommendation.descriptor().related();
+        final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);
+        final Investment i = Investment.fresh(participation, l, recommendation.amount());
         discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
         if (succeeded) {
             markSuccessfulPurchase(i);
-            events.fire(investmentPurchasedLazy(() -> investmentPurchased(i, loan, portfolio.getOverview())));
+            events.fire(investmentPurchasedLazy(() -> investmentPurchased(i, l, tenant.getPortfolio().getOverview())));
         }
         return succeeded;
     }
 
     private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
+        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
     }
 }
