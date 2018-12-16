@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * This class is thread-safe, since multiple threads may want to fire events and/or store state data at the same time.
  */
-public class Transactional implements Runnable {
+class Transactional implements Runnable {
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 

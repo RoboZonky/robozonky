@@ -25,7 +25,7 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.Transactional;
+import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +48,16 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
     private final Transactional transactional = createTransactional(zonky);
     private final Loan loan = Loan.custom().build();
     private final Investment investment = Investment.fresh(loan, 200).build();
+
+    protected static Transactional createTransactional() {
+        final Zonky zonky = harmlessZonky(10_000);
+        return createTransactional(zonky);
+    }
+
+    protected static Transactional createTransactional(final Zonky zonky) {
+        final Tenant tenant = mockTenant(zonky);
+        return new Transactional(tenant);
+    }
 
     @Test
     void thresholds() {

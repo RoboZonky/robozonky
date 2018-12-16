@@ -25,9 +25,6 @@ import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.daemon.LoanCache;
-import com.github.robozonky.app.daemon.Transactional;
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 
@@ -59,16 +56,6 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     protected static LoanDescriptor mockLoanDescriptorWithoutCaptcha() {
         return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt(), false);
-    }
-
-    protected static Transactional createTransactional() {
-        final Zonky zonky = harmlessZonky(10_000);
-        return createTransactional(zonky);
-    }
-
-    protected static Transactional createTransactional(final Zonky zonky) {
-        final Tenant tenant = mockTenant(zonky);
-        return new Transactional(tenant);
     }
 
     private static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
