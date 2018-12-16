@@ -36,8 +36,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.BlockedAmountProcessor;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
@@ -49,7 +47,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -64,8 +61,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> Loan.custom().build());
         final Tenant tenant = mockTenant();
         final Purchasing exec = new Purchasing(tenant);
-        final Portfolio portfolio = mock(Portfolio.class);
-        assertThat(exec.apply(portfolio, Collections.singleton(pd))).isEmpty();
+        assertThat(exec.apply(Collections.singleton(pd))).isEmpty();
         // check events
         final List<Event> events = getEventsRequested();
         assertThat(events).isEmpty();
@@ -82,8 +78,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(zonky);
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_STRATEGY));
         final Purchasing exec = new Purchasing(auth);
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        assertThat(exec.apply(portfolio, Collections.singleton(pd))).isEmpty();
+        assertThat(exec.apply(Collections.singleton(pd))).isEmpty();
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
@@ -114,10 +109,8 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(zonky);
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Purchasing exec = new Purchasing(auth);
-        final Portfolio portfolio = spy(Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth)));
-        assertThat(exec.apply(portfolio, Collections.singleton(pd))).isNotEmpty();
+        assertThat(exec.apply(Collections.singleton(pd))).isNotEmpty();
         verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
-        verify(portfolio).simulateCharge(loanId, loan.getRating(), mock.getRemainingPrincipal());
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {
@@ -128,7 +121,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
         });
         // doing a dry run; the same participation is now ignored
-        assertThat(exec.apply(portfolio, Collections.singleton(pd))).isEmpty();
+        assertThat(exec.apply(Collections.singleton(pd))).isEmpty();
     }
 
     @Test
@@ -154,8 +147,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Tenant auth = mockTenant(zonky, false);
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Purchasing exec = new Purchasing(auth);
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
-        assertThat(exec.apply(portfolio, Collections.singleton(pd))).isEmpty();
+        assertThat(exec.apply(Collections.singleton(pd))).isEmpty();
     }
 
     @Test
@@ -163,9 +155,8 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(auth);
-        final Portfolio portfolio = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
-        assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
+        assertThat(exec.apply(Collections.emptyList())).isEmpty();
         final List<Event> e = getEventsRequested();
         assertThat(e).isEmpty();
     }

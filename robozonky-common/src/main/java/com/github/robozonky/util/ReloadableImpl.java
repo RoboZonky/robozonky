@@ -30,8 +30,7 @@ import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class ReloadableImpl<T> implements ManuallyReloadable<T>,
-                                         TimeBasedReloadable<T> {
+final class ReloadableImpl<T> implements Reloadable<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReloadableImpl.class);
     private static final Consumer DO_NOTHING = (x) -> {
@@ -64,7 +63,7 @@ final class ReloadableImpl<T> implements ManuallyReloadable<T>,
     }
 
     @Override
-    public void clear() {
+    public synchronized void clear() {
         needsReload.forceReload();
     }
 

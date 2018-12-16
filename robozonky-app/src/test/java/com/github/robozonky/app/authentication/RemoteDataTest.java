@@ -16,38 +16,24 @@
 
 package com.github.robozonky.app.authentication;
 
-import java.math.BigDecimal;
-
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.RemoteBalance;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doThrow;
 
-class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
-
-    @Test
-    void updates() {
-        final Zonky zonky = harmlessZonky(10_000);
-        final Tenant tenant = mockTenant(zonky);
-        final RemoteBalance b = new RemoteBalanceImpl(tenant);
-        b.update(BigDecimal.TEN, true); // will be cleared during the update
-        b.update(BigDecimal.ONE, false);
-        assertThat(b.get()).isEqualTo(BigDecimal.valueOf(10_001));
-    }
+class RemoteDataTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    void recoversFromFailure() {
+    void getters() {
         final Zonky zonky = harmlessZonky(10_000);
-        doThrow(IllegalStateException.class).when(zonky).getWallet();
         final Tenant tenant = mockTenant(zonky);
-        final RemoteBalance b = new RemoteBalanceImpl(tenant);
-        b.update(BigDecimal.TEN, true); // will be cleared during the update
-        b.update(BigDecimal.ONE, false);
-        assertThat(b.get()).isEqualTo(BigDecimal.ONE); // the base is zero on account of failure when retrieving balance
+        final RemoteData data = RemoteData.load(tenant);
+        assertThat(data.getWallet()).isNotNull();
+        assertThat(data.getStatistics()).isNotNull();
+        assertThat(data.getBlocked()).isEmpty();
+        assertThat(data.getAtRisk()).isEmpty();
     }
 
 }

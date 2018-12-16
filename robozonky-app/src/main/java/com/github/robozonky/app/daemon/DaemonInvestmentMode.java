@@ -26,6 +26,8 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.app.daemon.operations.Selling;
+import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.Tenant;
@@ -45,17 +47,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     private final DaemonOperation investing, purchasing;
-    private final PortfolioUpdater portfolio;
     private final Tenant tenant;
     private final Consumer<Throwable> shutdownCall;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant, final Investor investor,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolio = PortfolioUpdater.create(shutdownCall, tenant);
         this.tenant = tenant;
-        this.investing = new InvestingDaemon(shutdownCall, tenant, investor, portfolio, primaryMarketplaceCheckPeriod);
-        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, portfolio, secondaryMarketplaceCheckPeriod);
+        this.investing = new InvestingDaemon(shutdownCall, tenant, investor, primaryMarketplaceCheckPeriod);
+        this.purchasing = new PurchasingDaemon(shutdownCall, tenant, secondaryMarketplaceCheckPeriod);
         this.shutdownCall = shutdownCall;
     }
 
@@ -77,23 +77,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
         }
     }
 
-    private static Duration getMaxJobRuntime(final Job job) {
-        final long maxMillis = job.killIn().toMillis();
-        final long absoluteMaxMillis = Duration.ofHours(1).toMillis();
-        final long result = Math.min(maxMillis, absoluteMaxMillis);
-        return Duration.ofMillis(result);
-    }
-
     private Skippable toSkippable(final DaemonOperation daemonOperation) {
         return new Skippable(daemonOperation, this::isUpdating);
     }
 
     private void scheduleDaemons(final Scheduler executor) {
-        LOGGER.debug("Scheduling portfolio updates.");
-        executor.run(portfolio); // first run the update
         // schedule hourly refresh
         final Duration oneHour = Duration.ofHours(1);
-        executor.submit(portfolio, oneHour, oneHour);
+        executor.submit(new Selling(tenant), oneHour, oneHour);
+        executor.submit(new IncomeProcessor(tenant), oneHour, oneHour);
         // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
         executor.submit(toSkippable(investing), investing.getRefreshInterval());
@@ -101,7 +93,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     private boolean isUpdating() {
-        return !tenant.isAvailable() || portfolio.isInitializing();
+        return !tenant.isAvailable();
     }
 
     void scheduleJob(final Job job, final Runnable runnable, final Scheduler executor) {
@@ -110,9 +102,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
             runSafe(Events.forSession(tenant.getSessionInfo()), runnable, shutdownCall);
             LOGGER.debug("Finished job {}.", job);
         };
-        final Duration maxRunTime = getMaxJobRuntime(job);
-        final Duration cancelIn = job.startIn().plusMillis(maxRunTime.toMillis());
-        LOGGER.debug("Scheduling job {}. Max run time: {}. Cancel in: {}.", job, maxRunTime, cancelIn);
         executor.submit(payload, job.repeatEvery(), job.startIn());
     }
 

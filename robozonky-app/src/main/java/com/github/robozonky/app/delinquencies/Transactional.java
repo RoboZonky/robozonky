@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Updates to state, which happen through {@link #getTenant()}, are postponed until {@link #run()} is called. Likewise
  * for events fired through {@link #fire(Event)}.
- *
+ * <p>
  * This class is thread-safe, since multiple threads may want to fire events and/or store state data at the same time.
  */
-public class Transactional implements Runnable {
+class Transactional implements Runnable {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Transactional.class);
 
     private final Tenant tenant;
     private final Queue<Object> eventsToFire = new ConcurrentLinkedQueue<>();
@@ -85,9 +85,9 @@ public class Transactional implements Runnable {
         while (!eventsToFire.isEmpty()) {
             final Object evt = eventsToFire.poll();
             if (evt instanceof LazyEvent) {
-                events.fire((LazyEvent)evt);
+                events.fire((LazyEvent) evt);
             } else if (evt instanceof Event) {
-                events.fire((Event)evt);
+                events.fire((Event) evt);
             } else {
                 throw new IllegalStateException("Can not happen.");
             }

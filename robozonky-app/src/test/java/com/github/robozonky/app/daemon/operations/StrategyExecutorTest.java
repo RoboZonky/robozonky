@@ -30,8 +30,6 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.BlockedAmountProcessor;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
@@ -58,32 +56,30 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     void rechecksMarketplaceIfBalanceIncreased() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
-        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
         // prepare the executor, have it fail when executing the investment operation
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new AlwaysFreshNeverInvesting(auth);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> spied = spy(e);
-        assertThat(spied.apply(p, marketplace)).isEmpty(); // fresh balance, check marketplace
-        verify(spied).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
-        assertThat(spied.apply(p, marketplace)).isEmpty(); // marketplace first processed
-        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
-        assertThat(spied.apply(p, marketplace)).isEmpty(); // nothing changed, no check
-        verify(spied, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(marketplace)).isEmpty(); // fresh balance, check marketplace
+        verify(spied).execute(eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(marketplace)).isEmpty(); // marketplace first processed
+        verify(spied, times(2)).execute(eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(marketplace)).isEmpty(); // nothing changed, no check
+        verify(spied, times(2)).execute(eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(100_000))); // increase remote balance
-        assertThat(spied.apply(p, marketplace)).isEmpty(); // should have checked marketplace
-        verify(spied, times(3)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
+        assertThat(spied.apply(marketplace)).isEmpty(); // should have checked marketplace
+        verify(spied, times(3)).execute(eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
     }
 
     @Test
     void doesNotInvestOnEmptyMarketplace() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant auth = mockTenant(zonky);
-        final Portfolio p = Portfolio.create(auth, BlockedAmountProcessor.createLazy(auth));
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting(auth));
-        assertThat(e.apply(p, Collections.emptyList())).isEmpty();
-        verify(e, never()).execute(any(), any(), any());
+        assertThat(e.apply(Collections.emptyList())).isEmpty();
+        verify(e, never()).execute(any(), any());
     }
 
     private static class AlwaysFreshNeverInvesting extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
@@ -103,9 +99,10 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
+        protected Collection<Investment> execute(final InvestmentStrategy strategy,
                                                  final Collection<LoanDescriptor> marketplace) {
-            return strategy.recommend(marketplace, portfolio.getOverview(), getTenant().getRestrictions())
+            final Tenant t = getTenant();
+            return strategy.recommend(marketplace, t.getPortfolio().getOverview(), t.getRestrictions())
                     .map(r -> Investment.fresh(r.descriptor().item(), r.amount().intValue()))
                     .collect(Collectors.toList());
         }

@@ -35,7 +35,7 @@ public class Scheduler implements AutoCloseable {
 
     public static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    private static final ManuallyReloadable<Scheduler> BACKGROUND_SCHEDULER = Reloadable.of(() -> {
+    private static final Reloadable<Scheduler> BACKGROUND_SCHEDULER = Reloadable.of(() -> {
         LOGGER.debug("Instantiating new background scheduler.");
         /*
          * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will

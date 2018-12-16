@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.authentication;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Map;
 
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.assertj.core.api.SoftAssertions;
@@ -34,16 +33,15 @@ class PortfolioOverviewImplTest {
 
     @Test
     void timestamp() {
-        final PortfolioOverview po = PortfolioOverviewImpl.calculate(() -> BigDecimal.TEN, Statistics.empty(),
-                                                                     Collections.emptyMap(), Collections.emptyMap());
+        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.TEN, Collections.emptyMap(),
+                                                               Collections.emptyMap());
         assertThat(po.getTimestamp()).isBeforeOrEqualTo(ZonedDateTime.now());
     }
 
     @Test
     void emptyPortfolio() {
         final BigDecimal balance = BigDecimal.TEN;
-        final PortfolioOverview po = PortfolioOverviewImpl.calculate(() -> balance, Statistics.empty(),
-                                                                     Collections.emptyMap(), Collections.emptyMap());
+        final PortfolioOverview po = new PortfolioOverviewImpl(balance, Collections.emptyMap(), Collections.emptyMap());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
@@ -66,7 +64,7 @@ class PortfolioOverviewImplTest {
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final BigDecimal adj = BigDecimal.TEN;
         final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
-        final PortfolioOverview po = PortfolioOverviewImpl.calculate(() -> BigDecimal.ZERO, Statistics.empty(), in, in);
+        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, in);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);

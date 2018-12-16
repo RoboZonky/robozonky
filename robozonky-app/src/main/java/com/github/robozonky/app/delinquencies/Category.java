@@ -35,7 +35,6 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.daemon.LoanCache;
-import com.github.robozonky.app.daemon.Transactional;
 import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.common.Tenant;

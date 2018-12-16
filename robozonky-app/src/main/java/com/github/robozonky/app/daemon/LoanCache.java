@@ -33,6 +33,8 @@ import com.github.robozonky.common.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.util.Scheduler;
 import io.vavr.Lazy;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +45,7 @@ public class LoanCache {
     private static final Lazy<LoanCache> INSTANCE = Lazy.of(LoanCache::new);
     private final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
     private final Lock updateLock = new ReentrantLock(true);
-    private final AtomicReference<Map<Integer, Pair<Loan, Instant>>> cache = new AtomicReference<>();
+    private final AtomicReference<Map<Integer, Tuple2<Loan, Instant>>> cache = new AtomicReference<>();
 
     LoanCache() {
         clean();
@@ -55,9 +57,9 @@ public class LoanCache {
         return INSTANCE.get();
     }
 
-    private static boolean isExpired(final Pair<Loan, Instant> p) {
+    private static boolean isExpired(final Tuple2<Loan, Instant> p) {
         final Instant now = DateUtil.now();
-        final Instant expiration = p.getTwo().plus(EVICT_AFTER);
+        final Instant expiration = p._2().plus(EVICT_AFTER);
         return expiration.isBefore(now);
     }
 
@@ -89,17 +91,17 @@ public class LoanCache {
     }
 
     Optional<Loan> getLoan(final int loanId) {
-        final Pair<Loan, Instant> result = callLocked(() -> cache.get().get(loanId));
+        final Tuple2<Loan, Instant> result = callLocked(() -> cache.get().get(loanId));
         if (result == null || isExpired(result)) {
             LOGGER.trace("Cache miss for loan #{}.", loanId);
             return Optional.empty();
         } else {
-            return Optional.of(result.getOne());
+            return Optional.of(result._1());
         }
     }
 
     private void addLoan(final int loanId, final Loan loan) {
-        runLocked(() -> cache.get().put(loanId, new Pair<>(loan, DateUtil.now())));
+        runLocked(() -> cache.get().put(loanId, Tuple.of(loan, DateUtil.now())));
     }
 
     public Loan getLoan(final int loanId, final Tenant tenant) {
@@ -122,30 +124,4 @@ public class LoanCache {
         runLocked(() -> cache.set(new ConcurrentHashMap<>(INITIAL_CACHE_SIZE)));
     }
 
-    private static final class Pair<A, B> {
-
-        private final A one;
-        private final B two;
-
-        public Pair(final A one, final B two) {
-            this.one = one;
-            this.two = two;
-        }
-
-        public A getOne() {
-            return one;
-        }
-
-        public B getTwo() {
-            return two;
-        }
-
-        @Override
-        public String toString() {
-            return "Pair{" +
-                    "one=" + one +
-                    ", two=" + two +
-                    '}';
-        }
-    }
 }

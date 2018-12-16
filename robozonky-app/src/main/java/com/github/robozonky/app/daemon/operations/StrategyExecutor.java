@@ -22,18 +22,17 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.util.NumberUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>, Collection<Investment>> {
+abstract class StrategyExecutor<T, S> implements Function<Collection<T>, Collection<Investment>> {
 
     private static final long[] NO_LONGS = new long[0];
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -61,7 +60,7 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
             LOGGER.debug("Asleep as the marketplace is empty.");
             return true;
         }
-        final BigDecimal currentBalance = tenant.getBalance().get();
+        final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
         if (isBalanceUnderMinimum(currentBalance.intValue())) {
             LOGGER.debug("Asleep due to balance being less than minimum.");
             return true;
@@ -85,13 +84,11 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
 
     /**
      * Execute the investment operations.
-     * @param portfolio Portfolio to use.
      * @param strategy Strategy used to determine which items to take.
      * @param marketplace Items available for the taking.
      * @return Items taken by the investment algorithm, having matched the strategy.
      */
-    protected abstract Collection<Investment> execute(final Portfolio portfolio, final S strategy,
-                                                      final Collection<T> marketplace);
+    protected abstract Collection<Investment> execute(final S strategy, final Collection<T> marketplace);
 
     /**
      * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
@@ -105,8 +102,7 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
         return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
     }
 
-    private Collection<Investment> invest(final Portfolio portfolio, final S strategy,
-                                          final Collection<T> marketplace) {
+    private Collection<Investment> invest(final S strategy, final Collection<T> marketplace) {
         if (skipStrategyEvaluation(marketplace)) {
             return Collections.emptyList();
         }
@@ -116,16 +112,16 @@ abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collectio
          * says to sleep - we will check the marketplace.
          */
         marketplaceCheckPending.set(true);
-        final Collection<Investment> result = execute(portfolio, strategy, marketplace);
+        final Collection<Investment> result = execute(strategy, marketplace);
         marketplaceCheckPending.set(false);
         LOGGER.trace("Marketplace processing complete.");
         return result;
     }
 
     @Override
-    public Collection<Investment> apply(final Portfolio portfolio, final Collection<T> marketplace) {
+    public Collection<Investment> apply(final Collection<T> marketplace) {
         return strategyProvider.get()
-                .map(strategy -> invest(portfolio, strategy, marketplace))
-                .orElse(Collections.emptyList());
+
+                .map(strategy -> invest(strategy, marketplace)).orElse(Collections.emptyList());
     }
 }

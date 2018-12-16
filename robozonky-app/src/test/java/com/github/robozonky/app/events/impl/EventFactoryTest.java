@@ -19,6 +19,7 @@ package com.github.robozonky.app.events.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Collections;
 
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
@@ -31,6 +32,7 @@ import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
@@ -48,8 +50,10 @@ import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -79,6 +83,26 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     private static RecommendedInvestment recommendedInvestment() {
         return new InvestmentDescriptor(Investment.custom().setRemainingPrincipal(BigDecimal.TEN).build(),
                                         () -> Loan.custom().build()).recommend().orElse(null);
+    }
+
+    private static void assertCorrectThreshold(final LoanDelinquentEvent e, final int threshold) {
+        assertThat(e.getThresholdInDays()).isEqualTo(threshold);
+    }
+
+    @Test
+    void thresholds() {
+        final Loan loan = Loan.custom().setRating(Rating.D).setAmount(100_000).build();
+        final Investment investment = Investment.fresh(loan, BigDecimal.TEN).build();
+        final LocalDate now = LocalDate.now();
+        final Collection<Development> developments = Collections.emptyList();
+        final LoanDelinquentEvent e = EventFactory.loanDelinquent90plus(investment, loan, now, developments);
+        assertCorrectThreshold(e, 90);
+        final LoanDelinquentEvent e2 = EventFactory.loanDelinquent60plus(investment, loan, now, developments);
+        assertCorrectThreshold(e2, 60);
+        final LoanDelinquentEvent e3 = EventFactory.loanDelinquent30plus(investment, loan, now, developments);
+        assertCorrectThreshold(e3, 30);
+        final LoanDelinquentEvent e4 = EventFactory.loanDelinquent10plus(investment, loan, now, developments);
+        assertCorrectThreshold(e4, 10);
     }
 
     @Test

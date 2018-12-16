@@ -90,7 +90,14 @@ public interface Tenant extends Closeable {
      */
     boolean isAvailable(ZonkyScope scope);
 
-    RemoteBalance getBalance();
+    /**
+     * Provides all relevant data representing user portfolio, such as blocked amounts and wallet balance. This may be
+     * cached for a period of time, but it is very important that the data is all loaded at the same time - otherwise
+     * the robot will have been operating over an inconsistent view of the data, where a sum of blocked amounts doesn't
+     * fully match the available balance.
+     * @return
+     */
+    RemotePortfolio getPortfolio();
 
     Restrictions getRestrictions();
 

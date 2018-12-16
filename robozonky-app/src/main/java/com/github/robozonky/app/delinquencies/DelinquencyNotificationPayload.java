@@ -28,7 +28,6 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.daemon.LoanCache;
-import com.github.robozonky.app.daemon.Transactional;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Zonky;

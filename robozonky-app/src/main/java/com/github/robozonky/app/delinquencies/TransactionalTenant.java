@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -25,7 +25,7 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.RemoteBalance;
+import com.github.robozonky.common.RemotePortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
@@ -59,8 +59,8 @@ final class TransactionalTenant implements Tenant {
     }
 
     @Override
-    public RemoteBalance getBalance() {
-        return parent.getBalance();
+    public RemotePortfolio getPortfolio() {
+        return parent.getPortfolio();
     }
 
     @Override

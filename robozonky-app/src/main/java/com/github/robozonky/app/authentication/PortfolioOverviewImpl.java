@@ -14,40 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.authentication;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-import com.github.robozonky.api.remote.entities.OverallPortfolio;
-import com.github.robozonky.api.remote.entities.RiskPortfolio;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.util.DateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PortfolioOverviewImpl.class);
-
     private final ZonedDateTime timestamp = DateUtil.zonedNow();
-    private final Supplier<BigDecimal> czkAvailable;
+    private final BigDecimal czkAvailable;
     private final BigDecimal czkInvested;
     private final BigDecimal czkAtRisk;
     private final Map<Rating, BigDecimal> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> czkAtRiskPerRating;
 
-    private PortfolioOverviewImpl(final Supplier<BigDecimal> czkAvailable,
+    PortfolioOverviewImpl(final BigDecimal czkAvailable,
                                   final Map<Rating, BigDecimal> czkInvestedPerRating,
                                   final Map<Rating, BigDecimal> czkAtRiskPerRating) {
         this.czkAvailable = czkAvailable;
@@ -71,36 +61,9 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private static BigDecimal sum(final OverallPortfolio portfolio) {
-        return portfolio.getDue().add(portfolio.getUnpaid());
-    }
-
-    public static PortfolioOverviewImpl calculate(final Supplier<BigDecimal> balance, final Statistics statistics,
-                                                  final Map<Rating, BigDecimal> adjustments,
-                                                  final Map<Rating, BigDecimal> atRisk) {
-        LOGGER.debug("Risk portfolio from Zonky: {}.", statistics.getRiskPortfolio());
-        LOGGER.debug("Adjustments: {}.", adjustments);
-        LOGGER.debug("At risk: {}.", atRisk);
-        final Map<Rating, BigDecimal> amounts = statistics.getRiskPortfolio().stream()
-                .collect(Collectors.toMap(RiskPortfolio::getRating,
-                                          PortfolioOverviewImpl::sum,
-                                          BigDecimal::add, // should not be necessary
-                                          () -> new EnumMap<>(Rating.class)));
-        adjustments.forEach((r, v) -> amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(v)));
-        final Map<Rating, BigDecimal> amountsAtRisk = new EnumMap<>(Rating.class);
-        amountsAtRisk.putAll(atRisk);
-        return calculate(balance, amounts, amountsAtRisk);
-    }
-
-    private static PortfolioOverviewImpl calculate(final Supplier<BigDecimal> balance,
-                                                   final Map<Rating, BigDecimal> amounts,
-                                                   final Map<Rating, BigDecimal> atRiskAmounts) {
-        return new PortfolioOverviewImpl(balance, amounts, atRiskAmounts);
-    }
-
     @Override
     public BigDecimal getCzkAvailable() {
-        return this.czkAvailable.get();
+        return this.czkAvailable;
     }
 
     @Override
@@ -157,7 +120,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     @Override
     public String toString() {
         return "PortfolioOverviewImpl{" +
-                "czkAvailable=" + czkAvailable.get() +
+                "czkAvailable=" + czkAvailable +
                 ", czkInvested=" + czkInvested +
                 ", czkInvestedPerRating=" + czkInvestedPerRating +
                 ", czkAtRisk=" + czkAtRisk +

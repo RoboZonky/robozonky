@@ -18,6 +18,7 @@ package com.github.robozonky.test;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -29,7 +30,7 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.common.RemoteBalance;
+import com.github.robozonky.common.RemotePortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
@@ -70,10 +71,19 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         return zonky;
     }
 
-    public static RemoteBalance mockBalance(final Zonky zonky) {
-        return new MockedBalance(zonky);
+    public static RemotePortfolio mockPortfolio(final Zonky zonky) {
+        final AtomicReference<BigDecimal> change = new AtomicReference<>(BigDecimal.ZERO);
+        final RemotePortfolio p = mock(RemotePortfolio.class);
+        doAnswer(i -> {
+            final BigDecimal amount = i.getArgument(2);
+            change.updateAndGet(old -> old.add(amount));
+            return null;
+        }).when(p).simulateCharge(anyInt(), any(), any());
+        final Supplier<BigDecimal> balance = () -> zonky.getWallet().getBalance().subtract(change.get());
+        when(p.getBalance()).thenAnswer(i -> balance.get());
+        when(p.getOverview()).thenAnswer(i -> mockPortfolioOverview(balance.get().intValue()));
+        return p;
     }
-
 
     protected static Tenant mockTenant(final Zonky zonky) {
         return mockTenant(zonky, true);

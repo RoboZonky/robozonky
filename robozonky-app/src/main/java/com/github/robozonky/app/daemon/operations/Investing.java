@@ -21,7 +21,6 @@ import java.util.Collection;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.daemon.Portfolio;
 import com.github.robozonky.common.Tenant;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
@@ -44,8 +43,9 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     }
 
     @Override
-    protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
+    protected Collection<Investment> execute(final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
-        return InvestingSession.invest(portfolio, investor, getTenant(), marketplace, strategy);
+        return InvestingSession.invest(investor, getTenant(), marketplace, strategy);
     }
+
 }

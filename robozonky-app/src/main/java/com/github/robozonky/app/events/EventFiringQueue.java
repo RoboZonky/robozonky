@@ -24,7 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-import com.github.robozonky.util.ManuallyReloadable;
 import com.github.robozonky.util.Reloadable;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ final class EventFiringQueue {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventFiringQueue.class);
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-    private final ManuallyReloadable<Thread> firingThread;
+    private final Reloadable<Thread> firingThread;
 
     private EventFiringQueue() {
         this(EventFiringRunnable::new);

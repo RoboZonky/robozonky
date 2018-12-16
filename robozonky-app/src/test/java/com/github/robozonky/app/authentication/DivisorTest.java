@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.authentication;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,12 +24,12 @@ class DivisorTest {
 
     @Test
     void calculate() {
-        final Divisor d = new Divisor(1000);
+        Divisor d = new Divisor(2);
         assertThat(d.getSharePerMille()).isEqualTo(0);
         d.add(1);
-        assertThat(d.getSharePerMille()).isEqualTo(1);
+        assertThat(d.getSharePerMille()).isEqualTo(500);
         d.add(10);
-        assertThat(d.getSharePerMille()).isEqualTo(11);
+        assertThat(d.getSharePerMille()).isEqualTo(5500);
     }
 
     @Test

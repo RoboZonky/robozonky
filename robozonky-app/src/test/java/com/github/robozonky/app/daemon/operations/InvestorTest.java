@@ -195,7 +195,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
 
     private void test(final ProxyType proxyType, final Either<InvestmentFailure, BigDecimal> responseType,
                       final RecommendedLoan r, final RemoteResponse confirmationResponse, final boolean seenBefore) {
-        final Zonky api = mock(Zonky.class);
+        final Zonky api = harmlessZonky(10_000);
         final Investor p = getZonkyProxy(proxyType, confirmationResponse, mockTenant(api, false));
         final Either<InvestmentFailure, BigDecimal> result = p.invest(r, seenBefore);
         assertSoftly(softly -> {

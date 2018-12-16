@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.delinquencies;
 
 import java.util.stream.Stream;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +29,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class TransactionalInstanceStateTest extends AbstractZonkyLeveragingTest {
+
+    protected static Transactional createTransactional() {
+        final Zonky zonky = harmlessZonky(10_000);
+        return createTransactional(zonky);
+    }
+
+    protected static Transactional createTransactional(final Zonky zonky) {
+        final Tenant tenant = mockTenant(zonky);
+        return new Transactional(tenant);
+    }
 
     @SuppressWarnings("unchecked")
     @Test

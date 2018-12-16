@@ -23,17 +23,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.app.daemon.PortfolioDependant;
-import com.github.robozonky.app.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.internal.util.DateUtil;
 
-public final class IncomeProcessor implements PortfolioDependant {
+public final class IncomeProcessor implements Runnable {
 
     static final String STATE_KEY = "lastSeenTransactionId";
     private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
+
+    private final Tenant tenant;
+
+    public IncomeProcessor(final Tenant tenant) {
+        this.tenant = tenant;
+    }
 
     private static long processAllTransactions(final Stream<Transaction> transactions) {
         return transactions.mapToLong(Transaction::getId)
@@ -41,11 +45,9 @@ public final class IncomeProcessor implements PortfolioDependant {
                 .orElse(-1);
     }
 
-    private static long processNewTransactions(final TransactionalPortfolio transactional,
-                                               final Stream<Transaction> transactions,
-                                               final long lastSeenTransactionId) {
-        final Consumer<Transaction> loansRepaid = new LoanRepaidProcessor(transactional);
-        final Consumer<Transaction> participationsSold = new ParticipationSoldProcessor(transactional);
+    private long processNewTransactions(final Stream<Transaction> transactions, final long lastSeenTransactionId) {
+        final Consumer<Transaction> loansRepaid = new LoanRepaidProcessor(tenant);
+        final Consumer<Transaction> participationsSold = new ParticipationSoldProcessor(tenant);
         return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
                 .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
@@ -59,9 +61,8 @@ public final class IncomeProcessor implements PortfolioDependant {
     }
 
     @Override
-    public void accept(final TransactionalPortfolio transactional) {
-        final InstanceState<IncomeProcessor> state =
-                transactional.getTenant().getState(IncomeProcessor.class);
+    public void run() {
+        final InstanceState<IncomeProcessor> state = tenant.getState(IncomeProcessor.class);
         final long lastSeenTransactionId = state.getValue(STATE_KEY)
                 .map(Integer::valueOf)
                 .orElse(-1);
@@ -70,10 +71,9 @@ public final class IncomeProcessor implements PortfolioDependant {
                 .map(u -> u.minusDays(1).toLocalDate())
                 .orElse(DateUtil.localNow().toLocalDate().minusWeeks(1));
         final Select sinceLastUpdate = new Select().greaterThanOrEquals("transaction.transactionDate", lastUpdate);
-        final Tenant tenant = transactional.getTenant();
         final Stream<Transaction> transactions = tenant.call(z -> z.getTransactions(sinceLastUpdate));
         final long newLastSeenTransactionId = lastSeenTransactionId >= 0 ?
-                processNewTransactions(transactional, transactions, lastSeenTransactionId) :
+                processNewTransactions(transactions, lastSeenTransactionId) :
                 processAllTransactions(transactions);
         state.update(m -> m.put(STATE_KEY, String.valueOf(newLastSeenTransactionId)));
     }

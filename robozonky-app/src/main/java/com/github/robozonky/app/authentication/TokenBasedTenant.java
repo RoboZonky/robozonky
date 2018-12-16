@@ -27,7 +27,7 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.RemoteBalance;
+import com.github.robozonky.common.RemotePortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -45,7 +45,7 @@ class TokenBasedTenant implements Tenant {
     private final ApiProvider apis;
     private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
     private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
-    private final RemoteBalance balance;
+    private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
 
@@ -55,7 +55,7 @@ class TokenBasedTenant implements Tenant {
         this.apis = apis;
         this.sessionInfo = sessionInfo;
         this.supplier = tokenSupplier;
-        this.balance = new RemoteBalanceImpl(this);
+        this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.of(() -> this.call(Zonky::getRestrictions), Duration.ofHours(1));
     }
 
@@ -82,8 +82,8 @@ class TokenBasedTenant implements Tenant {
     }
 
     @Override
-    public RemoteBalance getBalance() {
-        return balance;
+    public RemotePortfolio getPortfolio() {
+        return portfolio;
     }
 
     @Override

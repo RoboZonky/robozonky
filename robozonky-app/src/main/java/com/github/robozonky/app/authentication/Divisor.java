@@ -14,10 +14,28 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.app.authentication;
 
-public interface ManuallyReloadable<T> extends Reloadable<T> {
+import java.util.concurrent.atomic.LongAdder;
 
-    void clear();
+final class Divisor {
+
+    private final long max;
+    private final LongAdder adder = new LongAdder();
+
+    public Divisor(final long max) {
+        this.max = max;
+    }
+
+    public void add(final long number) {
+        adder.add(number);
+    }
+
+    public long getSharePerMille() {
+        if (max < 1) {
+            return Long.MAX_VALUE;
+        }
+        return (adder.sum() * 1000) / max;
+    }
 
 }
