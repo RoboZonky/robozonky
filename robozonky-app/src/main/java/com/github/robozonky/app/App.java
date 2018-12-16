@@ -87,7 +87,10 @@ public class App implements Runnable {
     }
 
     private ReturnCode executeSafe(final InvestmentMode m) {
-        shutdownHooks.register(() -> Optional.of(r -> Scheduler.inBackground().close()));
+        shutdownHooks.register(() -> {
+            final Scheduler s = Scheduler.inBackground(); // get it at the start, so we close the right thing at the end
+            return Optional.of(r -> s.close());
+        });
         Events.allSessions().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
         shutdownHooks.register(new Management(lifecycle));
