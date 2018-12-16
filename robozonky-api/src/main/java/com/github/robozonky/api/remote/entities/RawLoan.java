@@ -44,7 +44,9 @@ public class RawLoan extends BaseEntity {
 
     private boolean topped, covered, published, questionsAllowed, insuranceActive, multicash, fastcash;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount;
-    private double amount, remainingInvestment;
+    private double amount;
+    private double remainingInvestment;
+    private double reservedAmount;
     private String name, nickName, story, url;
     private BigDecimal interestRate;
     private OffsetDateTime datePublished, deadline;
@@ -203,6 +205,11 @@ public class RawLoan extends BaseEntity {
     @XmlElement
     public OtherInvestments getMyOtherInvestments() {
         return myOtherInvestments;
+    }
+
+    @XmlElement
+    public double getReservedAmount() {
+        return reservedAmount;
     }
 
     @XmlElement

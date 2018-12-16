@@ -23,9 +23,15 @@ public class BankAccount extends BaseEntity {
     private long id, accountNo;
     private int accountBank;
     private String accountName;
+    private boolean enteredManually;
 
     BankAccount() {
         // for JAXB
+    }
+
+    @XmlElement
+    public boolean isEnteredManually() {
+        return enteredManually;
     }
 
     @XmlElement
