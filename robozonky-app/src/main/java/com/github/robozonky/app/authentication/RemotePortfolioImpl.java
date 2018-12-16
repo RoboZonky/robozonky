@@ -61,7 +61,6 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     private void refresh(final RemoteData data) {
-        LOGGER.debug("New remote data: {}.", data);
         // force overview recalculation
         portfolioOverview.clear();
         // remove synthetic charges that are replaced by actual remote blocked amounts
