@@ -184,7 +184,7 @@ final class InvestingSession {
         LOGGER.debug("Will attempt to invest in {}.", recommendation);
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
-        if (tenant.getPortfolio().getOverview().getCzkAvailable().compareTo(recommendation.amount()) < 0) {
+        if (tenant.getPortfolio().getBalance().compareTo(recommendation.amount()) < 0) {
             // should not be allowed by the calling code
             LOGGER.debug("Balance was less than recommendation.");
             return false;

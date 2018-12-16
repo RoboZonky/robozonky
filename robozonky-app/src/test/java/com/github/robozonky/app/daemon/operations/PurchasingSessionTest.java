@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.RemotePortfolio;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Condition;
@@ -109,5 +110,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(5);
         verify(z).purchase(eq(p));
+        final RemotePortfolio rp = auth.getPortfolio();
+        verify(rp).simulateCharge(eq(l.getId()), eq(l.getRating()), any());
     }
 }

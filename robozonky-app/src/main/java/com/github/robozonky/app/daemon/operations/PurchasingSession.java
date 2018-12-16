@@ -84,7 +84,7 @@ final class PurchasingSession {
         boolean invested;
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
-                    .filter(r -> tenant.getPortfolio().getOverview().getCzkAvailable().compareTo(r.amount()) >= 0)
+                    .filter(r -> tenant.getPortfolio().getBalance().compareTo(r.amount()) >= 0)
                     .peek(r -> events.fire(purchaseRecommended(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);

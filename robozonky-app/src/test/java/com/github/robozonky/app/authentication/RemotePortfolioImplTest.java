@@ -33,6 +33,8 @@ import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,6 +65,17 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         verify(zonky, times(2)).getStatistics();
         verify(zonky, times(2)).getDelinquentInvestments();
         verify(zonky, times(2)).getBlockedAmounts();
+    }
+
+    @Test
+    void throwsWhenRemoteFails() {
+        final Zonky zonky = harmlessZonky(10_000);
+        final Tenant tenant = mockTenant(zonky);
+        doThrow(IllegalStateException.class).when(zonky).getStatistics();
+        final RemotePortfolio p = new RemotePortfolioImpl(tenant);
+        assertThatThrownBy(p::getOverview)
+                .isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(IllegalStateException.class);
     }
 
     @Test

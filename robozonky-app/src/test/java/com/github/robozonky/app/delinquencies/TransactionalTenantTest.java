@@ -42,6 +42,11 @@ class TransactionalTenantTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void delegatesPortfolio() {
+        assertThat(transactional.getPortfolio()).isSameAs(original.getPortfolio());
+    }
+
+    @Test
     void delegatesSessionInfo() {
         transactional.getSessionInfo();
         verify(original).getSessionInfo();
