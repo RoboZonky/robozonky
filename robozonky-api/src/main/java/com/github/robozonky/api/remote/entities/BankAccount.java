@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,15 @@ public class BankAccount extends BaseEntity {
 
     private int id, accountNo, accountBank;
     private String accountName;
+    private boolean enteredManually;
 
     BankAccount() {
         // for JAXB
+    }
+
+    @XmlElement
+    public boolean isEnteredManually() {
+        return enteredManually;
     }
 
     @XmlElement
