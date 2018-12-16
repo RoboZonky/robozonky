@@ -65,8 +65,6 @@ class PortfolioUpdater implements Runnable,
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth) {
         final Supplier<BlockedAmountProcessor> blockedAmounts = BlockedAmountProcessor.createLazy(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, blockedAmounts);
-        // update delinquents automatically with every portfolio update; important to be first as it brings risk data
-        updater.registerDependant(new AmountsAtRiskSummarizer());
         // update portfolio with blocked amounts coming from Zonky
         updater.registerDependant(po -> blockedAmounts.get().accept(po));
         // attempt to sell participations; a transaction update later may already pick up some sales

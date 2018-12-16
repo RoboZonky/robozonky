@@ -17,26 +17,30 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.reducing;
 
 public class Portfolio {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
 
     private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
-    private final AtomicReference<Map<Rating, BigDecimal>> atRisk = new AtomicReference<>(Collections.emptyMap());
     private final Statistics statistics;
     private final Tenant tenant;
     private final Supplier<BlockedAmountProcessor> blockedAmounts;
@@ -51,6 +55,22 @@ public class Portfolio {
         return new Portfolio(transfers, tenant);
     }
 
+    private static Map<Rating, BigDecimal> getAmountsAtRisk(final Tenant tenant) {
+        return tenant.call(Zonky::getDelinquentInvestments)
+                .parallel() // possibly many pages' worth of results; fetch in parallel
+                .collect(groupingBy(Investment::getRating,
+                                    () -> new EnumMap<>(Rating.class),
+                                    mapping(i -> {
+                                        final BigDecimal principalNotYetReturned = i.getRemainingPrincipal()
+                                                .subtract(i.getPaidInterest())
+                                                .subtract(i.getPaidPenalty())
+                                                .max(BigDecimal.ZERO);
+                                        LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
+                                                     principalNotYetReturned, i.getLoanId(), i.getId());
+                                        return principalNotYetReturned;
+                                    }, reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
+    }
+
     public void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
         LOGGER.debug("Simulating charge for loan #{} ({}), {} CZK.", loanId, rating, amount);
         blockedAmounts.get().simulateCharge(loanId, rating, amount);
@@ -58,22 +78,15 @@ public class Portfolio {
         portfolioOverview.set(null);
     }
 
-    public void amountsAtRiskUpdated(final Map<Rating, BigDecimal> newAmountsAtRisk) {
-        if (!Objects.equals(atRisk.get(), newAmountsAtRisk)) {
-            LOGGER.debug("New amounts at risk: {}.", newAmountsAtRisk);
-            atRisk.set(newAmountsAtRisk);
-            portfolioOverview.set(null);
-        }
-    }
-
     public PortfolioOverview getOverview() {
         return portfolioOverview.updateAndGet(old -> {
             if (old != null) {
                 return old;
             }
+            final Map<Rating, BigDecimal> atRisk = getAmountsAtRisk(tenant);
             final PortfolioOverview current = PortfolioOverviewImpl.calculate(tenant.getBalance(), statistics,
                                                                               blockedAmounts.get().getAdjustments(),
-                                                                              atRisk.get());
+                                                                              atRisk);
             LOGGER.debug("Calculated: {}.", current);
             return current;
         });
