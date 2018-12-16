@@ -19,6 +19,7 @@ package com.github.robozonky.app.authentication;
 import java.io.IOException;
 import java.util.Optional;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -85,6 +87,21 @@ class TokenBasedTenantTest extends AbstractRoboZonkyTest {
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);
+    }
+
+    @Test
+    void getters() throws IOException {
+        final OAuth a = mock(OAuth.class);
+        when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
+        final Zonky z = harmlessZonky(10_000);
+        doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
+        final ApiProvider api = mockApiProvider(a, z);
+        try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+            assertThat(tenant.getPortfolio()).isNotNull();
+            final Restrictions r = tenant.getRestrictions();
+            assertThat(r.isCannotAccessSmp()).isTrue();
+            assertThat(r.isCannotInvest()).isTrue();
+        }
     }
 
 }

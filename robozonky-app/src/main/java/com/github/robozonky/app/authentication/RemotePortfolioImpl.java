@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.common.RemotePortfolio;
 import com.github.robozonky.common.Tenant;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +50,11 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     private static BigDecimal sum(final OverallPortfolio portfolio) {
-        return portfolio.getDue().add(portfolio.getUnpaid());
+        return BigDecimalCalculator.plus(portfolio.getDue(), portfolio.getUnpaid());
     }
 
     private static BigDecimal sum(final Collection<Blocked> blockedAmounts) {
-        return blockedAmounts.stream().map(Blocked::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return blockedAmounts.stream().map(Blocked::getAmount).reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
     }
 
     private void trimSynthetics(final RemoteData data) {
@@ -101,7 +102,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     @Override
     public Map<Rating, BigDecimal> getAtRisk() {
-        return getRemoteData().atRisk();
+        return getRemoteData().getAtRisk();
     }
 
     @Override

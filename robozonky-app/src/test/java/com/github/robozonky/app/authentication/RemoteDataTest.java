@@ -16,28 +16,24 @@
 
 package com.github.robozonky.app.authentication;
 
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DivisorTest {
+class RemoteDataTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    void calculate() {
-        Divisor d = new Divisor(2);
-        assertThat(d.getSharePerMille()).isEqualTo(0);
-        d.add(1);
-        assertThat(d.getSharePerMille()).isEqualTo(500);
-        d.add(10);
-        assertThat(d.getSharePerMille()).isEqualTo(5500);
-    }
-
-    @Test
-    void calculateWithZeroBase() {
-        final Divisor d = new Divisor(0);
-        assertThat(d.getSharePerMille()).isEqualTo(Long.MAX_VALUE);
-        d.add(1);
-        assertThat(d.getSharePerMille()).isEqualTo(Long.MAX_VALUE);
+    void getters() {
+        final Zonky zonky = harmlessZonky(10_000);
+        final Tenant tenant = mockTenant(zonky);
+        final RemoteData data = RemoteData.load(tenant);
+        assertThat(data.getWallet()).isNotNull();
+        assertThat(data.getStatistics()).isNotNull();
+        assertThat(data.getBlocked()).isEmpty();
+        assertThat(data.getAtRisk()).isEmpty();
     }
 
 }

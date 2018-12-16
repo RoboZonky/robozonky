@@ -17,6 +17,7 @@
 package com.github.robozonky.app.authentication;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -34,7 +35,7 @@ final class Blocked {
     }
 
     public Blocked(final BlockedAmount amount, final Rating rating) {
-        this.id = amount.getId();
+        this.id = amount.getLoanId();
         this.amount = amount.getAmount().abs();
         this.rating = rating;
     }
@@ -49,5 +50,33 @@ final class Blocked {
 
     public Rating getRating() {
         return rating;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final Blocked blocked = (Blocked) o;
+        return id == blocked.id &&
+                Objects.equals(amount, blocked.amount) &&
+                rating == blocked.rating;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, amount, rating);
+    }
+
+    @Override
+    public String toString() {
+        return "Blocked{" +
+                "id=" + id +
+                ", amount=" + amount +
+                ", rating=" + rating +
+                '}';
     }
 }
