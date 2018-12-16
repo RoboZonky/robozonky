@@ -61,7 +61,7 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     private File keystore = null;
     @picocli.CommandLine.Option(names = {"-w", "--wait-primary", "--wait"},
             description = "Number of seconds between consecutive checks of primary marketplace.")
-    private int primaryMarketplaceCheckDelay = 5;
+    private int primaryMarketplaceCheckDelay = 1;
     @picocli.CommandLine.Option(names = {"-ws", "--wait-secondary"},
             description = "Number of seconds between consecutive checks of secondary marketplace.")
     private int secondaryMarketplaceCheckDelay = primaryMarketplaceCheckDelay;
