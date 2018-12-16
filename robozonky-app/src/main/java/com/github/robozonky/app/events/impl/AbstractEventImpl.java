@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
-import com.github.robozonky.util.ManuallyReloadable;
 import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ abstract class AbstractEventImpl implements Event {
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private final OffsetDateTime creationDateTime = DateUtil.offsetNow();
-    private final ManuallyReloadable<String> toString;
+    private final Reloadable<String> toString;
     private OffsetDateTime conceptionDateTime = creationDateTime;
 
     protected AbstractEventImpl(final String... toStringIgnoredFields) {

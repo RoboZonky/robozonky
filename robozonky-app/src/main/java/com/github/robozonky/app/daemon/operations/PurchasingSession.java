@@ -39,7 +39,9 @@ import static com.github.robozonky.app.events.impl.EventFactory.investmentPurcha
 import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
 import static com.github.robozonky.app.events.impl.EventFactory.purchaseRequested;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingStartedLazy;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.
@@ -66,15 +68,15 @@ final class PurchasingSession {
 
     public static Collection<Investment> purchase(final Tenant auth, final Collection<ParticipationDescriptor> items,
                                                   final PurchaseStrategy strategy) {
-        final PurchasingSession session = new PurchasingSession(items, auth);
-        final Collection<ParticipationDescriptor> c = session.getAvailable();
+        final PurchasingSession s = new PurchasingSession(items, auth);
+        final Collection<ParticipationDescriptor> c = s.getAvailable();
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        session.events.fire(purchasingStarted(c, auth.getPortfolio().getOverview()));
-        session.purchase(strategy);
-        final Collection<Investment> result = session.getResult();
-        session.events.fire(purchasingCompleted(result, auth.getPortfolio().getOverview()));
+        s.events.fire(purchasingStartedLazy(() -> purchasingStarted(c, auth.getPortfolio().getOverview())));
+        s.purchase(strategy);
+        final Collection<Investment> result = s.getResult();
+        s.events.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio().getOverview())));
         return Collections.unmodifiableCollection(result);
     }
 

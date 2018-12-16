@@ -35,7 +35,7 @@ class ReloadableTest {
     @Test
     void manually() {
         final Consumer<String> mock = mock(Consumer.class);
-        final ManuallyReloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), mock);
+        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), mock);
         final Either<Throwable, String> result = r.get();
         assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());

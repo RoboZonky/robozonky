@@ -77,13 +77,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
         }
     }
 
-    private static Duration getMaxJobRuntime(final Job job) {
-        final long maxMillis = job.killIn().toMillis();
-        final long absoluteMaxMillis = Duration.ofHours(1).toMillis();
-        final long result = Math.min(maxMillis, absoluteMaxMillis);
-        return Duration.ofMillis(result);
-    }
-
     private Skippable toSkippable(final DaemonOperation daemonOperation) {
         return new Skippable(daemonOperation, this::isUpdating);
     }
@@ -109,9 +102,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
             runSafe(Events.forSession(tenant.getSessionInfo()), runnable, shutdownCall);
             LOGGER.debug("Finished job {}.", job);
         };
-        final Duration maxRunTime = getMaxJobRuntime(job);
-        final Duration cancelIn = job.startIn().plusMillis(maxRunTime.toMillis());
-        LOGGER.debug("Scheduling job {}. Max run time: {}. Cancel in: {}.", job, maxRunTime, cancelIn);
         executor.submit(payload, job.repeatEvery(), job.startIn());
     }
 

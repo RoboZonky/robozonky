@@ -39,7 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.executionCompletedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.executionStarted;
+import static com.github.robozonky.app.events.impl.EventFactory.executionStartedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentDelegated;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
@@ -84,16 +86,16 @@ final class InvestingSession {
     public static Collection<Investment> invest(final Investor investor, final Tenant tenant,
                                                 final Collection<LoanDescriptor> loans,
                                                 final InvestmentStrategy strategy) {
-        final InvestingSession session = new InvestingSession(loans, investor, tenant);
+        final InvestingSession s = new InvestingSession(loans, investor, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         final long balance = portfolioOverview.getCzkAvailable().longValue();
-        session.events.fire(executionStarted(loans, portfolioOverview));
-        if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
-            session.invest(strategy);
+        s.events.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
+        if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !s.getAvailable().isEmpty()) {
+            s.invest(strategy);
         }
-        final Collection<Investment> result = session.getResult();
+        final Collection<Investment> result = s.getResult();
         // make sure we get fresh portfolio reference here
-        session.events.fire(executionCompleted(result, tenant.getPortfolio().getOverview()));
+        s.events.fire(executionCompletedLazy(() -> executionCompleted(result, tenant.getPortfolio().getOverview())));
         return Collections.unmodifiableCollection(result);
     }
 

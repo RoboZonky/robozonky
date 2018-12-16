@@ -44,9 +44,12 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final Reloadable<RemoteData> data;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
+    private final Reloadable<PortfolioOverview> portfolioOverview;
 
     public RemotePortfolioImpl(final Tenant tenant) {
-        this.data = Reloadable.of(() -> RemoteData.load(tenant), Duration.ofMinutes(5), this::trimSynthetics);
+        this.data = Reloadable.of(() -> RemoteData.load(tenant), Duration.ofMinutes(5), this::refresh);
+        this.portfolioOverview = Reloadable.of(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()),
+                                               Duration.ofMinutes(5));
     }
 
     private static BigDecimal sum(final OverallPortfolio portfolio) {
@@ -57,7 +60,10 @@ class RemotePortfolioImpl implements RemotePortfolio {
         return blockedAmounts.stream().map(Blocked::getAmount).reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
     }
 
-    private void trimSynthetics(final RemoteData data) {
+    private void refresh(final RemoteData data) {
+        // force overview recalculation
+        portfolioOverview.clear();
+        // remove synthetic charges that are replaced by actual remote blocked amounts
         final Map<Integer, Blocked> real = data.getBlocked();
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
                 .filter(e -> !real.containsKey(e.getKey()))
@@ -107,6 +113,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     @Override
     public PortfolioOverview getOverview() {
-        return new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk());
+        return portfolioOverview.get()
+                .getOrElseThrow(t -> new IllegalStateException("Failed calculating portfolio overview.", t));
     }
 }
