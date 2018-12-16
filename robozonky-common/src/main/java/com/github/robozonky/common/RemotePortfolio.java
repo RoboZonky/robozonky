@@ -24,6 +24,13 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 
 public interface RemotePortfolio {
 
+    /**
+     * Adjust {@link #getTotal()} and {@link #getBalance()} temporarily to reflect an operation performed by the robot
+     * that was not yet retrieved from the remote API.
+     * @param loanId
+     * @param rating
+     * @param amount
+     */
     void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount);
 
     BigDecimal getBalance();
@@ -32,6 +39,9 @@ public interface RemotePortfolio {
 
     Map<Rating, BigDecimal> getAtRisk();
 
+    /**
+     * Takes {@link #getBalance()}, {@link #getTotal()} and {@link #getAtRisk()} and summarizes them.
+     * @return
+     */
     PortfolioOverview getOverview();
-
 }
