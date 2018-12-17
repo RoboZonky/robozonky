@@ -19,7 +19,7 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired when RoboZonky detects that a new stable (X.Y.Z) version is available in Maven Central.
  */
-public interface RoboZonkyUpdateDetectedEvent extends Event {
+public interface RoboZonkyUpdateDetectedEvent extends GlobalEvent {
 
     String getNewVersion();
 }

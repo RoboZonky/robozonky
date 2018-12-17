@@ -19,6 +19,6 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired before the application shuts down cleanly, provided {@link RoboZonkyInitializedEvent} was fired before.
  */
-public interface RoboZonkyEndingEvent extends Event {
+public interface RoboZonkyEndingEvent extends GlobalEvent {
 
 }

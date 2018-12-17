@@ -21,7 +21,7 @@ import java.util.Optional;
 /**
  * Fired before the application forcibly terminates due to an error.
  */
-public interface RoboZonkyCrashedEvent extends Event {
+public interface RoboZonkyCrashedEvent extends GlobalEvent {
 
     Optional<Throwable> getCause();
 }

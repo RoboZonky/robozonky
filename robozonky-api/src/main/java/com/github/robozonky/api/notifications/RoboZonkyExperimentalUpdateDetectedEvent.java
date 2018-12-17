@@ -19,7 +19,7 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired when RoboZonky detects that a new unstable (alpha, beta, CR) version is available in Maven Central.
  */
-public interface RoboZonkyExperimentalUpdateDetectedEvent extends Event {
+public interface RoboZonkyExperimentalUpdateDetectedEvent extends GlobalEvent {
 
     String getNewVersion();
 }
