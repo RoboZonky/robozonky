@@ -19,30 +19,42 @@ package com.github.robozonky.app.events;
 import java.util.concurrent.CompletableFuture;
 
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.GlobalEvent;
+import com.github.robozonky.app.events.impl.EventFactory;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class AllSessionEvents implements Events {
+public final class GlobalEvents {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AllSessionEvents.class);
-    private static final Lazy<AllSessionEvents> INSTANCE = Lazy.of(AllSessionEvents::new);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalEvents.class);
+    private static final Lazy<GlobalEvents> INSTANCE = Lazy.of(GlobalEvents::new);
 
-    private AllSessionEvents() {
+    private GlobalEvents() {
         // no external instances
     }
 
-    static Events get() {
+    static GlobalEvents get() {
         return INSTANCE.get();
     }
 
     @SuppressWarnings("rawtypes")
-    @Override
-    public CompletableFuture<Void> fire(final LazyEvent<? extends Event> event) {
+    public CompletableFuture<Void> fire(final LazyEvent<? extends GlobalEvent> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
-        final CompletableFuture[] futures = SessionEventsImpl.all().stream()
-                .map(s -> s.fire(event))
+        final CompletableFuture[] futures = SessionEvents.all().stream()
+                .map(s -> s.fireAny(event))
                 .toArray(CompletableFuture[]::new);
         return CompletableFuture.allOf(futures);
     }
+
+    /**
+     * Transforms given {@link Event} into {@link LazyEvent} and delegates to {@link #fire(LazyEvent)}.
+     * @param event
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public CompletableFuture<Void> fire(final GlobalEvent event) {
+        return fire(EventFactory.async((Class<GlobalEvent>) event.getClass(), () -> event));
+    }
+
 }

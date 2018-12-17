@@ -20,8 +20,12 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.GlobalEvent;
+import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.GlobalEvents;
 import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.common.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,13 +85,21 @@ class Transactional implements Runnable {
         while (!stateUpdates.isEmpty()) {
             stateUpdates.poll().run();
         }
-        final Events events = Events.forSession(getTenant().getSessionInfo());
+        final SessionEvents sessionEvents = Events.forSession(getTenant().getSessionInfo());
+        final GlobalEvents globalEvents = Events.global();
         while (!eventsToFire.isEmpty()) {
             final Object evt = eventsToFire.poll();
             if (evt instanceof LazyEvent) {
-                events.fire((LazyEvent) evt);
-            } else if (evt instanceof Event) {
-                events.fire((Event) evt);
+                final LazyEvent<?> event = (LazyEvent<?>)evt;
+                if (event.getEventType().isAssignableFrom(GlobalEvent.class)) {
+                    globalEvents.fire((LazyEvent<GlobalEvent>)event);
+                } else {
+                    sessionEvents.fire((LazyEvent<SessionEvent>)event);
+                }
+            } else if (evt instanceof GlobalEvent) {
+                globalEvents.fire((GlobalEvent) evt);
+            } else if (evt instanceof SessionEvent) {
+                sessionEvents.fire((SessionEvent) evt);
             } else {
                 throw new IllegalStateException("Can not happen.");
             }

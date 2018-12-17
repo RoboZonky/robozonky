@@ -29,6 +29,7 @@ import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
@@ -65,7 +66,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
     }
 
-    static void runSafe(final Events events, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
+    static void runSafe(final SessionEvents events, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
         try {
             runnable.run();
         } catch (final Exception ex) {

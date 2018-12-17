@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.app.events.Events;
@@ -48,16 +48,16 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     }
 
     private static CompletableFuture<Void> execute(final ShutdownHook.Result result) {
-        final Event toFire = result.getReturnCode() == ReturnCode.OK ?
+        final GlobalEvent toFire = result.getReturnCode() == ReturnCode.OK ?
                 roboZonkyEnding() :
                 roboZonkyCrashed(result.getCause());
-        return Events.allSessions().fire(toFire);
+        return Events.global().fire(toFire);
     }
 
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
         LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
-        Events.allSessions().fire(roboZonkyInitialized());
+        Events.global().fire(roboZonkyInitialized());
         return Optional.of(result -> {
             final CompletableFuture<Void> waitUntilFired = execute(result);
             try {

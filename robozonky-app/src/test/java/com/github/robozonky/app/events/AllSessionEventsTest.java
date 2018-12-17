@@ -21,19 +21,20 @@ import java.util.concurrent.CompletableFuture;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.events.impl.EventFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-class AllSessionEventsTest {
+class AllSessionEventsTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void lazyFireReturnsFuture() {
         final Loan l = Loan.custom().build();
         final Investment i = Investment.fresh(l, 200).build();
-        final CompletableFuture<Void> result = AllSessionEvents.get()
+        final CompletableFuture<Void> result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanRepaidLazy(() -> EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class))));
         assertThat(result).isNotNull().isNotCancelled();
 
@@ -43,7 +44,7 @@ class AllSessionEventsTest {
     void fireReturnsFuture() {
         final Loan l = Loan.custom().build();
         final Investment i = Investment.fresh(l, 200).build();
-        final CompletableFuture<Void> result = AllSessionEvents.get()
+        final CompletableFuture<Void> result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class)));
         assertThat(result).isNotNull().isNotCancelled();
 

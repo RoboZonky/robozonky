@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
@@ -157,8 +156,7 @@ final class InvestingSession {
                 }
                 break;
             case DELEGATED:
-                final Event e = investmentDelegated(recommendation, providerId);
-                events.fire(e);
+                events.fire(investmentDelegated(recommendation, providerId));
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
                     discard(loan);
