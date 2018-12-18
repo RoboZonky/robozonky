@@ -31,7 +31,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final Investing exec = new Investing(null, auth);
         assertThat(exec.apply(Collections.singletonList(ld))).isEmpty();
         // check events
@@ -71,7 +71,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noItems() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         when(auth.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Investor builder = Investor.build(auth);
         final Investing exec = new Investing(builder, auth);
@@ -90,7 +90,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = harmlessZonky(9000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         when(auth.getInvestmentStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_STRATEGY));
         final Investor builder = Investor.build(auth);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
@@ -109,7 +109,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = harmlessZonky(9000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         when(auth.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Investor investor = mock(Investor.class);
         when(investor.getConfirmationProvider()).thenReturn(Optional.of(mock(ConfirmationProvider.class)));
@@ -136,7 +136,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final int loanId = loan.getId(); // will be random, to avoid problems with caching
         when(z.getLoan(eq(loanId))).thenReturn(loan);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         when(auth.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Investor builder = Investor.build(auth);
         final Investing exec = new Investing(builder, auth);

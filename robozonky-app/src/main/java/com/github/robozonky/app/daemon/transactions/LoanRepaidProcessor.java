@@ -22,17 +22,17 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
-import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.daemon.LoanCache;
+import com.github.robozonky.app.tenant.PowerTenant;
 
 import static com.github.robozonky.app.events.impl.EventFactory.loanRepaid;
 import static com.github.robozonky.app.events.impl.EventFactory.loanRepaidLazy;
 
 class LoanRepaidProcessor extends TransactionProcessor {
 
-    private final EventTenant tenant;
+    private final PowerTenant tenant;
 
-    LoanRepaidProcessor(final EventTenant tenant) {
+    LoanRepaidProcessor(final PowerTenant tenant) {
         this.tenant = tenant;
     }
 

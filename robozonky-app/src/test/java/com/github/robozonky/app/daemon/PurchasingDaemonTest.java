@@ -26,8 +26,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +45,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     @Test
     void standard() {
         final Zonky z = harmlessZonky(10_000);
-        final EventTenant a = mockTenant(z);
+        final PowerTenant a = mockTenant(z);
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
         }, a, Duration.ZERO);
         d.run();
@@ -66,7 +66,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
                 .setId(i.getArgument(0))
                 .setRating(Rating.D)
                 .build());
-        final EventTenant a = mockTenant(z);
+        final PowerTenant a = mockTenant(z);
         when(a.getSessionInfo()).thenReturn(SESSION); // no dry run
         when(a.getPurchaseStrategy()).thenReturn(Optional.of((available, portfolio, restrictions) -> available.stream()
                 .map(ParticipationDescriptor::recommend)
@@ -82,7 +82,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     @Test
     void noBalance() {
         final Zonky z = harmlessZonky(0);
-        final EventTenant a = mockTenant(z);
+        final PowerTenant a = mockTenant(z);
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
         }, a, Duration.ZERO);
         d.run();

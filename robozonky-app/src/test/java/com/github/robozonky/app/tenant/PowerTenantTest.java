@@ -21,12 +21,12 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-class EventTenantTest {
+class PowerTenantTest {
 
     @Test
     void doesNotCopyTransactional() {
-        final EventTenant t = mock(TransactionalEventTenant.class);
-        final EventTenant t2 = EventTenant.transactional(t);
+        final PowerTenant t = mock(TransactionalPowerTenant.class);
+        final PowerTenant t2 = PowerTenant.transactional(t);
         assertThat(t2).isSameAs(t);
     }
 

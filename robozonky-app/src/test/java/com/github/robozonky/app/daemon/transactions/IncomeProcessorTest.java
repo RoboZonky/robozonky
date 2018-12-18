@@ -28,7 +28,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
 class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky(10_000);
-    private final EventTenant tenant = mockTenant(zonky);
+    private final PowerTenant tenant = mockTenant(zonky);
     private final IncomeProcessor processor = new IncomeProcessor(tenant);
     private final InstanceState<IncomeProcessor> state =
             TenantState.of(tenant.getSessionInfo()).in(IncomeProcessor.class);

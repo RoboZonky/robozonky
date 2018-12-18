@@ -16,6 +16,11 @@
 
 package com.github.robozonky.api.notifications;
 
+import com.github.robozonky.api.SessionInfo;
+
+/**
+ * Signifies an event is only relevant to one particular {@link SessionInfo}.
+ */
 public interface SessionEvent extends Event {
 
 }

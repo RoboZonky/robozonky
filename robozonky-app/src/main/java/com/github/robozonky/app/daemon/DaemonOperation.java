@@ -19,7 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,10 @@ abstract class DaemonOperation implements Runnable {
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private final Duration refreshInterval;
-    private final EventTenant tenant;
+    private final PowerTenant tenant;
     private final Consumer<Throwable> shutdownCall;
 
-    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final EventTenant auth,
+    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final PowerTenant auth,
                               final Duration refreshInterval) {
         this.shutdownCall = shutdownCall;
         this.tenant = auth;

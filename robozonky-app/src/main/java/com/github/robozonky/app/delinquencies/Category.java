@@ -34,9 +34,9 @@ import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
@@ -147,7 +147,7 @@ enum Category {
      * @param tenant Tenant to execute over.
      * @param investment Investment to process.
      */
-    public void process(final EventTenant tenant, final Investment investment) {
+    public void process(final PowerTenant tenant, final Investment investment) {
         LOGGER.debug("Updating {}.", this);
         tenant.fire(getEvent(tenant, investment, thresholdInDays));
     }

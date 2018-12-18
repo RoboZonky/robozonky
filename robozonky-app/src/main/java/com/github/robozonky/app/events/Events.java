@@ -16,16 +16,28 @@
 
 package com.github.robozonky.app.events;
 
+import com.github.robozonky.api.notifications.GlobalEvent;
+import com.github.robozonky.api.notifications.SessionEvent;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.Tenant;
 
 public interface Events {
 
+    /**
+     * Used to fire {@link GlobalEvent}s, will reach all {@link Tenant}s in the system.
+     * @return
+     */
     static GlobalEvents global() {
         return GlobalEvents.get();
     }
 
-    static SessionEvents forSession(final Tenant tenant) {
+    /**
+     * Used to request {@link SessionEvent}s, will reach only the given {@link Tenant}. You should use
+     * {@link PowerTenant} to fire those.
+     * @param tenant The {@link Tenant} to reach. If you don't have the instance, you have no business firing the event.
+     * @return
+     */
+    static SessionEvents forSession(final PowerTenant tenant) {
         return SessionEvents.forSession(tenant.getSessionInfo());
     }
-
 }

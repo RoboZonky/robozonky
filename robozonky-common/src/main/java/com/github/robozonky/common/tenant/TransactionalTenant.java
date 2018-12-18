@@ -16,10 +16,17 @@
 
 package com.github.robozonky.common.tenant;
 
+/**
+ * Brings the ability of {@link #getState(Class)} to only persist all changes to internal state when {@link #commit()}
+ * is called. All unpersisted changes can be rolled back via {@link #abort()}. {@link #close()} will throw an
+ * {@link IllegalStateException} unless {@link #commit()} or {@link #abort()} is called beforehand - this is to prevent
+ * the applications from leaving uncommitted data in there.
+ * <p>
+ * Every method not related to state will be delegated to the underlying {@link Tenant}.
+ */
 public interface TransactionalTenant extends Tenant {
 
     void commit();
 
     void abort();
-
 }

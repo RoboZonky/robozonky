@@ -25,8 +25,8 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.tenant.EventTenant;
-import com.github.robozonky.app.tenant.TransactionalEventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,7 +79,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processNew() {
-        final TransactionalEventTenant transactional = EventTenant.transactional(mockTenant(zonky));
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         NEW.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
@@ -90,7 +90,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processMild() {
-        final TransactionalEventTenant transactional = EventTenant.transactional(mockTenant(zonky));
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         MILD.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
@@ -101,7 +101,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processSevere() {
-        final TransactionalEventTenant transactional = EventTenant.transactional(mockTenant(zonky));
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         SEVERE.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
@@ -112,7 +112,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processCritical() {
-        final TransactionalEventTenant transactional = EventTenant.transactional(mockTenant(zonky));
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         CRITICAL.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
@@ -123,7 +123,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processHopeless() {
-        final TransactionalEventTenant transactional = EventTenant.transactional(mockTenant(zonky));
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         System.out.println("Processing.");
         HOPELESS.process(transactional, investment);
         System.out.println("Processed.");
@@ -137,7 +137,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processDefaulted() {
-        final TransactionalEventTenant transactional = EventTenant.transactional(mockTenant(zonky));
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         DEFAULTED.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)

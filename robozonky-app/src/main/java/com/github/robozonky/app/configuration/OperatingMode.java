@@ -22,12 +22,12 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.app.tenant.EventTenant;
-import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;
@@ -47,7 +47,7 @@ final class OperatingMode {
         this.shutdownCall = shutdownCall;
     }
 
-    private static EventTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
+    private static PowerTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
         final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
         final TenantBuilder b = new TenantBuilder();
         if (cli.isDryRunEnabled()) {
@@ -82,7 +82,7 @@ final class OperatingMode {
                 });
     }
 
-    private static void configureNotifications(final CommandLine cli, final Tenant tenant) {
+    private static void configureNotifications(final CommandLine cli, final PowerTenant tenant) {
         // unregister if registered
         final SessionInfo session = tenant.getSessionInfo();
         ListenerServiceLoader.unregisterConfiguration(session);
@@ -93,7 +93,7 @@ final class OperatingMode {
         LOGGER.debug("Notification subsystem initialized: {}.", e);
     }
 
-    private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final EventTenant auth,
+    private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final PowerTenant auth,
                                                        final Investor investor) {
         final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, investor,
                                                           cli.getPrimaryMarketplaceCheckDelay(),
@@ -102,7 +102,7 @@ final class OperatingMode {
     }
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
-        final EventTenant tenant = getTenant(cli, secrets);
+        final PowerTenant tenant = getTenant(cli, secrets);
         configureNotifications(cli, tenant);
         // and now initialize the chosen mode of operation
         return cli.getConfirmationCredentials()

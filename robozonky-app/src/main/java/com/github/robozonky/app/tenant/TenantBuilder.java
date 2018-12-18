@@ -58,7 +58,7 @@ public final class TenantBuilder {
         return this;
     }
 
-    public EventTenant build(final Duration tokenRefresh) {
+    public PowerTenant build(final Duration tokenRefresh) {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
         }
@@ -66,10 +66,10 @@ public final class TenantBuilder {
         final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier =
                 scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, tokenRefresh);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
-        return new TokenBasedTenant(sessionInfo, apis, strategyProvider, tokenSupplier);
+        return new PowerTenantImpl(sessionInfo, apis, strategyProvider, tokenSupplier);
     }
 
-    public EventTenant build() {
+    public PowerTenant build() {
         return build(Settings.INSTANCE.getTokenRefreshPeriod());
     }
 }

@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
-import static com.github.robozonky.app.tenant.EventTenant.transactional;
+import static com.github.robozonky.app.tenant.PowerTenant.transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,12 +50,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
+class TransactionalPowerTenantTest extends AbstractZonkyLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
-    private final EventTenant tenant = mockTenant();
-    private final TransactionalEventTenant transactional = transactional(tenant);
+    private final PowerTenant tenant = mockTenant();
+    private final TransactionalPowerTenant transactional = transactional(tenant);
 
     @Test
     void delegatesAvailability() {
@@ -104,7 +104,7 @@ class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final TransactionalEventTenant t = transactional(new TenantBuilder()
+        final TransactionalPowerTenant t = transactional(new TenantBuilder()
                                                                  .withApi(api)
                                                                  .withSecrets(SECRETS)
                                                                  .build());
@@ -125,7 +125,7 @@ class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final TransactionalEventTenant t = transactional(new TenantBuilder()
+        final TransactionalPowerTenant t = transactional(new TenantBuilder()
                                                                  .withApi(api)
                                                                  .withSecrets(SECRETS)
                                                                  .build());
@@ -148,7 +148,7 @@ class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final TransactionalEventTenant t = transactional(new TenantBuilder()
+        final TransactionalPowerTenant t = transactional(new TenantBuilder()
                                                                  .withApi(api)
                                                                  .withSecrets(SECRETS)
                                                                  .build());
@@ -164,7 +164,7 @@ class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        try (final TransactionalEventTenant t = transactional(new TenantBuilder()
+        try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
                                                                       .withApi(api)
                                                                       .withSecrets(SECRETS)
                                                                       .build())) {
@@ -177,12 +177,12 @@ class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final EventTenant t = new TenantBuilder()
+        final PowerTenant t = new TenantBuilder()
                 .withApi(api)
                 .withSecrets(SECRETS)
                 .build();
         final TransactionalTenant tt = mock(TransactionalTenant.class);
-        try (final TransactionalEventTenant tet = new TransactionalTokenBasedTenant(t, tt)) {
+        try (final TransactionalPowerTenant tet = new TransactionalPowerTenantImpl(t, tt)) {
             tet.commit();
             verify(tt).commit();
         }
@@ -194,12 +194,12 @@ class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final EventTenant t = new TenantBuilder()
+        final PowerTenant t = new TenantBuilder()
                 .withApi(api)
                 .withSecrets(SECRETS)
                 .build();
         final TransactionalTenant tt = mock(TransactionalTenant.class);
-        try (final TransactionalEventTenant tet = new TransactionalTokenBasedTenant(t, tt)) {
+        try (final TransactionalPowerTenant tet = new TransactionalPowerTenantImpl(t, tt)) {
             tet.abort();
             verify(tt).abort();
         }
@@ -211,17 +211,17 @@ class TransactionalTokenBasedTenantTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final EventTenant t = new TenantBuilder()
+        final PowerTenant t = new TenantBuilder()
                 .withApi(api)
                 .withSecrets(SECRETS)
                 .build();
         final TransactionalTenant tt = mock(TransactionalTenant.class);
-        final InstanceState<TransactionalTokenBasedTenantTest> expected =
-                TenantState.of(t.getSessionInfo()).in(TransactionalTokenBasedTenantTest.class);
-        when(tt.getState(eq(TransactionalTokenBasedTenantTest.class))).thenAnswer(i -> expected);
-        try (final TransactionalEventTenant tet = new TransactionalTokenBasedTenant(t, tt)) {
-            final InstanceState<TransactionalTokenBasedTenantTest> actual =
-                    tet.getState(TransactionalTokenBasedTenantTest.class);
+        final InstanceState<TransactionalPowerTenantTest> expected =
+                TenantState.of(t.getSessionInfo()).in(TransactionalPowerTenantTest.class);
+        when(tt.getState(eq(TransactionalPowerTenantTest.class))).thenAnswer(i -> expected);
+        try (final TransactionalPowerTenant tet = new TransactionalPowerTenantImpl(t, tt)) {
+            final InstanceState<TransactionalPowerTenantTest> actual =
+                    tet.getState(TransactionalPowerTenantTest.class);
             assertThat(actual).isSameAs(expected);
         }
     }

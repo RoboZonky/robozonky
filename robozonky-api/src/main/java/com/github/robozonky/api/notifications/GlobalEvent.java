@@ -16,6 +16,12 @@
 
 package com.github.robozonky.api.notifications;
 
+import com.github.robozonky.api.SessionInfo;
+
+/**
+ * Signifies an event that is not specific to any particular {@link SessionInfo} and is relevant for all users of the
+ * application.
+ */
 public interface GlobalEvent extends Event {
 
 }

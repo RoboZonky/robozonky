@@ -27,9 +27,9 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.app.tenant.EventTenant;
-import com.github.robozonky.app.tenant.TransactionalEventTenant;
 import com.github.robozonky.app.daemon.LoanCache;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
@@ -63,7 +63,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         return i.getPaymentStatus().map(s -> s == PaymentStatus.PAID_OFF).orElse(false);
     }
 
-    private static void processNoLongerDelinquent(final EventTenant tenant, final Investment investment,
+    private static void processNoLongerDelinquent(final PowerTenant tenant, final Investment investment,
                                                   final PaymentStatus status) {
         LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
         switch (status) {
@@ -85,11 +85,11 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         }
     }
 
-    private static void processNoLongerDelinquent(final Investment investment, final EventTenant tenant) {
+    private static void processNoLongerDelinquent(final Investment investment, final PowerTenant tenant) {
         investment.getPaymentStatus().ifPresent(status -> processNoLongerDelinquent(tenant, investment, status));
     }
 
-    private static void processDelinquent(final EventTenant tenant, final Registry registry,
+    private static void processDelinquent(final PowerTenant tenant, final Registry registry,
                                           final Investment currentDelinquent) {
         final long investmentId = currentDelinquent.getId();
         final EnumSet<Category> knownCategories = registry.getCategories(currentDelinquent);
@@ -113,7 +113,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         }
     }
 
-    private static void processDefaulted(final EventTenant tenant, final Registry registry,
+    private static void processDefaulted(final PowerTenant tenant, final Registry registry,
                                          final Investment currentDelinquent) {
         final long investmentId = currentDelinquent.getId();
         final EnumSet<Category> knownCategories = registry.getCategories(currentDelinquent);
@@ -137,7 +137,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                 .filter(i -> !isDefaulted(i));
     }
 
-    private void process(final EventTenant tenant) {
+    private void process(final PowerTenant tenant) {
         final Set<Investment> delinquents = tenant.call(Zonky::getDelinquentInvestments)
                 .parallel() // possibly many pages' worth of results; fetch in parallel
                 .collect(Collectors.toSet());
@@ -171,7 +171,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     @Override
     public void accept(final Tenant tenant) {
-        final TransactionalEventTenant transactionalTenant = EventTenant.transactional((EventTenant) tenant);
+        final TransactionalPowerTenant transactionalTenant = PowerTenant.transactional((PowerTenant) tenant);
         try {
             process(transactionalTenant);
             transactionalTenant.commit();

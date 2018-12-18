@@ -36,15 +36,15 @@ import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class TransactionalTokenBasedTenant implements TransactionalEventTenant {
+class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTokenBasedTenant.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalPowerTenantImpl.class);
 
-    private final EventTenant parent;
+    private final PowerTenant parent;
     private final TransactionalTenant transactional;
     private final Reloadable<DelayedFiring> delayedFiring = Reloadable.of(DelayedFiring::new);
 
-    public TransactionalTokenBasedTenant(final EventTenant parent, final TransactionalTenant transactional) {
+    public TransactionalPowerTenantImpl(final PowerTenant parent, final TransactionalTenant transactional) {
         this.parent = parent;
         this.transactional = transactional;
     }

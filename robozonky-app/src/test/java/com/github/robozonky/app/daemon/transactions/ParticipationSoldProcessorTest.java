@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
             final String name = category + " " +
                     (successExpected ? "is" : "is not") +
                     " a participation sale.";
-            final EventTenant tenant = mockTenant();
+            final PowerTenant tenant = mockTenant();
             final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(tenant);
             final DynamicTest test = DynamicTest.dynamicTest(name, () -> {
                 assertThat(processor.isApplicable(transfer)).isEqualTo(successExpected);
@@ -79,7 +79,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
                 .setPaymentStatus(PaymentStatus.PAID)
                 .build();
         when(zonky.getInvestmentByLoanId(eq(loan.getId()))).thenReturn(Optional.of(investment));
-        final EventTenant tenant = mockTenant(zonky);
+        final PowerTenant tenant = mockTenant(zonky);
         final ParticipationSoldProcessor processor = new ParticipationSoldProcessor(tenant);
         processor.processApplicable(transfer);
         assertThat(getEventsRequested()).first().isInstanceOf(InvestmentSoldEvent.class);

@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.daemon.operations.Purchasing;
 import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;
 
@@ -34,7 +34,7 @@ class PurchasingDaemon extends DaemonOperation {
     private final Purchasing purchasing;
     private final SoldParticipationCache soldParticipationCache;
 
-    public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final EventTenant auth, final Duration refreshPeriod) {
+    public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final PowerTenant auth, final Duration refreshPeriod) {
         super(shutdownCall, auth, refreshPeriod);
         this.purchasing = new Purchasing(auth);
         this.soldParticipationCache = SoldParticipationCache.forTenant(auth);

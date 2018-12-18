@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.util.NumberUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +36,18 @@ abstract class StrategyExecutor<T, S> implements Function<Collection<T>, Collect
 
     private static final long[] NO_LONGS = new long[0];
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final EventTenant tenant;
+    private final PowerTenant tenant;
     private final Supplier<Optional<S>> strategyProvider;
     private final AtomicBoolean marketplaceCheckPending = new AtomicBoolean(false);
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
-    protected StrategyExecutor(final EventTenant tenant, Supplier<Optional<S>> strategy) {
+    protected StrategyExecutor(final PowerTenant tenant, Supplier<Optional<S>> strategy) {
         this.tenant = tenant;
         this.strategyProvider = strategy;
     }
 
-    protected EventTenant getTenant() {
+    protected PowerTenant getTenant() {
         return tenant;
     }
 

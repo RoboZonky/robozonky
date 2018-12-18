@@ -21,17 +21,17 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
-import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.daemon.LoanCache;
+import com.github.robozonky.app.tenant.PowerTenant;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentSold;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentSoldLazy;
 
 class ParticipationSoldProcessor extends TransactionProcessor {
 
-    private final EventTenant tenant;
+    private final PowerTenant tenant;
 
-    ParticipationSoldProcessor(final EventTenant tenant) {
+    ParticipationSoldProcessor(final PowerTenant tenant) {
         this.tenant = tenant;
     }
 

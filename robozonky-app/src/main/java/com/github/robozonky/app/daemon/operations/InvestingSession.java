@@ -30,7 +30,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.Tenant;
 import io.vavr.control.Either;
 import org.slf4j.Logger;
@@ -62,9 +62,9 @@ final class InvestingSession {
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
-    private final EventTenant tenant;
+    private final PowerTenant tenant;
 
-    InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor, final EventTenant tenant) {
+    InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor, final PowerTenant tenant) {
         this.investor = investor;
         this.tenant = tenant;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
@@ -78,7 +78,7 @@ final class InvestingSession {
         return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
     }
 
-    public static Collection<Investment> invest(final Investor investor, final EventTenant tenant,
+    public static Collection<Investment> invest(final Investor investor, final PowerTenant tenant,
                                                 final Collection<LoanDescriptor> loans,
                                                 final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, investor, tenant);

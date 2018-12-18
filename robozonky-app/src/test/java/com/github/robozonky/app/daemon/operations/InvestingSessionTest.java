@@ -42,7 +42,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import io.vavr.control.Either;
@@ -80,7 +80,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void constructor() {
         final Zonky z = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final LoanDescriptor ld = mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         final InvestingSession it = new InvestingSession(new LinkedHashSet<>(lds), getInvestor(auth), auth);
@@ -102,7 +102,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final int amount = 200;
         final LoanDescriptor ld = mockLoanDescriptorWithoutCaptcha();
         final int loanId = ld.item().getId();
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, mockLoanDescriptor());
         final Collection<Investment> i = InvestingSession.invest(getInvestor(auth), auth, lds,
                                                                  mockStrategy(loanId, amount));
@@ -123,7 +123,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void underBalance() {
         // setup APIs
         final Zonky z = harmlessZonky(199);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         // run test
         final InvestingSession it = new InvestingSession(Collections.emptySet(), getInvestor(auth), auth);
         final Optional<RecommendedLoan> recommendation = mockLoanDescriptor()
@@ -138,7 +138,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void underAmount() {
         final Zonky z = harmlessZonky(0);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final RecommendedLoan recommendation =
                 mockLoanDescriptor().recommend(200).get();
         final InvestingSession t = new InvestingSession(Collections.singleton(recommendation.descriptor()),
@@ -153,7 +153,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentFailed() {
         final Zonky z = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = mock(Investor.class);
@@ -165,7 +165,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentRejected() {
         final Zonky z = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
         final Investor p = mock(Investor.class);
         doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
@@ -190,7 +190,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = mockLoanDescriptor();
         final RecommendedLoan r = ld.recommend(200).get();
         final Zonky z = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
@@ -216,7 +216,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final RecommendedLoan r = ld.recommend(200, true).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         final Zonky z = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
@@ -242,7 +242,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         // setup APIs
         final Zonky z = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.empty()).when(p).getConfirmationProvider();
@@ -267,7 +267,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final int amountToInvest = 200;
         final RecommendedLoan r = mockLoanDescriptor().recommend(amountToInvest).get();
         final Zonky z = harmlessZonky(oldBalance);
-        final EventTenant auth = mockTenant(z);
+        final PowerTenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(Either.right(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of(CP)).when(p).getConfirmationProvider();

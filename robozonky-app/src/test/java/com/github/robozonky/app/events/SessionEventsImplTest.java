@@ -28,8 +28,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,8 +42,8 @@ import static org.mockito.Mockito.when;
 class SessionEventsImplTest extends AbstractEventLeveragingTest {
 
     private final Zonky zonky = harmlessZonky(10_000);
-    private final Tenant tenant = mockTenant(zonky, false);
-    private final Tenant tenantDry = mockTenant(zonky, true);
+    private final PowerTenant tenant = mockTenant(zonky, false);
+    private final PowerTenant tenantDry = mockTenant(zonky, true);
 
     @Test
     void identifiesEventTypeWhenClass() {
@@ -106,7 +106,7 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
         final SessionEvents a = Events.forSession(tenant);
         final SessionEvents b = Events.forSession(tenantDry);
         assertThat(a).isSameAs(b);
-        final Tenant t3 = mockTenant();
+        final PowerTenant t3 = mockTenant();
         when(t3.getSessionInfo()).thenReturn(new SessionInfo(UUID.randomUUID().toString()));
         final SessionEvents c = Events.forSession(t3);
         assertThat(a).isNotSameAs(c);

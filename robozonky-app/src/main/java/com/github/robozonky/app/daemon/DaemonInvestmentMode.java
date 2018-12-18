@@ -23,12 +23,12 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
@@ -45,10 +45,10 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     private final DaemonOperation investing, purchasing;
-    private final EventTenant tenant;
+    private final PowerTenant tenant;
     private final Consumer<Throwable> shutdownCall;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final EventTenant tenant,
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
                                 final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
@@ -57,13 +57,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.shutdownCall = shutdownCall;
     }
 
-    DaemonInvestmentMode(final EventTenant tenant, final Investor investor, final Duration primaryMarketplaceCheckPeriod,
+    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                          final Duration secondaryMarketplaceCheckPeriod) {
         this(t -> {
         }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
     }
 
-    static void runSafe(final EventTenant tenant, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
+    static void runSafe(final PowerTenant tenant, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
         try {
             runnable.run();
         } catch (final Exception ex) {

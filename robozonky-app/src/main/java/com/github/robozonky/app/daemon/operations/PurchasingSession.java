@@ -28,7 +28,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,16 +53,16 @@ final class PurchasingSession {
 
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
-    private final EventTenant tenant;
+    private final PowerTenant tenant;
     private final SessionState<ParticipationDescriptor> discarded;
 
-    PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final EventTenant tenant) {
+    PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final PowerTenant tenant) {
         this.tenant = tenant;
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = new ArrayList<>(marketplace);
     }
 
-    public static Collection<Investment> purchase(final EventTenant auth,
+    public static Collection<Investment> purchase(final PowerTenant auth,
                                                   final Collection<ParticipationDescriptor> items,
                                                   final PurchaseStrategy strategy) {
         final PurchasingSession s = new PurchasingSession(items, auth);

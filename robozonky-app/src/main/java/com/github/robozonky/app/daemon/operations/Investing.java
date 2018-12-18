@@ -21,13 +21,13 @@ import java.util.Collection;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
     private final Investor investor;
 
-    public Investing(final Investor investor, final EventTenant auth) {
+    public Investing(final Investor investor, final PowerTenant auth) {
         super(auth, auth::getInvestmentStrategy);
         this.investor = investor;
     }

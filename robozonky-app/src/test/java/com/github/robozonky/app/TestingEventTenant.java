@@ -20,13 +20,13 @@ import java.util.concurrent.CompletableFuture;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.test.TestingTenant;
 
-class TestingEventTenant extends TestingTenant implements EventTenant {
+class TestingEventTenant extends TestingTenant implements PowerTenant {
 
     public TestingEventTenant(final SessionInfo sessionInfo, final Zonky zonky) {
         super(sessionInfo, zonky);

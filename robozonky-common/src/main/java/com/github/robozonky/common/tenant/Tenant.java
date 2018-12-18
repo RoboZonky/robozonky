@@ -29,6 +29,10 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.util.StreamUtil;
 
+/**
+ * Base tenant functionality. All changes made via these methods will be immediately persisted, unless the instance
+ * also implements the {@link TransactionalTenant} interface.
+ */
 public interface Tenant extends AutoCloseable {
 
     static TransactionalTenant transactional(final Tenant tenant) {

@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.tenant.EventTenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void rechecksMarketplaceIfBalanceIncreased() {
         final Zonky zonky = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(zonky);
+        final PowerTenant auth = mockTenant(zonky);
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
@@ -77,7 +77,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void doesNotInvestOnEmptyMarketplace() {
         final Zonky zonky = harmlessZonky(10_000);
-        final EventTenant auth = mockTenant(zonky);
+        final PowerTenant auth = mockTenant(zonky);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting(auth));
         assertThat(e.apply(Collections.emptyList())).isEmpty();
         verify(e, never()).execute(any(), any());
@@ -85,7 +85,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     private static class AlwaysFreshNeverInvesting extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
-        public AlwaysFreshNeverInvesting(final EventTenant tenant) {
+        public AlwaysFreshNeverInvesting(final PowerTenant tenant) {
             super(tenant, StrategyExecutorTest.ALL_ACCEPTING);
         }
 

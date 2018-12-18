@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-class TokenBasedTenantTest extends AbstractEventLeveragingTest {
+class PowerTenantImplTest extends AbstractEventLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
@@ -88,7 +88,7 @@ class TokenBasedTenantTest extends AbstractEventLeveragingTest {
         when(s.getToInvest()).thenReturn(Optional.of(mock(InvestmentStrategy.class)));
         when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
         when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
-        final TokenBasedTenant t = new TokenBasedTenant(null, null, s, null);
+        final PowerTenantImpl t = new PowerTenantImpl(null, null, s, null);
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);
@@ -103,7 +103,7 @@ class TokenBasedTenantTest extends AbstractEventLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             assertThat(tenant.getPortfolio()).isNotNull();
-            assertThat(tenant.getState(TokenBasedTenant.class)).isNotNull();
+            assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
             final Restrictions r = tenant.getRestrictions();
             assertThat(r.isCannotAccessSmp()).isTrue();
             assertThat(r.isCannotInvest()).isTrue();
@@ -115,7 +115,7 @@ class TokenBasedTenantTest extends AbstractEventLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        try (final EventTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+        try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             tenant.fire(roboZonkyDaemonFailed(new IllegalStateException()));
         }
         assertThat(this.getEventsRequested())
@@ -128,7 +128,7 @@ class TokenBasedTenantTest extends AbstractEventLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        try (final EventTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+        try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
                                                                     mockPortfolioOverview(10_000))))
                     .join();

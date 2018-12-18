@@ -41,9 +41,9 @@ import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class TokenBasedTenant implements EventTenant {
+class PowerTenantImpl implements PowerTenant {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedTenant.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PowerTenantImpl.class);
     private static final Restrictions FULLY_RESTRICTED = new Restrictions();
 
     private final SessionInfo sessionInfo;
@@ -54,8 +54,8 @@ class TokenBasedTenant implements EventTenant {
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
 
-    TokenBasedTenant(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
-                     final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier) {
+    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
+                    final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.sessionInfo = sessionInfo;
