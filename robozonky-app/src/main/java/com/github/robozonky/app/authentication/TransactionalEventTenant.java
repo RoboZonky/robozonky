@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app.authentication;
 
-import java.util.function.Function;
+import com.github.robozonky.common.tenant.TransactionalTenant;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.runtime.Lifecycle;
-
-public interface InvestmentMode extends Function<Lifecycle, ReturnCode>,
-                                        AutoCloseable {
-
-    SessionInfo getSessionInfo();
+/**
+ * Instances of this interface should never get to users outside of the application, otherwise they would be able to
+ * fire events.
+ */
+public interface TransactionalEventTenant extends TransactionalTenant, EventTenant {
 
 }

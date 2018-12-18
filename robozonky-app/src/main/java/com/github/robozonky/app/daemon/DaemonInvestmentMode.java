@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
@@ -134,7 +133,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         tenant.close();
     }
 }

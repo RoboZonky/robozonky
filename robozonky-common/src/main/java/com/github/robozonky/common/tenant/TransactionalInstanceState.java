@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.delinquencies;
+package com.github.robozonky.common.tenant;
 
 import java.util.Optional;
 import java.util.function.Consumer;

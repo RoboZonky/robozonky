@@ -14,38 +14,69 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.delinquencies;
+package com.github.robozonky.app.authentication;
 
-import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.common.tenant.TransactionalTenant;
 import com.github.robozonky.common.tenant.ZonkyScope;
+import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * {@link #getState(Class)} returns {@link TransactionalInstanceState} instead of the default {@link InstanceState}
- * implementation. Every other method delegated to the default {@link Tenant} implementation.
- */
-final class TransactionalTenant implements Tenant {
+class TransactionalTokenBasedTenant implements TransactionalEventTenant {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTenant.class);
-    private final Tenant parent;
-    private final Transactional transactional;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTokenBasedTenant.class);
 
-    public TransactionalTenant(final Transactional transactional, final Tenant parent) {
-        this.transactional = transactional;
+    private final EventTenant parent;
+    private final TransactionalTenant transactional;
+    private final Reloadable<DelayedFiring> delayedFiring = Reloadable.of(DelayedFiring::new);
+
+    public TransactionalTokenBasedTenant(final EventTenant parent, final TransactionalTenant transactional) {
         this.parent = parent;
+        this.transactional = transactional;
+    }
+
+    private DelayedFiring getDelayedFiring() {
+        return delayedFiring.get().getOrElseThrow(() -> new IllegalStateException("Can not happen."));
+    }
+
+    @Override
+    public CompletableFuture<Void> fire(final SessionEvent event) {
+        LOGGER.trace("Event stored within transaction: {}.", event);
+        return getDelayedFiring().delay(() -> parent.fire(event));
+    }
+
+    @Override
+    public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
+        LOGGER.trace("Lazy event stored within transaction: {}.", event);
+        return getDelayedFiring().delay(() -> parent.fire(event));
+    }
+
+    @Override
+    public void commit() {
+        transactional.commit();
+        LOGGER.debug("Replaying transaction.");
+        getDelayedFiring().run();
+    }
+
+    @Override
+    public void abort() {
+        transactional.abort();
+        getDelayedFiring().cancel();
+        delayedFiring.clear();
     }
 
     @Override
@@ -90,12 +121,14 @@ final class TransactionalTenant implements Tenant {
 
     @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
-        LOGGER.trace("Creating transactional instance state for {}.", clz);
-        return new TransactionalInstanceState<>(transactional, parent.getState(clz));
+        return transactional.getState(clz);
     }
 
     @Override
-    public void close() throws IOException {
-        parent.close();
+    public void close() throws Exception {
+        transactional.close();
+        if (getDelayedFiring().isPending()) {
+            throw new IllegalStateException("There are uncommitted events.");
+        }
     }
 }

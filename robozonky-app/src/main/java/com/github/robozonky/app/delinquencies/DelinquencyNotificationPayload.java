@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.authentication.TransactionalEventTenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Zonky;
@@ -61,13 +63,13 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         return i.getPaymentStatus().map(s -> s == PaymentStatus.PAID_OFF).orElse(false);
     }
 
-    private static void processNoLongerDelinquent(final Transactional transactional, final Investment investment,
+    private static void processNoLongerDelinquent(final EventTenant tenant, final Investment investment,
                                                   final PaymentStatus status) {
         LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
         switch (status) {
             case WRITTEN_OFF: // investment is lost for good
-                transactional.fire(loanLostLazy(() -> {
-                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), transactional.getTenant());
+                tenant.fire(loanLostLazy(() -> {
+                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), tenant);
                     return loanLost(investment, loan);
                 }));
                 return;
@@ -76,18 +78,18 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                              investment.getId());
                 return;
             default:
-                transactional.fire(loanNoLongerDelinquentLazy(() -> {
-                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), transactional.getTenant());
+                tenant.fire(loanNoLongerDelinquentLazy(() -> {
+                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), tenant);
                     return loanNoLongerDelinquent(investment, loan);
                 }));
         }
     }
 
-    private static void processNoLongerDelinquent(final Investment investment, final Transactional transactional) {
-        investment.getPaymentStatus().ifPresent(status -> processNoLongerDelinquent(transactional, investment, status));
+    private static void processNoLongerDelinquent(final Investment investment, final EventTenant tenant) {
+        investment.getPaymentStatus().ifPresent(status -> processNoLongerDelinquent(tenant, investment, status));
     }
 
-    private static void processDelinquent(final Transactional transactional, final Registry registry,
+    private static void processDelinquent(final EventTenant tenant, final Registry registry,
                                           final Investment currentDelinquent) {
         final long investmentId = currentDelinquent.getId();
         final EnumSet<Category> knownCategories = registry.getCategories(currentDelinquent);
@@ -104,14 +106,14 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         if (firstNextCategory.isPresent()) {
             final Category category = firstNextCategory.get();
             LOGGER.debug("Investment #{} placed to category {}.", investmentId, category);
-            category.process(transactional, currentDelinquent);
+            category.process(tenant, currentDelinquent);
             registry.addCategory(currentDelinquent, category);
         } else {
             LOGGER.debug("Investment #{} can not yet be promoted to the next category.", investmentId);
         }
     }
 
-    private static void processDefaulted(final Transactional transactional, final Registry registry,
+    private static void processDefaulted(final EventTenant tenant, final Registry registry,
                                          final Investment currentDelinquent) {
         final long investmentId = currentDelinquent.getId();
         final EnumSet<Category> knownCategories = registry.getCategories(currentDelinquent);
@@ -120,7 +122,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         } else {
             final Category category = Category.DEFAULTED;
             LOGGER.debug("Investment #{} defaulted.", investmentId);
-            category.process(transactional, currentDelinquent);
+            category.process(tenant, currentDelinquent);
             registry.addCategory(currentDelinquent, category);
         }
     }
@@ -135,8 +137,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                 .filter(i -> !isDefaulted(i));
     }
 
-    private void process(final Transactional transactional) {
-        final Tenant tenant = transactional.getTenant();
+    private void process(final EventTenant tenant) {
         final Set<Investment> delinquents = tenant.call(Zonky::getDelinquentInvestments)
                 .parallel() // possibly many pages' worth of results; fetch in parallel
                 .collect(Collectors.toSet());
@@ -148,11 +149,11 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                     .parallelStream()
                     .forEach(i -> {
                         registry.remove(i);
-                        processNoLongerDelinquent(i, transactional);
+                        processNoLongerDelinquent(i, tenant);
                     });
             // potentially thousands of items, with relatively heavy logic behind them
-            getDefaulted(delinquents).forEach(d -> processDefaulted(transactional, registry, d));
-            getNonDefaulted(delinquents).forEach(d -> processDelinquent(transactional, registry, d));
+            getDefaulted(delinquents).forEach(d -> processDefaulted(tenant, registry, d));
+            getNonDefaulted(delinquents).forEach(d -> processDelinquent(tenant, registry, d));
         } else {
             getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
             getNonDefaulted(delinquents).forEach(d -> {
@@ -170,8 +171,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     @Override
     public void accept(final Tenant tenant) {
-        final Transactional transactional = new Transactional(tenant);
-        process(transactional);
-        transactional.run();
+        final TransactionalEventTenant transactionalEventTenant = EventTenant.transactional((EventTenant)tenant);
+        process(transactionalEventTenant);
     }
 }

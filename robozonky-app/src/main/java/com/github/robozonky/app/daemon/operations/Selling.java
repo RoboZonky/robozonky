@@ -36,6 +36,9 @@ import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingStartedLazy;
+
 /**
  * Implements selling of {@link RawInvestment}s on the secondary marketplace.
  */
@@ -81,13 +84,14 @@ public class Selling implements Runnable {
                 .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
-        tenant.fire(EventFactory.sellingStarted(eligible, overview));
+        tenant.fire(sellingStartedLazy(() -> EventFactory.sellingStarted(eligible, overview)));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
                 .peek(r -> tenant.fire(EventFactory.saleRecommended(r)))
                 .map(r -> processSale(r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        tenant.fire(EventFactory.sellingCompleted(investmentsSold, overview));
+        tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(investmentsSold,
+                                                                             tenant.getPortfolio().getOverview())));
     }
 
     /**

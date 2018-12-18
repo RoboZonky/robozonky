@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.delinquencies;
+package com.github.robozonky.common.tenant;
 
-import java.io.IOException;
 import java.util.function.Function;
 
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,10 +27,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class TransactionalTenantTest extends AbstractZonkyLeveragingTest {
+class TransactionalTenantTest {
 
-    private final Tenant original = mockTenant();
-    private final Tenant transactional = new TransactionalTenant(mock(Transactional.class), original);
+    private final Tenant original = mock(Tenant.class);
+    private final TransactionalTenant transactional = new TransactionalTenantImpl(original);
 
     @Test
     void delegatesRestrictions() {
@@ -81,7 +77,7 @@ class TransactionalTenantTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void delegateClose() throws IOException {
+    void delegateClose() throws Exception {
         transactional.close();
         verify(original).close();
     }

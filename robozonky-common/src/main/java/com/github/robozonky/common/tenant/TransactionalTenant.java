@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.common.tenant;
 
-import java.util.function.Function;
+public interface TransactionalTenant extends Tenant {
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.runtime.Lifecycle;
+    void commit();
 
-public interface InvestmentMode extends Function<Lifecycle, ReturnCode>,
-                                        AutoCloseable {
-
-    SessionInfo getSessionInfo();
+    void abort();
 
 }

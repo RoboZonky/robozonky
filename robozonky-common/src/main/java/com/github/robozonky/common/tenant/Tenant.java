@@ -16,7 +16,6 @@
 
 package com.github.robozonky.common.tenant;
 
-import java.io.Closeable;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -31,7 +30,11 @@ import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.util.StreamUtil;
 
-public interface Tenant extends Closeable {
+public interface Tenant extends AutoCloseable {
+
+    static TransactionalTenant transactional(final Tenant tenant) {
+        return new TransactionalTenantImpl(tenant);
+    }
 
     /**
      * Execute an operation using on the Zonky server, using the default scope.
@@ -112,4 +115,5 @@ public interface Tenant extends Closeable {
     default <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);
     }
+
 }

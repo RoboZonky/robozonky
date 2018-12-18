@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.authentication;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -53,7 +52,7 @@ class TokenBasedTenantTest extends AbstractRoboZonkyTest {
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build()) {
             assertThat(tenant.isAvailable()).isTrue();
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             fail(e);
         }
         verifyZeroInteractions(a);
@@ -70,7 +69,7 @@ class TokenBasedTenantTest extends AbstractRoboZonkyTest {
             final Statistics s = tenant.call(Zonky::getStatistics);
             assertThat(s).isSameAs(Statistics.empty());
             assertThat(tenant.isAvailable()).isTrue();
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             fail(e);
         }
         verify(a).login(any(), any(), any());
@@ -90,7 +89,7 @@ class TokenBasedTenantTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void getters() throws IOException {
+    void getters() throws Exception {
         final OAuth a = mock(OAuth.class);
         when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
         final Zonky z = harmlessZonky(10_000);

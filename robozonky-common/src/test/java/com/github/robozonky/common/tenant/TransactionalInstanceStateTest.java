@@ -14,38 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.delinquencies;
+package com.github.robozonky.common.tenant;
 
 import java.util.stream.Stream;
 
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class TransactionalInstanceStateTest extends AbstractZonkyLeveragingTest {
+class TransactionalInstanceStateTest {
 
-    protected static Transactional createTransactional() {
-        final Zonky zonky = harmlessZonky(10_000);
-        return createTransactional(zonky);
-    }
-
-    protected static Transactional createTransactional(final Zonky zonky) {
-        final Tenant tenant = mockTenant(zonky);
-        return new Transactional(tenant);
-    }
-
-    @SuppressWarnings("unchecked")
     @Test
     void delegatesKeys() {
         final InstanceState<String> parent = mock(InstanceState.class);
         when(parent.getKeys()).thenReturn(Stream.empty());
-        final TransactionalInstanceState<String> s = new TransactionalInstanceState<>(createTransactional(), parent);
+        final TransactionalInstanceState<String> s = new TransactionalInstanceState<>(new Transactional(), parent);
         assertThat(s.getKeys()).isSameAs(parent.getKeys());
     }
 
