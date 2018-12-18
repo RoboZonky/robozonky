@@ -17,6 +17,8 @@
 package com.github.robozonky.common.tenant;
 
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -37,7 +39,7 @@ final class TransactionalTenantImpl implements TransactionalTenant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTenantImpl.class);
     private final Tenant parent;
-    private final Transactional transactional = new Transactional();
+    private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
 
     public TransactionalTenantImpl(final Tenant parent) {
         this.parent = parent;
@@ -86,13 +88,13 @@ final class TransactionalTenantImpl implements TransactionalTenant {
     @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         LOGGER.trace("Creating transactional instance state for {}.", clz);
-        return new TransactionalInstanceState<>(transactional, parent.getState(clz));
+        return new TransactionalInstanceState<>(stateUpdates, parent.getState(clz));
     }
 
     @Override
     public synchronized void close() throws Exception {
         parent.close();
-        if (!transactional.getStateUpdates().isEmpty()) {
+        if (!stateUpdates.isEmpty()) {
             throw new IllegalStateException("There are uncommitted changes.");
         }
     }
@@ -100,13 +102,13 @@ final class TransactionalTenantImpl implements TransactionalTenant {
     @Override
     public synchronized void commit() {
         LOGGER.debug("Replaying transaction.");
-        while (!transactional.getStateUpdates().isEmpty()) {
-            transactional.getStateUpdates().poll().run();
+        while (!stateUpdates.isEmpty()) {
+            stateUpdates.poll().run();
         }
     }
 
     @Override
     public synchronized void abort() {
-        transactional.getStateUpdates().clear();
+        stateUpdates.clear();
     }
 }

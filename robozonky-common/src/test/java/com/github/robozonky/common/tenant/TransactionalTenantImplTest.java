@@ -18,19 +18,29 @@ package com.github.robozonky.common.tenant;
 
 import java.util.function.Function;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.state.TenantState;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class TransactionalTenantTest {
+class TransactionalTenantImplTest {
 
-    private final Tenant original = mock(Tenant.class);
+    private final Tenant original = mockTenant();
     private final TransactionalTenant transactional = new TransactionalTenantImpl(original);
+
+    private static Tenant mockTenant() {
+        final Tenant t = mock(Tenant.class);
+        when(t.getSessionInfo()).thenReturn(new SessionInfo("somewhere@someone.cz"));
+        return t;
+    }
 
     @Test
     void delegatesRestrictions() {
@@ -82,4 +92,21 @@ class TransactionalTenantTest {
         verify(original).close();
     }
 
+    @Test
+    void state() {
+        final String key = "a";
+        final InstanceState<TransactionalTenantImplTest> s = TenantState.of(transactional.getSessionInfo())
+                .in(TransactionalTenantImplTest.class);
+        final Tenant orig = mockTenant();
+        when(orig.getState(any())).thenAnswer(i -> s);
+        final TransactionalTenant copy = new TransactionalTenantImpl(orig);
+        final InstanceState<TransactionalTenantImplTest> is = copy.getState(TransactionalTenantImplTest.class);
+        is.update(m -> m.put(key, "b"));
+        assertThat(s.getKeys()).isEmpty(); // nothing was stored
+        copy.commit();
+        assertThat(s.getKeys()).containsOnly(key); // now it was persisted
+        is.reset();
+        copy.commit();
+        assertThat(s.getKeys()).isEmpty(); // now it was persisted
+    }
 }

@@ -27,12 +27,14 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.util.StreamUtil;
 
 public interface Tenant extends AutoCloseable {
 
     static TransactionalTenant transactional(final Tenant tenant) {
+        if (tenant instanceof TransactionalTenant) {
+            return (TransactionalTenant) tenant;
+        }
         return new TransactionalTenantImpl(tenant);
     }
 
@@ -112,8 +114,5 @@ public interface Tenant extends AutoCloseable {
 
     Optional<PurchaseStrategy> getPurchaseStrategy();
 
-    default <T> InstanceState<T> getState(final Class<T> clz) {
-        return TenantState.of(getSessionInfo()).in(clz);
-    }
-
+    <T> InstanceState<T> getState(final Class<T> clz);
 }

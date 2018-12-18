@@ -96,6 +96,11 @@ class StateCleanerTest {
         }
 
         @Override
+        public <T> InstanceState<T> getState(Class<T> clz) {
+            return TenantState.of(getSessionInfo()).in(clz);
+        }
+
+        @Override
         public void close() {
 
         }

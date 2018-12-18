@@ -16,6 +16,7 @@
 
 package com.github.robozonky.common.tenant;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -34,24 +35,24 @@ final class TransactionalInstanceState<T> implements InstanceState<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalInstanceState.class);
 
-    private final Transactional transactional;
+    private final Collection<Runnable> stateUpdates;
     private final InstanceState<T> parent;
 
-    public TransactionalInstanceState(final Transactional transactional, final InstanceState<T> parent) {
-        this.transactional = transactional;
+    public TransactionalInstanceState(final Collection<Runnable> stateUpdates, final InstanceState<T> parent) {
+        this.stateUpdates = stateUpdates;
         this.parent = parent;
     }
 
     @Override
     public void update(final Consumer<StateModifier<T>> modifier) {
         LOGGER.debug("Updating transactional instance state for {}.", parent);
-        transactional.getStateUpdates().add(() -> parent.update(modifier));
+        stateUpdates.add(() -> parent.update(modifier));
     }
 
     @Override
     public void reset(final Consumer<StateModifier<T>> setter) {
         LOGGER.debug("Resetting transactional instance state for {}.", parent);
-        transactional.getStateUpdates().add(() -> parent.reset(setter));
+        stateUpdates.add(() -> parent.reset(setter));
     }
 
     @Override

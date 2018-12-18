@@ -33,6 +33,8 @@ import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.ZonkyScope;
@@ -110,6 +112,11 @@ class TokenBasedTenant implements EventTenant {
     @Override
     public Optional<PurchaseStrategy> getPurchaseStrategy() {
         return strategyProvider.getToPurchase();
+    }
+
+    @Override
+    public <T> InstanceState<T> getState(Class<T> clz) {
+        return TenantState.of(getSessionInfo()).in(clz);
     }
 
     @Override

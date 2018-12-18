@@ -25,6 +25,8 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.common.tenant.ZonkyScope;
@@ -79,6 +81,11 @@ public class TestingTenant implements Tenant {
     @Override
     public Optional<PurchaseStrategy> getPurchaseStrategy() {
         return Optional.empty();
+    }
+
+    @Override
+    public <T> InstanceState<T> getState(Class<T> clz) {
+        return TenantState.of(getSessionInfo()).in(clz);
     }
 
     @Override

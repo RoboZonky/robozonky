@@ -29,11 +29,13 @@ import com.github.robozonky.common.tenant.Tenant;
 public interface EventTenant extends Tenant {
 
     static TransactionalEventTenant transactional(final EventTenant tenant) {
+        if (tenant instanceof TransactionalEventTenant) {
+            return (TransactionalEventTenant) tenant;
+        }
         return new TransactionalTokenBasedTenant(tenant, Tenant.transactional(tenant));
     }
 
     CompletableFuture<Void> fire(SessionEvent event);
 
     CompletableFuture<Void> fire(LazyEvent<? extends SessionEvent> event);
-
 }
