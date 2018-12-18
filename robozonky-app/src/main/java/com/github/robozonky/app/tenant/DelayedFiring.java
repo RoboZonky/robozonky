@@ -53,18 +53,18 @@ final class DelayedFiring implements Runnable {
     }
 
     public CompletableFuture<Void> delay(final Runnable runnable) {
-        LOGGER.debug("Delaying {}.", runnable);
         ensureNotOver();
+        LOGGER.debug("Delaying {}.", runnable);
         final CompletableFuture<Void> result = blocksUntilAllUnblock.get().thenRunAsync(runnable);
         all.add(result);
         return result;
     }
 
     public void cancel() {
-        LOGGER.debug("Cancelled.");
         ensureNotOver();
         blocksUntilAllUnblock.get().cancel(true);
         isOver.set(true);
+        LOGGER.debug("Cancelled.");
     }
 
     @Override

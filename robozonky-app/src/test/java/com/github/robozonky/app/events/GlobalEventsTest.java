@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-class AllSessionEventsTest extends AbstractZonkyLeveragingTest {
+class GlobalEventsTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void lazyFireReturnsFuture() {
@@ -37,7 +37,7 @@ class AllSessionEventsTest extends AbstractZonkyLeveragingTest {
         final CompletableFuture<Void> result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanRepaidLazy(() -> EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class))));
         assertThat(result).isNotNull().isNotCancelled();
-
+        result.join(); // make sure it does not throw
     }
 
     @Test
@@ -47,7 +47,7 @@ class AllSessionEventsTest extends AbstractZonkyLeveragingTest {
         final CompletableFuture<Void> result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class)));
         assertThat(result).isNotNull().isNotCancelled();
-
+        result.join(); // make sure it does not throw
     }
 
 }

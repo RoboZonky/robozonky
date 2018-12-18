@@ -61,14 +61,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     private void refresh(final RemoteData data) {
-        // force overview recalculation
-        portfolioOverview.clear();
         // remove synthetic charges that are replaced by actual remote blocked amounts
         final Map<Integer, Blocked> real = data.getBlocked();
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
                 .filter(e -> !real.containsKey(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         LOGGER.debug("New synthetics: {}.", updatedSynthetics);
+        // force overview recalculation now that we have the latest data
+        portfolioOverview.clear();
     }
 
     @Override

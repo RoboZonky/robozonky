@@ -16,22 +16,28 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.Collections;
 import java.util.Optional;
 
+import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +47,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-class TokenBasedTenantTest extends AbstractRoboZonkyTest {
+class TokenBasedTenantTest extends AbstractEventLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
@@ -97,10 +103,38 @@ class TokenBasedTenantTest extends AbstractRoboZonkyTest {
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             assertThat(tenant.getPortfolio()).isNotNull();
+            assertThat(tenant.getState(TokenBasedTenant.class)).isNotNull();
             final Restrictions r = tenant.getRestrictions();
             assertThat(r.isCannotAccessSmp()).isTrue();
             assertThat(r.isCannotInvest()).isTrue();
         }
     }
 
+    @Test
+    void fires() throws Exception {
+        final OAuth a = mock(OAuth.class);
+        final Zonky z = harmlessZonky(10_000);
+        final ApiProvider api = mockApiProvider(a, z);
+        try (final EventTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+            tenant.fire(roboZonkyDaemonFailed(new IllegalStateException()));
+        }
+        assertThat(this.getEventsRequested())
+                .hasSize(1)
+                .first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+    }
+
+    @Test
+    void firesLazy() throws Exception {
+        final OAuth a = mock(OAuth.class);
+        final Zonky z = harmlessZonky(10_000);
+        final ApiProvider api = mockApiProvider(a, z);
+        try (final EventTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+            tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
+                                                                    mockPortfolioOverview(10_000))))
+                    .join();
+        }
+        assertThat(this.getEventsRequested())
+                .hasSize(1)
+                .first().isInstanceOf(SellingCompletedEvent.class);
+    }
 }

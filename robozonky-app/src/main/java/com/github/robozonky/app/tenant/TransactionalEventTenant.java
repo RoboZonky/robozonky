@@ -16,6 +16,10 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.concurrent.CompletableFuture;
+
+import com.github.robozonky.api.notifications.SessionEvent;
+import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.TransactionalTenant;
 
 /**
@@ -24,4 +28,23 @@ import com.github.robozonky.common.tenant.TransactionalTenant;
  */
 public interface TransactionalEventTenant extends TransactionalTenant, EventTenant {
 
+    /**
+     * Do not block on the return value of this method, unless some other thread is still able to call
+     * {@link #commit()}. Otherwise this is a self-inflicted. deadlock.
+     *
+     * @param event
+     * @return
+     */
+    @Override
+    CompletableFuture<Void> fire(SessionEvent event);
+
+    /**
+     * Do not block on the return value of this method, unless some other thread is still able to call
+     * {@link #commit()}. Otherwise this is a self-inflicted. deadlock.
+     *
+     * @param event
+     * @return
+     */
+    @Override
+    CompletableFuture<Void> fire(LazyEvent<? extends SessionEvent> event);
 }
