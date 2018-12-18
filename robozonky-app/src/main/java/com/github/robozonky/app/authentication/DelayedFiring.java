@@ -16,14 +16,20 @@
 
 package com.github.robozonky.app.authentication;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vavr.Lazy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class DelayedFiring implements Runnable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DelayedFiring.class);
 
     private final AtomicBoolean isOver = new AtomicBoolean(false);
     private final CyclicBarrier triggersEventFiring = new CyclicBarrier(2);
@@ -34,6 +40,7 @@ final class DelayedFiring implements Runnable {
             throw new IllegalStateException("Interrupted while waiting for transaction commit.");
         }
     }));
+    private final Collection<CompletableFuture<Void>> all = new HashSet<>(0);
 
     private void ensureNotOver() {
         if (isOver.get()) {
@@ -42,15 +49,19 @@ final class DelayedFiring implements Runnable {
     }
 
     public boolean isPending() {
-        return blocksUntilAllUnblock.isEvaluated() && !isOver.get();
+        return !all.isEmpty() && !isOver.get();
     }
 
     public CompletableFuture<Void> delay(final Runnable runnable) {
+        LOGGER.debug("Delaying {}.", runnable);
         ensureNotOver();
-        return blocksUntilAllUnblock.get().thenRun(runnable);
+        final CompletableFuture<Void> result = blocksUntilAllUnblock.get().thenRunAsync(runnable);
+        all.add(result);
+        return result;
     }
 
     public void cancel() {
+        LOGGER.debug("Cancelled.");
         ensureNotOver();
         blocksUntilAllUnblock.get().cancel(true);
         isOver.set(true);
@@ -59,12 +70,20 @@ final class DelayedFiring implements Runnable {
     @Override
     public void run() {
         ensureNotOver();
+        LOGGER.debug("Requesting delayed event firing.");
+        isOver.set(true);
         try {
+            if (all.isEmpty()) {
+                return;
+            }
+            LOGGER.trace("Triggering firing.");
             triggersEventFiring.await();
+            LOGGER.trace("Waiting for firing to complete.");
+            CompletableFuture.allOf(all.toArray(new CompletableFuture[0])).join();
         } catch (final InterruptedException | BrokenBarrierException e) {
             throw new IllegalStateException("Failed firing events in a transaction.", e);
         } finally {
-            isOver.set(true);
+            LOGGER.debug("Firing over.");
         }
     }
 }

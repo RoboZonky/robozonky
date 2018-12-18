@@ -171,7 +171,13 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     @Override
     public void accept(final Tenant tenant) {
-        final TransactionalEventTenant transactionalEventTenant = EventTenant.transactional((EventTenant)tenant);
-        process(transactionalEventTenant);
+        final TransactionalEventTenant transactionalTenant = EventTenant.transactional((EventTenant) tenant);
+        try {
+            process(transactionalTenant);
+            transactionalTenant.commit();
+        } catch (final Exception ex) {
+            LOGGER.debug("Aborting transaction.", ex);
+            transactionalTenant.abort();
+        }
     }
 }

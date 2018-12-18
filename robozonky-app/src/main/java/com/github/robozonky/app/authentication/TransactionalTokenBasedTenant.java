@@ -70,6 +70,7 @@ class TransactionalTokenBasedTenant implements TransactionalEventTenant {
         transactional.commit();
         LOGGER.debug("Replaying transaction.");
         getDelayedFiring().run();
+        LOGGER.debug("Done.");
     }
 
     @Override
