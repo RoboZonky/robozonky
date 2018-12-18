@@ -17,7 +17,7 @@
 package com.github.robozonky.app.daemon.transactions;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.TenantBuilder;
+import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.tenant.Tenant;

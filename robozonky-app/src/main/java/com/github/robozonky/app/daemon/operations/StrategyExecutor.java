@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.util.NumberUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

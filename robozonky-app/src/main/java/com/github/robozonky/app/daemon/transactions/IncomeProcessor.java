@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.internal.util.DateUtil;

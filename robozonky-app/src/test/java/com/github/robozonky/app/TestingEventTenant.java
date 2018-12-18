@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.LazyEvent;

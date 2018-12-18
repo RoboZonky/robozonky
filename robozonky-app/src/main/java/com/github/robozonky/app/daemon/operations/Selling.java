@@ -28,7 +28,7 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.common.remote.Select;

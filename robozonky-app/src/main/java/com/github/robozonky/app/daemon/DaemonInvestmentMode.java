@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.daemon.operations.Selling;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.authentication;
+package com.github.robozonky.app.tenant;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;

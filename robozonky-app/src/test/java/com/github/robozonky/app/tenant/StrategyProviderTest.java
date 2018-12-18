@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.authentication;
+package com.github.robozonky.app.tenant;
 
 import java.io.File;
 import java.io.IOException;

@@ -21,7 +21,7 @@ import java.util.Collection;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 

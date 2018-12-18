@@ -19,7 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

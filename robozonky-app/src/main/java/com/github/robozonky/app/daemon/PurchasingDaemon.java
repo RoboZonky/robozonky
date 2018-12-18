@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.app.tenant.EventTenant;
 import com.github.robozonky.app.daemon.operations.Purchasing;
 import com.github.robozonky.app.daemon.transactions.SoldParticipationCache;
 import com.github.robozonky.common.remote.Select;
