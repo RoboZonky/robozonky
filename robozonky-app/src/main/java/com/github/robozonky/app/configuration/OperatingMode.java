@@ -22,16 +22,17 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
+import com.github.robozonky.app.authentication.EventTenant;
 import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
-import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ final class OperatingMode {
         this.shutdownCall = shutdownCall;
     }
 
-    private static Tenant getAuthenticated(final CommandLine cli, final SecretProvider secrets) {
+    private static EventTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
         final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
         final TenantBuilder b = new TenantBuilder();
         if (cli.isDryRunEnabled()) {
@@ -81,17 +82,18 @@ final class OperatingMode {
                 });
     }
 
-    private static void configureNotifications(final CommandLine cli, final SessionInfo session) {
+    private static void configureNotifications(final CommandLine cli, final Tenant tenant) {
         // unregister if registered
+        final SessionInfo session = tenant.getSessionInfo();
         ListenerServiceLoader.unregisterConfiguration(session);
         // register if needed
         cli.getNotificationConfigLocation().ifPresent(cfg -> ListenerServiceLoader.registerConfiguration(session, cfg));
         // create event handler for this session, otherwise session-less notifications will not be sent
-        final SessionEvents e = Events.forSession(session);
+        final SessionEvents e = Events.forSession(tenant);
         LOGGER.debug("Notification subsystem initialized: {}.", e);
     }
 
-    private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
+    private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final EventTenant auth,
                                                        final Investor investor) {
         final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, investor,
                                                           cli.getPrimaryMarketplaceCheckDelay(),
@@ -100,8 +102,8 @@ final class OperatingMode {
     }
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
-        final Tenant tenant = getAuthenticated(cli, secrets);
-        configureNotifications(cli, tenant.getSessionInfo());
+        final EventTenant tenant = getTenant(cli, secrets);
+        configureNotifications(cli, tenant);
         // and now initialize the chosen mode of operation
         return cli.getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))

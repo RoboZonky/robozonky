@@ -30,9 +30,8 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.events.SessionEvents;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.common.tenant.Tenant;
 import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,12 +62,9 @@ final class InvestingSession {
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
-    private final SessionEvents events;
-    private final Tenant tenant;
+    private final EventTenant tenant;
 
-    InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor,
-                     final Tenant tenant) {
-        this.events = Events.forSession(tenant.getSessionInfo());
+    InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor, final EventTenant tenant) {
         this.investor = investor;
         this.tenant = tenant;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
@@ -82,19 +78,19 @@ final class InvestingSession {
         return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
     }
 
-    public static Collection<Investment> invest(final Investor investor, final Tenant tenant,
+    public static Collection<Investment> invest(final Investor investor, final EventTenant tenant,
                                                 final Collection<LoanDescriptor> loans,
                                                 final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, investor, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         final long balance = portfolioOverview.getCzkAvailable().longValue();
-        s.events.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
+        s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
         if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !s.getAvailable().isEmpty()) {
             s.invest(strategy);
         }
         final Collection<Investment> result = s.getResult();
         // make sure we get fresh portfolio reference here
-        s.events.fire(executionCompletedLazy(() -> executionCompleted(result, tenant.getPortfolio().getOverview())));
+        s.tenant.fire(executionCompletedLazy(() -> executionCompleted(result, tenant.getPortfolio().getOverview())));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -102,7 +98,7 @@ final class InvestingSession {
         boolean invested;
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
-                    .peek(r -> events.fire(loanRecommended(r)))
+                    .peek(r -> tenant.fire(loanRecommended(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -131,7 +127,7 @@ final class InvestingSession {
         final Investment i = Investment.fresh(l, confirmedAmount);
         markSuccessfulInvestment(i);
         discard(recommendation.descriptor()); // never show again
-        events.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
+        tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
         return true;
     }
 
@@ -144,19 +140,19 @@ final class InvestingSession {
                 break;
             case REJECTED:
                 if (investor.getConfirmationProvider().isPresent()) {
-                    events.fire(investmentRejected(recommendation, providerId));
+                    tenant.fire(investmentRejected(recommendation, providerId));
                     // rejected through a confirmation provider => forget
                     discard(loan);
                 } else {
                     // rejected due to no confirmation provider => make available for direct investment later
-                    events.fire(investmentSkipped(recommendation));
+                    tenant.fire(investmentSkipped(recommendation));
                     final int loanId = loan.item().getId();
                     InvestingSession.LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
                     skip(loan);
                 }
                 break;
             case DELEGATED:
-                events.fire(investmentDelegated(recommendation, providerId));
+                tenant.fire(investmentDelegated(recommendation, providerId));
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
                     discard(loan);
@@ -187,7 +183,7 @@ final class InvestingSession {
             LOGGER.debug("Balance was less than recommendation.");
             return false;
         }
-        events.fire(investmentRequested(recommendation));
+        tenant.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
         final Either<InvestmentFailure, BigDecimal> response = investor.invest(recommendation, seenBefore);
         InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);

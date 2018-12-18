@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.util.function.Function;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -21,11 +21,11 @@ import java.util.Collection;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.authentication.EventTenant;
 
 public class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
 
-    public Purchasing(final Tenant auth) {
+    public Purchasing(final EventTenant auth) {
         super(auth, auth::getPurchaseStrategy);
     }
 

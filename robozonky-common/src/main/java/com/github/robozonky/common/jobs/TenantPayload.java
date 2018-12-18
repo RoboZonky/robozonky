@@ -18,7 +18,7 @@ package com.github.robozonky.common.jobs;
 
 import java.util.function.Consumer;
 
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.tenant.Tenant;
 
 @FunctionalInterface
 public interface TenantPayload extends Consumer<Tenant>, Payload {

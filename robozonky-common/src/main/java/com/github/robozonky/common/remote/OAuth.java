@@ -18,7 +18,7 @@ package com.github.robozonky.common.remote;
 
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.ZonkyScope;
+import com.github.robozonky.common.tenant.ZonkyScope;
 
 public class OAuth {
 

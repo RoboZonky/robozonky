@@ -21,7 +21,8 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.authentication.EventTenant;
+import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,7 +47,7 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void exceptional() {
-        final Tenant a = mockTenant();
+        final EventTenant a = mockTenant();
         doThrow(IllegalStateException.class).when(a).run(any());
         final DaemonOperation d = new CustomOperation(a, null);
         d.run();
@@ -55,7 +56,7 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void standard() {
-        final Tenant a = mockTenant();
+        final EventTenant a = mockTenant();
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
         verify(operation).accept(eq(a));
@@ -64,7 +65,7 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void error() {
-        final Tenant a = mockTenant();
+        final EventTenant a = mockTenant();
         final Consumer<Tenant> operation = api -> {
             throw new Error();
         };
@@ -77,12 +78,12 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
         private final Consumer<Tenant> operation;
 
-        CustomOperation(final Tenant auth, final Consumer<Tenant> operation) {
+        CustomOperation(final EventTenant auth, final Consumer<Tenant> operation) {
             this(auth, operation, t -> {
             });
         }
 
-        CustomOperation(final Tenant auth, final Consumer<Tenant> operation,
+        CustomOperation(final EventTenant auth, final Consumer<Tenant> operation,
                         final Consumer<Throwable> shutdownHook) {
             super(shutdownHook, auth, Duration.ofSeconds(1));
             this.operation = operation;

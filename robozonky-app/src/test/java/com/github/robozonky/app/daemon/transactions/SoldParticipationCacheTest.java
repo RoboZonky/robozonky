@@ -18,9 +18,9 @@ package com.github.robozonky.app.daemon.transactions;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.TenantBuilder;
-import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.events;
+package com.github.robozonky.common.tenant;
 
 import java.util.function.Supplier;
 
@@ -22,9 +22,9 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 
 /**
- * Encapsulates the creation of {@link Event}. This is useful in cases where the creation of events is expensive, such
- * as when additional remote information needs to be retrieved or calculations performed. We can first determine whether
- * someone is actually listening for the event first, and only then perform these heavy operations.
+ * Encapsulates the creation of {@link Event}. This is useful in cases where the creation of events is expensive,
+ * such as when additional remote information needs to be retrieved or calculations performed. We can first determine
+ * whether someone is actually listening for the event first, and only then perform these heavy operations.
  * @param <T>
  */
 public interface LazyEvent<T extends Event> extends Supplier<T> {
@@ -37,8 +37,8 @@ public interface LazyEvent<T extends Event> extends Supplier<T> {
 
     /**
      * Instantiate the event. This may result in expensive calls and should therefore only be performed when we are
-     * sure we need the {@link Event} instance. The instantiation process only happens once, every subsequent invocation
-     * must return the same object.
+     * sure we need the {@link Event} instance. The instantiation process only happens once, every subsequent
+     * invocation must return the same object.
      * @return Instantiated instance.
      */
     @Override

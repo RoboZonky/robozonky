@@ -24,10 +24,10 @@ import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

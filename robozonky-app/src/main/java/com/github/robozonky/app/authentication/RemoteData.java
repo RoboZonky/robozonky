@@ -23,8 +23,8 @@ import java.util.Map;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

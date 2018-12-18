@@ -19,7 +19,7 @@
  * distributing them to {@link com.github.robozonky.api.notifications.EventListener}s. Refer to
  * {@link com.github.robozonky.app.events.impl.EventFactory} in order to create
  * {@link com.github.robozonky.api.notifications.Event} instances. Refer to
- * {@link com.github.robozonky.app.events.Events#forSession(com.github.robozonky.api.SessionInfo)} or
+ * {@link com.github.robozonky.app.events.Events#forSession(com.github.robozonky.common.tenant.Tenant)} or
  * {@link com.github.robozonky.app.events.Events#global()} for an event-firing mechanism.
  */
 package com.github.robozonky.app.events;

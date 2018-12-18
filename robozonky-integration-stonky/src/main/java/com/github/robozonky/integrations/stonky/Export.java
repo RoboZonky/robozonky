@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.ws.rs.core.Response;
 
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import com.github.robozonky.util.Backoff;
 import io.vavr.control.Try;
 import org.slf4j.Logger;

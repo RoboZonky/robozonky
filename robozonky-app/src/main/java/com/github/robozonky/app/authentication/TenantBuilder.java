@@ -20,10 +20,9 @@ import java.time.Duration;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import com.github.robozonky.internal.api.Settings;
 
 public final class TenantBuilder {
@@ -59,7 +58,7 @@ public final class TenantBuilder {
         return this;
     }
 
-    public Tenant build(final Duration tokenRefresh) {
+    public EventTenant build(final Duration tokenRefresh) {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
         }
@@ -70,7 +69,7 @@ public final class TenantBuilder {
         return new TokenBasedTenant(sessionInfo, apis, strategyProvider, tokenSupplier);
     }
 
-    public Tenant build() {
+    public EventTenant build() {
         return build(Settings.INSTANCE.getTokenRefreshPeriod());
     }
 }

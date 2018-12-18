@@ -23,8 +23,9 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.events.EventFiringListener;
 import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,12 +56,14 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
     @BeforeEach
     public void startListeningForEvents() { // initialize session and create a listener
-        Events.forSession(SESSION).addListener(listener);
+        final Tenant t = mockTenant();
+        Events.forSession(t).addListener(listener);
     }
 
     @AfterEach
     public void stopListeningForEvents() {
-        Events.forSession(SESSION).removeListener(listener);
+        final Tenant t = mockTenant();
+        Events.forSession(t).removeListener(listener);
         readPreexistingEvents();
     }
 

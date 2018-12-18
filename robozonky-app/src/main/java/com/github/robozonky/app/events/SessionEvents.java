@@ -36,6 +36,7 @@ import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
+import com.github.robozonky.common.tenant.LazyEvent;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

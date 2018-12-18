@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.events;
+package com.github.robozonky.app.authentication;
 
+import java.util.concurrent.CompletableFuture;
+
+import com.github.robozonky.api.notifications.SessionEvent;
+import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.Tenant;
 
-public interface Events {
+/**
+ * Instances of this interface should never get to users outside of the application, otherwise they would be able to
+ * fire events.
+ */
+public interface EventTenant extends Tenant {
 
-    static GlobalEvents global() {
-        return GlobalEvents.get();
-    }
+    CompletableFuture<Void> fire(SessionEvent event);
 
-    static SessionEvents forSession(final Tenant tenant) {
-        return SessionEvents.forSession(tenant.getSessionInfo());
-    }
+    CompletableFuture<Void> fire(LazyEvent<? extends SessionEvent> event);
 
 }

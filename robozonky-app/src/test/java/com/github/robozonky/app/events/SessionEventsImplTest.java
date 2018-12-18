@@ -28,6 +28,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,8 +37,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SessionEventsImplTest extends AbstractEventLeveragingTest {
+
+    private final Zonky zonky = harmlessZonky(10_000);
+    private final Tenant tenant = mockTenant(zonky, false);
+    private final Tenant tenantDry = mockTenant(zonky, true);
 
     @Test
     void identifiesEventTypeWhenClass() {
@@ -57,11 +64,11 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
     @Test
     void registersListeners() {
         final EventFiringListener e = mock(EventFiringListener.class);
-        assertThat(Events.forSession(SESSION).addListener(e)).isTrue();
-        assertThat(Events.forSession(SESSION).addListener(e)).isFalse();
-        assertThat(Events.forSession(SESSION).removeListener(e)).isTrue();
-        assertThat(Events.forSession(SESSION).removeListener(e)).isFalse();
-        assertThat(Events.forSession(SESSION).addListener(e)).isTrue();
+        assertThat(Events.forSession(tenant).addListener(e)).isTrue();
+        assertThat(Events.forSession(tenant).addListener(e)).isFalse();
+        assertThat(Events.forSession(tenant).removeListener(e)).isTrue();
+        assertThat(Events.forSession(tenant).removeListener(e)).isFalse();
+        assertThat(Events.forSession(tenant).addListener(e)).isTrue();
     }
 
     @SuppressWarnings("unchecked")
@@ -69,7 +76,7 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
     void callsListeners() {
         final ExecutionCompletedEvent s =
                 EventFactory.executionCompleted(Collections.emptyList(), mockPortfolioOverview(10_000));
-        final SessionEvents events = Events.forSession(SESSION);
+        final SessionEvents events = Events.forSession(tenant);
         final EventFiringListener e = mock(EventFiringListener.class);
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         events.addListener(e);
@@ -86,7 +93,7 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
     void callsListenersOnError() {
         final ExecutionCompletedEvent s =
                 EventFactory.executionCompleted(Collections.emptyList(), mockPortfolioOverview(10_000));
-        final SessionEvents events = Events.forSession(SESSION);
+        final SessionEvents events = Events.forSession(tenant);
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         doThrow(IllegalStateException.class).when(l).handle(any(), any());
         events.injectEventListener(l);
@@ -96,10 +103,12 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
 
     @Test
     void differentInstancesForDifferentUsernames() {
-        final SessionEvents a = Events.forSession(SESSION);
-        final SessionEvents b = Events.forSession(SESSION_DRY);
+        final SessionEvents a = Events.forSession(tenant);
+        final SessionEvents b = Events.forSession(tenantDry);
         assertThat(a).isSameAs(b);
-        final SessionEvents c = Events.forSession(new SessionInfo(UUID.randomUUID().toString()));
+        final Tenant t3 = mockTenant();
+        when(t3.getSessionInfo()).thenReturn(new SessionInfo(UUID.randomUUID().toString()));
+        final SessionEvents c = Events.forSession(t3);
         assertThat(a).isNotSameAs(c);
     }
 }

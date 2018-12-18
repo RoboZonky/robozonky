@@ -19,8 +19,8 @@ package com.github.robozonky.common.state;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
-import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.jobs.TenantPayload;
+import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -36,7 +36,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.authentication.EventTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +59,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
     void noStrategy() {
         final Participation mock = mock(Participation.class);
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> Loan.custom().build());
-        final Tenant tenant = mockTenant();
+        final EventTenant tenant = mockTenant();
         final Purchasing exec = new Purchasing(tenant);
         assertThat(exec.apply(Collections.singleton(pd))).isEmpty();
         // check events
@@ -75,7 +75,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Participation mock = mock(Participation.class);
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
-        final Tenant auth = mockTenant(zonky);
+        final EventTenant auth = mockTenant(zonky);
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_STRATEGY));
         final Purchasing exec = new Purchasing(auth);
         assertThat(exec.apply(Collections.singleton(pd))).isEmpty();
@@ -106,7 +106,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         when(mock.getRating()).thenReturn(loan.getRating());
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
-        final Tenant auth = mockTenant(zonky);
+        final EventTenant auth = mockTenant(zonky);
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Purchasing exec = new Purchasing(auth);
         assertThat(exec.apply(Collections.singleton(pd))).isNotEmpty();
@@ -144,7 +144,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         when(mock.getRating()).thenReturn(loan.getRating());
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
-        final Tenant auth = mockTenant(zonky, false);
+        final EventTenant auth = mockTenant(zonky, false);
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Purchasing exec = new Purchasing(auth);
         assertThat(exec.apply(Collections.singleton(pd))).isEmpty();
@@ -153,7 +153,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noItems() {
         final Zonky zonky = harmlessZonky(10_000);
-        final Tenant auth = mockTenant(zonky);
+        final EventTenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(auth);
         when(auth.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         assertThat(exec.apply(Collections.emptyList())).isEmpty();

@@ -68,7 +68,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.common.tenant.LazyEvent;
 
 /**
  * Events which require an instance of {@link PortfolioOverview} or {@link Loan} are prime candidates for lazy

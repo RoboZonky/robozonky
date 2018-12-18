@@ -20,23 +20,28 @@ import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.RemotePortfolio;
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.ZonkyScope;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.common.tenant.RemotePortfolio;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import com.github.robozonky.util.Reloadable;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class TokenBasedTenant implements Tenant {
+class TokenBasedTenant implements EventTenant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedTenant.class);
     private static final Restrictions FULLY_RESTRICTED = new Restrictions();
@@ -48,6 +53,7 @@ class TokenBasedTenant implements Tenant {
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
+    private final Lazy<SessionEvents> sessionEvents = Lazy.of(() -> Events.forSession(this));
 
     TokenBasedTenant(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
                      final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier) {
@@ -109,5 +115,15 @@ class TokenBasedTenant implements Tenant {
     @Override
     public void close() { // cancel existing tokens
         tokens.forEach((k, v) -> v.close());
+    }
+
+    @Override
+    public CompletableFuture<Void> fire(final SessionEvent event) {
+        return sessionEvents.get().fire(event);
+    }
+
+    @Override
+    public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
+        return sessionEvents.get().fire(event);
     }
 }

@@ -26,11 +26,11 @@ import java.util.function.Supplier;
 import javax.ws.rs.BadRequestException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;

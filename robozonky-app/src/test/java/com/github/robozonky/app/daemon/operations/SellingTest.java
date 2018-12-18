@@ -32,7 +32,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.authentication.EventTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
@@ -74,7 +74,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = harmlessZonky(10_000);
-        final Tenant tenant = mockTenant(zonky);
+        final EventTenant tenant = mockTenant(zonky);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         new Selling(tenant).run();
         final List<Event> e = getEventsRequested();
@@ -94,7 +94,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Investment i = mockInvestment(loan);
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
-        final Tenant tenant = mockTenant(zonky);
+        final EventTenant tenant = mockTenant(zonky);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_STRATEGY));
         new Selling(tenant).run();
         final List<Event> e = getEventsRequested();
@@ -114,7 +114,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
-        final Tenant tenant = mockTenant(zonky, isDryRun);
+        final EventTenant tenant = mockTenant(zonky, isDryRun);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final Selling s = new Selling(tenant);
         s.run();

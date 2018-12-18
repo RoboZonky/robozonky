@@ -24,9 +24,9 @@ import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.GlobalEvents;
-import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.app.events.SessionEvents;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +85,7 @@ class Transactional implements Runnable {
         while (!stateUpdates.isEmpty()) {
             stateUpdates.poll().run();
         }
-        final SessionEvents sessionEvents = Events.forSession(getTenant().getSessionInfo());
+        final SessionEvents sessionEvents = Events.forSession(getTenant());
         final GlobalEvents globalEvents = Events.global();
         while (!eventsToFire.isEmpty()) {
             final Object evt = eventsToFire.poll();

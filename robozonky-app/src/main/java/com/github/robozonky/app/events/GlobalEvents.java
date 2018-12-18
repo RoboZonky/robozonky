@@ -21,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.common.tenant.LazyEvent;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

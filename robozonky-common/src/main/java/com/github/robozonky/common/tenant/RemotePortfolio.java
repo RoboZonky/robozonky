@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common;
+package com.github.robozonky.common.tenant;
 
 import java.math.BigDecimal;
 import java.util.Map;

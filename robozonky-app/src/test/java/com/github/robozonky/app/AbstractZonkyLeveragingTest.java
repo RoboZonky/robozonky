@@ -24,16 +24,31 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.authentication.EventTenant;
 import com.github.robozonky.app.daemon.LoanCache;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
+
+    protected static EventTenant mockTenant() {
+        return mockTenant(harmlessZonky(10_000));
+    }
+
+    protected static EventTenant mockTenant(final Zonky zonky) {
+        return mockTenant(zonky, true);
+    }
+
+    protected static EventTenant mockTenant(final Zonky zonky, final boolean isDryRun) {
+        return spy(new TestingEventTenant(isDryRun ? SESSION_DRY : SESSION, zonky));
+    }
 
     protected static MyInvestment mockMyInvestment() {
         return mockMyInvestment(OffsetDateTime.now());

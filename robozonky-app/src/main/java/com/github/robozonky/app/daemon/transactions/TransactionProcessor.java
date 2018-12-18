@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

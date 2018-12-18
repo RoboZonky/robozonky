@@ -25,11 +25,11 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.RemotePortfolio;
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.tenant.RemotePortfolio;
+import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

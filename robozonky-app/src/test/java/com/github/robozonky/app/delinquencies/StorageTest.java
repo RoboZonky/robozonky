@@ -19,8 +19,8 @@ package com.github.robozonky.app.delinquencies;
 import java.util.Collections;
 import java.util.UUID;
 
-import com.github.robozonky.common.Tenant;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
