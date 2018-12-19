@@ -27,7 +27,9 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,17 +51,22 @@ class StonkyTest extends AbstractRoboZonkyTest {
     private final Zonky zonky = mock(Zonky.class);
     private final Tenant tenant = mockTenant(zonky);
 
-    private ClientAndServer server;
-    private String serverUrl;
+    private static ClientAndServer server;
+    private static String serverUrl;
 
-    @BeforeEach
-    void startServer() {
+    @BeforeAll
+    static void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getLocalPort();
     }
 
     @AfterEach
-    void stopServer() {
+    void resetServer() {
+        server.reset();
+    }
+
+    @AfterAll
+    static void stopServer() {
         server.stop();
     }
 

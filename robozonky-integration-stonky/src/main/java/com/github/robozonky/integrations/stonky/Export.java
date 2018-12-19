@@ -53,11 +53,11 @@ enum Export {
                     final int status = response.getStatus();
                     LOGGER.debug("Download endpoint returned HTTP {}.", status);
                     if (status != 302) {
-                        return null;
+                        throw new IllegalStateException("Download not yet ready: " + this);
                     }
                     final String s = response.getHeaderString("Location");
                     return new URL(s);
-                }).getOrElseThrow(t -> new IllegalStateException("Failed downloading " + this, t));
+                }).get();
     }
 
     public CompletableFuture<Optional<File>> download(final Tenant tenant, final Duration backoffTime) {
