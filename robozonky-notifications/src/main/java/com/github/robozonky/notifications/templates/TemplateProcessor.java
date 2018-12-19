@@ -48,7 +48,6 @@ public enum TemplateProcessor {
         cfg.setCustomNumberFormats(customNumberFormats);
         cfg.setClassForTemplateLoading(templateRoot, "");
         cfg.setLogTemplateExceptions(false);
-        cfg.setDefaultEncoding(Defaults.CHARSET.displayName()); // otherwise e-mail contents is mangled
         return cfg;
     }
 
