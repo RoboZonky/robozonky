@@ -18,7 +18,7 @@ package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
-public interface LoanBased extends Event {
+public interface LoanBased extends SessionEvent {
 
     Loan getLoan();
 }

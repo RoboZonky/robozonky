@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.internal.util.DateUtil;
 import io.vavr.Lazy;
 import org.slf4j.Logger;

@@ -25,7 +25,8 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,19 +46,8 @@ import static org.mockito.Mockito.when;
 class CategoryTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky(10_000);
-    private final Transactional transactional = createTransactional(zonky);
     private final Loan loan = Loan.custom().build();
     private final Investment investment = Investment.fresh(loan, 200).build();
-
-    protected static Transactional createTransactional() {
-        final Zonky zonky = harmlessZonky(10_000);
-        return createTransactional(zonky);
-    }
-
-    protected static Transactional createTransactional(final Zonky zonky) {
-        final Tenant tenant = mockTenant(zonky);
-        return new Transactional(tenant);
-    }
 
     @Test
     void thresholds() {
@@ -89,8 +79,9 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processNew() {
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         NEW.process(transactional, investment);
-        transactional.run();
+        transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanNowDelinquentEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
@@ -99,8 +90,9 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processMild() {
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         MILD.process(transactional, investment);
-        transactional.run();
+        transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent10DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
@@ -109,8 +101,9 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processSevere() {
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         SEVERE.process(transactional, investment);
-        transactional.run();
+        transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent30DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
@@ -119,8 +112,9 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processCritical() {
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         CRITICAL.process(transactional, investment);
-        transactional.run();
+        transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent60DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
@@ -129,8 +123,12 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processHopeless() {
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
+        System.out.println("Processing.");
         HOPELESS.process(transactional, investment);
-        transactional.run();
+        System.out.println("Processed.");
+        transactional.commit();
+        System.out.println("Committed.");
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
@@ -139,8 +137,9 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void processDefaulted() {
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
         DEFAULTED.process(transactional, investment);
-        transactional.run();
+        transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDefaultedEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));

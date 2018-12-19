@@ -19,8 +19,8 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +29,13 @@ abstract class DaemonOperation implements Runnable {
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private final Duration refreshInterval;
-    private final Tenant api;
+    private final PowerTenant tenant;
     private final Consumer<Throwable> shutdownCall;
 
-    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final Tenant auth,
+    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final PowerTenant auth,
                               final Duration refreshInterval) {
         this.shutdownCall = shutdownCall;
-        this.api = auth;
+        this.tenant = auth;
         this.refreshInterval = refreshInterval;
     }
 
@@ -49,10 +49,10 @@ abstract class DaemonOperation implements Runnable {
 
     @Override
     public void run() {
-        DaemonInvestmentMode.runSafe(Events.forSession(api.getSessionInfo()), () -> {
+        DaemonInvestmentMode.runSafe(tenant, () -> {
             LOGGER.trace("Starting.");
-            if (isEnabled(api)) {
-                execute(api);
+            if (isEnabled(tenant)) {
+                execute(tenant);
             } else {
                 LOGGER.info("Access to marketplace disabled by Zonky.");
             }

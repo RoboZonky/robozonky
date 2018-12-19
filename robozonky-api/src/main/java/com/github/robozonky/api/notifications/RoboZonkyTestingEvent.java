@@ -19,6 +19,6 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired when testing notifications.
  */
-public interface RoboZonkyTestingEvent extends Event {
+public interface RoboZonkyTestingEvent extends GlobalEvent {
 
 }

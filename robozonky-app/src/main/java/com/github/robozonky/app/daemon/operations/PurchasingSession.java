@@ -28,9 +28,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.events.SessionEvents;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,28 +53,27 @@ final class PurchasingSession {
 
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
-    private final Tenant tenant;
+    private final PowerTenant tenant;
     private final SessionState<ParticipationDescriptor> discarded;
-    private final SessionEvents events;
 
-    PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final Tenant tenant) {
-        this.events = Events.forSession(tenant.getSessionInfo());
+    PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final PowerTenant tenant) {
         this.tenant = tenant;
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = new ArrayList<>(marketplace);
     }
 
-    public static Collection<Investment> purchase(final Tenant auth, final Collection<ParticipationDescriptor> items,
+    public static Collection<Investment> purchase(final PowerTenant auth,
+                                                  final Collection<ParticipationDescriptor> items,
                                                   final PurchaseStrategy strategy) {
         final PurchasingSession s = new PurchasingSession(items, auth);
         final Collection<ParticipationDescriptor> c = s.getAvailable();
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        s.events.fire(purchasingStartedLazy(() -> purchasingStarted(c, auth.getPortfolio().getOverview())));
+        s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(c, auth.getPortfolio().getOverview())));
         s.purchase(strategy);
         final Collection<Investment> result = s.getResult();
-        s.events.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio().getOverview())));
+        s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio().getOverview())));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -85,7 +82,7 @@ final class PurchasingSession {
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
                     .filter(r -> tenant.getPortfolio().getBalance().compareTo(r.amount()) >= 0)
-                    .peek(r -> events.fire(purchaseRecommended(r)))
+                    .peek(r -> tenant.fire(purchaseRecommended(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -119,7 +116,7 @@ final class PurchasingSession {
     }
 
     private boolean purchase(final RecommendedParticipation recommendation) {
-        events.fire(purchaseRequested(recommendation));
+        tenant.fire(purchaseRequested(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan l = recommendation.descriptor().related();
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);
@@ -127,7 +124,7 @@ final class PurchasingSession {
         discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
         if (succeeded) {
             markSuccessfulPurchase(i);
-            events.fire(investmentPurchasedLazy(() -> investmentPurchased(i, l, tenant.getPortfolio().getOverview())));
+            tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(i, l, tenant.getPortfolio().getOverview())));
         }
         return succeeded;
     }

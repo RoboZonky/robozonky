@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.daemon.operations.Investor;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +55,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(200);
         when(z.getAvailableLoans(notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
-        final Tenant a = mockTenant(z);
+        final PowerTenant a = mockTenant(z);
         final InvestmentStrategy is = mock(InvestmentStrategy.class);
         when(a.getInvestmentStrategy()).thenReturn(Optional.of(is));
         final InvestingDaemon d = new InvestingDaemon(t -> {
@@ -69,7 +69,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
     @Test
     void underBalance() {
         final Zonky z = harmlessZonky(199);
-        final Tenant a = mockTenant(z);
+        final PowerTenant a = mockTenant(z);
         final InvestingDaemon d = new InvestingDaemon(t -> {
         }, a, Investor.build(a), Duration.ofSeconds(1));
         d.run();

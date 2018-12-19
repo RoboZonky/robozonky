@@ -68,7 +68,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.events.LazyEvent;
+import com.github.robozonky.common.tenant.LazyEvent;
 
 /**
  * Events which require an instance of {@link PortfolioOverview} or {@link Loan} are prime candidates for lazy
@@ -322,8 +322,16 @@ public final class EventFactory {
         return async(PurchasingStartedEvent.class, supplier);
     }
 
+    public static LazyEvent<SellingCompletedEvent> sellingCompletedLazy(
+            final Supplier<SellingCompletedEvent> supplier) {
+        return async(SellingCompletedEvent.class, supplier);
+    }
+
+    public static LazyEvent<SellingStartedEvent> sellingStartedLazy(final Supplier<SellingStartedEvent> supplier) {
+        return async(SellingStartedEvent.class, supplier);
+    }
+
     public static <T extends Event> LazyEvent<T> async(final Class<T> clz, final Supplier<T> eventSupplier) {
         return new LazyEventImpl<>(clz, eventSupplier);
     }
-
 }

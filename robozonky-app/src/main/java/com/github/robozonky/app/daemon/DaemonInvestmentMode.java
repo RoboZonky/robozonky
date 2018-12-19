@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
@@ -28,9 +27,8 @@ import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
-import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
@@ -47,11 +45,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     private final DaemonOperation investing, purchasing;
-    private final Tenant tenant;
+    private final PowerTenant tenant;
     private final Consumer<Throwable> shutdownCall;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant, final Investor investor,
-                                final Duration primaryMarketplaceCheckPeriod,
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
+                                final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
         this.investing = new InvestingDaemon(shutdownCall, tenant, investor, primaryMarketplaceCheckPeriod);
@@ -59,18 +57,18 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.shutdownCall = shutdownCall;
     }
 
-    DaemonInvestmentMode(final Tenant tenant, final Investor investor, final Duration primaryMarketplaceCheckPeriod,
+    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                          final Duration secondaryMarketplaceCheckPeriod) {
         this(t -> {
         }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
     }
 
-    static void runSafe(final Events events, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
+    static void runSafe(final PowerTenant tenant, final Runnable runnable, final Consumer<Throwable> shutdownCall) {
         try {
             runnable.run();
         } catch (final Exception ex) {
             LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            events.fire(roboZonkyDaemonFailed(ex));
+            tenant.fire(roboZonkyDaemonFailed(ex));
         } catch (final Error t) {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);
@@ -99,7 +97,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     void scheduleJob(final Job job, final Runnable runnable, final Scheduler executor) {
         final Runnable payload = () -> {
             LOGGER.debug("Running job {}.", job);
-            runSafe(Events.forSession(tenant.getSessionInfo()), runnable, shutdownCall);
+            runSafe(tenant, runnable, shutdownCall);
             LOGGER.debug("Finished job {}.", job);
         };
         executor.submit(payload, job.repeatEvery(), job.startIn());
@@ -135,7 +133,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         tenant.close();
     }
 }

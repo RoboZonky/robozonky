@@ -29,13 +29,15 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.daemon.LoanCache;
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.events.impl.EventFactory;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Select;
+import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingStartedLazy;
 
 /**
  * Implements selling of {@link RawInvestment}s on the secondary marketplace.
@@ -44,9 +46,9 @@ public class Selling implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 
-    private final Tenant tenant;
+    private final PowerTenant tenant;
 
-    public Selling(final Tenant tenant) {
+    public Selling(final PowerTenant tenant) {
         this.tenant = tenant;
     }
 
@@ -55,8 +57,7 @@ public class Selling implements Runnable {
     }
 
     private Optional<Investment> processSale(final RecommendedInvestment r, final SessionState<Investment> sold) {
-        final SessionEvents evt = Events.forSession(tenant.getSessionInfo());
-        evt.fire(EventFactory.saleRequested(r));
+        tenant.fire(EventFactory.saleRequested(r));
         final Investment i = r.descriptor().item();
         final boolean isRealRun = !tenant.getSessionInfo().isDryRun();
         LOGGER.debug("Will send sell request for loan #{}: {}.", i.getLoanId(), isRealRun);
@@ -65,7 +66,7 @@ public class Selling implements Runnable {
             LOGGER.trace("Request over.");
         }
         sold.put(i); // make sure dry run never tries to sell this again in this instance
-        evt.fire(EventFactory.saleOffered(i, r.descriptor().related()));
+        tenant.fire(EventFactory.saleOffered(i, r.descriptor().related()));
         return Optional.of(i);
     }
 
@@ -83,14 +84,14 @@ public class Selling implements Runnable {
                 .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
-        final SessionEvents evt = Events.forSession(tenant.getSessionInfo());
-        evt.fire(EventFactory.sellingStarted(eligible, overview));
+        tenant.fire(sellingStartedLazy(() -> EventFactory.sellingStarted(eligible, overview)));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
-                .peek(r -> evt.fire(EventFactory.saleRecommended(r)))
+                .peek(r -> tenant.fire(EventFactory.saleRecommended(r)))
                 .map(r -> processSale(r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        evt.fire(EventFactory.sellingCompleted(investmentsSold, overview));
+        tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(investmentsSold,
+                                                                             tenant.getPortfolio().getOverview())));
     }
 
     /**

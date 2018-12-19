@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
             final String name = category + " " +
                     (successExpected ? "is" : "is not") +
                     " a repayment.";
-            final Tenant tenant = mockTenant();
+            final PowerTenant tenant = mockTenant();
             final LoanRepaidProcessor processor = new LoanRepaidProcessor(tenant);
             final DynamicTest test = DynamicTest.dynamicTest(name, () -> {
                 assertThat(processor.isApplicable(transfer)).isEqualTo(successExpected);

@@ -19,7 +19,7 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired after the daemon encountered an exception, but continues to run.
  */
-public interface RoboZonkyDaemonFailedEvent extends Event {
+public interface RoboZonkyDaemonFailedEvent extends GlobalEvent, SessionEvent {
 
     Throwable getCause();
 }

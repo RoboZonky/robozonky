@@ -22,17 +22,16 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.daemon.LoanCache;
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.app.tenant.PowerTenant;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentSold;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentSoldLazy;
 
 class ParticipationSoldProcessor extends TransactionProcessor {
 
-    private final Tenant tenant;
+    private final PowerTenant tenant;
 
-    ParticipationSoldProcessor(final Tenant tenant) {
+    ParticipationSoldProcessor(final PowerTenant tenant) {
         this.tenant = tenant;
     }
 
@@ -46,7 +45,7 @@ class ParticipationSoldProcessor extends TransactionProcessor {
     void processApplicable(final Transaction transaction) {
         final int loanId = transaction.getLoanId();
         SoldParticipationCache.forTenant(tenant).markAsSold(loanId);
-        Events.forSession(tenant.getSessionInfo()).fire(investmentSoldLazy(() -> {
+        tenant.fire(investmentSoldLazy(() -> {
             final Investment i = lookupOrFail(loanId, tenant);
             final Loan l = LoanCache.get().getLoan(loanId, tenant);
             return investmentSold(i, l, tenant.getPortfolio().getOverview());

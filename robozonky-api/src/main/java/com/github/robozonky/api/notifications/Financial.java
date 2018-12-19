@@ -21,7 +21,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 /**
  * Represents an event that may cause or has already caused the user's portfolio to change.
  */
-public interface Financial extends Event {
+public interface Financial extends SessionEvent {
 
     PortfolioOverview getPortfolioOverview();
 }

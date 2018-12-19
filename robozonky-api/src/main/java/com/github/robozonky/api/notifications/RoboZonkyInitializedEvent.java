@@ -19,6 +19,6 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired after the application has been properly configured and is ready for marketplace check.
  */
-public interface RoboZonkyInitializedEvent extends Event {
+public interface RoboZonkyInitializedEvent extends GlobalEvent {
 
 }

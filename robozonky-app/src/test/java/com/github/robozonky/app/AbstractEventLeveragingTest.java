@@ -23,15 +23,31 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.events.EventFiringListener;
 import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.events.LazyEvent;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import static org.mockito.Mockito.spy;
+
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
     private final MyEventFiringListener listener = new MyEventFiringListener();
+
+    protected static PowerTenant mockTenant() {
+        return mockTenant(harmlessZonky(10_000));
+    }
+
+    protected static PowerTenant mockTenant(final Zonky zonky) {
+        return mockTenant(zonky, true);
+    }
+
+    protected static PowerTenant mockTenant(final Zonky zonky, final boolean isDryRun) {
+        return spy(new TestingEventTenant(isDryRun ? SESSION_DRY : SESSION, zonky));
+    }
 
     protected List<Event> getEventsFired() {
         return listener.getEventsFired();
@@ -55,12 +71,14 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
     @BeforeEach
     public void startListeningForEvents() { // initialize session and create a listener
-        Events.forSession(SESSION).addListener(listener);
+        final PowerTenant t = mockTenant();
+        Events.forSession(t).addListener(listener);
     }
 
     @AfterEach
     public void stopListeningForEvents() {
-        Events.forSession(SESSION).removeListener(listener);
+        final PowerTenant t = mockTenant();
+        Events.forSession(t).removeListener(listener);
         readPreexistingEvents();
     }
 

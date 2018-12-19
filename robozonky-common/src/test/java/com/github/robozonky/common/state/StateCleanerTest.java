@@ -25,10 +25,10 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.RemotePortfolio;
-import com.github.robozonky.common.Tenant;
-import com.github.robozonky.common.ZonkyScope;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.RemotePortfolio;
+import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -93,6 +93,11 @@ class StateCleanerTest {
         @Override
         public Optional<PurchaseStrategy> getPurchaseStrategy() {
             return Optional.empty();
+        }
+
+        @Override
+        public <T> InstanceState<T> getState(Class<T> clz) {
+            return TenantState.of(getSessionInfo()).in(clz);
         }
 
         @Override

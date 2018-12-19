@@ -18,7 +18,7 @@ package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 
-public interface MarketplaceLoanBased extends Event {
+public interface MarketplaceLoanBased extends SessionEvent {
 
     MarketplaceLoan getLoan();
 }

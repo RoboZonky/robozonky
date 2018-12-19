@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.Tenant;
+import com.github.robozonky.common.tenant.Tenant;
 
 final class Registry {
 

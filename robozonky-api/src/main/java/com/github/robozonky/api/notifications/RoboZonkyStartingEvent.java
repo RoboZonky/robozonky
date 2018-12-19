@@ -19,6 +19,6 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired immediately after RoboZonky's started and is going to initialize.
  */
-public interface RoboZonkyStartingEvent extends Event {
+public interface RoboZonkyStartingEvent extends GlobalEvent {
 
 }

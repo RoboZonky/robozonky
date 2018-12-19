@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -78,7 +77,7 @@ public class KeyStoreHandler {
     private static SecretKeyFactory getSecretKeyFactory() {
         try {
             return SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
-        } catch (final NoSuchAlgorithmException ex) {
+        } catch (final Exception ex) { // otherwise we're seing security-related flakiness on Windows-based CI
             throw new IllegalStateException(ex);
         }
     }
