@@ -85,7 +85,9 @@ class EmailHandlerTest {
         });
         assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
-        assertThat(m.getSubject()).isNotNull().isEqualTo(subject);
+        assertThat(m.getSubject())
+                .isNotNull()
+                .isEqualTo(subject);
         assertThat(m.getFrom()[0].toString())
                 .contains("user@seznam.cz")
                 .contains("RoboZonky 'Test'");

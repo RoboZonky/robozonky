@@ -122,6 +122,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final String s = TemplateProcessor.INSTANCE.processPlainText(listener.getTemplateFileName(),
                                                                      listener.getData(event, SESSION_INFO));
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
+        assertThat(s).contains("uživatel"); // check that UTF-8 is properly encoded
     }
 
     private static <T extends Event> void testHtmlProcessing(final AbstractListener<T> listener,
@@ -131,6 +132,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final String s = TemplateProcessor.INSTANCE.processHtml(listener.getTemplateFileName(),
                                                                 Collections.unmodifiableMap(data));
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
+        assertThat(s).contains("uživatel"); // check that UTF-8 is properly encoded
     }
 
     private static void testListenerEnabled(final Event event) {

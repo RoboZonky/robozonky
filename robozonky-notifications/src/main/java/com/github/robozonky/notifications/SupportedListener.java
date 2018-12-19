@@ -369,6 +369,11 @@ public enum SupportedListener {
         }
 
         @Override
+        public boolean overrideGlobalGag() {
+            return true;
+        }
+
+        @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyExperimentalUpdateDetectedEventListener(this, targetHandler);
         }
