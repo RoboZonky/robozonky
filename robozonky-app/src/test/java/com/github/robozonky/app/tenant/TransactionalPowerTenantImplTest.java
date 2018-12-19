@@ -46,8 +46,8 @@ import static com.github.robozonky.app.tenant.PowerTenant.transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
@@ -183,16 +183,13 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final InstanceState<TransactionalPowerTenantImplTest> s = TenantState.of(transactional.getSessionInfo())
                 .in(TransactionalPowerTenantImplTest.class);
         final PowerTenant orig = mockTenant();
-        when(orig.getState(any())).thenAnswer(i -> s);
+        doAnswer(i -> s).when(orig).getState(any());
         final TransactionalTenant copy = new TransactionalPowerTenantImpl(orig);
         final InstanceState<TransactionalPowerTenantImplTest> is = copy.getState(TransactionalPowerTenantImplTest.class);
         is.update(m -> m.put(key, "b"));
         assertThat(s.getKeys()).isEmpty(); // nothing was stored
         copy.commit();
         assertThat(s.getKeys()).containsOnly(key); // now it was persisted
-        is.reset();
-        copy.commit();
-        assertThat(s.getKeys()).isEmpty(); // now it was persisted
     }
 
 }
