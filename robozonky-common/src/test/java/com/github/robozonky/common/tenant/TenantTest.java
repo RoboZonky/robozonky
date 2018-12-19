@@ -47,14 +47,4 @@ class TenantTest {
         verify(t).run(eq(c), any());
     }
 
-    @Test
-    void tenantUpgrade() {
-        final Tenant t = spy(Tenant.class);
-        final TransactionalTenant t2 = Tenant.transactional(t);
-        assertThat(t2).isNotNull().isNotSameAs(t);
-        final Tenant t3 = spy(TransactionalTenant.class);
-        final TransactionalTenant t4 = Tenant.transactional(t3);
-        assertThat(t4).isNotNull().isSameAs(t3);
-    }
-
 }

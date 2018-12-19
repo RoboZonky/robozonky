@@ -42,7 +42,7 @@ public interface PowerTenant extends Tenant {
         if (tenant instanceof TransactionalPowerTenant) {
             return (TransactionalPowerTenant) tenant;
         }
-        return new TransactionalPowerTenantImpl(tenant, Tenant.transactional(tenant));
+        return new TransactionalPowerTenantImpl(tenant);
     }
 
     /**

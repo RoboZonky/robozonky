@@ -37,6 +37,7 @@ final class DelayedFiring implements Runnable {
         try {
             triggersEventFiring.await();
         } catch (final InterruptedException | BrokenBarrierException ex) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting for transaction commit.");
         }
     }));
@@ -81,6 +82,7 @@ final class DelayedFiring implements Runnable {
             LOGGER.trace("Waiting for firing to complete.");
             CompletableFuture.allOf(all.toArray(new CompletableFuture[0])).join();
         } catch (final InterruptedException | BrokenBarrierException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed firing events in a transaction.", e);
         } finally {
             LOGGER.debug("Firing over.");

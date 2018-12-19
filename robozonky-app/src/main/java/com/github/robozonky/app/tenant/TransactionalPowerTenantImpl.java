@@ -17,7 +17,9 @@
 package com.github.robozonky.app.tenant;
 
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -30,7 +32,6 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
-import com.github.robozonky.common.tenant.TransactionalTenant;
 import com.github.robozonky.common.tenant.ZonkyScope;
 import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
@@ -41,12 +42,11 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalPowerTenantImpl.class);
 
     private final PowerTenant parent;
-    private final TransactionalTenant transactional;
     private final Reloadable<DelayedFiring> delayedFiring = Reloadable.of(DelayedFiring::new);
+    private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
 
-    public TransactionalPowerTenantImpl(final PowerTenant parent, final TransactionalTenant transactional) {
+    public TransactionalPowerTenantImpl(final PowerTenant parent) {
         this.parent = parent;
-        this.transactional = transactional;
     }
 
     private DelayedFiring getDelayedFiring() {
@@ -67,15 +67,17 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
     @Override
     public void commit() {
-        transactional.commit();
         LOGGER.debug("Replaying transaction.");
+        while (!stateUpdates.isEmpty()) {
+            stateUpdates.poll().run();
+        }
         getDelayedFiring().run();
         LOGGER.debug("Done.");
     }
 
     @Override
     public void abort() {
-        transactional.abort();
+        stateUpdates.clear();
         getDelayedFiring().cancel();
         delayedFiring.clear();
     }
@@ -122,12 +124,15 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
     @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
-        return transactional.getState(clz);
+        LOGGER.trace("Creating transactional instance state for {}.", clz);
+        return new TransactionalInstanceState<>(stateUpdates, parent.getState(clz));
     }
 
     @Override
-    public void close() throws Exception {
-        transactional.close();
+    public void close() {
+        if (!stateUpdates.isEmpty()) {
+            throw new IllegalStateException("There are uncommitted changes.");
+        }
         if (getDelayedFiring().isPending()) {
             throw new IllegalStateException("There are uncommitted events.");
         }

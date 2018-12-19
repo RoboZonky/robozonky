@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.tenant;
+package com.github.robozonky.app.tenant;
 
 import java.util.ArrayList;
 import java.util.Collections;

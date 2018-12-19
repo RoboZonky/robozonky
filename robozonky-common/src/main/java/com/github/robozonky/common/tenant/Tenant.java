@@ -35,13 +35,6 @@ import com.github.robozonky.util.StreamUtil;
  */
 public interface Tenant extends AutoCloseable {
 
-    static TransactionalTenant transactional(final Tenant tenant) {
-        if (tenant instanceof TransactionalTenant) {
-            return (TransactionalTenant) tenant;
-        }
-        return new TransactionalTenantImpl(tenant);
-    }
-
     /**
      * Execute an operation using on the Zonky server, using the default scope.
      * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and

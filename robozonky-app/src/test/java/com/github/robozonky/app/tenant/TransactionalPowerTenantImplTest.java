@@ -45,12 +45,11 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted
 import static com.github.robozonky.app.tenant.PowerTenant.transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class TransactionalPowerTenantTest extends AbstractZonkyLeveragingTest {
+class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
@@ -173,57 +172,27 @@ class TransactionalPowerTenantTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void triggersCommit() throws Exception {
-        final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
-        final ApiProvider api = mockApiProvider(a, z);
-        final PowerTenant t = new TenantBuilder()
-                .withApi(api)
-                .withSecrets(SECRETS)
-                .build();
-        final TransactionalTenant tt = mock(TransactionalTenant.class);
-        try (final TransactionalPowerTenant tet = new TransactionalPowerTenantImpl(t, tt)) {
-            tet.commit();
-            verify(tt).commit();
-        }
-        verify(tt).close();
+    void transactionalState() {
+        final InstanceState<String> state = transactional.getState(String.class);
+        assertThat(state).isInstanceOf(TransactionalInstanceState.class);
     }
 
     @Test
-    void triggersAbort() throws Exception {
-        final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
-        final ApiProvider api = mockApiProvider(a, z);
-        final PowerTenant t = new TenantBuilder()
-                .withApi(api)
-                .withSecrets(SECRETS)
-                .build();
-        final TransactionalTenant tt = mock(TransactionalTenant.class);
-        try (final TransactionalPowerTenant tet = new TransactionalPowerTenantImpl(t, tt)) {
-            tet.abort();
-            verify(tt).abort();
-        }
-        verify(tt).close();
-    }
-
-    @Test
-    void delegatesState() throws Exception {
-        final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
-        final ApiProvider api = mockApiProvider(a, z);
-        final PowerTenant t = new TenantBuilder()
-                .withApi(api)
-                .withSecrets(SECRETS)
-                .build();
-        final TransactionalTenant tt = mock(TransactionalTenant.class);
-        final InstanceState<TransactionalPowerTenantTest> expected =
-                TenantState.of(t.getSessionInfo()).in(TransactionalPowerTenantTest.class);
-        when(tt.getState(eq(TransactionalPowerTenantTest.class))).thenAnswer(i -> expected);
-        try (final TransactionalPowerTenant tet = new TransactionalPowerTenantImpl(t, tt)) {
-            final InstanceState<TransactionalPowerTenantTest> actual =
-                    tet.getState(TransactionalPowerTenantTest.class);
-            assertThat(actual).isSameAs(expected);
-        }
+    void state() {
+        final String key = "a";
+        final InstanceState<TransactionalPowerTenantImplTest> s = TenantState.of(transactional.getSessionInfo())
+                .in(TransactionalPowerTenantImplTest.class);
+        final PowerTenant orig = mockTenant();
+        when(orig.getState(any())).thenAnswer(i -> s);
+        final TransactionalTenant copy = new TransactionalPowerTenantImpl(orig);
+        final InstanceState<TransactionalPowerTenantImplTest> is = copy.getState(TransactionalPowerTenantImplTest.class);
+        is.update(m -> m.put(key, "b"));
+        assertThat(s.getKeys()).isEmpty(); // nothing was stored
+        copy.commit();
+        assertThat(s.getKeys()).containsOnly(key); // now it was persisted
+        is.reset();
+        copy.commit();
+        assertThat(s.getKeys()).isEmpty(); // now it was persisted
     }
 
 }
