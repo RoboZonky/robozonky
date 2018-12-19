@@ -34,6 +34,8 @@ import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.assertj.core.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +54,28 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         return main;
     }
 
+    @BeforeAll
+    static void ensureSecurityWorks() {
+        /*
+         * poorly configured JVMs in remote CI systems will fail here due to
+         * https://stackoverflow.com/questions/27036588/errorcould-not-initialize-class-javax-crypto-jcesecurity
+         */
+        Assumptions.assumeThatCode(() -> {
+            final String keyStorePassword = "password";
+            final File keystore = File.createTempFile("robozonky-", ".keystore");
+            keystore.delete();
+            KeyStoreHandler.create(keystore, keyStorePassword.toCharArray());
+        }).doesNotThrowAnyException();
+    }
+
+    private static Path getPath(final InputStream resource) throws IOException {
+        final File f = File.createTempFile("robozonky-", ".tmp");
+        f.delete();
+        final Path p = f.toPath();
+        Files.copy(resource, p);
+        return p;
+    }
+
     @Test
     void validDaemonCli() throws IOException, KeyStoreException {
         // prepare keystore
@@ -63,7 +87,8 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         SecretProvider.keyStoreBased(ksh, username, "something".toCharArray());
         // run the app
         final String name = UUID.randomUUID().toString();
-        final App main = new App("-n", name, "-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i", "somewhere.txt",
+        final App main = new App("-n", name, "-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i",
+                                 "somewhere.txt",
                                  "-s", "somewhere");
         final Optional<InvestmentMode> cfg = CommandLine.parse(main);
         assertThat(cfg).isPresent();
@@ -75,14 +100,6 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final App main = mockedApp("-g", "a", "-p", "p", "-i", "somewhere.txt", "-s", "somewhere");
         final Optional<InvestmentMode> cfg = CommandLine.parse(main);
         assertThat(cfg).isEmpty();
-    }
-
-    private static Path getPath(final InputStream resource) throws IOException {
-        final File f = File.createTempFile("robozonky-", ".tmp");
-        f.delete();
-        final Path p = f.toPath();
-        Files.copy(resource, p);
-        return p;
     }
 
     @Test
@@ -117,7 +134,8 @@ class CommandLineTest extends AbstractRoboZonkyTest {
 
     @Test
     void getters() {
-        final CommandLine cli = new CommandLine(t -> {});
+        final CommandLine cli = new CommandLine(t -> {
+        });
         assertThat(cli.getKeystore()).isEmpty();
         assertThat(cli.getNotificationConfigLocation()).isEmpty();
         assertThat(cli.getName()).isEqualTo("Unnamed");

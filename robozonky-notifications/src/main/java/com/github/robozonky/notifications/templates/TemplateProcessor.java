@@ -48,12 +48,12 @@ public enum TemplateProcessor {
         cfg.setCustomNumberFormats(customNumberFormats);
         cfg.setClassForTemplateLoading(templateRoot, "");
         cfg.setLogTemplateExceptions(false);
+        cfg.setDefaultEncoding(Defaults.CHARSET.displayName()); // otherwise e-mail contents is mangled
         return cfg;
     }
 
-    private String process(final Configuration configuration, final String embeddedTemplate,
-                           final Map<String, Object> embeddedData)
-            throws IOException, TemplateException {
+    private static String process(final Configuration configuration, final String embeddedTemplate,
+                                  final Map<String, Object> embeddedData) throws IOException, TemplateException {
         final Map<String, Object> data = Maps.ofEntries(
                 entry("timestamp", Date.from(DateUtil.now())),
                 entry("robozonkyUrl", Defaults.ROBOZONKY_URL),
