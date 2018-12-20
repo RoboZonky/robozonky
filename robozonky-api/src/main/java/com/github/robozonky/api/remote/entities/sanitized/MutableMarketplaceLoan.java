@@ -58,6 +58,8 @@ public interface MutableMarketplaceLoan<T extends MutableMarketplaceLoan<T>> ext
 
     T setRemainingInvestment(final int remainingInvestment);
 
+    T setNonReservedRemainingInvestment(final int remainingInvestment);
+
     T setCovered(final boolean isCovered);
 
     T setPublished(final boolean isPublished);

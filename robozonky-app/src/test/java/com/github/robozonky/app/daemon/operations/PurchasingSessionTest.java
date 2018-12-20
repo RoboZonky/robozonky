@@ -95,7 +95,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                 .setId(1)
                 .setAmount(200)
                 .setRating(Rating.D)
-                .setRemainingInvestment(200)
+                .setNonReservedRemainingInvestment(200)
                 .setMyInvestment(mockMyInvestment())
                 .build();
         final Participation p = mock(Participation.class);

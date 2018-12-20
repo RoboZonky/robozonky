@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class NaturalLanguageInvestmentStrategyTest {
                 .setId(1)
                 .setAmount(amount)
                 .setDatePublished(OffsetDateTime.now())
-                .setRemainingInvestment(amount)
+                .setNonReservedRemainingInvestment(amount)
                 .setRating(Rating.A)
                 .build();
     }

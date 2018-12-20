@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,11 +98,11 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
      * @return Empty if amount is out of bounds.
      */
     public Optional<RecommendedLoan> recommend(final int amount, final boolean confirmationRequired) {
-        if (amount <= loan.getRemainingInvestment()) {
+        final int remaining = loan.getNonReservedRemainingInvestment();
+        if (amount <= remaining) {
             return Optional.of(new RecommendedLoan(this, amount, confirmationRequired));
         } else {
-            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
-                        loan.getRemainingInvestment(), loan.getId());
+            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount, remaining, loan.getId());
             return Optional.empty();
         }
     }

@@ -41,6 +41,7 @@ public interface Loan extends MarketplaceLoan {
         if (loan instanceof MutableLoan) {
             final MutableLoan<LoanBuilder> l = (MutableLoan<LoanBuilder>) loan;
             l.setRemainingInvestment(marketplaceLoan.getRemainingInvestment())
+                    .setNonReservedRemainingInvestment(marketplaceLoan.getNonReservedRemainingInvestment())
                     .setMyInvestment(marketplaceLoan.getMyInvestment().orElse(null))
                     .setInvestmentRate(marketplaceLoan.getInvestmentRate())
                     .setInvestmentsCount(marketplaceLoan.getInvestmentsCount())

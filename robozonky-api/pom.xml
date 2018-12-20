@@ -117,6 +117,24 @@
                   }
                 },
                 "ignore": [
+                  {
+                    "code": "java.method.addedToInterface",
+                    "new": "method int com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan::getNonReservedRemainingInvestment()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MarketplaceLoan",
+                    "methodName": "getNonReservedRemainingInvestment",
+                    "elementKind": "method",
+                    "justification": "Zonky adds new important API."
+                  },
+                  {
+                    "code": "java.method.addedToInterface",
+                    "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T>>>::setNonReservedRemainingInvestment(int)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableMarketplaceLoan",
+                    "methodName": "setNonReservedRemainingInvestment",
+                    "elementKind": "method",
+                    "justification": "Zonky adds new important API."
+                  }
                 ]
               }
             }

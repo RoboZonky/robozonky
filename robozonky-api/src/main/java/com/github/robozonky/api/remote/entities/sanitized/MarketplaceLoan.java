@@ -70,7 +70,19 @@ public interface MarketplaceLoan {
 
     int getAmount();
 
+    /**
+     * Does include the amount that is reserved. This means investing this amount may fail, due to part of it being
+     * reserved.
+     * @return
+     */
     int getRemainingInvestment();
+
+    /**
+     * This is the amount actually available for investment in the marketplace, as opposed to
+     * {@link #getRemainingInvestment()}.
+     * @return
+     */
+    int getNonReservedRemainingInvestment();
 
     boolean isCovered();
 

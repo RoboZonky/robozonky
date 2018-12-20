@@ -109,7 +109,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Loan loan = Loan.custom()
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setRemainingInvestment(100_000)
+                .setNonReservedRemainingInvestment(100_000)
                 .setMyInvestment(mockMyInvestment())
                 .setDatePublished(OffsetDateTime.now())
                 .build();
@@ -136,7 +136,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Loan loan = Loan.custom()
                 .setAmount(100_000)
                 .setRating(Rating.C)
-                .setRemainingInvestment(20_000)
+                .setNonReservedRemainingInvestment(20_000)
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = harmlessZonky(10_000);

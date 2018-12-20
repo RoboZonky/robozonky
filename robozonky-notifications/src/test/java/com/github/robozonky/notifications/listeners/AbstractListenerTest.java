@@ -213,7 +213,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .setRegion(Region.JIHOCESKY)
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-                .setRemainingInvestment(2000)
+                .setNonReservedRemainingInvestment(2000)
                 .setRating(Rating.AAAAA)
                 .setTermInMonths(25)
                 .setUrl(new URL("http://www.robozonky.cz"))

@@ -114,4 +114,5 @@ final class MutableLoanImpl extends AbstractMutableLoanImpl<LoanBuilder> impleme
     public Collection<String> getKnownBorrowerNicknames() {
         return knownBorrowerNicknames;
     }
+
 }

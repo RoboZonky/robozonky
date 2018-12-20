@@ -69,12 +69,13 @@ class LoanTest {
         void updatesValuesThatMayChangeInTheMarketplace() {
             final MarketplaceLoan l = MarketplaceLoan.sanitize(mocked)
                     .setAmount(100000) // will not be updated
-                    .setRemainingInvestment(1000) // will be updated
+                    .setNonReservedRemainingInvestment(1000) // will be updated
                     .build();
             Loan.updateFromMarketplace(loan, l);
             assertSoftly(softly -> {
                 softly.assertThat(loan.getAmount()).isNotEqualTo(l.getAmount());
-                softly.assertThat(loan.getRemainingInvestment()).isEqualTo(l.getRemainingInvestment());
+                softly.assertThat(loan.getNonReservedRemainingInvestment())
+                        .isEqualTo(l.getNonReservedRemainingInvestment());
             });
         }
     }
@@ -243,6 +244,11 @@ class LoanTest {
         @Test
         void remainingInvestment() {
             integer(b, b::setRemainingInvestment, b::getRemainingInvestment, 1);
+        }
+
+        @Test
+        void nonReservedRemainingInvestment() {
+            integer(b, b::setNonReservedRemainingInvestment, b::getNonReservedRemainingInvestment, 1);
         }
 
         @Test
