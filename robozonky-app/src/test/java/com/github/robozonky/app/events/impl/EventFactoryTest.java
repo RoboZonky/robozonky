@@ -71,7 +71,8 @@ import static org.mockito.Mockito.when;
 class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static RecommendedLoan recommendedLoan() {
-        return new LoanDescriptor(Loan.custom().setRemainingInvestment(2000).build()).recommend(200).orElse(null);
+        final Loan loan = Loan.custom().setNonReservedRemainingInvestment(2000).build();
+        return new LoanDescriptor(loan).recommend(200).orElse(null);
     }
 
     private static RecommendedParticipation recommendedParticipation() {

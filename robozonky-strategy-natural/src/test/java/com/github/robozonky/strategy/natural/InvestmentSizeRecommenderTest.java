@@ -40,7 +40,7 @@ class InvestmentSizeRecommenderTest {
                 .setId(1)
                 .setRating(Rating.A)
                 .setAmount(amount)
-                .setRemainingInvestment(amount)
+                .setNonReservedRemainingInvestment(amount)
                 .build();
     }
 

@@ -29,7 +29,7 @@ class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
 
     private static final Comparator<MarketplaceLoan>
             MOST_RECENT_FIRST = Comparator.comparing(MarketplaceLoan::getDatePublished).reversed(),
-            BIGGEST_FIRST = Comparator.comparing(MarketplaceLoan::getRemainingInvestment).reversed(),
+            BIGGEST_FIRST = Comparator.comparing(MarketplaceLoan::getNonReservedRemainingInvestment).reversed(),
             INSURED_FIRST = Comparator.comparing(MarketplaceLoan::isInsuranceActive).reversed(),
             FINAL = INSURED_FIRST.thenComparing(MOST_RECENT_FIRST).thenComparing(BIGGEST_FIRST);
 

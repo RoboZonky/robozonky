@@ -94,7 +94,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
                 .setId(loanId)
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setRemainingInvestment(1000)
+                .setNonReservedRemainingInvestment(1000)
                 .setMyInvestment(mockMyInvestment())
                 .setDatePublished(OffsetDateTime.now())
                 .build();
@@ -131,7 +131,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
                 .setId(loanId)
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setRemainingInvestment(1000)
+                .setNonReservedRemainingInvestment(1000)
                 .setMyInvestment(mockMyInvestment())
                 .setDatePublished(OffsetDateTime.now())
                 .build();

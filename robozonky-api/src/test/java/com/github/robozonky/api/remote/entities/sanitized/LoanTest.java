@@ -231,6 +231,11 @@ class LoanTest {
         }
 
         @Test
+        void nonReservedRemainingInvestment() {
+            integer(b, b::setNonReservedRemainingInvestment, b::getNonReservedRemainingInvestment, 1);
+        }
+
+        @Test
         void investmentsCount() {
             integer(b, b::setInvestmentsCount, b::getInvestmentsCount, 1);
         }

@@ -41,10 +41,11 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> implements MutableMarketplaceLoan<T> {
 
     private static final Random RANDOM = new Random(0);
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private boolean topped, covered, published, questionsAllowed, insuranceActive;
-    private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount,
-            remainingInvestment;
+    private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount;
+    private int remainingInvestment;
+    private int nonReservedRemainingInvestment;
     private String name, nickName, story;
     private BigDecimal interestRate, investmentRate;
     private OffsetDateTime datePublished, deadline;
@@ -84,6 +85,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.rating = original.getRating();
         this.region = original.getRegion();
         this.remainingInvestment = (int) original.getRemainingInvestment();
+        this.nonReservedRemainingInvestment = (int)(original.getRemainingInvestment() - original.getReservedAmount());
         this.story = original.getStory();
         this.termInMonths = original.getTermInMonths();
         this.userId = original.getUserId();
@@ -389,6 +391,18 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.myInvestment = myInvestment;
         return (T) this;
     }
+
+    @Override
+    public int getNonReservedRemainingInvestment() {
+        return nonReservedRemainingInvestment;
+    }
+
+    @Override
+    public T setNonReservedRemainingInvestment(final int remainingInvestment) {
+        this.nonReservedRemainingInvestment = remainingInvestment;
+        return (T) this;
+    }
+
 
     @Override
     public final String toString() {

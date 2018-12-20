@@ -97,11 +97,11 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
      * @return Empty if amount is out of bounds.
      */
     public Optional<RecommendedLoan> recommend(final int amount, final boolean confirmationRequired) {
-        if (amount <= loan.getRemainingInvestment()) {
+        final int remaining = loan.getNonReservedRemainingInvestment();
+        if (amount <= remaining) {
             return Optional.of(new RecommendedLoan(this, amount, confirmationRequired));
         } else {
-            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
-                        loan.getRemainingInvestment(), loan.getId());
+            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount, remaining, loan.getId());
             return Optional.empty();
         }
     }

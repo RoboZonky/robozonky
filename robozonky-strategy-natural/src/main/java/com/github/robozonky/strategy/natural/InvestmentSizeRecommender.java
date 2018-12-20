@@ -81,7 +81,7 @@ class InvestmentSizeRecommender implements BiFunction<MarketplaceLoan, Integer, 
         Decisions.report(l -> l.debug("Recommended investment range for loan #{} is <{}; {}> CZK.", id,
                                       minimumRecommendation, maximumRecommendation));
         // round to nearest lower increment
-        final int loanRemaining = loan.getRemainingInvestment();
+        final int loanRemaining = loan.getNonReservedRemainingInvestment();
         if (minimumRecommendation > balance) {
             Decisions.report(l -> l.debug("Not recommending loan #{} due to minimum over balance.", id));
             return 0;

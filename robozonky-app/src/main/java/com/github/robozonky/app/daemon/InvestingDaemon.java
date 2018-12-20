@@ -35,7 +35,7 @@ class InvestingDaemon extends DaemonOperation {
     /**
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
      */
-    private static final Select SELECT = new Select().greaterThan("remainingInvestment", 0);
+    private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
     private final Investing investing;
 
     public InvestingDaemon(final Consumer<Throwable> shutdownCall, final PowerTenant auth, final Investor investor,

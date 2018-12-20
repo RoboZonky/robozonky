@@ -41,7 +41,7 @@ class SecondaryMarketplaceComparatorTest {
         return Loan.custom()
                 .setId(id)
                 .setAmount(amount)
-                .setRemainingInvestment(amount)
+                .setNonReservedRemainingInvestment(amount)
                 .setInsuranceActive(insured)
                 .build();
     }

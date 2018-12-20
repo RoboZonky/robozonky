@@ -61,7 +61,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
     private static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
         final LoanBuilder b = Loan.custom()
                 .setId(loanId)
-                .setRemainingInvestment(Integer.MAX_VALUE)
+                .setNonReservedRemainingInvestment(Integer.MAX_VALUE)
                 .setDatePublished(OffsetDateTime.now());
         if (withCaptcha) {
             System.setProperty(Settings.Key.CAPTCHA_DELAY_D.getName(), "120"); // enable CAPTCHA for the rating
