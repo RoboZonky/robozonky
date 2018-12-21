@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.operations;
+package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
 
@@ -23,7 +23,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
 
-public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
+class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
     private final Investor investor;
 

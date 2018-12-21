@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.operations;
+package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 

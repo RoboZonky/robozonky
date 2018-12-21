@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.operations;
+package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
 
@@ -23,7 +23,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 
-public class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
+class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
 
     public Purchasing(final PowerTenant auth) {
         super(auth, auth::getPurchaseStrategy);

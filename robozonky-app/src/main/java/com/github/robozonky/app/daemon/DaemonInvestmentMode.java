@@ -24,8 +24,6 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.configuration.InvestmentMode;
-import com.github.robozonky.app.daemon.operations.Investor;
-import com.github.robozonky.app.daemon.operations.Selling;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;

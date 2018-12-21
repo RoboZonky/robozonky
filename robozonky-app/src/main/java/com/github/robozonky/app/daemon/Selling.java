@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.operations;
+package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -28,7 +28,6 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Select;
@@ -42,7 +41,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingStartedLa
 /**
  * Implements selling of {@link RawInvestment}s on the secondary marketplace.
  */
-public class Selling implements Runnable {
+class Selling implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 
