@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.transactions;
+package com.github.robozonky.app.transactions;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.SoldParticipationCache;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;

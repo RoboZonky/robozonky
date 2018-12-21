@@ -62,7 +62,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             verify(a).getPurchaseStrategy();
             // call all the jobs we know about
             verify(d, times(1)).scheduleJob(any(SimpleJob.class), any(), any());
-            verify(d, times(3)).scheduleJob(any(TenantJob.class), any(), any());
+            verify(d, times(4)).scheduleJob(any(TenantJob.class), any(), any());
         } finally {
             e.shutdownNow();
         }

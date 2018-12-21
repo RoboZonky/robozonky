@@ -26,7 +26,6 @@ import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.daemon.operations.Selling;
-import com.github.robozonky.app.daemon.transactions.IncomeProcessor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.extensions.JobServiceLoader;
@@ -83,7 +82,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
         // schedule hourly refresh
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(new Selling(tenant), oneHour, oneHour);
-        executor.submit(new IncomeProcessor(tenant), oneHour, oneHour);
         // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
         executor.submit(toSkippable(investing), investing.getRefreshInterval());

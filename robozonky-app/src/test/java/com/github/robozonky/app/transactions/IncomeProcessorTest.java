@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.transactions;
+package com.github.robozonky.app.transactions;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -46,13 +46,13 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky(10_000);
     private final PowerTenant tenant = mockTenant(zonky);
-    private final IncomeProcessor processor = new IncomeProcessor(tenant);
+    private final IncomeProcessor processor = new IncomeProcessor();
     private final InstanceState<IncomeProcessor> state =
             TenantState.of(tenant.getSessionInfo()).in(IncomeProcessor.class);
 
     @Test
     public void doesNotQueryAtFirstAttempt() {
-        processor.run();
+        processor.accept(tenant);
         final Select s = new
                 Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusWeeks(1));
         verify(zonky, times(1)).getTransactions(eq(s));
@@ -62,7 +62,7 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
     @Test
     public void queriesAndKeepsPreviousMaxWhenNothingFound() {
         state.update(m -> m.put(IncomeProcessor.STATE_KEY, "1"));
-        processor.run();
+        processor.accept(tenant);
         final Select s = new
                 Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusDays(1));
         verify(zonky, times(1)).getTransactions(eq(s));
@@ -90,7 +90,7 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(l3.getId()))).thenReturn(l3);
         when(zonky.getInvestmentByLoanId(eq(l2.getId()))).thenReturn(Optional.of(i2));
         when(zonky.getInvestmentByLoanId(eq(l3.getId()))).thenReturn(Optional.of(i3));
-        processor.run();
+        processor.accept(tenant);
         verify(zonky, times(1)).getTransactions((Select) any());
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("3"); // new maximum
         assertThat(getEventsRequested()).hasSize(2);

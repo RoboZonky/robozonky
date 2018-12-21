@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.transactions;
+package com.github.robozonky.app.tenant;
 
 import java.time.Duration;
 import java.util.Map;

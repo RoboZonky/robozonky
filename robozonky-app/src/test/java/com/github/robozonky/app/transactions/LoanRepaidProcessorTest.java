@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon.transactions;
+package com.github.robozonky.app.transactions;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
