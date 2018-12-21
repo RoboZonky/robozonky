@@ -66,7 +66,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noSaleDueToNoStrategy() {
-        new Selling(mockTenant()).run();
+        new Selling().accept(mockTenant());
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(0);
     }
@@ -76,7 +76,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         final PowerTenant tenant = mockTenant(zonky);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
-        new Selling(tenant).run();
+        new Selling().accept(tenant);
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
@@ -96,7 +96,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         final PowerTenant tenant = mockTenant(zonky);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_STRATEGY));
-        new Selling(tenant).run();
+        new Selling().accept(tenant);
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
@@ -116,8 +116,8 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
         final PowerTenant tenant = mockTenant(zonky, isDryRun);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
-        final Selling s = new Selling(tenant);
-        s.run();
+        final Selling s = new Selling();
+        s.accept(tenant);
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {
@@ -131,7 +131,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
         // try to sell the same thing again, make sure it doesn't happen
         readPreexistingEvents();
-        s.run();
+        s.accept(tenant);
         verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
     }
 

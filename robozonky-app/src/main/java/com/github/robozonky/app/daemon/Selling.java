@@ -30,6 +30,7 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
@@ -41,21 +42,16 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingStartedLa
 /**
  * Implements selling of {@link RawInvestment}s on the secondary marketplace.
  */
-class Selling implements Runnable {
+final class Selling implements TenantPayload {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 
-    private final PowerTenant tenant;
-
-    public Selling(final PowerTenant tenant) {
-        this.tenant = tenant;
+    private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant tenant) {
+        return new InvestmentDescriptor(i, () -> LoanCache.get().getLoan(i, tenant));
     }
 
-    private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant auth) {
-        return new InvestmentDescriptor(i, () -> LoanCache.get().getLoan(i, auth));
-    }
-
-    private Optional<Investment> processSale(final RecommendedInvestment r, final SessionState<Investment> sold) {
+    private Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
+                                             final SessionState<Investment> sold) {
         tenant.fire(EventFactory.saleRequested(r));
         final Investment i = r.descriptor().item();
         final boolean isRealRun = !tenant.getSessionInfo().isDryRun();
@@ -69,7 +65,7 @@ class Selling implements Runnable {
         return Optional.of(i);
     }
 
-    private void sell(final SellStrategy strategy) {
+    private void sell(final PowerTenant tenant, final SellStrategy strategy) {
         final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
@@ -86,18 +82,15 @@ class Selling implements Runnable {
         tenant.fire(sellingStartedLazy(() -> EventFactory.sellingStarted(eligible, overview)));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
                 .peek(r -> tenant.fire(EventFactory.saleRecommended(r)))
-                .map(r -> processSale(r, sold))
+                .map(r -> processSale(tenant, r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
         tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(investmentsSold,
                                                                              tenant.getPortfolio().getOverview())));
     }
 
-    /**
-     * Execute the strategy on a given portfolio.
-     */
     @Override
-    public void run() {
-        tenant.getSellStrategy().ifPresent(this::sell);
+    public void accept(final Tenant tenant) {
+        tenant.getSellStrategy().ifPresent(s -> sell((PowerTenant) tenant, s));
     }
 }

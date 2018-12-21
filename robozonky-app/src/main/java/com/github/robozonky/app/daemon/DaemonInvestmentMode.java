@@ -54,7 +54,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.shutdownCall = shutdownCall;
     }
 
-    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor, final Duration primaryMarketplaceCheckPeriod,
+    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor,
+                         final Duration primaryMarketplaceCheckPeriod,
                          final Duration secondaryMarketplaceCheckPeriod) {
         this(t -> {
         }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
@@ -76,11 +77,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return new Skippable(daemonOperation, this::isUpdating);
     }
 
-    private void scheduleDaemons(final Scheduler executor) {
-        // schedule hourly refresh
-        final Duration oneHour = Duration.ofHours(1);
-        executor.submit(new Selling(tenant), oneHour, oneHour);
-        // run investing and purchasing daemons
+    private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
         executor.submit(toSkippable(investing), investing.getRefreshInterval());
         executor.submit(toSkippable(purchasing), purchasing.getRefreshInterval(), Duration.ofMillis(250));
