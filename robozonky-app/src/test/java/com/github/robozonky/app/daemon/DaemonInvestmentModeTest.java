@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.jobs.SimpleJob;
@@ -62,7 +61,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             verify(a).getPurchaseStrategy();
             // call all the jobs we know about
             verify(d, times(1)).scheduleJob(any(SimpleJob.class), any(), any());
-            verify(d, times(3)).scheduleJob(any(TenantJob.class), any(), any());
+            verify(d, times(5)).scheduleJob(any(TenantJob.class), any(), any());
         } finally {
             e.shutdownNow();
         }

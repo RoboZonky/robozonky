@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
-import com.github.robozonky.app.daemon.operations.Investor;
+import com.github.robozonky.app.daemon.Investor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.tenant.PowerTenant;

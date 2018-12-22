@@ -14,32 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.jobs;
+package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 
+import com.github.robozonky.common.jobs.TenantJob;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.assertThat;
 
-class JobTest {
+class SellingJobTest {
 
     @Test
-    void defaults() {
-        final Job j = new MyJob();
-        assertSoftly(softly -> {
-            softly.assertThat(j.startIn()).isGreaterThanOrEqualTo(Duration.ZERO);
-            softly.assertThat(j.repeatEvery()).isEqualTo(Duration.ZERO);
-            softly.assertThat(j.killIn()).isGreaterThan(Duration.ZERO);
-        });
-    }
-
-    private static final class MyJob implements Job {
-
-        @Override
-        public Duration repeatEvery() {
-            return Duration.ZERO;
-        }
+    void getters() {
+        final TenantJob t = new SellingJob();
+        assertThat(t.payload()).isNotNull()
+                .isInstanceOf(Selling.class);
+        assertThat(t.repeatEvery()).isEqualTo(Duration.ofDays(1));
     }
 
 }

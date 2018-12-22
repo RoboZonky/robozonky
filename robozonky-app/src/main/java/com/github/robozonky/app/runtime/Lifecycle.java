@@ -28,8 +28,6 @@ import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-;
-
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
  * network is available and Zonky is up. It will automatically {@link Schedulers#pause()} if it detects it is offline.

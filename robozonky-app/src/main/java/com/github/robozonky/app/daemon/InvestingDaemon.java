@@ -23,8 +23,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.daemon.operations.Investing;
-import com.github.robozonky.app.daemon.operations.Investor;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;

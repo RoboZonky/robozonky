@@ -55,4 +55,7 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
      */
     @Override
     CompletableFuture<Void> fire(LazyEvent<? extends SessionEvent> event);
+
+    @Override
+    void close();
 }

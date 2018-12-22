@@ -112,7 +112,7 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public <T> InstanceState<T> getState(Class<T> clz) {
+    public <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);
     }
 

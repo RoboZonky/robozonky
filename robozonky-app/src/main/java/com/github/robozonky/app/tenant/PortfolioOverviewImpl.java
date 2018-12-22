@@ -126,6 +126,6 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
                 ", czkAtRisk=" + czkAtRisk +
                 ", czkAtRiskPerRating=" + czkAtRiskPerRating +
                 ", timestamp=" + timestamp +
-                "}";
+                '}';
     }
 }
