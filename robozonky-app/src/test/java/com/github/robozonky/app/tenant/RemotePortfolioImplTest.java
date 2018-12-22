@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -30,10 +31,13 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.Maps;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -119,6 +123,49 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         p.simulateCharge(3, Rating.A, BigDecimal.ONE);
         assertThat(p.getTotal()).containsOnlyKeys(Rating.A, Rating.D)
                 .containsValues(BigDecimal.valueOf(2), BigDecimal.TEN);
+    }
+
+    @Test
+    void chargesAreProperlyReplacedByRemotes() {
+        final BigDecimal firstAmount = BigDecimal.ONE;
+        final Loan l = Loan.custom().setRating(Rating.D).build();
+        final BlockedAmount original = new BlockedAmount(l.getId(), firstAmount);
+        final Zonky zonky = harmlessZonky(10_000);
+        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
+        when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
+        final Tenant tenant = mockTenant(zonky);
+        // one blocked amount coming in remotely
+        final RemotePortfolio p = new RemotePortfolioImpl(tenant);
+        assertSoftly(softly -> {
+            softly.assertThat(p.getTotal()).containsOnly(Maps.entry(Rating.D, firstAmount));
+            softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount);
+        });
+        // new blocked amount for a different loan is registered locally
+        final BigDecimal secondAmount = BigDecimal.TEN;
+        final Loan l2 = Loan.custom().setRating(Rating.A).build();
+        p.simulateCharge(l2.getId(), l2.getRating(), secondAmount);
+        assertSoftly(softly -> {
+            softly.assertThat(p.getTotal()).containsOnly(
+                    Maps.entry(Rating.D, firstAmount),
+                    Maps.entry(Rating.A, secondAmount)
+            );
+            softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(secondAmount));
+        });
+        /*
+         * time passed, the same blocked amount is read from Zonky and the old one needs to be replaced.
+         * portfolio totals must not change, as there was no change - just the synthetic is replaced by real amount
+         */
+        setClock(Clock.fixed(Instant.now().plus(Duration.ofMinutes(5)), Defaults.ZONE_ID));
+        when(zonky.getBlockedAmounts())
+                .thenAnswer(i -> Stream.of(original, new BlockedAmount(l2.getId(), secondAmount)));
+        when(zonky.getLoan(eq(l2.getId()))).thenReturn(l2);
+        assertSoftly(softly -> {
+            softly.assertThat(p.getTotal()).containsOnly(
+                    Maps.entry(Rating.D, firstAmount),
+                    Maps.entry(Rating.A, secondAmount)
+            );
+            softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(secondAmount));
+        });
     }
 
 }

@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
@@ -79,6 +80,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
             return result;
         });
         LOGGER.debug("Synthetic added. New synthetics: {}", updatedSynthetics);
+        // force overview recalculation now that we have the latest data
+        portfolioOverview.clear();
     }
 
     private RemoteData getRemoteData() {
@@ -98,9 +101,11 @@ class RemotePortfolioImpl implements RemotePortfolio {
                                           RemotePortfolioImpl::sum,
                                           BigDecimal::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
-        syntheticByLoanId.get().forEach((loanId, blocked) -> {
-            final Rating r = blocked.getRating();
-            final BigDecimal amount = blocked.getAmount();
+        final Stream<Blocked> blocked = Stream.concat(syntheticByLoanId.get().values().stream(),
+                                                      getRemoteData().getBlocked().values().stream());
+        blocked.forEach(b -> {
+            final Rating r = b.getRating();
+            final BigDecimal amount = b.getAmount();
             amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(amount));
         });
         return Collections.unmodifiableMap(amounts);
