@@ -39,7 +39,7 @@ final class ReloadableImpl<T> implements Reloadable<T> {
 
     private final Supplier<T> supplier;
     private final Consumer<T> runWhenReloaded;
-    private final ReloadDetecion needsReload;
+    private final ReloadDetection needsReload;
     private final AtomicReference<T> value = new AtomicReference<>();
 
     public ReloadableImpl(final Supplier<T> supplier, final Consumer<T> runWhenReloaded) {
@@ -89,14 +89,14 @@ final class ReloadableImpl<T> implements Reloadable<T> {
                 .toEither();
     }
 
-    private interface ReloadDetecion extends BooleanSupplier {
+    private interface ReloadDetection extends BooleanSupplier {
 
         void markReloaded();
 
         void forceReload();
     }
 
-    private static final class ManualReload implements ReloadDetecion {
+    private static final class ManualReload implements ReloadDetection {
 
         private final AtomicBoolean needsReload = new AtomicBoolean(true);
 
@@ -118,12 +118,12 @@ final class ReloadableImpl<T> implements Reloadable<T> {
         }
     }
 
-    private static final class TimeBasedReload implements ReloadDetecion {
+    private static final class TimeBasedReload implements ReloadDetection {
 
         private final AtomicReference<Instant> lastReloaded;
         private final Duration reloadAfter;
 
-        public TimeBasedReload(Duration reloadAfter) {
+        public TimeBasedReload(final Duration reloadAfter) {
             this.reloadAfter = reloadAfter;
             lastReloaded = new AtomicReference<>();
         }
