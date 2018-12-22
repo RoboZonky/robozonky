@@ -53,7 +53,7 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
             final Runnable asyncOperation = () -> Try.ofSupplier(getOperation())
                     .peek(v -> processRetrievedValue(v, value::set)) // set the value on success
                     .getOrElseGet(t -> {
-                        logger.debug("Async reload failed.", t);
+                        logger.warn("Async reload failed, operating with stale value.", t);
                         return null;
                     });
             return CompletableFuture.runAsync(asyncOperation, Scheduler.inBackground().getExecutor());

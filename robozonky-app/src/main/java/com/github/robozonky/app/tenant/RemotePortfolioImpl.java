@@ -24,7 +24,6 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,15 +45,15 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final Reloadable<RemoteData> data;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
-    private final Reloadable<PortfolioOverview> portfolioOverview;
+    private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
 
     public RemotePortfolioImpl(final Tenant tenant) {
         this.data = Reloadable.with(() -> RemoteData.load(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
                 .finishWith(this::refresh)
+                .async() // run the update on the background, momentarily retrieve stale value until finished
                 .build();
-        this.portfolioOverview = Reloadable.with(
-                (Supplier<PortfolioOverview>) () -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()))
+        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()))
                 .reloadAfter(Duration.ofMinutes(5))
                 .build();
     }
