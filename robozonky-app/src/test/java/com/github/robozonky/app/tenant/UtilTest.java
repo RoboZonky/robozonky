@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.util.Maps;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,6 +113,20 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final BlockedAmount forLoan = new BlockedAmount(1, BigDecimal.TEN);
         doThrow(new NotFoundException()).when(zonky).getLoan(anyInt());
         assertThat(Util.getLoan(tenant, forLoan, d)).isEmpty();
+    }
+
+    @Test
+    void twoBlockedAmountsFromTheSameLoan() { // most likely culprit is the reservation system
+        final Loan loan = Loan.custom().setRating(Rating.D).build();
+        final BlockedAmount first = new BlockedAmount(loan.getId(), BigDecimal.TEN);
+        final BlockedAmount second = new BlockedAmount(loan.getId(), BigDecimal.ONE);
+        final Zonky zonky = harmlessZonky(10_000);
+        when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
+        when(zonky.getBlockedAmounts()).thenReturn(Stream.of(first, second));
+        final Tenant tenant = mockTenant(zonky);
+        final RemoteData data = RemoteData.load(tenant);
+        final Blocked sumOfBoth = new Blocked(first.getAmount().add(second.getAmount()), loan.getRating());
+        assertThat(data.getBlocked()).containsOnly(Maps.entry(loan.getId(), sumOfBoth));
     }
 
 }

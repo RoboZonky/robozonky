@@ -74,7 +74,25 @@ final class Util {
                 .flatMap(ba -> getLoan(tenant, ba, divisor)
                         .map(l -> Stream.of(new Blocked(ba, l.getRating())))
                         .orElse(Stream.empty()))
-                .collect(Collectors.toMap(Blocked::getId, b -> b));
+                .collect(Collectors.toMap(Blocked::getId, b -> b, Util::merge));
+    }
+
+    /**
+     * Two blocked amounts related to the same loan. May happen if robot invests while the user manually invests through
+     * the reservation system as well - that's the only time two investments in one {@link Loan} are possible.
+     * @param a
+     * @param b
+     * @return Sum of both amounts, in the rating that both of the amounts share.
+     * @throws IllegalArgumentException When the ratings of the two amounts don't match. That represents an invalid
+     * situation.
+     */
+    private static Blocked merge(final Blocked a, final Blocked b) {
+        final Rating rating = a.getRating();
+        if (rating != b.getRating()) {
+            throw new IllegalArgumentException("Ratings do not match: " + a + " and " + b);
+        }
+        final BigDecimal total = a.getAmount().add(b.getAmount());
+        return new Blocked(total, rating);
     }
 
     static Optional<Loan> getLoan(final Tenant tenant, final BlockedAmount ba, final Divisor divisor) {
@@ -88,7 +106,7 @@ final class Util {
              * anything. Comparatively, being wrong by 0,5 % is not so bad.
              */
             LOGGER.warn("Zonky API mistakenly reports loan #{} as non-existent. " +
-                                "Consider reporting this to Zonky so that they can fix it.", loanId, ex);
+                                "Consider reporting this to Zonky so that they can fix their cache.", loanId, ex);
             final BigDecimal amount = ba.getAmount();
             divisor.add(amount.longValue());
             final long shareThatIsWrongPerMille = divisor.getSharePerMille();
