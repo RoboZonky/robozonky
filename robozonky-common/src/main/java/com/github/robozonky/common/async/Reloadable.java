@@ -24,21 +24,33 @@ import io.vavr.control.Either;
 
 public interface Reloadable<T> {
 
+    static <V> ReloadableBuilder<V> with(final Supplier<V> supplier) {
+        return new ReloadableBuilder<>(supplier);
+    }
+
     static <V> Reloadable<V> of(final Supplier<V> supplier, final Consumer<V> runWhenLoaded) {
-        return new ReloadableImpl<>(supplier, runWhenLoaded);
+        return with(supplier)
+                .finishWith(runWhenLoaded)
+                .build();
     }
 
     static <V> Reloadable<V> of(final Supplier<V> supplier) {
-        return new ReloadableImpl<>(supplier);
+        return with(supplier)
+                .build();
     }
 
     static <V> Reloadable<V> of(final Supplier<V> supplier, final Duration reloadAfter,
-                                         final Consumer<V> runWhenLoaded) {
-        return new ReloadableImpl<>(supplier, reloadAfter, runWhenLoaded);
+                                final Consumer<V> runWhenLoaded) {
+        return with(supplier)
+                .reloadAfter(reloadAfter)
+                .finishWith(runWhenLoaded)
+                .build();
     }
 
     static <V> Reloadable<V> of(final Supplier<V> supplier, final Duration reloadAfter) {
-        return new ReloadableImpl<>(supplier, reloadAfter);
+        return with(supplier)
+                .reloadAfter(reloadAfter)
+                .build();
     }
 
     void clear();
