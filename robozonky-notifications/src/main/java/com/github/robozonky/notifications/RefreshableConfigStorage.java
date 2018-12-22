@@ -23,8 +23,8 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.Refreshable;
 import io.vavr.control.Try;
 
 public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {

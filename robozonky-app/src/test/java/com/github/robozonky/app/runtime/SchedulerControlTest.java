@@ -16,8 +16,8 @@
 
 package com.github.robozonky.app.runtime;
 
-import com.github.robozonky.util.Scheduler;
-import com.github.robozonky.util.Schedulers;
+import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Schedulers;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

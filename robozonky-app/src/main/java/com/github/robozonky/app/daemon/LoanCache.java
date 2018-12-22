@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
-import com.github.robozonky.util.Scheduler;
 import io.vavr.Lazy;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SchedulersTest {
 

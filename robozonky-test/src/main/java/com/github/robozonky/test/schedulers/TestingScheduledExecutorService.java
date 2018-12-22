@@ -25,8 +25,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.github.robozonky.util.PausableScheduledExecutorService;
-import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.common.async.PausableScheduledExecutorService;
+import com.github.robozonky.common.async.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

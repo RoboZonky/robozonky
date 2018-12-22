@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

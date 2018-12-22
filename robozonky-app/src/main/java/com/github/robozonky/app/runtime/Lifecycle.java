@@ -23,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.util.Schedulers;
+import com.github.robozonky.common.async.Schedulers;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

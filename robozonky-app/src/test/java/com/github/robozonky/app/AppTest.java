@@ -25,7 +25,7 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.common.async.Scheduler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

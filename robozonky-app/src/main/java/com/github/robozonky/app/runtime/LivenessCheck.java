@@ -26,11 +26,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.common.async.Refreshable;
+import com.github.robozonky.common.async.RoboZonkyThreadFactory;
+import com.github.robozonky.common.async.Schedulers;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.Refreshable;
-import com.github.robozonky.util.RoboZonkyThreadFactory;
-import com.github.robozonky.util.Schedulers;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 

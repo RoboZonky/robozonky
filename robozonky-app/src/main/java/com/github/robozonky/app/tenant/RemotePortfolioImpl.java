@@ -31,10 +31,10 @@ import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
-import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

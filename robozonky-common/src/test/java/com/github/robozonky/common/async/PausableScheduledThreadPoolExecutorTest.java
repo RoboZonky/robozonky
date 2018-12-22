@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PausableScheduledThreadPoolExecutorTest {
 

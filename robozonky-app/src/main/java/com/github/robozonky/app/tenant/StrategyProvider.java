@@ -25,9 +25,9 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.common.async.Refreshable;
+import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.extensions.StrategyLoader;
-import com.github.robozonky.util.Refreshable;
-import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

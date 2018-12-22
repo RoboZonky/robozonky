@@ -24,8 +24,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-import com.github.robozonky.util.Reloadable;
-import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.common.async.Reloadable;
+import com.github.robozonky.common.async.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class SchedulerServiceTest {
 

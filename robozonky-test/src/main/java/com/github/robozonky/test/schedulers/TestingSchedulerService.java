@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package com.github.robozonky.test.schedulers;
 
 import java.util.concurrent.ThreadFactory;
 
-import com.github.robozonky.util.PausableScheduledExecutorService;
-import com.github.robozonky.util.SchedulerService;
+import com.github.robozonky.common.async.PausableScheduledExecutorService;
+import com.github.robozonky.common.async.SchedulerService;
 import org.mockito.Mockito;
 
 public class TestingSchedulerService implements SchedulerService {

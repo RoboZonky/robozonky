@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.secrets;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,11 +22,12 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStoreException;
 
-import com.github.robozonky.common.secrets.KeyStoreHandler;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 class KeyStoreHandlerTest {
 
