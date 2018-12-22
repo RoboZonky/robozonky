@@ -51,10 +51,12 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
         this(supplier, reloadAfter, DO_NOTHING);
     }
 
-    private static <X> Supplier<X> getOperation(final Supplier<X> supplier, final Consumer<X> runWhenReloaded) {
+    private <X> Supplier<X> getOperation(final Supplier<X> supplier, final Consumer<X> runWhenReloaded) {
         return () -> {
+            logger.trace("Running operation on {}.", this);
             final X value = supplier.get();
             runWhenReloaded.accept(value);  // first run finisher before setting the value, in case finisher fails
+            logger.trace("Operation finished on {}.", this);
             return value;
         };
     }

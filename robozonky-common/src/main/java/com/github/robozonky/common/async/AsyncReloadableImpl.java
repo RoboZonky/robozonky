@@ -47,6 +47,22 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
         super(supplier, reloadAfter);
     }
 
+    CompletableFuture<Void> refresh(final CompletableFuture<Void> old) {
+        if (old == null || old.isDone()) {
+            logger.trace("Starting async reload.");
+            final Runnable asyncOperation = () -> Try.ofSupplier(getOperation())
+                    .peek(v -> processRetrievedValue(v, value::set)) // set the value on success
+                    .getOrElseGet(t -> {
+                        logger.debug("Async reload failed.", t);
+                        return null;
+                    });
+            return CompletableFuture.runAsync(asyncOperation, Scheduler.inBackground().getExecutor());
+        } else {
+            logger.trace("Reload already in progress on {} with {}.", this, old);
+            return old;
+        }
+    }
+
     @Override
     public synchronized Either<Throwable, T> get() {
         if (value.get() == null) { // force value retrieval and wait for it
@@ -60,22 +76,8 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
             return Either.right(value.get());
         }
         // trigger retrieval but return existing value
-        final CompletableFuture<Void> currentFuture = this.future.updateAndGet(old -> {
-            if (old == null || old.isDone()) {
-                logger.trace("Starting async reload.");
-                final Runnable asyncOperation = () -> Try.ofSupplier(getOperation())
-                        .peek(v -> processRetrievedValue(v, value::set)) // set the value on success
-                        .getOrElseGet(t -> {
-                            logger.debug("Async reload failed.", t);
-                            return null;
-                        });
-                return CompletableFuture.runAsync(asyncOperation, Scheduler.inBackground().getExecutor());
-            } else {
-                logger.trace("Reload already in progress.");
-                return old;
-            }
-        });
-        logger.trace("Operating Future: {}.", currentFuture);
+        final CompletableFuture<Void> currentFuture = future.getAndUpdate(this::refresh);
+        logger.debug("Retrieved potentially stale value on {}, while {}.", this, currentFuture);
         return Either.right(value.get());
     }
 }
