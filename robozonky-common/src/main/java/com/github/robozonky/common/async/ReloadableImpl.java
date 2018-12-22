@@ -74,13 +74,19 @@ final class ReloadableImpl<T> implements Reloadable<T> {
             return Either.right(value.get());
         }
         LOGGER.trace("Reloading {}.", this);
-        return Try.ofSupplier(supplier).peek(v -> {
-            LOGGER.trace("Supplier finished on {}.", this);
-            value.set(v);
-            needsReload.markReloaded();
-            runWhenReloaded.accept(v);
-            LOGGER.debug("Reloaded {}, new value is {}.", this, v);
-        }).toEither();
+        final Supplier<T> operation = () -> {
+            final T value = supplier.get();
+            runWhenReloaded.accept(value);  // first run finisher before setting the value, in case finisher fails
+            return value;
+        };
+        return Try.ofSupplier(operation)
+                .peek(v -> {
+                    LOGGER.trace("Supplier finished on {}.", this);
+                    value.set(v);
+                    needsReload.markReloaded();
+                    LOGGER.debug("Reloaded {}, new value is {}.", this, v);
+                })
+                .toEither();
     }
 
     private interface ReloadDetecion extends BooleanSupplier {

@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,6 +69,17 @@ class ReloadableTest {
         assertThat(result).containsRightInstanceOf(String.class);
         final String value = result.get();
         assertThat(r.get()).containsOnRight(value); // new call, no change
+    }
+
+    @Test
+    void finisherFails() {
+        final Consumer<String> finisher = mock(Consumer.class);
+        doThrow(IllegalStateException.class).when(finisher).accept(any());
+        final Reloadable<String> r = Reloadable.with(() -> "")
+                .finishWith(finisher)
+                .build();
+        final Either<Throwable, String> result = r.get();
+        assertThat(result).isLeft(); // no value as the finisher failed
     }
 
 }
