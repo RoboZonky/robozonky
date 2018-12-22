@@ -23,65 +23,36 @@ import java.util.function.Supplier;
 
 import io.vavr.control.Either;
 import io.vavr.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-final class ReloadableImpl<T> implements Reloadable<T> {
+final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReloadableImpl.class);
-    private static final Consumer DO_NOTHING = (x) -> {
-        // do nothing
-    };
-
-    private final Supplier<T> operation;
-    private final ReloadDetection needsReload;
     private final AtomicReference<T> value = new AtomicReference<>();
 
-    private static <X> Supplier<X> getOperation(final Supplier<X> supplier, final Consumer<X> runWhenReloaded) {
-        return () -> {
-            final X value = supplier.get();
-            runWhenReloaded.accept(value);  // first run finisher before setting the value, in case finisher fails
-            return value;
-        };
-    }
-
     public ReloadableImpl(final Supplier<T> supplier, final Consumer<T> runWhenReloaded) {
-        this.operation = getOperation(supplier, runWhenReloaded);
-        this.needsReload = new ManualReload();
+        super(supplier, runWhenReloaded);
     }
 
     public ReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter, final Consumer<T> runWhenReloaded) {
-        this.operation = getOperation(supplier, runWhenReloaded);
-        this.needsReload = new TimeBasedReload(reloadAfter);
+        super(supplier, reloadAfter, runWhenReloaded);
     }
 
     public ReloadableImpl(final Supplier<T> supplier) {
-        this(supplier, DO_NOTHING);
+        super(supplier);
     }
 
     public ReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter) {
-        this(supplier, reloadAfter, DO_NOTHING);
-    }
-
-    @Override
-    public synchronized void clear() {
-        needsReload.forceReload();
+        super(supplier, reloadAfter);
     }
 
     @Override
     public synchronized Either<Throwable, T> get() {
-        if (!needsReload.getAsBoolean()) {
-            LOGGER.trace("Not reloading {}.", this);
+        if (!needsReload()) {
+            logger.trace("Not reloading {}.", this);
             return Either.right(value.get());
         }
-        LOGGER.trace("Reloading {}.", this);
-        return Try.ofSupplier(operation)
-                .peek(v -> {
-                    LOGGER.trace("Supplier finished on {}.", this);
-                    value.set(v);
-                    needsReload.markReloaded();
-                    LOGGER.debug("Reloaded {}, new value is {}.", this, v);
-                })
+        logger.trace("Reloading {}.", this);
+        return Try.ofSupplier(getOperation())
+                .peek(v -> processRetrievedValue(v, value::set))
                 .toEither();
     }
 }
