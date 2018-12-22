@@ -31,6 +31,7 @@ public final class ReloadableBuilder<T> {
     private final Supplier<T> supplier;
     private Duration reloadAfter;
     private Consumer<T> finisher;
+    private boolean async = false;
 
     ReloadableBuilder(final Supplier<T> supplier) {
         this.supplier = supplier;
@@ -46,6 +47,11 @@ public final class ReloadableBuilder<T> {
         return this;
     }
 
+    public ReloadableBuilder<T> async() {
+        this.async = true;
+        return this;
+    }
+
     public Either<Throwable, Reloadable<T>> buildEager() {
         final Reloadable<T> result = build();
         LOGGER.debug("Running before returning: {}.", result);
@@ -56,15 +62,23 @@ public final class ReloadableBuilder<T> {
     public Reloadable<T> build() {
         if (finisher == null) {
             if (reloadAfter == null) {
-                return new ReloadableImpl<>(supplier);
+                return async ?
+                        new AsyncReloadableImpl<>(supplier) :
+                        new ReloadableImpl<>(supplier);
             } else {
-                return new ReloadableImpl<>(supplier, reloadAfter);
+                return async ?
+                        new AsyncReloadableImpl<>(supplier, reloadAfter) :
+                        new ReloadableImpl<>(supplier, reloadAfter);
             }
         } else {
             if (reloadAfter == null) {
-                return new ReloadableImpl<>(supplier, finisher);
+                return async ?
+                        new AsyncReloadableImpl<>(supplier, finisher) :
+                        new ReloadableImpl<>(supplier, finisher);
             } else {
-                return new ReloadableImpl<>(supplier, reloadAfter, finisher);
+                return async ?
+                        new AsyncReloadableImpl<>(supplier, reloadAfter, finisher) :
+                        new ReloadableImpl<>(supplier, reloadAfter, finisher);
             }
         }
     }

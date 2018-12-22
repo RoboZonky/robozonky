@@ -33,20 +33,25 @@ final class ReloadableImpl<T> implements Reloadable<T> {
         // do nothing
     };
 
-    private final Supplier<T> supplier;
-    private final Consumer<T> runWhenReloaded;
+    private final Supplier<T> operation;
     private final ReloadDetection needsReload;
     private final AtomicReference<T> value = new AtomicReference<>();
 
+    private static <X> Supplier<X> getOperation(final Supplier<X> supplier, final Consumer<X> runWhenReloaded) {
+        return () -> {
+            final X value = supplier.get();
+            runWhenReloaded.accept(value);  // first run finisher before setting the value, in case finisher fails
+            return value;
+        };
+    }
+
     public ReloadableImpl(final Supplier<T> supplier, final Consumer<T> runWhenReloaded) {
-        this.supplier = supplier;
-        this.runWhenReloaded = runWhenReloaded;
+        this.operation = getOperation(supplier, runWhenReloaded);
         this.needsReload = new ManualReload();
     }
 
     public ReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter, final Consumer<T> runWhenReloaded) {
-        this.supplier = supplier;
-        this.runWhenReloaded = runWhenReloaded;
+        this.operation = getOperation(supplier, runWhenReloaded);
         this.needsReload = new TimeBasedReload(reloadAfter);
     }
 
@@ -70,11 +75,6 @@ final class ReloadableImpl<T> implements Reloadable<T> {
             return Either.right(value.get());
         }
         LOGGER.trace("Reloading {}.", this);
-        final Supplier<T> operation = () -> {
-            final T value = supplier.get();
-            runWhenReloaded.accept(value);  // first run finisher before setting the value, in case finisher fails
-            return value;
-        };
         return Try.ofSupplier(operation)
                 .peek(v -> {
                     LOGGER.trace("Supplier finished on {}.", this);
