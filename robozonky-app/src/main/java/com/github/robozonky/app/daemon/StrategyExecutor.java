@@ -42,7 +42,7 @@ abstract class StrategyExecutor<T, S> implements Function<Collection<T>, Collect
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
-    protected StrategyExecutor(final PowerTenant tenant, Supplier<Optional<S>> strategy) {
+    protected StrategyExecutor(final PowerTenant tenant, final Supplier<Optional<S>> strategy) {
         this.tenant = tenant;
         this.strategyProvider = strategy;
     }
@@ -97,7 +97,7 @@ abstract class StrategyExecutor<T, S> implements Function<Collection<T>, Collect
      * @return Returning true triggers evaluation of the strategy.
      */
     private boolean hasMarketplaceUpdates(final Collection<T> marketplace, final ToLongFunction<T> idSupplier) {
-        final long[] idsFromMarketplace = marketplace.stream().mapToLong(idSupplier::applyAsLong).toArray();
+        final long[] idsFromMarketplace = marketplace.stream().mapToLong(idSupplier).toArray();
         final long[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
         return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
     }

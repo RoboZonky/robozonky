@@ -50,8 +50,8 @@ final class Selling implements TenantPayload {
         return new InvestmentDescriptor(i, () -> LoanCache.get().getLoan(i, tenant));
     }
 
-    private Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
-                                             final SessionState<Investment> sold) {
+    private static Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
+                                                    final SessionState<Investment> sold) {
         tenant.fire(EventFactory.saleRequested(r));
         final Investment i = r.descriptor().item();
         final boolean isRealRun = !tenant.getSessionInfo().isDryRun();
@@ -65,7 +65,7 @@ final class Selling implements TenantPayload {
         return Optional.of(i);
     }
 
-    private void sell(final PowerTenant tenant, final SellStrategy strategy) {
+    private static void sell(final PowerTenant tenant, final SellStrategy strategy) {
         final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this

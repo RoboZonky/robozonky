@@ -30,13 +30,10 @@ import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class IncomeProcessor implements TenantPayload {
 
     static final String STATE_KEY = "lastSeenTransactionId";
-    private static final Logger LOGGER = LoggerFactory.getLogger(IncomeProcessor.class);
     private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
 
     private static long processAllTransactions(final Stream<Transaction> transactions) {
@@ -62,7 +59,7 @@ final class IncomeProcessor implements TenantPayload {
                 .orElse(lastSeenTransactionId);
     }
 
-    private void run(final TransactionalPowerTenant tenant) {
+    private static void run(final TransactionalPowerTenant tenant) {
         final InstanceState<IncomeProcessor> state = tenant.getState(IncomeProcessor.class);
         final long lastSeenTransactionId = state.getValue(STATE_KEY)
                 .map(Integer::valueOf)
