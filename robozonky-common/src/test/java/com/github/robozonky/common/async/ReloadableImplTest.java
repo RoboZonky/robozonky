@@ -36,7 +36,9 @@ class ReloadableImplTest {
     @Test
     void manually() {
         final Consumer<String> mock = mock(Consumer.class);
-        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), mock);
+        final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
+                .finishWith(mock)
+                .build();
         final Either<Throwable, String> result = r.get();
         assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());
@@ -53,7 +55,10 @@ class ReloadableImplTest {
     @Test
     void timeBased() {
         final Consumer<String> mock = mock(Consumer.class);
-        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), Duration.ofSeconds(5), mock);
+        final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
+                .reloadAfter(Duration.ofSeconds(5))
+                .finishWith(mock)
+                .build();
         final Either<Throwable, String> result = r.get();
         assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());
@@ -64,7 +69,9 @@ class ReloadableImplTest {
 
     @Test
     void timeBasedNoConsumer() {
-        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), Duration.ofSeconds(5));
+        final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
+                .reloadAfter(Duration.ofSeconds(5))
+                .build();
         final Either<Throwable, String> result = r.get();
         assertThat(result).containsRightInstanceOf(String.class);
         final String value = result.get();

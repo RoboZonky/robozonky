@@ -51,14 +51,15 @@ final class EventFiringQueue {
      * @param threadSupplier
      */
     EventFiringQueue(final Function<BlockingQueue<Runnable>, EventFiringRunnable> threadSupplier) {
-        firingThread = Reloadable.of(() -> {
+        firingThread = Reloadable.with(() -> {
             final Runnable r = threadSupplier.apply(queue);
             LOGGER.debug("Creating new thread with {}.", r);
             final Thread t = Scheduler.THREAD_FACTORY.newThread(r);
             t.start();
             LOGGER.debug("Started event firing thread {}.", t.getName());
             return t;
-        });
+        })
+                .build();
     }
 
     private static void await(final CyclicBarrier barrier, final long id) {

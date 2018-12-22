@@ -61,7 +61,9 @@ class PowerTenantImpl implements PowerTenant {
         this.sessionInfo = sessionInfo;
         this.supplier = tokenSupplier;
         this.portfolio = new RemotePortfolioImpl(this);
-        this.restrictions = Reloadable.of(() -> this.call(Zonky::getRestrictions), Duration.ofHours(1));
+        this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
+                .reloadAfter(Duration.ofHours(1))
+                .build();
     }
 
     @Override

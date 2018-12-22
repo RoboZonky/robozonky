@@ -24,6 +24,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,9 +49,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final Reloadable<PortfolioOverview> portfolioOverview;
 
     public RemotePortfolioImpl(final Tenant tenant) {
-        this.data = Reloadable.of(() -> RemoteData.load(tenant), Duration.ofMinutes(5), this::refresh);
-        this.portfolioOverview = Reloadable.of(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()),
-                                               Duration.ofMinutes(5));
+        this.data = Reloadable.with(() -> RemoteData.load(tenant))
+                .reloadAfter(Duration.ofMinutes(5))
+                .finishWith(this::refresh)
+                .build();
+        this.portfolioOverview = Reloadable.with(
+                (Supplier<PortfolioOverview>) () -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()))
+                .reloadAfter(Duration.ofMinutes(5))
+                .build();
     }
 
     private static BigDecimal sum(final OverallPortfolio portfolio) {

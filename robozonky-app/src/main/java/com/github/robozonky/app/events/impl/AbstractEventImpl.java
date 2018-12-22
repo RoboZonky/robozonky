@@ -43,7 +43,8 @@ abstract class AbstractEventImpl implements Event {
     protected AbstractEventImpl(final String... toStringIgnoredFields) {
         final String[] ignored = Stream.concat(Stream.of("toString"), Stream.of(toStringIgnoredFields))
                 .toArray(String[]::new);
-        this.toString = Reloadable.of(() -> ToStringBuilder.createFor(this, ignored));
+        this.toString = Reloadable.with(() -> ToStringBuilder.createFor(this, ignored))
+                .build();
     }
 
     public OffsetDateTime getCreatedOn() {

@@ -50,11 +50,13 @@ final class Counter {
         this.id = id;
         this.maxItems = maxItems;
         this.period = period;
-        this.timestamps = Reloadable.of(() -> {
+        this.timestamps = Reloadable.with(() -> {
             final Set<OffsetDateTime> result = load(sessionInfo, id);
             LOGGER.debug("Loaded timestamps: {}.", result);
             return result;
-        }, period);
+        })
+                .reloadAfter(period)
+                .build();
     }
 
     private static Set<OffsetDateTime> load(final SessionInfo sessionInfo, final String id) {

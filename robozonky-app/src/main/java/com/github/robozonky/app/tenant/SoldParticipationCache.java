@@ -40,14 +40,16 @@ public final class SoldParticipationCache {
     private final Reloadable<Set<Integer>> listedSoldRemotely;
 
     private SoldParticipationCache(final Tenant tenant) {
-        this.listedSoldRemotely = Reloadable.of(() -> {
+        this.listedSoldRemotely = Reloadable.with(() -> {
             final Select s = new Select().equals("status", "SOLD");
             return tenant.call(zonky -> zonky.getInvestments(s))
                     .mapToInt(Investment::getLoanId)
                     .distinct()
                     .boxed()
                     .collect(Collectors.toSet());
-        }, Duration.ofMinutes(5));
+        })
+                .reloadAfter(Duration.ofMinutes(5))
+                .build();
     }
 
     private static SoldParticipationCache newCache(final Tenant tenant) {

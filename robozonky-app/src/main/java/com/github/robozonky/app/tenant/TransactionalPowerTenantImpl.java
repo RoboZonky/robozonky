@@ -42,7 +42,8 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalPowerTenantImpl.class);
 
     private final PowerTenant parent;
-    private final Reloadable<DelayedFiring> delayedFiring = Reloadable.of(DelayedFiring::new);
+    private final Reloadable<DelayedFiring> delayedFiring = Reloadable.with(DelayedFiring::new)
+            .build();
     private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
 
     public TransactionalPowerTenantImpl(final PowerTenant parent) {
