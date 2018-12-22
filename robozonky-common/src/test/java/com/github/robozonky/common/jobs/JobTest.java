@@ -28,7 +28,7 @@ class JobTest {
     void defaults() {
         final Job j = new MyJob();
         assertSoftly(softly -> {
-            softly.assertThat(j.startIn()).isGreaterThan(Duration.ZERO);
+            softly.assertThat(j.startIn()).isGreaterThanOrEqualTo(Duration.ZERO);
             softly.assertThat(j.repeatEvery()).isEqualTo(Duration.ZERO);
             softly.assertThat(j.killIn()).isGreaterThan(Duration.ZERO);
         });
