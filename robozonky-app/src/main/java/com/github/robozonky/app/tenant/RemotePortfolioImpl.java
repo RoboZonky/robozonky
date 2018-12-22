@@ -42,16 +42,22 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RemotePortfolioImpl.class);
 
-    private final Reloadable<RemoteData> data;
+    private final Reloadable<RemoteData> portfolio;
+    private final Reloadable<Map<Rating, BigDecimal>> atRisk;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
     private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
 
     public RemotePortfolioImpl(final Tenant tenant) {
-        this.data = Reloadable.with(() -> RemoteData.load(tenant))
+        this.portfolio = Reloadable.with(() -> RemoteData.load(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
-                .finishWith(this::refresh)
+                .finishWith(this::refreshPortfolio)
                 .async() // run the update on the background, momentarily retrieve stale value until finished
+                .build();
+        this.atRisk = Reloadable.with(() -> Util.getAmountsAtRisk(tenant))
+                .reloadAfter(Duration.ofMinutes(30)) // not so important, may have a bit of delay
+                .finishWith(this::refreshRisk)
+                .async()
                 .build();
         this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()))
                 .reloadAfter(Duration.ofMinutes(5))
@@ -66,14 +72,20 @@ class RemotePortfolioImpl implements RemotePortfolio {
         return blockedAmounts.stream().map(Blocked::getAmount).reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
     }
 
-    private void refresh(final RemoteData data) {
+    private void refreshPortfolio(final RemoteData data) {
         // remove synthetic charges that are replaced by actual remote blocked amounts
         final Map<Integer, Blocked> real = data.getBlocked();
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
                 .filter(e -> !real.containsKey(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         LOGGER.debug("New synthetics: {}.", updatedSynthetics);
-        // force overview recalculation now that we have the latest data
+        // force overview recalculation now that we have the latest portfolio
+        portfolioOverview.clear();
+    }
+
+    private void refreshRisk(final Map<Rating, BigDecimal> data) {
+        LOGGER.debug("New risk data: {}.", data);
+        // force overview recalculation now that we have the latest risk data
         portfolioOverview.clear();
     }
 
@@ -85,29 +97,29 @@ class RemotePortfolioImpl implements RemotePortfolio {
             return result;
         });
         LOGGER.debug("Synthetic added. New synthetics: {}", updatedSynthetics);
-        // force overview recalculation now that we have the latest data
+        // force overview recalculation now that we have the latest portfolio
         portfolioOverview.clear();
     }
 
-    private RemoteData getRemoteData() {
-        return data.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote data.", t));
+    private RemoteData getRemotePortfolio() {
+        return portfolio.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
     }
 
     @Override
     public BigDecimal getBalance() {
         final BigDecimal allBlocked = sum(syntheticByLoanId.get().values());
-        return getRemoteData().getWallet().getAvailableBalance().subtract(allBlocked);
+        return getRemotePortfolio().getWallet().getAvailableBalance().subtract(allBlocked);
     }
 
     @Override
     public Map<Rating, BigDecimal> getTotal() {
-        final Map<Rating, BigDecimal> amounts = getRemoteData().getStatistics().getRiskPortfolio().stream()
+        final Map<Rating, BigDecimal> amounts = getRemotePortfolio().getStatistics().getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating,
                                           RemotePortfolioImpl::sum,
                                           BigDecimal::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
         final Stream<Blocked> blocked = Stream.concat(syntheticByLoanId.get().values().stream(),
-                                                      getRemoteData().getBlocked().values().stream());
+                                                      getRemotePortfolio().getBlocked().values().stream());
         blocked.forEach(b -> {
             final Rating r = b.getRating();
             final BigDecimal amount = b.getAmount();
@@ -118,7 +130,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     @Override
     public Map<Rating, BigDecimal> getAtRisk() {
-        return getRemoteData().getAtRisk();
+        return atRisk.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote risk data.", t));
     }
 
     @Override

@@ -33,7 +33,6 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
         assertThat(data.getWallet()).isNotNull();
         assertThat(data.getStatistics()).isNotNull();
         assertThat(data.getBlocked()).isEmpty();
-        assertThat(data.getAtRisk()).isEmpty();
     }
 
 }
