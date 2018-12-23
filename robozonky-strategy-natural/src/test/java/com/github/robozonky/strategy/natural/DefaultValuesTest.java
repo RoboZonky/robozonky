@@ -16,17 +16,21 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.time.LocalDate;
+import java.time.Clock;
+import java.time.Instant;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
+import com.github.robozonky.internal.util.DateUtil;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class DefaultValuesTest {
+class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
 
     @Test
     void construct() {
@@ -66,7 +70,8 @@ class DefaultValuesTest {
 
     @Test
     void setExitStrategy() {
-        final ExitProperties p = new ExitProperties(LocalDate.now().plusMonths(1));
+        setClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
+        final ExitProperties p = new ExitProperties(DateUtil.localNow().plusMonths(1).toLocalDate());
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         assertThat(v.getMonthsBeforeExit()).isEqualTo(-1);
         v.setExitProperties(p);
