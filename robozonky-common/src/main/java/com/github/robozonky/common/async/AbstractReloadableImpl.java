@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
 
-    private static final Consumer DO_NOTHING = (x) -> {
+    private static final Consumer DO_NOTHING = x -> {
         // do nothing
     };
     protected final Logger logger = LoggerFactory.getLogger(getClass());

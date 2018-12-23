@@ -72,6 +72,7 @@ public class Backoff<T> implements Supplier<Either<Throwable, T>> {
         try {
             Thread.sleep(duration.toMillis());
         } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
             LOGGER.debug("Wait interrupted.", ex);
         }
     }
