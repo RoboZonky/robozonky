@@ -16,11 +16,13 @@
 
 package com.github.robozonky.common.async;
 
+import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import io.vavr.control.Either;
+import org.assertj.core.api.Assertions;
 import org.assertj.vavr.api.VavrAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +32,27 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 class ReloadableBuilderTest {
+
+    @Test
+    void asyncNoFinisher() {
+        final Reloadable<String> s = Reloadable.with(() -> "")
+                .reloadAfter(Duration.ofSeconds(5))
+                .async()
+                .build();
+        Assertions.assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
+    }
+
+    @Test
+    void asyncWithinisher() {
+        final Reloadable<String> s = Reloadable.with(() -> "")
+                .finishWith(x -> {
+
+                })
+                .reloadAfter(Duration.ofSeconds(5))
+                .async()
+                .build();
+        Assertions.assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
+    }
 
     @Test
     void nonLazy() {
