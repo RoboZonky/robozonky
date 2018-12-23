@@ -30,6 +30,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
@@ -37,7 +38,6 @@ import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.ZonkyScope;
-import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,9 @@ class PowerTenantImpl implements PowerTenant {
         this.sessionInfo = sessionInfo;
         this.supplier = tokenSupplier;
         this.portfolio = new RemotePortfolioImpl(this);
-        this.restrictions = Reloadable.of(() -> this.call(Zonky::getRestrictions), Duration.ofHours(1));
+        this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
+                .reloadAfter(Duration.ofHours(1))
+                .build();
     }
 
     @Override

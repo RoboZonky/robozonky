@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
 import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import com.github.robozonky.util.StreamUtil;
 
 /**
  * Loads pluggable {@link SchedulerService}s using {@link ServiceLoader}. If no such are available, will use a default

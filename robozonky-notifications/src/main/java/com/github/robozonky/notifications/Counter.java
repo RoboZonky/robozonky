@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.util.DateUtil;
-import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +50,13 @@ final class Counter {
         this.id = id;
         this.maxItems = maxItems;
         this.period = period;
-        this.timestamps = Reloadable.of(() -> {
+        this.timestamps = Reloadable.with(() -> {
             final Set<OffsetDateTime> result = load(sessionInfo, id);
             LOGGER.debug("Loaded timestamps: {}.", result);
             return result;
-        }, period);
+        })
+                .reloadAfter(period)
+                .build();
     }
 
     private static Set<OffsetDateTime> load(final SessionInfo sessionInfo, final String id) {

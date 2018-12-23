@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
+
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
-class RoboZonkyThreadFactoryTest {
+class SchedulerServiceTest {
 
     @Test
-    void daemon() {
-        final ThreadGroup tg = new ThreadGroup("testing");
-        final RoboZonkyThreadFactory f = new RoboZonkyThreadFactory(tg);
-        final Thread t = f.newThread(() -> {
-        });
-        assertThat(t.isDaemon()).isTrue();
+    void defaults() {
+        final PausableScheduledExecutorService expected = mock(PausableScheduledExecutorService.class);
+        final SchedulerService s = (parallelism, threadFactory) -> expected;
+        final ScheduledExecutorService ses = s.newScheduledExecutorService(1);
+        assertThat(ses).isSameAs(expected);
     }
-
 }

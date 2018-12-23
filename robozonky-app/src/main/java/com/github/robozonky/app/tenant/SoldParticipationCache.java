@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +40,16 @@ public final class SoldParticipationCache {
     private final Reloadable<Set<Integer>> listedSoldRemotely;
 
     private SoldParticipationCache(final Tenant tenant) {
-        this.listedSoldRemotely = Reloadable.of(() -> {
+        this.listedSoldRemotely = Reloadable.with(() -> {
             final Select s = new Select().equals("status", "SOLD");
             return tenant.call(zonky -> zonky.getInvestments(s))
                     .mapToInt(Investment::getLoanId)
                     .distinct()
                     .boxed()
                     .collect(Collectors.toSet());
-        }, Duration.ofMinutes(5));
+        })
+                .reloadAfter(Duration.ofMinutes(5))
+                .build();
     }
 
     private static SoldParticipationCache newCache(final Tenant tenant) {

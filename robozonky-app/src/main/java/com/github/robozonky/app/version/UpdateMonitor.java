@@ -39,9 +39,9 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.common.jobs.SimplePayload;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.Refreshable;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;

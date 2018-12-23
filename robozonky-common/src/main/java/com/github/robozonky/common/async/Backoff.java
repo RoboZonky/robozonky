@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -72,6 +72,7 @@ public class Backoff<T> implements Supplier<Either<Throwable, T>> {
         try {
             Thread.sleep(duration.toMillis());
         } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
             LOGGER.debug("Wait interrupted.", ex);
         }
     }

@@ -20,9 +20,9 @@ import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
-import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,8 @@ abstract class AbstractEventImpl implements Event {
     protected AbstractEventImpl(final String... toStringIgnoredFields) {
         final String[] ignored = Stream.concat(Stream.of("toString"), Stream.of(toStringIgnoredFields))
                 .toArray(String[]::new);
-        this.toString = Reloadable.of(() -> ToStringBuilder.createFor(this, ignored));
+        this.toString = Reloadable.with(() -> ToStringBuilder.createFor(this, ignored))
+                .build();
     }
 
     public OffsetDateTime getCreatedOn() {

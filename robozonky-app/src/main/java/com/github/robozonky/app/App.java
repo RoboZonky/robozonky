@@ -26,7 +26,7 @@ import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.common.async.Scheduler;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

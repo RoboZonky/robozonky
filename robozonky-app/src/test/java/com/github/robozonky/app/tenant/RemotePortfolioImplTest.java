@@ -50,12 +50,12 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
-        p.getBalance(); // read everything one
+        p.getOverview(); // read everything once
         verify(zonky).getWallet();
         verify(zonky).getStatistics();
         verify(zonky).getDelinquentInvestments();
         verify(zonky).getBlockedAmounts();
-        p.getBalance(); // it is cached, does not re-read
+        p.getOverview(); // it is cached, does not re-read
         verify(zonky, times(1)).getWallet();
         verify(zonky, times(1)).getStatistics();
         verify(zonky, times(1)).getDelinquentInvestments();
@@ -64,11 +64,19 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
                 .plus(Duration.ofMinutes(5))
                 .plus(Duration.ofSeconds(1));
         setClock(Clock.fixed(fiveMinutesLater, Defaults.ZONE_ID)); // move clock past refresh
-        p.getBalance();
+        p.getOverview();
         verify(zonky, times(2)).getWallet();
         verify(zonky, times(2)).getStatistics();
-        verify(zonky, times(2)).getDelinquentInvestments();
+        verify(zonky, times(1)).getDelinquentInvestments(); // this is on a longer cycle
         verify(zonky, times(2)).getBlockedAmounts();
+        final Instant thirtyFiveMinutesLater = Instant.now()
+                .plus(Duration.ofMinutes(35));
+        setClock(Clock.fixed(thirtyFiveMinutesLater, Defaults.ZONE_ID)); // move clock past refresh
+        p.getOverview();
+        verify(zonky, times(3)).getWallet();
+        verify(zonky, times(3)).getStatistics();
+        verify(zonky, times(2)).getDelinquentInvestments();
+        verify(zonky, times(3)).getBlockedAmounts();
     }
 
     @Test

@@ -16,13 +16,11 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import org.slf4j.Logger;
@@ -35,24 +33,20 @@ final class RemoteData {
     private final Wallet wallet;
     private final Statistics statistics;
     private final Map<Integer, Blocked> blocked;
-    private final Map<Rating, BigDecimal> atRisk;
 
-    private RemoteData(final Wallet wallet, final Statistics statistics, final Map<Integer, Blocked> blocked,
-                       final Map<Rating, BigDecimal> atRisk) {
+    private RemoteData(final Wallet wallet, final Statistics statistics, final Map<Integer, Blocked> blocked) {
         this.wallet = wallet;
         this.statistics = statistics;
         this.blocked = blocked;
-        this.atRisk = atRisk;
     }
 
     public static RemoteData load(final Tenant tenant) {
         LOGGER.debug("Loading the latest Zonky portfolio information.");
-        final Map<Rating, BigDecimal> atRisk = Util.getAmountsAtRisk(tenant); // goes first as it will take some time
         final Statistics statistics = tenant.call(Zonky::getStatistics);
         final Map<Integer, Blocked> blocked = Util.readBlockedAmounts(tenant, statistics);
         final Wallet wallet = tenant.call(Zonky::getWallet); // goes last as it's a very short call
         LOGGER.debug("Finished.");
-        return new RemoteData(wallet, statistics, blocked, atRisk);
+        return new RemoteData(wallet, statistics, blocked);
     }
 
     public Wallet getWallet() {
@@ -67,15 +61,10 @@ final class RemoteData {
         return Collections.unmodifiableMap(blocked);
     }
 
-    public Map<Rating, BigDecimal> getAtRisk() {
-        return Collections.unmodifiableMap(atRisk);
-    }
-
     @Override
     public String toString() {
         return "RemoteData{" +
-                "atRisk=" + atRisk +
-                ", blocked=" + blocked +
+                "blocked=" + blocked +
                 ", statistics=" + statistics +
                 ", wallet=" + wallet +
                 '}';

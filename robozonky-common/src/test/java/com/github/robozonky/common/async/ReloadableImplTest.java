@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -26,16 +26,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class ReloadableTest {
+class ReloadableImplTest {
 
     @Test
     void manually() {
         final Consumer<String> mock = mock(Consumer.class);
-        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), mock);
+        final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
+                .finishWith(mock)
+                .build();
         final Either<Throwable, String> result = r.get();
         assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());
@@ -52,7 +55,10 @@ class ReloadableTest {
     @Test
     void timeBased() {
         final Consumer<String> mock = mock(Consumer.class);
-        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), Duration.ofSeconds(5), mock);
+        final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
+                .reloadAfter(Duration.ofSeconds(5))
+                .finishWith(mock)
+                .build();
         final Either<Throwable, String> result = r.get();
         assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());
@@ -63,11 +69,24 @@ class ReloadableTest {
 
     @Test
     void timeBasedNoConsumer() {
-        final Reloadable<String> r = Reloadable.of(() -> UUID.randomUUID().toString(), Duration.ofSeconds(5));
+        final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
+                .reloadAfter(Duration.ofSeconds(5))
+                .build();
         final Either<Throwable, String> result = r.get();
         assertThat(result).containsRightInstanceOf(String.class);
         final String value = result.get();
         assertThat(r.get()).containsOnRight(value); // new call, no change
+    }
+
+    @Test
+    void finisherFails() {
+        final Consumer<String> finisher = mock(Consumer.class);
+        doThrow(IllegalStateException.class).when(finisher).accept(any());
+        final Reloadable<String> r = Reloadable.with(() -> "")
+                .finishWith(finisher)
+                .build();
+        final Either<Throwable, String> result = r.get();
+        assertThat(result).isLeft(); // no value as the finisher failed
     }
 
 }

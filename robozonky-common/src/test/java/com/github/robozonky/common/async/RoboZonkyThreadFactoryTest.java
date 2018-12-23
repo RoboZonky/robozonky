@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.runtime;
+package com.github.robozonky.common.async;
 
-import com.github.robozonky.common.async.Scheduler;
-import com.github.robozonky.common.async.Schedulers;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SchedulerControlTest {
+class RoboZonkyThreadFactoryTest {
 
     @Test
-    void check() {
-        try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            final SchedulerControl rc = new SchedulerControl();
-            rc.valueUnset(null);
-            assertThat(s.isPaused()).isTrue();
-            rc.valueSet("1.0.0");
-            assertThat(s.isPaused()).isFalse();
-        }
+    void daemon() {
+        final ThreadGroup tg = new ThreadGroup("testing");
+        final RoboZonkyThreadFactory f = new RoboZonkyThreadFactory(tg);
+        final Thread t = f.newThread(() -> {
+        });
+        assertThat(t.isDaemon()).isTrue();
     }
+
 }

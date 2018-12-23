@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.common.async;
 
-import java.util.concurrent.ScheduledExecutorService;
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-class SchedulerServiceTest {
+class TimeBasedReloadTest {
 
     @Test
-    void defaults() {
-        final PausableScheduledExecutorService expected = mock(PausableScheduledExecutorService.class);
-        final SchedulerService s = (parallelism, threadFactory) -> expected;
-        final ScheduledExecutorService ses = s.newScheduledExecutorService(1);
-        assertThat(ses).isSameAs(expected);
+    void force() {
+        final TimeBasedReload r = new TimeBasedReload(Duration.ofMinutes(5));
+        assertThat(r.getAsBoolean()).isTrue();
+        r.markReloaded();
+        assertThat(r.getAsBoolean()).isFalse();
+        r.forceReload();
+        assertThat(r.getAsBoolean()).isTrue();
     }
+
 }

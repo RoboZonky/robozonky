@@ -24,8 +24,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-import com.github.robozonky.util.Reloadable;
-import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.common.async.Reloadable;
+import com.github.robozonky.common.async.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,14 +51,15 @@ final class EventFiringQueue {
      * @param threadSupplier
      */
     EventFiringQueue(final Function<BlockingQueue<Runnable>, EventFiringRunnable> threadSupplier) {
-        firingThread = Reloadable.of(() -> {
+        firingThread = Reloadable.with(() -> {
             final Runnable r = threadSupplier.apply(queue);
             LOGGER.debug("Creating new thread with {}.", r);
             final Thread t = Scheduler.THREAD_FACTORY.newThread(r);
             t.start();
             LOGGER.debug("Started event firing thread {}.", t.getName());
             return t;
-        });
+        })
+                .build();
     }
 
     private static void await(final CyclicBarrier barrier, final long id) {

@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -28,12 +28,12 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.ZonkyScope;
-import com.github.robozonky.util.Reloadable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,8 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalPowerTenantImpl.class);
 
     private final PowerTenant parent;
-    private final Reloadable<DelayedFiring> delayedFiring = Reloadable.of(DelayedFiring::new);
+    private final Reloadable<DelayedFiring> delayedFiring = Reloadable.with(DelayedFiring::new)
+            .build();
     private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
 
     public TransactionalPowerTenantImpl(final PowerTenant parent) {

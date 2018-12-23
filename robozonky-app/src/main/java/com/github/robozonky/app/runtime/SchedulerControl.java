@@ -16,8 +16,8 @@
 
 package com.github.robozonky.app.runtime;
 
-import com.github.robozonky.util.Refreshable;
-import com.github.robozonky.util.Schedulers;
+import com.github.robozonky.common.async.Refreshable;
+import com.github.robozonky.common.async.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

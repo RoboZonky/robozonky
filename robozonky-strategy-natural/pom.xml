@@ -48,6 +48,11 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-api</artifactId>
+      <classifier>tests</classifier>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <scope>test</scope>

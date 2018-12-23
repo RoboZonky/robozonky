@@ -27,10 +27,10 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
+import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
