@@ -27,6 +27,7 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Scheduler;
+import io.vavr.Lazy;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class App implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
     private final ShutdownHook shutdownHooks = new ShutdownHook();
-    private final Lifecycle lifecycle = new Lifecycle(shutdownHooks);
+    private final Lazy<Lifecycle> lifecycle = Lazy.of(() -> new Lifecycle(shutdownHooks));
     private final String[] args;
 
     public App(final String... args) {
@@ -53,7 +54,7 @@ public class App implements Runnable {
 
     private void exit(final ReturnCode returnCode) {
         LOGGER.trace("Exit requested with return code {}.", returnCode);
-        final ShutdownHook.Result r = lifecycle.getTerminationCause()
+        final ShutdownHook.Result r = lifecycle.get().getTerminationCause()
                 .map(t -> new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, t))
                 .orElse(new ShutdownHook.Result(returnCode, null));
         exit(r);
@@ -93,17 +94,17 @@ public class App implements Runnable {
         });
         Events.global().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
-        shutdownHooks.register(new Management(lifecycle));
+        shutdownHooks.register(new Management(lifecycle.get()));
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
-        return m.apply(lifecycle);
+        return m.apply(lifecycle.get());
     }
 
     public void resumeToFail(final Throwable throwable) {
-        lifecycle.resumeToFail(throwable);
+        lifecycle.get().resumeToFail(throwable);
     }
 
     void ensureLiveness() {
-        if (!lifecycle.waitUntilOnline()) {
+        if (!lifecycle.get().waitUntilOnline()) {
             exit(ReturnCode.ERROR_DOWN);
         }
     }
