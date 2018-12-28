@@ -32,8 +32,11 @@ import org.slf4j.LoggerFactory;
 public final class Management {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Management.class);
-
     private static final Lazy<MBeanServer> server = Lazy.of(ManagementFactory::getPlatformMBeanServer);
+
+    private Management() {
+        // no instances
+    }
 
     public static Optional<ObjectName> register(final ManagementBean<?> mbean) {
         try {
