@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.app.runtime;
 
-import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.internal.api.Defaults;
-import org.junit.jupiter.api.Test;
+import com.github.robozonky.common.management.BaseMBean;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public interface RuntimeMBean extends BaseMBean {
 
-class RuntimeTest {
+    void stopDaemon();
 
-    @Test
-    void version() {
-        final Runtime runtime = new Runtime(new Lifecycle());
-        assertThat(runtime.getVersion()).isEqualTo(Defaults.ROBOZONKY_VERSION);
-    }
+    String getZonkyApiVersion();
+
+    String getVersion();
 }

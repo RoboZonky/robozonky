@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.common.management;
 
-public interface RuntimeMBean extends BaseMBean {
+import java.time.OffsetDateTime;
 
-    void stopDaemon();
+public interface BaseMBean {
 
-    String getZonkyApiVersion();
+    OffsetDateTime getLastUpdated();
 
-    String getVersion();
 }

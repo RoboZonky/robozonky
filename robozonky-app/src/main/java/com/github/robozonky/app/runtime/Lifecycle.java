@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.async.Schedulers;
+import com.github.robozonky.common.management.ManagementBean;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,7 @@ public class Lifecycle {
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
     private final AtomicReference<Throwable> terminationCause = new AtomicReference<>();
+    private final ManagementBean<RuntimeMBean> managementBean;
 
     /**
      * For testing purposes only.
@@ -69,6 +72,9 @@ public class Lifecycle {
         this.livenessCheck = mc;
         final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
         this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
+        this.managementBean = new ManagementBean<>(RuntimeMBean.class, () -> new Runtime(this));
+        final boolean stored = RuntimeManagementBeanService.setManagementBean(managementBean);
+        LOGGER.debug("Runtime management bean stored: {}", stored);
         hooks.register(LivenessCheck.setup(livenessCheck));
         hooks.register(shutdownEnabler);
     }
@@ -77,7 +83,7 @@ public class Lifecycle {
      * For testing purposes. PITest mutations would start these and not kill them, leading to stuck processes.
      */
     public static void clearShutdownHooks() {
-        HOOKS.forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
+        HOOKS.forEach(h -> java.lang.Runtime.getRuntime().removeShutdownHook(h));
         HOOKS.clear();
     }
 
@@ -99,6 +105,10 @@ public class Lifecycle {
         return livenessCheck.getApiVersion();
     }
 
+    public OffsetDateTime getZonkyApiLastUpdate() {
+        return livenessCheck.getTimestamp();
+    }
+
     /**
      * Will block until RoboZonky is back online.
      * @return True if now online, false if interrupted.
@@ -112,7 +122,7 @@ public class Lifecycle {
      */
     public void suspend() {
         final Thread t = shutdownHook.get();
-        Runtime.getRuntime().addShutdownHook(shutdownHook.get());
+        java.lang.Runtime.getRuntime().addShutdownHook(shutdownHook.get());
         HOOKS.add(t);
         LOGGER.debug("Pausing main thread.");
         try {

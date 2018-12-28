@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.common.management;
 
-import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.ServiceLoader;
 
-public interface BaseMBean {
+/**
+ * Use Java's {@link ServiceLoader} to load various JMX Beans into the system.
+ */
+public interface ManagementBeanService {
 
-    OffsetDateTime getLatestUpdatedDateTime();
+    Collection<ManagementBean<?>> getManagementBeans();
+
 }

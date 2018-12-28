@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.app.runtime;
 
 import java.time.OffsetDateTime;
 
-import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.common.management.AbstractBaseMBean;
 import com.github.robozonky.internal.api.Defaults;
 
-class Runtime implements RuntimeMBean {
+class Runtime extends AbstractBaseMBean implements RuntimeMBean {
 
     private final Lifecycle lifecycle;
-    private OffsetDateTime lastUpdatedDateTime;
 
     public Runtime(final Lifecycle lifecycle) {
         this.lifecycle = lifecycle;
@@ -41,17 +39,13 @@ class Runtime implements RuntimeMBean {
         return lifecycle.getZonkyApiVersion().orElse("N/A");
     }
 
-    void handle(final ExecutionCompletedEvent event) {
-        this.lastUpdatedDateTime = event.getCreatedOn();
-    }
-
-    @Override
-    public OffsetDateTime getLatestUpdatedDateTime() {
-        return this.lastUpdatedDateTime;
-    }
-
     @Override
     public String getVersion() {
         return Defaults.ROBOZONKY_VERSION;
+    }
+
+    @Override
+    public OffsetDateTime getLastUpdated() {
+        return lifecycle.getZonkyApiLastUpdate();
     }
 }
