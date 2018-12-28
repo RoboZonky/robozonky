@@ -26,7 +26,7 @@ class AbstractBaseMBeanTest {
 
     @Test
     void updates() {
-        final AbstractBaseMBean mb = new TestingMBean();
+        final AbstractBaseMBean mb = new Base();
         assertThat(mb.getLastUpdated()).isNull();
         mb.markUpdated();
         assertThat(mb.getLastUpdated()).isBeforeOrEqualTo(OffsetDateTime.now());

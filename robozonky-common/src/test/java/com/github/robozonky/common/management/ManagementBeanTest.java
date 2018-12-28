@@ -25,9 +25,9 @@ class ManagementBeanTest {
 
     @Test
     void constructor() {
-        final ManagementBean<TestingMBean> mb = new ManagementBean<>(TestingMBean.class, TestingMBean::new);
+        final ManagementBean<Base> mb = new ManagementBean<>(Base.class, Base::new);
         final ObjectName firstName = mb.getObjectName();
-        final TestingMBean firstInstance = mb.getInstance();
+        final Base firstInstance = mb.getInstance();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(firstName).isNotNull();
             softly.assertThat(firstInstance).isNotNull();

@@ -28,14 +28,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class RuntimeTest extends AbstractEventLeveragingTest {
+class AboutMBeanTest extends AbstractEventLeveragingTest {
 
     @Test
     void values() {
         final Lifecycle l = mock(Lifecycle.class);
         when(l.getZonkyApiLastUpdate()).thenReturn(OffsetDateTime.now());
         when(l.getZonkyApiVersion()).thenReturn(Optional.of("1.0.0"));
-        final RuntimeMBean r = new Runtime(l);
+        final AboutMBean r = new About(l);
         assertSoftly(softly -> {
             softly.assertThat(r.getVersion()).isEqualTo(Defaults.ROBOZONKY_VERSION);
             softly.assertThat(r.getZonkyApiVersion()).isEqualTo("1.0.0");

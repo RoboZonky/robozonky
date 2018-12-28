@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.async.Schedulers;
+import com.github.robozonky.common.management.Management;
 import com.github.robozonky.common.management.ManagementBean;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class Lifecycle {
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
     private final AtomicReference<Throwable> terminationCause = new AtomicReference<>();
-    private final ManagementBean<RuntimeMBean> managementBean;
+    private final ManagementBean<AboutMBean> managementBean;
 
     /**
      * For testing purposes only.
@@ -72,9 +73,8 @@ public class Lifecycle {
         this.livenessCheck = mc;
         final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
         this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
-        this.managementBean = new ManagementBean<>(RuntimeMBean.class, () -> new Runtime(this));
-        final boolean stored = RuntimeManagementBeanService.setManagementBean(managementBean);
-        LOGGER.debug("Runtime management bean stored: {}", stored);
+        this.managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
+        Management.register(managementBean);
         hooks.register(LivenessCheck.setup(livenessCheck));
         hooks.register(shutdownEnabler);
     }
@@ -83,7 +83,7 @@ public class Lifecycle {
      * For testing purposes. PITest mutations would start these and not kill them, leading to stuck processes.
      */
     public static void clearShutdownHooks() {
-        HOOKS.forEach(h -> java.lang.Runtime.getRuntime().removeShutdownHook(h));
+        HOOKS.forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
         HOOKS.clear();
     }
 
@@ -122,7 +122,7 @@ public class Lifecycle {
      */
     public void suspend() {
         final Thread t = shutdownHook.get();
-        java.lang.Runtime.getRuntime().addShutdownHook(shutdownHook.get());
+        Runtime.getRuntime().addShutdownHook(shutdownHook.get());
         HOOKS.add(t);
         LOGGER.debug("Pausing main thread.");
         try {

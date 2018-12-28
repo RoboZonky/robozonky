@@ -16,6 +16,6 @@
 
 package com.github.robozonky.common.management;
 
-final class TestingMBean extends AbstractBaseMBean {
+final class Base extends AbstractBaseMBean {
 
 }

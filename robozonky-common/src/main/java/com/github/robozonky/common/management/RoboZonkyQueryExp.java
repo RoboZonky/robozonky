@@ -16,14 +16,27 @@
 
 package com.github.robozonky.common.management;
 
-import java.util.Collection;
-import java.util.ServiceLoader;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.QueryExp;
 
-/**
- * Use Java's {@link ServiceLoader} to load various JMX Beans into the system.
- */
-public interface ManagementBeanService {
+final class RoboZonkyQueryExp implements QueryExp {
 
-    Collection<ManagementBean<?>> getManagementBeans();
+    private final AtomicReference<MBeanServer> server = new AtomicReference<>();
 
+    @Override
+    public boolean apply(final ObjectName name) {
+        return name.getDomain().equals(ManagementBean.DOMAIN);
+    }
+
+    Optional<MBeanServer> getMBeanServer() {
+        return Optional.ofNullable(server.get());
+    }
+
+    @Override
+    public void setMBeanServer(final MBeanServer s) {
+        server.set(s);
+    }
 }

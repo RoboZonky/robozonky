@@ -18,7 +18,7 @@ package com.github.robozonky.app.runtime;
 
 import com.github.robozonky.common.management.BaseMBean;
 
-public interface RuntimeMBean extends BaseMBean {
+public interface AboutMBean extends BaseMBean {
 
     void stopDaemon();
 

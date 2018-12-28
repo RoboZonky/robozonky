@@ -25,6 +25,8 @@ import io.vavr.control.Try;
 
 public final class ManagementBean<T extends BaseMBean> {
 
+    static final String DOMAIN = "com.github.robozonky";
+
     private final Lazy<ObjectName> name;
     private final Lazy<T> instance;
 
@@ -35,8 +37,9 @@ public final class ManagementBean<T extends BaseMBean> {
 
     private static Either<Throwable, ObjectName> assembleObjectName(final Class<?> clz) {
         return Try.of(() -> {
+            final String packageName = clz.getPackage().getName();
             final String className = clz.getSimpleName();
-            return new ObjectName("com.github.robozonky:type=" + className);
+            return new ObjectName(DOMAIN + ":type=" + packageName + ",name=" + className);
         }).toEither();
     }
 
@@ -47,4 +50,5 @@ public final class ManagementBean<T extends BaseMBean> {
     public T getInstance() {
         return instance.get();
     }
+
 }
