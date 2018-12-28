@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 import com.github.robozonky.common.management.AbstractBaseMBean;
 import com.github.robozonky.internal.api.Defaults;
 
-class Runtime extends AbstractBaseMBean implements RuntimeMBean {
+public class Runtime extends AbstractBaseMBean implements RuntimeMBean {
 
     private final Lifecycle lifecycle;
 

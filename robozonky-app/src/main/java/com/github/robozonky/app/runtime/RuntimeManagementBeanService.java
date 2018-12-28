@@ -30,8 +30,12 @@ public final class RuntimeManagementBeanService implements ManagementBeanService
     private static final AtomicReference<ManagementBean<?>> BEAN = new AtomicReference<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeManagementBeanService.class);
 
-    static boolean setManagementBean(final ManagementBean<?> mBean) {
+    public static boolean setManagementBean(final ManagementBean<? extends RuntimeMBean> mBean) {
         return BEAN.compareAndSet(null, mBean);
+    }
+
+    public static void resetManagementBean() {
+        BEAN.set(null);
     }
 
     @Override

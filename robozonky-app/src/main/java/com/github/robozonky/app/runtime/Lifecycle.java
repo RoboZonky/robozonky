@@ -101,11 +101,11 @@ public class Lifecycle {
         }
     }
 
-    public Optional<String> getZonkyApiVersion() {
+    Optional<String> getZonkyApiVersion() {
         return livenessCheck.getApiVersion();
     }
 
-    public OffsetDateTime getZonkyApiLastUpdate() {
+    OffsetDateTime getZonkyApiLastUpdate() {
         return livenessCheck.getTimestamp();
     }
 

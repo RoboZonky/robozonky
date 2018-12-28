@@ -31,6 +31,7 @@ import org.junit.jupiter.api.function.Executable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 class ShutdownEnablerTest {
 
@@ -45,7 +46,7 @@ class ShutdownEnablerTest {
                 .orElseThrow(() -> new IllegalStateException("Should have returned."));
         c.accept(new ShutdownHook.Result(ReturnCode.OK, null)); // this unblocks the thread
         // this should return
-        org.junit.jupiter.api.Assertions.assertTimeout(Duration.ofSeconds(5), (Executable) f::get);
+        assertTimeout(Duration.ofSeconds(5), (Executable) f::get);
         assertThat(f).isDone();
         e.shutdownNow();
     }

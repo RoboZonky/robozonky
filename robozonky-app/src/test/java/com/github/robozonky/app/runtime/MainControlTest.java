@@ -17,6 +17,7 @@
 package com.github.robozonky.app.runtime;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,19 +26,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.github.robozonky.app.AbstractEventLeveragingTest;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-class MainControlTest {
+class MainControlTest extends AbstractEventLeveragingTest {
 
     @Test
     void operation() throws InterruptedException, ExecutionException {
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final MainControl mainControl = new MainControl();
         final AtomicBoolean started = new AtomicBoolean(false);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(mainControl.getApiVersion()).isEmpty();
+            softly.assertThat(mainControl.getTimestamp()).isBeforeOrEqualTo(OffsetDateTime.now());
+        });
         final Future<?> f = e.submit(() -> {
             started.set(true);
             try {
@@ -51,12 +55,20 @@ class MainControlTest {
                 Thread.sleep(1);
             }
         });
+        final OffsetDateTime before = OffsetDateTime.now();
         mainControl.valueUnset(null);
-        assertThat(mainControl.getApiVersion()).isEmpty();
-        assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
-                .isInstanceOf(TimeoutException.class);  // nothing will happen
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(mainControl.getApiVersion()).isEmpty();
+            softly.assertThat(mainControl.getTimestamp()).isAfterOrEqualTo(before);
+            softly.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
+                    .isInstanceOf(TimeoutException.class);  // nothing will happen
+        });
+        final OffsetDateTime before2 = OffsetDateTime.now();
         mainControl.valueSet("1.0.0");
         f.get(); // make sure task finished
-        assertThat(mainControl.getApiVersion()).contains("1.0.0");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(mainControl.getApiVersion()).contains("1.0.0");
+            softly.assertThat(mainControl.getTimestamp()).isAfterOrEqualTo(before2);
+        });
     }
 }

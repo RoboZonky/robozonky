@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.events.EventFiringListener;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.app.runtime.RuntimeManagementBeanService;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.LazyEvent;
@@ -73,6 +74,11 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     public void startListeningForEvents() { // initialize session and create a listener
         final PowerTenant t = mockTenant();
         Events.forSession(t).addListener(listener);
+    }
+
+    @AfterEach
+    private void unregisterBean() {
+        RuntimeManagementBeanService.resetManagementBean();
     }
 
     @AfterEach
