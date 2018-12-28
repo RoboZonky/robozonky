@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.common.management;
 
-import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.internal.api.Defaults;
-import org.junit.jupiter.api.Test;
+import java.time.OffsetDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public interface BaseMBean {
 
-class RuntimeTest {
+    OffsetDateTime getLastUpdated();
 
-    @Test
-    void version() {
-        final Runtime runtime = new Runtime(new Lifecycle());
-        assertThat(runtime.getVersion()).isEqualTo(Defaults.ROBOZONKY_VERSION);
-    }
 }

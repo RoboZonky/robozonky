@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.common.management;
 
-import org.junit.jupiter.api.Test;
+import java.time.OffsetDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class MBeanTest {
+public abstract class AbstractBaseMBean implements BaseMBean {
 
-    @Test
-    void objectName() {
-        final MBean m = MBean.RUNTIME;
-        assertThat(m.getObjectName().getCanonicalName())
-                .isEqualTo("com.github.robozonky:type=Runtime");
+    private final AtomicReference<OffsetDateTime> lastUpdated = new AtomicReference<>();
+    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    protected void markUpdated() {
+        lastUpdated.set(OffsetDateTime.now());
     }
 
+    @Override
+    public OffsetDateTime getLastUpdated() {
+        return lastUpdated.get();
+    }
 }

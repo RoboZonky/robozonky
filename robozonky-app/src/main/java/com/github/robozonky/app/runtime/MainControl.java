@@ -16,11 +16,14 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.common.async.Refreshable;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +34,12 @@ class MainControl implements Refreshable.RefreshListener<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainControl.class);
     private final AtomicReference<CountDownLatch> trigger = new AtomicReference<>(new CountDownLatch(1));
-    private final AtomicReference<String> version = new AtomicReference<>();
+    private final AtomicReference<Tuple2<String, OffsetDateTime>> version =
+            new AtomicReference<>(getVersionTuple(null));
+
+    private static Tuple2<String, OffsetDateTime> getVersionTuple(final String version) {
+        return Tuple.of(version, OffsetDateTime.now());
+    }
 
     public void waitUntilTriggered() throws InterruptedException {
         LOGGER.trace("Waiting on {}.", this);
@@ -40,19 +48,23 @@ class MainControl implements Refreshable.RefreshListener<String> {
     }
 
     public Optional<String> getApiVersion() {
-        return Optional.ofNullable(version.get());
+        return Optional.ofNullable(version.get()._1);
+    }
+
+    public OffsetDateTime getTimestamp() {
+        return version.get()._2;
     }
 
     @Override
     public void valueSet(final String newApiVersion) { // becomes online, release
-        version.set(newApiVersion);
+        version.set(getVersionTuple(newApiVersion));
         trigger.get().countDown();
         LOGGER.trace("Counted down on {}.", this);
     }
 
     @Override
     public void valueUnset(final String oldApiVersion) { // becomes offline, block
-        version.set(null);
+        version.set(getVersionTuple(null));
         trigger.updateAndGet(currentTrigger -> {
             if (currentTrigger.getCount() == 0) { // already triggered, can set new trigger
                 LOGGER.trace("Countdown restarted on {}.", this);

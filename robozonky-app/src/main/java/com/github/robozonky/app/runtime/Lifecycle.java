@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.async.Schedulers;
+import com.github.robozonky.common.management.Management;
+import com.github.robozonky.common.management.ManagementBean;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +43,7 @@ public class Lifecycle {
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
     private final AtomicReference<Throwable> terminationCause = new AtomicReference<>();
+    private final ManagementBean<AboutMBean> managementBean;
 
     /**
      * For testing purposes only.
@@ -69,6 +73,8 @@ public class Lifecycle {
         this.livenessCheck = mc;
         final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
         this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
+        this.managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
+        Management.register(managementBean);
         hooks.register(LivenessCheck.setup(livenessCheck));
         hooks.register(shutdownEnabler);
     }
@@ -95,8 +101,12 @@ public class Lifecycle {
         }
     }
 
-    public Optional<String> getZonkyApiVersion() {
+    Optional<String> getZonkyApiVersion() {
         return livenessCheck.getApiVersion();
+    }
+
+    OffsetDateTime getZonkyApiLastUpdate() {
+        return livenessCheck.getTimestamp();
     }
 
     /**

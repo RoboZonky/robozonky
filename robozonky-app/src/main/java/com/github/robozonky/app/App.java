@@ -24,9 +24,9 @@ import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
-import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.management.Management;
 import io.vavr.Lazy;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
@@ -94,7 +94,7 @@ public class App implements Runnable {
         });
         Events.global().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
-        shutdownHooks.register(new Management(lifecycle.get()));
+        shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         return m.apply(lifecycle.get());
     }
