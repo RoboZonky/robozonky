@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -36,9 +35,8 @@ class InvestingDaemon extends DaemonOperation {
     private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
     private final Investing investing;
 
-    public InvestingDaemon(final Consumer<Throwable> shutdownCall, final PowerTenant auth, final Investor investor,
-                           final Duration refreshPeriod) {
-        super(shutdownCall, auth, refreshPeriod);
+    public InvestingDaemon(final PowerTenant auth, final Investor investor, final Duration refreshPeriod) {
+        super(auth, refreshPeriod);
         this.investing = new Investing(investor, auth);
     }
 

@@ -36,7 +36,7 @@ final class Skippable implements Runnable {
     @Override
     public void run() {
         if (shouldBeSkipped.get()) {
-            LOGGER.trace("Not running {}.", toRun);
+            LOGGER.debug("Not running {} on account of Zonky not being available.", toRun);
             return;
         }
         LOGGER.trace("Running {}.", toRun);

@@ -85,7 +85,7 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
         CustomOperation(final PowerTenant auth, final Consumer<Tenant> operation,
                         final Consumer<Throwable> shutdownHook) {
-            super(shutdownHook, auth, Duration.ofSeconds(1));
+            super(auth, Duration.ofSeconds(1));
             this.operation = operation;
         }
 
