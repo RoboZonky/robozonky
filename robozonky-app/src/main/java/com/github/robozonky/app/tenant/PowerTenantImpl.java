@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
@@ -32,7 +31,6 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
@@ -58,13 +56,13 @@ class PowerTenantImpl implements PowerTenant {
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
 
-    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final Supplier<Lifecycle> lifecycleSupplier,
+    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
                     final StrategyProvider strategyProvider,
                     final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.sessionInfo = sessionInfo;
-        this.availability = () -> lifecycleSupplier.get().isOnline();
+        this.availability = zonkyAvailability;
         this.supplier = tokenSupplier;
         this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))

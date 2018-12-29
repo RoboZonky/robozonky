@@ -43,7 +43,6 @@ public class Lifecycle {
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
     private final AtomicReference<Throwable> terminationCause = new AtomicReference<>();
-    private final ManagementBean<AboutMBean> managementBean;
 
     /**
      * For testing purposes only.
@@ -73,7 +72,7 @@ public class Lifecycle {
         this.livenessCheck = mc;
         final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
         this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
-        this.managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
+        final ManagementBean<AboutMBean> managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
         Management.register(managementBean);
         LivenessCheck.setup(livenessCheck);
         hooks.register(shutdownEnabler);

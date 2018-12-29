@@ -17,6 +17,7 @@
 package com.github.robozonky.app.tenant;
 
 import java.time.Duration;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -69,14 +70,13 @@ public final class TenantBuilder {
     public PowerTenant build(final Duration tokenRefresh) {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
-        } else if (lifecycle == null) {
-            throw new IllegalStateException("Lifecycle must be provided.");
         }
         final ApiProvider apis = api == null ? new ApiProvider() : api;
         final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier =
                 scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, tokenRefresh);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
-        return new PowerTenantImpl(sessionInfo, apis, lifecycle, strategyProvider, tokenSupplier);
+        final BooleanSupplier zonkyAvailability = lifecycle == null ? () -> true : () -> lifecycle.get().isOnline();
+        return new PowerTenantImpl(sessionInfo, apis, zonkyAvailability, strategyProvider, tokenSupplier);
     }
 
     public PowerTenant build() {

@@ -36,7 +36,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 class LifecycleTest extends AbstractEventLeveragingTest {
@@ -82,15 +81,18 @@ class LifecycleTest extends AbstractEventLeveragingTest {
         }
     }
 
+    /**
+     * This will unfortunately call the Zonky API, making the test flaky during Zonky downtimes.
+     */
     @Test
     void create() {
         final ShutdownHook hooks = spy(ShutdownHook.class);
         final Lifecycle h = new Lifecycle(hooks);
         assertSoftly(softly -> {
-            softly.assertThat(h.getZonkyApiVersion()).isEmpty();
+            softly.assertThat(h.getZonkyApiVersion()).isNotEmpty();
             softly.assertThat(h.getTerminationCause()).isEmpty();
             softly.assertThat(h.getZonkyApiLastUpdate()).isNotNull();
         });
-        verify(hooks, times(2)).register(any()); // 2 shutdown hooks have been registered
+        verify(hooks).register(any()); // 2 shutdown hooks have been registered
     }
 }
