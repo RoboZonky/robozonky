@@ -18,8 +18,10 @@ package com.github.robozonky.app.tenant;
 
 import java.time.Duration;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.tenant.ZonkyScope;
@@ -30,6 +32,7 @@ public final class TenantBuilder {
     private String name = null;
     private boolean dryRun = false;
     private SecretProvider secrets = null;
+    private Supplier<Lifecycle> lifecycle = null;
     private StrategyProvider strategyProvider = StrategyProvider.empty();
     private ApiProvider api;
 
@@ -40,6 +43,11 @@ public final class TenantBuilder {
 
     public TenantBuilder withStrategy(final String strategyLocation) {
         this.strategyProvider = StrategyProvider.createFor(strategyLocation);
+        return this;
+    }
+
+    public TenantBuilder withAvailabilityFrom(final Supplier<Lifecycle> lifecycle) {
+        this.lifecycle = lifecycle;
         return this;
     }
 
@@ -61,12 +69,14 @@ public final class TenantBuilder {
     public PowerTenant build(final Duration tokenRefresh) {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
+        } else if (lifecycle == null) {
+            throw new IllegalStateException("Lifecycle must be provided.");
         }
         final ApiProvider apis = api == null ? new ApiProvider() : api;
         final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier =
                 scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, tokenRefresh);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
-        return new PowerTenantImpl(sessionInfo, apis, strategyProvider, tokenSupplier);
+        return new PowerTenantImpl(sessionInfo, apis, lifecycle, strategyProvider, tokenSupplier);
     }
 
     public PowerTenant build() {

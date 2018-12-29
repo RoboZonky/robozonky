@@ -96,15 +96,15 @@ public class App implements Runnable {
         ensureLiveness();
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
-        return m.apply(lifecycle.get());
+        return m.apply(getLifecycle());
     }
 
-    public void resumeToFail(final Throwable throwable) {
-        lifecycle.get().resumeToFail(throwable);
+    public Lifecycle getLifecycle() {
+        return lifecycle.get();
     }
 
     void ensureLiveness() {
-        if (!lifecycle.get().waitUntilOnline()) {
+        if (!getLifecycle().waitUntilOnline()) {
             exit(ReturnCode.ERROR_DOWN);
         }
     }

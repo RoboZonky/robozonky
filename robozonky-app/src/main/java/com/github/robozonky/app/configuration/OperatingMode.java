@@ -18,7 +18,7 @@ package com.github.robozonky.app.configuration;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
@@ -26,6 +26,7 @@ import com.github.robozonky.app.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.daemon.Investor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
@@ -41,13 +42,14 @@ final class OperatingMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperatingMode.class);
 
-    private final Consumer<Throwable> shutdownCall;
+    private final Supplier<Lifecycle> lifecycle;
 
-    OperatingMode(final Consumer<Throwable> shutdownCall) {
-        this.shutdownCall = shutdownCall;
+    OperatingMode(final Supplier<Lifecycle> lifecycle) {
+        this.lifecycle = lifecycle;
     }
 
-    private static PowerTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
+    private static PowerTenant getTenant(final CommandLine cli, final Supplier<Lifecycle> lifecycle,
+                                         final SecretProvider secrets) {
         final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
         final TenantBuilder b = new TenantBuilder();
         if (cli.isDryRunEnabled()) {
@@ -56,6 +58,7 @@ final class OperatingMode {
         }
         return b.withSecrets(secrets)
                 .withStrategy(cli.getStrategyLocation())
+                .withAvailabilityFrom(lifecycle)
                 .named(cli.getName())
                 .build(duration);
     }
@@ -95,14 +98,14 @@ final class OperatingMode {
 
     private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final PowerTenant auth,
                                                        final Investor investor) {
-        final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, investor,
+        final InvestmentMode m = new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), auth, investor,
                                                           cli.getPrimaryMarketplaceCheckDelay(),
                                                           cli.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);
     }
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
-        final PowerTenant tenant = getTenant(cli, secrets);
+        final PowerTenant tenant = getTenant(cli, lifecycle, secrets);
         configureNotifications(cli, tenant);
         // and now initialize the chosen mode of operation
         return cli.getConfirmationCredentials()

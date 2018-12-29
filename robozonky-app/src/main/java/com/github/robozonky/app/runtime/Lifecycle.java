@@ -109,6 +109,10 @@ public class Lifecycle {
         return livenessCheck.getTimestamp();
     }
 
+    public boolean isOnline() {
+        return getZonkyApiVersion().isPresent();
+    }
+
     /**
      * Will block until RoboZonky is back online.
      * @return True if now online, false if interrupted.
