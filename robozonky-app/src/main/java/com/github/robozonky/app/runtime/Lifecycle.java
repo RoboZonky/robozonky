@@ -24,7 +24,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.common.async.Schedulers;
 import com.github.robozonky.common.management.Management;
 import com.github.robozonky.common.management.ManagementBean;
 import io.vavr.Lazy;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
- * network is available and Zonky is up. It will automatically {@link Schedulers#pause()} if it detects it is offline.
+ * network is available and Zonky is up.
  */
 public class Lifecycle {
 
@@ -43,7 +42,6 @@ public class Lifecycle {
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
     private final AtomicReference<Throwable> terminationCause = new AtomicReference<>();
-    private final ManagementBean<AboutMBean> managementBean;
 
     /**
      * For testing purposes only.
@@ -73,9 +71,9 @@ public class Lifecycle {
         this.livenessCheck = mc;
         final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
         this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
-        this.managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
+        final ManagementBean<AboutMBean> managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
         Management.register(managementBean);
-        hooks.register(LivenessCheck.setup(livenessCheck));
+        LivenessCheck.setup(livenessCheck);
         hooks.register(shutdownEnabler);
     }
 
@@ -107,6 +105,10 @@ public class Lifecycle {
 
     OffsetDateTime getZonkyApiLastUpdate() {
         return livenessCheck.getTimestamp();
+    }
+
+    public boolean isOnline() {
+        return getZonkyApiVersion().isPresent();
     }
 
     /**

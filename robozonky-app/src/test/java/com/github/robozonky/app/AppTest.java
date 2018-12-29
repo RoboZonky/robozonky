@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app;
 
+import java.lang.management.ManagementFactory;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import com.github.robozonky.api.SessionInfo;
@@ -26,6 +28,10 @@ import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.management.AbstractBaseMBean;
+import com.github.robozonky.common.management.BaseMBean;
+import com.github.robozonky.common.management.Management;
+import com.github.robozonky.common.management.ManagementBean;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,6 +92,20 @@ class AppTest extends AbstractEventLeveragingTest {
         });
     }
 
+    @Test
+    void unregistersBeans() {
+        final App main = spy(new App());
+        doNothing().when(main).actuallyExit(anyInt());
+        doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
+        final int countBefore = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
+        main.execute(new MyInvestmentMode());
+        final int countAfter = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
+        assertThat(countAfter).isGreaterThan(countBefore);
+        main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
+        final int finalCount = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
+        assertThat(finalCount).isEqualTo(countBefore);
+    }
+
     /**
      * This is a hackish white-box test that tests various internals of the app implementation.
      */
@@ -113,12 +133,22 @@ class AppTest extends AbstractEventLeveragingTest {
 
         @Override
         public ReturnCode apply(final Lifecycle lifecycle) {
+            final ManagementBean<BaseMBean> mb = new ManagementBean<>(BaseMBean.class, Base::new);
+            Management.register(mb);
             return ReturnCode.OK;
         }
 
         @Override
         public void close() {
 
+        }
+    }
+
+    private static final class Base extends AbstractBaseMBean {
+
+        @Override
+        public OffsetDateTime getLastUpdated() {
+            return OffsetDateTime.now();
         }
     }
 

@@ -18,7 +18,6 @@ package com.github.robozonky.app.runtime;
 
 import java.util.UUID;
 
-import com.github.robozonky.common.async.Schedulers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,11 +48,6 @@ class LivenessCheckTest {
     @AfterAll
     static void stopServer() {
         server.stop();
-    }
-
-    @AfterEach
-    void resumeSchedulers() {
-        Schedulers.INSTANCE.resume(); // reset
     }
 
     @Test

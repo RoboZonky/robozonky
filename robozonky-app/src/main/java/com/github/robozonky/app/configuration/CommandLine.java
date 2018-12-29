@@ -23,9 +23,10 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.github.robozonky.app.App;
+import com.github.robozonky.app.runtime.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class CommandLine implements Callable<Optional<InvestmentMode>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
-    private final Consumer<Throwable> shutdownCall;
+    private final Supplier<Lifecycle> lifecycle;
     @picocli.CommandLine.Option(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")
     String strategyLocation = "";
@@ -66,8 +67,8 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
             description = "Number of seconds between consecutive checks of secondary marketplace.")
     private int secondaryMarketplaceCheckDelay = primaryMarketplaceCheckDelay;
 
-    public CommandLine(final Consumer<Throwable> shutdownCall) {
-        this.shutdownCall = shutdownCall;
+    public CommandLine(final Supplier<Lifecycle> lifecycle) {
+        this.lifecycle = lifecycle;
         // for backwards compatibility with RoboZonky 4.x, which used JCommander
         System.setProperty("picocli.trimQuotes", "true");
         System.setProperty("picocli.useSimplifiedAtFiles", "true");
@@ -81,7 +82,7 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
      */
     public static Optional<InvestmentMode> parse(final App main) {
         // parse the arguments
-        final CommandLine cli = new CommandLine(main::resumeToFail);
+        final CommandLine cli = new CommandLine(main::getLifecycle);
         final Optional<InvestmentMode> result = picocli.CommandLine.call(cli, main.getArgs());
         return Objects.isNull(result) ? Optional.empty() : result;
     }
@@ -138,7 +139,7 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
 
     @Override
     public Optional<InvestmentMode> call() {
-        final OperatingMode mode = new OperatingMode(shutdownCall);
+        final OperatingMode mode = new OperatingMode(lifecycle);
         return SecretProviderFactory.getSecretProvider(this)
                 .flatMap(secrets -> mode.configure(this, secrets));
     }

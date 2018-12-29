@@ -46,7 +46,7 @@ class SchedulerTest {
 
     @Test
     void submit() {
-        try (final Scheduler s = Schedulers.INSTANCE.create()) {
+        try (final Scheduler s = new Scheduler()) {
             assertThat(s.isSubmitted(RUNNABLE)).isFalse();
             final ScheduledFuture<?> f = s.submit(RUNNABLE);
             SoftAssertions.assertSoftly(softly -> {
@@ -59,7 +59,7 @@ class SchedulerTest {
 
     @Test
     void run() throws InterruptedException, ExecutionException, TimeoutException {
-        try (final Scheduler s = Schedulers.INSTANCE.create()) {
+        try (final Scheduler s = new Scheduler()) {
             final Future<?> f = s.run(RUNNABLE);
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat((Future<?>) f).isNotNull();
@@ -71,7 +71,7 @@ class SchedulerTest {
 
     @Test
     void runWithDelay() throws InterruptedException, ExecutionException, TimeoutException {
-        try (final Scheduler s = Schedulers.INSTANCE.create()) {
+        try (final Scheduler s = new Scheduler()) {
             final Future<?> f = s.run(RUNNABLE, Duration.ofSeconds(1));
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat((Future<?>) f).isNotNull();

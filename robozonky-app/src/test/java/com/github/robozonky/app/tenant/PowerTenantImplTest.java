@@ -88,7 +88,7 @@ class PowerTenantImplTest extends AbstractEventLeveragingTest {
         when(s.getToInvest()).thenReturn(Optional.of(mock(InvestmentStrategy.class)));
         when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
         when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
-        final PowerTenantImpl t = new PowerTenantImpl(null, null, s, null);
+        final PowerTenantImpl t = new PowerTenantImpl(null, null, null, s, null);
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);

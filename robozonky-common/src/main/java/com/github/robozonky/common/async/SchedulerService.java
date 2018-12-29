@@ -17,18 +17,19 @@
 package com.github.robozonky.common.async;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Pluggable {@link PausableScheduledExecutorService} for the purposes of testing what RoboZonky does with background
+ * Pluggable {@link ScheduledExecutorService} for the purposes of testing what RoboZonky does with background
  * tasks. Load with {@link SchedulerServiceLoader}.
  */
 public interface SchedulerService {
 
-    PausableScheduledExecutorService newScheduledExecutorService(final int parallelism,
-                                                                 final ThreadFactory threadFactory);
+    ScheduledExecutorService newScheduledExecutorService(final int parallelism,
+                                                         final ThreadFactory threadFactory);
 
-    default PausableScheduledExecutorService newScheduledExecutorService(final int parallelism) {
+    default ScheduledExecutorService newScheduledExecutorService(final int parallelism) {
         return this.newScheduledExecutorService(parallelism, Executors.defaultThreadFactory());
     }
 }

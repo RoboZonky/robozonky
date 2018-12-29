@@ -19,12 +19,12 @@ package com.github.robozonky.common.async;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
@@ -41,16 +41,18 @@ public class Scheduler implements AutoCloseable {
          * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
          * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
          */
-        return Schedulers.INSTANCE.create(2, THREAD_FACTORY);
-    })
-            .build();
+        return new Scheduler(2, THREAD_FACTORY);
+    }).build();
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Collection<Runnable> submitted = new CopyOnWriteArraySet<>();
-    private final AtomicInteger pauseRequests = new AtomicInteger(0);
-    private final PausableScheduledExecutorService executor;
+    private final ScheduledExecutorService executor;
 
-    Scheduler(final int poolSize, final ThreadFactory threadFactory) {
+    public Scheduler(final int poolSize, final ThreadFactory threadFactory) {
         this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
+    }
+
+    Scheduler() {
+        this(1, Executors.defaultThreadFactory());
     }
 
     private static Scheduler actuallyGetBackgroundScheduler() {
@@ -105,24 +107,6 @@ public class Scheduler implements AutoCloseable {
         return submitted.contains(refreshable);
     }
 
-    /**
-     * Pause the scheduler, queuing all scheduled executions until {@link #resume()} is called. Calling this method
-     * several times in a row will require equal amount of calls to {@link #resume()} to resume the scheduler later.
-     */
-    void pause() {
-        pauseRequests.updateAndGet(old -> {
-            if (old == 0) {
-                executor.pause();
-            }
-            return old + 1;
-        });
-        LOGGER.trace("Incrementing pause counter for {}.", this);
-    }
-
-    public boolean isPaused() {
-        return pauseRequests.get() > 0;
-    }
-
     public boolean isClosed() {
         return executor.isShutdown();
     }
@@ -131,24 +115,9 @@ public class Scheduler implements AutoCloseable {
         return executor;
     }
 
-    /**
-     * Decrements the counter of times that {@link #pause()} was called. If counter reaches zero, scheduler is resumed
-     * and all queued tasks are executed.
-     */
-    void resume() {
-        LOGGER.trace("Decrementing pause counter for {}.", this);
-        pauseRequests.updateAndGet(old -> {
-            if (old == 1) {
-                executor.resume();
-            }
-            return Math.max(0, old - 1);
-        });
-    }
-
     @Override
     public void close() {
         Scheduler.LOGGER.trace("Shutting down {}.", this);
         executor.shutdownNow();
-        Schedulers.INSTANCE.destroy(this);
     }
 }

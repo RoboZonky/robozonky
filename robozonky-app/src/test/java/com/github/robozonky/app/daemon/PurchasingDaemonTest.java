@@ -46,8 +46,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void standard() {
         final Zonky z = harmlessZonky(10_000);
         final PowerTenant a = mockTenant(z);
-        final PurchasingDaemon d = new PurchasingDaemon(t -> {
-        }, a, Duration.ZERO);
+        final PurchasingDaemon d = new PurchasingDaemon(a, Duration.ZERO);
         d.run();
         verify(z, times(1)).getAvailableParticipations(any());
     }
@@ -72,8 +71,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
                 .map(ParticipationDescriptor::recommend)
                 .flatMap(s -> s.map(Stream::of).orElse(Stream.empty())))); // recommend all participations
         SoldParticipationCache.forTenant(a).markAsSold(loanId);
-        final PurchasingDaemon d = new PurchasingDaemon(t -> {
-        }, a, Duration.ZERO);
+        final PurchasingDaemon d = new PurchasingDaemon(a, Duration.ZERO);
         d.run();
         verify(z, never()).purchase(eq(p));
         verify(z).purchase(eq(p2));
@@ -83,8 +81,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void noBalance() {
         final Zonky z = harmlessZonky(0);
         final PowerTenant a = mockTenant(z);
-        final PurchasingDaemon d = new PurchasingDaemon(t -> {
-        }, a, Duration.ZERO);
+        final PurchasingDaemon d = new PurchasingDaemon(a, Duration.ZERO);
         d.run();
         verify(z, never()).getAvailableParticipations(any());
     }

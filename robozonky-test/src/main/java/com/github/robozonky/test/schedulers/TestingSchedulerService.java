@@ -16,20 +16,19 @@
 
 package com.github.robozonky.test.schedulers;
 
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-import com.github.robozonky.common.async.PausableScheduledExecutorService;
 import com.github.robozonky.common.async.SchedulerService;
 import org.mockito.Mockito;
 
 public class TestingSchedulerService implements SchedulerService {
 
-    public static final PausableScheduledExecutorService MOCK_SERVICE =
-            Mockito.spy(new TestingScheduledExecutorService());
+    public static final ScheduledExecutorService MOCK_SERVICE = Mockito.spy(new TestingScheduledExecutorService());
 
     @Override
-    public PausableScheduledExecutorService newScheduledExecutorService(final int parallelism,
-                                                                        final ThreadFactory threadFactory) {
+    public ScheduledExecutorService newScheduledExecutorService(final int parallelism,
+                                                                final ThreadFactory threadFactory) {
         return MOCK_SERVICE;
     }
 }

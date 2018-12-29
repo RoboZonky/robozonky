@@ -57,8 +57,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         final PowerTenant a = mockTenant(z);
         final InvestmentStrategy is = mock(InvestmentStrategy.class);
         when(a.getInvestmentStrategy()).thenReturn(Optional.of(is));
-        final InvestingDaemon d = new InvestingDaemon(t -> {
-        }, a, Investor.build(a), Duration.ofSeconds(1));
+        final InvestingDaemon d = new InvestingDaemon(a, Investor.build(a), Duration.ofSeconds(1));
         d.run();
         verify(z).getAvailableLoans(notNull());
         verify(is).recommend(any(), any(), any());
@@ -69,8 +68,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
     void underBalance() {
         final Zonky z = harmlessZonky(199);
         final PowerTenant a = mockTenant(z);
-        final InvestingDaemon d = new InvestingDaemon(t -> {
-        }, a, Investor.build(a), Duration.ofSeconds(1));
+        final InvestingDaemon d = new InvestingDaemon(a, Investor.build(a), Duration.ofSeconds(1));
         d.run();
         verify(z, never()).getAvailableLoans(notNull());
     }

@@ -21,6 +21,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -49,16 +50,19 @@ class PowerTenantImpl implements PowerTenant {
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
     private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
+    private final BooleanSupplier availability;
     private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
 
-    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
+    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
+                    final StrategyProvider strategyProvider,
                     final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.sessionInfo = sessionInfo;
+        this.availability = zonkyAvailability;
         this.supplier = tokenSupplier;
         this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
@@ -85,7 +89,7 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
-        return getTokenSupplier(scope).isAvailable();
+        return availability.getAsBoolean() && getTokenSupplier(scope).isAvailable();
     }
 
     @Override

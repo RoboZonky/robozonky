@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.github.robozonky.common.async.PausableScheduledExecutorService;
 import com.github.robozonky.common.async.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * The goal of this class is to bring background tasks from {@link Scheduler} to the foreground. This will help will
  * test stability and will allow to write assertions against operations performed with the scheduler.
  */
-class TestingScheduledExecutorService implements PausableScheduledExecutorService {
+class TestingScheduledExecutorService implements ScheduledExecutorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestingScheduledExecutorService.class);
 
@@ -182,15 +182,5 @@ class TestingScheduledExecutorService implements PausableScheduledExecutorServic
         } finally {
             LOGGER.debug("Finished executing task.");
         }
-    }
-
-    @Override
-    public void pause() {
-        // FIXME implement
-    }
-
-    @Override
-    public void resume() {
-        // FIXME implement
     }
 }

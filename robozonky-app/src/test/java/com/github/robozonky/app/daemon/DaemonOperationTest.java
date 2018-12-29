@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.Tenant;
@@ -31,8 +30,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doThrow;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 
@@ -42,16 +40,12 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Mock
     private Consumer<Tenant> operation;
-    @Mock
-    private Consumer<Throwable> shutdown;
 
     @Test
     void exceptional() {
         final PowerTenant a = mockTenant();
-        doThrow(IllegalStateException.class).when(a).run(any());
         final DaemonOperation d = new CustomOperation(a, null);
-        d.run();
-        assertThat(getEventsRequested()).first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+        assertThatThrownBy(d::run).isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -63,29 +57,12 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 
-    @Test
-    void error() {
-        final PowerTenant a = mockTenant();
-        final Consumer<Tenant> operation = api -> {
-            throw new Error();
-        };
-        final DaemonOperation d = new CustomOperation(a, operation, shutdown);
-        d.run();
-        verify(shutdown).accept(any());
-    }
-
     private static final class CustomOperation extends DaemonOperation {
 
         private final Consumer<Tenant> operation;
 
         CustomOperation(final PowerTenant auth, final Consumer<Tenant> operation) {
-            this(auth, operation, t -> {
-            });
-        }
-
-        CustomOperation(final PowerTenant auth, final Consumer<Tenant> operation,
-                        final Consumer<Throwable> shutdownHook) {
-            super(shutdownHook, auth, Duration.ofSeconds(1));
+            super(auth, Duration.ofSeconds(1));
             this.operation = operation;
         }
 

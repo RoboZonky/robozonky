@@ -88,23 +88,23 @@ public class App implements Runnable {
     }
 
     private ReturnCode executeSafe(final InvestmentMode m) {
+        Events.global().fire(EventFactory.roboZonkyStarting());
+        ensureLiveness();
+        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         shutdownHooks.register(() -> {
             final Scheduler s = Scheduler.inBackground(); // get it at the start, so we close the right thing at the end
             return Optional.of(r -> s.close());
         });
-        Events.global().fire(EventFactory.roboZonkyStarting());
-        ensureLiveness();
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
-        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
-        return m.apply(lifecycle.get());
+        return m.apply(getLifecycle());
     }
 
-    public void resumeToFail(final Throwable throwable) {
-        lifecycle.get().resumeToFail(throwable);
+    public Lifecycle getLifecycle() {
+        return lifecycle.get();
     }
 
     void ensureLiveness() {
-        if (!lifecycle.get().waitUntilOnline()) {
+        if (!getLifecycle().waitUntilOnline()) {
             exit(ReturnCode.ERROR_DOWN);
         }
     }

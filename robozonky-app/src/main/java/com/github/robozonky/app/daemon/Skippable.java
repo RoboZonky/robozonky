@@ -16,32 +16,45 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
+import com.github.robozonky.app.tenant.PowerTenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 
 final class Skippable implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Skippable.class);
 
-    private final Supplier<Boolean> shouldBeSkipped;
+    private final PowerTenant tenant;
+    private final Consumer<Throwable> shutdownCall;
     private final Runnable toRun;
 
-    public Skippable(final Runnable toRun, final Supplier<Boolean> shouldBeSkipped) {
-        this.shouldBeSkipped = shouldBeSkipped;
+    public Skippable(final Runnable toRun, final PowerTenant tenant, final Consumer<Throwable> shutdownCall) {
         this.toRun = toRun;
+        this.tenant = tenant;
+        this.shutdownCall = shutdownCall;
     }
 
     @Override
     public void run() {
-        if (shouldBeSkipped.get()) {
-            LOGGER.trace("Not running {}.", toRun);
+        if (!tenant.isAvailable()) {
+            LOGGER.debug("Not running {} on account of Zonky not being available.", toRun);
             return;
         }
         LOGGER.trace("Running {}.", toRun);
-        toRun.run();
-        LOGGER.trace("Update finished.");
+        try {
+            toRun.run();
+            LOGGER.trace("Finished {}.", toRun);
+        } catch (final Exception ex) {
+            LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
+            tenant.fire(roboZonkyDaemonFailed(ex));
+        } catch (final Error t) {
+            LOGGER.error("Caught unexpected error, terminating.", t);
+            shutdownCall.accept(t);
+        }        LOGGER.trace("Update finished.");
     }
 
     @Override

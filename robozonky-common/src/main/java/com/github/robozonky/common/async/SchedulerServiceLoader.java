@@ -18,6 +18,7 @@ package com.github.robozonky.common.async;
 
 import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
 import com.github.robozonky.util.StreamUtil;
@@ -32,7 +33,7 @@ import com.github.robozonky.util.StreamUtil;
 final class SchedulerServiceLoader {
 
     private static final ServiceLoader<SchedulerService> LOADER = ServiceLoader.load(SchedulerService.class);
-    private static final SchedulerService REAL_SCHEDULER = PausableScheduledThreadPoolExecutor::new;
+    private static final SchedulerService REAL_SCHEDULER = ScheduledThreadPoolExecutor::new;
 
     private SchedulerServiceLoader() {
         // no instances

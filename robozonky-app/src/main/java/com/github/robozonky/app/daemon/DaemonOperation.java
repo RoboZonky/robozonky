@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.function.Consumer;
 
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.Tenant;
@@ -30,11 +29,8 @@ abstract class DaemonOperation implements Runnable {
 
     private final Duration refreshInterval;
     private final PowerTenant tenant;
-    private final Consumer<Throwable> shutdownCall;
 
-    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final PowerTenant auth,
-                              final Duration refreshInterval) {
-        this.shutdownCall = shutdownCall;
+    protected DaemonOperation(final PowerTenant auth, final Duration refreshInterval) {
         this.tenant = auth;
         this.refreshInterval = refreshInterval;
     }
@@ -49,14 +45,12 @@ abstract class DaemonOperation implements Runnable {
 
     @Override
     public void run() {
-        DaemonInvestmentMode.runSafe(tenant, () -> {
-            LOGGER.trace("Starting.");
-            if (isEnabled(tenant)) {
-                execute(tenant);
-            } else {
-                LOGGER.info("Access to marketplace disabled by Zonky.");
-            }
-            LOGGER.trace("Finished.");
-        }, shutdownCall);
+        LOGGER.trace("Starting.");
+        if (isEnabled(tenant)) {
+            execute(tenant);
+        } else {
+            LOGGER.info("Access to marketplace disabled by Zonky.");
+        }
+        LOGGER.trace("Finished.");
     }
 }
