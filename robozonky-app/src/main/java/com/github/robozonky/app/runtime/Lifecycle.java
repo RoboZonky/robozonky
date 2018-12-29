@@ -24,7 +24,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.common.async.Schedulers;
 import com.github.robozonky.common.management.Management;
 import com.github.robozonky.common.management.ManagementBean;
 import io.vavr.Lazy;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
- * network is available and Zonky is up. It will automatically {@link Schedulers#pause()} if it detects it is offline.
+ * network is available and Zonky is up.
  */
 public class Lifecycle {
 

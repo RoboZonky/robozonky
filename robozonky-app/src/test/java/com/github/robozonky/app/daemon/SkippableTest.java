@@ -16,28 +16,75 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.function.Consumer;
+
+import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.tenant.PowerTenant;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class SkippableTest {
+class SkippableTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void skips() {
         final Runnable r = mock(Runnable.class);
-        final Skippable s = new Skippable(r, () -> true);
+        final PowerTenant t = mockTenant();
+        when(t.isAvailable(any())).thenReturn(false);
+        final Consumer<Throwable> c = mock(Consumer.class);
+        final Skippable s = new Skippable(r, t, c);
         s.run();
         verify(r, never()).run();
+        verify(c, never()).accept(any());
+        assertThat(this.getEventsRequested()).isEmpty();
     }
 
     @Test
     void doesNotSkip() {
         final Runnable r = mock(Runnable.class);
-        final Skippable s = new Skippable(r, () -> false);
+        final PowerTenant t = mockTenant();
+        final Consumer<Throwable> c = mock(Consumer.class);
+        final Skippable s = new Skippable(r, t, c);
         s.run();
-        verify(r, times(1)).run();
+        verify(r).run();
+        verify(c, never()).accept(any());
+        assertThat(this.getEventsRequested()).isEmpty();
     }
+
+    @Test
+    void fails() {
+        final Runnable r = mock(Runnable.class);
+        doThrow(IllegalStateException.class).when(r).run();
+        final PowerTenant t = mockTenant();
+        final Consumer<Throwable> c = mock(Consumer.class);
+        final Skippable s = new Skippable(r, t, c);
+        s.run();
+        verify(c, never()).accept(any());
+        assertThat(this.getEventsRequested()).hasSize(1)
+                .first()
+                .isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+    }
+
+    @Test
+    void shutsDown() {
+        final Runnable r = mock(Runnable.class);
+        final Error e = mock(Error.class);
+        doThrow(e).when(r).run();
+        final PowerTenant t = mockTenant();
+        final Consumer<Throwable> c = mock(Consumer.class);
+        final Skippable s = new Skippable(r, t, c);
+        s.run();
+        verify(c).accept(eq(e));
+        assertThat(this.getEventsRequested()).isEmpty();
+    }
+
 }
+

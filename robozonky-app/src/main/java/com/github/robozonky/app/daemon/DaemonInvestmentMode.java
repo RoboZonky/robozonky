@@ -34,8 +34,6 @@ import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
-
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
@@ -61,36 +59,14 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     /**
-     * Make sure that the {@link Runnable} provided may never throw.
-     * @param runnable The {@link Runnable} to be made safe.
-     * @param tenant To fire failure events in case of a recoverable failure.
-     * @param shutdownCall The code to call to tell the daemon that an unrecoverable {@link Error} was encoutered.
-     */
-    private static void runSafe(final Runnable runnable, final PowerTenant tenant,
-                                final Consumer<Throwable> shutdownCall) {
-        try {
-            LOGGER.trace("Running {}.", runnable);
-            runnable.run();
-            LOGGER.trace("Finished {}.", runnable);
-        } catch (final Exception ex) {
-            LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            tenant.fire(roboZonkyDaemonFailed(ex));
-        } catch (final Error t) {
-            LOGGER.error("Caught unexpected error, terminating.", t);
-            shutdownCall.accept(t);
-        }
-    }
-
-    /**
-     * Converts a {@link Runnable} into one that will never throw, since that would cause it to stop repeating
+     * Converts a {@link Runnable} into one that will never throw, since that would cause it to stop repeating,
      * effectively stopping the daemon. The operation will instead just terminate, possibly halting the daemon on an
      * unrecoverable failure.
      * @param operation Operation to be made safe.
      * @return Safe version of the operation.
      */
     private Runnable toSkippable(final Runnable operation) {
-        final Runnable r = () -> runSafe(operation, tenant, shutdownCall);
-        return new Skippable(r, () -> !tenant.isAvailable());
+        return new Skippable(operation, tenant, shutdownCall);
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
@@ -104,6 +80,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter, final Duration initialDelay) {
+        LOGGER.debug("Submitting {} to {}, repeating after {} and starting in {}.", r, executor, repeatAfter,
+                     initialDelay);
         executor.submit(toSkippable(r), repeatAfter, initialDelay);
     }
 
