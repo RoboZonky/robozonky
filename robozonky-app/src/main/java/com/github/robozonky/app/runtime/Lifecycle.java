@@ -75,7 +75,7 @@ public class Lifecycle {
         this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
         this.managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
         Management.register(managementBean);
-        hooks.register(LivenessCheck.setup(livenessCheck));
+        LivenessCheck.setup(livenessCheck);
         hooks.register(shutdownEnabler);
     }
 

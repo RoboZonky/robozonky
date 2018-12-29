@@ -19,15 +19,10 @@ package com.github.robozonky.app.runtime;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.common.async.RoboZonkyThreadFactory;
+import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
 import io.vavr.control.Try;
@@ -42,29 +37,27 @@ class LivenessCheck extends Refreshable<String> {
 
     private final String url;
 
-    private LivenessCheck() {
-        this(ZONKY_VERSION_URL);
+    private LivenessCheck(final RefreshListener<String> listener) {
+        this(ZONKY_VERSION_URL, listener);
+    }
+
+    LivenessCheck(final String url, final RefreshListener<String> listener) {
+        super(listener);
+        this.url = url;
     }
 
     LivenessCheck(final String url) {
         this.url = url;
     }
 
-    private static ThreadFactory getThreadFactory() {
-        return new RoboZonkyThreadFactory(new ThreadGroup("rzLiveness"));
-    }
-
-    public static ShutdownHook.Handler setup(final MainControl mainThreadControl) {
-        final Refreshable<String> liveness = new LivenessCheck();
-        liveness.registerListener(mainThreadControl);
-        // independent of the other schedulers; it controls whether or not the others are even allowed to run
-        final ScheduledExecutorService e = Executors.newScheduledThreadPool(1, getThreadFactory());
-        e.scheduleWithFixedDelay(liveness, 0, Duration.ofSeconds(5).toMillis(), TimeUnit.MILLISECONDS);
-        return () -> Optional.of(returnCode -> e.shutdownNow());
+    public static void setup(final MainControl mainThreadControl) {
+        final Refreshable<String> liveness = new LivenessCheck(mainThreadControl);
+        Scheduler.inBackground().submit(liveness, Duration.ofSeconds(5));
     }
 
     @Override
     protected String getLatestSource() {
+        LOGGER.trace("Running.");
         // need to send parsed version, since the object itself changes every time due to currentApiTime field
         return Try.withResources(() -> new URL(url).openStream())
                 .of(s -> {
