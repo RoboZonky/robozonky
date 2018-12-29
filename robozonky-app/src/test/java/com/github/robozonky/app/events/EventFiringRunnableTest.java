@@ -16,28 +16,43 @@
 
 package com.github.robozonky.app.events;
 
+import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 class EventFiringRunnableTest {
 
     @Test
     void endsLoop() throws InterruptedException {
-        final Runnable r = mock(Runnable.class);
+        final Runnable first = mock(Runnable.class);
+        final Runnable failing = mock(Runnable.class);
         doAnswer(i -> {
             throw new InterruptedException();
-        }).when(r).run();
+        }).when(failing).run();
         final BlockingQueue<Runnable> q = new LinkedBlockingDeque<>();
-        q.put(r);
-        final EventFiringRunnable e = new EventFiringRunnable(q);
-        e.run();
-        verify(r).run();
+        q.put(first);
+        q.put(failing);
+        final Runnable last = mock(Runnable.class);
+        q.put(last);
+        // will interrupt current thread, therefore run in on a different thread than this
+        final CompletableFuture<Void> task = CompletableFuture.runAsync(() -> {
+            final EventFiringRunnable e = new EventFiringRunnable(q);
+            e.run();
+        });
+        assertTimeout(Duration.ofSeconds(5), task::join); // make sure it's finished
+        assertThat(task).isCompleted();
+        verify(first).run();
+        verify(failing).run();
+        verify(last, never()).run();
     }
-
 }
