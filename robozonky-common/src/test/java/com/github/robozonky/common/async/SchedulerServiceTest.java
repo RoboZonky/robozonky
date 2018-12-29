@@ -27,7 +27,7 @@ class SchedulerServiceTest {
 
     @Test
     void defaults() {
-        final PausableScheduledExecutorService expected = mock(PausableScheduledExecutorService.class);
+        final ScheduledExecutorService expected = mock(ScheduledExecutorService.class);
         final SchedulerService s = (parallelism, threadFactory) -> expected;
         final ScheduledExecutorService ses = s.newScheduledExecutorService(1);
         assertThat(ses).isSameAs(expected);

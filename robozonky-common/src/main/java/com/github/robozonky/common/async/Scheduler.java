@@ -42,12 +42,11 @@ public class Scheduler implements AutoCloseable {
          * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
          */
         return Schedulers.INSTANCE.create(2, THREAD_FACTORY);
-    })
-            .build();
+    }).build();
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Collection<Runnable> submitted = new CopyOnWriteArraySet<>();
     private final AtomicInteger pauseRequests = new AtomicInteger(0);
-    private final PausableScheduledExecutorService executor;
+    private final ScheduledExecutorService executor;
 
     Scheduler(final int poolSize, final ThreadFactory threadFactory) {
         this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
@@ -105,44 +104,12 @@ public class Scheduler implements AutoCloseable {
         return submitted.contains(refreshable);
     }
 
-    /**
-     * Pause the scheduler, queuing all scheduled executions until {@link #resume()} is called. Calling this method
-     * several times in a row will require equal amount of calls to {@link #resume()} to resume the scheduler later.
-     */
-    void pause() {
-        pauseRequests.updateAndGet(old -> {
-            if (old == 0) {
-                executor.pause();
-            }
-            return old + 1;
-        });
-        LOGGER.trace("Incrementing pause counter for {}.", this);
-    }
-
-    public boolean isPaused() {
-        return pauseRequests.get() > 0;
-    }
-
     public boolean isClosed() {
         return executor.isShutdown();
     }
 
     public ScheduledExecutorService getExecutor() {
         return executor;
-    }
-
-    /**
-     * Decrements the counter of times that {@link #pause()} was called. If counter reaches zero, scheduler is resumed
-     * and all queued tasks are executed.
-     */
-    void resume() {
-        LOGGER.trace("Decrementing pause counter for {}.", this);
-        pauseRequests.updateAndGet(old -> {
-            if (old == 1) {
-                executor.resume();
-            }
-            return Math.max(0, old - 1);
-        });
     }
 
     @Override

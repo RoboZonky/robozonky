@@ -48,12 +48,4 @@ public enum Schedulers {
         return items.remove(scheduler);
     }
 
-    public void pause() {
-        items.forEach(Scheduler::pause);
-    }
-
-    public void resume() {
-        items.forEach(Scheduler::resume);
-    }
-
 }

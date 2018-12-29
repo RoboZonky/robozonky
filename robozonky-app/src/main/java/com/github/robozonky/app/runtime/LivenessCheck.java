@@ -28,16 +28,13 @@ import java.util.stream.Collectors;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.common.async.RoboZonkyThreadFactory;
-import com.github.robozonky.common.async.Schedulers;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 
 /**
- * Periodically queries remote Zonky API, checking whether it's accessible. Based on that, it will trigger
- * {@link SchedulerControl} to call either {@link Schedulers#pause()} or {@link Schedulers#resume()}, therefore
- * controlling the entire daemon runtime.
+ * Periodically queries remote Zonky API, checking whether it's accessible.
  */
 class LivenessCheck extends Refreshable<String> {
 
@@ -59,8 +56,6 @@ class LivenessCheck extends Refreshable<String> {
 
     public static ShutdownHook.Handler setup(final MainControl mainThreadControl) {
         final Refreshable<String> liveness = new LivenessCheck();
-        final Refreshable.RefreshListener<String> schedulerControl = new SchedulerControl();
-        liveness.registerListener(schedulerControl);
         liveness.registerListener(mainThreadControl);
         // independent of the other schedulers; it controls whether or not the others are even allowed to run
         final ScheduledExecutorService e = Executors.newScheduledThreadPool(1, getThreadFactory());
