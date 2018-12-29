@@ -28,7 +28,6 @@ import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.async.RoboZonkyThreadFactory;
 import com.github.robozonky.common.async.Scheduler;
-import com.github.robozonky.common.async.Schedulers;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
@@ -104,7 +103,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     @Override
     public ReturnCode apply(final Lifecycle lifecycle) {
         scheduleJobs(Scheduler.inBackground());
-        return Try.withResources(() -> Schedulers.INSTANCE.create(1, THREAD_FACTORY))
+        return Try.withResources(() -> new Scheduler(1, THREAD_FACTORY))
                 .of(executor -> {
                     // schedule the tasks
                     scheduleDaemons(executor);

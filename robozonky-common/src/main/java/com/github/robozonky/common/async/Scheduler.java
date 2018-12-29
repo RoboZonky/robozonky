@@ -19,12 +19,12 @@ package com.github.robozonky.common.async;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
@@ -41,15 +41,18 @@ public class Scheduler implements AutoCloseable {
          * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
          * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
          */
-        return Schedulers.INSTANCE.create(2, THREAD_FACTORY);
+        return new Scheduler(2, THREAD_FACTORY);
     }).build();
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Collection<Runnable> submitted = new CopyOnWriteArraySet<>();
-    private final AtomicInteger pauseRequests = new AtomicInteger(0);
     private final ScheduledExecutorService executor;
 
-    Scheduler(final int poolSize, final ThreadFactory threadFactory) {
+    public Scheduler(final int poolSize, final ThreadFactory threadFactory) {
         this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
+    }
+
+    Scheduler() {
+        this(1, Executors.defaultThreadFactory());
     }
 
     private static Scheduler actuallyGetBackgroundScheduler() {
@@ -116,6 +119,5 @@ public class Scheduler implements AutoCloseable {
     public void close() {
         Scheduler.LOGGER.trace("Shutting down {}.", this);
         executor.shutdownNow();
-        Schedulers.INSTANCE.destroy(this);
     }
 }
