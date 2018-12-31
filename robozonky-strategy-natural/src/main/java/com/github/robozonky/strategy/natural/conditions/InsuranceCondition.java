@@ -22,7 +22,11 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public class InsuranceCondition extends MarketplaceFilterConditionImpl {
 
-    public static final MarketplaceFilterCondition ACTIVE = new InsuranceCondition(), INACTIVE = ACTIVE.invert();
+    public static final MarketplaceFilterCondition ACTIVE = new InsuranceCondition(), INACTIVE = ACTIVE.negate();
+
+    private InsuranceCondition() {
+        // no external instances
+    }
 
     @Override
     public Optional<String> getDescription() {

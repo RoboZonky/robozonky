@@ -44,5 +44,12 @@ public interface MarketplaceFilterCondition extends Predicate<Wrapper<?>> {
 
     boolean test(final Wrapper<?> item);
 
-    MarketplaceFilterCondition invert();
+    @Override
+    default MarketplaceFilterCondition negate() {
+        if (this instanceof NegatingCondition) {
+            return ((NegatingCondition) this).getToNegate();
+        } else {
+            return new NegatingCondition(this);
+        }
+    }
 }

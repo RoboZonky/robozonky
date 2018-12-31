@@ -27,9 +27,9 @@ class MarketplaceFilterConditionImplTest {
 
     @Test
     void doubleNegation() {
-        final MarketplaceFilterCondition negated = AlwaysAcceptingCondition.INSTANCE.invert();
+        final MarketplaceFilterCondition negated = AlwaysAcceptingCondition.INSTANCE.negate();
         assertThat(negated.test(Wrapper.wrap(new LoanDescriptor(Loan.custom().build())))).isFalse();
-        final MarketplaceFilterCondition doubleNegated = negated.invert();
+        final MarketplaceFilterCondition doubleNegated = negated.negate();
         assertThat(doubleNegated).isSameAs(AlwaysAcceptingCondition.INSTANCE);
     }
 }

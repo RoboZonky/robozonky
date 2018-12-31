@@ -16,11 +16,14 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.util.Optional;
+
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class InsuranceConditionTest {
@@ -36,5 +39,12 @@ class InsuranceConditionTest {
             softly.assertThat(InsuranceCondition.ACTIVE.getDescription()).contains("With insurance.");
             softly.assertThat(InsuranceCondition.INACTIVE).rejects(wrap);
         });
+    }
+
+    @Test
+    void negation() {
+        final Optional<String> activeDescription = InsuranceCondition.ACTIVE.getDescription();
+        final Optional<String> inactiveDescription = InsuranceCondition.INACTIVE.getDescription();
+        assertThat(inactiveDescription).contains("NOT " + activeDescription.get());
     }
 }

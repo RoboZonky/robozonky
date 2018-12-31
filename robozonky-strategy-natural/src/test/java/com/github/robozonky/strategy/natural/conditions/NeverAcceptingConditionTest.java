@@ -24,7 +24,7 @@ class NeverAcceptingConditionTest {
 
     @Test
     void negate() {
-        final MarketplaceFilterCondition negated = NeverAceptingCondition.INSTANCE.invert();
+        final MarketplaceFilterCondition negated = NeverAceptingCondition.INSTANCE.negate();
         assertThat(negated).isEqualTo(AlwaysAcceptingCondition.INSTANCE);
     }
 

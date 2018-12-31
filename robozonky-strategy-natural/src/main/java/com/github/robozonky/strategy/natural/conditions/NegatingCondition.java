@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-class NegatingCondition extends MarketplaceFilterConditionImpl {
+final class NegatingCondition extends MarketplaceFilterConditionImpl {
 
     private final MarketplaceFilterCondition toNegate;
 
@@ -34,7 +34,8 @@ class NegatingCondition extends MarketplaceFilterConditionImpl {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("NOT " + toNegate);
+        final String s = toNegate.getDescription().orElse("Unknown.");
+        return Optional.of("NOT " + s);
     }
 
     @Override

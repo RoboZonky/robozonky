@@ -22,7 +22,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 enum AlwaysAcceptingCondition implements MarketplaceFilterCondition {
 
-    // cheap thread-safe sigleton
+    // cheap thread-safe singleton
     INSTANCE;
 
     @Override
@@ -36,7 +36,7 @@ enum AlwaysAcceptingCondition implements MarketplaceFilterCondition {
     }
 
     @Override
-    public MarketplaceFilterCondition invert() {
+    public MarketplaceFilterCondition negate() {
         return NeverAceptingCondition.INSTANCE;
     }
 }
