@@ -18,6 +18,6 @@ package com.github.robozonky.notifications.templates.html;
 
 public enum HtmlTemplate {
 
-    INSTANCE;
+    INSTANCE
 
 }

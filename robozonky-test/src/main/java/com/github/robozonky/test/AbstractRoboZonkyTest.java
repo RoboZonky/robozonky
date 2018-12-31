@@ -89,7 +89,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         return mockTenant(zonky, true);
     }
 
-    @SuppressWarnings("unchecked")
     protected static Tenant mockTenant(final Zonky zonky, final boolean isDryRun) {
         final Tenant auth = new TestingTenant(isDryRun ? SESSION_DRY : SESSION, zonky);
         return spy(auth);
@@ -99,7 +98,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         return mockTenant(harmlessZonky(10_000));
     }
 
-    @SuppressWarnings("unchecked")
     protected static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
         final ApiProvider api = mock(ApiProvider.class);
         when(api.oauth(any())).then(i -> {

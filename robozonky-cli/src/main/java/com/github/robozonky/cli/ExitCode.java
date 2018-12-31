@@ -27,6 +27,6 @@ enum ExitCode {
      */
     NO_OPERATION,
     SETUP_FAIL,
-    TEST_FAIL;
+    TEST_FAIL
 
 }

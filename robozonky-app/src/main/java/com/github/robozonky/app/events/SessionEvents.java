@@ -146,7 +146,6 @@ public final class SessionEvents {
         this.injectedDebugListener = listener;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
         return fireAny(event);
     }

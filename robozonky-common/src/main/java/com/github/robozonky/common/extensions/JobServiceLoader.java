@@ -39,7 +39,7 @@ public final class JobServiceLoader {
         // no instances
     }
 
-    static <T> Stream<T> load(final Iterable<JobService> loader, Function<JobService, Collection<T>> jobProvider) {
+    static <T> Stream<T> load(final Iterable<JobService> loader, final Function<JobService, Collection<T>> jobProvider) {
         JobServiceLoader.LOGGER.debug("Looking up batch jobs.");
         return StreamUtil.toStream(loader)
                 .peek(cp -> JobServiceLoader.LOGGER.trace("Evaluating job service '{}'.", cp.getClass()))

@@ -18,6 +18,6 @@ package com.github.robozonky.notifications.templates.plaintext;
 
 public enum PlainTextTemplate {
 
-    INSTANCE;
+    INSTANCE
 
 }

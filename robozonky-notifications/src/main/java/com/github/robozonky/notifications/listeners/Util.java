@@ -98,7 +98,7 @@ final class Util {
     }
 
     private static Map<String, Object> perRating(final Function<Rating, Number> provider) {
-        return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, provider::apply));
+        return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, provider));
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
