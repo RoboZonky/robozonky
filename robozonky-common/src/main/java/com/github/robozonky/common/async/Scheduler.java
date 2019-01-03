@@ -17,8 +17,6 @@
 package com.github.robozonky.common.async;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,36 +39,42 @@ public class Scheduler implements AutoCloseable {
          * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
          * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
          */
-        return new Scheduler(2, THREAD_FACTORY);
+        return new Scheduler(2, THREAD_FACTORY, Scheduler::cleanBackgroundScheduler);
     }).build();
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
-    private final Collection<Runnable> submitted = new CopyOnWriteArraySet<>();
     private final ScheduledExecutorService executor;
+    private final Runnable onClose;
+
+    /**
+     * @param poolSize
+     * @param threadFactory
+     * @param onClose This exists mostly so that the background scheduler can reload itself after its {@link #close()}
+     * method had been called.
+     */
+    private Scheduler(final int poolSize, final ThreadFactory threadFactory, final Runnable onClose) {
+        this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
+        this.onClose = onClose;
+    }
 
     public Scheduler(final int poolSize, final ThreadFactory threadFactory) {
-        this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
+        this(poolSize, threadFactory, null);
     }
 
     Scheduler() {
         this(1, Executors.defaultThreadFactory());
     }
 
-    private static Scheduler actuallyGetBackgroundScheduler() {
-        return BACKGROUND_SCHEDULER.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
+    private static void cleanBackgroundScheduler() {
+        BACKGROUND_SCHEDULER.clear();
+        LOGGER.trace("Cleared background scheduler.");
     }
 
     public static Scheduler inBackground() {
-        final Scheduler s = actuallyGetBackgroundScheduler();
-        if (s.isClosed()) {
-            BACKGROUND_SCHEDULER.clear();
-            return actuallyGetBackgroundScheduler();
-        } else {
-            return s;
-        }
+        return BACKGROUND_SCHEDULER.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
     }
 
     public ScheduledFuture submit(final Runnable toSchedule) {
-        return this.submit(toSchedule, Scheduler.REFRESH);
+        return this.submit(toSchedule, REFRESH);
     }
 
     public ScheduledFuture submit(final Runnable toSchedule, final Duration delayInBetween) {
@@ -79,32 +83,26 @@ public class Scheduler implements AutoCloseable {
 
     public ScheduledFuture submit(final Runnable toSchedule, final Duration delayInBetween,
                                   final Duration firstDelay) {
-        Scheduler.LOGGER.debug("Scheduling {} every {} ms, starting in {} ms.", toSchedule, delayInBetween.toMillis(),
+        LOGGER.debug("Scheduling {} every {} ms, starting in {} ms.", toSchedule, delayInBetween.toMillis(),
                                firstDelay.toMillis());
         /*
          * it is imperative that tasks be scheduled with fixed delay. if scheduled at fixed rate instead, pausing the
          * executor would result in tasks queuing up. and since we use this class to schedule tasks as frequently as
          * every second, such behavior is not acceptable.
          */
-        final ScheduledFuture f = executor.scheduleWithFixedDelay(toSchedule, firstDelay.toNanos(),
-                                                                  delayInBetween.toNanos(), TimeUnit.NANOSECONDS);
-        this.submitted.add(toSchedule);
-        return f;
+        return executor.scheduleWithFixedDelay(toSchedule, firstDelay.toNanos(), delayInBetween.toNanos(),
+                                               TimeUnit.NANOSECONDS);
     }
 
     public Future run(final Runnable toRun) {
-        Scheduler.LOGGER.debug("Submitting {} immediately.", toRun);
+        LOGGER.debug("Submitting {} immediately.", toRun);
         return executor.submit(toRun);
     }
 
     public Future run(final Runnable toRun, final Duration delay) {
         final long millis = delay.toMillis();
-        Scheduler.LOGGER.debug("Submitting {} to run in {} ms.", toRun, millis);
+        LOGGER.debug("Submitting {} to run in {} ms.", toRun, millis);
         return executor.schedule(toRun, millis, TimeUnit.MILLISECONDS);
-    }
-
-    public boolean isSubmitted(final Runnable refreshable) {
-        return submitted.contains(refreshable);
     }
 
     public boolean isClosed() {
@@ -117,7 +115,10 @@ public class Scheduler implements AutoCloseable {
 
     @Override
     public void close() {
-        Scheduler.LOGGER.trace("Shutting down {}.", this);
+        LOGGER.trace("Shutting down {}.", this);
         executor.shutdownNow();
+        if (onClose != null) {
+            onClose.run();
+        }
     }
 }

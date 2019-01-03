@@ -26,8 +26,8 @@ import java.util.concurrent.TimeoutException;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class SchedulerTest {
 
@@ -47,12 +47,10 @@ class SchedulerTest {
     @Test
     void submit() {
         try (final Scheduler s = new Scheduler()) {
-            assertThat(s.isSubmitted(RUNNABLE)).isFalse();
             final ScheduledFuture<?> f = s.submit(RUNNABLE);
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(Scheduler.inBackground()).isNotNull();
                 softly.assertThat((Future<?>) f).isNotNull();
-                softly.assertThat(s.isSubmitted(RUNNABLE)).isTrue();
             });
         }
     }
@@ -63,7 +61,6 @@ class SchedulerTest {
             final Future<?> f = s.run(RUNNABLE);
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat((Future<?>) f).isNotNull();
-                softly.assertThat(s.isSubmitted(RUNNABLE)).isFalse();
             });
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }
@@ -75,7 +72,6 @@ class SchedulerTest {
             final Future<?> f = s.run(RUNNABLE, Duration.ofSeconds(1));
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat((Future<?>) f).isNotNull();
-                softly.assertThat(s.isSubmitted(RUNNABLE)).isFalse();
             });
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }
