@@ -48,6 +48,15 @@ public enum TemplateProcessor {
         cfg.setCustomNumberFormats(customNumberFormats);
         cfg.setClassForTemplateLoading(templateRoot, "");
         cfg.setLogTemplateExceptions(false);
+        /*
+         * This is important! We don't control installer's encoding, it will always be selected by the user running the
+         * installer. Since templates are encoded in UTF-8, and e-mails are sent in UTF-8, we must set this here so that
+         * the templates are read properly and installer e-mails are proper.
+         *
+         * This is not a problem within the daemon itself, since that will be run after the installer is run. And the
+         * installer will enforce that the correct encoding is used when the daemon is run.
+         */
+        cfg.setDefaultEncoding(Defaults.CHARSET.displayName());
         return cfg;
     }
 
