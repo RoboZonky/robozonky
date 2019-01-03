@@ -29,7 +29,6 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
@@ -98,7 +97,7 @@ final class Util {
     static Optional<Loan> getLoan(final Tenant tenant, final BlockedAmount ba, final Divisor divisor) {
         final int loanId = ba.getLoanId();
         try {
-            return Optional.of(LoanCache.get().getLoan(loanId, tenant));
+            return Optional.of(tenant.getLoan(loanId));
         } catch (final NotFoundException ex) {
             /*
              * Zonky has an intermittent caching problem and a failure here would prevent the robot from

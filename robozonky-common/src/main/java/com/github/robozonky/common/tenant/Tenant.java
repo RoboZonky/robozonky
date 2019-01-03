@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -110,6 +111,15 @@ public interface Tenant extends AutoCloseable {
     Optional<SellStrategy> getSellStrategy();
 
     Optional<PurchaseStrategy> getPurchaseStrategy();
+
+    /**
+     * Retrieve a {@link Loan} from Zonky, possibly caching it in the process. If you don't wish to cache the loan,
+     * simply use {@link #call(Function)} to get to {@link Zonky#getLoan(int)}.
+     *
+     * @param loanId
+     * @return
+     */
+    Loan getLoan(final int loanId);
 
     <T> InstanceState<T> getState(final Class<T> clz);
 }

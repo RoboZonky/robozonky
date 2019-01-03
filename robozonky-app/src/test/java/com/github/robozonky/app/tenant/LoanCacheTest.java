@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.tenant;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
@@ -30,20 +29,15 @@ import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class LoanCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void emptyGetLoan() {
-        final LoanCache c = new LoanCache();
         final int loanId = 1;
-        assertThat(c.getLoan(loanId)).isEmpty(); // nothing returned at first
         final MyInvestment mi = mock(MyInvestment.class);
         final OffsetDateTime d = OffsetDateTime.now();
         when(mi.getTimeCreated()).thenReturn(d);
@@ -53,30 +47,28 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Zonky z = harmlessZonky(10_000);
         final Tenant t = mockTenant(z);
+        final LoanCache c = new LoanCache(t);
+        assertThat(c.getLoanFromCache(loanId)).isEmpty(); // nothing returned at first
         when(z.getLoan(eq(loanId))).thenReturn(loan);
-        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // return the freshly retrieved loan
-        final Investment i = Investment.custom()
-                .setLoanId(loanId)
-                .build();
-        assertThat(c.getLoan(i, t)).isEqualTo(loan);
+        assertThat(c.getLoan(loanId)).isEqualTo(loan); // return the freshly retrieved loan
     }
 
     @Test
     void loadLoan() {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
-        final LoanCache c = new LoanCache();
         final Loan loan = Loan.custom().build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant t = mockTenant(z);
-        assertThat(c.getLoan(loanId, t)).isEqualTo(loan); // return the freshly retrieved loan
+        final LoanCache c = new LoanCache(t);
+        assertThat(c.getLoan(loanId)).isEqualTo(loan); // return the freshly retrieved loan
         verify(z).getLoan(eq(loanId));
-        assertThat(c.getLoan(loanId)).contains(loan);
+        assertThat(c.getLoanFromCache(loanId)).contains(loan);
         verify(z, times(1)).getLoan(eq(loanId));
         // and now test eviction
         setClock(Clock.fixed(instant.plus(Duration.ofHours(2)), Defaults.ZONE_ID));
-        assertThat(c.getLoan(loanId)).isEmpty();
+        assertThat(c.getLoanFromCache(loanId)).isEmpty();
     }
 }

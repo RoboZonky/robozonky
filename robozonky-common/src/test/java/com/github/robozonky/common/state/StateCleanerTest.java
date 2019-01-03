@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -32,7 +33,7 @@ import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class StateCleanerTest {
 
@@ -93,6 +94,11 @@ class StateCleanerTest {
         @Override
         public Optional<PurchaseStrategy> getPurchaseStrategy() {
             return Optional.empty();
+        }
+
+        @Override
+        public Loan getLoan(final int loanId) {
+            return call(z -> z.getLoan(loanId));
         }
 
         @Override

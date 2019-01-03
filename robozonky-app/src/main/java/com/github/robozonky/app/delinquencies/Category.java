@@ -34,7 +34,6 @@ import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.LazyEvent;
@@ -115,7 +114,7 @@ enum Category {
         final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getDaysPastDue());
         final int loanId = investment.getLoanId();
         final Collection<Development> developments = getDevelopments(tenant, loanId, since);
-        final Loan loan = LoanCache.get().getLoan(loanId, tenant);
+        final Loan loan = tenant.getLoan(loanId);
         final Supplier<SessionEvent> s = () -> getEventSupplierConstructor(threshold).apply(investment, loan, since,
                                                                                             developments);
         final LazyEvent<? extends SessionEvent> e = getLazyEventSupplier(threshold, s);

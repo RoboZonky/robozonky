@@ -47,7 +47,7 @@ final class Selling implements TenantPayload {
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 
     private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant tenant) {
-        return new InvestmentDescriptor(i, () -> LoanCache.get().getLoan(i, tenant));
+        return new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId()));
     }
 
     private static Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,

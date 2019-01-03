@@ -38,8 +38,8 @@ class PurchasingDaemon extends DaemonOperation {
         this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
     }
 
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
-        return new ParticipationDescriptor(p, () -> LoanCache.get().getLoan(p.getLoanId(), auth));
+    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant tenant) {
+        return new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId()));
     }
 
     @Override

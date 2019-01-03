@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.common.jobs.TenantPayload;
@@ -69,7 +68,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         switch (status) {
             case WRITTEN_OFF: // investment is lost for good
                 tenant.fire(loanLostLazy(() -> {
-                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), tenant);
+                    final Loan loan = tenant.getLoan(investment.getLoanId());
                     return loanLost(investment, loan);
                 }));
                 return;
@@ -79,7 +78,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                 return;
             default:
                 tenant.fire(loanNoLongerDelinquentLazy(() -> {
-                    final Loan loan = LoanCache.get().getLoan(investment.getLoanId(), tenant);
+                    final Loan loan = tenant.getLoan(investment.getLoanId());
                     return loanNoLongerDelinquent(investment, loan);
                 }));
         }

@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -81,6 +82,11 @@ public class TestingTenant implements Tenant {
     @Override
     public Optional<PurchaseStrategy> getPurchaseStrategy() {
         return Optional.empty();
+    }
+
+    @Override
+    public Loan getLoan(final int loanId) {
+        return call(z -> z.getLoan(loanId));
     }
 
     @Override

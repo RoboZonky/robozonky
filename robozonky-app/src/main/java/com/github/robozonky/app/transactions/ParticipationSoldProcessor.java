@@ -21,7 +21,6 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
-import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.SoldParticipationCache;
 
@@ -48,7 +47,7 @@ class ParticipationSoldProcessor extends TransactionProcessor {
         SoldParticipationCache.forTenant(tenant).markAsSold(loanId);
         tenant.fire(investmentSoldLazy(() -> {
             final Investment i = lookupOrFail(loanId, tenant);
-            final Loan l = LoanCache.get().getLoan(loanId, tenant);
+            final Loan l = tenant.getLoan(loanId);
             return investmentSold(i, l, tenant.getPortfolio().getOverview());
         }));
     }

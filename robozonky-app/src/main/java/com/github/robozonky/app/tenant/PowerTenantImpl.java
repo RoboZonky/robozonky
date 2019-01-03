@@ -27,6 +27,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -39,6 +40,7 @@ import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.ZonkyScope;
+import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,7 @@ class PowerTenantImpl implements PowerTenant {
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
+    private final Lazy<LoanCache> loanCache = Lazy.of(() -> new LoanCache(this));
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
                     final StrategyProvider strategyProvider,
@@ -118,13 +121,19 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
+    public Loan getLoan(final int loanId) {
+        return loanCache.get().getLoan(loanId);
+    }
+
+    @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);
     }
 
     @Override
-    public void close() { // cancel existing tokens
-        tokens.forEach((k, v) -> v.close());
+    public void close() {
+        tokens.forEach((k, v) -> v.close()); // cancel existing tokens
+        loanCache.get().close(); // clean up the cache
     }
 
     @Override
@@ -135,5 +144,12 @@ class PowerTenantImpl implements PowerTenant {
     @Override
     public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
         return Events.forSession(this).fire(event);
+    }
+
+    @Override
+    public String toString() {
+        return "PowerTenantImpl{" +
+                "sessionInfo=" + sessionInfo +
+                '}';
     }
 }

@@ -25,6 +25,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -124,6 +125,11 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
+    public Loan getLoan(final int loanId) {
+        return parent.getLoan(loanId);
+    }
+
+    @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         LOGGER.trace("Creating transactional instance state for {}.", clz);
         return new TransactionalInstanceState<>(stateUpdates, parent.getState(clz));
@@ -137,5 +143,12 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
         if (getDelayedFiring().isPending()) {
             throw new IllegalStateException("There are uncommitted events.");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionalPowerTenantImpl{" +
+                "parent=" + parent +
+                '}';
     }
 }

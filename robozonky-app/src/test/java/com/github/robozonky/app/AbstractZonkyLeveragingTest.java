@@ -24,12 +24,9 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.daemon.LoanCache;
 import com.github.robozonky.internal.api.Settings;
-import org.junit.jupiter.api.AfterEach;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
@@ -71,11 +68,6 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
             b.setRating(Rating.AAAAA);
         }
         return new LoanDescriptor(b.build());
-    }
-
-    @AfterEach
-    public void clearCache() {
-        LoanCache.get().clean();
     }
 
 }
