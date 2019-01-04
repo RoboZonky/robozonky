@@ -35,16 +35,8 @@ import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ZonkyApiTokenSupplierTest {
 
@@ -98,7 +90,6 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
-        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -113,7 +104,6 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isEqualTo(token);
-        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -131,7 +121,6 @@ class ZonkyApiTokenSupplierTest {
                 .isNotNull()
                 .isNotEqualTo(token);
         verify(oAuth).refresh(eq(token));
-        assertThat(!t.isAvailable()).isFalse();
     }
 
     @Test
@@ -148,7 +137,6 @@ class ZonkyApiTokenSupplierTest {
         assertThat(token2)
                 .isNotNull()
                 .isNotEqualTo(token);
-        assertThat(t.isAvailable()).isTrue();
     }
 
     @Test
@@ -165,7 +153,6 @@ class ZonkyApiTokenSupplierTest {
         assertThat(t.get()).isNotNull();
         verify(oAuth).refresh(any()); // refresh was called
         verify(oAuth, times(2)).login(any(), any(), any()); // password-based login was used again
-        assertThat(t.isAvailable()).isTrue();
     }
 
     @Test

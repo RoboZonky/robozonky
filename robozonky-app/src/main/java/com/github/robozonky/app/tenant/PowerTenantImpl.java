@@ -92,7 +92,7 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
-        return availability.getAsBoolean() && getTokenSupplier(scope).isAvailable();
+        return availability.getAsBoolean();
     }
 
     @Override

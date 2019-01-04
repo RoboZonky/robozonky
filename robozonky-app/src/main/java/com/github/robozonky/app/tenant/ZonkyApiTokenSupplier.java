@@ -18,7 +18,6 @@ package com.github.robozonky.app.tenant;
 
 import java.io.Closeable;
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
@@ -41,7 +40,6 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     private final ZonkyScope scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;
-    private final AtomicReference<Boolean> isUpdating = new AtomicReference<>(false);
     private final Reloadable<ZonkyApiToken> token;
 
     ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
@@ -60,11 +58,11 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     private ZonkyApiToken login() {
-        return performTokenUpdate(() -> apis.oauth(oauth -> {
+        return apis.oauth(oauth -> {
             final String username = secrets.getUsername();
             LOGGER.info("Authenticating as '{}', requesting scope '{}'.", username, scope);
             return oauth.login(scope, username, secrets.getPassword());
-        }));
+        });
     }
 
     private ZonkyApiToken refresh(final ZonkyApiToken token) {
@@ -72,33 +70,17 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         return apis.oauth(oauth -> oauth.refresh(token));
     }
 
-    private ZonkyApiToken performTokenUpdate(final Supplier<ZonkyApiToken> supplier) {
-        isUpdating.set(true);
-        try {
-            return supplier.get();
-        } finally {
-            isUpdating.set(false);
-            LOGGER.debug("Token updated.");
-        }
-    }
-
     private ZonkyApiToken refreshOrLogin(final ZonkyApiToken token) {
-        return performTokenUpdate(() -> {
-            if (token.willExpireIn(Duration.ZERO)) {
-                LOGGER.debug("Found expired token for '{}', scope '{}'.", secrets.getUsername(), scope);
-                return login();
-            }
-            try { // FIXME what if it's already expired?
-                return refresh(token);
-            } catch (final Exception ex) {
-                LOGGER.debug("Failed refreshing access token, falling back to password.", ex);
-                return login();
-            }
-        });
-    }
-
-    public boolean isAvailable() {
-        return !isUpdating.get();
+        if (token.willExpireIn(Duration.ZERO)) {
+            LOGGER.debug("Found expired token for '{}', scope '{}'.", secrets.getUsername(), scope);
+            return login();
+        }
+        try {
+            return refresh(token);
+        } catch (final Exception ex) {
+            LOGGER.debug("Failed refreshing access token, falling back to password.", ex);
+            return login();
+        }
     }
 
     @Override
