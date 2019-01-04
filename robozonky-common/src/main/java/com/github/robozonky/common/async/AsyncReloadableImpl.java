@@ -21,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import io.vavr.control.Either;
 import io.vavr.control.Try;
@@ -30,27 +31,20 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
     private final AtomicReference<T> value = new AtomicReference<>();
     private final AtomicReference<CompletableFuture<Void>> future = new AtomicReference<>();
 
-    public AsyncReloadableImpl(final Supplier<T> supplier, final Consumer<T> runWhenReloaded) {
-        super(supplier, runWhenReloaded);
-    }
-
-    public AsyncReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter,
+    public AsyncReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
                                final Consumer<T> runWhenReloaded) {
-        super(supplier, reloadAfter, runWhenReloaded);
+        super(supplier, reloader, runWhenReloaded);
     }
 
-    public AsyncReloadableImpl(final Supplier<T> supplier) {
-        super(supplier);
-    }
-
-    public AsyncReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter) {
-        super(supplier, reloadAfter);
+    public AsyncReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
+                               final Consumer<T> runWhenReloaded, final Duration reloadAfter) {
+        super(supplier, reloader, runWhenReloaded, reloadAfter);
     }
 
     CompletableFuture<Void> refreshIfNotAlreadyRefreshing(final CompletableFuture<Void> old) {
         if (old == null || old.isDone()) {
             logger.trace("Starting async reload.");
-            final Runnable asyncOperation = () -> Try.ofSupplier(getOperation())
+            final Runnable asyncOperation = () -> Try.ofSupplier(() -> getOperation().apply(value.get()))
                     .peek(v -> processRetrievedValue(v, value::set)) // set the value on success
                     .getOrElseGet(t -> {
                         logger.warn("Async reload failed, operating with stale value.", t);
@@ -73,7 +67,7 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
             synchronized (this) {
                 if (needsInitialization()) { // double-checked locking to make sure the value is only ever loaded once
                     logger.debug("Fetching initial value synchronously on {}.", this);
-                    return Try.ofSupplier(getOperation())
+                    return Try.ofSupplier(() -> getOperation().apply(null))
                             .peek(v -> processRetrievedValue(v, value::set))
                             .toEither();
                 }

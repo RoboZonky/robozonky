@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import io.vavr.control.Either;
 import io.vavr.control.Try;
@@ -28,20 +29,14 @@ final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
 
     private final AtomicReference<T> value = new AtomicReference<>();
 
-    public ReloadableImpl(final Supplier<T> supplier, final Consumer<T> runWhenReloaded) {
-        super(supplier, runWhenReloaded);
+    public ReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
+                          final Consumer<T> runWhenReloaded) {
+        super(supplier, reloader, runWhenReloaded);
     }
 
-    public ReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter, final Consumer<T> runWhenReloaded) {
-        super(supplier, reloadAfter, runWhenReloaded);
-    }
-
-    public ReloadableImpl(final Supplier<T> supplier) {
-        super(supplier);
-    }
-
-    public ReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter) {
-        super(supplier, reloadAfter);
+    public ReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
+                          final Consumer<T> runWhenReloaded, final Duration reloadAfter) {
+        super(supplier, reloader, runWhenReloaded, reloadAfter);
     }
 
     @Override
@@ -50,7 +45,7 @@ final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
             synchronized (this) {
                 if (needsReload()) {
                     logger.trace("Reloading {}.", this);
-                    return Try.ofSupplier(getOperation())
+                    return Try.ofSupplier(() -> getOperation().apply(value.get()))
                             .peek(v -> processRetrievedValue(v, value::set))
                             .toEither();
                 }

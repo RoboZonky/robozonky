@@ -19,6 +19,7 @@ package com.github.robozonky.common.async;
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import io.vavr.control.Either;
 import org.slf4j.Logger;
@@ -30,9 +31,13 @@ import org.slf4j.LoggerFactory;
  */
 public final class ReloadableBuilder<T> {
 
+    private static final Consumer<?> NOOP_CONSUMER = x -> {
+        // do nothing
+    };
     private static final Logger LOGGER = LoggerFactory.getLogger(ReloadableBuilder.class);
 
     private final Supplier<T> supplier;
+    private UnaryOperator<T> reloader;
     private Duration reloadAfter;
     private Consumer<T> finisher;
     private boolean async = false;
@@ -51,6 +56,18 @@ public final class ReloadableBuilder<T> {
      */
     public ReloadableBuilder<T> reloadAfter(final Duration duration) {
         this.reloadAfter = duration;
+        return this;
+    }
+
+    /**
+     * While the first instance will be loaded using the supplier provided in {@link #ReloadableBuilder(Supplier)},
+     * every other instance will be retrieved using the function provided here.
+     * @param reloader Previous instance retrieved by previous invocation of the supplier above or the function
+     * provided here.
+     * @return Fresh instance.
+     */
+    public ReloadableBuilder<T> reloadWith(final UnaryOperator<T> reloader) {
+        this.reloader = reloader;
         return this;
     }
 
@@ -95,26 +112,16 @@ public final class ReloadableBuilder<T> {
      * @return New instance.
      */
     public Reloadable<T> build() {
-        if (finisher == null) {
-            if (reloadAfter == null) {
-                return async ?
-                        new AsyncReloadableImpl<>(supplier) :
-                        new ReloadableImpl<>(supplier);
-            } else {
-                return async ?
-                        new AsyncReloadableImpl<>(supplier, reloadAfter) :
-                        new ReloadableImpl<>(supplier, reloadAfter);
-            }
+        final Consumer<T> finish = finisher == null ? (Consumer<T>) NOOP_CONSUMER : finisher;
+        final UnaryOperator<T> reload = reloader == null ? t -> supplier.get() : reloader;
+        if (reloadAfter == null) {
+            return async ?
+                    new AsyncReloadableImpl<>(supplier, reload, finish) :
+                    new ReloadableImpl<>(supplier, reload, finish);
         } else {
-            if (reloadAfter == null) {
-                return async ?
-                        new AsyncReloadableImpl<>(supplier, finisher) :
-                        new ReloadableImpl<>(supplier, finisher);
-            } else {
-                return async ?
-                        new AsyncReloadableImpl<>(supplier, reloadAfter, finisher) :
-                        new ReloadableImpl<>(supplier, reloadAfter, finisher);
-            }
+            return async ?
+                    new AsyncReloadableImpl<>(supplier, reload, finish, reloadAfter) :
+                    new ReloadableImpl<>(supplier, reload, finish, reloadAfter);
         }
     }
 }
