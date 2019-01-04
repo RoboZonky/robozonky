@@ -30,6 +30,7 @@ ENV JAVA_OPTS="$JAVA_OPTS \
     -Dlogback.configurationFile=$CONFIG_DIRECTORY/logback.xml \
     -Dcom.sun.management.jmxremote \
     -Dcom.sun.management.jmxremote.port=$JMX_PORT \
+    -Dcom.sun.management.jmxremote.rmi.port=$JMX_PORT \
     -Dcom.sun.management.jmxremote.ssl=false \
     -Dcom.sun.management.jmxremote.authenticate=false \
     -Djmx.remote.x.notification.buffer.size=50"
