@@ -47,7 +47,7 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
         super(supplier, reloadAfter);
     }
 
-    CompletableFuture<Void> refresh(final CompletableFuture<Void> old) {
+    CompletableFuture<Void> refreshIfNotAlreadyRefreshing(final CompletableFuture<Void> old) {
         if (old == null || old.isDone()) {
             logger.trace("Starting async reload.");
             final Runnable asyncOperation = () -> Try.ofSupplier(getOperation())
@@ -63,21 +63,30 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
         }
     }
 
+    private boolean needsInitialization() {
+        return value.get() == null;
+    }
+
     @Override
-    public synchronized Either<Throwable, T> get() {
-        if (value.get() == null) { // force value retrieval and wait for it
-            logger.debug("Fetching initial value synchronously on {}.", this);
-            return Try.ofSupplier(getOperation())
-                    .peek(v -> processRetrievedValue(v, value::set))
-                    .toEither();
+    public Either<Throwable, T> get() {
+        if (needsInitialization()) { // force value retrieval and wait for it
+            synchronized (this) {
+                if (needsInitialization()) { // double-checked locking to make sure the value is only ever loaded once
+                    logger.debug("Fetching initial value synchronously on {}.", this);
+                    return Try.ofSupplier(getOperation())
+                            .peek(v -> processRetrievedValue(v, value::set))
+                            .toEither();
+                }
+                // otherwise fall through to retrieve the current value
+            }
         }
-        if (!needsReload()) { // return old value
-            logger.trace("Not reloading {}.", this);
-            return Either.right(value.get());
+        if (needsReload()) { // trigger value retrieval on the background
+            synchronized (this) {
+                final CompletableFuture<Void> currentFuture = future.getAndUpdate(this::refreshIfNotAlreadyRefreshing);
+                logger.debug("Retrieved potentially stale value on {}, while {}.", this, currentFuture);
+            }
         }
-        // trigger retrieval but return existing value
-        final CompletableFuture<Void> currentFuture = future.getAndUpdate(this::refresh);
-        logger.debug("Retrieved potentially stale value on {}, while {}.", this, currentFuture);
+        // return the current value
         return Either.right(value.get());
     }
 }

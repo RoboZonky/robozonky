@@ -65,7 +65,7 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
         return operation;
     }
 
-    protected synchronized void markReloaded() {
+    protected void markReloaded() {
         needsReload.markReloaded();
     }
 
@@ -76,12 +76,12 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
         logger.debug("Reloaded {}, new value is {}.", this, value);
     }
 
-    protected synchronized boolean needsReload() {
+    protected boolean needsReload() {
         return needsReload.getAsBoolean();
     }
 
     @Override
-    public synchronized void clear() {
+    public void clear() {
         needsReload.forceReload();
     }
 }

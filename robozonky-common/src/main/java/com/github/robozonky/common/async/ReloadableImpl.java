@@ -45,14 +45,19 @@ final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
     }
 
     @Override
-    public synchronized Either<Throwable, T> get() {
-        if (!needsReload()) {
-            logger.trace("Not reloading {}.", this);
-            return Either.right(value.get());
+    public Either<Throwable, T> get() {
+        if (needsReload()) { // double-checked locking to make sure the reload only happens once
+            synchronized (this) {
+                if (needsReload()) {
+                    logger.trace("Reloading {}.", this);
+                    return Try.ofSupplier(getOperation())
+                            .peek(v -> processRetrievedValue(v, value::set))
+                            .toEither();
+                }
+                // otherwise fall through to retrieve the value
+            }
         }
-        logger.trace("Reloading {}.", this);
-        return Try.ofSupplier(getOperation())
-                .peek(v -> processRetrievedValue(v, value::set))
-                .toEither();
+        logger.trace("Not reloading {}.", this);
+        return Either.right(value.get());
     }
 }

@@ -18,6 +18,10 @@ package com.github.robozonky.common.async;
 
 import java.util.function.BooleanSupplier;
 
+/**
+ * Operations here are assumed to be atomic. A call to {@link #markReloaded()} or {@link #forceReload()} must be
+ * immediately reflected in the value of {@link #getAsBoolean()}.
+ */
 interface ReloadDetection extends BooleanSupplier {
 
     void markReloaded();
