@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -35,6 +34,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.util.RandomUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 final class MutableInvestmentImpl implements InvestmentBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MutableInvestmentImpl.class);
-    private static final Random RANDOM = new Random(0L);
     private final AtomicReference<OffsetDateTime> investmentDate = new AtomicReference<>();
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
     private long id;
@@ -62,7 +61,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private Supplier<LocalDate> investmentDateSupplier = () -> DateUtil.localNow().toLocalDate();
 
     MutableInvestmentImpl() {
-        this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
+        this.id = RandomUtil.getNextInt(); // simplifies tests which do not have to generate random IDs themselves
     }
 
     /**

@@ -18,6 +18,8 @@ package com.github.robozonky.common.jobs;
 
 import java.time.Duration;
 
+import com.github.robozonky.internal.util.RandomUtil;
+
 public interface Job {
 
     /**
@@ -25,7 +27,7 @@ public interface Job {
      * @return By default, this returns a random duration of less than 1000 seconds.
      */
     default Duration startIn() {
-        final long randomSeconds = (long) Math.abs(Math.random() * 1000);
+        final long randomSeconds = RandomUtil.getNextInt(1000);
         return Duration.ofSeconds(randomSeconds);
     }
 

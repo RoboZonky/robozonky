@@ -17,7 +17,7 @@
 package com.github.robozonky.internal.util;
 
 import java.time.Clock;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
@@ -26,21 +26,22 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractMinimalRoboZonkyTest {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-    private final AtomicReference<Clock> original = new AtomicReference<>();
 
     protected void setClock(final Clock clock) {
-        LOGGER.debug("Setting custom system clock: {}.", clock);
-        original.compareAndSet(null, DateUtil.getSystemClock()); // first call stores the original
         DateUtil.setSystemClock(clock);
+    }
+
+    protected void setRandom(final Random random) {
+        RandomUtil.setRandom(random);
     }
 
     @AfterEach
     protected void resetClock() {
-        final Clock stored = original.getAndSet(null);
-        if (stored != null) {
-            DateUtil.setSystemClock(stored);
-            LOGGER.debug("Setting original system clock: {}.", stored);
-        }
+        DateUtil.resetSystemClock();
     }
 
+    @AfterEach
+    protected void resetRandom() {
+        RandomUtil.resetRandom();
+    }
 }

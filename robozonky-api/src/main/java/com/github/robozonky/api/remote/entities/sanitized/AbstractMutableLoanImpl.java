@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Random;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
@@ -32,6 +31,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.util.RandomUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> implements MutableMarketplaceLoan<T> {
 
-    private static final Random RANDOM = new Random(0);
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private boolean topped, covered, published, questionsAllowed, insuranceActive;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount;
@@ -59,7 +58,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     AbstractMutableLoanImpl() {
-        this.id = RANDOM.nextInt(Integer.MAX_VALUE); // simplifies tests which do not need to IDs themselves
+        this.id = RandomUtil.getNextInt(Integer.MAX_VALUE); // simplifies tests which do not need to IDs themselves
     }
 
     AbstractMutableLoanImpl(final RawLoan original) {

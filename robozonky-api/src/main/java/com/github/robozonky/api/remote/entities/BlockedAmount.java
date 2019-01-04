@@ -19,15 +19,13 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
-import java.util.Random;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.util.RandomUtil;
 
 public class BlockedAmount extends BaseEntity {
-
-    private static final Random RANDOM = new Random();
 
     private BigDecimal amount, discount;
     private int id, loanId;
@@ -45,7 +43,7 @@ public class BlockedAmount extends BaseEntity {
 
     public BlockedAmount(final int loanId, final BigDecimal loanAmount,
                          final TransactionCategory category) {
-        this.id = RANDOM.nextInt(1_000_000_000);
+        this.id = RandomUtil.getNextInt(1_000_000_000);
         this.loanId = loanId;
         this.amount = loanAmount;
         this.category = category;

@@ -24,6 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.internal.api.Defaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * All RoboZonky code should use this class to retrieve its now. This will ensure that tests will be able to inject
@@ -31,18 +33,26 @@ import com.github.robozonky.internal.api.Defaults;
  */
 public final class DateUtil {
 
-    private static final AtomicReference<Clock> CLOCK = new AtomicReference<>(Clock.system(Defaults.ZONE_ID));
+    private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
+    private static final Clock DEFAULT = Clock.system(Defaults.ZONE_ID);
+    private static final AtomicReference<Clock> CLOCK = new AtomicReference<>(DEFAULT);
 
     private DateUtil() {
         // no instances
     }
 
-    static Clock getSystemClock() {
+    private static Clock getSystemClock() {
         return CLOCK.get();
     }
 
     static void setSystemClock(final Clock clock) {
         CLOCK.set(clock);
+        LOGGER.debug("Setting system clock: {}.", clock);
+    }
+
+    static void resetSystemClock() {
+        CLOCK.set(DEFAULT);
+        LOGGER.debug("Reset to original system clock.");
     }
 
     public static ZonedDateTime zonedNow() {

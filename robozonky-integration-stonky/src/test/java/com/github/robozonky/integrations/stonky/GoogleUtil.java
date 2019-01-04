@@ -29,6 +29,8 @@ import com.google.api.services.sheets.v4.model.Spreadsheet;
 
 final class GoogleUtil {
 
+    private static final Random RANDOM = new Random();
+
     public static File getFolder(final String name) {
         final File result = getFile(name);
         result.setMimeType(DriveOverview.MIME_TYPE_FOLDER);
@@ -65,8 +67,6 @@ final class GoogleUtil {
         result.setMimeType(DriveOverview.MIME_TYPE_GOOGLE_SPREADSHEET);
         return result;
     }
-
-    private static final Random RANDOM = new Random();
 
     private static Sheet getSheet(final String name, final int index) {
         final SheetProperties p1 = new SheetProperties();
