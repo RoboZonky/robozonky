@@ -57,15 +57,11 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
         }
     }
 
-    private boolean needsInitialization() {
-        return value.get() == null;
-    }
-
     @Override
     public Either<Throwable, T> get() {
-        if (needsInitialization()) { // force value retrieval and wait for it
+        if (!hasValue()) { // force value retrieval and wait for it
             synchronized (this) {
-                if (needsInitialization()) { // double-checked locking to make sure the value is only ever loaded once
+                if (!hasValue()) { // double-checked locking to make sure the value is only ever loaded once
                     logger.debug("Fetching initial value synchronously on {}.", this);
                     return Try.ofSupplier(() -> getOperation().apply(null))
                             .peek(v -> processRetrievedValue(v, value::set))
@@ -82,5 +78,10 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
         }
         // return the current value
         return Either.right(value.get());
+    }
+
+    @Override
+    public boolean hasValue() {
+        return value.get() != null;
     }
 }

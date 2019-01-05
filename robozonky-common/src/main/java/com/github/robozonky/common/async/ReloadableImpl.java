@@ -55,4 +55,9 @@ final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
         logger.trace("Not reloading {}.", this);
         return Either.right(value.get());
     }
+
+    @Override
+    public boolean hasValue() {
+        return value.get() != null;
+    }
 }

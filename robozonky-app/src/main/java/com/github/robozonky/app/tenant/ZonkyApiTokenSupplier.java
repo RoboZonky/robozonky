@@ -90,9 +90,13 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     @Override
     public void close() {
+        if (!token.hasValue()) {
+            LOGGER.debug("Nothing to close.");
+            return;
+        }
         final ZonkyApiToken toClose = token.get().getOrElse(() -> null);
         if (toClose == null || toClose.willExpireIn(Duration.ZERO)) {
-            LOGGER.debug("Nothing to close.");
+            LOGGER.debug("Nothing to close or expired.");
             return;
         }
         LOGGER.info("Logging '{}' out of scope '{}'.", secrets.getUsername(), scope);

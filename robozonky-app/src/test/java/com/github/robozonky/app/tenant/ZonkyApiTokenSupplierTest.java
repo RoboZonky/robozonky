@@ -93,37 +93,6 @@ class ZonkyApiTokenSupplierTest {
     }
 
     @Test
-    void reusesExistingToken() {
-        final OAuth oAuth = mock(OAuth.class);
-        when(oAuth.login(eq(ZonkyScope.APP), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
-                .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofMinutes(5)));
-        final ApiProvider api = mockApi(oAuth);
-        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        final ZonkyApiToken token = t.get();
-        final ZonkyApiToken token2 = t.get();
-        assertThat(token2)
-                .isNotNull()
-                .isEqualTo(token);
-    }
-
-    @Test
-    void refreshesTokenBeforeExpiration() {
-        final OAuth oAuth = mock(OAuth.class);
-        when(oAuth.login(eq(ZonkyScope.APP), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
-                .thenReturn(getTokenExpiringIn(Duration.ofSeconds(5)));
-        when(oAuth.refresh(any()))
-                .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
-        final ApiProvider api = mockApi(oAuth);
-        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ofSeconds(1));
-        final ZonkyApiToken token = t.get();
-        final ZonkyApiToken token2 = t.get();
-        assertThat(token2)
-                .isNotNull()
-                .isNotEqualTo(token);
-        verify(oAuth).refresh(eq(token));
-    }
-
-    @Test
     void refreshFailOnToken() {
         final OAuth oAuth = mock(OAuth.class);
         when(oAuth.login(eq(ZonkyScope.APP), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
@@ -159,8 +128,10 @@ class ZonkyApiTokenSupplierTest {
     void closing() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
+        final ZonkyApiToken token = getTokenExpiringIn(Duration.ofSeconds(5));
         when(oAuth.login(eq(ZonkyScope.APP), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
-                .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
+                .thenAnswer(invocation -> token);
+        when(oAuth.refresh(any())).thenReturn(token);
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         t.close();
@@ -176,8 +147,9 @@ class ZonkyApiTokenSupplierTest {
     void notClosingWhenExpired() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
+        final ZonkyApiToken token = getTokenExpiringIn(Duration.ZERO);
         when(oAuth.login(eq(ZonkyScope.APP), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
-                .thenAnswer(invocation -> getTokenExpiringIn(Duration.ZERO));
+                .thenAnswer(invocation -> token);
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         t.close();
