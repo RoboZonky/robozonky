@@ -92,7 +92,7 @@ final class Util {
             throw new IllegalArgumentException("Ratings do not match: " + a + " and " + b);
         }
         final BigDecimal total = a.getAmount().add(b.getAmount());
-        return new Blocked(total, rating);
+        return new Blocked(total, rating, a.isPersistent());
     }
 
     static Optional<Loan> getLoan(final Tenant tenant, final BlockedAmount ba, final Divisor divisor) {

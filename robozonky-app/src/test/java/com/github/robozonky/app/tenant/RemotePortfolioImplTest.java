@@ -34,14 +34,10 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.Maps;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
 
@@ -134,14 +130,14 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void chargesAreProperlyReplacedByRemotes() {
+    void chargesAreProperlyReplacedByRemotesOutsideDryRun() {
         final BigDecimal firstAmount = BigDecimal.ONE;
         final Loan l = Loan.custom().setRating(Rating.D).build();
         final BlockedAmount original = new BlockedAmount(l.getId(), firstAmount);
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
-        final Tenant tenant = mockTenant(zonky);
+        final Tenant tenant = mockTenant(zonky, false);
         // one blocked amount coming in remotely
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertSoftly(softly -> {
@@ -173,6 +169,50 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
                     Maps.entry(Rating.A, secondAmount)
             );
             softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(secondAmount));
+        });
+    }
+
+    @Test
+    void chargesAreNeverReplacedByRemotesInDryRun() {
+        final BigDecimal firstAmount = BigDecimal.ONE;
+        final Loan l = Loan.custom().setRating(Rating.D).build();
+        final BlockedAmount original = new BlockedAmount(l.getId(), firstAmount);
+        final Zonky zonky = harmlessZonky(10_000);
+        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
+        when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
+        final Tenant tenant = mockTenant(zonky, true);
+        // one blocked amount coming in remotely
+        final RemotePortfolio p = new RemotePortfolioImpl(tenant);
+        assertSoftly(softly -> {
+            softly.assertThat(p.getTotal()).containsOnly(Maps.entry(Rating.D, firstAmount));
+            softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount);
+        });
+        // new blocked amount for a different loan is registered locally
+        final BigDecimal secondAmount = BigDecimal.TEN;
+        final Loan l2 = Loan.custom().setRating(Rating.A).build();
+        p.simulateCharge(l2.getId(), l2.getRating(), secondAmount);
+        assertSoftly(softly -> {
+            softly.assertThat(p.getTotal()).containsOnly(
+                    Maps.entry(Rating.D, firstAmount),
+                    Maps.entry(Rating.A, secondAmount)
+            );
+            softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(secondAmount));
+        });
+        /*
+         * time passed, the same blocked amount is read from Zonky and must be added to the synthetic one from the
+         * dry run.
+         */
+        setClock(Clock.fixed(Instant.now().plus(Duration.ofMinutes(5)), Defaults.ZONE_ID));
+        when(zonky.getBlockedAmounts())
+                .thenAnswer(i -> Stream.of(original, new BlockedAmount(l2.getId(), secondAmount)));
+        when(zonky.getLoan(eq(l2.getId()))).thenReturn(l2);
+        final BigDecimal total = secondAmount.add(secondAmount);
+        assertSoftly(softly -> {
+            softly.assertThat(p.getTotal()).containsOnly(
+                    Maps.entry(Rating.D, firstAmount),
+                    Maps.entry(Rating.A, total)
+            );
+            softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(total));
         });
     }
 

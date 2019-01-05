@@ -38,14 +38,10 @@ import org.junit.jupiter.api.Test;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class PowerTenantImplTest extends AbstractEventLeveragingTest {
 
@@ -88,7 +84,7 @@ class PowerTenantImplTest extends AbstractEventLeveragingTest {
         when(s.getToInvest()).thenReturn(Optional.of(mock(InvestmentStrategy.class)));
         when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
         when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
-        final PowerTenantImpl t = new PowerTenantImpl(null, null, s, null);
+        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, s, null);
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);

@@ -27,17 +27,28 @@ final class Blocked {
     private final int id;
     private final BigDecimal amount;
     private final Rating rating;
+    private final boolean persistent;
 
     public Blocked(final BigDecimal amount, final Rating rating) {
-        this.id = -1;
-        this.amount = amount.abs();
-        this.rating = rating;
+        this(amount, rating, true);
     }
 
     public Blocked(final BlockedAmount amount, final Rating rating) {
+        this(amount, rating, true);
+    }
+
+    public Blocked(final BigDecimal amount, final Rating rating, final boolean persistent) {
+        this.id = -1;
+        this.amount = amount.abs();
+        this.rating = rating;
+        this.persistent = persistent;
+    }
+
+    public Blocked(final BlockedAmount amount, final Rating rating, final boolean persistent) {
         this.id = amount.getLoanId();
         this.amount = amount.getAmount().abs();
         this.rating = rating;
+        this.persistent = persistent;
     }
 
     public int getId() {
@@ -50,6 +61,14 @@ final class Blocked {
 
     public Rating getRating() {
         return rating;
+    }
+
+    /**
+     *
+     * @return True if this information should continue to be persisted after the next remote read of blocked amounts.
+     */
+    public boolean isPersistent() {
+        return persistent;
     }
 
     @Override
@@ -74,8 +93,9 @@ final class Blocked {
     @Override
     public String toString() {
         return "Blocked{" +
-                "id=" + id +
-                ", amount=" + amount +
+                "amount=" + amount +
+                ", persistent=" + persistent +
+                ", id=" + id +
                 ", rating=" + rating +
                 '}';
     }
