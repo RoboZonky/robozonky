@@ -123,7 +123,7 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public boolean willExpireIn(final TemporalAmount temporalAmount) {
-        final OffsetDateTime maxExpirationDate = OffsetDateTime.now().plus(temporalAmount);
+        final OffsetDateTime maxExpirationDate = DateUtil.offsetNow().plus(temporalAmount);
         return getExpiresOn().isBefore(maxExpirationDate);
     }
 

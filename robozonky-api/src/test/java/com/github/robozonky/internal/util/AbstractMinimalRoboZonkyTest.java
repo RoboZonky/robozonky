@@ -17,8 +17,11 @@
 package com.github.robozonky.internal.util;
 
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Random;
 
+import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,11 @@ public abstract class AbstractMinimalRoboZonkyTest {
 
     protected void setClock(final Clock clock) {
         DateUtil.setSystemClock(clock);
+    }
+
+    protected void skipAheadBy(final Duration duration) {
+        final Instant next = DateUtil.now().plus(duration);
+        setClock(Clock.fixed(next, Defaults.ZONE_ID));
     }
 
     protected void setRandom(final Random random) {
