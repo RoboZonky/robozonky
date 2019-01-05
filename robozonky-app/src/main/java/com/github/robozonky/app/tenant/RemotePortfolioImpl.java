@@ -47,8 +47,10 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
     private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
+    private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
+        this.isDryRun = tenant.getSessionInfo().isDryRun();
         this.portfolio = Reloadable.with(() -> RemoteData.load(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
                 .finishWith(this::refreshPortfolio)
@@ -74,9 +76,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     private void refreshPortfolio(final RemoteData data) {
         // remove synthetic charges that are replaced by actual remote blocked amounts
-        final Map<Integer, Blocked> real = data.getBlocked();
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
-                .filter(e -> !real.containsKey(e.getKey()))
+                .filter(e -> e.getValue().isPersistent())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         LOGGER.debug("New synthetics: {}.", updatedSynthetics);
         // force overview recalculation now that we have the latest portfolio
@@ -93,7 +94,11 @@ class RemotePortfolioImpl implements RemotePortfolio {
     public void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> {
             final Map<Integer, Blocked> result = new LinkedHashMap<>(old);
-            result.put(loanId, new Blocked(amount, rating));
+            /*
+             * synthetic blocked amounts are persistent only during dry runs; otherwise all synthetics will be removed
+             * after a remote update of blocked amounts.
+             */
+            result.put(loanId, new Blocked(amount, rating, isDryRun));
             return result;
         });
         LOGGER.debug("Synthetic added. New synthetics: {}", updatedSynthetics);
@@ -101,25 +106,31 @@ class RemotePortfolioImpl implements RemotePortfolio {
         portfolioOverview.clear();
     }
 
+    /**
+     * Calling this method may cause a background operation to re-fetch all the data from Zonky.
+     * @return
+     */
     private RemoteData getRemotePortfolio() {
         return portfolio.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
     }
 
     @Override
-    public BigDecimal getBalance() {
+    public BigDecimal getBalance() { // load balance first, as it may result in update to synthetics
+        final BigDecimal balance = getRemotePortfolio().getWallet().getAvailableBalance();
         final BigDecimal allBlocked = sum(syntheticByLoanId.get().values());
-        return getRemotePortfolio().getWallet().getAvailableBalance().subtract(allBlocked);
+        return balance.subtract(allBlocked);
     }
 
     @Override
     public Map<Rating, BigDecimal> getTotal() {
-        final Map<Rating, BigDecimal> amounts = getRemotePortfolio().getStatistics().getRiskPortfolio().stream()
+        final RemoteData data = getRemotePortfolio(); // use the same data for the entirety of this method
+        final Map<Rating, BigDecimal> amounts = data.getStatistics().getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating,
                                           RemotePortfolioImpl::sum,
                                           BigDecimal::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
         final Stream<Blocked> blocked = Stream.concat(syntheticByLoanId.get().values().stream(),
-                                                      getRemotePortfolio().getBlocked().values().stream());
+                                                      data.getBlocked().values().stream());
         blocked.forEach(b -> {
             final Rating r = b.getRating();
             final BigDecimal amount = b.getAmount();
