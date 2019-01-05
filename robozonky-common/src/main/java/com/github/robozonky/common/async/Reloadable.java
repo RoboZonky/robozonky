@@ -49,4 +49,6 @@ public interface Reloadable<T> {
      * @return Result of the last call of the operation.
      */
     Either<Throwable, T> get();
+
+    boolean hasValue();
 }

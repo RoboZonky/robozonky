@@ -19,53 +19,45 @@ package com.github.robozonky.common.async;
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
 
-    private static final Consumer DO_NOTHING = x -> {
-        // do nothing
-    };
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    private final Supplier<T> operation;
+    private final UnaryOperator<T> operation;
     private final ReloadDetection needsReload;
 
-    public AbstractReloadableImpl(final Supplier<T> supplier, final Consumer<T> runWhenReloaded) {
-        this.operation = getOperation(supplier, runWhenReloaded);
+    public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
+                                  final Consumer<T> runWhenReloaded) {
+        this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new ManualReload();
     }
 
-    public AbstractReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter,
-                                  final Consumer<T> runWhenReloaded) {
-        this.operation = getOperation(supplier, runWhenReloaded);
+    public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
+                                  final Consumer<T> runWhenReloaded, final Duration reloadAfter) {
+        this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new TimeBasedReload(reloadAfter);
     }
 
-    public AbstractReloadableImpl(final Supplier<T> supplier) {
-        this(supplier, DO_NOTHING);
-    }
-
-    public AbstractReloadableImpl(final Supplier<T> supplier, final Duration reloadAfter) {
-        this(supplier, reloadAfter, DO_NOTHING);
-    }
-
-    private <X> Supplier<X> getOperation(final Supplier<X> supplier, final Consumer<X> runWhenReloaded) {
-        return () -> {
-            logger.trace("Running operation on {}.", this);
-            final X value = supplier.get();
+    private <X> UnaryOperator<X> getOperation(final Supplier<X> supplier, final UnaryOperator<X> reloader,
+                                              final Consumer<X> runWhenReloaded) {
+        return original -> {
+            logger.trace("Running operation on {}, previous value given: {}.", this, original);
+            final X value = original == null ? supplier.get() : reloader.apply(original);
             runWhenReloaded.accept(value);  // first run finisher before setting the value, in case finisher fails
             logger.trace("Operation finished on {}.", this);
             return value;
         };
     }
 
-    protected Supplier<T> getOperation() {
+    protected UnaryOperator<T> getOperation() {
         return operation;
     }
 
-    protected synchronized void markReloaded() {
+    protected void markReloaded() {
         needsReload.markReloaded();
     }
 
@@ -76,12 +68,12 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
         logger.debug("Reloaded {}, new value is {}.", this, value);
     }
 
-    protected synchronized boolean needsReload() {
+    protected boolean needsReload() {
         return needsReload.getAsBoolean();
     }
 
     @Override
-    public synchronized void clear() {
+    public void clear() {
         needsReload.forceReload();
     }
 }

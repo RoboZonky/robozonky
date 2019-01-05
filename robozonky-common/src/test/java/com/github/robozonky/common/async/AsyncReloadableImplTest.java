@@ -27,11 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class AsyncReloadableImplTest {
 
@@ -105,14 +101,14 @@ class AsyncReloadableImplTest {
         final AsyncReloadableImpl<String> r = (AsyncReloadableImpl<String>)Reloadable.with(() -> "")
                 .async()
                 .build();
-        final CompletableFuture<Void> first = r.refresh(null);
+        final CompletableFuture<Void> first = r.refreshIfNotAlreadyRefreshing(null);
         Assertions.assertThat(first).isNotNull();
         first.completeExceptionally(new IllegalStateException());
-        final CompletableFuture<Void> second = r.refresh(first);
+        final CompletableFuture<Void> second = r.refreshIfNotAlreadyRefreshing(first);
         Assertions.assertThat(second).isNotNull().isNotSameAs(first);
         final CompletableFuture<Void> third = mock(CompletableFuture.class);
         when(third.isDone()).thenReturn(false);
-        Assertions.assertThat(r.refresh(third)).isSameAs(third);
+        Assertions.assertThat(r.refreshIfNotAlreadyRefreshing(third)).isSameAs(third);
     }
 
 }
