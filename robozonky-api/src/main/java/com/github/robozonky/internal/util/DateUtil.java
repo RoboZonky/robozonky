@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public final class DateUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
-    private static final Clock DEFAULT = Clock.systemDefaultZone();
+    private static final Clock DEFAULT = Clock.system(Defaults.ZONE_ID);
     private static final AtomicReference<Clock> CLOCK = new AtomicReference<>(DEFAULT);
 
     private DateUtil() {
