@@ -21,19 +21,28 @@ import java.io.IOException;
 
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class Util {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     private Util() {
         // no instances
     }
 
     public static String readEntity(final HttpEntity entity) {
+        if (entity == null) {
+            LOGGER.debug("Zonkoid sent an empty response.");
+            return null;
+        }
         final ByteArrayOutputStream outstream = new ByteArrayOutputStream(); // no need to close this one
         try {
             entity.writeTo(outstream);
             return outstream.toString(Defaults.CHARSET.displayName());
-        } catch (final IOException e) { // don't even log the exception as it's entirely uninteresting
+        } catch (final IOException ex) {
+            LOGGER.debug("Failed reading Zonkoid response.", ex);
             return null;
         }
     }

@@ -27,7 +27,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class UtilTest {
@@ -47,6 +47,11 @@ class UtilTest {
         final HttpEntity e = mock(HttpEntity.class);
         doThrow(IOException.class).when(e).writeTo(any());
         assertThat(Util.readEntity(e)).isNull();
+    }
+
+    @Test
+    void responseEmpty() {
+        assertThat(Util.readEntity(null)).isNull();
     }
 
     @Test
