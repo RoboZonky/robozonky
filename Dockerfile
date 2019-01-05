@@ -20,14 +20,17 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
 # ... then restart from a minimal image and copy built binary from previous stage
 FROM adoptopenjdk/openjdk11:alpine-slim
 LABEL maintainer="The RoboZonky Project (www.robozonky.cz)"
+# we recommend overriding JMX_HOST with the external IP address of the host, or JMX client may not be able to connect
 ENV INSTALL_DIRECTORY=/opt/robozonky \
      CONFIG_DIRECTORY=/etc/robozonky \
     WORKING_DIRECTORY=/var/robozonky \
+    JMX_HOST="127.0.0.1" \
     JMX_PORT=7091
-# using different ENV as otherwise the above wouldn't be used
+# using different ENV as otherwise the ENV definitions above wouldn't be used
 ENV JAVA_OPTS="$JAVA_OPTS \
     -Drobozonky.properties.file=$CONFIG_DIRECTORY/robozonky.properties \
     -Dlogback.configurationFile=$CONFIG_DIRECTORY/logback.xml \
+    -Djava.rmi.server.hostname=$JMX_HOST \
     -Dcom.sun.management.jmxremote \
     -Dcom.sun.management.jmxremote.port=$JMX_PORT \
     -Dcom.sun.management.jmxremote.rmi.port=$JMX_PORT \
