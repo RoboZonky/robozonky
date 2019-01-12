@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
 import com.github.robozonky.util.StreamUtil;
+import io.vavr.Lazy;
 
 /**
  * Loads pluggable {@link SchedulerService}s using {@link ServiceLoader}. If no such are available, will use a default
@@ -33,13 +34,19 @@ import com.github.robozonky.util.StreamUtil;
 final class SchedulerServiceLoader {
 
     private static final ServiceLoader<SchedulerService> LOADER = ServiceLoader.load(SchedulerService.class);
-    private static final SchedulerService REAL_SCHEDULER = ScheduledThreadPoolExecutor::new;
+    private static final Lazy<SchedulerService> REAL_SCHEDULER = Lazy.of(() -> (parallelism, threadFactory) -> {
+        final ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(1, threadFactory);
+        stpe.setMaximumPoolSize(parallelism);
+        return stpe;
+    });
 
     private SchedulerServiceLoader() {
         // no instances
     }
 
     public static SchedulerService load() {
-        return StreamUtil.toStream(LOADER).findAny().orElse(REAL_SCHEDULER);
+        return StreamUtil.toStream(LOADER)
+                .findAny()
+                .orElseGet(REAL_SCHEDULER);
     }
 }

@@ -35,18 +35,16 @@ public class Scheduler implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final Reloadable<Scheduler> BACKGROUND_SCHEDULER = Reloadable.with(() -> {
         LOGGER.debug("Instantiating new background scheduler.");
-        /*
-         * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
-         * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
-         */
-        return new Scheduler(2, THREAD_FACTORY, Scheduler::cleanBackgroundScheduler);
+        // give as many threads as is necessary; the scheduler will start with 1 and scale back to 1 if no more needed
+        return new Scheduler(Integer.MAX_VALUE, THREAD_FACTORY, Scheduler::cleanBackgroundScheduler);
     }).build();
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final ScheduledExecutorService executor;
     private final Runnable onClose;
 
     /**
-     * @param poolSize
+     * @param poolSize The maximum amount of threads that the scheduler will have available. Minimum is 1 and the
+     * scheduler may scale down to that number when it has no need for more threads.
      * @param threadFactory
      * @param onClose This exists mostly so that the background scheduler can reload itself after its {@link #close()}
      * method had been called.
@@ -84,7 +82,7 @@ public class Scheduler implements AutoCloseable {
     public ScheduledFuture submit(final Runnable toSchedule, final Duration delayInBetween,
                                   final Duration firstDelay) {
         LOGGER.debug("Scheduling {} every {} ms, starting in {} ms.", toSchedule, delayInBetween.toMillis(),
-                               firstDelay.toMillis());
+                     firstDelay.toMillis());
         /*
          * it is imperative that tasks be scheduled with fixed delay. if scheduled at fixed rate instead, pausing the
          * executor would result in tasks queuing up. and since we use this class to schedule tasks as frequently as
