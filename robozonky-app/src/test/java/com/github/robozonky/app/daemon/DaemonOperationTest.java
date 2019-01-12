@@ -29,10 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
@@ -67,13 +65,18 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        protected boolean isEnabled(final Tenant authenticated) {
+        protected boolean isEnabled(final Tenant tenant) {
             return true;
         }
 
         @Override
-        protected void execute(final Tenant authenticated) {
-            operation.accept(authenticated);
+        protected boolean hasStrategy(final Tenant tenant) {
+            return true;
+        }
+
+        @Override
+        protected void execute(final Tenant tenant) {
+            operation.accept(tenant);
         }
     }
 }

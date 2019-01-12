@@ -43,13 +43,18 @@ class PurchasingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected boolean isEnabled(final Tenant authenticated) {
-        return !authenticated.getRestrictions().isCannotAccessSmp();
+    protected boolean isEnabled(final Tenant tenant) {
+        return !tenant.getRestrictions().isCannotAccessSmp();
     }
 
     @Override
-    protected void execute(final Tenant authenticated) {
-        final long balance = authenticated.getPortfolio().getBalance().longValue();
+    protected boolean hasStrategy(final Tenant tenant) {
+        return tenant.getPurchaseStrategy().isPresent();
+    }
+
+    @Override
+    protected void execute(final Tenant tenant) {
+        final long balance = tenant.getPortfolio().getBalance().longValue();
         if (balance <= 0) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, 0);
             return;
@@ -58,14 +63,14 @@ class PurchasingDaemon extends DaemonOperation {
                 .lessThanOrEquals("remainingPrincipal", balance)
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
         final Collection<ParticipationDescriptor> applicable =
-                authenticated.call(zonky -> zonky.getAvailableParticipations(s))
+                tenant.call(zonky -> zonky.getAvailableParticipations(s))
                         .filter(p -> { // never re-purchase what was once sold
                             final int loanId = p.getLoanId();
                             final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
                             LOGGER.debug("Loan #{} already sold before, ignoring: {}.", loanId, wasSoldBefore);
                             return !wasSoldBefore;
                         })
-                        .map(p -> toDescriptor(p, authenticated))
+                        .map(p -> toDescriptor(p, tenant))
                         .collect(Collectors.toList());
         purchasing.apply(applicable);
     }

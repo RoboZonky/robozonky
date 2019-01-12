@@ -35,9 +35,11 @@ abstract class DaemonOperation implements Runnable {
         this.refreshInterval = refreshInterval;
     }
 
-    protected abstract boolean isEnabled(final Tenant authenticated);
+    protected abstract boolean isEnabled(final Tenant tenant);
 
-    protected abstract void execute(final Tenant authenticated);
+    protected abstract boolean hasStrategy(final Tenant tenant);
+
+    protected abstract void execute(final Tenant tenant);
 
     public Duration getRefreshInterval() {
         return this.refreshInterval;
@@ -46,10 +48,12 @@ abstract class DaemonOperation implements Runnable {
     @Override
     public void run() {
         LOGGER.trace("Starting.");
-        if (isEnabled(tenant)) {
-            execute(tenant);
-        } else {
+        if (!isEnabled(tenant)) {
             LOGGER.info("Access to marketplace disabled by Zonky.");
+        } else if (!hasStrategy(tenant)) {
+            LOGGER.info("Asleep as there is no strategy.");
+        } else {
+            execute(tenant);
         }
         LOGGER.trace("Finished.");
     }

@@ -48,21 +48,26 @@ class InvestingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected boolean isEnabled(final Tenant authenticated) {
-        return !authenticated.getRestrictions().isCannotInvest();
+    protected boolean isEnabled(final Tenant tenant) {
+        return !tenant.getRestrictions().isCannotInvest();
     }
 
     @Override
-    protected void execute(final Tenant authenticated) {
+    protected boolean hasStrategy(final Tenant tenant) {
+        return tenant.getInvestmentStrategy().isPresent();
+    }
+
+    @Override
+    protected void execute(final Tenant tenant) {
         // don't query anything unless we have enough money to invest
-        final long balance = authenticated.getPortfolio().getBalance().longValue();
-        final int minimum = authenticated.getRestrictions().getMinimumInvestmentAmount();
+        final long balance = tenant.getPortfolio().getBalance().longValue();
+        final int minimum = tenant.getRestrictions().getMinimumInvestmentAmount();
         if (balance < minimum) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
             return;
         }
         // query marketplace for investment opportunities
-        final Collection<LoanDescriptor> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
+        final Collection<LoanDescriptor> loans = tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
                 .map(LoanDescriptor::new)
                 .filter(InvestingDaemon::isActionable)

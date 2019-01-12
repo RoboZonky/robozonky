@@ -25,6 +25,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.SoldParticipationCache;
@@ -34,11 +35,7 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
 
@@ -46,9 +43,19 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void standard() {
         final Zonky z = harmlessZonky(10_000);
         final PowerTenant a = mockTenant(z);
+        when(a.getPurchaseStrategy()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
         final PurchasingDaemon d = new PurchasingDaemon(a, Duration.ZERO);
         d.run();
         verify(z, times(1)).getAvailableParticipations(any());
+    }
+
+    @Test
+    void noStrategy() {
+        final Zonky z = harmlessZonky(10_000);
+        final PowerTenant a = mockTenant(z);
+        final PurchasingDaemon d = new PurchasingDaemon(a, Duration.ZERO);
+        d.run();
+        verify(z, never()).getAvailableParticipations(any());
     }
 
     @Test
