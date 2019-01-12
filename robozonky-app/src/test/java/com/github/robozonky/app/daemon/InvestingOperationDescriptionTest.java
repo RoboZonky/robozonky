@@ -1,6 +1,5 @@
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
@@ -10,7 +9,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -23,10 +21,7 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
         final Loan l = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(l);
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(d.getRefreshInterval()).isEqualTo(Duration.ZERO);
-            softly.assertThat(d.identify(ld)).isEqualTo(l.getId());
-        });
+        assertThat(d.identify(ld)).isEqualTo(l.getId());
     }
 
     @Test

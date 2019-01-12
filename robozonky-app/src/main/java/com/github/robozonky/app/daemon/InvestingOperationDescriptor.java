@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -34,16 +33,10 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
      */
     private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
-    private final Duration refreshInterval;
     private final Investor investor;
 
-    public InvestingOperationDescriptor(final Investor investor, final Duration refreshInterval) {
-        this.investor = investor;
-        this.refreshInterval = refreshInterval;
-    }
-
     public InvestingOperationDescriptor(final Investor investor) {
-        this(investor, Duration.ZERO);
+        this.investor = investor;
     }
 
     public InvestingOperationDescriptor() {
@@ -65,11 +58,6 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     @Override
     public Optional<InvestmentStrategy> getStrategy(final Tenant tenant) {
         return tenant.getInvestmentStrategy();
-    }
-
-    @Override
-    public Duration getRefreshInterval() {
-        return refreshInterval;
     }
 
     @Override

@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,6 +25,10 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.util.NumberUtil;
 import org.slf4j.Logger;
@@ -34,15 +37,24 @@ import org.slf4j.LoggerFactory;
 class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
     private static final long[] NO_LONGS = new long[0];
-    private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecutor.class);
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final PowerTenant tenant;
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
     private final OperationDescriptor<T, S> operationDescriptor;
 
-    public StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S> operationDescriptor) {
+    StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S> operationDescriptor) {
         this.tenant = tenant;
         this.operationDescriptor = operationDescriptor;
+    }
+
+    public static StrategyExecutor<LoanDescriptor, InvestmentStrategy> forInvesting(final PowerTenant tenant,
+                                                                                    final Investor investor) {
+        return new Investing(tenant, investor);
+    }
+
+    public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> forPurchasing(final PowerTenant tenant) {
+        return new Purchasing(tenant);
     }
 
     private static boolean isBiggerThan(final BigDecimal left, final BigDecimal right) {
@@ -51,20 +63,20 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
     private boolean skipStrategyEvaluation(final Collection<T> marketplace) {
         if (marketplace.isEmpty()) {
-            LOGGER.debug("Asleep as the marketplace is empty.");
+            logger.debug("Asleep as the marketplace is empty.");
             return true;
         }
         final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
         final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
         final boolean balanceChangedMeaningfully = isBiggerThan(currentBalance, lastCheckedBalance);
         if (balanceChangedMeaningfully) {
-            LOGGER.debug("Waking up due to a balance increase.");
+            logger.debug("Waking up due to a balance increase.");
             return false;
         } else if (hasMarketplaceUpdates(marketplace, operationDescriptor::identify)) {
-            LOGGER.debug("Waking up due to a change in marketplace.");
+            logger.debug("Waking up due to a change in marketplace.");
             return false;
         } else {
-            LOGGER.debug("Asleep as there was no change since last checked.");
+            logger.debug("Asleep as there was no change since last checked.");
             return true;
         }
     }
@@ -86,33 +98,51 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         if (skipStrategyEvaluation(marketplace)) {
             return Collections.emptyList();
         }
-        LOGGER.trace("Processing {} items from the marketplace.", marketplace.size());
+        logger.trace("Processing {} items from the marketplace.", marketplace.size());
         final Collection<Investment> result = operationDescriptor.getOperation().apply(tenant, marketplace, strategy);
-        LOGGER.trace("Marketplace processing complete.");
+        logger.trace("Marketplace processing complete.");
         return result;
-    }
-
-    public Duration getRefreshInterval() {
-        return operationDescriptor.getRefreshInterval();
     }
 
     @Override
     public Collection<Investment> get() {
         if (!operationDescriptor.isEnabled(tenant)) {
-            LOGGER.debug("Access to marketplace disabled by Zonky.");
+            logger.debug("Access to marketplace disabled by Zonky.");
             return Collections.emptyList();
         }
         final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
         final BigDecimal minimum = operationDescriptor.getMinimumBalance(tenant);
         if (isBiggerThan(minimum, currentBalance)) {
-            LOGGER.debug("Asleep due to balance being at or below than minimum. ({} <= {})", currentBalance, minimum);
+            logger.debug("Asleep due to balance being at or below than minimum. ({} <= {})", currentBalance, minimum);
             return Collections.emptyList();
         }
         return operationDescriptor.getStrategy(tenant)
                 .map(this::invest)
                 .orElseGet(() -> {
-                    LOGGER.debug("Asleep as there is no strategy.");
+                    logger.debug("Asleep as there is no strategy.");
                     return Collections.emptyList();
                 });
+    }
+
+    /**
+     * The reason for this class' existence is so that the logger in the superclass indicates the type of strategy
+     * being executed.
+     */
+    private static final class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
+
+        public Investing(final PowerTenant tenant, final Investor investor) {
+            super(tenant, new InvestingOperationDescriptor(investor));
+        }
+    }
+
+    /**
+     * The reason for this class' existence is so that the logger in the superclass indicates the type of strategy
+     * being executed.
+     */
+    private static final class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
+
+        public Purchasing(final PowerTenant tenant) {
+            super(tenant, new PurchasingOperationDescriptor());
+        }
     }
 }

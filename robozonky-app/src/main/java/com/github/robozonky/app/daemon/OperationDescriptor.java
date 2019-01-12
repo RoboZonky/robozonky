@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -28,8 +27,6 @@ interface OperationDescriptor<T, S> {
     boolean isEnabled(final Tenant tenant);
 
     Optional<S> getStrategy(final Tenant tenant);
-
-    Duration getRefreshInterval();
 
     Stream<T> readMarketplace(final Tenant tenant);
 

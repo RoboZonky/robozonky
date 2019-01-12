@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -34,16 +33,6 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PurchasingOperationDescriptor.class);
 
-    private final Duration refreshInterval;
-
-    public PurchasingOperationDescriptor(final Duration refreshInterval) {
-        this.refreshInterval = refreshInterval;
-    }
-
-    PurchasingOperationDescriptor() {
-        this(Duration.ZERO);
-    }
-
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant tenant) {
         return new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId()));
     }
@@ -56,11 +45,6 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     @Override
     public Optional<PurchaseStrategy> getStrategy(final Tenant tenant) {
         return tenant.getPurchaseStrategy();
-    }
-
-    @Override
-    public Duration getRefreshInterval() {
-        return refreshInterval;
     }
 
     @Override
