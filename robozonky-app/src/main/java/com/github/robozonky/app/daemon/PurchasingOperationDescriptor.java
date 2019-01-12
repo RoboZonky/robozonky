@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
@@ -81,8 +82,8 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
-    public boolean isBalanceUnderMinimum(final Tenant tenant, final int currentBalance) {
-        return currentBalance < 1;
+    public BigDecimal getMinimumBalance(final Tenant tenant) {
+        return BigDecimal.ONE;
     }
 
     @Override

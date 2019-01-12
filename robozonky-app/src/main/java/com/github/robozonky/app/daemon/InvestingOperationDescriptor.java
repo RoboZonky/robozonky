@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -82,8 +83,8 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public boolean isBalanceUnderMinimum(final Tenant tenant, final int currentBalance) {
-        return currentBalance < tenant.getRestrictions().getMinimumInvestmentAmount();
+    public BigDecimal getMinimumBalance(final Tenant tenant) {
+        return BigDecimal.valueOf(tenant.getRestrictions().getMinimumInvestmentAmount());
     }
 
     @Override

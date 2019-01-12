@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
@@ -32,7 +33,7 @@ interface OperationDescriptor<T, S> {
 
     Collection<T> readMarketplace(final Tenant tenant);
 
-    boolean isBalanceUnderMinimum(final Tenant tenant, final int currentBalance);
+    BigDecimal getMinimumBalance(final Tenant tenant);
 
     long identify(final T descriptor);
 

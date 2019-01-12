@@ -112,8 +112,9 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
             return Collections.emptyList();
         }
         final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
-        if (operationDescriptor.isBalanceUnderMinimum(tenant, currentBalance.intValue())) {
-            LOGGER.debug("Asleep due to balance being less than minimum.");
+        final BigDecimal minimum = operationDescriptor.getMinimumBalance(tenant);
+        if (minimum.compareTo(currentBalance) > 0) {
+            LOGGER.debug("Asleep due to balance being less than minimum. ({} < {})", currentBalance, minimum);
             return Collections.emptyList();
         }
         return operationDescriptor.getStrategy(tenant)
