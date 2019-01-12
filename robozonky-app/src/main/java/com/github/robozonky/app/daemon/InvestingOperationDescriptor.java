@@ -19,9 +19,8 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -74,12 +73,11 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public Collection<LoanDescriptor> readMarketplace(final Tenant tenant) {
+    public Stream<LoanDescriptor> readMarketplace(final Tenant tenant) {
         return tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
                 .map(LoanDescriptor::new)
-                .filter(InvestingOperationDescriptor::isActionable)
-                .collect(Collectors.toList());
+                .filter(InvestingOperationDescriptor::isActionable);
     }
 
     @Override

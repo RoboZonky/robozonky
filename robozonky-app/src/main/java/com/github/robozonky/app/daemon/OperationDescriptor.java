@@ -18,8 +18,8 @@ package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.github.robozonky.common.tenant.Tenant;
 
@@ -31,7 +31,7 @@ interface OperationDescriptor<T, S> {
 
     Duration getRefreshInterval();
 
-    Collection<T> readMarketplace(final Tenant tenant);
+    Stream<T> readMarketplace(final Tenant tenant);
 
     BigDecimal getMinimumBalance(final Tenant tenant);
 

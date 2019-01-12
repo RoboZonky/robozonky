@@ -18,9 +18,8 @@ package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -65,20 +64,20 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
-    public Collection<ParticipationDescriptor> readMarketplace(final Tenant tenant) {
+    public Stream<ParticipationDescriptor> readMarketplace(final Tenant tenant) {
         final long balance = tenant.getPortfolio().getBalance().longValue();
         final Select s = new Select()
                 .lessThanOrEquals("remainingPrincipal", balance)
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
+        final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
-                    final boolean wasSoldBefore = SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId);
+                    final boolean wasSoldBefore = cache.wasOnceSold(loanId);
                     LOGGER.debug("Loan #{} already sold before, ignoring: {}.", loanId, wasSoldBefore);
                     return !wasSoldBefore;
                 })
-                .map(p -> toDescriptor(p, tenant))
-                .collect(Collectors.toList());
+                .map(p -> toDescriptor(p, tenant));
     }
 
     @Override
