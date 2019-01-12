@@ -30,13 +30,9 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.jobs.SimplePayload;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
@@ -57,7 +53,6 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             // call all the jobs and daemons we know about
-            verify(d, times(2)).submit(any(), any(DaemonOperation.class), any(), any());
             verify(d, times(1)).submit(any(), any(SimplePayload.class), any(), any());
             verify(d, times(8)).submit(any(), any(), any(), any());
         } finally {

@@ -21,6 +21,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -34,7 +38,8 @@ import org.slf4j.LoggerFactory;
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
-    private final DaemonOperation investing, purchasing;
+    private final StrategyExecutor<LoanDescriptor, InvestmentStrategy> investing;
+    private final StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> purchasing;
     private final PowerTenant tenant;
     private final Consumer<Throwable> shutdownCall;
 
@@ -42,8 +47,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                 final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
-        this.investing = new InvestingDaemon(tenant, investor, primaryMarketplaceCheckPeriod);
-        this.purchasing = new PurchasingDaemon(tenant, secondaryMarketplaceCheckPeriod);
+        this.investing = new StrategyExecutor<>(tenant, new InvestingOperationDescriptor(investor, primaryMarketplaceCheckPeriod));
+        this.purchasing = new StrategyExecutor<>(tenant, new PurchasingOperationDescriptor(tenant, secondaryMarketplaceCheckPeriod));
         this.shutdownCall = shutdownCall;
     }
 
@@ -67,8 +72,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
-        submit(executor, investing, investing.getRefreshInterval());
-        submit(executor, purchasing, purchasing.getRefreshInterval(), Duration.ofMillis(250));
+        submit(executor, investing::get, investing.getRefreshInterval());
+        submit(executor, purchasing::get, purchasing.getRefreshInterval(), Duration.ofMillis(250));
     }
 
     private void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter) {
