@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.SoldParticipationCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;
@@ -35,16 +34,14 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PurchasingOperationDescriptor.class);
 
-    private final SoldParticipationCache soldParticipationCache;
     private final Duration refreshInterval;
 
-    public PurchasingOperationDescriptor(final PowerTenant auth, final Duration refreshInterval) {
-        this.soldParticipationCache = SoldParticipationCache.forTenant(auth);
+    public PurchasingOperationDescriptor(final Duration refreshInterval) {
         this.refreshInterval = refreshInterval;
     }
 
-    PurchasingOperationDescriptor(final PowerTenant auth) {
-        this(auth, Duration.ZERO);
+    PurchasingOperationDescriptor() {
+        this(Duration.ZERO);
     }
 
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant tenant) {
@@ -75,7 +72,7 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
-                    final boolean wasSoldBefore = soldParticipationCache.wasOnceSold(loanId);
+                    final boolean wasSoldBefore = SoldParticipationCache.forTenant(tenant).wasOnceSold(loanId);
                     LOGGER.debug("Loan #{} already sold before, ignoring: {}.", loanId, wasSoldBefore);
                     return !wasSoldBefore;
                 })

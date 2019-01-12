@@ -48,7 +48,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
         this.investing = new StrategyExecutor<>(tenant, new InvestingOperationDescriptor(investor, primaryMarketplaceCheckPeriod));
-        this.purchasing = new StrategyExecutor<>(tenant, new PurchasingOperationDescriptor(tenant, secondaryMarketplaceCheckPeriod));
+        this.purchasing = new StrategyExecutor<>(tenant, new PurchasingOperationDescriptor(
+                secondaryMarketplaceCheckPeriod));
         this.shutdownCall = shutdownCall;
     }
 
