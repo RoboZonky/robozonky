@@ -34,16 +34,19 @@ import org.slf4j.LoggerFactory;
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
-    private final DaemonOperation investing, purchasing;
     private final PowerTenant tenant;
+    private final Investor investor;
+    private final Duration primaryMarketplaceCheckPeriod;
+    private final Duration secondaryMarketplaceCheckPeriod;
     private final Consumer<Throwable> shutdownCall;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
                                 final Investor investor, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
-        this.investing = new InvestingDaemon(tenant, investor, primaryMarketplaceCheckPeriod);
-        this.purchasing = new PurchasingDaemon(tenant, secondaryMarketplaceCheckPeriod);
+        this.investor = investor;
+        this.primaryMarketplaceCheckPeriod = primaryMarketplaceCheckPeriod;
+        this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
         this.shutdownCall = shutdownCall;
     }
 
@@ -67,8 +70,9 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
-        submit(executor, investing, investing.getRefreshInterval());
-        submit(executor, purchasing, purchasing.getRefreshInterval(), Duration.ofMillis(250));
+        submit(executor, StrategyExecutor.forInvesting(tenant, investor)::get, primaryMarketplaceCheckPeriod);
+        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, secondaryMarketplaceCheckPeriod,
+               Duration.ofMillis(250));
     }
 
     private void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter) {

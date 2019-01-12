@@ -16,28 +16,31 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
 
-class InvestingDaemon extends DaemonOperation {
+class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
 
     /**
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
      */
     private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
-    private final Investing investing;
+    private final Investor investor;
 
-    public InvestingDaemon(final PowerTenant auth, final Investor investor, final Duration refreshPeriod) {
-        super(auth, refreshPeriod);
-        this.investing = new Investing(investor, auth);
+    public InvestingOperationDescriptor(final Investor investor) {
+        this.investor = investor;
+    }
+
+    public InvestingOperationDescriptor() {
+        this(null);
     }
 
     private static boolean isActionable(final LoanDescriptor loanDescriptor) {
@@ -48,30 +51,35 @@ class InvestingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected boolean isEnabled(final Tenant tenant) {
+    public boolean isEnabled(final Tenant tenant) {
         return !tenant.getRestrictions().isCannotInvest();
     }
 
     @Override
-    protected boolean hasStrategy(final Tenant tenant) {
-        return tenant.getInvestmentStrategy().isPresent();
+    public Optional<InvestmentStrategy> getStrategy(final Tenant tenant) {
+        return tenant.getInvestmentStrategy();
     }
 
     @Override
-    protected void execute(final Tenant tenant) {
-        // don't query anything unless we have enough money to invest
-        final long balance = tenant.getPortfolio().getBalance().longValue();
-        final int minimum = tenant.getRestrictions().getMinimumInvestmentAmount();
-        if (balance < minimum) {
-            LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
-            return;
-        }
-        // query marketplace for investment opportunities
-        final Collection<LoanDescriptor> loans = tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
+    public Stream<LoanDescriptor> readMarketplace(final Tenant tenant) {
+        return tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
                 .map(LoanDescriptor::new)
-                .filter(InvestingDaemon::isActionable)
-                .collect(Collectors.toList());
-        investing.apply(loans);
+                .filter(InvestingOperationDescriptor::isActionable);
+    }
+
+    @Override
+    public BigDecimal getMinimumBalance(final Tenant tenant) {
+        return BigDecimal.valueOf(tenant.getRestrictions().getMinimumInvestmentAmount());
+    }
+
+    @Override
+    public long identify(final LoanDescriptor descriptor) {
+        return descriptor.item().getId();
+    }
+
+    @Override
+    public Operation<LoanDescriptor, InvestmentStrategy> getOperation() {
+        return (a, b, c) -> InvestingSession.invest(investor, a, b, c);
     }
 }

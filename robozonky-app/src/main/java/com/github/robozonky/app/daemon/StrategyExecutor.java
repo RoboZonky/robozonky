@@ -19,76 +19,67 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.util.NumberUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class StrategyExecutor<T, S> implements Function<Collection<T>, Collection<Investment>> {
+class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
     private static final long[] NO_LONGS = new long[0];
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final PowerTenant tenant;
-    private final Supplier<Optional<S>> strategyProvider;
-    private final AtomicBoolean marketplaceCheckPending = new AtomicBoolean(false);
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
+    private final OperationDescriptor<T, S> operationDescriptor;
 
-    protected StrategyExecutor(final PowerTenant tenant, final Supplier<Optional<S>> strategy) {
+    StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S> operationDescriptor) {
         this.tenant = tenant;
-        this.strategyProvider = strategy;
+        this.operationDescriptor = operationDescriptor;
     }
 
-    protected PowerTenant getTenant() {
-        return tenant;
+    public static StrategyExecutor<LoanDescriptor, InvestmentStrategy> forInvesting(final PowerTenant tenant,
+                                                                                    final Investor investor) {
+        return new Investing(tenant, investor);
     }
 
-    protected abstract boolean isBalanceUnderMinimum(final int currentBalance);
+    public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> forPurchasing(final PowerTenant tenant) {
+        return new Purchasing(tenant);
+    }
 
-    protected abstract long identify(final T descriptor);
+    private static boolean isBiggerThan(final BigDecimal left, final BigDecimal right) {
+        return left.compareTo(right) > 0;
+    }
 
     private boolean skipStrategyEvaluation(final Collection<T> marketplace) {
         if (marketplace.isEmpty()) {
-            LOGGER.debug("Asleep as the marketplace is empty.");
+            logger.debug("Asleep as the marketplace is empty.");
             return true;
         }
         final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
-        if (isBalanceUnderMinimum(currentBalance.intValue())) {
-            LOGGER.debug("Asleep due to balance being less than minimum.");
-            return true;
-        } else if (marketplaceCheckPending.get()) {
-            LOGGER.debug("Waking up to finish a pending marketplace check.");
-            return false;
-        }
         final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
-        final boolean balanceChangedMeaningfully = currentBalance.compareTo(lastCheckedBalance) > 0;
+        final boolean balanceChangedMeaningfully = isBiggerThan(currentBalance, lastCheckedBalance);
         if (balanceChangedMeaningfully) {
-            LOGGER.debug("Waking up due to a balance increase.");
+            logger.debug("Waking up due to a balance increase.");
             return false;
-        } else if (hasMarketplaceUpdates(marketplace, this::identify)) {
-            LOGGER.debug("Waking up due to a change in marketplace.");
+        } else if (hasMarketplaceUpdates(marketplace, operationDescriptor::identify)) {
+            logger.debug("Waking up due to a change in marketplace.");
             return false;
         } else {
-            LOGGER.debug("Asleep as there was no change since last checked.");
+            logger.debug("Asleep as there was no change since last checked.");
             return true;
         }
     }
-
-    /**
-     * Execute the investment operations.
-     * @param strategy Strategy used to determine which items to take.
-     * @param marketplace Items available for the taking.
-     * @return Items taken by the investment algorithm, having matched the strategy.
-     */
-    protected abstract Collection<Investment> execute(final S strategy, final Collection<T> marketplace);
 
     /**
      * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
@@ -102,26 +93,56 @@ abstract class StrategyExecutor<T, S> implements Function<Collection<T>, Collect
         return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
     }
 
-    private Collection<Investment> invest(final S strategy, final Collection<T> marketplace) {
+    private Collection<Investment> invest(final S strategy) {
+        final Collection<T> marketplace = operationDescriptor.readMarketplace(tenant).collect(Collectors.toList());
         if (skipStrategyEvaluation(marketplace)) {
             return Collections.emptyList();
         }
-        LOGGER.trace("Processing {} items from the marketplace.", marketplace.size());
-        /*
-         * if the strategy evaluation fails with an exception, store that so that the next time - even if shouldSleep()
-         * says to sleep - we will check the marketplace.
-         */
-        marketplaceCheckPending.set(true);
-        final Collection<Investment> result = execute(strategy, marketplace);
-        marketplaceCheckPending.set(false);
-        LOGGER.trace("Marketplace processing complete.");
+        logger.trace("Processing {} items from the marketplace.", marketplace.size());
+        final Collection<Investment> result = operationDescriptor.getOperation().apply(tenant, marketplace, strategy);
+        logger.trace("Marketplace processing complete.");
         return result;
     }
 
     @Override
-    public Collection<Investment> apply(final Collection<T> marketplace) {
-        return strategyProvider.get()
-                .map(strategy -> invest(strategy, marketplace))
-                .orElse(Collections.emptyList());
+    public Collection<Investment> get() {
+        if (!operationDescriptor.isEnabled(tenant)) {
+            logger.debug("Access to marketplace disabled by Zonky.");
+            return Collections.emptyList();
+        }
+        final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
+        final BigDecimal minimum = operationDescriptor.getMinimumBalance(tenant);
+        if (isBiggerThan(minimum, currentBalance)) {
+            logger.debug("Asleep due to balance being at or below than minimum. ({} <= {})", currentBalance, minimum);
+            return Collections.emptyList();
+        }
+        return operationDescriptor.getStrategy(tenant)
+                .map(this::invest)
+                .orElseGet(() -> {
+                    logger.debug("Asleep as there is no strategy.");
+                    return Collections.emptyList();
+                });
+    }
+
+    /**
+     * The reason for this class' existence is so that the logger in the superclass indicates the type of strategy
+     * being executed.
+     */
+    private static final class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
+
+        public Investing(final PowerTenant tenant, final Investor investor) {
+            super(tenant, new InvestingOperationDescriptor(investor));
+        }
+    }
+
+    /**
+     * The reason for this class' existence is so that the logger in the superclass indicates the type of strategy
+     * being executed.
+     */
+    private static final class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
+
+        public Purchasing(final PowerTenant tenant) {
+            super(tenant, new PurchasingOperationDescriptor());
+        }
     }
 }
