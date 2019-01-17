@@ -76,6 +76,19 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void hasAdditions() {
+        final long[] original = new long[]{1};
+        final long[] updated = new long[]{1, 2};
+        assertSoftly(softly -> {
+            softly.assertThat(StrategyExecutor.hasAdditions(new long[0], original)).isFalse();
+            softly.assertThat(StrategyExecutor.hasAdditions(updated, original)).isTrue();
+            softly.assertThat(StrategyExecutor.hasAdditions(updated, original)).isTrue();
+            softly.assertThat(StrategyExecutor.hasAdditions(original, original)).isFalse();
+        });
+    }
+
+
+    @Test
     void purchasingNoneAccepted() {
         final Zonky zonky = harmlessZonky(9_000);
         final Loan loan = Loan.custom().setId(1).setAmount(200).build();

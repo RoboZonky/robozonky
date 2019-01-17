@@ -30,7 +30,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.util.NumberUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +58,30 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
     private static boolean isBiggerThan(final BigDecimal left, final BigDecimal right) {
         return left.compareTo(right) > 0;
+    }
+
+    private static boolean contains(final long toFind, final long... original) {
+        for (final long j : original) {
+            if (j == toFind) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean hasAdditions(final long[] current, final long... original) {
+        if (current.length == 0) {
+            return false;
+        } else if (current.length > original.length) {
+            return true;
+        }
+        for (final long i : current) {
+            final boolean found = contains(i, original);
+            if (!found) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean skipStrategyEvaluation(final Collection<T> marketplace) {
@@ -90,7 +113,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     private boolean hasMarketplaceUpdates(final Collection<T> marketplace, final ToLongFunction<T> idSupplier) {
         final long[] idsFromMarketplace = marketplace.stream().mapToLong(idSupplier).toArray();
         final long[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
-        return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
+        return hasAdditions(idsFromMarketplace, presentWhenLastChecked);
     }
 
     private Collection<Investment> invest(final S strategy) {
