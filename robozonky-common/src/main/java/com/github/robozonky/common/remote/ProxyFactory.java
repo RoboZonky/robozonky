@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import com.github.robozonky.internal.api.Settings;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +39,7 @@ final class ProxyFactory {
         LOGGER.debug("Set socket timeout to {} ms.", socketTimeout);
         final long connectionTimeout = settings.getConnectionTimeout().toMillis();
         LOGGER.debug("Set connection timeout to {} ms.", connectionTimeout);
-        // Supply the provider factory singleton, as otherwise RESTEasy would create a new instance every time.
         final ResteasyClientBuilder builder = new ResteasyClientBuilder()
-                .providerFactory(ResteasyProviderFactory.getInstance())
                 .readTimeout(socketTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(connectionTimeout, TimeUnit.MILLISECONDS);
         // setup HTTP proxy when required
