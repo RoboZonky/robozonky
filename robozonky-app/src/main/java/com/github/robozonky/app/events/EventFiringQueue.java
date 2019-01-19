@@ -58,8 +58,7 @@ final class EventFiringQueue {
             t.start();
             LOGGER.debug("Started event firing thread {}.", t.getName());
             return t;
-        })
-                .build();
+        }).build();
     }
 
     private static void await(final CyclicBarrier barrier, final long id) {
@@ -75,14 +74,22 @@ final class EventFiringQueue {
     }
 
     private void ensureConsumerIsAlive() {
+        ensureConsumerIsAlive(false);
+    }
+
+    private void ensureConsumerIsAlive(final boolean isRestarted) {
         final boolean isReady = firingThread.get().fold(t -> {
             LOGGER.debug("Failed retrieving event firing thread.", t);
             return false;
         }, Thread::isAlive);
-        if (!isReady) {
+        if (isReady) { // the thread is available
+            return;
+        } else if (isRestarted) { // the thread is not available even though it really should have been by now
+            throw new IllegalStateException("Event firing thread could not be started.");
+        } else {
             LOGGER.debug("Consumer thread not alive, restarting.");
             firingThread.clear();
-            ensureConsumerIsAlive();
+            ensureConsumerIsAlive(true); // "true" here prevents endless recursion
         }
     }
 
