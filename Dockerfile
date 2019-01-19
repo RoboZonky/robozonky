@@ -29,4 +29,4 @@ ENV JAVA_OPTS="$JAVA_OPTS \
     -Dlogback.configurationFile=$CONFIG_DIRECTORY/logback.xml"
 COPY --from=scratch /tmp/robozonky $INSTALL_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
-ENTRYPOINT exec $INSTALL_DIRECTORY/robozonky.sh @$CONFIG_DIRECTORY/robozonky.cli
+ENTRYPOINT $INSTALL_DIRECTORY/robozonky.sh @$CONFIG_DIRECTORY/robozonky.cli
