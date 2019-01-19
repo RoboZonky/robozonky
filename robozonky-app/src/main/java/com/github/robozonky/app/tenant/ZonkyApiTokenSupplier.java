@@ -75,6 +75,7 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
             LOGGER.debug("Found expired token for '{}', scope '{}'.", secrets.getUsername(), scope);
             return login();
         }
+        LOGGER.debug("Current token expiring on {}.", token.getExpiresOn());
         try {
             return refresh(token);
         } catch (final Exception ex) {

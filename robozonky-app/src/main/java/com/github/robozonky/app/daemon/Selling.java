@@ -58,7 +58,7 @@ final class Selling implements TenantPayload {
         LOGGER.debug("Will send sell request for loan #{}: {}.", i.getLoanId(), isRealRun);
         if (isRealRun) {
             tenant.run(z -> z.sell(i));
-            LOGGER.trace("Request over.");
+            LOGGER.info("Offered to sell investment in loan #{}.", i.getLoanId());
         }
         sold.put(i); // make sure dry run never tries to sell this again in this instance
         tenant.fire(EventFactory.saleOffered(i, r.descriptor().related()));

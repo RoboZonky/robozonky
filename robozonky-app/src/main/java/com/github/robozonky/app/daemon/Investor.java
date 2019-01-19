@@ -69,7 +69,7 @@ public class Investor {
         final Investment i = convertToInvestment(recommendedLoan);
         try {
             auth.run(zonky -> zonky.invest(i));
-            LOGGER.debug("Investment succeeded.");
+            LOGGER.info("Invested {} CZK into loan #{}.", recommendedLoan.amount(), i.getLoanId());
             return Either.right(recommendedLoan.amount());
         } catch (final Exception ex) {
             LOGGER.debug("Failed investing {} CZK into loan #{}. Likely already full in the meantime.",

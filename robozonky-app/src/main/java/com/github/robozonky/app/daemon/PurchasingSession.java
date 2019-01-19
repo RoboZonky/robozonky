@@ -108,6 +108,7 @@ final class PurchasingSession {
     private boolean actualPurchase(final Participation participation) {
         try {
             tenant.run(zonky -> zonky.purchase(participation));
+            LOGGER.info("Purchased a participation worth {} CZK.", participation.getRemainingPrincipal());
             return true;
         } catch (final Exception ex) {
             LOGGER.debug("Failed purchasing {}. Likely someone's beaten us to it.", ex);

@@ -105,22 +105,22 @@ public class Zonky {
     }
 
     public void invest(final Investment investment) {
-        LOGGER.info("Investing into loan #{}.", investment.getLoanId());
+        LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.invest(new RawInvestment(investment)));
     }
 
     public void cancel(final Investment investment) {
-        LOGGER.info("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
+        LOGGER.debug("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
     public void purchase(final Participation participation) {
-        LOGGER.info("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
+        LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
         controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
     }
 
     public void sell(final Investment investment) {
-        LOGGER.info("Offering to sell investment in loan #{}.", investment.getLoanId());
+        LOGGER.debug("Offering to sell investment in loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.offer(new SellRequest(new RawInvestment(investment))));
     }
 
