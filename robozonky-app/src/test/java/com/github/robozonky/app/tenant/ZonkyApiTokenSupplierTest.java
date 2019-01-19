@@ -130,7 +130,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void closing() {
+    void closingNeverLoaded() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
         final ZonkyApiToken token = getTokenExpiringIn(Duration.ofSeconds(5));
@@ -142,10 +142,26 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         t.close();
         verify(oAuth, never()).login(any(), any(), any());
         verify(zonky, never()).logout();
+        assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void closingLoaded() {
+        final Zonky zonky = mock(Zonky.class);
+        final OAuth oAuth = mock(OAuth.class);
+        final ZonkyApiToken token = getTokenExpiringIn(Duration.ofSeconds(5));
+        when(oAuth.login(eq(ZonkyScope.APP), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
+                .thenAnswer(invocation -> token);
+        when(oAuth.refresh(any())).thenReturn(token);
+        final ApiProvider api = mockApi(oAuth, zonky);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         t.get();
         verify(oAuth).login(any(), any(), any());
+        assertThat(t.isClosed()).isFalse();
         t.close();
         verify(zonky, only()).logout();
+        assertThat(t.isClosed()).isTrue();
+        assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -157,10 +173,6 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
                 .thenAnswer(invocation -> token);
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        t.close();
-        verify(zonky, never()).logout();
-        t.get();
-        verify(oAuth).login(any(), any(), any());
         t.close();
         verify(zonky, never()).logout();
     }

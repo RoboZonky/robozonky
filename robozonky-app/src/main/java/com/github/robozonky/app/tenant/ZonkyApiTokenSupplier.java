@@ -18,6 +18,7 @@ package com.github.robozonky.app.tenant;
 
 import java.io.Closeable;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
@@ -33,14 +34,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Will keep permanent user authentication running in the background.
  */
-final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
-                                             Closeable {
+class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
+                                       Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
     private final ZonkyScope scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;
     private final Reloadable<ZonkyApiToken> token;
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
         this(ZonkyScope.APP, apis, secrets, refreshAfter);
@@ -84,13 +86,22 @@ final class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         }
     }
 
+    public boolean isClosed() {
+        return isClosed.get();
+    }
+
     @Override
     public ZonkyApiToken get() {
-        return token.get().getOrElseThrow(t -> new NotAuthorizedException(t));
+        if (isClosed.get()) {
+            throw new IllegalStateException("Token already closed.");
+        } else {
+            return token.get().getOrElseThrow(t -> new NotAuthorizedException(t));
+        }
     }
 
     @Override
     public void close() {
+        isClosed.set(true);
         if (!token.hasValue()) {
             LOGGER.debug("Nothing to close.");
             return;

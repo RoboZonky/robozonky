@@ -92,7 +92,8 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public boolean isAvailable(final ZonkyScope scope) {
-        return availability.getAsBoolean();
+        // either Zonky is not available, or we have already logged out prior to daemon shutdown
+        return availability.getAsBoolean() && !getTokenSupplier(scope).isClosed();
     }
 
     @Override

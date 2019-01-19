@@ -41,7 +41,7 @@ final class Skippable implements Runnable {
     @Override
     public void run() {
         if (!tenant.isAvailable()) {
-            LOGGER.debug("Not running {} on account of Zonky not being available.", toRun);
+            LOGGER.debug("Not running {} on account of Zonky token not being available.", toRun);
             return;
         }
         LOGGER.trace("Running {}.", toRun);
