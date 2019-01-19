@@ -37,9 +37,8 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private final Map<Rating, BigDecimal> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> czkAtRiskPerRating;
 
-    PortfolioOverviewImpl(final BigDecimal czkAvailable,
-                                  final Map<Rating, BigDecimal> czkInvestedPerRating,
-                                  final Map<Rating, BigDecimal> czkAtRiskPerRating) {
+    PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
+                          final Map<Rating, BigDecimal> czkAtRiskPerRating) {
         this.czkAvailable = czkAvailable;
         this.czkInvested = sum(czkInvestedPerRating.values());
         if (isZero(this.czkInvested)) {

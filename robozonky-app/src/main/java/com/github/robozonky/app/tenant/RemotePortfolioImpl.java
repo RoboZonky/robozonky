@@ -62,6 +62,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .async()
                 .build();
         this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()))
+                .finishWith(po -> LOGGER.debug("New portfolio overview: {}.", po))
                 .reloadAfter(Duration.ofMinutes(5))
                 .build();
     }
@@ -76,6 +77,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     private void refreshPortfolio(final RemoteData data) {
         // remove synthetic charges that are replaced by actual remote blocked amounts
+        LOGGER.debug("New remote data: {}.", data);
+        LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
                 .filter(e -> e.getValue().isPersistent())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
@@ -92,6 +95,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     @Override
     public void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
+        LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> {
             final Map<Integer, Blocked> result = new LinkedHashMap<>(old);
             /*
@@ -106,36 +110,37 @@ class RemotePortfolioImpl implements RemotePortfolio {
         portfolioOverview.clear();
     }
 
-    /**
-     * Calling this method may cause a background operation to re-fetch all the data from Zonky.
-     * @return
-     */
     private RemoteData getRemotePortfolio() {
         return portfolio.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
     }
 
     @Override
-    public BigDecimal getBalance() { // load balance first, as it may result in update to synthetics
-        final BigDecimal balance = getRemotePortfolio().getWallet().getAvailableBalance();
+    public BigDecimal getBalance() {
+        final RemoteData data = getRemotePortfolio();
+        final BigDecimal balance = data.getWallet().getAvailableBalance();
         final BigDecimal allBlocked = sum(syntheticByLoanId.get().values());
-        return balance.subtract(allBlocked);
+        final BigDecimal result = balance.subtract(allBlocked);
+        LOGGER.debug("Balance: {} CZK available, {} CZK synthetic, {} CZK total.", balance, allBlocked, result);
+        return result;
     }
 
     @Override
     public Map<Rating, BigDecimal> getTotal() {
         final RemoteData data = getRemotePortfolio(); // use the same data for the entirety of this method
+        LOGGER.debug("Remote data used: {}.", data);
         final Map<Rating, BigDecimal> amounts = data.getStatistics().getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating,
                                           RemotePortfolioImpl::sum,
                                           BigDecimal::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
-        final Stream<Blocked> blocked = Stream.concat(syntheticByLoanId.get().values().stream(),
-                                                      data.getBlocked().values().stream());
-        blocked.forEach(b -> {
-            final Rating r = b.getRating();
-            final BigDecimal amount = b.getAmount();
-            amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(amount));
-        });
+        LOGGER.debug("Before synthetics: {}.", amounts);
+        Stream.concat(syntheticByLoanId.get().values().stream(), data.getBlocked().values().stream())
+                .forEach(b -> {
+                    final Rating r = b.getRating();
+                    final BigDecimal amount = b.getAmount();
+                    amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(amount));
+                });
+        LOGGER.debug("Totals: {}.", amounts);
         return Collections.unmodifiableMap(amounts);
     }
 
