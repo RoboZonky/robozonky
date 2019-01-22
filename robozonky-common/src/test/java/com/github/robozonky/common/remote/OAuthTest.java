@@ -41,7 +41,7 @@ class OAuthTest {
         final ZonkyApiToken token = oauth.login(USERNAME, PASSWORD.toCharArray());
         assertThat(token).isNotNull();
         verify(api, times(1))
-                .login(eq(USERNAME), eq(PASSWORD), eq(PASSWORD), eq(OAuthScope.APP_WEB));
+                .login(eq(USERNAME), eq(PASSWORD), eq(PASSWORD), eq(OAuthScope.SCOPE_APP_WEB));
     }
 
     @Test

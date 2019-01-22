@@ -16,20 +16,20 @@
 
 package com.github.robozonky.api.remote.enums;
 
-public enum OAuthScope implements BaseEnum {
+import java.util.Objects;
+import java.util.stream.Stream;
 
-    APP_OAUTH("SCOPE_APP_OAUTH"),
-    APP_WEB("SCOPE_APP_WEB"),
-    FILE_DOWNLOAD("SCOPE_FILE_DOWNLOAD");
+public enum OAuthScope {
 
-    private String code;
+    SCOPE_APP_OAUTH,
+    SCOPE_APP_WEB,
+    SCOPE_FILE_DOWNLOAD;
 
-    OAuthScope(final String code) {
-        this.code = code;
+    public static OAuthScope findByCode(final String code) {
+        return Stream.of(OAuthScope.values())
+                .filter(r -> Objects.equals(r.name(), code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown OAuth scope: " + code));
     }
 
-    @Override
-    public String getCode() {
-        return code;
-    }
 }

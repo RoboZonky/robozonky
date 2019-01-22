@@ -45,7 +45,7 @@ public interface Tenant extends AutoCloseable {
      * @return Whatever the operation returned.
      */
     default <T> T call(final Function<Zonky, T> operation) {
-        return call(operation, OAuthScope.APP_WEB);
+        return call(operation, OAuthScope.SCOPE_APP_WEB);
     }
 
     /**
@@ -64,7 +64,7 @@ public interface Tenant extends AutoCloseable {
      * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      */
     default void run(final Consumer<Zonky> operation) {
-        run(operation, OAuthScope.APP_WEB);
+        run(operation, OAuthScope.SCOPE_APP_WEB);
     }
 
     /**
@@ -83,7 +83,7 @@ public interface Tenant extends AutoCloseable {
      * the present authentication may already be invalid, without the new one being available yet.
      */
     default boolean isAvailable() {
-        return isAvailable(OAuthScope.APP_WEB);
+        return isAvailable(OAuthScope.SCOPE_APP_WEB);
     }
 
     /**
