@@ -21,10 +21,12 @@ import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.internal.util.DateUtil;
 
@@ -42,6 +44,10 @@ public class ZonkyApiToken extends BaseEntity {
     public static final String SCOPE_APP_WEB_STRING = "SCOPE_APP_WEB";
     public static final String SCOPE_FILE_DOWNLOAD_STRING = "SCOPE_FILE_DOWNLOAD";
 
+    private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
+
+    @XmlTransient
+    private final long id = ID_GENERATOR.getAndIncrement();
     @XmlElement(name = "access_token")
     private char[] accessToken;
     @XmlElement(name = REFRESH_TOKEN_STRING)
@@ -70,7 +76,7 @@ public class ZonkyApiToken extends BaseEntity {
         this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, SCOPE_APP_WEB_STRING);
     }
 
-    public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,final String scope) {
+    public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn, final String scope) {
         this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, scope);
     }
 
@@ -87,6 +93,10 @@ public class ZonkyApiToken extends BaseEntity {
         this.type = type;
         this.scope = scope;
         this.obtainedOn = obtainedOn;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public char[] getAccessToken() {

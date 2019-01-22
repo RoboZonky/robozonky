@@ -72,18 +72,24 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         return apis.oauth(oauth -> oauth.refresh(token));
     }
 
-    private ZonkyApiToken refreshOrLogin(final ZonkyApiToken token) {
+    private ZonkyApiToken actuallyRefreshOrLogin(final ZonkyApiToken token) {
         if (token.willExpireIn(Duration.ZERO)) {
-            LOGGER.debug("Found expired token for '{}', scope '{}'.", secrets.getUsername(), scope);
+            LOGGER.debug("Found expired token #{} for '{}', scope '{}'.", token.getId(), secrets.getUsername(), scope);
             return login();
         }
-        LOGGER.debug("Current token expiring on {}.", token.getExpiresOn());
+        LOGGER.debug("Current token #{} expiring on {}.", token.getId(), token.getExpiresOn());
         try {
             return refresh(token);
         } catch (final Exception ex) {
             LOGGER.debug("Failed refreshing access token, falling back to password.", ex);
             return login();
         }
+    }
+
+    private ZonkyApiToken refreshOrLogin(final ZonkyApiToken token) {
+        final ZonkyApiToken result = actuallyRefreshOrLogin(token);
+        LOGGER.debug("New token: {}.", token);
+        return result;
     }
 
     public boolean isClosed() {
