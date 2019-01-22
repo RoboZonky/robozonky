@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.tenant;
+package com.github.robozonky.api.remote.enums;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import org.junit.jupiter.api.Test;
 
-public enum ZonkyScope {
+import static org.assertj.core.api.Assertions.*;
 
-    APP(ZonkyApiToken.SCOPE_APP_WEB_STRING),
-    FILES(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
+class ZonkyScopeTest {
 
-    private String id;
-
-    ZonkyScope(final String id) {
-        this.id = id;
+    @Test
+    void defaults() {
+        assertThat(OAuthScope.APP.getId()).isEqualTo(ZonkyApiToken.SCOPE_APP_WEB_STRING);
+        assertThat(OAuthScope.FILES.getId()).isEqualTo(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
     }
 
-    public String getId() {
-        return id;
-    }
-
-    static ZonkyScope getDefault() {
-        return APP;
-    }
 }

@@ -22,10 +22,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import com.github.robozonky.internal.api.Settings;
 
 public final class TenantBuilder {
@@ -72,7 +72,7 @@ public final class TenantBuilder {
             throw new IllegalStateException("Secret provider must be provided.");
         }
         final ApiProvider apis = api == null ? new ApiProvider() : api;
-        final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier =
+        final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier =
                 scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, tokenRefresh);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
         final BooleanSupplier zonkyAvailability = lifecycle == null ? () -> true : () -> lifecycle.get().isOnline();

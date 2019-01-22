@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -33,7 +34,6 @@ import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
@@ -95,18 +95,18 @@ class PowerTenantImplTest extends AbstractEventLeveragingTest {
     void availabilityOfToken() {
         final ZonkyApiTokenSupplier s = mock(ZonkyApiTokenSupplier.class);
         final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, () -> true, null, scope -> s);
-        assertThat(t.isAvailable(ZonkyScope.APP)).isTrue();
+        assertThat(t.isAvailable(OAuthScope.APP)).isTrue();
         when(s.isClosed()).thenReturn(true);
-        assertThat(t.isAvailable(ZonkyScope.APP)).isFalse();
+        assertThat(t.isAvailable(OAuthScope.APP)).isFalse();
     }
 
     @Test
     void availabilityOfZonky() {
         final ZonkyApiTokenSupplier s = mock(ZonkyApiTokenSupplier.class);
         final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, () -> false, null, scope -> s);
-        assertThat(t.isAvailable(ZonkyScope.APP)).isFalse();
+        assertThat(t.isAvailable(OAuthScope.APP)).isFalse();
         when(s.isClosed()).thenReturn(true); // token availability makes no difference
-        assertThat(t.isAvailable(ZonkyScope.APP)).isFalse();
+        assertThat(t.isAvailable(OAuthScope.APP)).isFalse();
     }
 
     @Test

@@ -24,6 +24,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -36,18 +37,15 @@ import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.TransactionalTenant;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static com.github.robozonky.app.tenant.PowerTenant.transactional;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
@@ -58,8 +56,8 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void delegatesAvailability() {
-        final boolean available = tenant.isAvailable(ZonkyScope.APP);
-        assertThat(transactional.isAvailable(ZonkyScope.APP)).isEqualTo(available);
+        final boolean available = tenant.isAvailable(OAuthScope.APP);
+        assertThat(transactional.isAvailable(OAuthScope.APP)).isEqualTo(available);
     }
 
     @Test

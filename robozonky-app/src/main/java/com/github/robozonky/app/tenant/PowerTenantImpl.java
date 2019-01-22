@@ -28,6 +28,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -39,7 +40,6 @@ import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import io.vavr.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +51,9 @@ class PowerTenantImpl implements PowerTenant {
 
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
-    private final Function<ZonkyScope, ZonkyApiTokenSupplier> supplier;
+    private final Function<OAuthScope, ZonkyApiTokenSupplier> supplier;
     private final BooleanSupplier availability;
-    private final Map<ZonkyScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(ZonkyScope.class);
+    private final Map<OAuthScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(OAuthScope.class);
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final StrategyProvider strategyProvider;
@@ -61,7 +61,7 @@ class PowerTenantImpl implements PowerTenant {
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
                     final StrategyProvider strategyProvider,
-                    final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier) {
+                    final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.sessionInfo = sessionInfo;
@@ -81,17 +81,17 @@ class PowerTenantImpl implements PowerTenant {
         });
     }
 
-    private ZonkyApiTokenSupplier getTokenSupplier(final ZonkyScope scope) {
+    private ZonkyApiTokenSupplier getTokenSupplier(final OAuthScope scope) {
         return tokens.computeIfAbsent(scope, supplier);
     }
 
     @Override
-    public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
+    public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
         return apis.call(operation, getTokenSupplier(scope));
     }
 
     @Override
-    public boolean isAvailable(final ZonkyScope scope) {
+    public boolean isAvailable(final OAuthScope scope) {
         // either Zonky is not available, or we have already logged out prior to daemon shutdown
         return availability.getAsBoolean() && !getTokenSupplier(scope).isClosed();
     }

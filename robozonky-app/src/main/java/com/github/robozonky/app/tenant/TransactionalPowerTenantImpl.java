@@ -26,6 +26,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -34,7 +35,6 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.RemotePortfolio;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,12 +85,12 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
-    public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
+    public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
         return parent.call(operation, scope);
     }
 
     @Override
-    public boolean isAvailable(final ZonkyScope scope) {
+    public boolean isAvailable(final OAuthScope scope) {
         return parent.isAvailable(scope);
     }
 

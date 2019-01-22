@@ -23,11 +23,11 @@ import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +38,17 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                                        Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
-    private final ZonkyScope scope;
+    private final OAuthScope scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;
     private final Reloadable<ZonkyApiToken> token;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
-        this(ZonkyScope.APP, apis, secrets, refreshAfter);
+        this(OAuthScope.APP, apis, secrets, refreshAfter);
     }
 
-    public ZonkyApiTokenSupplier(final ZonkyScope scope, final ApiProvider apis, final SecretProvider secrets,
+    public ZonkyApiTokenSupplier(final OAuthScope scope, final ApiProvider apis, final SecretProvider secrets,
                                  final Duration refreshAfter) {
         this.scope = scope;
         this.apis = apis;

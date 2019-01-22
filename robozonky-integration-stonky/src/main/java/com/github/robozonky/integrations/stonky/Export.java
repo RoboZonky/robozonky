@@ -25,10 +25,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.ws.rs.core.Response;
 
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.common.async.Backoff;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +61,9 @@ enum Export {
     }
 
     public CompletableFuture<Optional<File>> download(final Tenant tenant, final Duration backoffTime) {
-        final Backoff<URL> waitWhileExportRunning = Backoff.exponential(() -> tenant.call(download, ZonkyScope.FILES),
+        final Backoff<URL> waitWhileExportRunning = Backoff.exponential(() -> tenant.call(download, OAuthScope.FILES),
                                                                         Duration.ofSeconds(1), backoffTime);
-        return CompletableFuture.runAsync(() -> tenant.run(trigger, ZonkyScope.APP))
+        return CompletableFuture.runAsync(() -> tenant.run(trigger, OAuthScope.APP))
                 .thenApplyAsync(v -> waitWhileExportRunning.get())
                 .thenApplyAsync(urlOrError -> urlOrError.fold(r -> Optional.empty(), Util::download));
     }

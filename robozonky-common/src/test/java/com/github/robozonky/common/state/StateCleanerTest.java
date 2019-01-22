@@ -23,13 +23,13 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,12 +57,12 @@ class StateCleanerTest {
     private static final class MyTenant implements Tenant {
 
         @Override
-        public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
+        public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
             return null;
         }
 
         @Override
-        public boolean isAvailable(final ZonkyScope scope) {
+        public boolean isAvailable(final OAuthScope scope) {
             return false;
         }
 

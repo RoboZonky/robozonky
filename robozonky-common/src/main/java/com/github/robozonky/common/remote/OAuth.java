@@ -18,7 +18,7 @@ package com.github.robozonky.common.remote;
 
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.common.tenant.ZonkyScope;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 
 public class OAuth {
 
@@ -29,10 +29,10 @@ public class OAuth {
     }
 
     public ZonkyApiToken login(final String username, final char[] password) {
-        return login(ZonkyScope.APP, username, password);
+        return login(OAuthScope.APP, username, password);
     }
 
-    public ZonkyApiToken login(final ZonkyScope scope, final String username, final char[] password) {
+    public ZonkyApiToken login(final OAuthScope scope, final String username, final char[] password) {
         return api.call(a -> a.login(username, String.valueOf(password), "password", scope.getId()));
     }
 

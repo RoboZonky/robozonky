@@ -23,6 +23,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -44,7 +45,7 @@ public interface Tenant extends AutoCloseable {
      * @return Whatever the operation returned.
      */
     default <T> T call(final Function<Zonky, T> operation) {
-        return call(operation, ZonkyScope.getDefault());
+        return call(operation, OAuthScope.APP);
     }
 
     /**
@@ -55,7 +56,7 @@ public interface Tenant extends AutoCloseable {
      * @param <T> Return type of the operation.
      * @return Whatever the operation returned.
      */
-    <T> T call(Function<Zonky, T> operation, ZonkyScope scope);
+    <T> T call(Function<Zonky, T> operation, OAuthScope scope);
 
     /**
      * Execute an operation using on the Zonky server, using the default scope.
@@ -63,7 +64,7 @@ public interface Tenant extends AutoCloseable {
      * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      */
     default void run(final Consumer<Zonky> operation) {
-        run(operation, ZonkyScope.getDefault());
+        run(operation, OAuthScope.APP);
     }
 
     /**
@@ -72,7 +73,7 @@ public interface Tenant extends AutoCloseable {
      * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      * @param scope The scope of access to request with the Zonky server.
      */
-    default void run(final Consumer<Zonky> operation, final ZonkyScope scope) {
+    default void run(final Consumer<Zonky> operation, final OAuthScope scope) {
         call(StreamUtil.toFunction(operation), scope);
     }
 
@@ -82,7 +83,7 @@ public interface Tenant extends AutoCloseable {
      * the present authentication may already be invalid, without the new one being available yet.
      */
     default boolean isAvailable() {
-        return isAvailable(ZonkyScope.getDefault());
+        return isAvailable(OAuthScope.APP);
     }
 
     /**
@@ -91,7 +92,7 @@ public interface Tenant extends AutoCloseable {
      * @return False in cases such as when the user's authentication credentials are being refreshed and therefore
      * the present authentication may already be invalid, without the new one being available yet.
      */
-    boolean isAvailable(ZonkyScope scope);
+    boolean isAvailable(OAuthScope scope);
 
     /**
      * Provides all relevant data representing user portfolio, such as blocked amounts and wallet balance. This may be
@@ -115,7 +116,6 @@ public interface Tenant extends AutoCloseable {
     /**
      * Retrieve a {@link Loan} from Zonky, possibly caching it in the process. If you don't wish to cache the loan,
      * simply use {@link #call(Function)} to get to {@link Zonky#getLoan(int)}.
-     *
      * @param loanId
      * @return
      */
