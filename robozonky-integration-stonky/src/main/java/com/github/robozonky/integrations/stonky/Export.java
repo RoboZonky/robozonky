@@ -61,9 +61,9 @@ enum Export {
     }
 
     public CompletableFuture<Optional<File>> download(final Tenant tenant, final Duration backoffTime) {
-        final Backoff<URL> waitWhileExportRunning = Backoff.exponential(() -> tenant.call(download, OAuthScope.FILES),
+        final Backoff<URL> waitWhileExportRunning = Backoff.exponential(() -> tenant.call(download, OAuthScope.FILE_DOWNLOAD),
                                                                         Duration.ofSeconds(1), backoffTime);
-        return CompletableFuture.runAsync(() -> tenant.run(trigger, OAuthScope.APP))
+        return CompletableFuture.runAsync(() -> tenant.run(trigger, OAuthScope.APP_WEB))
                 .thenApplyAsync(v -> waitWhileExportRunning.get())
                 .thenApplyAsync(urlOrError -> urlOrError.fold(r -> Optional.empty(), Util::download));
     }

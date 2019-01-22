@@ -45,7 +45,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
-        this(OAuthScope.APP, apis, secrets, refreshAfter);
+        this(OAuthScope.APP_WEB, apis, secrets, refreshAfter);
     }
 
     public ZonkyApiTokenSupplier(final OAuthScope scope, final ApiProvider apis, final SecretProvider secrets,

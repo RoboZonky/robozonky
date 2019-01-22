@@ -95,18 +95,18 @@ class PowerTenantImplTest extends AbstractEventLeveragingTest {
     void availabilityOfToken() {
         final ZonkyApiTokenSupplier s = mock(ZonkyApiTokenSupplier.class);
         final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, () -> true, null, scope -> s);
-        assertThat(t.isAvailable(OAuthScope.APP)).isTrue();
+        assertThat(t.isAvailable(OAuthScope.APP_WEB)).isTrue();
         when(s.isClosed()).thenReturn(true);
-        assertThat(t.isAvailable(OAuthScope.APP)).isFalse();
+        assertThat(t.isAvailable(OAuthScope.APP_WEB)).isFalse();
     }
 
     @Test
     void availabilityOfZonky() {
         final ZonkyApiTokenSupplier s = mock(ZonkyApiTokenSupplier.class);
         final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, () -> false, null, scope -> s);
-        assertThat(t.isAvailable(OAuthScope.APP)).isFalse();
+        assertThat(t.isAvailable(OAuthScope.APP_WEB)).isFalse();
         when(s.isClosed()).thenReturn(true); // token availability makes no difference
-        assertThat(t.isAvailable(OAuthScope.APP)).isFalse();
+        assertThat(t.isAvailable(OAuthScope.APP_WEB)).isFalse();
     }
 
     @Test

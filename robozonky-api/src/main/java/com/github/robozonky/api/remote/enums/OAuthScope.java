@@ -16,21 +16,16 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-
 public enum OAuthScope implements BaseEnum {
 
-    APP(ZonkyApiToken.SCOPE_APP_WEB_STRING),
-    FILES(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
+    APP_OAUTH("SCOPE_APP_OAUTH"),
+    APP_WEB("SCOPE_APP_WEB"),
+    FILE_DOWNLOAD("SCOPE_FILE_DOWNLOAD");
 
     private String code;
 
     OAuthScope(final String code) {
         this.code = code;
-    }
-
-    public String getId() {
-        return code;
     }
 
     @Override

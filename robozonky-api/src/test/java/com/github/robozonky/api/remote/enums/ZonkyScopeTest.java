@@ -16,7 +16,6 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,8 +24,9 @@ class ZonkyScopeTest {
 
     @Test
     void defaults() {
-        assertThat(OAuthScope.APP.getId()).isEqualTo(ZonkyApiToken.SCOPE_APP_WEB_STRING);
-        assertThat(OAuthScope.FILES.getId()).isEqualTo(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
+        assertThat(OAuthScope.APP_WEB.getCode()).isEqualTo("SCOPE_APP_WEB");
+        assertThat(OAuthScope.FILE_DOWNLOAD.getCode()).isEqualTo("SCOPE_FILE_DOWNLOAD");
+        assertThat(OAuthScope.APP_OAUTH.getCode()).isEqualTo("SCOPE_APP_OAUTH");
     }
 
 }

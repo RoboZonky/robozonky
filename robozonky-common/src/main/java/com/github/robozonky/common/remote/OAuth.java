@@ -29,15 +29,16 @@ public class OAuth {
     }
 
     public ZonkyApiToken login(final String username, final char[] password) {
-        return login(OAuthScope.APP, username, password);
+        return login(OAuthScope.APP_WEB, username, password);
     }
 
     public ZonkyApiToken login(final OAuthScope scope, final String username, final char[] password) {
-        return api.call(a -> a.login(username, String.valueOf(password), "password", scope.getId()));
+        return api.call(a -> a.login(username, String.valueOf(password), "password", scope));
     }
 
     public ZonkyApiToken refresh(final ZonkyApiToken token) {
+        // FIXME get the proper scope
         return api.call(a -> a.refresh(String.valueOf(token.getRefreshToken()), ZonkyApiToken.REFRESH_TOKEN_STRING,
-                                       token.getScope()));
+                                       OAuthScope.APP_WEB));
     }
 }

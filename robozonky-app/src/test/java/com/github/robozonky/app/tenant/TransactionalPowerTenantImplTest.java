@@ -56,8 +56,8 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void delegatesAvailability() {
-        final boolean available = tenant.isAvailable(OAuthScope.APP);
-        assertThat(transactional.isAvailable(OAuthScope.APP)).isEqualTo(available);
+        final boolean available = tenant.isAvailable(OAuthScope.APP_WEB);
+        assertThat(transactional.isAvailable(OAuthScope.APP_WEB)).isEqualTo(available);
     }
 
     @Test

@@ -37,7 +37,7 @@ class TenantTest {
         when(t.getSessionInfo()).thenReturn(new SessionInfo("someone@somewhere.cz"));
         when(t.isAvailable(any())).thenReturn(true);
         assertThat(t.isAvailable()).isTrue();
-        verify(t).isAvailable(eq(OAuthScope.APP));
+        verify(t).isAvailable(eq(OAuthScope.APP_WEB));
         final Function<Zonky, String> f = z -> "";
         t.call(f);
         verify(t).call(eq(f));
