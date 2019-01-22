@@ -88,7 +88,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     private ZonkyApiToken refreshOrLogin(final ZonkyApiToken token) {
         final ZonkyApiToken result = actuallyRefreshOrLogin(token);
-        LOGGER.debug("New token: {}.", token);
+        LOGGER.debug("Token changed from {} to {}.", token, result);
         return result;
     }
 
