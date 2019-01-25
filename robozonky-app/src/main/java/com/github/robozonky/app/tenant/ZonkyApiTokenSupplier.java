@@ -32,9 +32,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Will keep permanent user authentication running in the background.
- * <p>
- * Certain parts of this class are synchronized, so that the tokens are only ever modified by one thread and therefore
- * different threads cannot interfere with one another.
  */
 class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                                        Closeable {
@@ -110,26 +107,22 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         if (isClosed.get()) {
             throw new IllegalStateException("Token already closed.");
         }
-        synchronized (this) {
-            return token.get().getOrElseThrow(t -> new IllegalStateException("Token retrieval failed.", t));
-        }
+        return token.get().getOrElseThrow(t -> new IllegalStateException("Token retrieval failed.", t));
     }
 
     @Override
     public void close() {
         isClosed.set(true);
-        synchronized (this) {
-            if (!token.hasValue()) {
-                LOGGER.debug("Nothing to close.");
-                return;
-            }
-            final ZonkyApiToken toClose = token.get().getOrElse(() -> null);
-            if (toClose == null || toClose.isExpired()) {
-                LOGGER.debug("Nothing to close or expired.");
-                return;
-            }
-            LOGGER.info("Logging '{}' out of scope '{}'.", secrets.getUsername(), scope);
-            apis.run(Zonky::logout, () -> toClose);
+        if (!token.hasValue()) {
+            LOGGER.debug("Nothing to close.");
+            return;
         }
+        final ZonkyApiToken toClose = token.get().getOrElse(() -> null);
+        if (toClose == null || toClose.isExpired()) {
+            LOGGER.debug("Nothing to close or expired.");
+            return;
+        }
+        LOGGER.info("Logging '{}' out of scope '{}'.", secrets.getUsername(), scope);
+        apis.run(Zonky::logout, () -> toClose);
     }
 }
