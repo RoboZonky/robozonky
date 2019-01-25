@@ -80,7 +80,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
         assertThat(t.get()).isEqualTo(token);
-        skipAheadBy(Duration.ofMinutes(2)); // get over the refresh period
+        skipAheadBy(Duration.ofSeconds(4 * 60 + 56)); // get over the refresh period
         final ZonkyApiToken secondToken = getTokenExpiringIn(Duration.ofMinutes(5));
         when(oAuth.refresh(any())).thenReturn(secondToken);
         assertThat(t.get()).isEqualTo(secondToken);
@@ -123,7 +123,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
         final ZonkyApiToken token = t.get();
         assertThat(token).isNotNull();
-        skipAheadBy(Duration.ofMinutes(2)); // get over the refresh period
+        skipAheadBy(Duration.ofMinutes(5)); // get over the refresh period
         doThrow(IllegalStateException.class).when(oAuth).refresh(any());
         assertThat(t.get()).isNotNull()
                 .isNotSameAs(token);

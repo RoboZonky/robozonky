@@ -17,6 +17,7 @@
 package com.github.robozonky.app.tenant;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
@@ -25,19 +26,18 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class TenantBuilderTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void apiProvided() {
         final OAuth o = mock(OAuth.class);
+        when(o.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider a = mockApiProvider(o, z);
         final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());

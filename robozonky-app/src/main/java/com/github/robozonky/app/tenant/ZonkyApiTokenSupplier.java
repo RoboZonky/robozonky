@@ -103,18 +103,22 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         return isClosed.get();
     }
 
+    private static final ZonkyApiToken getToken(final Reloadable<ZonkyApiToken> token) {
+        return token.get().getOrElseThrow(t -> new NotAuthorizedException(t));
+    }
+
     @Override
     public ZonkyApiToken get() {
         if (isClosed.get()) {
             throw new IllegalStateException("Token already closed.");
         }
-        final ZonkyApiToken result = token.get().getOrElseThrow(t -> new NotAuthorizedException(t));
+        final ZonkyApiToken result = getToken(token);
         if (!result.isExpired()) {
             return result;
         }
         LOGGER.debug("Retrieved expired token #{}.", result.getId());
         token.clear();
-        return get();
+        return getToken(token);
     }
 
     @Override
