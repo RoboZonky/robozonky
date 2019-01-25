@@ -68,10 +68,6 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         return Duration.ofSeconds(secondsToReloadAfter);
     }
 
-    private static ZonkyApiToken getToken(final Reloadable<ZonkyApiToken> token) {
-        return token.get().getOrElseThrow(t -> new IllegalStateException("Token retrieval failed.", t));
-    }
-
     private ZonkyApiToken login() {
         return apis.oauth(oauth -> {
             final String username = secrets.getUsername();
@@ -115,13 +111,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
             throw new IllegalStateException("Token already closed.");
         }
         synchronized (this) {
-            final ZonkyApiToken result = getToken(token);
-            if (!result.isExpired()) {
-                return result;
-            }
-            LOGGER.debug("Retrieved expired token #{}.", result.getId());
-            token.clear();
-            return getToken(token);
+            return token.get().getOrElseThrow(t -> new IllegalStateException("Token retrieval failed.", t));
         }
     }
 

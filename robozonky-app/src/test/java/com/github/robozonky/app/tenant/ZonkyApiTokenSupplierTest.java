@@ -86,6 +86,23 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void newLoginWhenTokenExpiredWithoutRefresh() {
+        final Zonky zonky = mock(Zonky.class);
+        final OAuth oAuth = mock(OAuth.class);
+        final ZonkyApiToken token = getTokenExpiringIn(Duration.ofMinutes(5));
+        when(oAuth.login(eq(OAuthScope.SCOPE_APP_WEB), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
+                .thenAnswer(invocation -> token);
+        final ApiProvider api = mockApi(oAuth, zonky);
+        final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
+        assertThat(t.get()).isEqualTo(token);
+        skipAheadBy(Duration.ofMinutes(6)); // get over the expiration period
+        final ZonkyApiToken secondToken = getTokenExpiringIn(Duration.ofMinutes(5));
+        when(oAuth.login(eq(OAuthScope.SCOPE_APP_WEB), eq(SECRETS.getUsername()), eq(SECRETS.getPassword())))
+                .thenAnswer(invocation -> secondToken);
+        assertThat(t.get()).isEqualTo(secondToken);
+    }
+
+    @Test
     void reloginsWhenAlreadyExpired() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
@@ -122,10 +139,12 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
         final ZonkyApiToken token = t.get();
         assertThat(token).isNotNull();
-        skipAheadBy(Duration.ofMinutes(5)); // get over the refresh period
+        skipAheadBy(Duration.ofSeconds(4 * 60 + 55)); // get over the refresh period, but not over expiration
         doThrow(IllegalStateException.class).when(oAuth).refresh(any());
-        assertThat(t.get()).isNotNull()
+        assertThat(t.get())
+                .isNotNull()
                 .isNotSameAs(token);
+        verify(oAuth).refresh(any()); // make sure refresh was rejected before login was called
     }
 
     @Test
