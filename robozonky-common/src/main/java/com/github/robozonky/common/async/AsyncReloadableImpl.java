@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -37,7 +38,7 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
     }
 
     public AsyncReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                               final Consumer<T> runWhenReloaded, final Duration reloadAfter) {
+                               final Consumer<T> runWhenReloaded, final Function<T, Duration> reloadAfter) {
         super(supplier, reloader, runWhenReloaded, reloadAfter);
     }
 

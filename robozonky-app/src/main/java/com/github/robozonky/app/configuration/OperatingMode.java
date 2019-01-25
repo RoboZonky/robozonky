@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -34,7 +33,6 @@ import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +48,6 @@ final class OperatingMode {
 
     private static PowerTenant getTenant(final CommandLine cli, final Supplier<Lifecycle> lifecycle,
                                          final SecretProvider secrets) {
-        final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
         final TenantBuilder b = new TenantBuilder();
         if (cli.isDryRunEnabled()) {
             LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
@@ -60,7 +57,7 @@ final class OperatingMode {
                 .withStrategy(cli.getStrategyLocation())
                 .withAvailabilityFrom(lifecycle)
                 .named(cli.getName())
-                .build(duration);
+                .build();
     }
 
     private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials,

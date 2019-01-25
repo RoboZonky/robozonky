@@ -21,15 +21,12 @@ import java.util.UUID;
 
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class OAuthTest {
 
@@ -38,13 +35,13 @@ class OAuthTest {
     @Test
     void login() {
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
-        when(api.login(anyString(), anyString(), anyString(), anyString())).thenReturn(mock(ZonkyApiToken.class));
+        when(api.login(anyString(), anyString(), anyString(), any())).thenReturn(mock(ZonkyApiToken.class));
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         final OAuth oauth = new OAuth(wrapper);
         final ZonkyApiToken token = oauth.login(USERNAME, PASSWORD.toCharArray());
         assertThat(token).isNotNull();
         verify(api, times(1))
-                .login(eq(USERNAME), eq(PASSWORD), eq(PASSWORD), eq("SCOPE_APP_WEB"));
+                .login(eq(USERNAME), eq(PASSWORD), eq(PASSWORD), eq(OAuthScope.SCOPE_APP_WEB));
     }
 
     @Test
@@ -54,8 +51,7 @@ class OAuthTest {
                                                             OffsetDateTime.now());
         final ZonkyApiToken resultToken = mock(ZonkyApiToken.class);
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
-        when(api.refresh(eq(originalTokenId),
-                         anyString(), anyString())).thenReturn(resultToken);
+        when(api.refresh(eq(originalTokenId), anyString(), any())).thenReturn(resultToken);
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         final OAuth oauth = new OAuth(wrapper);
         final ZonkyApiToken returnedToken = oauth.refresh(originToken);

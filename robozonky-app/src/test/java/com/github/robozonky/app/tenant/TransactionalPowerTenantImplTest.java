@@ -24,6 +24,8 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -36,30 +38,28 @@ import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.TransactionalTenant;
-import com.github.robozonky.common.tenant.ZonkyScope;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static com.github.robozonky.app.tenant.PowerTenant.transactional;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
-    private final PowerTenant tenant = mockTenant();
+    private final Zonky zonky = harmlessZonky(10_000);
+    private final PowerTenant tenant = mockTenant(zonky);
     private final TransactionalPowerTenant transactional = transactional(tenant);
 
     @Test
     void delegatesAvailability() {
-        final boolean available = tenant.isAvailable(ZonkyScope.APP);
-        assertThat(transactional.isAvailable(ZonkyScope.APP)).isEqualTo(available);
+        final boolean available = tenant.isAvailable(OAuthScope.SCOPE_APP_WEB);
+        assertThat(transactional.isAvailable(OAuthScope.SCOPE_APP_WEB)).isEqualTo(available);
     }
 
     @Test
@@ -99,7 +99,14 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void fires() throws Exception {
+    void delegatesLoan() {
+        when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
+        final Loan result = tenant.getLoan(1);
+        assertThat(transactional.getLoan(1)).isEqualTo(result);
+    }
+
+    @Test
+    void fires() {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
@@ -120,7 +127,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void firesLazy() throws Exception {
+    void firesLazy() {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
@@ -159,7 +166,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void doesNotFailOnNoop() throws Exception {
+    void doesNotFailOnNoop() {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
@@ -185,12 +192,12 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final PowerTenant orig = mockTenant();
         doAnswer(i -> s).when(orig).getState(any());
         final TransactionalTenant copy = new TransactionalPowerTenantImpl(orig);
-        final InstanceState<TransactionalPowerTenantImplTest> is = copy.getState(TransactionalPowerTenantImplTest.class);
+        final InstanceState<TransactionalPowerTenantImplTest> is = copy.getState(
+                TransactionalPowerTenantImplTest.class);
         is.update(m -> m.put(key, "b"));
         assertThat(s.getKeys()).isEmpty(); // nothing was stored
         copy.commit();
         assertThat(s.getKeys()).containsOnly(key); // now it was persisted
     }
-
 }
 

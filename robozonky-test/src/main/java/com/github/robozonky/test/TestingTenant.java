@@ -22,6 +22,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -30,7 +31,6 @@ import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.common.tenant.ZonkyScope;
 
 public class TestingTenant implements Tenant {
 
@@ -45,12 +45,12 @@ public class TestingTenant implements Tenant {
     }
 
     @Override
-    public <T> T call(final Function<Zonky, T> operation, final ZonkyScope scope) {
+    public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
         return operation.apply(zonky);
     }
 
     @Override
-    public boolean isAvailable(final ZonkyScope scope) {
+    public boolean isAvailable(final OAuthScope scope) {
         return true;
     }
 

@@ -19,6 +19,7 @@ package com.github.robozonky.common.async;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -35,7 +36,7 @@ final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
     }
 
     public ReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                          final Consumer<T> runWhenReloaded, final Duration reloadAfter) {
+                          final Consumer<T> runWhenReloaded, final Function<T, Duration> reloadAfter) {
         super(supplier, reloader, runWhenReloaded, reloadAfter);
     }
 

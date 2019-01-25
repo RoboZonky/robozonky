@@ -11,6 +11,66 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String, ===java.lang.String===)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String, ===com.github.robozonky.api.remote.enums.OAuthScope===)",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String, ===java.lang.String===)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String, ===com.github.robozonky.api.remote.enums.OAuthScope===)",
+        "annotation": "@javax.ws.rs.DefaultValue(\"SCOPE_APP_WEB\")",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String, ===java.lang.String===)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String, ===com.github.robozonky.api.remote.enums.OAuthScope===)",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String, ===java.lang.String===)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String, ===com.github.robozonky.api.remote.enums.OAuthScope===)",
+        "annotation": "@javax.ws.rs.DefaultValue(\"SCOPE_APP_WEB\")",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.field.removedWithConstant",
+        "old": "field com.github.robozonky.api.remote.entities.ZonkyApiToken.SCOPE_APP_WEB_STRING",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.field.removedWithConstant",
+        "old": "field com.github.robozonky.api.remote.entities.ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, java.lang.String)",
+        "new": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, java.time.OffsetDateTime, java.lang.String, com.github.robozonky.api.remote.enums.OAuthScope[])",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, java.time.OffsetDateTime, java.lang.String, java.lang.String)",
+        "new": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, java.time.OffsetDateTime)",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, java.time.OffsetDateTime)",
+        "new": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "justification": "OAuth Token Scope is an Enum now."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.lang.String com.github.robozonky.api.remote.entities.ZonkyApiToken::getScope()",
+        "new": "method com.github.robozonky.api.remote.enums.OAuthScopes com.github.robozonky.api.remote.entities.ZonkyApiToken::getScope()",
+        "justification": "OAuth Token Scope is an Enum now."
+      }
     ]
   }
 }

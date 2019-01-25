@@ -20,15 +20,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class TenantTest {
 
@@ -38,7 +37,7 @@ class TenantTest {
         when(t.getSessionInfo()).thenReturn(new SessionInfo("someone@somewhere.cz"));
         when(t.isAvailable(any())).thenReturn(true);
         assertThat(t.isAvailable()).isTrue();
-        verify(t).isAvailable(eq(ZonkyScope.getDefault()));
+        verify(t).isAvailable(eq(OAuthScope.SCOPE_APP_WEB));
         final Function<Zonky, String> f = z -> "";
         t.call(f);
         verify(t).call(eq(f));

@@ -22,6 +22,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 
 @Path("/oauth/token")
 public interface ZonkyOAuthApi {
@@ -31,11 +32,11 @@ public interface ZonkyOAuthApi {
             @FormParam("username") String username,
             @FormParam("password") String password,
             @FormParam("grant_type") @DefaultValue("password") String grantType,
-            @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
+            @FormParam("scope") OAuthScope scope);
 
     @POST
     ZonkyApiToken refresh(
             @FormParam("refresh_token") String refreshToken,
             @FormParam("grant_type") @DefaultValue("refresh_token") String grantType,
-            @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
+            @FormParam("scope") OAuthScope scope);
 }

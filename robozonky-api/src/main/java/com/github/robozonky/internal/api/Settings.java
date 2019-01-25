@@ -157,10 +157,6 @@ public enum Settings {
         return get(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING);
     }
 
-    public Duration getTokenRefreshPeriod() {
-        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_TOKEN_REFRESH, 60));
-    }
-
     public Duration getRemoteResourceRefreshInterval() {
         return Duration.ofMinutes(get(Settings.Key.DEFAULTS_RESOURCE_REFRESH, 5));
     }
@@ -212,7 +208,6 @@ public enum Settings {
     public enum Key {
 
         DEBUG_ENABLE_HTTP_RESPONSE_LOGGING("robozonky.debug.enable_http_response_logging"),
-        DEFAULTS_TOKEN_REFRESH("robozonky.default.token_refresh_seconds"),
         DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),
         DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),

@@ -16,17 +16,15 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Duration;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.common.tenant.ZonkyScope;
-import com.github.robozonky.internal.api.Settings;
 
 public final class TenantBuilder {
 
@@ -67,21 +65,18 @@ public final class TenantBuilder {
         return this;
     }
 
-    public PowerTenant build(final Duration tokenRefresh) {
+    public PowerTenant build() {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
         }
         final ApiProvider apis = api == null ? new ApiProvider() : api;
-        final Function<ZonkyScope, ZonkyApiTokenSupplier> tokenSupplier =
-                scope -> new ZonkyApiTokenSupplier(scope, apis, secrets, tokenRefresh);
+        final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier =
+                scope -> new ZonkyApiTokenSupplier(scope, apis, secrets);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
         final BooleanSupplier zonkyAvailability = lifecycle == null ? () -> true : () -> lifecycle.get().isOnline();
         return new PowerTenantImpl(sessionInfo, apis, zonkyAvailability, strategyProvider, tokenSupplier);
     }
 
-    public PowerTenant build() {
-        return build(Settings.INSTANCE.getTokenRefreshPeriod());
-    }
 }
 
 

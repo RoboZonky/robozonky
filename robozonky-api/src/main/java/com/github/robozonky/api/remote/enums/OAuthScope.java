@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.tenant;
+package com.github.robozonky.api.remote.enums;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import org.junit.jupiter.api.Test;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public enum OAuthScope {
 
-class ZonkyScopeTest {
+    SCOPE_APP_OAUTH,
+    SCOPE_APP_WEB,
+    SCOPE_FILE_DOWNLOAD;
 
-    @Test
-    void defaults() {
-        assertThat(ZonkyScope.getDefault()).isEqualTo(ZonkyScope.APP);
-        assertThat(ZonkyScope.APP.getId()).isEqualTo(ZonkyApiToken.SCOPE_APP_WEB_STRING);
-        assertThat(ZonkyScope.FILES.getId()).isEqualTo(ZonkyApiToken.SCOPE_FILE_DOWNLOAD_STRING);
+    public static OAuthScope findByCode(final String code) {
+        return Stream.of(OAuthScope.values())
+                .filter(r -> Objects.equals(r.name(), code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown OAuth scope: " + code));
     }
 
 }

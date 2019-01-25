@@ -16,6 +16,9 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.stream.Stream;
+
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
@@ -23,7 +26,9 @@ import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.*;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -56,10 +61,13 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void retrieves() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
+        final Investment i1 = Investment.custom().setLoanId(2).build();
+        when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
+        assertThat(instance.wasOnceSold(2)).isTrue();
         assertThat(instance.wasOnceSold(1)).isFalse();
         instance.markAsSold(1);
+        assertThat(instance.wasOnceSold(2)).isTrue();
         assertThat(instance.wasOnceSold(1)).isTrue();
     }
-
 }
