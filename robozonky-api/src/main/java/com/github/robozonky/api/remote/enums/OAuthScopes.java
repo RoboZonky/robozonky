@@ -34,10 +34,11 @@ public class OAuthScopes {
     }
 
     public static OAuthScopes valueOf(final String input) {
-        final String[] scopes = input.split(SEPARATOR);
-        if (scopes.length < 1) {
+        final String toParse = input.trim();
+        if (toParse.length() == 0) {
             return new OAuthScopes(Collections.emptySet());
         }
+        final String[] scopes = toParse.split(SEPARATOR);
         final Set<OAuthScope> result = Arrays.stream(scopes).map(OAuthScope::findByCode).collect(Collectors.toSet());
         return new OAuthScopes(result);
     }
@@ -54,6 +55,12 @@ public class OAuthScopes {
         return scopes;
     }
 
+    /**
+     * Primary scope is the scope that is actually useful for the application. When {@link OAuthScope#SCOPE_APP_WEB} is
+     * requested, Zonky may return scopes such as "SCOPE_APP_WEB SCOPE_APP_OAUTH" and out of the two, we only care about
+     * the one that was requested.
+     * @return
+     */
     public Optional<OAuthScope> getPrimaryScope() {
         if (scopes.contains(OAuthScope.SCOPE_APP_WEB)) {
             return Optional.of(OAuthScope.SCOPE_APP_WEB);

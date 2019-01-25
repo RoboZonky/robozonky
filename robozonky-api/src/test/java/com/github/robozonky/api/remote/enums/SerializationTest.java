@@ -58,6 +58,11 @@ class SerializationTest {
     Collection<DynamicTest> deserialize() {
         final Collection<DynamicTest> tests = new ArrayList<>(0);
         // test deserialization of all income types
+        for (final OAuthScope toSerialize : OAuthScope.values()) {
+            final String serialized = escape(toSerialize.name());
+            tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
+        }
+        // test deserialization of all income types
         for (final MainIncomeType toSerialize : MainIncomeType.values()) {
             final String serialized = escape(toSerialize.name());
             tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
