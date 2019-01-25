@@ -20,15 +20,15 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class TimeBasedReloadTest {
 
     @Test
     void force() {
-        final TimeBasedReload r = new TimeBasedReload(Duration.ofMinutes(5));
+        final TimeBasedReload r = new TimeBasedReload(x -> Duration.ofMinutes(5));
         assertThat(r.getAsBoolean()).isTrue();
-        r.markReloaded();
+        r.markReloaded(null);
         assertThat(r.getAsBoolean()).isFalse();
         r.forceReload();
         assertThat(r.getAsBoolean()).isTrue();

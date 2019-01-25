@@ -19,34 +19,37 @@ package com.github.robozonky.common.async;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import com.github.robozonky.internal.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class TimeBasedReload implements ReloadDetection {
+final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeBasedReload.class);
 
-    private final AtomicReference<Instant> lastReloaded;
-    private final Duration reloadAfter;
+    private final AtomicReference<Instant> lastReloaded = new AtomicReference<>();
+    private final AtomicReference<Duration> reloadAfter = new AtomicReference<>();
+    private final Function<T, Duration> reloadFunction;
 
-    public TimeBasedReload(final Duration reloadAfter) {
-        this.reloadAfter = reloadAfter;
-        lastReloaded = new AtomicReference<>();
+    public TimeBasedReload(final Function<T, Duration> reloadAfter) {
+        this.reloadFunction = reloadAfter;
     }
 
     @Override
     public boolean getAsBoolean() {
         final Instant lastReloadedInstant = lastReloaded.get();
         return lastReloadedInstant == null ||
-                lastReloadedInstant.plus(reloadAfter).isBefore(DateUtil.now());
+                lastReloadedInstant.plus(reloadAfter.get()).isBefore(DateUtil.now());
     }
 
     @Override
-    public void markReloaded() {
+    public void markReloaded(final T newValue) {
+        final Duration newReload = reloadFunction.apply(newValue);
+        reloadAfter.set(newReload);
         lastReloaded.set(DateUtil.now());
-        LOGGER.trace("Marked reloaded on {}.", this);
+        LOGGER.trace("Marked reloaded on {}, will be reloaded after {}.", this, newReload);
     }
 
     @Override

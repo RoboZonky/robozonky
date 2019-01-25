@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class ManualReload implements ReloadDetection {
+final class ManualReload<T> implements ReloadDetection<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManualReload.class);
 
@@ -33,7 +33,7 @@ final class ManualReload implements ReloadDetection {
     }
 
     @Override
-    public void markReloaded() {
+    public void markReloaded(final T newValue) {
         needsReload.set(false);
         LOGGER.trace("Marked reloaded on {}.", this);
     }

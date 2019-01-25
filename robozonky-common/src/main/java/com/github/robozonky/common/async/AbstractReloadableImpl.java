@@ -18,6 +18,7 @@ package com.github.robozonky.common.async;
 
 import java.time.Duration;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -28,18 +29,18 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private final UnaryOperator<T> operation;
-    private final ReloadDetection needsReload;
+    private final ReloadDetection<T> needsReload;
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
                                   final Consumer<T> runWhenReloaded) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
-        this.needsReload = new ManualReload();
+        this.needsReload = new ManualReload<>();
     }
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                                  final Consumer<T> runWhenReloaded, final Duration reloadAfter) {
+                                  final Consumer<T> runWhenReloaded, final Function<T, Duration> reloadAfter) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
-        this.needsReload = new TimeBasedReload(reloadAfter);
+        this.needsReload = new TimeBasedReload<>(reloadAfter);
     }
 
     private <X> UnaryOperator<X> getOperation(final Supplier<X> supplier, final UnaryOperator<X> reloader,
@@ -57,14 +58,10 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
         return operation;
     }
 
-    protected void markReloaded() {
-        needsReload.markReloaded();
-    }
-
     protected void processRetrievedValue(final T value, final Consumer<T> valueSetter) {
         logger.trace("Supplier finished on {}.", this);
         valueSetter.accept(value);
-        markReloaded();
+        needsReload.markReloaded(value);
         logger.debug("Reloaded {}, new value is {}.", this, value);
     }
 

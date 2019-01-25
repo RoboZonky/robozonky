@@ -44,19 +44,26 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     private final Reloadable<ZonkyApiToken> token;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
-    ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
-        this(OAuthScope.SCOPE_APP_WEB, apis, secrets, refreshAfter);
+    ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets) {
+        this(OAuthScope.SCOPE_APP_WEB, apis, secrets);
     }
 
-    public ZonkyApiTokenSupplier(final OAuthScope scope, final ApiProvider apis, final SecretProvider secrets,
-                                 final Duration refreshAfter) {
+    public ZonkyApiTokenSupplier(final OAuthScope scope, final ApiProvider apis, final SecretProvider secrets) {
         this.scope = scope;
         this.apis = apis;
         this.secrets = secrets;
         this.token = Reloadable.with(this::login)
                 .reloadWith(this::refreshOrLogin)
-                .reloadAfter(refreshAfter)
+                .reloadAfter(ZonkyApiTokenSupplier::reloadAfter)
                 .build();
+    }
+
+    static Duration reloadAfter(final ZonkyApiToken token) {
+        final int expirationInSeconds = token.getExpiresIn();
+        final int minimumSecondsBeforeExpiration = 5;
+        final int secondsToReloadAfter =
+                Math.max(minimumSecondsBeforeExpiration, expirationInSeconds - minimumSecondsBeforeExpiration);
+        return Duration.ofSeconds(secondsToReloadAfter);
     }
 
     private ZonkyApiToken login() {

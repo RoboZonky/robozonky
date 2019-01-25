@@ -18,6 +18,7 @@ package com.github.robozonky.common.async;
 
 import java.time.Duration;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -38,7 +39,7 @@ public final class ReloadableBuilder<T> {
 
     private final Supplier<T> supplier;
     private UnaryOperator<T> reloader;
-    private Duration reloadAfter;
+    private Function<T, Duration> reloadAfter;
     private Consumer<T> finisher;
     private boolean async = false;
 
@@ -55,7 +56,18 @@ public final class ReloadableBuilder<T> {
      * @return This.
      */
     public ReloadableBuilder<T> reloadAfter(final Duration duration) {
-        this.reloadAfter = duration;
+        this.reloadAfter = x -> duration;
+        return this;
+    }
+
+    /**
+     * The same semantics as {@link #reloadAfter(Function)}, only the actual duration would be inferred from the value
+     * of the {@link Reloadable} every time its new value is fetched.
+     * @param durationSupplier
+     * @return This.
+     */
+    public ReloadableBuilder<T> reloadAfter(final Function<T, Duration> durationSupplier) {
+        this.reloadAfter = durationSupplier;
         return this;
     }
 
