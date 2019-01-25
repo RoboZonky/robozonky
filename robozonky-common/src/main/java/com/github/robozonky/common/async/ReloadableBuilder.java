@@ -56,8 +56,7 @@ public final class ReloadableBuilder<T> {
      * @return This.
      */
     public ReloadableBuilder<T> reloadAfter(final Duration duration) {
-        this.reloadAfter = x -> duration;
-        return this;
+        return reloadAfter(x -> duration);
     }
 
     /**

@@ -26,11 +26,14 @@ class TimeBasedReloadTest {
 
     @Test
     void force() {
-        final TimeBasedReload r = new TimeBasedReload(x -> Duration.ofMinutes(5));
+        final TimeBasedReload<Void> r = new TimeBasedReload<>(x -> Duration.ofMinutes(5));
+        assertThat(r.getReloadAfter()).isEmpty();
         assertThat(r.getAsBoolean()).isTrue();
         r.markReloaded(null);
+        assertThat(r.getReloadAfter()).contains(Duration.ofMinutes(5));
         assertThat(r.getAsBoolean()).isFalse();
         r.forceReload();
+        assertThat(r.getReloadAfter()).isEmpty();
         assertThat(r.getAsBoolean()).isTrue();
     }
 

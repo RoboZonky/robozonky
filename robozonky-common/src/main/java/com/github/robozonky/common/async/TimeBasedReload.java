@@ -18,6 +18,7 @@ package com.github.robozonky.common.async;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -44,17 +45,22 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
                 lastReloadedInstant.plus(reloadAfter.get()).isBefore(DateUtil.now());
     }
 
+    Optional<Duration> getReloadAfter() {
+        return Optional.ofNullable(reloadAfter.get());
+    }
+
     @Override
     public void markReloaded(final T newValue) {
         final Duration newReload = reloadFunction.apply(newValue);
-        reloadAfter.set(newReload);
         lastReloaded.set(DateUtil.now());
+        reloadAfter.set(newReload);
         LOGGER.trace("Marked reloaded on {}, will be reloaded after {}.", this, newReload);
     }
 
     @Override
     public void forceReload() {
         lastReloaded.set(null);
+        reloadAfter.set(null);
         LOGGER.trace("Forcing reload on {}.", this);
     }
 }
