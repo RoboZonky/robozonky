@@ -120,6 +120,10 @@ public class ZonkyApiToken extends BaseEntity {
         return expiresIn;
     }
 
+    public boolean isExpired() {
+        return willExpireIn(Duration.ZERO);
+    }
+
     public OAuthScopes getScope() {
         // TODO convert to ZonkyScope?
         return scope;

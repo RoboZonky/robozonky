@@ -80,8 +80,8 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     private ZonkyApiToken actuallyRefreshOrLogin(final ZonkyApiToken token) {
-        if (token.willExpireIn(Duration.ZERO)) {
-            LOGGER.debug("Found expired token #{} for '{}', scope '{}'.", token.getId(), secrets.getUsername(), scope);
+        if (token.isExpired()) {
+            LOGGER.debug("Found expired token #{}.", token.getId());
             return login();
         }
         LOGGER.debug("Current token #{} expiring on {}.", token.getId(), token.getExpiresOn());
@@ -107,9 +107,14 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     public ZonkyApiToken get() {
         if (isClosed.get()) {
             throw new IllegalStateException("Token already closed.");
-        } else {
-            return token.get().getOrElseThrow(t -> new NotAuthorizedException(t));
         }
+        final ZonkyApiToken result = token.get().getOrElseThrow(t -> new NotAuthorizedException(t));
+        if (!result.isExpired()) {
+            return result;
+        }
+        LOGGER.debug("Retrieved expired token #{}.", result.getId());
+        token.clear();
+        return get();
     }
 
     @Override
