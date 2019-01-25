@@ -20,7 +20,6 @@ import java.io.Closeable;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
-import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.OAuthScope;
@@ -33,6 +32,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Will keep permanent user authentication running in the background.
+ * <p>
+ * Certain parts of this class are synchronized, so that the tokens are only ever modified by one thread and therefore
+ * different threads cannot interfere with one another.
  */
 class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                                        Closeable {
@@ -64,6 +66,10 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         final int secondsToReloadAfter =
                 Math.max(minimumSecondsBeforeExpiration, expirationInSeconds - minimumSecondsBeforeExpiration);
         return Duration.ofSeconds(secondsToReloadAfter);
+    }
+
+    private static ZonkyApiToken getToken(final Reloadable<ZonkyApiToken> token) {
+        return token.get().getOrElseThrow(t -> new IllegalStateException("Token retrieval failed.", t));
     }
 
     private ZonkyApiToken login() {
@@ -103,37 +109,37 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         return isClosed.get();
     }
 
-    private static final ZonkyApiToken getToken(final Reloadable<ZonkyApiToken> token) {
-        return token.get().getOrElseThrow(t -> new NotAuthorizedException(t));
-    }
-
     @Override
     public ZonkyApiToken get() {
         if (isClosed.get()) {
             throw new IllegalStateException("Token already closed.");
         }
-        final ZonkyApiToken result = getToken(token);
-        if (!result.isExpired()) {
-            return result;
+        synchronized (this) {
+            final ZonkyApiToken result = getToken(token);
+            if (!result.isExpired()) {
+                return result;
+            }
+            LOGGER.debug("Retrieved expired token #{}.", result.getId());
+            token.clear();
+            return getToken(token);
         }
-        LOGGER.debug("Retrieved expired token #{}.", result.getId());
-        token.clear();
-        return getToken(token);
     }
 
     @Override
     public void close() {
         isClosed.set(true);
-        if (!token.hasValue()) {
-            LOGGER.debug("Nothing to close.");
-            return;
+        synchronized (this) {
+            if (!token.hasValue()) {
+                LOGGER.debug("Nothing to close.");
+                return;
+            }
+            final ZonkyApiToken toClose = token.get().getOrElse(() -> null);
+            if (toClose == null || toClose.isExpired()) {
+                LOGGER.debug("Nothing to close or expired.");
+                return;
+            }
+            LOGGER.info("Logging '{}' out of scope '{}'.", secrets.getUsername(), scope);
+            apis.run(Zonky::logout, () -> toClose);
         }
-        final ZonkyApiToken toClose = token.get().getOrElse(() -> null);
-        if (toClose == null || toClose.willExpireIn(Duration.ZERO)) {
-            LOGGER.debug("Nothing to close or expired.");
-            return;
-        }
-        LOGGER.info("Logging '{}' out of scope '{}'.", secrets.getUsername(), scope);
-        apis.run(Zonky::logout, () -> toClose);
     }
 }

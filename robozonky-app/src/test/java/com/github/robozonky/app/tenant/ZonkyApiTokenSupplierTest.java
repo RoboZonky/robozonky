@@ -22,7 +22,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.OAuthScope;
@@ -110,7 +109,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(oAuth).login(any(), any(), any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
-        assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
+        assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
