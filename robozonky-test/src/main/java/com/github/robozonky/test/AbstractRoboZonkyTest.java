@@ -150,6 +150,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     @AfterEach
     protected void deleteState() {
         TenantState.destroyAll();
-        LOGGER.info("Destroyed state.");
+        logger.info("Destroyed state.");
     }
 }

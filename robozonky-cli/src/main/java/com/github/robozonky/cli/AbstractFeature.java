@@ -23,27 +23,27 @@ import org.apache.logging.log4j.Logger;
 
 abstract class AbstractFeature implements Feature {
 
-    protected final Logger LOGGER = LogManager.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
     @Override
     public ExitCode call() {
-        LOGGER.info("Welcome to the RoboZonky command-line configuration and validation tool.");
-        LOGGER.warn("This is a tool for the brave. Create a backup copy of RoboZonky " +
+        logger.info("Welcome to the RoboZonky command-line configuration and validation tool.");
+        logger.warn("This is a tool for the brave. Create a backup copy of RoboZonky " +
                             "or use RoboZonky installer instead.");
         try {
             final String description = describe();
-            LOGGER.info("--- Press any key to run: '{}'", description);
+            logger.info("--- Press any key to run: '{}'", description);
             System.in.read();
             setup();
-            LOGGER.info("--- Executed, running test of the new setup.");
+            logger.info("--- Executed, running test of the new setup.");
             test();
-            LOGGER.info("--- Success.");
+            logger.info("--- Success.");
             return ExitCode.SUCCESS;
         } catch (final SetupFailedException | IOException e) {
-            LOGGER.error("!!! Could not perform setup, configuration may have been corrupted.", e);
+            logger.error("!!! Could not perform setup, configuration may have been corrupted.", e);
             return ExitCode.SETUP_FAIL;
         } catch (final TestFailedException e) {
-            LOGGER.error("!!! Could not test setup, configuration may have been corrupted.", e);
+            logger.error("!!! Could not test setup, configuration may have been corrupted.", e);
             return ExitCode.TEST_FAIL;
         }
     }

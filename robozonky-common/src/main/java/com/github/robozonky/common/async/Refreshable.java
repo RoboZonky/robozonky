@@ -44,7 +44,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class Refreshable<T> implements Runnable,
                                                 Supplier<Optional<T>> {
 
-    protected final Logger LOGGER = LogManager.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
     private final String id;
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
@@ -121,7 +121,7 @@ public abstract class Refreshable<T> implements Runnable,
     private void storeResult(final T result) {
         final T previous = cachedResult.getAndSet(result);
         if (Objects.equals(previous, result)) { // both values equal or null
-            LOGGER.trace("Value not changed: {}.", this);
+            logger.trace("Value not changed: {}.", this);
             return;
         }
         if (previous == null) { // value newly available
@@ -137,7 +137,7 @@ public abstract class Refreshable<T> implements Runnable,
         try {
             return Optional.ofNullable(this.getLatestSource());
         } catch (final Exception ex) {
-            LOGGER.warn("Failed reading resource.", ex);
+            logger.warn("Failed reading resource.", ex);
             return Optional.empty();
         }
     }
@@ -147,7 +147,7 @@ public abstract class Refreshable<T> implements Runnable,
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
             if (Objects.equals(newSource, latestKnownSource.get())) {
-                LOGGER.trace("Source not changed: {}.", this);
+                logger.trace("Source not changed: {}.", this);
                 return;
             }
             // source changed, result needs to be refreshed
@@ -177,11 +177,11 @@ public abstract class Refreshable<T> implements Runnable,
     @Override
     public void run() {
         try {
-            LOGGER.trace("Starting {}.", this);
+            logger.trace("Starting {}.", this);
             runLocked();
-            LOGGER.trace("Finished {}.", this);
+            logger.trace("Finished {}.", this);
         } catch (final Exception ex) {
-            LOGGER.debug("Refresh failed: {}.", this, ex);
+            logger.debug("Refresh failed: {}.", this, ex);
         }
     }
 
@@ -227,17 +227,17 @@ public abstract class Refreshable<T> implements Runnable,
 
         @Override
         public void valueSet(final T newValue) {
-            LOGGER.trace("New value '{}': {}.", newValue, this);
+            logger.trace("New value '{}': {}.", newValue, this);
         }
 
         @Override
         public void valueUnset(final T oldValue) {
-            LOGGER.trace("Value removed: {}.", this);
+            logger.trace("Value removed: {}.", this);
         }
 
         @Override
         public void valueChanged(final T oldValue, final T newValue) {
-            LOGGER.trace("Value changed to '{}': {}.", newValue, this);
+            logger.trace("Value changed to '{}': {}.", newValue, this);
         }
     }
 }

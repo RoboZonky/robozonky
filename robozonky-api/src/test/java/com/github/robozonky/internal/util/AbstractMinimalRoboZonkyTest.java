@@ -28,7 +28,7 @@ import org.junit.jupiter.api.AfterEach;
 
 public abstract class AbstractMinimalRoboZonkyTest {
 
-    protected final Logger LOGGER = LogManager.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     protected void setClock(final Clock clock) {
         DateUtil.setSystemClock(clock);

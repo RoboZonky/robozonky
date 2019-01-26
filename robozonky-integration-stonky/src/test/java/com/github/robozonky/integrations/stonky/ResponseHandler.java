@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class ResponseHandler implements BiFunction<String, String, Optional<MockLowLevelHttpResponse>> {
 
     private static final JacksonFactory FACTORY = new JacksonFactory();
-    protected final Logger LOGGER = LogManager.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
     protected static String toJson(final Object object) {
         try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -54,10 +54,10 @@ public abstract class ResponseHandler implements BiFunction<String, String, Opti
     @Override
     public Optional<MockLowLevelHttpResponse> apply(final String method, final String url) {
         if (appliesTo(method, url)) {
-            LOGGER.debug("Applies to {} {}.", method, url);
+            logger.debug("Applies to {} {}.", method, url);
             return Optional.ofNullable(respond(method, url));
         } else {
-            LOGGER.debug("Does not apply to {} {}.", method, url);
+            logger.debug("Does not apply to {} {}.", method, url);
             return Optional.empty();
         }
     }

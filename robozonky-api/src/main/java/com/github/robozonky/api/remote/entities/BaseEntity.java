@@ -36,7 +36,7 @@ abstract class BaseEntity {
 
     private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
     @XmlTransient
-    protected final Logger LOGGER = LogManager.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
     @XmlTransient
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
@@ -48,14 +48,14 @@ abstract class BaseEntity {
     @JsonAnyGetter
     void handleUnknownGetter(final String key) {
         if (!hasBeenCalledBefore(key)) {
-            LOGGER.info("Trying to get value of unknown property '{}'. Indicates an unexpected API change.", key);
+            logger.info("Trying to get value of unknown property '{}'. Indicates an unexpected API change.", key);
         }
     }
 
     @JsonAnySetter
     void handleUnknownSetter(final String key, final Object value) {
         if (!hasBeenCalledBefore(key)) {
-            LOGGER.info("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change.",
+            logger.info("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change.",
                         value, key);
         }
     }

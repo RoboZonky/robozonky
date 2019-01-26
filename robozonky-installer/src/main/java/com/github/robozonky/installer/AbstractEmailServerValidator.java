@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,12 @@ abstract class AbstractEmailServerValidator extends AbstractValidator {
                 .of(transport -> {
                     final String host = Variables.SMTP_HOSTNAME.getValue(installData);
                     final int port = Integer.parseInt(Variables.SMTP_PORT.getValue(installData));
-                    LOGGER.debug("Connecting to {}:{} with {}.", host, port, smtpProps);
+                    logger.debug("Connecting to {}:{} with {}.", host, port, smtpProps);
                     transport.connect(host, port, Variables.SMTP_USERNAME.getValue(installData),
                               Variables.SMTP_PASSWORD.getValue(installData));
                     return DataValidator.Status.OK;
                 }).getOrElseGet(t -> {
-                    LOGGER.warn("Failed authenticating with SMTP server.", t);
+                    logger.warn("Failed authenticating with SMTP server.", t);
                     return DataValidator.Status.WARNING;
                 });
     }

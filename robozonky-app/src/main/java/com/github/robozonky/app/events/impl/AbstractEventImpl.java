@@ -34,7 +34,7 @@ import org.apache.logging.log4j.Logger;
  */
 abstract class AbstractEventImpl implements Event {
 
-    protected final Logger LOGGER = LogManager.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     private final OffsetDateTime creationDateTime = DateUtil.offsetNow();
     private final Reloadable<String> toString;
@@ -57,7 +57,7 @@ abstract class AbstractEventImpl implements Event {
     }
 
     public void setConceivedOn(final OffsetDateTime offsetDateTime) {
-        LOGGER.debug("Setting conception time of {}, creation time remains {}.", offsetDateTime, creationDateTime);
+        logger.debug("Setting conception time of {}, creation time remains {}.", offsetDateTime, creationDateTime);
         conceptionDateTime = offsetDateTime;
         toString.clear(); // toString() will have changed by this
     }

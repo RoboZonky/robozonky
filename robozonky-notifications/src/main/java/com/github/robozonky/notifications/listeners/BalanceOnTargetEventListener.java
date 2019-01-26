@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStar
         final Optional<BigDecimal> lastKnownBalance = balanceTracker.getLastKnownBalance(sessionInfo);
         final BigDecimal newBalance = event.getPortfolioOverview().getCzkAvailable();
         final BigDecimal expectedBalance = BigDecimal.valueOf(targetBalance);
-        LOGGER.debug("Last known balance: {}, target: {}, new: {}.", lastKnownBalance, expectedBalance, newBalance);
+        logger.debug("Last known balance: {}, target: {}, new: {}.", lastKnownBalance, expectedBalance, newBalance);
         final boolean balanceNowExceeded = newBalance.compareTo(expectedBalance) > 0;
         final boolean wasFineLastTime =
                 !lastKnownBalance.isPresent() || lastKnownBalance.get().compareTo(expectedBalance) < 0;

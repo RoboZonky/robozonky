@@ -53,7 +53,7 @@ import static com.github.robozonky.internal.util.Maps.entry;
 
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
-    protected final Logger LOGGER = LogManager.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
     final BalanceTracker balanceTracker;
     final DelinquencyTracker delinquencyTracker;
     private final AbstractTargetHandler handler;
@@ -181,10 +181,10 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     public final void handle(final T event, final SessionInfo sessionInfo) {
         try {
             if (!this.shouldNotify(event, sessionInfo)) {
-                LOGGER.debug("Will not notify.");
+                logger.debug("Will not notify.");
             } else {
                 // only do the heavy lifting in the handler, after the final send/no-send decision was made
-                LOGGER.debug("Notifying {}.", event);
+                logger.debug("Notifying {}.", event);
                 handler.offer(createSubmission(event, sessionInfo));
             }
         } catch (final Exception ex) {
@@ -193,9 +193,9 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
             try {
                 finish(event, sessionInfo);
             } catch (final Exception ex) {
-                LOGGER.trace("Finisher failed.", ex);
+                logger.trace("Finisher failed.", ex);
             } finally {
-                LOGGER.debug("Notified {}.", event);
+                logger.debug("Notified {}.", event);
             }
         }
     }

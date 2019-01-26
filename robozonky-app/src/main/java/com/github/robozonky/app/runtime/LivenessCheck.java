@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,13 +57,13 @@ class LivenessCheck extends Refreshable<String> {
 
     @Override
     protected String getLatestSource() {
-        LOGGER.trace("Running.");
+        logger.trace("Running.");
         // need to send parsed version, since the object itself changes every time due to currentApiTime field
         return Try.withResources(() -> new URL(url).openStream())
                 .of(s -> {
                     final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
                             .collect(Collectors.joining(System.lineSeparator()));
-                    LOGGER.trace("API info coming from Zonky: {}.", source);
+                    logger.trace("API info coming from Zonky: {}.", source);
                     final ApiVersion version = ApiVersion.read(source);
                     // need to send parsed version, since the object itself changes every time due to
                     // currentApiTime field
@@ -71,7 +71,7 @@ class LivenessCheck extends Refreshable<String> {
                 })
                 .getOrElseGet(ex -> {
                     // don't propagate this exception as it is likely to happen and the calling code would WARN about it
-                    LOGGER.debug("Zonky servers are likely unavailable.", ex);
+                    logger.debug("Zonky servers are likely unavailable.", ex);
                     return null; // will fail during transform()
                 });
     }
