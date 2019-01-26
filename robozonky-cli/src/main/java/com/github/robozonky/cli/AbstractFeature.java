@@ -40,10 +40,10 @@ abstract class AbstractFeature implements Feature {
             logger.info("--- Success.");
             return ExitCode.SUCCESS;
         } catch (final SetupFailedException | IOException e) {
-            logger.error("!!! Could not perform setup, configuration may have been corrupted.", e);
+            logger.error("Could not perform setup, configuration may have been corrupted.", e);
             return ExitCode.SETUP_FAIL;
         } catch (final TestFailedException e) {
-            logger.error("!!! Could not test setup, configuration may have been corrupted.", e);
+            logger.error("Could not test setup, configuration may have been corrupted.", e);
             return ExitCode.TEST_FAIL;
         }
     }

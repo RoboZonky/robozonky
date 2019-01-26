@@ -43,7 +43,7 @@ final class SecretProviderFactory {
                 final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
                 return Optional.of(SecretProvider.keyStoreBased(ksh));
             } catch (final Exception ex) {
-                SecretProviderFactory.LOGGER.error("Failed opening guarded storage.", ex);
+                LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.<SecretProvider>empty();
             }
         }).orElseThrow(() -> new IllegalStateException("Could not find keystore."));

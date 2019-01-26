@@ -48,7 +48,7 @@ public final class StrategyLoader {
         try {
             return getter.apply(service, strategy);
         } catch (final Exception ex) {
-            StrategyLoader.LOGGER.error("Failed reading strategy.", ex);
+            LOGGER.error("Failed reading strategy.", ex);
             return Optional.empty();
         }
     }
@@ -56,24 +56,24 @@ public final class StrategyLoader {
     static <T> Optional<T> load(final String strategy, final Iterable<StrategyService> loader,
                                 final BiFunction<StrategyService, String, Optional<T>> provider) {
         return StreamUtil.toStream(loader)
-                .map(iss -> StrategyLoader.processStrategyService(iss, strategy, provider))
+                .map(iss -> processStrategyService(iss, strategy, provider))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
     }
 
     public static Optional<InvestmentStrategy> toInvest(final String strategy) {
-        StrategyLoader.LOGGER.debug("Reading investment strategy.");
-        return StrategyLoader.load(strategy, StrategyLoader.LOADER.get(), StrategyService::toInvest);
+        LOGGER.debug("Reading investment strategy.");
+        return load(strategy, LOADER.get(), StrategyService::toInvest);
     }
 
     public static Optional<SellStrategy> toSell(final String strategy) {
-        StrategyLoader.LOGGER.debug("Reading selling strategy.");
-        return StrategyLoader.load(strategy, StrategyLoader.LOADER.get(), StrategyService::toSell);
+        LOGGER.debug("Reading selling strategy.");
+        return load(strategy, LOADER.get(), StrategyService::toSell);
     }
 
     public static Optional<PurchaseStrategy> toPurchase(final String strategy) {
-        StrategyLoader.LOGGER.debug("Reading purchasing strategy.");
-        return StrategyLoader.load(strategy, StrategyLoader.LOADER.get(), StrategyService::toPurchase);
+        LOGGER.debug("Reading purchasing strategy.");
+        return load(strategy, LOADER.get(), StrategyService::toPurchase);
     }
 }
 
