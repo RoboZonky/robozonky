@@ -516,34 +516,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>declare-all-dependencies</id>
-            <goals>
-              <goal>analyze-only</goal>
-            </goals>
-            <configuration>
-              <failOnWarning>true</failOnWarning>
-              <ignoredUnusedDeclaredDependencies> <!-- Mostly service-loaded stuff, APIs, also some of our own. -->
-                <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>ch.qos.logback</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.jboss.spec.javax.xml.bind</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.jboss.spec.javay.ws.rs</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
-              </ignoredUnusedDeclaredDependencies>
-              <ignoredUsedUndeclaredDependencies>
-                <ignoredUsedUndeclaredDependency>ch.qos.logback</ignoredUsedUndeclaredDependency>
-                <ignoredUsedUndeclaredDependency>org.slf4j</ignoredUsedUndeclaredDependency>
-              </ignoredUsedUndeclaredDependencies>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -637,6 +609,38 @@
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>3.1.1</version>
+          <dependencies> <!-- Remove when 3.1.2 is released. -->
+            <dependency>
+              <groupId>org.apache.maven.shared</groupId>
+              <artifactId>maven-dependency-analyzer</artifactId>
+              <version>1.11.1</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>declare-all-dependencies</id>
+              <goals>
+                <goal>analyze-only</goal>
+              </goals>
+              <configuration>
+                <failOnWarning>true</failOnWarning>
+                <ignoredUnusedDeclaredDependencies> <!-- Mostly service-loaded stuff, APIs, also some of our own. -->
+                  <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>ch.qos.logback</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>org.jboss.spec.javax.xml.bind</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>org.jboss.spec.javay.ws.rs</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
+                </ignoredUnusedDeclaredDependencies>
+                <ignoredUsedUndeclaredDependencies>
+                  <ignoredUsedUndeclaredDependency>ch.qos.logback</ignoredUsedUndeclaredDependency>
+                  <ignoredUsedUndeclaredDependency>org.slf4j</ignoredUsedUndeclaredDependency>
+                </ignoredUsedUndeclaredDependencies>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
