@@ -54,7 +54,8 @@ final class Skippable implements Runnable {
         } catch (final Error t) {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);
-        }        LOGGER.trace("Update finished.");
+        }
+        LOGGER.trace("Update finished.");
     }
 
     @Override
