@@ -34,11 +34,11 @@ public final class Credentials {
         final String[] parts = request.split(":");
         if (parts.length == 1) {
             this.toolId = parts[0];
-            Credentials.LOGGER.debug("Credentials for '{}' not given password.", this.toolId);
+            LOGGER.debug("Credentials for '{}' not given password.", this.toolId);
         } else if (parts.length == 2) {
             this.toolId = parts[0];
             this.secretProvider.setSecret(this.toolId, parts[1].toCharArray());
-            Credentials.LOGGER.debug("Credentials for '{}' stored password.", this.toolId);
+            LOGGER.debug("Credentials for '{}' stored password.", this.toolId);
         } else {
             throw new IllegalArgumentException("Request must be 1 or 2 parts: " + Arrays.toString(parts));
         }

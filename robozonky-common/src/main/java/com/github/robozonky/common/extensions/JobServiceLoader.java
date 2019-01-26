@@ -39,19 +39,20 @@ public final class JobServiceLoader {
         // no instances
     }
 
-    static <T> Stream<T> load(final Iterable<JobService> loader, final Function<JobService, Collection<T>> jobProvider) {
-        JobServiceLoader.LOGGER.debug("Looking up batch jobs.");
+    static <T> Stream<T> load(final Iterable<JobService> loader,
+                              final Function<JobService, Collection<T>> jobProvider) {
+        LOGGER.debug("Looking up batch jobs.");
         return StreamUtil.toStream(loader)
-                .peek(cp -> JobServiceLoader.LOGGER.trace("Evaluating job service '{}'.", cp.getClass()))
+                .peek(cp -> LOGGER.trace("Evaluating job service '{}'.", cp.getClass()))
                 .flatMap(cp -> jobProvider.apply(cp).stream());
     }
 
     public static Stream<SimpleJob> loadSimpleJobs() {
-        return JobServiceLoader.load(JobServiceLoader.LOADER.get(), JobService::getSimpleJobs);
+        return load(LOADER.get(), JobService::getSimpleJobs);
     }
 
     public static Stream<TenantJob> loadTenantJobs() {
-        return JobServiceLoader.load(JobServiceLoader.LOADER.get(), JobService::getTenantJobs);
+        return load(LOADER.get(), JobService::getTenantJobs);
     }
 }
 

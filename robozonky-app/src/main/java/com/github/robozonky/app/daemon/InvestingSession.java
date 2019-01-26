@@ -147,7 +147,7 @@ final class InvestingSession {
                     // rejected due to no confirmation provider => make available for direct investment later
                     tenant.fire(investmentSkipped(recommendation));
                     final int loanId = loan.item().getId();
-                    InvestingSession.LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
+                    LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
                     skip(loan);
                 }
                 break;
@@ -186,7 +186,7 @@ final class InvestingSession {
         tenant.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
         final Either<InvestmentFailure, BigDecimal> response = investor.invest(recommendation, seenBefore);
-        InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);
+        LOGGER.debug("Response for loan {}: {}.", loanId, response);
         return response.fold(reason -> unsuccessfulInvestment(recommendation, reason),
                              amount -> successfulInvestment(recommendation, amount));
     }

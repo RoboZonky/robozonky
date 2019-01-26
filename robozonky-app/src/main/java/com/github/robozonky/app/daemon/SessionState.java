@@ -73,21 +73,21 @@ final class SessionState<T> {
         this.idSupplier = idSupplier;
         this.items = read();
         this.items.retainAll(retain.stream().mapToLong(idSupplier).boxed().collect(Collectors.toSet()));
-        SessionState.LOGGER.debug("'{}' contains {}.", key, items);
+        LOGGER.debug("'{}' contains {}.", key, items);
     }
 
     private Set<Long> read() {
         final long[] result = state.getValues(key)
                 .map(s -> s.mapToLong(Long::parseLong).toArray())
                 .orElse(NO_LONGS);
-        SessionState.LOGGER.trace("'{}' read {}.", key, result);
+        LOGGER.trace("'{}' read {}.", key, result);
         return LongStream.of(result).boxed().collect(Collectors.toSet());
     }
 
     private void write(final Collection<Long> items) {
         state.update(b -> b.put(key, items.stream().map(String::valueOf)));
         final String value = state.getValue(key).orElse("nothing");
-        SessionState.LOGGER.trace("'{}' wrote '{}'.", key, value);
+        LOGGER.trace("'{}' wrote '{}'.", key, value);
     }
 
     /**
