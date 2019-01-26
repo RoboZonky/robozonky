@@ -1,11 +1,11 @@
 # Requires support for multi-stage builds, available in Docker 17.05 or later
 # First build RoboZonky and unpack into the install directory...
-FROM fedora:latest AS scratch
+FROM maven:3-jdk-11 AS scratch
 ENV SOURCE_DIRECTORY=/usr/src/robozonky \
     BINARY_DIRECTORY=/tmp/robozonky
 COPY . $SOURCE_DIRECTORY
 WORKDIR $SOURCE_DIRECTORY
-RUN dnf -y install maven xz && mvn install -B -Dgpg.skip -DskipTests -Ddocker
+RUN mvn install -B -Dgpg.skip -DskipTests -Ddocker
 RUN ROBOZONKY_VERSION=$(mvn -q \
             -Dexec.executable="echo" \
             -Dexec.args='${project.version}' \
