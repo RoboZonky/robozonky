@@ -70,206 +70,181 @@
         "old": "method java.lang.String com.github.robozonky.api.remote.entities.ZonkyApiToken::getScope()",
         "new": "method com.github.robozonky.api.remote.enums.OAuthScopes com.github.robozonky.api.remote.entities.ZonkyApiToken::getScope()",
         "justification": "OAuth Token Scope is an Enum now."
-      }, {
-        "code": "java.field.typeChanged",
+      },
+      {
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.BankAccount",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.BankAccount",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.BlockedAmount",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.BlockedAmount",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.CurrentOverview",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.CurrentOverview",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.DateDescriptor",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.DateDescriptor",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.ExpectedPayment",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.ExpectedPayment",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Instalment",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Instalment",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.MonthlySuperInvestorOverview",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.MonthlySuperInvestorOverview",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.MyInvestment",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.MyInvestment",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.OtherInvestments",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.OtherInvestments",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.OverallOverview",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.OverallOverview",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.OverallPortfolio",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.OverallPortfolio",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Participation",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Participation",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Photo",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Photo",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.PurchaseRequest",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.PurchaseRequest",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RawDevelopment",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RawDevelopment",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RawInvestment",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RawInvestment",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RawLoan",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RawLoan",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Restrictions",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Restrictions",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RiskPortfolio",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.RiskPortfolio",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.SellRequest",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.SellRequest",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Statistics",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Statistics",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.SuperInvestorOverview",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.SuperInvestorOverview",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Transaction",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Transaction",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Wallet",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.Wallet",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
-        "code": "java.field.typeChanged",
+        "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.ZonkyApiToken",
-        "new": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.ZonkyApiToken",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
         "code": "java.class.externalClassExposedInAPI",
         "new": "class org.apache.logging.log4j.Level",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
         "code": "java.class.externalClassExposedInAPI",
         "new": "interface org.apache.logging.log4j.Logger",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
         "code": "java.class.externalClassExposedInAPI",
         "new": "interface org.apache.logging.log4j.Marker",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
         "code": "java.class.externalClassExposedInAPI",
         "new": "interface org.apache.logging.log4j.message.Message",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
         "code": "java.class.externalClassExposedInAPI",
         "new": "interface org.apache.logging.log4j.message.MessageFactory",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
         "code": "java.class.externalClassExposedInAPI",
         "new": "interface org.apache.logging.log4j.util.MessageSupplier",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
         "code": "java.class.externalClassExposedInAPI",
         "new": "interface org.apache.logging.log4j.util.Supplier<T extends java.lang.Object>",
-        "justification": "SLF4J is replaced by a more advanced API."
-      }, {
+        "justification": "Logging goes through Log4J instead of SLF4J."
+      },
+      {
         "code": "java.class.externalClassExposedInAPI",
         "new": "enum org.apache.logging.log4j.spi.StandardLevel",
-        "justification": "SLF4J is replaced by a more advanced API."
+        "justification": "Logging goes through Log4J instead of SLF4J."
       }
     ]
   }
