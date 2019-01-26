@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class AbstractBaseMBean implements BaseMBean {
 
     private final AtomicReference<OffsetDateTime> lastUpdated = new AtomicReference<>();
-    protected Logger LOGGER = LogManager.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
     protected void markUpdated() {
         lastUpdated.set(OffsetDateTime.now());
