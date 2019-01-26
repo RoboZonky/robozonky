@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.stream.LongStream;
 
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.tenant.Tenant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The purpose of this class is to keep a certain number of elements, and to persist those across many repeated
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 final class SessionState<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);
+    private static final Logger LOGGER = LogManager.getLogger(SessionState.class);
     private static final long[] NO_LONGS = new long[0];
     private final Collection<Long> items;
     private final ToLongFunction<T> idSupplier;
@@ -73,21 +73,21 @@ final class SessionState<T> {
         this.idSupplier = idSupplier;
         this.items = read();
         this.items.retainAll(retain.stream().mapToLong(idSupplier).boxed().collect(Collectors.toSet()));
-        SessionState.LOGGER.debug("'{}' contains {}.", key, items);
+        LOGGER.debug("'{}' contains {}.", key, items);
     }
 
     private Set<Long> read() {
         final long[] result = state.getValues(key)
                 .map(s -> s.mapToLong(Long::parseLong).toArray())
                 .orElse(NO_LONGS);
-        SessionState.LOGGER.trace("'{}' read {}.", key, result);
+        LOGGER.trace("'{}' read {}.", key, result);
         return LongStream.of(result).boxed().collect(Collectors.toSet());
     }
 
     private void write(final Collection<Long> items) {
         state.update(b -> b.put(key, items.stream().map(String::valueOf)));
         final String value = state.getValue(key).orElse("nothing");
-        SessionState.LOGGER.trace("'{}' wrote '{}'.", key, value);
+        LOGGER.trace("'{}' wrote '{}'.", key, value);
     }
 
     /**

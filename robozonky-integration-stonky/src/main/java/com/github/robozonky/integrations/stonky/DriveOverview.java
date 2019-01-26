@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import io.vavr.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DriveOverview {
 
@@ -43,7 +43,7 @@ public class DriveOverview {
     static final String MIME_TYPE_GOOGLE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
     static final String ROBOZONKY_PEOPLE_SHEET_NAME = "Export investic";
     static final String ROBOZONKY_WALLET_SHEET_NAME = "Export peněženky";
-    private static final Logger LOGGER = LoggerFactory.getLogger(DriveOverview.class);
+    private static final Logger LOGGER = LogManager.getLogger(DriveOverview.class);
     private final SessionInfo sessionInfo;
     private final Drive driveService;
     private final Sheets sheetService;

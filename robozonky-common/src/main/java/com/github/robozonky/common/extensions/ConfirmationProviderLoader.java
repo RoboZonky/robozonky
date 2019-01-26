@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.ConfirmationProviderService;
 import com.github.robozonky.util.StreamUtil;
 import io.vavr.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class ConfirmationProviderLoader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmationProviderLoader.class);
+    private static final Logger LOGGER = LogManager.getLogger(ConfirmationProviderLoader.class);
     private static final Lazy<ServiceLoader<ConfirmationProviderService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ConfirmationProviderService.class);
 
@@ -39,17 +39,16 @@ public final class ConfirmationProviderLoader {
 
     static Optional<ConfirmationProvider> load(final String providerId,
                                                final Iterable<ConfirmationProviderService> loader) {
-        ConfirmationProviderLoader.LOGGER.debug("Looking up confirmation provider '{}'.", providerId);
+        LOGGER.debug("Looking up confirmation provider '{}'.", providerId);
         return StreamUtil.toStream(loader)
-                .peek(cp -> ConfirmationProviderLoader.LOGGER.trace("Evaluating confirmation provider '{}' with '{}'.",
-                                                                    providerId, cp.getClass()))
+                .peek(cp -> LOGGER.trace("Evaluating confirmation provider '{}' with '{}'.", providerId, cp.getClass()))
                 .map(cp -> cp.find(providerId))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
     }
 
     public static Optional<ConfirmationProvider> load(final String providerId) {
-        return ConfirmationProviderLoader.load(providerId, ConfirmationProviderLoader.LOADER.get());
+        return load(providerId, LOADER.get());
     }
 }
 

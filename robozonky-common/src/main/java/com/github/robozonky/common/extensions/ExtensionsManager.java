@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.ServiceLoader;
 
 import io.vavr.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Ensures that all extensions, available in the current working directory's "extensions/" subdirectory, will be on
@@ -36,17 +36,17 @@ enum ExtensionsManager {
 
     INSTANCE; // cheap thread-safe singleton
 
-    private final Logger LOGGER = LoggerFactory.getLogger(ExtensionsManager.class);
+    private final Logger logger = LogManager.getLogger(ExtensionsManager.class);
 
     private static boolean isJarFile(final File f) {
         return f.isFile() && f.getPath().toLowerCase().endsWith(".jar");
     }
 
     ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
-        this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
+        logger.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
         final File[] jars = extensionsFolder.listFiles(ExtensionsManager::isJarFile);
         final String jarString = Arrays.toString(jars);
-        this.LOGGER.debug("JARS found: '{}'.", jarString);
+        logger.debug("JARS found: '{}'.", jarString);
         final URL[] urls = FileUtil.filesToUrls(jars).toArray(URL[]::new);
         return new URLClassLoader(urls);
     }
@@ -55,7 +55,7 @@ enum ExtensionsManager {
         return FileUtil.findFolder(folderName)
                 .map(this::retrieveExtensionClassLoader)
                 .orElseGet(() -> {
-                    this.LOGGER.debug("Extensions folder not found.");
+                    logger.debug("Extensions folder not found.");
                     return ExtensionsManager.class.getClassLoader();
                 });
     }
@@ -72,7 +72,7 @@ enum ExtensionsManager {
     }
 
     <T> ServiceLoader<T> getServiceLoader(final Class<T> serviceClass, final String folderName) {
-        this.LOGGER.debug("Retrieving service loader for '{}'.", serviceClass);
+        logger.debug("Retrieving service loader for '{}'.", serviceClass);
         return ServiceLoader.load(serviceClass, this.retrieveExtensionClassLoader(folderName));
     }
 

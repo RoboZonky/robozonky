@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
 import io.vavr.control.Either;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Investor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
+    private static final Logger LOGGER = LogManager.getLogger(Investor.class);
     private static final InvestOperation DRY_RUN = recommendedLoan -> {
         LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", recommendedLoan);
         return Either.right(recommendedLoan.amount());

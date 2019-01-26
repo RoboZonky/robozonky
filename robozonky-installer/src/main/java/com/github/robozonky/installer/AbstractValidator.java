@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import java.util.concurrent.TimeUnit;
 
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 abstract class AbstractValidator implements DataValidator {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
     protected abstract DataValidator.Status validateDataPossiblyThrowingException(InstallData installData);
 
@@ -37,16 +37,16 @@ abstract class AbstractValidator implements DataValidator {
     public DataValidator.Status validateData(final InstallData installData) {
         final ExecutorService e = Executors.newCachedThreadPool();
         try {
-            LOGGER.info("Starting validation.");
+            logger.info("Starting validation.");
             final Callable<DataValidator.Status> c = () -> this.validateDataPossiblyThrowingException(installData);
             final Future<DataValidator.Status> f = e.submit(c);
             return f.get(15, TimeUnit.SECONDS); // don't wait for result indefinitely
         } catch (final Exception ex) { // the installer must never ever throw an exception (= neverending spinner)
-            LOGGER.error("Uncaught exception.", ex);
+            logger.error("Uncaught exception.", ex);
             return DataValidator.Status.ERROR;
         } finally {
             e.shutdownNow();
-            LOGGER.info("Finished validation.");
+            logger.info("Finished validation.");
         }
     }
 

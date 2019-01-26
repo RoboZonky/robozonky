@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * These are RoboZonky settings read from a property file at system startup. The location of this file will be looked
@@ -41,7 +41,7 @@ public enum Settings {
 
     public static final String FILE_LOCATION_PROPERTY = "robozonky.properties.file";
     private static final int HTTPS_DEFAULT_PORT = 443;
-    private final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
+    private final Logger LOGGER = LogManager.getLogger(Settings.class);
     private final AtomicReference<Properties> properties = new AtomicReference<>();
 
     private static Settings.Key getRatingKey(final Rating r) {

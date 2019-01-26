@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.github.robozonky.internal.api.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("rawtypes")
 public class Scheduler implements AutoCloseable {
 
     public static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
-    private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
+    private static final Logger LOGGER = LogManager.getLogger(Scheduler.class);
     private static final Reloadable<Scheduler> BACKGROUND_SCHEDULER = Reloadable.with(() -> {
         LOGGER.debug("Instantiating new background scheduler.");
         // give as many threads as is necessary; the scheduler will start with 1 and scale back to 1 if no more needed

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import com.izforge.izpack.api.event.AbstractInstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_HOST;
 import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_PORT;
@@ -51,7 +51,7 @@ import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_LOCAL_F
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
     static final char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoboZonkyInstallerListener.class);
+    private static final Logger LOGGER = LogManager.getLogger(RoboZonkyInstallerListener.class);
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
             CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
     private static InstallData DATA;

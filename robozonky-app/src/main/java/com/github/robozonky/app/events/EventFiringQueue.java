@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.util.function.Function;
 
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.async.Scheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Guarantees that events are fired in the order in which they are received. Use {@link #fire(Runnable)} to queue an
@@ -37,7 +37,7 @@ final class EventFiringQueue {
 
     public static final EventFiringQueue INSTANCE = new EventFiringQueue();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventFiringQueue.class);
+    private static final Logger LOGGER = LogManager.getLogger(EventFiringQueue.class);
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
     private final Reloadable<Thread> firingThread;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import io.vavr.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Simple abstraction for dealing with the overly complicated {@link KeyStore} API. Always call {@link #save()} to
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class KeyStoreHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(KeyStoreHandler.class);
     private static final String KEYSTORE_TYPE = "JCEKS";
     private static final String KEY_TYPE = "PBE";
     private final AtomicBoolean dirty;
@@ -76,7 +76,7 @@ public class KeyStoreHandler {
 
     private static SecretKeyFactory getSecretKeyFactory() {
         try {
-            return SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
+            return SecretKeyFactory.getInstance(KEY_TYPE);
         } catch (final Exception ex) { // otherwise we're seing security-related flakiness on Windows-based CI
             throw new IllegalStateException(ex);
         }
@@ -97,7 +97,7 @@ public class KeyStoreHandler {
         } else if (keyStoreFile.exists()) {
             throw new FileAlreadyExistsException(keyStoreFile.getAbsolutePath());
         }
-        final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
+        final KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
         // get user password and file input stream
         try {
             ks.load(null, password);
@@ -105,7 +105,7 @@ public class KeyStoreHandler {
             throw new IllegalStateException(ex);
         }
         // store the newly created key store
-        final SecretKeyFactory skf = KeyStoreHandler.getSecretKeyFactory();
+        final SecretKeyFactory skf = getSecretKeyFactory();
         final KeyStoreHandler ksh = new KeyStoreHandler(ks, password, keyStoreFile, skf);
         ksh.save();
         return ksh;
@@ -126,12 +126,12 @@ public class KeyStoreHandler {
         } else if (!keyStoreFile.exists()) {
             throw new FileNotFoundException(keyStoreFile.getAbsolutePath());
         }
-        final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
+        final KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
         // get user password and file input stream
         return Try.withResources(() -> new FileInputStream(keyStoreFile))
                 .of(fis -> {
                     ks.load(fis, password);
-                    return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(),
+                    return new KeyStoreHandler(ks, password, keyStoreFile, getSecretKeyFactory(),
                                                false);
                 })
                 .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
@@ -151,7 +151,7 @@ public class KeyStoreHandler {
             this.dirty.set(true);
             return true;
         }).getOrElseGet(t -> {
-            KeyStoreHandler.LOGGER.debug("Failed storing '{}'.", alias, t);
+            LOGGER.debug("Failed storing '{}'.", alias, t);
             return false;
         });
     }
@@ -172,7 +172,7 @@ public class KeyStoreHandler {
                                                                                PBEKeySpec.class);
             return Optional.of(keySpec.getPassword());
         }).getOrElseGet(t -> {
-            KeyStoreHandler.LOGGER.debug("Unrecoverable entry '{}'.", alias, t);
+            LOGGER.debug("Unrecoverable entry '{}'.", alias, t);
             return Optional.empty();
         });
     }
@@ -188,7 +188,7 @@ public class KeyStoreHandler {
             this.dirty.set(true);
             return true;
         }).getOrElseGet(t -> {
-            KeyStoreHandler.LOGGER.debug("Entry '{}' not deleted.", alias, t);
+            LOGGER.debug("Entry '{}' not deleted.", alias, t);
             return false;
         });
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,14 @@ import com.github.robozonky.notifications.Submission;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
 import freemarker.template.TemplateException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.internal.util.Maps.entry;
 
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
     final BalanceTracker balanceTracker;
     final DelinquencyTracker delinquencyTracker;
     private final AbstractTargetHandler handler;
@@ -181,10 +181,10 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     public final void handle(final T event, final SessionInfo sessionInfo) {
         try {
             if (!this.shouldNotify(event, sessionInfo)) {
-                LOGGER.debug("Will not notify.");
+                logger.debug("Will not notify.");
             } else {
                 // only do the heavy lifting in the handler, after the final send/no-send decision was made
-                LOGGER.debug("Notifying {}.", event);
+                logger.debug("Notifying {}.", event);
                 handler.offer(createSubmission(event, sessionInfo));
             }
         } catch (final Exception ex) {
@@ -193,9 +193,9 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
             try {
                 finish(event, sessionInfo);
             } catch (final Exception ex) {
-                LOGGER.trace("Finisher failed.", ex);
+                logger.trace("Finisher failed.", ex);
             } finally {
-                LOGGER.debug("Notified {}.", event);
+                logger.debug("Notified {}.", event);
             }
         }
     }

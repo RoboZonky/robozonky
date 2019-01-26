@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import java.util.stream.Collectors;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class ResponseHandler implements BiFunction<String, String, Optional<MockLowLevelHttpResponse>> {
 
     private static final JacksonFactory FACTORY = new JacksonFactory();
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
 
     protected static String toJson(final Object object) {
         try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -54,10 +54,10 @@ public abstract class ResponseHandler implements BiFunction<String, String, Opti
     @Override
     public Optional<MockLowLevelHttpResponse> apply(final String method, final String url) {
         if (appliesTo(method, url)) {
-            LOGGER.debug("Applies to {} {}.", method, url);
+            logger.debug("Applies to {} {}.", method, url);
             return Optional.ofNullable(respond(method, url));
         } else {
-            LOGGER.debug("Does not apply to {} {}.", method, url);
+            logger.debug("Does not apply to {} {}.", method, url);
             return Optional.empty();
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * All RoboZonky code should use this class to retrieve its random numbers. This will ensure that tests will be able to
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class RandomUtil extends Random {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RandomUtil.class);
+    private static final Logger LOGGER = LogManager.getLogger(RandomUtil.class);
     private static final Supplier<Random> DEFAULT = ThreadLocalRandom::current;
     private static final AtomicReference<Supplier<Random>> RANDOM = new AtomicReference<>(DEFAULT);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.Tenant;
 import io.vavr.control.Either;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompletedLazy;
@@ -57,7 +57,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
  */
 final class InvestingSession {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InvestingSession.class);
+    private static final Logger LOGGER = LogManager.getLogger(InvestingSession.class);
     private final Collection<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;
@@ -147,7 +147,7 @@ final class InvestingSession {
                     // rejected due to no confirmation provider => make available for direct investment later
                     tenant.fire(investmentSkipped(recommendation));
                     final int loanId = loan.item().getId();
-                    InvestingSession.LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
+                    LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
                     skip(loan);
                 }
                 break;
@@ -186,7 +186,7 @@ final class InvestingSession {
         tenant.fire(investmentRequested(recommendation));
         final boolean seenBefore = seen.contains(loan);
         final Either<InvestmentFailure, BigDecimal> response = investor.invest(recommendation, seenBefore);
-        InvestingSession.LOGGER.debug("Response for loan {}: {}.", loanId, response);
+        LOGGER.debug("Response for loan {}: {}.", loanId, response);
         return response.fold(reason -> unsuccessfulInvestment(recommendation, reason),
                              amount -> successfulInvestment(recommendation, amount));
     }

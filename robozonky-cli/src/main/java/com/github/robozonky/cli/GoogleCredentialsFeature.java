@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
     }
 
     private <T> T runGoogleCredentialCheck(final SessionInfo sessionInfo, final Function<Credential, T> provider) {
-        LOGGER.debug("Running credential check.");
+        logger.debug("Running credential check.");
         final Credential credential = credentialProvider.get().getCredential(sessionInfo);
         return provider.apply(credential);
     }
@@ -103,11 +103,11 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
 
     @Override
     public void setup() throws SetupFailedException {
-        LOGGER.info("A web browser window may open, or you may be asked to visit a Google link.");
-        LOGGER.info("Unless you allow RoboZonky to access your Google Sheets, Stonky integration will be disabled.");
+        logger.info("A web browser window may open, or you may be asked to visit a Google link.");
+        logger.info("Unless you allow RoboZonky to access your Google Sheets, Stonky integration will be disabled.");
         try {
             runGoogleCredentialCheck();
-            LOGGER.info("Press Enter to confirm that you have granted permission, otherwise exit.");
+            logger.info("Press Enter to confirm that you have granted permission, otherwise exit.");
             System.in.read();
         } catch (final Exception ex) {
             throw new SetupFailedException(ex);
@@ -121,7 +121,7 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
             final Drive service = runGoogleCredentialCheckForDrive(sessionInfo);
             final Sheets service2 = runGoogleCredentialCheckForSheets(sessionInfo);
             final DriveOverview driveOverview = DriveOverview.create(sessionInfo, service, service2);
-            LOGGER.debug("Google Drive contents: {}.", driveOverview);
+            logger.debug("Google Drive contents: {}.", driveOverview);
         } catch (final Exception ex) {
             throw new TestFailedException(ex);
         }

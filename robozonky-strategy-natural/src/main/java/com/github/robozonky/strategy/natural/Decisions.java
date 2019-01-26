@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package com.github.robozonky.strategy.natural;
 
 import java.util.function.Consumer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The purpose of this class is so that all possible reasons for a strategy to reject/accept a loan are properly logged
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 final class Decisions {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Decisions.class);
+    private static final Logger LOGGER = LogManager.getLogger(Decisions.class);
 
     private Decisions() {
         // no instances

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,18 +47,18 @@ public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
         return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)))
                 .of(baos -> Optional.of(ConfigStorage.create(baos)))
                 .getOrElseGet(ex -> {
-                    LOGGER.warn("Failed transforming source.", ex);
+                    logger.warn("Failed transforming source.", ex);
                     return Optional.empty();
                 });
     }
 
     @Override
     protected String getLatestSource() {
-        LOGGER.debug("Reading notification configuration from '{}'.", source);
+        logger.debug("Reading notification configuration from '{}'.", source);
         return Try.withResources(() -> new BufferedReader(new InputStreamReader(source.openStream(), Defaults.CHARSET)))
                 .of(r -> r.lines().collect(Collectors.joining(System.lineSeparator())))
                 .getOrElseGet(t -> {
-                    LOGGER.warn("Failed reading notification configuration from '{}' due to '{}'.", source,
+                    logger.warn("Failed reading notification configuration from '{}' due to '{}'.", source,
                                 t.getMessage());
                     return null;
                 });

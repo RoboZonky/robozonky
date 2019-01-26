@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.StateModifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Delegates to default {@link InstanceState} implementation, except for {@link #update(Consumer)} and
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 final class TransactionalInstanceState<T> implements InstanceState<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalInstanceState.class);
+    private static final Logger LOGGER = LogManager.getLogger(TransactionalInstanceState.class);
 
     private final Collection<Runnable> stateUpdates;
     private final InstanceState<T> parent;

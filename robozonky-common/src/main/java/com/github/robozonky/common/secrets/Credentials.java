@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package com.github.robozonky.common.secrets;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class Credentials {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Credentials.class);
+    private static final Logger LOGGER = LogManager.getLogger(Credentials.class);
 
     private final String toolId;
     private final SecretProvider secretProvider;
@@ -34,11 +34,11 @@ public final class Credentials {
         final String[] parts = request.split(":");
         if (parts.length == 1) {
             this.toolId = parts[0];
-            Credentials.LOGGER.debug("Credentials for '{}' not given password.", this.toolId);
+            LOGGER.debug("Credentials for '{}' not given password.", this.toolId);
         } else if (parts.length == 2) {
             this.toolId = parts[0];
             this.secretProvider.setSecret(this.toolId, parts[1].toCharArray());
-            Credentials.LOGGER.debug("Credentials for '{}' stored password.", this.toolId);
+            LOGGER.debug("Credentials for '{}' stored password.", this.toolId);
         } else {
             throw new IllegalArgumentException("Request must be 1 or 2 parts: " + Arrays.toString(parts));
         }

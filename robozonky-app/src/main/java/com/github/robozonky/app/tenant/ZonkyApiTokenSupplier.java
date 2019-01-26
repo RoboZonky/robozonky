@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Will keep permanent user authentication running in the background.
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                                        Closeable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
+    private static final Logger LOGGER = LogManager.getLogger(ZonkyApiTokenSupplier.class);
     private final OAuthScope scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;

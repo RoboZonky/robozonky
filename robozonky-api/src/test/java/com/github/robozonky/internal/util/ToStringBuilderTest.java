@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package com.github.robozonky.internal.util;
 
 import io.vavr.Lazy;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -31,7 +31,7 @@ class ToStringBuilderTest {
     // will be ignored since specifically excluded
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
     // will be ignored as it's one of the ignored types
-    private final Logger LOGGER = LoggerFactory.getLogger(ToStringBuilderTest.class);
+    private final Logger LOGGER = LogManager.getLogger(ToStringBuilderTest.class);
     // will be concatenated as it's too long
     private final String abbreviated = StringUtils.repeat(CHAR, 100);
 

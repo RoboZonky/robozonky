@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.github.robozonky.internal.api.Defaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * In order to communicate with the Google Sheets API, we need to authenticate against it. For that, we need to use a
@@ -64,7 +64,7 @@ class ApiKey {
             "AiEbZf8mGwVRUz+Dul9VEpoZcxhm5mnQgz69GGP6F3oRJDd4ZNqquyXfOK2CwpuYE4ZkQFd8yMyfEYbc3hJtAzWXAy9nUB3tLL+" +
             "ZL5vOGtCr8BFuwGh+udsZPp+mdkvM7HxJoM6T5DbrF6X3VT4i5ULy2RlvOym2HO2Rt0VrlATEFSn7InDX/EDavukoQ6L/7bGWCH" +
             "m9q0RyQM3Zd2YOKbXL54T3zJjoVXaaa+5wvslURZ9nGbGT4Ucj+mf30=";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApiKey.class);
+    private static final Logger LOGGER = LogManager.getLogger(ApiKey.class);
 
     public static void main(final String... args) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException,
             IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidKeySpecException,

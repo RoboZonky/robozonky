@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.internal.util.Maps;
 import io.vavr.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
@@ -44,7 +44,7 @@ import static com.github.robozonky.internal.util.Maps.entry;
 
 final class FinancialCalculator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FinancialCalculator.class);
+    private static final Logger LOGGER = LogManager.getLogger(FinancialCalculator.class);
     private static final Instant MIDNIGHT_2017_09_01 =
             LocalDate.of(2017, 9, 1).atStartOfDay(Defaults.ZONE_ID).toInstant();
     private static final BigDecimal ONE_PERCENT = new BigDecimal("0.01"), FIVE_PERCENT = new BigDecimal("0.05"),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.util.Optional;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import com.github.robozonky.common.secrets.SecretProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class SecretProviderFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecretProviderFactory.class);
+    private static final Logger LOGGER = LogManager.getLogger(SecretProviderFactory.class);
 
     private SecretProviderFactory() {
         // no instances
@@ -43,7 +43,7 @@ final class SecretProviderFactory {
                 final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
                 return Optional.of(SecretProvider.keyStoreBased(ksh));
             } catch (final Exception ex) {
-                SecretProviderFactory.LOGGER.error("Failed opening guarded storage.", ex);
+                LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.<SecretProvider>empty();
             }
         }).orElseThrow(() -> new IllegalStateException("Could not find keystore."));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package com.github.robozonky.app.daemon;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.tenant.PowerTenant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
 
 final class Skippable implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Skippable.class);
+    private static final Logger LOGGER = LogManager.getLogger(Skippable.class);
 
     private final PowerTenant tenant;
     private final Consumer<Throwable> shutdownCall;
@@ -54,7 +54,8 @@ final class Skippable implements Runnable {
         } catch (final Error t) {
             LOGGER.error("Caught unexpected error, terminating.", t);
             shutdownCall.accept(t);
-        }        LOGGER.trace("Update finished.");
+        }
+        LOGGER.trace("Update finished.");
     }
 
     @Override

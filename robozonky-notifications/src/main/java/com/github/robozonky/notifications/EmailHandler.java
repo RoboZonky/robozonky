@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class EmailHandler extends AbstractTargetHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmailHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(EmailHandler.class);
 
     public EmailHandler(final ConfigStorage config) {
         super(config, Target.EMAIL);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * If delegated, this provider will allow investors to fill out CAPTCHA.
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 public class ZonkoidConfirmationProvider implements ConfirmationProvider {
 
     static final String PATH = "/zonkycommander/rest/notifications";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZonkoidConfirmationProvider.class);
+    private static final Logger LOGGER = LogManager.getLogger(ZonkoidConfirmationProvider.class);
     private static final String PROTOCOL_MAIN = "https", PROTOCOL_FALLBACK = "http", CLIENT_APP = "ROBOZONKY";
 
     private final String rootUrl;

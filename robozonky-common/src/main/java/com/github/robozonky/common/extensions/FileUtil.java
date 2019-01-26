@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import io.vavr.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class FileUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
+    private static final Logger LOGGER = LogManager.getLogger(FileUtil.class);
 
     private FileUtil() {
         // no instances
@@ -44,7 +44,7 @@ final class FileUtil {
                         .filter(f -> Objects.equals(f.getName(), folderName))
                         .findFirst())
                 .getOrElseGet(ex -> {
-                    FileUtil.LOGGER.warn("Exception while walking file tree.", ex);
+                    LOGGER.warn("Exception while walking file tree.", ex);
                     return Optional.empty();
                 });
     }
@@ -58,7 +58,7 @@ final class FileUtil {
                     try {
                         return Optional.of(f.toURI().toURL());
                     } catch (final MalformedURLException e) {
-                        FileUtil.LOGGER.debug("Skipping file: '{}'.", f, e);
+                        LOGGER.debug("Skipping file: '{}'.", f, e);
                         return Optional.<URL>empty();
                     }
                 }).flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));

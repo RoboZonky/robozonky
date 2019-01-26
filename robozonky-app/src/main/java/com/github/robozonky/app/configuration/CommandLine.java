@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.app.App;
 import com.github.robozonky.app.runtime.Lifecycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Converts command line into application configuration using {@link picocli.CommandLine}.
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 @picocli.CommandLine.Command(name = "robozonky(.sh|.bat)")
 public class CommandLine implements Callable<Optional<InvestmentMode>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
+    private static final Logger LOGGER = LogManager.getLogger(CommandLine.class);
     private final Supplier<Lifecycle> lifecycle;
     @picocli.CommandLine.Option(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")
