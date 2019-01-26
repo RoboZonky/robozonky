@@ -19,8 +19,7 @@ env:
     - MODULE=robozonky-integration-stonky
 os:
   - linux
-jdk: # OpenJDK releases (non-EA) belong here
-  - openjdk8
+jdk: # OpenJDK releases (non-EA) belong here, minimum of Java 11 is required
   - openjdk11
 stages: # order the stages we'll use during this build
   - precache
