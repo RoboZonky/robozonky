@@ -588,19 +588,6 @@
         </dependencies>
       </plugin>
       <plugin>
-        <groupId>org.antlr</groupId>
-        <artifactId>antlr4-maven-plugin</artifactId>
-        <version>${version.org.antlr}</version>
-        <executions>
-          <execution>
-            <id>antlr</id>
-            <goals>
-              <goal>antlr4</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
@@ -680,6 +667,11 @@
         <plugin> <!-- 3.0.0-M1 breaks IZPack. See for similar: https://github.com/openhab/openhab-core/pull/408 -->
           <artifactId>maven-install-plugin</artifactId>
           <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.antlr</groupId>
+          <artifactId>antlr4-maven-plugin</artifactId>
+          <version>${version.org.antlr}</version>
         </plugin>
       </plugins>
     </pluginManagement>
