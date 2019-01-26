@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,12 @@ import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.UpdateSheetPropertiesRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class Stonky implements Function<Tenant, Optional<String>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Stonky.class);
+    private static final Logger LOGGER = LogManager.getLogger(Stonky.class);
 
     private final HttpTransport transport;
     private final CredentialProvider credentialSupplier;

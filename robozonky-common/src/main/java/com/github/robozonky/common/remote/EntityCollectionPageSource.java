@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import java.util.function.Function;
 import java.util.function.LongConsumer;
 
 import com.github.rutledgepaulv.pagingstreams.PageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class EntityCollectionPageSource<T, S> implements PageSource<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EntityCollectionPageSource.class);
+    private static final Logger LOGGER = LogManager.getLogger(EntityCollectionPageSource.class);
 
     private final PaginatedApi<T, S> api;
     private final Function<S, List<T>> function;

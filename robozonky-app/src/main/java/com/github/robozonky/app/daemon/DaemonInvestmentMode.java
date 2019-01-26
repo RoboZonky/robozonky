@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import io.vavr.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DaemonInvestmentMode implements InvestmentMode {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
+    private static final Logger LOGGER = LogManager.getLogger(DaemonInvestmentMode.class);
     private final PowerTenant tenant;
     private final Investor investor;
     private final Duration primaryMarketplaceCheckPeriod;

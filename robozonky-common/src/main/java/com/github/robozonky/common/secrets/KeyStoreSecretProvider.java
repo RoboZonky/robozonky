@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ package com.github.robozonky.common.secrets;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Every set*() operation must result in a {@link KeyStoreHandler#save()} call.
  */
 final class KeyStoreSecretProvider implements SecretProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreSecretProvider.class);
+    private static final Logger LOGGER = LogManager.getLogger(KeyStoreSecretProvider.class);
     private static final String ALIAS_PASSWORD = "pwd";
     private static final String ALIAS_USERNAME = "usr";
 

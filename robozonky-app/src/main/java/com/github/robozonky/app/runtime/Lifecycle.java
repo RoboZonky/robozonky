@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.management.Management;
 import com.github.robozonky.common.management.ManagementBean;
 import io.vavr.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Lifecycle {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Lifecycle.class);
+    private static final Logger LOGGER = LogManager.getLogger(Lifecycle.class);
     private static final Set<Thread> HOOKS = new HashSet<>(0);
     private final CountDownLatch circuitBreaker;
     private final MainControl livenessCheck;

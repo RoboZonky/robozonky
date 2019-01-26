@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.tenant.LazyEvent;
 import org.apache.commons.lang3.ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class SessionEvents {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionEvents.class);
+    private static final Logger LOGGER = LogManager.getLogger(SessionEvents.class);
     private static final Map<String, SessionEvents> BY_TENANT = new ConcurrentHashMap<>(0);
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> debugListeners = new LinkedHashSet<>(0);

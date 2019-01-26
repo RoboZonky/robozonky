@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package com.github.robozonky.common.management;
 import java.time.OffsetDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractBaseMBean implements BaseMBean {
 
     private final AtomicReference<OffsetDateTime> lastUpdated = new AtomicReference<>();
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected Logger LOGGER = LogManager.getLogger(this.getClass());
 
     protected void markUpdated() {
         lastUpdated.set(OffsetDateTime.now());

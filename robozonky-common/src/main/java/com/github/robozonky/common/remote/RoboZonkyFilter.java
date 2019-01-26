@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import javax.ws.rs.core.UriBuilder;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Decorates the request with User-Agent and adds some simple request logging.
@@ -44,7 +44,7 @@ class RoboZonkyFilter implements ClientRequestFilter,
                                  ClientResponseFilter {
 
     // not static, so that filters extending this one get the proper logger class
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LogManager.getLogger(this.getClass());
     private final Map<String, Object[]> queryParams = new TreeMap<>();
     private final Map<String, String> requestHeaders = new TreeMap<>();
     private Map<String, String> responseHeaders = Collections.emptyMap();

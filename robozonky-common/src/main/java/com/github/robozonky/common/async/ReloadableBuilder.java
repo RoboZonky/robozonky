@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import io.vavr.control.Either;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Builds an instance of {@link Reloadable}.
@@ -35,7 +35,7 @@ public final class ReloadableBuilder<T> {
     private static final Consumer<?> NOOP_CONSUMER = x -> {
         // do nothing
     };
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReloadableBuilder.class);
+    private static final Logger LOGGER = LogManager.getLogger(ReloadableBuilder.class);
 
     private final Supplier<T> supplier;
     private UnaryOperator<T> reloader;

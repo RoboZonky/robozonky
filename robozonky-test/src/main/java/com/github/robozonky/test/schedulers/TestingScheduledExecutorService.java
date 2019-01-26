@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.github.robozonky.common.async.Scheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The goal of this class is to bring background tasks from {@link Scheduler} to the foreground. This will help will
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 class TestingScheduledExecutorService implements ScheduledExecutorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestingScheduledExecutorService.class);
+    private static final Logger LOGGER = LogManager.getLogger(TestingScheduledExecutorService.class);
 
     private boolean wasShutdown = false;
 

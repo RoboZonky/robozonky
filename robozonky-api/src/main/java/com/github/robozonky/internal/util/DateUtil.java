@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.internal.api.Defaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * All RoboZonky code should use this class to retrieve its now. This will ensure that tests will be able to inject
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class DateUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
+    private static final Logger LOGGER = LogManager.getLogger(DateUtil.class);
     private static final Clock DEFAULT = Clock.system(Defaults.ZONE_ID);
     private static final AtomicReference<Clock> CLOCK = new AtomicReference<>(DEFAULT);
 

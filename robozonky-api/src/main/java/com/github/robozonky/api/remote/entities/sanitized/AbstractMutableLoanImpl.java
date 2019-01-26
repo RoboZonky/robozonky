@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.util.RandomUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
 import io.vavr.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("unchecked")
 abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> implements MutableMarketplaceLoan<T> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = LogManager.getLogger(getClass());
     private boolean topped, covered, published, questionsAllowed, insuranceActive;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount;
     private int remainingInvestment;

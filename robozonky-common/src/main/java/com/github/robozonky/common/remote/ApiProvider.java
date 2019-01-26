@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.util.StreamUtil;
 import io.vavr.Lazy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides instances of APIs for the rest of RoboZonky to use.
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class ApiProvider implements AutoCloseable {
 
     public static final String ZONKY_URL = "https://api.zonky.cz";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApiProvider.class);
+    private static final Logger LOGGER = LogManager.getLogger(ApiProvider.class);
     /**
      * Instances of the Zonky API are kept for as long as the token supplier is kept by the GC. This guarantees that,
      * for the lifetime of the token supplier, the expensive API-retrieving operations wouldn't be executed twice.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,14 @@ import com.github.robozonky.notifications.Submission;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
 import freemarker.template.TemplateException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.internal.util.Maps.entry;
 
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    protected final Logger LOGGER = LogManager.getLogger(this.getClass());
     final BalanceTracker balanceTracker;
     final DelinquencyTracker delinquencyTracker;
     private final AbstractTargetHandler handler;

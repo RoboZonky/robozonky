@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ShutdownHook {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownHook.class);
+    private static final Logger LOGGER = LogManager.getLogger(ShutdownHook.class);
     private final Deque<Consumer<Result>> stack = new ArrayDeque<>(0);
 
     /**

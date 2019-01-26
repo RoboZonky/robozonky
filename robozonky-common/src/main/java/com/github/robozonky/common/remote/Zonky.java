@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Zonky {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Zonky.class);
+    private static final Logger LOGGER = LogManager.getLogger(Zonky.class);
 
     private final Api<ControlApi> controlApi;
     private final Api<ExportApi> exports;

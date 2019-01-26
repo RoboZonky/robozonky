@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import java.util.Optional;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Carries metadata regarding a {@link RawLoan}.
  */
 public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoanDescriptor.class);
+    private static final Logger LOGGER = LogManager.getLogger(LoanDescriptor.class);
 
     private final MarketplaceLoan loan;
 

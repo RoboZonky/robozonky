@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class RemoteData {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteData.class);
+    private static final Logger LOGGER = LogManager.getLogger(RemoteData.class);
 
     private final Wallet wallet;
     private final Statistics statistics;

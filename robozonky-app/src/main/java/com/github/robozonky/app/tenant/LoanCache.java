@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class LoanCache implements AutoCloseable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
+    private static final Logger LOGGER = LogManager.getLogger(LoanCache.class);
     private static final Duration EVICT_AFTER = Duration.ofHours(1);
     private static final Duration EVICT_EVERY = Duration.ofMinutes(30);
 

@@ -58,11 +58,11 @@ oldMarketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, C
         })
     )* {
         if ($primary.isEmpty()) {
-            LoggerFactory.getLogger(this.getClass())
+            LogManager.getLogger(this.getClass())
                 .warn("Primary marketplace filters missing without excuse. This is deprecated and will eventually break.");
         }
         if ($secondary.isEmpty()) {
-            LoggerFactory.getLogger(this.getClass())
+            LogManager.getLogger(this.getClass())
                 .warn("Secondary marketplace filters missing without excuse. This is deprecated and will eventually break.");
         }
    }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import io.vavr.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Simple abstraction for dealing with the overly complicated {@link KeyStore} API. Always call {@link #save()} to
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class KeyStoreHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(KeyStoreHandler.class);
     private static final String KEYSTORE_TYPE = "JCEKS";
     private static final String KEY_TYPE = "PBE";
     private final AtomicBoolean dirty;

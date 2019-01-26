@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class BlockingOperation<T> implements ForkJoinPool.ManagedBlocker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlockingOperation.class);
+    private static final Logger LOGGER = LogManager.getLogger(BlockingOperation.class);
 
     private final Supplier<T> operation;
     private final AtomicReference<T> result = new AtomicReference<>();

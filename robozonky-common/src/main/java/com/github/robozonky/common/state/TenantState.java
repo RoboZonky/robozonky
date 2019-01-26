@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.api.Defaults;
 import io.vavr.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class TenantState {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TenantState.class);
+    private static final Logger LOGGER = LogManager.getLogger(TenantState.class);
     private static final Map<SessionInfo, TenantState> TENANT_STATE_MAP = new ConcurrentHashMap<>(0);
     private final FileBackedStateStorage stateStorage;
 

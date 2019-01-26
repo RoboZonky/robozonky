@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.util.function.Supplier;
 import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The set of filters prescribed by the strategy changes based on whether or not the user has chosen to gradually exit
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 class FilterSupplier {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FilterSupplier.class);
+    private static final Logger LOGGER = LogManager.getLogger(FilterSupplier.class);
 
     private final DefaultValues defaults;
     private final Supplier<Collection<MarketplaceFilter>> primarySupplier, secondarySupplier, sellSupplier;

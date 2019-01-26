@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ package com.github.robozonky.common.state;
 import java.io.File;
 import java.util.UUID;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class FileBackedStateStorageTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileBackedStateStorageTest.class);
+    private static final Logger LOGGER = LogManager.getLogger(FileBackedStateStorageTest.class);
 
     private final File f = new File(UUID.randomUUID().toString());
     private final FileBackedStateStorage s = new FileBackedStateStorage(f);

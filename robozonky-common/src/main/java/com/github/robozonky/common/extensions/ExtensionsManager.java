@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.ServiceLoader;
 
 import io.vavr.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Ensures that all extensions, available in the current working directory's "extensions/" subdirectory, will be on
@@ -36,7 +36,7 @@ enum ExtensionsManager {
 
     INSTANCE; // cheap thread-safe singleton
 
-    private final Logger LOGGER = LoggerFactory.getLogger(ExtensionsManager.class);
+    private final Logger LOGGER = LogManager.getLogger(ExtensionsManager.class);
 
     private static boolean isJarFile(final File f) {
         return f.isFile() && f.getPath().toLowerCase().endsWith(".jar");

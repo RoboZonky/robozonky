@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Mandatory parent for any event that may be fired any time during RoboZonky's runtime.
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractEventImpl implements Event {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = LogManager.getLogger(getClass());
 
     private final OffsetDateTime creationDateTime = DateUtil.offsetNow();
     private final Reloadable<String> toString;

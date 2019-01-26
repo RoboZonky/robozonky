@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static java.util.stream.Collectors.toList;
 
@@ -61,7 +61,7 @@ enum Category {
      */
     DEFAULTED(-1);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Category.class);
+    private static final Logger LOGGER = LogManager.getLogger(Category.class);
     private final int thresholdInDays;
 
     Category(final int thresholdInDays) {

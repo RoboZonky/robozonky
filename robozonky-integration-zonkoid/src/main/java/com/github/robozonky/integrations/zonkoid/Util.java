@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import java.io.IOException;
 
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class Util {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
+    private static final Logger LOGGER = LogManager.getLogger(Util.class);
 
     private Util() {
         // no instances

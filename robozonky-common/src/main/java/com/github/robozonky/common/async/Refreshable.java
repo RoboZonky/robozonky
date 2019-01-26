@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Represents a resource that can be periodically checked for new results.
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 public abstract class Refreshable<T> implements Runnable,
                                                 Supplier<Optional<T>> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    protected final Logger LOGGER = LogManager.getLogger(this.getClass());
     private final String id;
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractTargetHandler {
 
     private static final String HOURLY_LIMIT = "hourlyMaxEmails";
     protected final Target target;
     final ConfigStorage config;
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Logger LOGGER = LogManager.getLogger(getClass());
     private final Map<SessionInfo, Counter> notifications = new HashMap<>(0);
     private final Map<SupportedListener, Map<SessionInfo, Counter>> specificNotifications =
             new EnumMap<>(SupportedListener.class);
