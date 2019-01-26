@@ -41,8 +41,6 @@
     <!-- Default encoding is UTF-8, no matter what platform we're on. -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
-    <!-- Minimal supported JDK version is 1.8. -->
-    <java.version>1.8</java.version>
     <!--
       Default Java 9 automatic module name; modules may override to comply with the module system spec.
       The RoboZonky-specific rule is that this must match the top-level package in the JAR.
@@ -437,8 +435,8 @@
             </goals>
             <configuration>
               <rules>
-                <banDuplicatePomDependencyVersions />
-                <dependencyConvergence />
+                <banDuplicatePomDependencyVersions/>
+                <dependencyConvergence/>
                 <reactorModuleConvergence>
                   <ignoreModuleDependencies>true</ignoreModuleDependencies>
                 </reactorModuleConvergence>
@@ -496,9 +494,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <source>${java.version}</source>
-        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -610,12 +605,29 @@
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
+          <executions>
+            <execution>
+              <id>default-compile</id>
+              <configuration>
+                <release>11</release>
+              </configuration>
+            </execution>
+            <execution>
+              <id>base-compile</id>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+              <!-- recompile everything for target VM except the module-info.java -->
+              <configuration>
+                <excludes>
+                  <exclude>module-info.java</exclude>
+                </excludes>
+              </configuration>
+            </execution>
+          </executions>
           <configuration>
-            <compilerVersion>${java.version}</compilerVersion>
             <fork>true</fork>
-            <source>${java.version}</source>
-            <target>${java.version}</target>
-            <testTarget>${java.version}</testTarget>
+            <release>8</release>
           </configuration>
         </plugin>
         <plugin>
