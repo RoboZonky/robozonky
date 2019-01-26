@@ -443,7 +443,7 @@
                   <ignoreModuleDependencies>true</ignoreModuleDependencies>
                 </reactorModuleConvergence>
                 <requireJavaVersion>
-                  <version>[${java.version},)</version>
+                  <version>[11,)</version>
                 </requireJavaVersion>
                 <requireReleaseDeps> <!-- No SNAPSHOT dependencies, except for our own for development purposes. -->
                   <failWhenParentIsSnapshot>false</failWhenParentIsSnapshot>
