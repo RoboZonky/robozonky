@@ -44,7 +44,7 @@ final class FileUtil {
                         .filter(f -> Objects.equals(f.getName(), folderName))
                         .findFirst())
                 .getOrElseGet(ex -> {
-                    FileUtil.LOGGER.warn("Exception while walking file tree.", ex);
+                    LOGGER.warn("Exception while walking file tree.", ex);
                     return Optional.empty();
                 });
     }
@@ -58,7 +58,7 @@ final class FileUtil {
                     try {
                         return Optional.of(f.toURI().toURL());
                     } catch (final MalformedURLException e) {
-                        FileUtil.LOGGER.debug("Skipping file: '{}'.", f, e);
+                        LOGGER.debug("Skipping file: '{}'.", f, e);
                         return Optional.<URL>empty();
                     }
                 }).flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));

@@ -26,9 +26,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to
+ * Used for things that need to be executed at app start and shutdown. Use {@link #register(Handler)} to
  * specify
- * such actions and {@link #execute(ShutdownHook.Result)} ignoreWhen it's time to shut the app down.
+ * such actions and {@link #execute(Result)} ignoreWhen it's time to shut the app down.
  */
 public class ShutdownHook {
 
@@ -40,12 +40,12 @@ public class ShutdownHook {
      * @param handler Needs to return the call handler and optionally perform other things.
      * @return True if the handler was registered and will be executed during call.
      */
-    public boolean register(final ShutdownHook.Handler handler) {
+    public boolean register(final Handler handler) {
         if (handler == null) {
             throw new IllegalArgumentException("Handler may not be null.");
         }
         try {
-            final Optional<Consumer<ShutdownHook.Result>> end = handler.get();
+            final Optional<Consumer<Result>> end = handler.get();
             if (end.isPresent()) {
                 stack.push(end.get());
                 return true;
@@ -53,26 +53,26 @@ public class ShutdownHook {
                 return false;
             }
         } catch (final RuntimeException ex) {
-            ShutdownHook.LOGGER.warn("Failed to register state handler.", ex);
+            LOGGER.warn("Failed to register state handler.", ex);
             return false;
         }
     }
 
     /**
-     * Execute and remove all handlers that were previously {@link #register(ShutdownHook.Handler)}ed, in the reverse
+     * Execute and remove all handlers that were previously {@link #register(Handler)}ed, in the reverse
      * order of
      * their registration. If any handler throws an exception, it will be ignored.
      * @param result The terminating state of the application.
      */
-    public void execute(final ShutdownHook.Result result) {
-        ShutdownHook.LOGGER.debug("RoboZonky terminating with '{}' return code.", result.getReturnCode());
+    public void execute(final Result result) {
+        LOGGER.debug("RoboZonky terminating with '{}' return code.", result.getReturnCode());
         while (!stack.isEmpty()) {
             try {
-                final Consumer<ShutdownHook.Result> h = stack.pop();
+                final Consumer<Result> h = stack.pop();
                 LOGGER.trace("Executing {}.", h);
                 h.accept(result);
             } catch (final RuntimeException ex) {
-                ShutdownHook.LOGGER.warn("Failed to call state handler.", ex);
+                LOGGER.warn("Failed to call state handler.", ex);
             }
         }
     }
@@ -81,15 +81,15 @@ public class ShutdownHook {
      * Represents a unit of state in the application.
      */
     @FunctionalInterface
-    public interface Handler extends Supplier<Optional<Consumer<ShutdownHook.Result>>> {
+    public interface Handler extends Supplier<Optional<Consumer<Result>>> {
 
         /**
          * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
-         * {@link ShutdownHook#execute(ShutdownHook.Result)}.
+         * {@link ShutdownHook#execute(Result)}.
          * @return Will be called during app shutdown, if present.
          */
         @Override
-        Optional<Consumer<ShutdownHook.Result>> get();
+        Optional<Consumer<Result>> get();
     }
 
     public static final class Result {

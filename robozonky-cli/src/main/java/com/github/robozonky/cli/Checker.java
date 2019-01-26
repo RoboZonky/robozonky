@@ -44,7 +44,7 @@ public final class Checker {
     private static final Comparator<RawLoan> SUBCOMPARATOR =
             Comparator.comparing(RawLoan::getRemainingInvestment).reversed();
     private static final Comparator<RawLoan> COMPARATOR =
-            Comparator.comparing(RawLoan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
+            Comparator.comparing(RawLoan::getInterestRate).thenComparing(SUBCOMPARATOR);
 
     private Checker() {
         // no instances
@@ -58,9 +58,9 @@ public final class Checker {
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.
              */
-            return loans.stream().min(Checker.COMPARATOR);
+            return loans.stream().min(COMPARATOR);
         } catch (final Exception t) {
-            Checker.LOGGER.warn("Failed obtaining a loan.", t);
+            LOGGER.warn("Failed obtaining a loan.", t);
             return Optional.empty();
         }
     }
@@ -73,19 +73,19 @@ public final class Checker {
 
     public static boolean confirmations(final ConfirmationProvider provider, final String username,
                                         final char... secret) {
-        return Checker.confirmations(provider, username, secret, ApiProvider::new);
+        return confirmations(provider, username, secret, ApiProvider::new);
     }
 
     static boolean confirmations(final ConfirmationProvider provider, final String username, final char[] secret,
                                  final Supplier<ApiProvider> apiProviderSupplier) {
-        return Checker.getOneLoanFromMarketplace(apiProviderSupplier)
-                .map(l -> Checker.notifyProvider(l, provider, username, secret))
+        return getOneLoanFromMarketplace(apiProviderSupplier)
+                .map(l -> notifyProvider(l, provider, username, secret))
                 .orElse(false);
     }
 
     static boolean notifications(final SessionInfo sessionInfo, final URL configurationLocation) {
         ListenerServiceLoader.registerConfiguration(sessionInfo, configurationLocation);
-        return Checker.notifications(sessionInfo, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
+        return notifications(sessionInfo, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
 
     static boolean notifications(final SessionInfo sessionInfo,
