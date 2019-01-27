@@ -19,13 +19,13 @@ package com.github.robozonky.app.events;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -46,7 +46,7 @@ public final class SessionEvents {
     private static final Logger LOGGER = LogManager.getLogger(SessionEvents.class);
     private static final Map<String, SessionEvents> BY_TENANT = new ConcurrentHashMap<>(0);
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
-    private final Set<EventFiringListener> debugListeners = new LinkedHashSet<>(0);
+    private final Set<EventFiringListener> debugListeners = new CopyOnWriteArraySet<>();
     private final SessionInfo sessionInfo;
     private EventListener<? extends Event> injectedDebugListener;
 
@@ -69,8 +69,8 @@ public final class SessionEvents {
         final Stream<Class<?>> interfaces = original.isInterface() ? // interface could be extending it directly
                 Stream.concat(Stream.of(original), provided) :
                 provided;
-        return (Class<T>) interfaces.filter(
-                i -> Objects.equals(i.getPackage().getName(), "com.github.robozonky.api.notifications"))
+        final String apiPackage = "com.github.robozonky.api.notifications";
+        return (Class<T>) interfaces.filter(i -> Objects.equals(i.getPackage().getName(), apiPackage))
                 .filter(i -> i.getSimpleName().endsWith("Event"))
                 .filter(i -> !Objects.equals(i.getSimpleName(), "Event"))
                 .findFirst()
@@ -88,6 +88,13 @@ public final class SessionEvents {
         final CompletableFuture[] results = futures.map(EventFiringQueue.INSTANCE::fire)
                 .toArray(CompletableFuture[]::new);
         return CompletableFuture.allOf(results);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static List<EventListenerSupplier<? extends Event>> retrieveListenerSuppliers(final Class eventType) {
+        final Class<? extends Event> impl = getImplementingEvent(eventType);
+        LOGGER.trace("Event {} implements {}.", eventType, impl);
+        return Collections.unmodifiableList(ListenerServiceLoader.load(impl));
     }
 
     /**
@@ -114,13 +121,11 @@ public final class SessionEvents {
         // loan all listeners
         debugListeners.forEach(l -> l.requested(event));
         final Class<? extends Event> eventType = event.getEventType();
-        final List<EventListenerSupplier<? extends Event>> s = suppliers.computeIfAbsent(eventType, key -> {
-            final Class<? extends Event> impl = getImplementingEvent(eventType);
-            LOGGER.trace("Event {} implements {}.", eventType, impl);
-            return new ArrayList<>(ListenerServiceLoader.load(impl));
-        });
+        final List<EventListenerSupplier<? extends Event>> s =
+                suppliers.computeIfAbsent(eventType, SessionEvents::retrieveListenerSuppliers);
         // send the event to all listeners, execute on the background
-        final Stream<EventListener> registered = s.stream().map(Supplier::get)
+        final Stream<EventListener> registered = s.stream()
+                .map(Supplier::get)
                 .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()));
         final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :

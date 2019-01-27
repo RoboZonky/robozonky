@@ -90,7 +90,7 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i10, i30, i60, i90, defaulted));
         when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
         payload.accept(tenant); // the new delinquencies will show up now
-        assertThat(getEventsRequested()).hasSize(5)
+        assertThat(getEventsRequested())
                 .extracting(e -> (Object) e.getClass().getInterfaces()[0])
                 .containsOnly(LoanDefaultedEvent.class,
                               LoanDelinquent10DaysOrMoreEvent.class, LoanDelinquent30DaysOrMoreEvent.class,
