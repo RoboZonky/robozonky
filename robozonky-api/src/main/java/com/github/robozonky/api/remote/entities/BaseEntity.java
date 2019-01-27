@@ -35,8 +35,7 @@ import org.apache.logging.log4j.Logger;
 abstract class BaseEntity {
 
     private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
-    @XmlTransient
-    protected final Logger logger = LogManager.getLogger(this.getClass());
+    private static final Logger LOGGER = LogManager.getLogger(BaseEntity.class);
     @XmlTransient
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
@@ -48,15 +47,16 @@ abstract class BaseEntity {
     @JsonAnyGetter
     void handleUnknownGetter(final String key) {
         if (!hasBeenCalledBefore(key)) {
-            logger.info("Trying to get value of unknown property '{}'. Indicates an unexpected API change.", key);
+            LOGGER.info("Trying to get value of unknown property '{}' on {}. Indicates an unexpected API change.", key,
+                        this.getClass());
         }
     }
 
     @JsonAnySetter
     void handleUnknownSetter(final String key, final Object value) {
         if (!hasBeenCalledBefore(key)) {
-            logger.info("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change.",
-                        value, key);
+            LOGGER.info("Trying to set value '{}' to unknown property '{}' on {}. Indicates an unexpected API change.",
+                        value, key, this.getClass());
         }
     }
 

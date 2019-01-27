@@ -40,7 +40,8 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings("unchecked")
 abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> implements MutableMarketplaceLoan<T> {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
+    private static final Logger LOGGER = LogManager.getLogger(AbstractMutableLoanImpl.class);
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
     private boolean topped, covered, published, questionsAllowed, insuranceActive;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount;
     private int remainingInvestment;
@@ -55,14 +56,13 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private URL url;
     private MyInvestment myInvestment;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
-    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
     AbstractMutableLoanImpl() {
-        this.id = RandomUtil.getNextInt(Integer.MAX_VALUE); // simplifies tests which do not need to IDs themselves
+        this.id = RandomUtil.getNextInt(Integer.MAX_VALUE); // simplifies tests which do not need to set IDs themselves
     }
 
     AbstractMutableLoanImpl(final RawLoan original) {
-        logger.trace("Sanitizing loan #{}.", original.getId());
+        LOGGER.trace("Sanitizing loan #{}.", original.getId());
         this.activeLoansCount = original.getActiveLoansCount();
         this.amount = (int) original.getAmount();
         this.datePublished = original.getDatePublished();
@@ -84,7 +84,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.rating = original.getRating();
         this.region = original.getRegion();
         this.remainingInvestment = (int) original.getRemainingInvestment();
-        this.nonReservedRemainingInvestment = (int)(original.getRemainingInvestment() - original.getReservedAmount());
+        this.nonReservedRemainingInvestment = (int) (original.getRemainingInvestment() - original.getReservedAmount());
         this.story = original.getStory();
         this.termInMonths = original.getTermInMonths();
         this.userId = original.getUserId();
@@ -401,7 +401,6 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.nonReservedRemainingInvestment = remainingInvestment;
         return (T) this;
     }
-
 
     @Override
     public final String toString() {
