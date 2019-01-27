@@ -108,18 +108,21 @@ enum Category {
         }
     }
 
-    private static LazyEvent<? extends SessionEvent> getEvent(final Tenant tenant, final Investment investment,
-                                                              final int threshold) {
+    private static SessionEvent supplyEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
         final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getDaysPastDue());
         final int loanId = investment.getLoanId();
         final Collection<Development> developments = getDevelopments(tenant, loanId, since);
         final Loan loan = tenant.getLoan(loanId);
-        final Supplier<SessionEvent> s = () -> getEventSupplierConstructor(threshold).apply(investment, loan, since,
-                                                                                            developments);
-        final LazyEvent<? extends SessionEvent> e = getLazyEventSupplier(threshold, s);
+        final SessionEvent e = getEventSupplierConstructor(threshold)
+                .apply(investment, loan, since, developments);
         LOGGER.trace("Done.");
         return e;
+    }
+
+    private static LazyEvent<? extends SessionEvent> getEvent(final Tenant tenant, final Investment investment,
+                                                              final int threshold) {
+        return getLazyEventSupplier(threshold, () -> supplyEvent(tenant, investment, threshold));
     }
 
     private static List<Development> getDevelopments(final Tenant auth, final int loanId,
