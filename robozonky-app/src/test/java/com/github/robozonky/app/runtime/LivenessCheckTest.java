@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,6 +32,13 @@ import static org.mockserver.model.HttpResponse.response;
 
 class LivenessCheckTest {
 
+    private static final String SAMPLE = "{\"branch\":\"origin/master\"," +
+            "\"commitId\":\"e51d4fcb9eac1a9599a64c93c181325a2c38e779\"," +
+            "\"commitIdAbbrev\":\"e51d4fc\"," +
+            "\"buildTime\":\"2018-01-18T20:16:08+0100\"," +
+            "\"buildVersion\":\"0.77.0\"," +
+            "\"currentApiTime\":\"2018-01-18T20:16:08.123+01:00\"," +
+            "\"tags\":[\"0.77.0\"]}";
     private static ClientAndServer server;
     private static String serverUrl;
 
@@ -40,14 +48,20 @@ class LivenessCheckTest {
         serverUrl = "127.0.0.1:" + server.getLocalPort();
     }
 
+    @AfterAll
+    static void stopServer() {
+        server.stop();
+    }
+
     @AfterEach
     void resetServer() {
         server.reset();
     }
 
-    @AfterAll
-    static void stopServer() {
-        server.stop();
+    @Test
+    void parse() throws IOException {
+        final String v = LivenessCheck.read(SAMPLE);
+        assertThat(v).isEqualTo("0.77.0");
     }
 
     @Test
@@ -56,7 +70,7 @@ class LivenessCheckTest {
                 .when(request())
                 .respond(response()
                                  .withStatusCode(200)
-                                 .withBody(ApiVersionTest.SAMPLE));
+                                 .withBody(SAMPLE));
         final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
         assertThat(l.get()).isPresent();

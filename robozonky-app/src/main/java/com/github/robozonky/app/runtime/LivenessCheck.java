@@ -16,15 +16,19 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
+import io.vavr.Lazy;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 
@@ -34,6 +38,7 @@ import org.apache.commons.io.IOUtils;
 class LivenessCheck extends Refreshable<String> {
 
     private static final String ZONKY_VERSION_URL = ApiProvider.ZONKY_URL + "/version";
+    private static final Lazy<ObjectMapper> MAPPER = Lazy.of(ObjectMapper::new); // stored for performance reasons
 
     private final String url;
 
@@ -55,6 +60,11 @@ class LivenessCheck extends Refreshable<String> {
         Scheduler.inBackground().submit(liveness, Duration.ofSeconds(5));
     }
 
+    static String read(final String json) throws IOException {
+        final JsonNode actualObj = MAPPER.get().readTree(json);
+        return actualObj.get("buildVersion").asText();
+    }
+
     @Override
     protected String getLatestSource() {
         logger.trace("Running.");
@@ -64,10 +74,7 @@ class LivenessCheck extends Refreshable<String> {
                     final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
                             .collect(Collectors.joining(System.lineSeparator()));
                     logger.trace("API info coming from Zonky: {}.", source);
-                    final ApiVersion version = ApiVersion.read(source);
-                    // need to send parsed version, since the object itself changes every time due to
-                    // currentApiTime field
-                    return version.getBuildVersion();
+                    return read(source);
                 })
                 .getOrElseGet(ex -> {
                     // don't propagate this exception as it is likely to happen and the calling code would WARN about it
