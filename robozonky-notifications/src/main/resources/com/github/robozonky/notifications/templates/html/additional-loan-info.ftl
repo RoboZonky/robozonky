@@ -2,8 +2,8 @@
 <table>
   <tbody>
     <tr>
-      <th style="text-align: right;">Rating:</th>
-      <td><@idRating id=data.loanRating /></td>
+      <th style="text-align: right;">Úrok:</th>
+      <td><@idRating id=data.loanInterestRate /></td>
     </tr>
     <tr>
       <th style="text-align: right;">Výše úvěru:</th>

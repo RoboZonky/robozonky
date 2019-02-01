@@ -1,7 +1,7 @@
 Půjčka s následujícími parametry byla zcela splacena:
 
 - Půjčka:                      #${data.loanId?c} ${data.loanName?cap_first}
-- Rating:                      ${data.loanRating}
+- Úrok:                        ${data.loanInterestRate} % p.a.
 - Zaplaceno:                   ${data.amountPaid?string.currency} za půjčených ${data.amountHeld?string.currency}
 - Doba držení:                 ${data.monthsElapsed?c} měsíců
 - Dosažený výnos*:             ${data.yield?string.currency}
