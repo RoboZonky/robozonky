@@ -176,7 +176,6 @@ secondaryMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondit
 
 jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     c1=regionCondition { $result = $c1.result; }
-    | c2=ratingCondition { $result = $c2.result; }
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
@@ -187,7 +186,6 @@ jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
 
 primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     c1=regionCondition { $result = $c1.result; }
-    | c2=ratingCondition { $result = $c2.result; }
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
@@ -199,7 +197,6 @@ primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
 
 secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     c1=regionCondition { $result = $c1.result; }
-    | c2=ratingCondition { $result = $c2.result; }
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }

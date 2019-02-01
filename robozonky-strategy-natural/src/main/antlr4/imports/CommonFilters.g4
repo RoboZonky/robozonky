@@ -154,29 +154,6 @@ elapsedRelativeTermConditionRangeClosedRight returns [MarketplaceFilterCondition
     { $result = new RelativeElapsedLoanTermCondition(0, $max.result - 1); }
 ;
 
-interestCondition returns [MarketplaceFilterCondition result]:
-    'úrok ' (
-        (c1 = interestConditionRangeOpen { $result = $c1.result; })
-        | (c2 = interestConditionRangeClosedLeft { $result = $c2.result; })
-        | (c3 = interestConditionRangeClosedRight { $result = $c3.result; })
-    ) ' % p.a' DOT? // last dot is optional, so that it is possible to end sentence like "p.a." and not "p.a.."
-;
-
-interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
-    IS min=floatExpr UP_TO max=floatExpr
-    { $result = new LoanInterestRateCondition($min.result, $max.result); }
-;
-
-interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
-    MORE_THAN min=floatExpr
-    { $result = new LoanInterestRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
-;
-
-interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
-    LESS_THAN max=floatExpr
-    { $result = new LoanInterestRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
-;
-
 amountCondition returns [MarketplaceFilterCondition result]:
     'výše ' (
         (c1 = amountConditionRangeOpen { $result = $c1.result; })

@@ -47,7 +47,7 @@ class StrategyValidationFeatureTest {
             "Investovat do všech participací.\n" +
             "\n" +
             "- Prodej participací\n" +
-            "Prodat participaci, kde: rating je lepší než A*.";
+            "Prodat participaci, kde: úrok nedosahuje 5,0 % p.a.";
 
     @Test
     void failsOnNonExistentFile() throws IOException {
