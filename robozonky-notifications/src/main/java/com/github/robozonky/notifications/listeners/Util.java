@@ -87,6 +87,7 @@ final class Util {
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()),
                 entry("loanInterestRate", loan.getRating().getCode()),
+                entry("loanRating", loan.getRating()),
                 entry("loanTerm", loan.getTermInMonths()),
                 entry("loanUrl", loan.getUrl()),
                 entry("loanRegion", loan.getRegion()),
