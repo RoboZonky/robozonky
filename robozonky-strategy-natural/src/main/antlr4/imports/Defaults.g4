@@ -17,6 +17,15 @@ defaultExpression returns [DefaultValues result]:
  (c=confirmationExpression { $result.setConfirmationCondition($c.result); })?
 ;
 
+portfolioExpression returns [DefaultPortfolio result] :
+    'Robot má udržovat ' (
+        ( 'konzervativní' { $result = DefaultPortfolio.CONSERVATIVE; } )
+        | ( 'balancované' { $result = DefaultPortfolio.BALANCED; } )
+        | ( 'progresivní' { $result = DefaultPortfolio.PROGRESSIVE; } )
+        | ( 'uživatelem definované' { $result = DefaultPortfolio.EMPTY; } )
+    ) ' portfolio' DOT
+;
+
 exitDateExpression returns [ExitProperties result]:
     'Opustit Zonky k ' termination=dateExpr (
         ( { $result = new ExitProperties($termination.result); } )
@@ -42,7 +51,6 @@ defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
 ;
 
 confirmationExpression returns [MarketplaceFilterCondition result] :
-    'Potvrzovat mobilem investice do úvěrů, kde ' r=ratingCondition DOT
-    {$result = $r.result;}
+    'Potvrzovat mobilem investice do úvěrů, kde ' s=interestCondition DOT { $result = $s.result; }
 ;
 

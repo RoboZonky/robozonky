@@ -8,17 +8,17 @@ import Tokens;
     import com.github.robozonky.strategy.natural.*;
 }
 
-investmentSizeExpression returns [Map<Rating, InvestmentSize> result]
-    @init {
+investmentSizeExpression returns [Map<Rating, InvestmentSize> result]:
+    {
         final EnumMap<Rating, InvestmentSize> result = new EnumMap<>(Rating.class);
-    }:
-    (i=investmentSizeRatingExpression { result.put($i.rating, $i.size); })* {
+    }
+    (i=investmentSizeInterestRateExpression { result.put($i.rating, $i.size); })+ {
         $result = result;
     }
 ;
 
-investmentSizeRatingExpression returns [Rating rating, InvestmentSize size] :
-    'Do úvěrů v ratingu ' r=ratingExpression 'investovat ' i=investmentSizeRatingSubExpression {
+investmentSizeInterestRateExpression returns [Rating rating, InvestmentSize size] :
+    'S úročením ' r=interestRateBasedRatingExpression 'jednotlivě investovat ' i=investmentSizeRatingSubExpression {
         $rating = $r.result;
         $size = $i.result;
     }

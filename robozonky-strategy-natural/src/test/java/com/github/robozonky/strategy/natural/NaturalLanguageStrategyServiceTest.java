@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ class NaturalLanguageStrategyServiceTest {
         return Stream.of(
                 dynamicTest("simplest possible", () -> simplest(type)),
                 dynamicTest("complex", () -> complex(type)),
-                dynamicTest("complex with whitespace", () -> complexWithWhitespace(type)),
                 dynamicTest("with disabled filters", () -> disabled(type)),
                 dynamicTest("with enabled filters", () -> enabled(type)),
                 dynamicTest("with some filters missing", () -> missingFilters1(type)),
@@ -103,13 +102,6 @@ class NaturalLanguageStrategyServiceTest {
 
     private static void complex(final Type strategy) throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
-        final Optional<?> actualStrategy = getStrategy(strategy, str);
-        assertThat(actualStrategy).isPresent();
-    }
-
-    private static void complexWithWhitespace(final Type strategy) throws IOException {
-        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex-whitespace");
         final String str = IOUtils.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         assertThat(actualStrategy).isPresent();

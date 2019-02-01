@@ -1,5 +1,5 @@
 - Obecná nastavení
-Robot má udržovat prázdné portfolio.
+Robot má udržovat uživatelem definované portfolio.
 - Filtrování tržiště
 Ignorovat vše, kde: délka přesahuje 36 měsíců.
 - Prodej participací

@@ -23,8 +23,6 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Mandatory parent for any event that may be fired any time during RoboZonky's runtime.
@@ -33,8 +31,6 @@ import org.apache.logging.log4j.Logger;
  * will throw an exception.
  */
 abstract class AbstractEventImpl implements Event {
-
-    protected final Logger logger = LogManager.getLogger(getClass());
 
     private final OffsetDateTime creationDateTime = DateUtil.offsetNow();
     private final Reloadable<String> toString;
@@ -57,7 +53,6 @@ abstract class AbstractEventImpl implements Event {
     }
 
     public void setConceivedOn(final OffsetDateTime offsetDateTime) {
-        logger.debug("Setting conception time of {}, creation time remains {}.", offsetDateTime, creationDateTime);
         conceptionDateTime = offsetDateTime;
         toString.clear(); // toString() will have changed by this
     }

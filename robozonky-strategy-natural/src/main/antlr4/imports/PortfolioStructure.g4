@@ -9,12 +9,12 @@ import Tokens;
 
 portfolioStructureExpression returns [Collection<PortfolioShare> result]:
  { Collection<PortfolioShare> result = new LinkedHashSet<>(); }
- (i=portfolioStructureRatingExpression { result.add($i.result); })*
+ (i=portfolioStructureInterestRateExpression { result.add($i.result); })+
  { $result = result; }
 ;
 
-portfolioStructureRatingExpression returns [PortfolioShare result] :
-    'Prostředky v ratingu ' r=ratingExpression 'tvoří' (
+portfolioStructureInterestRateExpression returns [PortfolioShare result] :
+    'Prostředky úročené ' r=interestRateBasedRatingExpression 'mají tvořit' (
         ( maximumInvestmentInCzk=intExpr
             { $result = new PortfolioShare($r.result, $maximumInvestmentInCzk.result); })
         | ( minimumInvestmentInCzk=intExpr UP_TO maximumInvestmentInCzk=intExpr

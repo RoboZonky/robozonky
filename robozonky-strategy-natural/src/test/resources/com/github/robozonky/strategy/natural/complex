@@ -2,31 +2,31 @@
 # =================================
 # První tři sekce se vztahují na všechny investice s výjimkou těch, které odpovídají pravidlům ve čtvrté sekci.
 # Řádky začínající na '#' jsou vysvětlující komentáře a nejsou povinné. Strategie bude fungovat i bez nich.
-Tato strategie vyžaduje RoboZonky ve verzi 4.1.0 nebo pozdější.
+Tato strategie vyžaduje RoboZonky ve verzi 5.1.0 nebo pozdější.
 
 # Povinná sekce.
 - Obecná nastavení
-Robot má udržovat prázdné portfolio.
+Robot má udržovat uživatelem definované portfolio.
 Opustit Zonky k 31.12.2021, výprodej zahájit 12. 3. 2020.
-Cílová zůstatková částka je 100000 Kč.
-Běžná výše investice je 200 Kč.
-Investovat maximálně 1 % výše úvěru.
-Investovat pouze pokud disponibilní zůstatek přesáhne 1000 Kč.
-Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
+Cílová zůstatková částka je                                 100000 Kč.
+Běžná výše investice je                                     200 Kč.
+Investovat maximálně                                        1 % výše úvěru.
+Investovat pouze pokud disponibilní zůstatek přesáhne       1000 Kč.
+Potvrzovat mobilem investice do úvěrů, kde úrok přesahuje   5,0 % p.a.
 
 # Volitelná sekce.
 # Neuvedené ratingy budou investovány tak, jak to odpovídá výše zvolenému portfoliu.
 - Úprava struktury portfolia
-Prostředky v ratingu A** tvoří 15 % aktuální zůstatkové částky.
-Prostředky v ratingu A++ tvoří 5 až 10 % aktuální zůstatkové částky.
-Prostředky v ratingu D tvoří 1 až 2 % aktuální zůstatkové částky.
+Prostředky úročené      5,99 % p.a. mají tvořit          15 % aktuální zůstatkové částky.
+Prostředky úročené     13,49 % p.a. mají tvořit     5 až 10 % aktuální zůstatkové částky.
+Prostředky úročené     19,99 % p.a. mají tvořit     1 až  2 % aktuální zůstatkové částky.
 
 # Volitelná sekce.
 # Neuvedené ratingy budou investovány v běžné výši.
 - Výše investice
-Do úvěrů v ratingu B investovat až 600 Kč.
-Do úvěrů v ratingu C investovat 800 až 400 Kč.
-Do úvěrů v ratingu A* investovat 1000 Kč.
+S úročením  3,99 % p.a. jednotlivě investovat       až 600 Kč.
+S úročením 10,99 % p.a. jednotlivě investovat   800 až 400 Kč.
+S úročením 15,49 % p.a. jednotlivě investovat         1000 Kč.
 
 # Volitelná sekce.
 # Jednotlivé řádky představují vzájemně nezávislé filtry.
@@ -38,10 +38,11 @@ Ignorovat úvěr, kde: kraj klienta je Ústecký.
 Ignorovat úvěr, kde: účel je cestování nebo jiné.
 Ignorovat úvěr, kde: klient je bez zaměstnání, důchodce nebo student.
 
-# Rating lze uvést buď jako výčet, nebo jako interval.
-Ignorovat úvěr, kde: rating je C nebo D.
-Ignorovat úvěr, kde: rating je horší než A.
-Ignorovat úvěr, kde: rating je lepší než A+.
+# Úrok lze uvést jednotlivě nebo jako interval.
+Ignorovat úvěr, kde: úrok je 5,99 % p.a.
+Ignorovat úvěr, kde: úrok je 3,99 až 15,99 % p.a.
+Ignorovat úvěr, kde: úrok přesahuje  6,0 % p.a.
+Ignorovat úvěr, kde: úrok nedosahuje 10,0 % p.a.
 
 # Stručně prozkoumat lze i příběh.
 Ignorovat úvěr, kde: příběh je velmi krátký.
@@ -49,16 +50,15 @@ Ignorovat úvěr, kde: příběh je velmi krátký.
 # Výše, délka a úrok úvěru jsou určeny intervalem.
 Ignorovat úvěr, kde: délka nedosahuje 36 měsíců.
 Ignorovat úvěr, kde: délka je 20 až 40 měsíců.
-Ignorovat úvěr, kde: úrok je 6,66 až 42,0 % p.a.
 Ignorovat úvěr, kde: výše je 100000 až 150000 Kč.
 Ignorovat úvěr, kde: výše přesahuje 200000 Kč.
 
 # Jednotlivé podmínky jde slučovat. Středník (";") zastupuje logickou spojku "AND", "a zároveň."
-Ignorovat úvěr, kde: rating je horší než A+; úrok nedosahuje 5,0 % p.a.; klient je bez zaměstnání nebo důchodce.
+Ignorovat úvěr, kde: úrok nedosahuje 5,0 % p.a.; klient je bez zaměstnání nebo důchodce.
 
 # Z filtrů lze dělat i výjimky. Pravidla v závorce se vztahují k předcházejícímu filtru.
 Ignorovat úvěr, kde: kraj klienta je Ústecký nebo Moravskoslezský; pojištění není aktivní.
-(Ale ne když: rating je lepší než A++.)
+(Ale ne když: úrok nedosahuje 5,0 % p.a.)
 
 # Náhradou slova "úvěr" za "participaci" se filtr bude vztahovat na sekundární trh namísto primárního.
 # Ve filtrech pro sekundární trh se nelze dotazovat na zbývající výši úvěru.

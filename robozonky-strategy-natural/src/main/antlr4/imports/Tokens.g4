@@ -13,15 +13,6 @@ grammar Tokens;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
-portfolioExpression returns [DefaultPortfolio result] :
-    'Robot má udržovat ' (
-        ( 'konzervativní' { $result = DefaultPortfolio.CONSERVATIVE; } )
-        | ( 'balancované' { $result = DefaultPortfolio.BALANCED; } )
-        | ( 'progresivní' { $result = DefaultPortfolio.PROGRESSIVE; } )
-        | ( 'prázdné' { $result = DefaultPortfolio.EMPTY; } )
-    ) ' portfolio' DOT
-;
-
 targetPortfolioSizeExpression returns [long result] :
     'Cílová zůstatková částka je ' maximumInvestmentInCzk=longExpr KC DOT
     {$result = $maximumInvestmentInCzk.result;}
@@ -32,33 +23,53 @@ targetBalanceExpression returns [long result] :
     {$result = $balance.result;}
 ;
 
-ratingCondition returns [MarketplaceFilterCondition result]:
-    'rating ' IS (
-        ( r1=ratingEnumeratedExpression
-            {
-                LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
-                c.add($r1.result);
-                $result = c;
-            })
-        | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterCondition($r2.result); })
-        | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseCondition($r3.result); })
-    )
+interestCondition returns [MarketplaceFilterCondition result]:
+    'úrok ' (
+        (c1 = interestConditionRangeOpen { $result = $c1.result; })
+        | (c2 = interestConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = interestConditionRangeClosedRight { $result = $c3.result; })
+     ) ' % p.a' DOT?
 ;
 
-ratingExpression returns [Rating result] :
-    r=RATING
-    { $result = Rating.findByCode($r.getText()); }
+interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=floatExpr {
+        // by default, just pick the one rating
+        final Rating r = Rating.findByCode($min.result.toString());
+        LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
+        c.add(r);
+        $result = c;
+    }
+    (
+        UP_TO max=floatExpr {
+            // if the second one is provided, use the range
+            $result = new LoanInterestRateCondition($min.result, $max.result);
+        }
+    ) ?
 ;
 
-ratingEnumeratedExpression returns [Collection<Rating> result]:
+interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=floatExpr
+    { $result = new LoanInterestRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
+;
+
+interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=floatExpr
+    { $result = new LoanInterestRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
+;
+
+interestEnumeratedExpression returns [Collection<Rating> result]:
     { $result = new LinkedHashSet<Rating>(); }
     (
         (
-            r1=ratingExpression OR_COMMA { $result.add($r1.result); }
+            r1=interestRateBasedRatingExpression OR_COMMA { $result.add($r1.result); }
         )*
-        r2=ratingExpression OR { $result.add($r2.result); }
+        r2=interestRateBasedRatingExpression OR { $result.add($r2.result); }
     )?
-    r3=ratingExpression { $result.add($r3.result); }
+    r3=interestRateBasedRatingExpression { $result.add($r3.result); }
+;
+
+interestRateBasedRatingExpression returns [Rating result] :
+    r=floatExpr ' % p.a' DOT? { $result = Rating.findByCode($r.result.toString()); }
 ;
 
 investmentSizeRatingSubExpression returns [InvestmentSize result] :
@@ -133,17 +144,6 @@ REGION_S : 'Středočeský';
 REGION_T : 'Moravskoslezský';
 REGION_U : 'Ústecký';
 REGION_Z : 'Zlínský';
-
-// ratings
-RATING       : (RATING_AAAAA | RATING_AAAA | RATING_AAA | RATING_AA | RATING_A | RATING_B | RATING_C | RATING_D);
-RATING_AAAAA : 'A**';
-RATING_AAAA  : 'A*';
-RATING_AAA   : 'A++';
-RATING_AA    : 'A+';
-RATING_A     : 'A';
-RATING_B     : 'B';
-RATING_C     : 'C';
-RATING_D     : 'D';
 
 // main income types
 INCOME                      : (INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION

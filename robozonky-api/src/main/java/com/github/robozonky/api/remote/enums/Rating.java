@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import com.github.robozonky.internal.api.Settings;
 public enum Rating implements BaseEnum {
 
     // it is imperative for proper functioning of strategy algorithms that ratings here be ordered best to worst
-    AAAAA("A**"),
-    AAAA("A*"),
-    AAA("A++"),
-    AA("A+"),
-    A("A"),
-    B("B"),
-    C("C"),
-    D("D");
+    AAAAA("3.99"),
+    AAAA("4.99"),
+    AAA("5.99"),
+    AA("8.49"),
+    A("10.99"),
+    B("13.49"),
+    C("15.49"),
+    D("19.99");
 
     private final String code;
 
