@@ -1,7 +1,7 @@
 Půjčka s následujícími parametry byla zesplatněna:
 
 - Půjčka:                      #${data.loanId?c} ${data.loanName?cap_first}
-- Rating:                      ${data.loanRating}
+- Úrok:                        <@idRating id=data.loanInterestRate />
 - Zbývá splatit:               ${data.amountRemaining?string.currency} z ${data.amountHeld?string.currency}
 - Zbývá splátek:               ${data.loanTermRemaining?c} z ${data.loanTerm?c}
 - Po splatnosti od:            ${data.since?date}

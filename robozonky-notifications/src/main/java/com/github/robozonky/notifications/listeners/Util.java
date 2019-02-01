@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ final class Util {
     }
 
     private static String identifyLoan(final MarketplaceLoan loan) {
-        return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
+        return "č. " + loan.getId() + " (" + loan.getRating().getCode() + " % p.a., " + loan.getTermInMonths() + " m.)";
     }
 
     public static String identifyLoan(final MarketplaceLoanBased event) {
@@ -86,7 +86,8 @@ final class Util {
         return Maps.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()),
-                entry("loanRating", loan.getRating().getCode()),
+                entry("loanInterestRate", loan.getRating().getCode()),
+                entry("loanRating", loan.getRating()),
                 entry("loanTerm", loan.getTermInMonths()),
                 entry("loanUrl", loan.getUrl()),
                 entry("loanRegion", loan.getRegion()),

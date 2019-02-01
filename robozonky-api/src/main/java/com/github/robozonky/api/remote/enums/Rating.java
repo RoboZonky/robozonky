@@ -16,11 +16,14 @@
 
 package com.github.robozonky.api.remote.enums;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.github.robozonky.internal.api.Settings;
+
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
 public enum Rating implements BaseEnum {
 
@@ -35,9 +38,11 @@ public enum Rating implements BaseEnum {
     D("19.99");
 
     private final String code;
+    private final BigDecimal interestRate;
 
     Rating(final String code) {
         this.code = code;
+        this.interestRate = divide(new BigDecimal(code), 100);
     }
 
     public static Rating findByCode(final String code) {
@@ -45,6 +50,10 @@ public enum Rating implements BaseEnum {
                 .filter(r -> Objects.equals(r.code, code))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
+    }
+
+    public BigDecimal getInterestRate() {
+        return interestRate;
     }
 
     public Duration getCaptchaDelay() {
