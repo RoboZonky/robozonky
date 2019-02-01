@@ -234,7 +234,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>3.9.0</version>
+        <version>3.9.3</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
