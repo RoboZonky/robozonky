@@ -67,6 +67,7 @@
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
      -->
     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+    <pit.skip>${skipTests}</pit.skip>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -464,7 +465,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <skip>${skipTests}</skip>
+          <skip>${pit.skip}</skip>
           <timestampedReports>false</timestampedReports>
           <coverageThreshold>90</coverageThreshold>
           <mutationThreshold>90</mutationThreshold>
