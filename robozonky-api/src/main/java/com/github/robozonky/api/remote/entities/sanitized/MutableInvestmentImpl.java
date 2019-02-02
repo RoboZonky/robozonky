@@ -53,6 +53,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private Boolean isInWithdrawal;
     private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
             expectedInterest, paidPenalty, remainingPrincipal, smpFee, smpSoldFor;
+    private BigDecimal revenueRate;
     private Rating rating;
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
@@ -154,6 +155,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public InvestmentBuilder setInterestRate(final BigDecimal interestRate) {
         this.interestRate = interestRate;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setRevenueRate(final BigDecimal revenueRate) {
+        this.revenueRate = revenueRate;
         return this;
     }
 
@@ -380,6 +387,11 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public BigDecimal getInterestRate() {
         return interestRate;
+    }
+
+    @Override
+    public BigDecimal getRevenueRate() {
+        return revenueRate;
     }
 
     @Override

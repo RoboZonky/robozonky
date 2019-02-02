@@ -245,6 +245,34 @@
         "code": "java.class.externalClassExposedInAPI",
         "new": "enum org.apache.logging.log4j.spi.StandardLevel",
         "justification": "Logging goes through Log4J instead of SLF4J."
+      },{
+        "code": "java.method.addedToInterface",
+        "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan::getAnnuity()",
+        "justification": "Zonky API brings new fields."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan::getRevenueRate()",
+        "justification": "Zonky API brings new fields."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T>>>::setAnnuity(java.math.BigDecimal)",
+        "justification": "Zonky API brings new fields."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T>>>::setRevenueRate(java.math.BigDecimal)",
+        "justification": "Zonky API brings new fields."
+      },{
+        "code": "java.method.addedToInterface",
+        "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.Investment::getRevenueRate()",
+        "justification": "Zonky API brings new fields."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setRevenueRate(java.math.BigDecimal)",
+        "justification": "Zonky API brings new fields."
       }
     ]
   }

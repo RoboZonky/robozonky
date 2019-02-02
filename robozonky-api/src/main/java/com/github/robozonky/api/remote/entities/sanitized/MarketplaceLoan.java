@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ public interface MarketplaceLoan {
 
     BigDecimal getInterestRate();
 
+    BigDecimal getRevenueRate();
+
     Rating getRating();
 
     boolean isTopped();
@@ -76,6 +78,8 @@ public interface MarketplaceLoan {
      * @return
      */
     int getRemainingInvestment();
+
+    BigDecimal getAnnuity();
 
     /**
      * This is the amount actually available for investment in the marketplace, as opposed to

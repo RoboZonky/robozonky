@@ -176,6 +176,16 @@ class LoanTest {
         }
 
         @Test
+        void annuity() {
+            standard(b, b::setAnnuity, b::getAnnuity, BigDecimal.ONE);
+        }
+
+        @Test
+        void revenueRate() {
+            standard(b, b::setRevenueRate, b::getRevenueRate, BigDecimal.ONE);
+        }
+
+        @Test
         void interestRate() {
             standard(b, b::setInterestRate, b::getInterestRate, BigDecimal.ONE);
         }

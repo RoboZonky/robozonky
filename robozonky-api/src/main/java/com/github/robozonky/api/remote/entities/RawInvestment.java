@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class RawInvestment extends BaseInvestment {
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
             duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
             smpFee, paidPenalty = BigDecimal.ZERO;
+    private BigDecimal revenueRate;
     private Rating rating;
     private Collection<InsurancePolicyPeriod> insuranceHistory;
 
@@ -74,6 +75,7 @@ public class RawInvestment extends BaseInvestment {
         this.investmentDate = investment.getInvestmentDate();
         this.nextPaymentDate = investment.getNextPaymentDate().orElse(null);
         this.interestRate = investment.getInterestRate();
+        this.revenueRate = investment.getRevenueRate();
         this.paidInterest = investment.getPaidInterest();
         this.dueInterest = investment.getDueInterest();
         this.paidPrincipal = investment.getPaidPrincipal();
@@ -296,5 +298,10 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public boolean hasCollectionHistory() {
         return hasCollectionHistory;
+    }
+
+    @XmlElement
+    public BigDecimal getRevenueRate() {
+        return revenueRate;
     }
 }
