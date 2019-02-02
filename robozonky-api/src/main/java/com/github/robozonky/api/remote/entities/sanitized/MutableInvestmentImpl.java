@@ -86,6 +86,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isOnSmp = investment.isOnSmp();
         this.originalPrincipal = investment.getPurchasePrice();
         this.interestRate = investment.getInterestRate();
+        this.revenueRate = investment.getRevenueRate();
         this.paidPrincipal = investment.getPaidPrincipal();
         this.duePrincipal = investment.getDuePrincipal();
         this.paidInterest = investment.getPaidInterest();
@@ -119,6 +120,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isOnSmp = false;
         this.originalPrincipal = originalPrincipal;
         this.interestRate = loan.getInterestRate();
+        this.revenueRate = loan.getRevenueRate();
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.ZERO;
         this.paidInterest = BigDecimal.ZERO;

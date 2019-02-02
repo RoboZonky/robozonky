@@ -47,11 +47,15 @@ Ignorovat úvěr, kde: úrok nedosahuje 10,0 % p.a.
 # Stručně prozkoumat lze i příběh.
 Ignorovat úvěr, kde: příběh je velmi krátký.
 
-# Výše, délka a úrok úvěru jsou určeny intervalem.
+# Výše a délka úvěru, měsíční splátka a výnos jsou určeny intervalem.
 Ignorovat úvěr, kde: délka nedosahuje 36 měsíců.
 Ignorovat úvěr, kde: délka je 20 až 40 měsíců.
 Ignorovat úvěr, kde: výše je 100000 až 150000 Kč.
 Ignorovat úvěr, kde: výše přesahuje 200000 Kč.
+Ignorovat úvěr, kde: měsíční splátka je 5000 až 10000 Kč.
+Ignorovat úvěr, kde: měsíční splátka přesahuje 2000 Kč.
+Ignorovat úvěr, kde: optimální výnos je 5,1 až 10,3 % p.a.
+Ignorovat úvěr, kde: optimální výnos nedosahuje 5,0 % p.a.
 
 # Jednotlivé podmínky jde slučovat. Středník (";") zastupuje logickou spojku "AND", "a zároveň."
 Ignorovat úvěr, kde: úrok nedosahuje 5,0 % p.a.; klient je bez zaměstnání nebo důchodce.
