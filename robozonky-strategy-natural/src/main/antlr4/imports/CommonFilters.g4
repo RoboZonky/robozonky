@@ -7,6 +7,7 @@ import Tokens;
     import java.util.ArrayList;
     import java.util.Map;
     import java.util.HashMap;
+    import com.github.robozonky.internal.util.BigDecimalCalculator;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
@@ -239,10 +240,10 @@ revenueRateConditionRangeOpen returns [MarketplaceFilterCondition result]:
 
 revenueRateConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=floatExpr
-    { $result = new RevenueRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
+    { $result = new RevenueRateCondition(BigDecimalCalculator.moreThan($min.result)); }
 ;
 
 revenueRateConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=floatExpr
-    { $result = new RevenueRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
+    { $result = new RevenueRateCondition(BigDecimal.ZERO, BigDecimalCalculator.lessThan($max.result)); }
 ;

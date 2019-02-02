@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.math.RoundingMode;
 
 public final class BigDecimalCalculator {
 
+    static final int DEFAULT_SCALE = 8;
+    private static final BigDecimal MINIMAL_INCREMENT = BigDecimal.valueOf(Double.MIN_VALUE);
+
     private BigDecimalCalculator() {
         // no instances
     }
-
-    static final int DEFAULT_SCALE = 8;
 
     public static BigDecimal toScale(final BigDecimal number, final int scale) {
         return number.setScale(scale, RoundingMode.HALF_EVEN);
@@ -101,5 +102,13 @@ public final class BigDecimalCalculator {
 
     public static BigDecimal times(final BigDecimal multiplicand, final BigDecimal multiplier) {
         return multiplicand.multiply(multiplier).stripTrailingZeros();
+    }
+
+    public static BigDecimal lessThan(final BigDecimal number) {
+        return number.subtract(MINIMAL_INCREMENT);
+    }
+
+    public static BigDecimal moreThan(final BigDecimal number) {
+        return number.add(MINIMAL_INCREMENT);
     }
 }

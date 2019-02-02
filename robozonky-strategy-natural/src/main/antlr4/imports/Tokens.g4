@@ -7,6 +7,7 @@ grammar Tokens;
     import java.time.LocalDate;
     import java.util.Collection;
     import java.util.LinkedHashSet;
+    import com.github.robozonky.internal.util.BigDecimalCalculator;
     import com.github.robozonky.api.remote.enums.*;
     import com.github.robozonky.api.remote.entities.*;
     import com.github.robozonky.strategy.natural.*;
@@ -49,12 +50,12 @@ interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
 
 interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=floatExpr
-    { $result = new LoanInterestRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
+    { $result = new LoanInterestRateCondition(BigDecimalCalculator.moreThan($min.result)); }
 ;
 
 interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=floatExpr
-    { $result = new LoanInterestRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
+    { $result = new LoanInterestRateCondition(BigDecimal.ZERO, BigDecimalCalculator.lessThan($max.result)); }
 ;
 
 interestEnumeratedExpression returns [Collection<Rating> result]:

@@ -22,24 +22,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public class RevenueRateCondition extends AbstractRangeCondition {
 
-    private static final BigDecimal MIN_INCREMENT = BigDecimal.valueOf(Double.MIN_VALUE),
-            MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);
-
-    public static BigDecimal lessThan(final BigDecimal num) {
-        return num.subtract(RevenueRateCondition.MIN_INCREMENT);
-    }
-
-    public static BigDecimal moreThan(final BigDecimal num) {
-        return num.add(RevenueRateCondition.MIN_INCREMENT);
-    }
-
-    private static void assertIsInRange(final BigDecimal interestRate) {
-        final BigDecimal min = BigDecimal.ZERO;
-        final BigDecimal max = RevenueRateCondition.MAX_RATE;
-        if (min.compareTo(interestRate) > 0 || max.compareTo(interestRate) < 0) {
-            throw new IllegalArgumentException("Revenue rate must be in range of <" + min + "; " + max + ">.");
-        }
-    }
+    private static final BigDecimal MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);
 
     public RevenueRateCondition(final BigDecimal fromInclusive, final BigDecimal toInclusive) {
         super(Wrapper::getRevenueRate, fromInclusive, toInclusive);
@@ -49,5 +32,13 @@ public class RevenueRateCondition extends AbstractRangeCondition {
 
     public RevenueRateCondition(final BigDecimal fromInclusive) {
         this(fromInclusive, RevenueRateCondition.MAX_RATE);
+    }
+
+    private static void assertIsInRange(final BigDecimal interestRate) {
+        final BigDecimal min = BigDecimal.ZERO;
+        final BigDecimal max = RevenueRateCondition.MAX_RATE;
+        if (min.compareTo(interestRate) > 0 || max.compareTo(interestRate) < 0) {
+            throw new IllegalArgumentException("Revenue rate must be in range of <" + min + "; " + max + ">.");
+        }
     }
 }

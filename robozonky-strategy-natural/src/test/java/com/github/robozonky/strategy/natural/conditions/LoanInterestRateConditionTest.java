@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -32,7 +33,7 @@ class LoanInterestRateConditionTest {
 
     @Test
     void rightBoundary() {
-        final BigDecimal maxInterestRate = LoanInterestRateCondition.moreThan(BigDecimal.valueOf(Double.MAX_VALUE));
+        final BigDecimal maxInterestRate = BigDecimalCalculator.moreThan(BigDecimal.valueOf(Double.MAX_VALUE));
         assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO, maxInterestRate))
                 .isInstanceOf(IllegalArgumentException.class);
     }
