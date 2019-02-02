@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public class LoanInterestRateCondition extends AbstractRangeCondition {
 
-    private static final BigDecimal MIN_INCREMENT = BigDecimal.valueOf(Double.MIN_VALUE),
-            MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);
-
-    public static BigDecimal lessThan(final BigDecimal num) {
-        return num.subtract(LoanInterestRateCondition.MIN_INCREMENT);
-    }
-
-    public static BigDecimal moreThan(final BigDecimal num) {
-        return num.add(LoanInterestRateCondition.MIN_INCREMENT);
-    }
+    private static final BigDecimal MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);
 
     private static void assertIsInRange(final BigDecimal interestRate) {
         final BigDecimal min = BigDecimal.ZERO;

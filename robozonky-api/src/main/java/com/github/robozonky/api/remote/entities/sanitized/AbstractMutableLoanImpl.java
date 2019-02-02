@@ -47,7 +47,10 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private int remainingInvestment;
     private int nonReservedRemainingInvestment;
     private String name, nickName, story;
-    private BigDecimal interestRate, investmentRate;
+    private BigDecimal interestRate;
+    private BigDecimal investmentRate;
+    private BigDecimal revenueRate;
+    private BigDecimal annuity;
     private OffsetDateTime datePublished, deadline;
     private Rating rating;
     private MainIncomeType mainIncomeType;
@@ -72,6 +75,8 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.interestRate = original.getInterestRate();
         this.investmentsCount = original.getInvestmentsCount();
         this.investmentRate = original.getInvestmentRate();
+        this.revenueRate = original.getRevenueRate();
+        this.annuity = original.getAnnuityWithInsurance();
         this.insuranceActive = original.isInsuranceActive();
         this.published = original.isPublished();
         this.questionsAllowed = original.isQuestionsAllowed();
@@ -400,6 +405,28 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     public T setNonReservedRemainingInvestment(final int remainingInvestment) {
         this.nonReservedRemainingInvestment = remainingInvestment;
         return (T) this;
+    }
+
+    @Override
+    public T setRevenueRate(final BigDecimal revenueRate) {
+        this.revenueRate = revenueRate;
+        return (T) this;
+    }
+
+    @Override
+    public T setAnnuity(final BigDecimal annuity) {
+        this.annuity = annuity;
+        return (T) this;
+    }
+
+    @Override
+    public BigDecimal getRevenueRate() {
+        return revenueRate;
+    }
+
+    @Override
+    public BigDecimal getAnnuity() {
+        return annuity;
     }
 
     @Override

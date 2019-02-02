@@ -23,18 +23,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class LoanInterestRateConditionTest {
+class RevenueRateConditionTest {
 
     @Test
     void leftBoundary() {
-        assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO.subtract(BigDecimal.ONE)))
+        assertThatThrownBy(() -> new RevenueRateCondition(BigDecimal.ZERO.subtract(BigDecimal.ONE)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void rightBoundary() {
         final BigDecimal maxInterestRate = BigDecimalCalculator.moreThan(BigDecimal.valueOf(Double.MAX_VALUE));
-        assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO, maxInterestRate))
+        assertThatThrownBy(() -> new RevenueRateCondition(BigDecimal.ZERO, maxInterestRate))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

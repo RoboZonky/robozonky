@@ -7,6 +7,7 @@ import Tokens;
     import java.util.ArrayList;
     import java.util.Map;
     import java.util.HashMap;
+    import com.github.robozonky.internal.util.BigDecimalCalculator;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
@@ -198,4 +199,51 @@ remainingAmountConditionRangeClosedLeft returns [MarketplaceFilterCondition resu
 remainingAmountConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
     { $result = new RemainingAmountCondition(0, $max.result - 1); }
+;
+
+annuityCondition returns [MarketplaceFilterCondition result]:
+    'měsíční splátka ' (
+        (c1 = annuityConditionRangeOpen { $result = $c1.result; })
+        | (c2 = annuityConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = annuityConditionRangeClosedRight { $result = $c3.result; })
+    ) KC
+;
+
+annuityConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = new LoanAnnuityCondition($min.result, $max.result); }
+;
+
+annuityConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=intExpr
+    { $result = new LoanAnnuityCondition($min.result + 1); }
+;
+
+annuityConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=intExpr
+    { $result = new LoanAnnuityCondition(0, $max.result - 1); }
+;
+
+revenueRateCondition returns [MarketplaceFilterCondition result]:
+    'optimální výnos ' (
+        (c1 = revenueRateConditionRangeOpen { $result = $c1.result; })
+        | (c2 = revenueRateConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = revenueRateConditionRangeClosedRight { $result = $c3.result; })
+     ) ' % p.a' DOT?
+;
+
+revenueRateConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=floatExpr UP_TO max=floatExpr {
+        $result = new RevenueRateCondition($min.result, $max.result);
+    }
+;
+
+revenueRateConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=floatExpr
+    { $result = new RevenueRateCondition(BigDecimalCalculator.moreThan($min.result)); }
+;
+
+revenueRateConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=floatExpr
+    { $result = new RevenueRateCondition(BigDecimal.ZERO, BigDecimalCalculator.lessThan($max.result)); }
 ;

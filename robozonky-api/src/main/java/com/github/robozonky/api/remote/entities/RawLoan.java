@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,10 @@ public class RawLoan extends BaseEntity {
     private double reservedAmount;
     private String name, nickName, story, url;
     private BigDecimal interestRate;
+    private BigDecimal revenueRate;
+    private BigDecimal annuity;
+    private BigDecimal premium;
+    private BigDecimal annuityWithInsurance;
     private OffsetDateTime datePublished, deadline;
     private Rating rating;
     private Collection<Photo> photos;
@@ -238,5 +242,29 @@ public class RawLoan extends BaseEntity {
     @XmlElement
     public String getUrl() {
         return url;
+    }
+
+    @XmlElement
+    public BigDecimal getRevenueRate() {
+        return revenueRate;
+    }
+
+    @XmlElement
+    public BigDecimal getAnnuity() {
+        return annuity;
+    }
+
+    @XmlElement
+    public BigDecimal getPremium() {
+        return premium;
+    }
+
+    /**
+     *
+     * @return {@link #getAnnuity()} + {@link #getPremium()}
+     */
+    @XmlElement
+    public BigDecimal getAnnuityWithInsurance() {
+        return annuityWithInsurance;
     }
 }

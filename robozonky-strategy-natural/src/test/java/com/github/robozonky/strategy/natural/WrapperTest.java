@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ class WrapperTest {
         final Loan loan = Loan.custom()
                 .setId(1)
                 .setAmount(100_000)
+                .setRevenueRate(BigDecimal.ONE)
+                .setAnnuity(BigDecimal.ONE)
                 .build();
         final int invested = 200;
         final Investment investment = Investment.fresh(loan, invested).build();
@@ -43,6 +45,8 @@ class WrapperTest {
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
             softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
             softly.assertThat(w.getInterestRate()).isEqualTo(loan.getInterestRate());
+            softly.assertThat(w.getRevenueRate()).isEqualTo(investment.getRevenueRate());
+            softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
             softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(invested));
             softly.assertThat(w.toString()).isNotNull();

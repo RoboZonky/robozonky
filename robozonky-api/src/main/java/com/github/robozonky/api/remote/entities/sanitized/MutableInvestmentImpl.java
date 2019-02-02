@@ -53,6 +53,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private Boolean isInWithdrawal;
     private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
             expectedInterest, paidPenalty, remainingPrincipal, smpFee, smpSoldFor;
+    private BigDecimal revenueRate;
     private Rating rating;
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
@@ -85,6 +86,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isOnSmp = investment.isOnSmp();
         this.originalPrincipal = investment.getPurchasePrice();
         this.interestRate = investment.getInterestRate();
+        this.revenueRate = investment.getRevenueRate();
         this.paidPrincipal = investment.getPaidPrincipal();
         this.duePrincipal = investment.getDuePrincipal();
         this.paidInterest = investment.getPaidInterest();
@@ -118,6 +120,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isOnSmp = false;
         this.originalPrincipal = originalPrincipal;
         this.interestRate = loan.getInterestRate();
+        this.revenueRate = loan.getRevenueRate();
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.ZERO;
         this.paidInterest = BigDecimal.ZERO;
@@ -154,6 +157,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public InvestmentBuilder setInterestRate(final BigDecimal interestRate) {
         this.interestRate = interestRate;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setRevenueRate(final BigDecimal revenueRate) {
+        this.revenueRate = revenueRate;
         return this;
     }
 
@@ -380,6 +389,11 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public BigDecimal getInterestRate() {
         return interestRate;
+    }
+
+    @Override
+    public BigDecimal getRevenueRate() {
+        return revenueRate;
     }
 
     @Override

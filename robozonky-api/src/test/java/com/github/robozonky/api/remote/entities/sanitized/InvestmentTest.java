@@ -106,8 +106,8 @@ class InvestmentTest {
             });
         }
 
-        private <T> void bool(final InvestmentBuilder builder, final Function<Boolean, InvestmentBuilder> setter,
-                              final Supplier<Boolean> getter) {
+        private void bool(final InvestmentBuilder builder, final Function<Boolean, InvestmentBuilder> setter,
+                          final Supplier<Boolean> getter) {
             assertThat(getter.get()).as("False before setting.").isFalse();
             final InvestmentBuilder newBuilder = setter.apply(true);
             assertSoftly(softly -> {
@@ -116,8 +116,8 @@ class InvestmentTest {
             });
         }
 
-        private <T> void integer(final InvestmentBuilder builder, final Function<Integer, InvestmentBuilder> setter,
-                                 final Supplier<Integer> getter, final int value) {
+        private void integer(final InvestmentBuilder builder, final Function<Integer, InvestmentBuilder> setter,
+                             final Supplier<Integer> getter, final int value) {
             assertThat(getter.get()).as("False before setting.").isLessThanOrEqualTo(0);
             final InvestmentBuilder newBuilder = setter.apply(value);
             assertSoftly(softly -> {
@@ -256,6 +256,10 @@ class InvestmentTest {
             standard(b, b::setInterestRate, b::getInterestRate, BigDecimal.ONE);
         }
 
+        @Test
+        void revenueRate() {
+            standard(b, b::setRevenueRate, b::getRevenueRate, BigDecimal.ONE);
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,10 @@ public interface MutableMarketplaceLoan<T extends MutableMarketplaceLoan<T>> ext
     T setTermInMonths(final int termInMonths);
 
     T setInterestRate(final BigDecimal interestRate);
+
+    T setRevenueRate(final BigDecimal revenueRate);
+
+    T setAnnuity(final BigDecimal annuity);
 
     T setRating(final Rating rating);
 

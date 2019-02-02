@@ -182,6 +182,8 @@ jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c6=termCondition { $result = $c6.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c12=insuranceCondition { $result = $c12.result; }
+    | c14=annuityCondition { $result = $c14.result; }
+    | c15=revenueRateCondition { $result = $c15.result; }
 ;
 
 primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
@@ -193,6 +195,8 @@ primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c12=insuranceCondition { $result = $c12.result; }
+    | c14=annuityCondition { $result = $c14.result; }
+    | c15=revenueRateCondition { $result = $c15.result; }
 ;
 
 secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
@@ -207,4 +211,6 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c11=elapsedRelativeTermCondition { $result = $c11.result; }
     | c12=insuranceCondition { $result = $c12.result; }
     | c13=remainingAmountCondition { $result = $c13.result; }
+    | c14=annuityCondition { $result = $c14.result; }
+    | c15=revenueRateCondition { $result = $c15.result; }
 ;
