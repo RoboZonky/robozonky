@@ -2,16 +2,12 @@
 <table>
   <tbody>
     <tr>
-      <th style="text-align: right;">Úrok:</th>
-      <td><@idRating id=data.loanInterestRate /></td>
-    </tr>
-    <tr>
       <th style="text-align: right;">Výše úvěru:</th>
-      <td>${data.loanAmount?string.currency}</td>
+      <td>${data.loanAmount?string.currency} s úrokem <@idRating id=data.loanInterestRate /></td>
     </tr>
     <tr>
-      <th style="text-align: right;">Délka splácení:</th>
-      <td>${data.loanTerm?c} měsíců</td>
+      <th style="text-align: right;">Amortizace:</th>
+      <td>${data.loanTerm?c} měsíců po ${data.loanAnnuity?string.currency}</td>
     </tr>
     <tr>
       <th style="text-align: right;">Účel:</th>

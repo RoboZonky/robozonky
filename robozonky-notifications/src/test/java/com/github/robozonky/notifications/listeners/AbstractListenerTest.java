@@ -203,6 +203,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final Loan loan = Loan.custom()
                 .setId(66666)
                 .setAmount(100_000)
+                .setAnnuity(BigDecimal.TEN)
                 .setInterestRate(BigDecimal.TEN)
                 .setDatePublished(OffsetDateTime.now().minusMonths(2))
                 .setName("Úvěr")

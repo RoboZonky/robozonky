@@ -86,6 +86,7 @@ final class Util {
         return Maps.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()),
+                entry("loanAnnuity", loan.getAnnuity().intValue()),
                 entry("loanInterestRate", loan.getRating().getCode()),
                 entry("loanRating", loan.getRating()),
                 entry("loanTerm", loan.getTermInMonths()),

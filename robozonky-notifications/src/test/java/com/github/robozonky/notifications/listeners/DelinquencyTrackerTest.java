@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -52,6 +53,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
     private static final Loan LOAN = Loan.custom()
             .setId(1)
             .setAmount(200)
+            .setAnnuity(BigDecimal.TEN)
             .setRating(Rating.D)
             .setPurpose(Purpose.AUTO_MOTO)
             .setRegion(Region.JIHOCESKY)
@@ -65,6 +67,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
     private static final Loan LOAN2 = Loan.custom()
             .setId(2)
             .setAmount(200)
+            .setAnnuity(BigDecimal.TEN)
             .setRating(Rating.A)
             .setPurpose(Purpose.CESTOVANI)
             .setRegion(Region.JIHOMORAVSKY)

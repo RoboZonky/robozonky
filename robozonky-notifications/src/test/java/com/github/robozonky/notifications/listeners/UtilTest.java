@@ -62,6 +62,7 @@ class UtilTest {
                 .build();
         final Loan l = Loan.custom()
                 .setRating(Rating.D)
+                .setAnnuity(BigDecimal.TEN)
                 .build();
         final Investment i = Investment.fresh(l, 200).build();
         Util.getDelinquentData(i, l, Collections.singleton(d), LocalDate.now());
