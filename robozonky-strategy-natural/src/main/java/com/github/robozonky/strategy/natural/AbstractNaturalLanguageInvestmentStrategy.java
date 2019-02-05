@@ -48,13 +48,17 @@ abstract class AbstractNaturalLanguageInvestmentStrategy {
     abstract protected int recommendAmount(final MarketplaceLoan loan, final BigDecimal balance,
                                            final Restrictions restrictions);
 
+    protected Stream<LoanDescriptor> acceptableLoans(final Collection<LoanDescriptor> loans) {
+        return strategy.getApplicableLoans(loans);
+    }
+
     protected Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans,
                                                 final PortfolioOverview portfolio, final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
-        final Map<Rating, List<LoanDescriptor>> splitByRating = Util.sortByRating(strategy.getApplicableLoans(loans),
+        final Map<Rating, List<LoanDescriptor>> splitByRating = Util.sortByRating(acceptableLoans(loans),
                                                                                   d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
         final BigDecimal balance = portfolio.getCzkAvailable();

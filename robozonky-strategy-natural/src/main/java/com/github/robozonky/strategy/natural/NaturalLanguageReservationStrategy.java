@@ -41,6 +41,20 @@ class NaturalLanguageReservationStrategy extends AbstractNaturalLanguageInvestme
     }
 
     @Override
+    protected Stream<LoanDescriptor> acceptableLoans(final Collection<LoanDescriptor> loanDescriptors) {
+        switch (getType()) {
+            case ONLY_ACCEPT: // accept everything found
+                Decisions.report(logger -> logger.debug("Will accept all loans from the reservation system."));
+                return loanDescriptors.stream();
+            case FULL_OWNERSHIP: // accept whatever the parsed strategy accepts
+                Decisions.report(logger -> logger.debug("Will process loans from the reservation system."));
+                return super.acceptableLoans(loanDescriptors);
+            default:
+                throw new IllegalStateException("Impossible.");
+        }
+    }
+
+    @Override
     protected int recommendAmount(final MarketplaceLoan loan, final BigDecimal balance,
                                   final Restrictions restrictions) {
         return restrictions.getMinimumInvestmentAmount();
