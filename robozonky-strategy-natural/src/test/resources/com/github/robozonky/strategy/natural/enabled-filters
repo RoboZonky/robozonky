@@ -1,5 +1,5 @@
 - Obecná nastavení
 Robot má udržovat uživatelem definované portfolio.
-Robot má pravidelně kontrolovat rezervační systém a automaticky přijímat tamější rezervace.
+Robot má pravidelně kontrolovat rezervační systém a přijímat rezervace půjček odpovídajících této strategii.
 Investovat do všech půjček a participací.
 Prodej participací zakázán.

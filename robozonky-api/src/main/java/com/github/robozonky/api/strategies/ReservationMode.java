@@ -21,9 +21,9 @@ public enum ReservationMode {
     /**
      * Read reservations and accept them.
      */
-    ONLY_ACCEPT,
+    ACCEPT_MATCHING,
     /**
-     * On top of {@link #ONLY_ACCEPT}, this will also have the power to reconfigure the reservation system in any way
+     * On top of {@link #ACCEPT_MATCHING}, this will also have the power to reconfigure the reservation system in any way
      * that the robot sees fit.
      */
     FULL_OWNERSHIP

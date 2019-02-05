@@ -10,7 +10,7 @@ import Tokens;
 
 defaultExpression returns [DefaultValues result]:
  r=portfolioExpression { $result = new DefaultValues($r.result); }
- (v=reservationExpression { $result.setReservationStrategyType($v.result); })
+ (v=reservationExpression { $result.setReservationMode($v.result); })
  (e=exitDateExpression { $result.setExitProperties($e.result); })?
  (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
  (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
@@ -54,11 +54,11 @@ defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
 
 reservationExpression returns [ReservationMode result] :
     (
-        'Robot má pravidelně kontrolovat rezervační systém a automaticky přijímat tamější rezervace.' {
-            $result = ReservationMode.ONLY_ACCEPT;
+        'Robot má pravidelně kontrolovat rezervační systém a přijímat rezervace půjček odpovídajících této strategii.' {
+            $result = ReservationMode.ACCEPT_MATCHING;
         }
     ) | (
-        'Robot má převzít kontrolu nad rezervačním systémem a přijímat či odmítat vzniklé rezervace dle této strategie.' {
+        'Robot má převzít kontrolu nad rezervačním systémem a přijímat rezervace půjček odpovídajících této strategii.' {
             $result = ReservationMode.FULL_OWNERSHIP;
         }
     )  | (
