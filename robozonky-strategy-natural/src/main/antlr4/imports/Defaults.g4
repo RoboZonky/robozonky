@@ -52,14 +52,14 @@ defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
     ' % výše úvěru' DOT
 ;
 
-reservationExpression returns [ReservationStrategyType result] :
+reservationExpression returns [ReservationMode result] :
     (
         'Robot má pravidelně kontrolovat rezervační systém a automaticky přijímat tamější rezervace.' {
-            $result = ReservationStrategyType.ONLY_ACCEPT;
+            $result = ReservationMode.ONLY_ACCEPT;
         }
     ) | (
         'Robot má převzít kontrolu nad rezervačním systémem a přijímat či odmítat vzniklé rezervace dle této strategie.' {
-            $result = ReservationStrategyType.FULL_OWNERSHIP;
+            $result = ReservationMode.FULL_OWNERSHIP;
         }
     )  | (
         'Robot má zcela ignorovat rezervační systém.' {

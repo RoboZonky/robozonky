@@ -100,7 +100,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     @Override
     public Optional<ReservationStrategy> forReservations(final String strategy) {
-        return getStrategy(strategy, s -> s.getReservationStrategyType().isPresent() ?
+        return getStrategy(strategy, s -> s.getReservationMode().isPresent() ?
                 new NaturalLanguageReservationStrategy(s) :
                 null);
     }

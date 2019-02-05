@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.strategies;
 
-public enum ReservationStrategyType {
+public enum ReservationMode {
 
     /**
      * Read reservations and accept them.

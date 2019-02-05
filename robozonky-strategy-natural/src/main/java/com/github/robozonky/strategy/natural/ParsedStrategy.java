@@ -29,7 +29,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.ReservationStrategyType;
+import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -185,8 +185,8 @@ class ParsedStrategy {
         return filters.isPrimaryMarketplaceEnabled();
     }
 
-    public Optional<ReservationStrategyType> getReservationStrategyType() {
-        return defaults.getReservationStrategyType();
+    public Optional<ReservationMode> getReservationMode() {
+        return defaults.getReservationMode();
     }
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> i) {

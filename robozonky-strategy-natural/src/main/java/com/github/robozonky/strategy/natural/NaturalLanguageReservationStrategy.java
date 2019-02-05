@@ -25,8 +25,8 @@ import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
-import com.github.robozonky.api.strategies.ReservationStrategyType;
 
 class NaturalLanguageReservationStrategy extends AbstractNaturalLanguageInvestmentStrategy
         implements ReservationStrategy {
@@ -42,7 +42,7 @@ class NaturalLanguageReservationStrategy extends AbstractNaturalLanguageInvestme
 
     @Override
     protected Stream<LoanDescriptor> acceptableLoans(final Collection<LoanDescriptor> loanDescriptors) {
-        switch (getType()) {
+        switch (getMode()) {
             case ONLY_ACCEPT: // accept everything found
                 Decisions.report(logger -> logger.debug("Will accept all loans from the reservation system."));
                 return loanDescriptors.stream();
@@ -61,8 +61,8 @@ class NaturalLanguageReservationStrategy extends AbstractNaturalLanguageInvestme
     }
 
     @Override
-    public ReservationStrategyType getType() {
-        return getStrategy().getReservationStrategyType()
+    public ReservationMode getMode() {
+        return getStrategy().getReservationMode()
                 .orElseThrow(() -> new IllegalStateException("Reservations are not enabled, yet strategy exists."));
     }
 

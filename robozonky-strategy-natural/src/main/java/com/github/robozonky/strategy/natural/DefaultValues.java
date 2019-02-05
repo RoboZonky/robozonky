@@ -20,14 +20,14 @@ import java.time.Period;
 import java.util.Optional;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ReservationStrategyType;
+import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 class DefaultValues {
 
     private final DefaultPortfolio portfolio;
-    private ReservationStrategyType reservationStrategyType = null;
+    private ReservationMode reservationMode = null;
     private long targetPortfolioSize = Long.MAX_VALUE;
     private long minimumBalance = 0;
     private InvestmentSize investmentSize = new InvestmentSize();
@@ -43,12 +43,12 @@ class DefaultValues {
         return portfolio;
     }
 
-    public Optional<ReservationStrategyType> getReservationStrategyType() {
-        return Optional.ofNullable(reservationStrategyType);
+    public Optional<ReservationMode> getReservationMode() {
+        return Optional.ofNullable(reservationMode);
     }
 
-    public void setReservationStrategyType(final ReservationStrategyType reservationStrategyType) {
-        this.reservationStrategyType = reservationStrategyType;
+    public void setReservationMode(final ReservationMode reservationMode) {
+        this.reservationMode = reservationMode;
     }
 
     public long getMinimumBalance() {
@@ -125,7 +125,7 @@ class DefaultValues {
     public String toString() {
         return "DefaultValues{" +
                 "portfolio=" + portfolio +
-                ",reservationStrategyType=" + reservationStrategyType +
+                ",reservationMode=" + reservationMode +
                 ", targetPortfolioSize=" + targetPortfolioSize +
                 ", minimumBalance=" + minimumBalance +
                 ", investmentSize=" + investmentSize +

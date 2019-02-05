@@ -27,7 +27,7 @@ import com.github.robozonky.api.remote.entities.Restrictions;
  */
 public interface ReservationStrategy {
 
-    ReservationStrategyType getType();
+    ReservationMode getMode();
 
     /**
      * Retrieve loans that are acceptable by the strategy, in the order in which they are to be evaluated. After an
