@@ -50,6 +50,7 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
+import com.github.robozonky.api.notifications.ReservationConfirmedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -224,6 +225,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .build();
         // create events for listeners
         return Stream.of(
+                forListener(SupportedListener.RESERVATION_CONFIRMED, new MyReservationConfirmedEvent(loan, i)),
                 forListener(SupportedListener.INVESTMENT_DELEGATED,
                             new MyInvestmentDelegatedEvent(recommendation, loan)),
                 forListener(SupportedListener.INVESTMENT_MADE, new MyInvestmentMadeEvent(loan, i)),
@@ -503,6 +505,37 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public Loan getLoan() {
             return loan;
+        }
+    }
+
+    private static class MyReservationConfirmedEvent implements ReservationConfirmedEvent {
+
+        private final Loan loan;
+        private final Investment i;
+
+        public MyReservationConfirmedEvent(final Loan loan, final Investment i) {
+            this.loan = loan;
+            this.i = i;
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
+        @Override
+        public Loan getLoan() {
+            return loan;
+        }
+
+        @Override
+        public Investment getInvestment() {
+            return i;
+        }
+
+        @Override
+        public PortfolioOverview getPortfolioOverview() {
+            return MAX_PORTFOLIO;
         }
     }
 
