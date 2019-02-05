@@ -48,7 +48,8 @@ class NaturalLanguageReservationStrategy extends AbstractNaturalLanguageInvestme
 
     @Override
     public ReservationStrategyType getType() {
-        return null;
+        return getStrategy().getReservationStrategyType()
+                .orElseThrow(() -> new IllegalStateException("Reservations are not enabled, yet strategy exists."));
     }
 
     @Override

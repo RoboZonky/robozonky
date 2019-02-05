@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@
 package com.github.robozonky.strategy.natural;
 
 import java.time.Period;
+import java.util.Optional;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.ReservationStrategyType;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 class DefaultValues {
 
     private final DefaultPortfolio portfolio;
+    private final ReservationStrategyType reservationStrategyType;
     private long targetPortfolioSize = Long.MAX_VALUE;
     private long minimumBalance = 0;
     private InvestmentSize investmentSize = new InvestmentSize();
@@ -34,10 +37,15 @@ class DefaultValues {
 
     public DefaultValues(final DefaultPortfolio portfolio) {
         this.portfolio = portfolio;
+        this.reservationStrategyType = null;
     }
 
     public DefaultPortfolio getPortfolio() {
         return portfolio;
+    }
+
+    public Optional<ReservationStrategyType> getReservationStrategyType() {
+        return Optional.ofNullable(reservationStrategyType);
     }
 
     public long getMinimumBalance() {
@@ -114,6 +122,7 @@ class DefaultValues {
     public String toString() {
         return "DefaultValues{" +
                 "portfolio=" + portfolio +
+                ",reservationStrategyType=" + reservationStrategyType +
                 ", targetPortfolioSize=" + targetPortfolioSize +
                 ", minimumBalance=" + minimumBalance +
                 ", investmentSize=" + investmentSize +

@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.ReservationStrategyType;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -150,9 +151,6 @@ class ParsedStrategy {
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> l) {
-        if (!isInvestingEnabled()) {
-            return Stream.empty();
-        }
         return l.parallelStream()
                 .map(Wrapper::wrap)
                 .filter(w -> !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
@@ -187,12 +185,8 @@ class ParsedStrategy {
         return filters.isPrimaryMarketplaceEnabled();
     }
 
-    public boolean areReservationsEnabled() {
-        return false;
-    }
-
-    public boolean areReservationsOwnedByUs() {
-        return false;
+    public Optional<ReservationStrategyType> getReservationStrategyType() {
+        return defaults.getReservationStrategyType();
     }
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> i) {
