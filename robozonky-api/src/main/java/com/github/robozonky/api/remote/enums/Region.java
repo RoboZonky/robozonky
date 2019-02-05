@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
@@ -49,24 +51,7 @@ public enum Region implements BaseEnum {
     ZLINSKY("Zlínský"),
     UNKNOWN("N/A");
 
-    static class RegionDeserializer extends JsonDeserializer<Region> {
-
-        @Override
-        public Region deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            final int actualId = Integer.parseInt(id) - 1; // regions in Zonky API are indexed from 1
-            return Region.values()[actualId];
-        }
-    }
-
-    public static Region findByCode(final String code) {
-        return Stream.of(Region.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown region: " + code));
-    }
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(Region.class);
     private final String code;
     private final String richCode;
 
@@ -77,6 +62,13 @@ public enum Region implements BaseEnum {
     Region(final String code, final String richCode) {
         this.code = code;
         this.richCode = richCode;
+    }
+
+    public static Region findByCode(final String code) {
+        return Stream.of(Region.values())
+                .filter(r -> Objects.equals(r.code, code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown region: " + code));
     }
 
     @Override
@@ -90,5 +82,22 @@ public enum Region implements BaseEnum {
      */
     public String getRichCode() {
         return richCode;
+    }
+
+    static class RegionDeserializer extends JsonDeserializer<Region> {
+
+        @Override
+        public Region deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
+                throws IOException {
+            final String id = jsonParser.getText();
+            try {
+                final int actualId = Integer.parseInt(id) - 1; // regions in Zonky API are indexed from 1
+                return Region.values()[actualId];
+            } catch (final Exception ex) {
+                LOGGER.warn("Received unknown loan region from Zonky: '{}'. This may be a problem, but we continue.",
+                            id);
+                return UNKNOWN;
+            }
+        }
     }
 }
