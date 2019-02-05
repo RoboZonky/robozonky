@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
@@ -112,6 +113,8 @@ public interface Tenant extends AutoCloseable {
     Optional<SellStrategy> getSellStrategy();
 
     Optional<PurchaseStrategy> getPurchaseStrategy();
+
+    Optional<ReservationStrategy> getReservationStrategy();
 
     /**
      * Retrieve a {@link Loan} from Zonky, possibly caching it in the process. If you don't wish to cache the loan,

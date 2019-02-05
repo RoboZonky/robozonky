@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.common.async.Scheduler;
@@ -38,6 +39,7 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
     private final AtomicReference<InvestmentStrategy> toInvest = new AtomicReference<>();
     private final AtomicReference<SellStrategy> toSell = new AtomicReference<>();
     private final AtomicReference<PurchaseStrategy> toPurchase = new AtomicReference<>();
+    private final AtomicReference<ReservationStrategy> forReservations = new AtomicReference<>();
 
     StrategyProvider() {
         // no external instances
@@ -70,7 +72,9 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
         final InvestmentStrategy i = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
         final PurchaseStrategy p = set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
         final SellStrategy s = set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
-        final boolean allMissing = Stream.of(i, p, s).allMatch(Objects::isNull);
+        final ReservationStrategy r = set(forReservations, () -> StrategyLoader.forReservations(newValue),
+                                          "Reservations");
+        final boolean allMissing = Stream.of(i, p, s, r).allMatch(Objects::isNull);
         if (allMissing) {
             LOGGER.warn("No strategies are available. Check log for parser errors.");
         }
@@ -79,7 +83,7 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
 
     @Override
     public void valueUnset(final String oldValue) {
-        Stream.of(toInvest, toSell, toPurchase).forEach(ref -> ref.set(null));
+        Stream.of(toInvest, toSell, toPurchase, forReservations).forEach(ref -> ref.set(null));
         LOGGER.warn("There are no strategies, all operations are disabled.");
     }
 
@@ -98,5 +102,9 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
 
     public Optional<PurchaseStrategy> getToPurchase() {
         return Optional.ofNullable(toPurchase.get());
+    }
+
+    public Optional<ReservationStrategy> getForReservations() {
+        return Optional.ofNullable(forReservations.get());
     }
 }

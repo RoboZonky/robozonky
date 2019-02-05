@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.common.async.Reloadable;
@@ -119,6 +120,11 @@ class PowerTenantImpl implements PowerTenant {
     @Override
     public Optional<PurchaseStrategy> getPurchaseStrategy() {
         return strategyProvider.getToPurchase();
+    }
+
+    @Override
+    public Optional<ReservationStrategy> getReservationStrategy() {
+        return strategyProvider.getForReservations();
     }
 
     @Override
