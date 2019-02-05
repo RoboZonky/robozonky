@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,10 @@ import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
+import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
+import com.github.robozonky.api.notifications.ReservationConfirmationRecommendedEvent;
+import com.github.robozonky.api.notifications.ReservationConfirmedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -245,6 +249,32 @@ public final class EventFactory {
     public static SellingStartedEvent sellingStarted(final Collection<InvestmentDescriptor> investments,
                                                      final PortfolioOverview portfolio) {
         return new SellingStartedEventImpl(investments, portfolio);
+    }
+
+    public static ReservationCheckStartedEvent reservationCheckStarted(final Collection<LoanDescriptor> investments,
+                                                                       final PortfolioOverview portfolioOverview) {
+        return new ReservationCheckStartedEventImpl(investments, portfolioOverview);
+    }
+
+    public static ReservationCheckCompletedEvent reservationCheckCompleted(final Collection<Investment> loans,
+                                                                           final PortfolioOverview portfolioOverview) {
+        return new ReservationCheckCompletedEventImpl(loans, portfolioOverview);
+    }
+
+    public static ReservationConfirmationRecommendedEvent reservationConfirmationRecommended(
+            final RecommendedLoan recommendation) {
+        return new ReservationConfirmationRecommendedEventImpl(recommendation);
+    }
+
+    public static ReservationConfirmedEvent reservationConfirmed(final Investment investment,
+                                                                 final MarketplaceLoan loan,
+                                                                 final PortfolioOverview portfolioOverview) {
+        return new ReservationConfirmedEventImpl(investment, loan, portfolioOverview);
+    }
+
+    public static LazyEvent<ReservationConfirmedEvent> reservationConfirmedLazy(
+            final Supplier<ReservationConfirmedEvent> supplier) {
+        return async(ReservationConfirmedEvent.class, supplier);
     }
 
     public static LazyEvent<InvestmentMadeEvent> investmentMadeLazy(final Supplier<InvestmentMadeEvent> supplier) {
