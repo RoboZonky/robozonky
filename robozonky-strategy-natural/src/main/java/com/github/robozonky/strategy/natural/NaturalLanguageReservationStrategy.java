@@ -22,30 +22,33 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.api.strategies.ReservationStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategyType;
 
-class NaturalLanguageInvestmentStrategy extends AbstractNaturalLanguageInvestmentStrategy
-        implements InvestmentStrategy {
+class NaturalLanguageReservationStrategy extends AbstractNaturalLanguageInvestmentStrategy
+        implements ReservationStrategy {
 
-    private final InvestmentSizeRecommender recommender;
-
-    public NaturalLanguageInvestmentStrategy(final ParsedStrategy p) {
+    public NaturalLanguageReservationStrategy(final ParsedStrategy p) {
         super(p);
-        this.recommender = new InvestmentSizeRecommender(p);
     }
 
     @Override
     protected boolean needsConfirmation(final LoanDescriptor loanDescriptor) {
-        return getStrategy().needsConfirmation(loanDescriptor);
+        return false;
     }
 
     @Override
     protected int recommendAmount(final MarketplaceLoan loan, final BigDecimal balance,
                                   final Restrictions restrictions) {
-        return recommender.apply(loan, balance.intValue(), restrictions);
+        return restrictions.getMinimumInvestmentAmount();
+    }
+
+    @Override
+    public ReservationStrategyType getType() {
+        return null;
     }
 
     @Override

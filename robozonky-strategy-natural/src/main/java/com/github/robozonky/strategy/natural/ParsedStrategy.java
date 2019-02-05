@@ -187,6 +187,14 @@ class ParsedStrategy {
         return filters.isPrimaryMarketplaceEnabled();
     }
 
+    public boolean areReservationsEnabled() {
+        return false;
+    }
+
+    public boolean areReservationsOwnedByUs() {
+        return false;
+    }
+
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> i) {
         return i.parallelStream()
                 .map(Wrapper::wrap)
