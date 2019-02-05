@@ -19,11 +19,11 @@ package com.github.robozonky.api.strategies;
 public enum ReservationStrategyType {
 
     /**
-     * Read reservations and decide whether or not to accept them.
+     * Read reservations and accept them.
      */
-    ONLY_PROCESS,
+    ONLY_ACCEPT,
     /**
-     * On top of {@link #ONLY_PROCESS}, this will also have the power to reconfigure the reservation system in any way
+     * On top of {@link #ONLY_ACCEPT}, this will also have the power to reconfigure the reservation system in any way
      * that the robot sees fit.
      */
     FULL_OWNERSHIP

@@ -27,7 +27,7 @@ import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterConditi
 class DefaultValues {
 
     private final DefaultPortfolio portfolio;
-    private final ReservationStrategyType reservationStrategyType;
+    private ReservationStrategyType reservationStrategyType = null;
     private long targetPortfolioSize = Long.MAX_VALUE;
     private long minimumBalance = 0;
     private InvestmentSize investmentSize = new InvestmentSize();
@@ -37,7 +37,6 @@ class DefaultValues {
 
     public DefaultValues(final DefaultPortfolio portfolio) {
         this.portfolio = portfolio;
-        this.reservationStrategyType = null;
     }
 
     public DefaultPortfolio getPortfolio() {
@@ -46,6 +45,10 @@ class DefaultValues {
 
     public Optional<ReservationStrategyType> getReservationStrategyType() {
         return Optional.ofNullable(reservationStrategyType);
+    }
+
+    public void setReservationStrategyType(final ReservationStrategyType reservationStrategyType) {
+        this.reservationStrategyType = reservationStrategyType;
     }
 
     public long getMinimumBalance() {

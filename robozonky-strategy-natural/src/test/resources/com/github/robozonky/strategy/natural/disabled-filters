@@ -1,4 +1,5 @@
 - Obecná nastavení
 Robot má udržovat prázdné portfolio.
+Robot má pravidelně kontrolovat rezervační systém a automaticky přijímat tamější rezervace.
 Ignorovat všechny půjčky i participace.
 Prodej participací zakázán.
