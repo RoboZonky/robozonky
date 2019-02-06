@@ -16,23 +16,12 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.Collection;
 
-import com.github.robozonky.common.tenant.Tenant;
+interface MarketplaceAccessor<T> {
 
-interface OperationDescriptor<T, S> {
+    Collection<T> getMarketplace();
 
-    boolean isEnabled(final Tenant tenant);
-
-    Optional<S> getStrategy(final Tenant tenant);
-
-    MarketplaceAccessor<T> newMarketplaceAccessor(final Tenant tenant);
-
-    BigDecimal getMinimumBalance(final Tenant tenant);
-
-    long identify(final T descriptor);
-
-    Operation<T, S> getOperation();
+    boolean hasUpdates();
 
 }
