@@ -19,6 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,11 +37,14 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
 
     private final Tenant tenant;
     private final Function<long[], long[]> lastChecked;
+    private final ToLongFunction<ParticipationDescriptor> identifier;
     private final AtomicReference<Collection<ParticipationDescriptor>> marketplace = new AtomicReference<>();
 
-    public SecondaryMarketplaceAccessor(final Tenant tenant, final Function<long[], long[]> lastCheckedSetter) {
+    public SecondaryMarketplaceAccessor(final Tenant tenant, final Function<long[], long[]> lastCheckedSetter,
+                                        final ToLongFunction<ParticipationDescriptor> identifier) {
         this.tenant = tenant;
         this.lastChecked = lastCheckedSetter;
+        this.identifier = identifier;
     }
 
     private static boolean contains(final long toFind, final long... original) {
@@ -78,7 +82,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
      * @return Returning true triggers evaluation of the strategy.
      */
     private boolean hasMarketplaceUpdates(final Collection<ParticipationDescriptor> marketplace) {
-        final long[] idsFromMarketplace = marketplace.stream().mapToLong(p -> p.item().getId()).toArray();
+        final long[] idsFromMarketplace = marketplace.stream().mapToLong(identifier).toArray();
         final long[] presentWhenLastChecked = lastChecked.apply(idsFromMarketplace);
         return hasAdditions(idsFromMarketplace, presentWhenLastChecked);
     }

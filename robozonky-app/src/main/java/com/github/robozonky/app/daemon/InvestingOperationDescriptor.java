@@ -20,15 +20,15 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.common.tenant.Tenant;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
 
-    private static final long[] NO_LONGS = new long[0];
     private final Investor investor;
-    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
+    private final AtomicReference<LastPublishedLoan> lastChecked = new AtomicReference<>(null);
 
     public InvestingOperationDescriptor(final Investor investor) {
         this.investor = investor;

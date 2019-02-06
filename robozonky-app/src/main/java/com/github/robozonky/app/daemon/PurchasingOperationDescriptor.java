@@ -41,7 +41,7 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
 
     @Override
     public MarketplaceAccessor<ParticipationDescriptor> newMarketplaceAccessor(final Tenant tenant) {
-        return new SecondaryMarketplaceAccessor(tenant, lastChecked::getAndSet);
+        return new SecondaryMarketplaceAccessor(tenant, lastChecked::getAndSet, this::identify);
     }
 
     @Override
