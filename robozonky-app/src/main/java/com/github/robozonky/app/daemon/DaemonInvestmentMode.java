@@ -34,27 +34,21 @@ import org.apache.logging.log4j.Logger;
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LogManager.getLogger(DaemonInvestmentMode.class);
+    private static final Duration MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(1);
     private final PowerTenant tenant;
     private final Investor investor;
-    private final Duration primaryMarketplaceCheckPeriod;
-    private final Duration secondaryMarketplaceCheckPeriod;
     private final Consumer<Throwable> shutdownCall;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
-                                final Investor investor, final Duration primaryMarketplaceCheckPeriod,
-                                final Duration secondaryMarketplaceCheckPeriod) {
+                                final Investor investor) {
         this.tenant = tenant;
         this.investor = investor;
-        this.primaryMarketplaceCheckPeriod = primaryMarketplaceCheckPeriod;
-        this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
         this.shutdownCall = shutdownCall;
     }
 
-    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor,
-                         final Duration primaryMarketplaceCheckPeriod,
-                         final Duration secondaryMarketplaceCheckPeriod) {
+    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor) {
         this(t -> {
-        }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
+        }, tenant, investor);
     }
 
     /**
@@ -70,9 +64,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
-        submit(executor, StrategyExecutor.forInvesting(tenant, investor)::get, primaryMarketplaceCheckPeriod);
-        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, secondaryMarketplaceCheckPeriod,
-               Duration.ofMillis(250));
+        submit(executor, StrategyExecutor.forInvesting(tenant, investor)::get, MARKETPLACE_CHECK_PERIOD);
+        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, MARKETPLACE_CHECK_PERIOD, Duration.ofMillis(250));
     }
 
     private void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter) {
