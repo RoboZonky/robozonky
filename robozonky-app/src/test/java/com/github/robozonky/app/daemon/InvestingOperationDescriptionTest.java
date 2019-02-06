@@ -16,12 +16,16 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
@@ -32,4 +36,17 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(d.identify(ld)).isEqualTo(l.getId());
     }
+
+    @Test
+    void freshAccessorEveryTimeButTheyShareState() {
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
+        final Tenant t = mockTenant(z);
+        final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
+        final MarketplaceAccessor<LoanDescriptor> a1 = d.newMarketplaceAccessor(t);
+        assertThat(a1.hasUpdates()).isTrue();
+        final MarketplaceAccessor<LoanDescriptor> a2 = d.newMarketplaceAccessor(t);
+        assertThat(a2.hasUpdates()).isFalse();
+    }
+
 }

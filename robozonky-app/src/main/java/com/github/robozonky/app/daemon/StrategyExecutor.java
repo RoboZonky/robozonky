@@ -62,10 +62,6 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     }
 
     private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
-        if (needsToForceMarketplaceCheck()) {
-            logger.debug("Forcing a periodic live marketplace checked.");
-            return false;
-        }
         final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
         final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
         final boolean balanceChangedMeaningfully = isBiggerThan(currentBalance, lastCheckedBalance);
@@ -74,6 +70,9 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
             return false;
         } else if (marketplace.hasUpdates()) {
             logger.debug("Waking up due to a change in marketplace.");
+            return false;
+        } else if (needsToForceMarketplaceCheck()) {
+            logger.debug("Forcing a periodic live marketplace check.");
             return false;
         } else {
             logger.debug("Asleep as there was no change since last checked.");
@@ -94,7 +93,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         }
         final Collection<T> marketplace = marketplaceAccessor.getMarketplace();
         if (marketplace.isEmpty()) {
-            logger.debug("Asleep as the marketplace is empty.");
+            logger.debug("Marketplace is empty.");
             return Collections.emptyList();
         }
         logger.trace("Processing {} items from the marketplace.", marketplace.size());

@@ -39,12 +39,12 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
      */
     private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
     private final Tenant tenant;
-    private final Function<LastPublishedLoan, LastPublishedLoan> lastChecked;
+    private final Function<LastPublishedLoan, LastPublishedLoan> stateAccessor;
 
     public PrimaryMarketplaceAccessor(final Tenant tenant,
-                                      final Function<LastPublishedLoan, LastPublishedLoan> lastCheckedSetter) {
+                                      final Function<LastPublishedLoan, LastPublishedLoan> stateAccessor) {
         this.tenant = tenant;
-        this.lastChecked = lastCheckedSetter;
+        this.stateAccessor = stateAccessor;
     }
 
     private static boolean isActionable(final LoanDescriptor loanDescriptor) {
@@ -67,7 +67,7 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
     public boolean hasUpdates() {
         try {
             final LastPublishedLoan current = tenant.call(Zonky::getLastPublishedLoanInfo);
-            final LastPublishedLoan previous = lastChecked.apply(current);
+            final LastPublishedLoan previous = stateAccessor.apply(current);
             return !Objects.equals(previous, current);
         } catch (final Exception ex) {
             LOGGER.debug("Zonky marketplace status endpoint failed, forcing live marketplace check.", ex);

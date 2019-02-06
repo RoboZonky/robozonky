@@ -36,14 +36,14 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
     private static final Logger LOGGER = LogManager.getLogger();
 
     private final Tenant tenant;
-    private final Function<long[], long[]> lastChecked;
+    private final Function<long[], long[]> stateAccessor;
     private final ToLongFunction<ParticipationDescriptor> identifier;
     private final AtomicReference<Collection<ParticipationDescriptor>> marketplace = new AtomicReference<>();
 
-    public SecondaryMarketplaceAccessor(final Tenant tenant, final Function<long[], long[]> lastCheckedSetter,
+    public SecondaryMarketplaceAccessor(final Tenant tenant, final Function<long[], long[]> stateAccessor,
                                         final ToLongFunction<ParticipationDescriptor> identifier) {
         this.tenant = tenant;
-        this.lastChecked = lastCheckedSetter;
+        this.stateAccessor = stateAccessor;
         this.identifier = identifier;
     }
 
@@ -83,7 +83,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
      */
     private boolean hasMarketplaceUpdates(final Collection<ParticipationDescriptor> marketplace) {
         final long[] idsFromMarketplace = marketplace.stream().mapToLong(identifier).toArray();
-        final long[] presentWhenLastChecked = lastChecked.apply(idsFromMarketplace);
+        final long[] presentWhenLastChecked = stateAccessor.apply(idsFromMarketplace);
         return hasAdditions(idsFromMarketplace, presentWhenLastChecked);
     }
 

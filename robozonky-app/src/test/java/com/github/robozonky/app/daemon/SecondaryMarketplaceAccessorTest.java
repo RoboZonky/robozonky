@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -61,5 +62,20 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
                 .element(0)
                 .extracting(ParticipationDescriptor::item)
                 .isSameAs(p);
+    }
+
+    @Test
+    void hasUpdatesWhenCurrentAndPreviousEmpty() {
+        final Participation p = mock(Participation.class);
+        when(p.getId()).thenReturn(1l);
+        final Zonky zonky = harmlessZonky(10_000);
+        when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
+        final Tenant tenant = mockTenant(zonky);
+        final AtomicReference<long[]> state = new AtomicReference<>(new long[0]);
+        final MarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(tenant,
+                                                                                                state::getAndSet,
+                                                                                                f -> f.item().getId());
+        assertThat(a.hasUpdates()).isTrue(); // detect update, store present state
+        assertThat(a.hasUpdates()).isFalse(); // state same as marketplace, no update
     }
 }

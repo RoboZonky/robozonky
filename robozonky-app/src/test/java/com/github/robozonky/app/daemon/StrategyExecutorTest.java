@@ -62,7 +62,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY =
             (a, p, r) -> a.stream().map(d -> d.recommend(200).get());
 
-    private static PurchasingOperationDescriptor mockPurchasingOperationDescriptor(final ParticipationDescriptor... pd) {
+    private static PurchasingOperationDescriptor mockPurchasingOperationDescriptor(
+            final ParticipationDescriptor... pd) {
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         final PurchasingOperationDescriptor spied = spy(d);
         final MarketplaceAccessor<ParticipationDescriptor> marketplace = mock(MarketplaceAccessor.class);
@@ -274,6 +275,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec2 = new StrategyExecutor<>(tenant, d);
         assertThat(exec2.get()).isEmpty();
         verify(investor, times(1)).invest(any(), anyBoolean()); // call to invest
+        final List<Event> evt = getEventsRequested();
+        assertThat(evt).isNotEmpty();
     }
 
     @Test
@@ -299,19 +302,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .isEqualTo(Collections.singletonList(loanId));
         // re-check; no balance changed, no marketplace changed, nothing should happen
         assertThat(exec.get()).isEmpty();
-    }
-
-    @Test
-    void doesNotInvestOnEmptyMarketplace() {
-        final Zonky zonky = harmlessZonky(10_000);
-        final PowerTenant tenant = mockTenant(zonky);
-        final InvestingOperationDescriptor d = mockInvestingOperationDescriptor();
-        doReturn(true).when(d).isEnabled(any());
-        doReturn(BigDecimal.ZERO).when(d).getMinimumBalance(any());
-        doReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY)).when(d).getStrategy(any());
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
-        assertThat(e.get()).isEmpty();
-        verify(d, never()).getOperation();
+        final List<Event> evt = getEventsRequested();
+        assertThat(evt).isNotEmpty();
     }
 
     @Test
@@ -326,6 +318,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
         verify(d, never()).getOperation();
+        final List<Event> evt = getEventsRequested();
+        assertThat(evt).isEmpty();
     }
 
     @Test
@@ -334,9 +328,11 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final PowerTenant tenant = mockTenant(zonky);
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = mock(OperationDescriptor.class);
         when(d.isEnabled(any())).thenReturn(false);
-        when(d.getMinimumBalance(any())).thenReturn(BigDecimal.ZERO);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
-        verify(d, never()).getOperation();
+        verify(d, never()).newMarketplaceAccessor(any());
+        final List<Event> evt = getEventsRequested();
+        assertThat(evt).isEmpty();
     }
+
 }

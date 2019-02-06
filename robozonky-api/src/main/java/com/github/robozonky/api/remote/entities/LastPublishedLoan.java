@@ -20,12 +20,23 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.internal.util.DateUtil;
+
 public class LastPublishedLoan extends BaseEntity {
 
     @XmlElement
     private int id;
     @XmlElement
     private OffsetDateTime datePublished;
+
+    public LastPublishedLoan(final int loanId) {
+        this(loanId, DateUtil.offsetNow());
+    }
+
+    public LastPublishedLoan(final int loanId, final OffsetDateTime datePublished) {
+        this.id = loanId;
+        this.datePublished = datePublished;
+    }
 
     public int getId() {
         return id;
