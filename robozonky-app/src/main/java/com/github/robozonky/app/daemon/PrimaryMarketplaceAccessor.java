@@ -28,9 +28,12 @@ import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
      */
@@ -62,8 +65,13 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
 
     @Override
     public boolean hasUpdates() {
-        final LastPublishedLoan current = tenant.call(Zonky::getLastPublishedLoanInfo);
-        final LastPublishedLoan previous = lastChecked.apply(current);
-        return !Objects.equals(previous, current);
+        try {
+            final LastPublishedLoan current = tenant.call(Zonky::getLastPublishedLoanInfo);
+            final LastPublishedLoan previous = lastChecked.apply(current);
+            return !Objects.equals(previous, current);
+        } catch (final Exception ex) {
+            LOGGER.debug("Zonky marketplace status endpoint failed, forcing live marketplace check.", ex);
+            return true;
+        }
     }
 }

@@ -17,6 +17,8 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,14 +30,17 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.util.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
+    private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(15);
     private final Logger logger = LogManager.getLogger(getClass());
     private final PowerTenant tenant;
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
+    private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
     private final OperationDescriptor<T, S> operationDescriptor;
 
     StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S> operationDescriptor) {
@@ -57,6 +62,10 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     }
 
     private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
+        if (needsToForceMarketplaceCheck()) {
+            logger.debug("Forcing a periodic live marketplace checked.");
+            return false;
+        }
         final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
         final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
         final boolean balanceChangedMeaningfully = isBiggerThan(currentBalance, lastCheckedBalance);
@@ -72,6 +81,12 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         }
     }
 
+    private boolean needsToForceMarketplaceCheck() {
+        return lastSuccessfulMarketplaceCheck.get()
+                .plus(FORCED_MARKETPLACE_CHECK_PERIOD)
+                .isBefore(DateUtil.now());
+    }
+
     private Collection<Investment> invest(final S strategy) {
         final MarketplaceAccessor<T> marketplaceAccessor = operationDescriptor.newMarketplaceAccessor(tenant);
         if (skipStrategyEvaluation(marketplaceAccessor)) {
@@ -84,6 +99,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         }
         logger.trace("Processing {} items from the marketplace.", marketplace.size());
         final Collection<Investment> result = operationDescriptor.getOperation().apply(tenant, marketplace, strategy);
+        lastSuccessfulMarketplaceCheck.set(DateUtil.now());
         logger.trace("Marketplace processing complete.");
         return result;
     }
