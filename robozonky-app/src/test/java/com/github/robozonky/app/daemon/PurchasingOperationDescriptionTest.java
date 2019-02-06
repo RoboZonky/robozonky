@@ -1,13 +1,25 @@
-package com.github.robozonky.app.daemon;
+/*
+ * Copyright 2019 The RoboZonky Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import java.util.stream.Stream;
+package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -23,21 +35,6 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final Loan l = Loan.custom().build();
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         assertThat(d.identify(pd)).isEqualTo(1);
-    }
-
-    @Test
-    void readsMarketplace() {
-        final Participation p = mock(Participation.class);
-        when(p.getId()).thenReturn(1l);
-        final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
-        final Zonky zonky = harmlessZonky(10_000);
-        when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
-        final Tenant tenant = mockTenant(zonky);
-        final Stream<ParticipationDescriptor> ld = d.readMarketplace(tenant);
-        assertThat(ld).hasSize(1)
-                .element(0)
-                .extracting(ParticipationDescriptor::item)
-                .isSameAs(p);
     }
 
 }
