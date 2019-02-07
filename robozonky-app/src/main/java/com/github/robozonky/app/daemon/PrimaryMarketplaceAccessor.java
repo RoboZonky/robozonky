@@ -19,7 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
@@ -39,10 +39,9 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
      */
     private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
     private final Tenant tenant;
-    private final Function<LastPublishedLoan, LastPublishedLoan> stateAccessor;
+    private final UnaryOperator<LastPublishedLoan> stateAccessor;
 
-    public PrimaryMarketplaceAccessor(final Tenant tenant,
-                                      final Function<LastPublishedLoan, LastPublishedLoan> stateAccessor) {
+    public PrimaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<LastPublishedLoan> stateAccessor) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
     }

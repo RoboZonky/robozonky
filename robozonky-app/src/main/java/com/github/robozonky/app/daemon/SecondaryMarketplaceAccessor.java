@@ -18,8 +18,8 @@ package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,11 +36,11 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
     private static final Logger LOGGER = LogManager.getLogger();
 
     private final Tenant tenant;
-    private final Function<long[], long[]> stateAccessor;
+    private final UnaryOperator<long[]> stateAccessor;
     private final ToLongFunction<ParticipationDescriptor> identifier;
     private final AtomicReference<Collection<ParticipationDescriptor>> marketplace = new AtomicReference<>();
 
-    public SecondaryMarketplaceAccessor(final Tenant tenant, final Function<long[], long[]> stateAccessor,
+    public SecondaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<long[]> stateAccessor,
                                         final ToLongFunction<ParticipationDescriptor> identifier) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
