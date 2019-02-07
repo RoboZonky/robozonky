@@ -33,6 +33,7 @@ import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
+import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
@@ -188,6 +189,10 @@ public class Zonky {
     public Optional<Investment> getInvestmentByLoanId(final int loanId) {
         final Select s = new Select().equals("loan.id", loanId);
         return getInvestments(s).findFirst();
+    }
+
+    public LastPublishedLoan getLastPublishedLoanInfo() {
+        return loanApi.execute(LoanApi::lastPublished);
     }
 
     /**

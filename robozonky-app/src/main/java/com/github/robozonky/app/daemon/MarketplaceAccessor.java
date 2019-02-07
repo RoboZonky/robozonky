@@ -16,23 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.Collection;
 
-import com.github.robozonky.common.tenant.Tenant;
+/**
+ * The purpose of implementations of this interface is that marketplace checks are coupled to information about latest
+ * updates to those marketplaces. Each instance of an implementing class may decide to cache the marketplace during
+ * {@link #hasUpdates()} and only ever return that in {@link #getMarketplace()}.
+ * @param <T> Type of the entity coming from the marketplace.
+ */
+interface MarketplaceAccessor<T> {
 
-interface OperationDescriptor<T, S> {
+    Collection<T> getMarketplace();
 
-    boolean isEnabled(final Tenant tenant);
-
-    Optional<S> getStrategy(final Tenant tenant);
-
-    MarketplaceAccessor<T> newMarketplaceAccessor(final Tenant tenant);
-
-    BigDecimal getMinimumBalance(final Tenant tenant);
-
-    long identify(final T descriptor);
-
-    Operation<T, S> getOperation();
-
+    boolean hasUpdates();
 }

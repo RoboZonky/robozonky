@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,18 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.internal.util.DateUtil;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
 
-    /**
-     * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
-     */
-    private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
     private final Investor investor;
+    private final AtomicReference<LastPublishedLoan> lastChecked = new AtomicReference<>(null);
 
     public InvestingOperationDescriptor(final Investor investor) {
         this.investor = investor;
@@ -41,13 +36,6 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     public InvestingOperationDescriptor() {
         this(null);
-    }
-
-    private static boolean isActionable(final LoanDescriptor loanDescriptor) {
-        final OffsetDateTime now = DateUtil.offsetNow();
-        return loanDescriptor.getLoanCaptchaProtectionEndDateTime()
-                .map(d -> d.isBefore(now))
-                .orElse(true);
     }
 
     @Override
@@ -61,11 +49,8 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public Stream<LoanDescriptor> readMarketplace(final Tenant tenant) {
-        return tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
-                .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
-                .map(LoanDescriptor::new)
-                .filter(InvestingOperationDescriptor::isActionable);
+    public MarketplaceAccessor<LoanDescriptor> newMarketplaceAccessor(final Tenant tenant) {
+        return new PrimaryMarketplaceAccessor(tenant, lastChecked::getAndSet);
     }
 
     @Override

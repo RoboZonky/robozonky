@@ -96,7 +96,6 @@ final class OperatingMode {
     private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final PowerTenant auth,
                                                        final Investor investor) {
         final InvestmentMode m = new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), auth, investor,
-                                                          cli.getPrimaryMarketplaceCheckDelay(),
                                                           cli.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);
     }

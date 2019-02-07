@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The RoboZonky Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.robozonky.app.daemon;
 
 import java.util.stream.Stream;
@@ -26,18 +42,17 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void readsMarketplace() {
+    void freshAccessorEveryTimeButTheyShareState() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getAvailableParticipations(any())).thenAnswer(i -> Stream.of(p));
+        final Tenant t = mockTenant(z);
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
-        final Zonky zonky = harmlessZonky(10_000);
-        when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
-        final Tenant tenant = mockTenant(zonky);
-        final Stream<ParticipationDescriptor> ld = d.readMarketplace(tenant);
-        assertThat(ld).hasSize(1)
-                .element(0)
-                .extracting(ParticipationDescriptor::item)
-                .isSameAs(p);
+        final MarketplaceAccessor<ParticipationDescriptor> a1 = d.newMarketplaceAccessor(t);
+        assertThat(a1.hasUpdates()).isTrue();
+        final MarketplaceAccessor<ParticipationDescriptor> a2 = d.newMarketplaceAccessor(t);
+        assertThat(a2.hasUpdates()).isFalse();
     }
 
 }

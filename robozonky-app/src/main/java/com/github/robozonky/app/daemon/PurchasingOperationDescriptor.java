@@ -18,24 +18,16 @@ package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.tenant.SoldParticipationCache;
-import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy> {
 
-    private static final Logger LOGGER = LogManager.getLogger(PurchasingOperationDescriptor.class);
-
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant tenant) {
-        return new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId()));
-    }
+    private static final long[] NO_LONGS = new long[0];
+    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
 
     @Override
     public boolean isEnabled(final Tenant tenant) {
@@ -48,20 +40,8 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
-    public Stream<ParticipationDescriptor> readMarketplace(final Tenant tenant) {
-        final long balance = tenant.getPortfolio().getBalance().longValue();
-        final Select s = new Select()
-                .lessThanOrEquals("remainingPrincipal", balance)
-                .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
-        final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
-        return tenant.call(zonky -> zonky.getAvailableParticipations(s))
-                .filter(p -> { // never re-purchase what was once sold
-                    final int loanId = p.getLoanId();
-                    final boolean wasSoldBefore = cache.wasOnceSold(loanId);
-                    LOGGER.debug("Loan #{} already sold before, ignoring: {}.", loanId, wasSoldBefore);
-                    return !wasSoldBefore;
-                })
-                .map(p -> toDescriptor(p, tenant));
+    public MarketplaceAccessor<ParticipationDescriptor> newMarketplaceAccessor(final Tenant tenant) {
+        return new SecondaryMarketplaceAccessor(tenant, lastChecked::getAndSet, this::identify);
     }
 
     @Override

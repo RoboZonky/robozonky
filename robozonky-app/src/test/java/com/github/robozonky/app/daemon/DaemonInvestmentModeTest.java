@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final PowerTenant a = mockTenant(harmlessZonky(10_000), true);
         final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a, b, ONE_SECOND, ONE_SECOND))) {
+        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a, b, ONE_SECOND))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
             doNothing().when(d).submit(any(), any(), any(), any());
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
