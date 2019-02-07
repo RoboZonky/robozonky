@@ -18,7 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
@@ -51,7 +51,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getAvailableLoans(any())).thenReturn(Stream.of(alreadyInvested, normal));
         final Tenant tenant = mockTenant(zonky);
-        final MarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant, Function.identity());
+        final MarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant, UnaryOperator.identity());
         final Collection<LoanDescriptor> ld = d.getMarketplace();
         assertThat(ld).hasSize(1)
                 .element(0)

@@ -18,7 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Participation;
@@ -55,7 +55,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final Tenant tenant = mockTenant(zonky);
         final MarketplaceAccessor<ParticipationDescriptor> d = new SecondaryMarketplaceAccessor(tenant,
-                                                                                                Function.identity(),
+                                                                                                UnaryOperator.identity(),
                                                                                                 f -> f.item().getId());
         final Collection<ParticipationDescriptor> ld = d.getMarketplace();
         assertThat(ld).hasSize(1)
