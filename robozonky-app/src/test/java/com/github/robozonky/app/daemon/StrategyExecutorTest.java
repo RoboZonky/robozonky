@@ -17,6 +17,9 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,6 +47,8 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.DateUtil;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 
@@ -335,4 +340,34 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(evt).isEmpty();
     }
 
+    @Test
+    void forcesMarketplaceCheck() {
+        final Instant now = Instant.now();
+        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        final Zonky zonky = harmlessZonky(10_000);
+        final Loan loan = Loan.custom()
+                .setDatePublished(DateUtil.offsetNow().minusMinutes(10)) // avoid CAPTCHA
+                .setRating(Rating.D)
+                .build();
+        when(zonky.getAvailableLoans(any())).thenAnswer(i -> Stream.of(loan));
+        final PowerTenant tenant = mockTenant(zonky);
+        when(tenant.getInvestmentStrategy())
+                .thenReturn(Optional.of((available, portfolio, restrictions) -> Stream.empty()));
+        final Investor investor = Investor.build(tenant);
+        final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = new InvestingOperationDescriptor(investor);
+        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
+        assertThat(e.get()).isEmpty();
+        verify(zonky, never()).getLastPublishedLoanInfo();
+        verify(zonky, times(1)).getAvailableLoans(any());
+        assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked
+        verify(zonky, times(1)).getLastPublishedLoanInfo();
+        verify(zonky, times(1)).getAvailableLoans(any());
+        assertThat(e.get()).isEmpty(); // the third time, marketplace wasn't checked but the cache was
+        verify(zonky, times(2)).getLastPublishedLoanInfo();
+        verify(zonky, times(1)).getAvailableLoans(any());
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONE_ID));
+        assertThat(e.get()).isEmpty(); // after 1 minute, marketplace was force-checked
+        verify(zonky, times(3)).getLastPublishedLoanInfo();
+        verify(zonky, times(2)).getAvailableLoans(any());
+    }
 }
