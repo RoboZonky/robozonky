@@ -18,10 +18,15 @@ package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
 
+/**
+ * The purpose of implementations of this interface is that marketplace checks are coupled to information about latest
+ * updates to those marketplaces. Each instance of an implementing class may decide to cache the marketplace during
+ * {@link #hasUpdates()} and only ever return that in {@link #getMarketplace()}.
+ * @param <T> Type of the entity coming from the marketplace.
+ */
 interface MarketplaceAccessor<T> {
 
     Collection<T> getMarketplace();
 
     boolean hasUpdates();
-
 }
