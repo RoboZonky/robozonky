@@ -36,25 +36,22 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LogManager.getLogger(DaemonInvestmentMode.class);
     private final PowerTenant tenant;
     private final Investor investor;
-    private final Duration primaryMarketplaceCheckPeriod;
     private final Duration secondaryMarketplaceCheckPeriod;
     private final Consumer<Throwable> shutdownCall;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
-                                final Investor investor, final Duration primaryMarketplaceCheckPeriod,
+                                final Investor investor,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
         this.investor = investor;
-        this.primaryMarketplaceCheckPeriod = primaryMarketplaceCheckPeriod;
         this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
         this.shutdownCall = shutdownCall;
     }
 
     DaemonInvestmentMode(final PowerTenant tenant, final Investor investor,
-                         final Duration primaryMarketplaceCheckPeriod,
                          final Duration secondaryMarketplaceCheckPeriod) {
         this(t -> {
-        }, tenant, investor, primaryMarketplaceCheckPeriod, secondaryMarketplaceCheckPeriod);
+        }, tenant, investor, secondaryMarketplaceCheckPeriod);
     }
 
     /**
@@ -70,7 +67,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
-        submit(executor, StrategyExecutor.forInvesting(tenant, investor)::get, primaryMarketplaceCheckPeriod);
+        submit(executor, StrategyExecutor.forInvesting(tenant, investor)::get, Duration.ofSeconds(1));
         submit(executor, StrategyExecutor.forPurchasing(tenant)::get, secondaryMarketplaceCheckPeriod,
                Duration.ofMillis(250));
     }

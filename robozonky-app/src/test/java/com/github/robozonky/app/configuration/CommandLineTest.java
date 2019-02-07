@@ -136,7 +136,6 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         assertThat(cli.getNotificationConfigLocation()).isEmpty();
         assertThat(cli.getName()).isEqualTo("Unnamed");
         assertThat(cli.isDryRunEnabled()).isFalse();
-        assertThat(cli.getPrimaryMarketplaceCheckDelay()).isEqualTo(Duration.ofSeconds(1));
         assertThat(cli.getSecondaryMarketplaceCheckDelay()).isEqualTo(Duration.ofSeconds(1));
     }
 }
