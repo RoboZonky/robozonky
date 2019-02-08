@@ -24,10 +24,12 @@ import com.github.robozonky.internal.util.DateUtil;
 
 public class LastPublishedLoan extends BaseEntity {
 
-    @XmlElement
     private int id;
-    @XmlElement
     private OffsetDateTime datePublished;
+
+    LastPublishedLoan() {
+        // for JAXB
+    }
 
     public LastPublishedLoan(final int loanId) {
         this(loanId, DateUtil.offsetNow());
@@ -38,10 +40,12 @@ public class LastPublishedLoan extends BaseEntity {
         this.datePublished = datePublished;
     }
 
+    @XmlElement
     public int getId() {
         return id;
     }
 
+    @XmlElement
     public OffsetDateTime getDatePublished() {
         return datePublished;
     }
