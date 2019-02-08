@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 
-interface BaseLoan {
+public interface BaseLoan {
 
     MainIncomeType getMainIncomeType();
 
