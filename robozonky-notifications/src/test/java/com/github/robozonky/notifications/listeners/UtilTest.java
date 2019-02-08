@@ -95,7 +95,7 @@ class UtilTest {
         final MarketplaceLoanBased l = new InvestmentSkippedEvent() {
             @Override
             public MarketplaceLoan getLoan() {
-                return MarketplaceLoan.custom().setRating(Rating.C).build();
+                return MarketplaceLoan.custom().setRating(Rating.C).setInterestRate(BigDecimal.TEN).build();
             }
 
             @Override
@@ -121,7 +121,7 @@ class UtilTest {
 
             @Override
             public Loan getLoan() {
-                return Loan.custom().setRating(Rating.D).build();
+                return Loan.custom().setRating(Rating.D).setInterestRate(BigDecimal.TEN).build();
             }
 
             @Override

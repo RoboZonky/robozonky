@@ -51,6 +51,7 @@ import static com.github.robozonky.internal.util.Maps.entry;
 
 final class Util {
 
+    private static final BigDecimal HUNDRED = BigDecimal.TEN.pow(2);
     private static final String AT = "@";
     private static final Pattern COMPILE = Pattern.compile("\\Q" + AT + "\\E");
 
@@ -71,7 +72,9 @@ final class Util {
     }
 
     private static String identifyLoan(final MarketplaceLoan loan) {
-        return "č. " + loan.getId() + " (" + loan.getRating().getCode() + " % p.a., " + loan.getTermInMonths() + " m.)";
+        final BigDecimal interestRate = loan.getInterestRate().multiply(HUNDRED);
+        // string formatting ensures proper locale-specific floating point separator
+        return String.format("č. %d (%.2f %% p.a., %d m.)", loan.getId(), interestRate, loan.getTermInMonths());
     }
 
     public static String identifyLoan(final MarketplaceLoanBased event) {
