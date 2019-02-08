@@ -18,43 +18,54 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.api.strategies.RecommendedReservation;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 
-class NaturalLanguageReservationStrategy extends AbstractNaturalLanguageInvestmentStrategy
-        implements ReservationStrategy {
+class NaturalLanguageReservationStrategy implements ReservationStrategy {
+
+    private static final Comparator<ReservationDescriptor> COMPARATOR = new ReservationComparator();
+    private final ParsedStrategy strategy;
 
     public NaturalLanguageReservationStrategy(final ParsedStrategy p) {
-        super(p);
-    }
-
-    @Override
-    protected boolean needsConfirmation(final LoanDescriptor loanDescriptor) {
-        return false;
-    }
-
-    @Override
-    protected int recommendAmount(final MarketplaceLoan loan, final BigDecimal balance,
-                                  final Restrictions restrictions) {
-        return restrictions.getMinimumInvestmentAmount();
+        this.strategy = p;
     }
 
     @Override
     public ReservationMode getMode() {
-        return getStrategy().getReservationMode()
+        return strategy.getReservationMode()
                 .orElseThrow(() -> new IllegalStateException("Reservations are not enabled, yet strategy exists."));
     }
 
     @Override
-    public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> available,
-                                             final PortfolioOverview portfolio, final Restrictions restrictions) {
-        return super.recommend(available, portfolio, restrictions);
+    public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
+                                                    final PortfolioOverview portfolio,
+                                                    final Restrictions restrictions) {
+        if (!Util.isAcceptable(strategy, portfolio)) {
+            return Stream.empty();
+        }
+        // split available marketplace into buckets per rating
+        final Map<Rating, List<ReservationDescriptor>> splitByRating =
+                Util.sortByRating(strategy.getApplicableReservations(available), d -> d.item().getRating());
+        // and now return recommendations in the order in which investment should be attempted
+        return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
+                .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
+                .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
+                .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
+                .flatMap(d -> { // recommend amount to invest per strategy
+                    final BigDecimal amount = BigDecimal.valueOf(d.item().getMyReservation().getReservedAmount());
+                    return d.recommend(amount)
+                            .map(Stream::of)
+                            .orElse(Stream.empty());
+                });
     }
 }

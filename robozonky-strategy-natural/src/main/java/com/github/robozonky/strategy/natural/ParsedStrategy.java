@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.apache.logging.log4j.LogManager;
@@ -150,14 +151,21 @@ class ParsedStrategy {
         return getInvestmentSize(rating).getMaximumInvestmentInCzk();
     }
 
-    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> l) {
-        return l.parallelStream()
-                .map(Wrapper::wrap)
+    private <T> Stream<T> getApplicable(final Stream<Wrapper<T>> wrappers) {
+        return wrappers
                 .filter(w -> !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
                                             "{} to be ignored as it matched primary marketplace filter {}."))
                 .filter(w -> !matchesFilter(w, filters.getSellFilters(),
                                             "{} to be ignored as it matched sell filter {}."))
                 .map(Wrapper::getOriginal);
+    }
+
+    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> l) {
+        return getApplicable(l.parallelStream().map(Wrapper::wrap));
+    }
+
+    public Stream<ReservationDescriptor> getApplicableReservations(final Collection<ReservationDescriptor> r) {
+        return getApplicable(r.parallelStream().map(Wrapper::wrap));
     }
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(final Collection<ParticipationDescriptor> p) {
