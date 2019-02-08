@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Zonky API is notorious for only providing certain field values at certain stages in the
- * {@link com.github.robozonky.api.remote.entities.RawInvestment}/
- * {@link com.github.robozonky.api.remote.entities.RawLoan}/
- * {@link com.github.robozonky.api.remote.entities.RawDevelopment}/
- * {@link com.github.robozonky.api.remote.entities.RawReservation} lifecycle. The aim of this package is to provide
- * null-safe alternatives for some of the Zonky API entities. {@link java.lang.NullPointerException}s thrown from within
- * this package should be considered bugs in RoboZonky and not some quirks of the Zonky API.
- */
 package com.github.robozonky.api.remote.entities.sanitized;
+
+import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.RawReservation;
+
+public interface Reservation extends BaseLoan {
+
+    static Reservation sanitized(final RawReservation original) {
+        return Reservation.sanitize(original).build();
+    }
+
+    static ReservationBuilder custom() {
+        return new MutableReservationImpl();
+    }
+
+    static ReservationBuilder sanitize(final RawReservation original) {
+        return new MutableReservationImpl(original);
+    }
+
+    MyReservation getMyReservation();
+}
