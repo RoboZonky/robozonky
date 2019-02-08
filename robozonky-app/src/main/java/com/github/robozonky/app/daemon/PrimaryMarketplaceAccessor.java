@@ -67,6 +67,7 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
         try {
             final LastPublishedLoan current = tenant.call(Zonky::getLastPublishedLoanInfo);
             final LastPublishedLoan previous = stateAccessor.apply(current);
+            LOGGER.trace("Current is {}, previous is {}.", current, previous);
             return !Objects.equals(previous, current);
         } catch (final Exception ex) {
             LOGGER.debug("Zonky marketplace status endpoint failed, forcing live marketplace check.", ex);
