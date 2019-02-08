@@ -11,6 +11,11 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.remote.entities.LastPublishedLoan com.github.robozonky.api.remote.LoanApi::lastPublished()",
+        "justification": "New Zonky API."
+      }
     ]
   }
 }

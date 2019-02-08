@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,10 @@ import org.assertj.core.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class CommandLineTest extends AbstractRoboZonkyTest {
 
@@ -140,7 +137,6 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         assertThat(cli.getNotificationConfigLocation()).isEmpty();
         assertThat(cli.getName()).isEqualTo("Unnamed");
         assertThat(cli.isDryRunEnabled()).isFalse();
-        assertThat(cli.getPrimaryMarketplaceCheckDelay()).isEqualTo(Duration.ofSeconds(1));
         assertThat(cli.getSecondaryMarketplaceCheckDelay()).isEqualTo(Duration.ofSeconds(1));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
+import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
@@ -105,22 +106,22 @@ public class Zonky {
     }
 
     public void invest(final Investment investment) {
-        LOGGER.info("Investing into loan #{}.", investment.getLoanId());
+        LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.invest(new RawInvestment(investment)));
     }
 
     public void cancel(final Investment investment) {
-        LOGGER.info("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
+        LOGGER.debug("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
     public void purchase(final Participation participation) {
-        LOGGER.info("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
+        LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
         controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
     }
 
     public void sell(final Investment investment) {
-        LOGGER.info("Offering to sell investment in loan #{}.", investment.getLoanId());
+        LOGGER.debug("Offering to sell investment in loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.offer(new SellRequest(new RawInvestment(investment))));
     }
 
@@ -188,6 +189,10 @@ public class Zonky {
     public Optional<Investment> getInvestmentByLoanId(final int loanId) {
         final Select s = new Select().equals("loan.id", loanId);
         return getInvestments(s).findFirst();
+    }
+
+    public LastPublishedLoan getLastPublishedLoanInfo() {
+        return loanApi.execute(LoanApi::lastPublished);
     }
 
     /**

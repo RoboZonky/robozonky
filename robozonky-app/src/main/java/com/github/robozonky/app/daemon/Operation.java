@@ -16,21 +16,14 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
+import java.util.Collection;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import org.junit.jupiter.api.Test;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.app.tenant.PowerTenant;
 
-import static org.assertj.core.api.Assertions.*;
+@FunctionalInterface
+interface Operation<B, C> {
 
-class SellingJobTest {
-
-    @Test
-    void getters() {
-        final TenantJob t = new SellingJob();
-        assertThat(t.payload()).isNotNull()
-                .isInstanceOf(Selling.class);
-        assertThat(t.repeatEvery()).isEqualTo(Duration.ofDays(1));
-    }
+    Collection<Investment> apply(PowerTenant a, Collection<B> b, C c);
 
 }

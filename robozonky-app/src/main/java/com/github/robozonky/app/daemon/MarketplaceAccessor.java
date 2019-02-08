@@ -16,21 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
+import java.util.Collection;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import org.junit.jupiter.api.Test;
+/**
+ * The purpose of implementations of this interface is that marketplace checks are coupled to information about latest
+ * updates to those marketplaces. Each instance of an implementing class may decide to cache the marketplace during
+ * {@link #hasUpdates()} and only ever return that in {@link #getMarketplace()}.
+ * @param <T> Type of the entity coming from the marketplace.
+ */
+interface MarketplaceAccessor<T> {
 
-import static org.assertj.core.api.Assertions.*;
+    Collection<T> getMarketplace();
 
-class SellingJobTest {
-
-    @Test
-    void getters() {
-        final TenantJob t = new SellingJob();
-        assertThat(t.payload()).isNotNull()
-                .isInstanceOf(Selling.class);
-        assertThat(t.repeatEvery()).isEqualTo(Duration.ofDays(1));
-    }
-
+    boolean hasUpdates();
 }

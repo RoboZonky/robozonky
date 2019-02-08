@@ -16,21 +16,23 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
+import java.math.BigDecimal;
+import java.util.Optional;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import org.junit.jupiter.api.Test;
+import com.github.robozonky.common.tenant.Tenant;
 
-import static org.assertj.core.api.Assertions.*;
+interface OperationDescriptor<T, S> {
 
-class SellingJobTest {
+    boolean isEnabled(final Tenant tenant);
 
-    @Test
-    void getters() {
-        final TenantJob t = new SellingJob();
-        assertThat(t.payload()).isNotNull()
-                .isInstanceOf(Selling.class);
-        assertThat(t.repeatEvery()).isEqualTo(Duration.ofDays(1));
-    }
+    Optional<S> getStrategy(final Tenant tenant);
+
+    MarketplaceAccessor<T> newMarketplaceAccessor(final Tenant tenant);
+
+    BigDecimal getMinimumBalance(final Tenant tenant);
+
+    long identify(final T descriptor);
+
+    Operation<T, S> getOperation();
 
 }

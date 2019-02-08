@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,9 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     @picocli.CommandLine.Option(names = {"-g", "--guarded"},
             description = "Path to secure file that contains username, password etc.", required = true)
     private File keystore = null;
-    @picocli.CommandLine.Option(names = {"-w", "--wait-primary", "--wait"},
-            description = "Number of seconds between consecutive checks of primary marketplace.")
-    private int primaryMarketplaceCheckDelay = 1;
     @picocli.CommandLine.Option(names = {"-ws", "--wait-secondary"},
             description = "Number of seconds between consecutive checks of secondary marketplace.")
-    private int secondaryMarketplaceCheckDelay = primaryMarketplaceCheckDelay;
+    private int secondaryMarketplaceCheckDelay = 1;
 
     public CommandLine(final Consumer<Throwable> shutdownCall) {
         this.shutdownCall = shutdownCall;
@@ -84,10 +81,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
         final CommandLine cli = new CommandLine(main::resumeToFail);
         final Optional<InvestmentMode> result = picocli.CommandLine.call(cli, main.getArgs());
         return Objects.isNull(result) ? Optional.empty() : result;
-    }
-
-    Duration getPrimaryMarketplaceCheckDelay() {
-        return Duration.ofSeconds(primaryMarketplaceCheckDelay);
     }
 
     Duration getSecondaryMarketplaceCheckDelay() {
