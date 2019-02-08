@@ -16,12 +16,8 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Collection;
 import javax.xml.bind.annotation.XmlElement;
 
-import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -40,30 +36,10 @@ import com.github.robozonky.api.remote.enums.Region;
  * points in the investment lifecycle. Please use {@link Loan} and {@link MarketplaceLoan} as a null-safe alternative.
  * Instances may be created with static methods such as {@link Loan#sanitized(RawLoan)}.
  */
-public class RawLoan extends BaseEntity {
+public class RawLoan extends BaseLoan {
 
-    private boolean topped, covered, published, questionsAllowed, insuranceActive, multicash, fastcash;
-    private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount;
-    private double amount;
-    private double remainingInvestment;
-    private double reservedAmount;
-    private String name, nickName, story, url;
-    private BigDecimal interestRate;
-    private BigDecimal revenueRate;
-    private BigDecimal annuity;
-    private BigDecimal premium;
-    private BigDecimal annuityWithInsurance;
-    private OffsetDateTime datePublished, deadline;
-    private Rating rating;
-    private Collection<Photo> photos;
-    private BigDecimal investmentRate;
-    private BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
+    private String url;
     private MyInvestment myInvestment;
-    private OtherInvestments myOtherInvestments;
-    private MainIncomeType mainIncomeType;
-    private Region region;
-    private Purpose purpose;
-    private Collection<InsurancePolicyPeriod> insuranceHistory;
 
     protected RawLoan() {
         // for JAXB
@@ -78,193 +54,8 @@ public class RawLoan extends BaseEntity {
     }
 
     @XmlElement
-    public MainIncomeType getMainIncomeType() {
-        return mainIncomeType;
-    }
-
-    @XmlElement
-    public BigDecimal getInvestmentRate() {
-        return investmentRate;
-    }
-
-    @XmlElement
-    public Region getRegion() {
-        return region;
-    }
-
-    @XmlElement
-    public Purpose getPurpose() {
-        return purpose;
-    }
-
-    @XmlElement
-    public int getId() {
-        return id;
-    }
-
-    @XmlElement
-    public String getName() {
-        return name;
-    }
-
-    @XmlElement
-    public String getStory() {
-        return story;
-    }
-
-    @XmlElement
-    public String getNickName() {
-        return nickName;
-    }
-
-    @XmlElement
-    public int getTermInMonths() {
-        return termInMonths;
-    }
-
-    @XmlElement
-    public BigDecimal getInterestRate() {
-        return interestRate;
-    }
-
-    @XmlElement
-    public Rating getRating() {
-        return rating;
-    }
-
-    @XmlElement
-    public boolean isTopped() {
-        return topped;
-    }
-
-    @XmlElement
-    public double getAmount() {
-        return amount;
-    }
-
-    @XmlElement
-    public double getRemainingInvestment() {
-        return remainingInvestment;
-    }
-
-    @XmlElement
-    public boolean isCovered() {
-        return covered;
-    }
-
-    @XmlElement
-    public boolean isMulticash() {
-        return multicash;
-    }
-
-    @XmlElement
-    public boolean isFastcash() {
-        return fastcash;
-    }
-
-    @XmlElement
-    public boolean isPublished() {
-        return published;
-    }
-
-    @XmlElement
-    public OffsetDateTime getDatePublished() {
-        return datePublished;
-    }
-
-    @XmlElement
-    public OffsetDateTime getDeadline() {
-        return deadline;
-    }
-
-    @XmlElement
-    public int getInvestmentsCount() {
-        return investmentsCount;
-    }
-
-    @XmlElement
-    public int getActiveLoansCount() {
-        return activeLoansCount;
-    }
-
-    @XmlElement
-    public int getQuestionsCount() {
-        return questionsCount;
-    }
-
-    @XmlElement
-    public boolean isQuestionsAllowed() {
-        return questionsAllowed;
-    }
-
-    @XmlElement
-    public Collection<Photo> getPhotos() {
-        return photos;
-    }
-
-    /**
-     * Holds the same information as {@link #getBorrowerRelatedInvestmentInfo()}, no need to use this.
-     * @return
-     */
-    @XmlElement
-    public OtherInvestments getMyOtherInvestments() {
-        return myOtherInvestments;
-    }
-
-    @XmlElement
-    public double getReservedAmount() {
-        return reservedAmount;
-    }
-
-    @XmlElement
-    public boolean isInsuranceActive() {
-        return insuranceActive;
-    }
-
-    @XmlElement
-    public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
-        return insuranceHistory;
-    }
-
-    /**
-     * @return Null unless the loan was queried using {@link LoanApi#item(int)}.
-     */
-    @XmlElement
-    public BorrowerRelatedInvestmentInfo getBorrowerRelatedInvestmentInfo() {
-        return borrowerRelatedInvestmentInfo;
-    }
-
-    @XmlElement
-    public int getUserId() {
-        return userId;
-    }
-
-    @XmlElement
     public String getUrl() {
         return url;
     }
 
-    @XmlElement
-    public BigDecimal getRevenueRate() {
-        return revenueRate;
-    }
-
-    @XmlElement
-    public BigDecimal getAnnuity() {
-        return annuity;
-    }
-
-    @XmlElement
-    public BigDecimal getPremium() {
-        return premium;
-    }
-
-    /**
-     *
-     * @return {@link #getAnnuity()} + {@link #getPremium()}
-     */
-    @XmlElement
-    public BigDecimal getAnnuityWithInsurance() {
-        return annuityWithInsurance;
-    }
 }
