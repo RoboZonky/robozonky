@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.api.remote.enums;
 
-/**
- * Fired immediately after an investment was confirmed through the reservation system's API.
- */
-public interface ReservationConfirmedEvent extends MarketplaceInvestmentBased,
-                                                   Financial {
+public enum Resolution {
+
+    ACCEPTED,
+    REJECTED
 
 }

@@ -44,10 +44,10 @@ import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
-import com.github.robozonky.api.notifications.ReservationConfirmationRecommendedEvent;
-import com.github.robozonky.api.notifications.ReservationConfirmedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -72,6 +72,8 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
+import com.github.robozonky.api.strategies.RecommendedReservation;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.common.tenant.LazyEvent;
 
 /**
@@ -251,30 +253,31 @@ public final class EventFactory {
         return new SellingStartedEventImpl(investments, portfolio);
     }
 
-    public static ReservationCheckStartedEvent reservationCheckStarted(final Collection<LoanDescriptor> investments,
-                                                                       final PortfolioOverview portfolioOverview) {
-        return new ReservationCheckStartedEventImpl(investments, portfolioOverview);
+    public static ReservationCheckStartedEvent reservationCheckStarted(
+            final Collection<ReservationDescriptor> reservations,
+            final PortfolioOverview portfolioOverview) {
+        return new ReservationCheckStartedEventImpl(reservations, portfolioOverview);
     }
 
-    public static ReservationCheckCompletedEvent reservationCheckCompleted(final Collection<Investment> loans,
+    public static ReservationCheckCompletedEvent reservationCheckCompleted(final Collection<Investment> investments,
                                                                            final PortfolioOverview portfolioOverview) {
-        return new ReservationCheckCompletedEventImpl(loans, portfolioOverview);
+        return new ReservationCheckCompletedEventImpl(investments, portfolioOverview);
     }
 
-    public static ReservationConfirmationRecommendedEvent reservationConfirmationRecommended(
-            final RecommendedLoan recommendation) {
-        return new ReservationConfirmationRecommendedEventImpl(recommendation);
+    public static ReservationAcceptationRecommendedEvent reservationAcceptationRecommended(
+            final RecommendedReservation recommendation) {
+        return new ReservationAcceptationRecommendedEventImpl(recommendation);
     }
 
-    public static ReservationConfirmedEvent reservationConfirmed(final Investment investment,
-                                                                 final MarketplaceLoan loan,
-                                                                 final PortfolioOverview portfolioOverview) {
-        return new ReservationConfirmedEventImpl(investment, loan, portfolioOverview);
+    public static ReservationAcceptedEvent reservationAccepted(final Investment investment,
+                                                               final MarketplaceLoan loan,
+                                                               final PortfolioOverview portfolioOverview) {
+        return new ReservationAcceptedEventImpl(investment, loan, portfolioOverview);
     }
 
-    public static LazyEvent<ReservationConfirmedEvent> reservationConfirmedLazy(
-            final Supplier<ReservationConfirmedEvent> supplier) {
-        return async(ReservationConfirmedEvent.class, supplier);
+    public static LazyEvent<ReservationAcceptedEvent> reservationAcceptedLazy(
+            final Supplier<ReservationAcceptedEvent> supplier) {
+        return async(ReservationAcceptedEvent.class, supplier);
     }
 
     public static LazyEvent<InvestmentMadeEvent> investmentMadeLazy(final Supplier<InvestmentMadeEvent> supplier) {

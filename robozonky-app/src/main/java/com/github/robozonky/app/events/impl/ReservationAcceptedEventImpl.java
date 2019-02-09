@@ -16,19 +16,19 @@
 
 package com.github.robozonky.app.events.impl;
 
-import com.github.robozonky.api.notifications.ReservationConfirmedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-final class ReservationConfirmedEventImpl extends AbstractEventImpl implements ReservationConfirmedEvent {
+final class ReservationAcceptedEventImpl extends AbstractEventImpl implements ReservationAcceptedEvent {
 
     private final Investment investment;
     private final MarketplaceLoan loan;
     private final PortfolioOverview portfolioOverview;
 
-    public ReservationConfirmedEventImpl(final Investment investment, final MarketplaceLoan loan,
-                                         final PortfolioOverview portfolioOverview) {
+    public ReservationAcceptedEventImpl(final Investment investment, final MarketplaceLoan loan,
+                                        final PortfolioOverview portfolioOverview) {
         this.investment = investment;
         this.loan = loan;
         this.portfolioOverview = portfolioOverview;

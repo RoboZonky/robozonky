@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.strategies.ReservationStrategy;
+import java.util.Collection;
+import java.util.Collections;
+import javax.xml.bind.annotation.XmlElement;
 
-/**
- * Fired immediately after {@link ReservationStrategy} has recommended a particular loan.
- * {@link ReservationConfirmedEvent} may be fired next.
- */
-public interface ReservationConfirmationRecommendedEvent extends MarketplaceLoanBased,
-                                                                 Recommending {
+public class Reservations extends BaseEntity {
 
+    private Collection<RawReservation> reservations = Collections.emptyList();
+
+    Reservations() {
+        // for JAXB
+    }
+
+    @XmlElement
+    public Collection<RawReservation> getReservations() {
+        return reservations;
+    }
 }

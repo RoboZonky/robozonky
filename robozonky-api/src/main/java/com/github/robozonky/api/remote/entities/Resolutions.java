@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.api.remote.entities;
 
 import java.util.Collection;
+import java.util.Collections;
+import javax.xml.bind.annotation.XmlElement;
 
-import com.github.robozonky.api.strategies.ReservationDescriptor;
+public class Resolutions extends BaseEntity {
 
-/**
- * Fired immediately before the loans are submitted to the reservation recommendation algorithm. Will eventually be
- * followed by {@link ReservationCheckCompletedEvent}.
- */
-public interface ReservationCheckStartedEvent extends Financial {
+    private Collection<ResolutionRequest> resolutions = Collections.emptyList();
 
-    /**
-     * @return Loans found on the marketplace that are available for confirmation.
-     */
-    Collection<ReservationDescriptor> getReservationDescriptors();
+    public Resolutions(final Collection<ResolutionRequest> resolutions) {
+        this.resolutions = resolutions;
+    }
 
+    Resolutions() {
+        // for JAXB
+    }
+
+    @XmlElement
+    public Collection<ResolutionRequest> getResolutions() {
+        return resolutions;
+    }
 }

@@ -25,6 +25,7 @@ import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.Reservations;
 import com.github.robozonky.internal.api.Defaults;
 
 @Path("/loans")
@@ -45,6 +46,9 @@ public interface LoanApi extends EntityCollectionApi<RawLoan> {
     @Path("last-published")
     LastPublishedLoan lastPublished();
 
+    @GET
+    @Path("marketplace/reservations/my-reservations")
+    Reservations getPending();
 
     @GET
     @Path("{loanId}")

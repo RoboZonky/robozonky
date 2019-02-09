@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.app.daemon;
 
-import java.util.Collection;
+import java.time.Duration;
 
-import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.common.jobs.TenantPayload;
 
-/**
- * Fired immediately before the loans are submitted to the reservation recommendation algorithm. Will eventually be
- * followed by {@link ReservationCheckCompletedEvent}.
- */
-public interface ReservationCheckStartedEvent extends Financial {
+final class ReservationsProcessingJob implements TenantJob {
 
-    /**
-     * @return Loans found on the marketplace that are available for confirmation.
-     */
-    Collection<ReservationDescriptor> getReservationDescriptors();
+    @Override
+    public TenantPayload payload() {
+        return new ReservationsProcessing();
+    }
 
+    @Override
+    public Duration repeatEvery() {
+        return Duration.ofHours(4);
+    }
 }

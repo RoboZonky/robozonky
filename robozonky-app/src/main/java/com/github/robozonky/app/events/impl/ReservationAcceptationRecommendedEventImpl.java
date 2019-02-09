@@ -18,18 +18,18 @@ package com.github.robozonky.app.events.impl;
 
 import java.math.BigDecimal;
 
-import com.github.robozonky.api.notifications.ReservationConfirmationRecommendedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
+import com.github.robozonky.api.remote.entities.sanitized.Reservation;
+import com.github.robozonky.api.strategies.RecommendedReservation;
 
-final class ReservationConfirmationRecommendedEventImpl extends AbstractEventImpl
-        implements ReservationConfirmationRecommendedEvent {
+final class ReservationAcceptationRecommendedEventImpl extends AbstractEventImpl
+        implements ReservationAcceptationRecommendedEvent {
 
-    private final MarketplaceLoan loan;
+    private final Reservation reservation;
     private final BigDecimal recommendation;
 
-    public ReservationConfirmationRecommendedEventImpl(final RecommendedLoan recommendation) {
-        this.loan = recommendation.descriptor().item();
+    public ReservationAcceptationRecommendedEventImpl(final RecommendedReservation recommendation) {
+        this.reservation = recommendation.descriptor().item();
         this.recommendation = recommendation.amount();
     }
 
@@ -38,8 +38,7 @@ final class ReservationConfirmationRecommendedEventImpl extends AbstractEventImp
         return recommendation;
     }
 
-    @Override
-    public MarketplaceLoan getLoan() {
-        return loan;
+    public Reservation getReservation() {
+        return reservation;
     }
 }

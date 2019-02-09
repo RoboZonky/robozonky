@@ -20,17 +20,18 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
-import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 
 final class ReservationCheckStartedEventImpl extends AbstractEventImpl implements ReservationCheckStartedEvent {
 
-    private final Collection<LoanDescriptor> loanDescriptors;
+    private final Collection<ReservationDescriptor> reservationDescriptors;
     private final PortfolioOverview portfolioOverview;
 
-    public ReservationCheckStartedEventImpl(final Collection<LoanDescriptor> loanDescriptors, final PortfolioOverview portfolio) {
+    public ReservationCheckStartedEventImpl(final Collection<ReservationDescriptor> reservationDescriptors,
+                                            final PortfolioOverview portfolio) {
         super("loanDescriptors");
-        this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
+        this.reservationDescriptors = Collections.unmodifiableCollection(reservationDescriptors);
         this.portfolioOverview = portfolio;
     }
 
@@ -40,8 +41,8 @@ final class ReservationCheckStartedEventImpl extends AbstractEventImpl implement
     }
 
     @Override
-    public Collection<LoanDescriptor> getLoanDescriptors() {
-        return this.loanDescriptors;
+    public Collection<ReservationDescriptor> getReservationDescriptors() {
+        return this.reservationDescriptors;
     }
 
 }

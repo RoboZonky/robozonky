@@ -34,7 +34,7 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.notifications.ReservationConfirmedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -56,7 +56,7 @@ import com.github.robozonky.notifications.listeners.LoanDelinquentEventListener;
 import com.github.robozonky.notifications.listeners.LoanLostEventListener;
 import com.github.robozonky.notifications.listeners.LoanNoLongerDelinquentEventListener;
 import com.github.robozonky.notifications.listeners.LoanRepaidEventListener;
-import com.github.robozonky.notifications.listeners.ReservationConfirmedEventListener;
+import com.github.robozonky.notifications.listeners.ReservationAcceptedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyCrashedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyDaemonFailedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyEndingEventListener;
@@ -147,15 +147,15 @@ public enum SupportedListener {
             return new SaleOfferedEventListener(this, targetHandler);
         }
     },
-    RESERVATION_CONFIRMED {
+    RESERVATION_ACCEPTED {
         @Override
         public Class<? extends Event> getEventType() {
-            return ReservationConfirmedEvent.class;
+            return ReservationAcceptedEvent.class;
         }
 
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new ReservationConfirmedEventListener(this, targetHandler);
+            return new ReservationAcceptedEventListener(this, targetHandler);
         }
     },
     LOAN_NOW_DELINQUENT {

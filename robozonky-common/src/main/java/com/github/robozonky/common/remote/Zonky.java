@@ -18,6 +18,7 @@ package com.github.robozonky.common.remote;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -39,6 +40,8 @@ import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.ResolutionRequest;
+import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -49,6 +52,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.entities.sanitized.Reservation;
+import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.internal.util.DateUtil;
@@ -125,8 +130,25 @@ public class Zonky {
         controlApi.run(api -> api.offer(new SellRequest(new RawInvestment(investment))));
     }
 
+    public void accept(final Reservation reservation) {
+        final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation().getId(), Resolution.ACCEPTED);
+        final Resolutions rs = new Resolutions(Collections.singleton(r));
+        controlApi.run(c -> c.accept(rs));
+    }
+
     public Wallet getWallet() {
         return walletApi.execute(WalletApi::wallet);
+    }
+
+    /**
+     * Retrieve reservations that the user has to either accept or reject.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Reservation> getPendingReservations() {
+        return loanApi.execute(LoanApi::getPending)
+                .getReservations()
+                .stream()
+                .map(Reservation::sanitized);
     }
 
     /**

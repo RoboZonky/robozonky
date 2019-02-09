@@ -19,30 +19,30 @@ package com.github.robozonky.notifications.listeners;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import com.github.robozonky.api.notifications.ReservationConfirmedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
-public class ReservationConfirmedEventListener extends AbstractListener<ReservationConfirmedEvent> {
+public class ReservationAcceptedEventListener extends AbstractListener<ReservationAcceptedEvent> {
 
-    public ReservationConfirmedEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
+    public ReservationAcceptedEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
     }
 
     @Override
-    String getSubject(final ReservationConfirmedEvent event) {
+    String getSubject(final ReservationAcceptedEvent event) {
         final Investment i = event.getInvestment();
         return "Rezervace potvrzena - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override
     String getTemplateFileName() {
-        return "reservation-confirmed.ftl";
+        return "reservation-accepted.ftl";
     }
 
     @Override
-    protected Map<String, Object> getData(final ReservationConfirmedEvent event) {
+    protected Map<String, Object> getData(final ReservationAcceptedEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = super.getData(event);
         final long invested = event.getPortfolioOverview().getCzkInvested().longValue();

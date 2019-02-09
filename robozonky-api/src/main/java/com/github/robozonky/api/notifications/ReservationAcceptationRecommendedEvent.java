@@ -16,19 +16,12 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.util.Collection;
-
-import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 
 /**
- * Fired immediately before the loans are submitted to the reservation recommendation algorithm. Will eventually be
- * followed by {@link ReservationCheckCompletedEvent}.
+ * Fired immediately after {@link ReservationStrategy} has recommended a particular loan.
+ * {@link ReservationAcceptedEvent} may be fired next.
  */
-public interface ReservationCheckStartedEvent extends Financial {
-
-    /**
-     * @return Loans found on the marketplace that are available for confirmation.
-     */
-    Collection<ReservationDescriptor> getReservationDescriptors();
+public interface ReservationAcceptationRecommendedEvent extends Recommending, SessionEvent {
 
 }
