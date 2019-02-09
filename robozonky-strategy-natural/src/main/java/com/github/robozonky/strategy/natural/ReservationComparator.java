@@ -21,17 +21,15 @@ import java.util.Comparator;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 
-/**
- * Loan ordering such that it maximizes the chances the loan is still available on the marketplace when the investment
- * operation is triggered. In other words, this tries to implement a heuristic of "most popular insured loans first."
- */
 class ReservationComparator implements Comparator<ReservationDescriptor> {
 
     private static final Comparator<Reservation>
-            INSURED_FIRST = Comparator.comparing(Reservation::isInsuranceActive).reversed();
+            LEAST_RECENT_FIRST = Comparator.comparing(Reservation::getDatePublished),
+            INSURED_FIRST = Comparator.comparing(Reservation::isInsuranceActive).reversed(),
+            FINAL = INSURED_FIRST.thenComparing(LEAST_RECENT_FIRST);
 
     @Override
     public int compare(final ReservationDescriptor loan1, final ReservationDescriptor loan2) {
-        return INSURED_FIRST.compare(loan1.item(), loan2.item());
+        return FINAL.compare(loan1.item(), loan2.item());
     }
 }
