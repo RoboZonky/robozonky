@@ -33,19 +33,23 @@ interestCondition returns [MarketplaceFilterCondition result]:
 ;
 
 interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
-    IS min=floatExpr {
-        // by default, just pick the one rating
-        final Rating r = Rating.findByCode($min.result.toString());
-        LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
-        c.add(r);
-        $result = c;
-    }
+    { boolean needsBothValues = false; }
+    IS min=floatExpr
     (
-        UP_TO max=floatExpr {
+        UP_TO max=floatExpr { needsBothValues = true; }
+    ) ?
+    {
+        if (needsBothValues) {
             // if the second one is provided, use the range
             $result = new LoanInterestRateCondition($min.result, $max.result);
+        } else {
+            // by default, just pick the one rating
+            final Rating r = Rating.findByCode($min.result.toString());
+            LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
+            c.add(r);
+            $result = c;
         }
-    ) ?
+    }
 ;
 
 interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:

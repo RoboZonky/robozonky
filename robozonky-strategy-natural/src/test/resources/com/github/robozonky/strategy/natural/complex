@@ -40,7 +40,7 @@ Ignorovat úvěr, kde: klient je bez zaměstnání, důchodce nebo student.
 
 # Úrok lze uvést jednotlivě nebo jako interval.
 Ignorovat úvěr, kde: úrok je 5,99 % p.a.
-Ignorovat úvěr, kde: úrok je 3,99 až 15,99 % p.a.
+Ignorovat úvěr, kde: úrok je 4,0 až 16,0 % p.a.
 Ignorovat úvěr, kde: úrok přesahuje  6,0 % p.a.
 Ignorovat úvěr, kde: úrok nedosahuje 10,0 % p.a.
 
