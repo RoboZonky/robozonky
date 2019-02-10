@@ -69,14 +69,14 @@ final class ReservationSession {
         return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
     }
 
-    public static Collection<Investment> invest(final PowerTenant tenant, final Collection<ReservationDescriptor> loans,
-                                                final ReservationStrategy strategy) {
+    public static Collection<Investment> process(final PowerTenant tenant, final Collection<ReservationDescriptor> loans,
+                                                 final ReservationStrategy strategy) {
         final ReservationSession s = new ReservationSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         final long balance = portfolioOverview.getCzkAvailable().longValue();
         s.tenant.fire(reservationCheckStarted(loans, portfolioOverview));
         if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !s.getAvailable().isEmpty()) {
-            s.invest(strategy);
+            s.process(strategy);
         }
         final Collection<Investment> result = s.getResult();
         // make sure we get fresh portfolio reference here
@@ -84,12 +84,12 @@ final class ReservationSession {
         return Collections.unmodifiableCollection(result);
     }
 
-    private void invest(final ReservationStrategy strategy) {
+    private void process(final ReservationStrategy strategy) {
         boolean invested;
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
                     .peek(r -> tenant.fire(reservationAcceptationRecommended(r)))
-                    .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
+                    .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
 
@@ -129,7 +129,7 @@ final class ReservationSession {
      * @param recommendation Loan to invest into.
      * @return True if investment successful. The investment is reflected in {@link #getResult()}.
      */
-    boolean invest(final RecommendedReservation recommendation) {
+    boolean accept(final RecommendedReservation recommendation) {
         LOGGER.debug("Will attempt to accept reservation {}.", recommendation);
         if (tenant.getPortfolio().getBalance().compareTo(recommendation.amount()) < 0) {
             // should not be allowed by the calling code
