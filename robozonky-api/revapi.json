@@ -247,6 +247,11 @@
         "justification": "Logging goes through Log4J instead of SLF4J."
       },
       {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.LOGGER @ com.github.robozonky.api.remote.entities.LastPublishedLoan",
+        "justification": "Logging goes through Log4J instead of SLF4J."
+      },
+      {
         "code": "java.method.addedToInterface",
         "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan::getAnnuity()",
         "justification": "Zonky API brings new fields."
