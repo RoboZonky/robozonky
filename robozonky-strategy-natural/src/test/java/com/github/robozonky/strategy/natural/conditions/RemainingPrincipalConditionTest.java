@@ -25,16 +25,16 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
-class RemainingAmountConditionTest {
+class RemainingPrincipalConditionTest {
 
     @Test
     void leftBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new RemainingAmountCondition(-1, 0))
+            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(-1, 0))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RemainingAmountCondition(0, -1))
+            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(0, -1))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RemainingAmountCondition(-1, -1))
+            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(-1, -1))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
@@ -43,7 +43,7 @@ class RemainingAmountConditionTest {
     void boundaryCorrect() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
-        final MarketplaceFilterConditionImpl condition = new RemainingAmountCondition(0, 0);
+        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(0, 0);
         assertThat(condition.test(l)).isTrue();
     }
 
@@ -51,7 +51,7 @@ class RemainingAmountConditionTest {
     void leftOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
-        final MarketplaceFilterConditionImpl condition = new RemainingAmountCondition(1, 1);
+        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
@@ -59,7 +59,7 @@ class RemainingAmountConditionTest {
     void rightOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(2));
-        final MarketplaceFilterConditionImpl condition = new RemainingAmountCondition(1, 1);
+        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 }

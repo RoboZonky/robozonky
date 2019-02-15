@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public class RemainingAmountCondition extends AbstractRangeCondition {
+public class RemainingPrincipalCondition extends AbstractRangeCondition {
 
-    public RemainingAmountCondition(final int fromInclusive, final int toInclusive) {
+    public RemainingPrincipalCondition(final int fromInclusive, final int toInclusive) {
         super(Wrapper::getRemainingPrincipal, fromInclusive, toInclusive);
         if (fromInclusive < 0 || toInclusive < 0) {
             throw new IllegalArgumentException("Either values need to be 0 or more.");
         }
     }
 
-    public RemainingAmountCondition(final int fromInclusive) {
+    public RemainingPrincipalCondition(final int fromInclusive) {
         this(fromInclusive, Integer.MAX_VALUE);
     }
 }
