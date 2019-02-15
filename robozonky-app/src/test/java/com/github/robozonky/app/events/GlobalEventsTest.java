@@ -38,6 +38,7 @@ class GlobalEventsTest extends AbstractZonkyLeveragingTest {
                 .fire(EventFactory.loanRepaidLazy(() -> EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class))));
         assertThat(result).isNotNull().isNotCancelled();
         result.join(); // make sure it does not throw
+        assertThat(getEventsRequested()).hasSize(1);
     }
 
     @Test
@@ -48,6 +49,7 @@ class GlobalEventsTest extends AbstractZonkyLeveragingTest {
                 .fire(EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class)));
         assertThat(result).isNotNull().isNotCancelled();
         result.join(); // make sure it does not throw
+        assertThat(getEventsRequested()).hasSize(1);
     }
 
 }

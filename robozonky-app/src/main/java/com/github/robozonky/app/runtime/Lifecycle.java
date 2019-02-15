@@ -124,7 +124,7 @@ public class Lifecycle {
      */
     public void suspend() {
         final Thread t = shutdownHook.get();
-        Runtime.getRuntime().addShutdownHook(shutdownHook.get());
+        Runtime.getRuntime().addShutdownHook(t);
         HOOKS.add(t);
         LOGGER.debug("Pausing main thread.");
         try {
