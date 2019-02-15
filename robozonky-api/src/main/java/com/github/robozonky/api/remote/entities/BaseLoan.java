@@ -29,18 +29,32 @@ import com.github.robozonky.api.remote.enums.Region;
 
 public abstract class BaseLoan extends BaseEntity {
 
-    private boolean topped, covered, published, questionsAllowed, insuranceActive, multicash, fastcash;
-    private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount;
+    private boolean topped;
+    private boolean covered;
+    private boolean published;
+    private boolean questionsAllowed;
+    private boolean insuranceActive;
+    private boolean multicash;
+    private boolean fastcash;
+    private int id;
+    private int termInMonths;
+    private int investmentsCount;
+    private int questionsCount;
+    private int userId;
+    private int activeLoansCount;
     private double amount;
     private double remainingInvestment;
     private double reservedAmount;
-    private String name, nickName, story;
+    private String name;
+    private String nickName;
+    private String story;
     private BigDecimal interestRate;
     private BigDecimal revenueRate;
     private BigDecimal annuity;
     private BigDecimal premium;
     private BigDecimal annuityWithInsurance;
-    private OffsetDateTime datePublished, deadline;
+    private OffsetDateTime datePublished;
+    private OffsetDateTime deadline;
     private Rating rating;
     private Collection<Photo> photos;
     private BigDecimal investmentRate;
@@ -233,7 +247,6 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     /**
-     *
      * @return {@link #getAnnuity()} + {@link #getPremium()}
      */
     @XmlElement
