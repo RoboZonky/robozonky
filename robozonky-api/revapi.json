@@ -285,6 +285,21 @@
         "code": "java.method.addedToInterface",
         "new": "method com.github.robozonky.api.remote.entities.LastPublishedLoan com.github.robozonky.api.remote.LoanApi::lastPublished()",
         "justification": "We're using a new Zonky API."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Optional<com.github.robozonky.api.strategies.ReservationStrategy> com.github.robozonky.api.strategies.StrategyService::forReservations(java.lang.String)",
+        "justification": "Introducing the reservation system."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method void com.github.robozonky.api.remote.ControlApi::accept(com.github.robozonky.api.remote.entities.Resolutions)",
+        "justification": "Introducing the reservation system."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method void com.github.robozonky.api.remote.ControlApi::setReservationPreferences(com.github.robozonky.api.remote.entities.ReservationPreferences)",
+        "justification": "Introducing the reservation system."
       }
     ]
   }

@@ -24,7 +24,6 @@ import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class StrategyProviderTest {
@@ -39,12 +38,14 @@ class StrategyProviderTest {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
+            softly.assertThat(r.getForReservations()).isEmpty();
         });
         r.valueChanged(MINIMAL_STRATEGY, UUID.randomUUID().toString()); // store invalid strategy
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isEmpty();
+            softly.assertThat(r.getForReservations()).isEmpty();
         });
     }
 
@@ -56,12 +57,14 @@ class StrategyProviderTest {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
+            softly.assertThat(r.getForReservations()).isEmpty();
         });
         r.valueUnset(MINIMAL_STRATEGY);
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isEmpty();
+            softly.assertThat(r.getForReservations()).isEmpty();
         });
     }
 
@@ -78,6 +81,7 @@ class StrategyProviderTest {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
+            softly.assertThat(r.getForReservations()).isEmpty();
         });
     }
 
@@ -89,6 +93,7 @@ class StrategyProviderTest {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isEmpty();
+            softly.assertThat(r.getForReservations()).isEmpty();
         });
     }
 
@@ -100,15 +105,19 @@ class StrategyProviderTest {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
+            softly.assertThat(r.getForReservations()).isEmpty();
         });
     }
 
     @Test
     void empty() {
-        final StrategyProvider s = StrategyProvider.empty();
-        assertThat(s.getToInvest()).isEmpty();
-        assertThat(s.getToPurchase()).isEmpty();
-        assertThat(s.getToSell()).isEmpty();
+        final StrategyProvider r = StrategyProvider.empty();
+        assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isEmpty();
+            softly.assertThat(r.getToPurchase()).isEmpty();
+            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getForReservations()).isEmpty();
+        });
     }
 
 }

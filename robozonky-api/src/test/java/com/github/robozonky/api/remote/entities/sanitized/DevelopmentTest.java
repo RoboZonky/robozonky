@@ -64,6 +64,11 @@ class DevelopmentTest {
         assertThat(d).isNotNull();
     }
 
+    @Test
+    void hasToString() {
+        assertThat(Development.custom().build().toString()).isNotEmpty();
+    }
+
     @Nested
     @DisplayName("Setters for ")
     class SetterTest {

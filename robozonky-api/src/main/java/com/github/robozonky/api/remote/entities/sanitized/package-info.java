@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@
  * Zonky API is notorious for only providing certain field values at certain stages in the
  * {@link com.github.robozonky.api.remote.entities.RawInvestment}/
  * {@link com.github.robozonky.api.remote.entities.RawLoan}/
- * {@link com.github.robozonky.api.remote.entities.RawDevelopment} lifecycle. The aim of this package is to provide
+ * {@link com.github.robozonky.api.remote.entities.RawDevelopment}/
+ * {@link com.github.robozonky.api.remote.entities.RawReservation} lifecycle. The aim of this package is to provide
  * null-safe alternatives for some of the Zonky API entities. {@link java.lang.NullPointerException}s thrown from within
  * this package should be considered bugs in RoboZonky and not some quirks of the Zonky API.
  */

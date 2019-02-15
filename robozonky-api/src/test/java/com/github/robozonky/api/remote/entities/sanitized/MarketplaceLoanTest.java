@@ -42,4 +42,10 @@ class MarketplaceLoanTest {
     void custom() {
         assertThat(MarketplaceLoan.custom().build()).isNotNull();
     }
+
+    @Test
+    void hasToString() {
+        assertThat(MarketplaceLoan.custom().build().toString()).isNotEmpty();
+    }
+
 }

@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.util.StreamUtil;
@@ -74,6 +75,11 @@ public final class StrategyLoader {
     public static Optional<PurchaseStrategy> toPurchase(final String strategy) {
         LOGGER.debug("Reading purchasing strategy.");
         return load(strategy, LOADER.get(), StrategyService::toPurchase);
+    }
+
+    public static Optional<ReservationStrategy> forReservations(final String strategy) {
+        LOGGER.debug("Reading strategy for reservations.");
+        return load(strategy, LOADER.get(), StrategyService::forReservations);
     }
 }
 

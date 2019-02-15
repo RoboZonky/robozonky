@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.api.Defaults;
@@ -95,5 +96,12 @@ public class NaturalLanguageStrategyService implements StrategyService {
     @Override
     public Optional<PurchaseStrategy> toPurchase(final String strategy) {
         return getStrategy(strategy, s -> s.isPurchasingEnabled() ? new NaturalLanguagePurchaseStrategy(s) : null);
+    }
+
+    @Override
+    public Optional<ReservationStrategy> forReservations(final String strategy) {
+        return getStrategy(strategy, s -> s.getReservationMode().isPresent() ?
+                new NaturalLanguageReservationStrategy(s) :
+                null);
     }
 }

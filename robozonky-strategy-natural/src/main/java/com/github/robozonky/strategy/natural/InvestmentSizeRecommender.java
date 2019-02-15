@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,17 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.function.BiFunction;
 
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 
-class InvestmentSizeRecommender implements BiFunction<MarketplaceLoan, Integer, Integer> {
+class InvestmentSizeRecommender {
 
     private final ParsedStrategy strategy;
-    private final Restrictions restrictions;
 
-    public InvestmentSizeRecommender(final ParsedStrategy strategy, final Restrictions restrictions) {
+    public InvestmentSizeRecommender(final ParsedStrategy strategy) {
         this.strategy = strategy;
-        this.restrictions = restrictions;
     }
 
     private static int roundToNearestIncrement(final int number, final int increment) {
@@ -45,7 +42,8 @@ class InvestmentSizeRecommender implements BiFunction<MarketplaceLoan, Integer, 
                 .intValue();
     }
 
-    private int[] getInvestmentBounds(final ParsedStrategy strategy, final MarketplaceLoan loan) {
+    private int[] getInvestmentBounds(final ParsedStrategy strategy, final MarketplaceLoan loan,
+                                      final Restrictions restrictions) {
         final Rating rating = loan.getRating();
         final int absoluteMinimum = Math.max(strategy.getMinimumInvestmentSizeInCzk(rating),
                                              restrictions.getMinimumInvestmentAmount());
@@ -72,10 +70,9 @@ class InvestmentSizeRecommender implements BiFunction<MarketplaceLoan, Integer, 
         return new int[]{minimumInvestment, maximumInvestment};
     }
 
-    @Override
-    public Integer apply(final MarketplaceLoan loan, final Integer balance) {
+    public Integer apply(final MarketplaceLoan loan, final Integer balance, final Restrictions restrictions) {
         final int id = loan.getId();
-        final int[] recommended = getInvestmentBounds(strategy, loan);
+        final int[] recommended = getInvestmentBounds(strategy, loan, restrictions);
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
         Decisions.report(l -> l.debug("Recommended investment range for loan #{} is <{}; {}> CZK.", id,

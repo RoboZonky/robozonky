@@ -25,6 +25,7 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 
 public interface Wrapper<T> {
 
@@ -39,6 +40,11 @@ public interface Wrapper<T> {
     static Wrapper<ParticipationDescriptor> wrap(final ParticipationDescriptor descriptor) {
         return new ParticipationWrapper(descriptor);
     }
+
+    static Wrapper<ReservationDescriptor> wrap(final ReservationDescriptor descriptor) {
+        return new ReservationWrapper(descriptor);
+    }
+
 
     boolean isInsuranceActive();
 

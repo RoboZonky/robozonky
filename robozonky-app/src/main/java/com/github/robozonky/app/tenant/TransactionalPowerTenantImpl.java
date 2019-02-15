@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.remote.Zonky;
@@ -122,6 +123,11 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     @Override
     public Optional<PurchaseStrategy> getPurchaseStrategy() {
         return parent.getPurchaseStrategy();
+    }
+
+    @Override
+    public Optional<ReservationStrategy> getReservationStrategy() {
+        return parent.getReservationStrategy();
     }
 
     @Override

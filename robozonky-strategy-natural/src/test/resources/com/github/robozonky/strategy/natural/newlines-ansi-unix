@@ -2,6 +2,7 @@
 Tato strategie vyžaduje RoboZonky ve verzi 4.1.0 nebo pozdìjší.
 - Obecná nastavení
 Robot má udržovat progresivní portfolio.
+Robot má zcela ignorovat rezervaèní systém.
 Bìžná výše investice je 200 až 400 Kè.
 Investovat maximálnì 2 % výše úvìru.
 

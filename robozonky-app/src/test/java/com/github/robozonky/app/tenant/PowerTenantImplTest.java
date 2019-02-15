@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.AbstractEventLeveragingTest;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
@@ -44,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class PowerTenantImplTest extends AbstractEventLeveragingTest {
+class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
@@ -85,10 +87,12 @@ class PowerTenantImplTest extends AbstractEventLeveragingTest {
         when(s.getToInvest()).thenReturn(Optional.of(mock(InvestmentStrategy.class)));
         when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
         when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
+        when(s.getForReservations()).thenReturn(Optional.of(mock(ReservationStrategy.class)));
         final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, null, s, null);
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);
+        assertThat(t.getReservationStrategy()).containsInstanceOf(ReservationStrategy.class);
     }
 
     @Test
@@ -114,9 +118,12 @@ class PowerTenantImplTest extends AbstractEventLeveragingTest {
         final OAuth a = mock(OAuth.class);
         when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
         final Zonky z = harmlessZonky(10_000);
+        final Loan l = Loan.custom().setId(1).build();
+        when(z.getLoan(eq(1))).thenReturn(l);
         doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+            assertThat(tenant.getLoan(1)).isSameAs(l);
             assertThat(tenant.getPortfolio()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
             final Restrictions r = tenant.getRestrictions();

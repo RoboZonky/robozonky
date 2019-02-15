@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,36 +33,34 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private static final Comparator<LoanDescriptor> COMPARATOR = new PrimaryMarketplaceComparator();
+
     private final ParsedStrategy strategy;
+    private final InvestmentSizeRecommender recommender;
 
     public NaturalLanguageInvestmentStrategy(final ParsedStrategy p) {
         this.strategy = p;
-    }
-
-    private boolean needsConfirmation(final LoanDescriptor loanDescriptor) {
-        return strategy.needsConfirmation(loanDescriptor);
+        this.recommender = new InvestmentSizeRecommender(p);
     }
 
     @Override
-    public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans, final PortfolioOverview portfolio,
-                                             final Restrictions restrictions) {
+    public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> available,
+                                             final PortfolioOverview portfolio, final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
-        final Map<Rating, List<LoanDescriptor>> splitByRating = Util.sortByRating(strategy.getApplicableLoans(loans),
-                                                                                  d -> d.item().getRating());
+        final Map<Rating, List<LoanDescriptor>> splitByRating =
+                Util.sortByRating(strategy.getApplicableLoans(available), d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
         final BigDecimal balance = portfolio.getCzkAvailable();
-        final InvestmentSizeRecommender recommender = new InvestmentSizeRecommender(strategy, restrictions);
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
                 .flatMap(d -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = recommender.apply(d.item(), balance.intValue());
+                    final int recommendedAmount = recommender.apply(d.item(), balance.intValue(), restrictions);
                     if (recommendedAmount > 0) {
-                        return d.recommend(recommendedAmount, needsConfirmation(d))
+                        return d.recommend(recommendedAmount, strategy.needsConfirmation(d))
                                 .map(Stream::of)
                                 .orElse(Stream.empty());
                     } else {

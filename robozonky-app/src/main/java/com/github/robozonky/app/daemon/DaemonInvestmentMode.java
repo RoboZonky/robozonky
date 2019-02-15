@@ -40,8 +40,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final Consumer<Throwable> shutdownCall;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
-                                final Investor investor,
-                                final Duration secondaryMarketplaceCheckPeriod) {
+                                final Investor investor, final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
         this.investor = investor;
         this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
@@ -52,17 +51,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
                          final Duration secondaryMarketplaceCheckPeriod) {
         this(t -> {
         }, tenant, investor, secondaryMarketplaceCheckPeriod);
-    }
-
-    /**
-     * Converts a {@link Runnable} into one that will never throw, since that would cause it to stop repeating,
-     * effectively stopping the daemon. The operation will instead just terminate, possibly halting the daemon on an
-     * unrecoverable failure.
-     * @param operation Operation to be made safe.
-     * @return Safe version of the operation.
-     */
-    private Runnable toSkippable(final Runnable operation) {
-        return new Skippable(operation, tenant, shutdownCall);
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
@@ -77,9 +65,9 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter, final Duration initialDelay) {
-        LOGGER.debug("Submitting {} to {}, repeating after {} and starting in {}.", r, executor, repeatAfter,
+        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}.", r, executor, repeatAfter,
                      initialDelay);
-        executor.submit(toSkippable(r), repeatAfter, initialDelay);
+        executor.submit(new Skippable(r, tenant, shutdownCall), repeatAfter, initialDelay);
     }
 
     private void scheduleJobs(final Scheduler executor) {

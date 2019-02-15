@@ -16,21 +16,13 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import java.math.BigDecimal;
 import java.net.URL;
-import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.Optional;
 
-import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
 
-public interface MarketplaceLoan {
+public interface MarketplaceLoan extends BaseLoan {
 
     static MarketplaceLoan sanitized(final RawLoan original) {
         return MarketplaceLoan.sanitize(original).build();
@@ -43,72 +35,6 @@ public interface MarketplaceLoan {
     static MarketplaceLoanBuilder sanitize(final RawLoan original) {
         return new MutableMarketplaceLoanImpl(original);
     }
-
-    MainIncomeType getMainIncomeType();
-
-    BigDecimal getInvestmentRate();
-
-    Region getRegion();
-
-    Purpose getPurpose();
-
-    int getId();
-
-    String getName();
-
-    String getStory();
-
-    String getNickName();
-
-    int getTermInMonths();
-
-    BigDecimal getInterestRate();
-
-    BigDecimal getRevenueRate();
-
-    Rating getRating();
-
-    boolean isTopped();
-
-    int getAmount();
-
-    /**
-     * Does include the amount that is reserved. This means investing this amount may fail, due to part of it being
-     * reserved.
-     * @return
-     */
-    int getRemainingInvestment();
-
-    BigDecimal getAnnuity();
-
-    /**
-     * This is the amount actually available for investment in the marketplace, as opposed to
-     * {@link #getRemainingInvestment()}.
-     * @return
-     */
-    int getNonReservedRemainingInvestment();
-
-    boolean isCovered();
-
-    boolean isPublished();
-
-    OffsetDateTime getDatePublished();
-
-    OffsetDateTime getDeadline();
-
-    int getInvestmentsCount();
-
-    int getActiveLoansCount();
-
-    int getQuestionsCount();
-
-    boolean isQuestionsAllowed();
-
-    boolean isInsuranceActive();
-
-    Collection<InsurancePolicyPeriod> getInsuranceHistory();
-
-    int getUserId();
 
     URL getUrl();
 

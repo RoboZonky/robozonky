@@ -80,6 +80,7 @@ public final class StrategyValidationFeature extends AbstractFeature {
         StrategyLoader.toInvest(text).ifPresent(s -> report(adder, "Investing"));
         StrategyLoader.toPurchase(text).ifPresent(s -> report(adder, "Purchasing"));
         StrategyLoader.toSell(text).ifPresent(s -> report(adder, "Selling"));
+        StrategyLoader.forReservations(text).ifPresent(s -> report(adder, "Reservation system"));
         if (adder.sum() == 0) {
             throw new TestFailedException("No strategies found. Check log for possible parser errors.");
         }

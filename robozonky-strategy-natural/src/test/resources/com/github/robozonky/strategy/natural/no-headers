@@ -3,6 +3,7 @@
 
 # Obecná nastavení
 Robot má udržovat balancované portfolio.
+Robot má zcela ignorovat rezervační systém.
 Investovat pouze pokud disponibilní zůstatek přesáhne 1000 Kč.
 Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
 

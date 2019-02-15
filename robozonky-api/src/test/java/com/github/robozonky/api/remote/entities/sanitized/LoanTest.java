@@ -54,6 +54,11 @@ class LoanTest {
         assertThat(Loan.sanitized(mocked)).isNotNull();
     }
 
+    @Test
+    void hasToString() {
+        assertThat(Loan.custom().build().toString()).isNotEmpty();
+    }
+
     @Nested
     @DisplayName("Setters for ")
     class SetterTest {
@@ -82,7 +87,7 @@ class LoanTest {
 
         private <T> void integer(final LoanBuilder builder, final Function<Integer, LoanBuilder> setter,
                                  final Supplier<Integer> getter, final int value) {
-            assertThat(getter.get()).as("False before setting.").isLessThanOrEqualTo(0);
+            assertThat(getter.get()).as("Zero before setting.").isLessThanOrEqualTo(0);
             final LoanBuilder newBuilder = setter.apply(value);
             assertSoftly(softly -> {
                 softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);

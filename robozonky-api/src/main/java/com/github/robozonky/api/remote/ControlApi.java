@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,6 +26,8 @@ import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
+import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.internal.api.ApiConstants;
@@ -59,6 +62,14 @@ public interface ControlApi {
     @DELETE
     @Path("/traded-investments/{id}")
     void cancel(@PathParam("id") long id);
+
+    @PATCH
+    @Path("/loans/marketplace/reservations/my-reservations")
+    void accept(Resolutions resolutions);
+
+    @PATCH
+    @Path("/loans/marketplace/reservations/my-preferences")
+    void setReservationPreferences(ReservationPreferences preferences);
 
 }
 

@@ -45,7 +45,6 @@ public interface LoanApi extends EntityCollectionApi<RawLoan> {
     @Path("last-published")
     LastPublishedLoan lastPublished();
 
-
     @GET
     @Path("{loanId}")
     RawLoan item(@PathParam("loanId") int id);

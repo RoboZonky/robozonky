@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class SessionEventsImplTest extends AbstractEventLeveragingTest {
+class SessionEventsTest extends AbstractEventLeveragingTest {
 
     private final Zonky zonky = harmlessZonky(10_000);
     private final PowerTenant tenant = mockTenant(zonky, false);
@@ -102,10 +102,14 @@ class SessionEventsImplTest extends AbstractEventLeveragingTest {
     void differentInstancesForDifferentUsernames() {
         final SessionEvents a = Events.forSession(tenant);
         final SessionEvents b = Events.forSession(tenantDry);
-        assertThat(a).isSameAs(b);
+        assertThat(a)
+                .isNotNull()
+                .isSameAs(b);
         final PowerTenant t3 = mockTenant();
         when(t3.getSessionInfo()).thenReturn(new SessionInfo(UUID.randomUUID().toString()));
         final SessionEvents c = Events.forSession(t3);
-        assertThat(a).isNotSameAs(c);
+        assertThat(a)
+                .isNotNull()
+                .isNotSameAs(c);
     }
 }

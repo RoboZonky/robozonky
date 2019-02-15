@@ -36,7 +36,9 @@ class ReloadableImplTest {
         final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
                 .finishWith(mock)
                 .build();
+        Assertions.assertThat(r.hasValue()).isFalse();
         final Either<Throwable, String> result = r.get();
+        Assertions.assertThat(r.hasValue()).isTrue();
         assertThat(result).containsRightInstanceOf(String.class);
         verify(mock).accept(any());
         final String value = result.get();

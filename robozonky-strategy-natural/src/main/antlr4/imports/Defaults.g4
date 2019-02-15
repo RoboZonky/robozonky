@@ -3,12 +3,14 @@ grammar Defaults;
 import Tokens;
 
 @header {
+    import com.github.robozonky.api.strategies.*;
     import com.github.robozonky.strategy.natural.*;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
 defaultExpression returns [DefaultValues result]:
  r=portfolioExpression { $result = new DefaultValues($r.result); }
+ (v=reservationExpression { $result.setReservationMode($v.result); })
  (e=exitDateExpression { $result.setExitProperties($e.result); })?
  (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
  (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
@@ -48,6 +50,22 @@ defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
         maximumInvestmentInCzk=intExpr
         { $result = new DefaultInvestmentShare($maximumInvestmentInCzk.result); }
     ' % výše úvěru' DOT
+;
+
+reservationExpression returns [ReservationMode result] :
+    (
+        'Robot má pravidelně kontrolovat rezervační systém a přijímat rezervace půjček odpovídajících této strategii.' {
+            $result = ReservationMode.ACCEPT_MATCHING;
+        }
+    ) | (
+        'Robot má převzít kontrolu nad rezervačním systémem a přijímat rezervace půjček odpovídajících této strategii.' {
+            $result = ReservationMode.FULL_OWNERSHIP;
+        }
+    )  | (
+        'Robot má zcela ignorovat rezervační systém.' {
+            $result = null;
+        }
+    )
 ;
 
 confirmationExpression returns [MarketplaceFilterCondition result] :

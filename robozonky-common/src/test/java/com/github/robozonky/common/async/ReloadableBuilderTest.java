@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import io.vavr.control.Either;
 import org.assertj.core.api.Assertions;
@@ -41,7 +42,7 @@ class ReloadableBuilderTest {
     }
 
     @Test
-    void asyncWithinisher() {
+    void asyncWithFinisher() {
         final Reloadable<String> s = Reloadable.with(() -> "")
                 .finishWith(x -> {
 
@@ -56,13 +57,14 @@ class ReloadableBuilderTest {
     void nonLazy() {
         final String test = UUID.randomUUID().toString();
         final Supplier<String> supplier = () -> test;
+        final UnaryOperator<String> secondSupplier = old -> UUID.randomUUID().toString();
         final Consumer<String> finisher = mock(Consumer.class);
         final Either<Throwable, Reloadable<String>> s = Reloadable.with(supplier)
+                .reloadWith(secondSupplier)
                 .finishWith(finisher)
                 .buildEager();
         verify(finisher).accept(eq(test)); // value was fetched
-        VavrAssertions.assertThat(s)
-                .isRight();
+        VavrAssertions.assertThat(s).isRight();
         VavrAssertions.assertThat(s.get().get()).containsOnRight(test);
         verify(finisher, times(1)).accept(eq(test)); // was not called again
     }
