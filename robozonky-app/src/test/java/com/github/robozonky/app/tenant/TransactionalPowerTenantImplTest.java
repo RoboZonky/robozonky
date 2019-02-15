@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -90,6 +91,12 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void delegatesSellStrategy() {
         final Optional<SellStrategy> result = tenant.getSellStrategy();
         assertThat(transactional.getSellStrategy()).isEqualTo(result);
+    }
+
+    @Test
+    void delegatesReservationStrategy() {
+        final Optional<ReservationStrategy> result = tenant.getReservationStrategy();
+        assertThat(transactional.getReservationStrategy()).isEqualTo(result);
     }
 
     @Test
