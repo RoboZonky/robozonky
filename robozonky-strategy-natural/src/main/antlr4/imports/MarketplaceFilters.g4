@@ -180,6 +180,7 @@ jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
     | c6=termCondition { $result = $c6.result; }
+    | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c12=insuranceCondition { $result = $c12.result; }
     | c14=annuityCondition { $result = $c14.result; }
@@ -205,6 +206,7 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
     | c6=termCondition { $result = $c6.result; }
+    | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c9=relativeTermCondition { $result = $c9.result; }
     | c10=elapsedTermCondition { $result = $c10.result; }
