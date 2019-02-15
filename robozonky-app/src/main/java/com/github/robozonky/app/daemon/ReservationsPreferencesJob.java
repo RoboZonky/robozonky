@@ -16,26 +16,25 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.time.Duration;
 
-import com.github.robozonky.common.jobs.JobService;
-import com.github.robozonky.common.jobs.SimpleJob;
 import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.common.jobs.TenantPayload;
 
-public final class ReservationsJobService implements JobService {
-
-    private static final TenantJob PROCESSING_INSTANCE = new ReservationsProcessingJob();
-    private static final TenantJob SETTINGS_INSTANCE = new ReservationsPreferencesJob();
+final class ReservationsPreferencesJob implements TenantJob {
 
     @Override
-    public Collection<SimpleJob> getSimpleJobs() {
-        return Collections.emptyList();
+    public TenantPayload payload() {
+        return new ReservationsPreferences();
     }
 
     @Override
-    public Collection<TenantJob> getTenantJobs() {
-        return Arrays.asList(SETTINGS_INSTANCE, PROCESSING_INSTANCE);
+    public Duration startIn() {
+        return Duration.ofHours(1);
+    }
+
+    @Override
+    public Duration repeatEvery() {
+        return Duration.ofHours(1);
     }
 }

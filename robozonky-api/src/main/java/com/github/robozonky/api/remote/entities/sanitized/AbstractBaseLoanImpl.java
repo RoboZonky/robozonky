@@ -29,10 +29,13 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.util.RandomUtil;
+import com.github.robozonky.internal.util.ToStringBuilder;
+import io.vavr.Lazy;
 
 @SuppressWarnings("unchecked")
 abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements MutableBaseLoan<T> {
 
+    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
     private boolean topped, covered, published, questionsAllowed, insuranceActive;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount;
     private int remainingInvestment;
@@ -391,5 +394,10 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     @Override
     public BigDecimal getAnnuity() {
         return annuity;
+    }
+
+    @Override
+    public final String toString() {
+        return toString.get();
     }
 }

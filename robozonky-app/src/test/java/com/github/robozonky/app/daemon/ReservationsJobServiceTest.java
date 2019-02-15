@@ -16,25 +16,19 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
+import com.github.robozonky.common.jobs.JobService;
+import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
+import static org.assertj.core.api.Assertions.*;
 
-final class ReservationPreferencesJob implements TenantJob {
+class ReservationsJobServiceTest {
 
-    @Override
-    public TenantPayload payload() {
-        return new ReservationsPreferences();
+    @Test
+    void getters() {
+        final JobService s = new ReservationsJobService();
+        assertThat(s.getSimpleJobs()).isEmpty();
+        assertThat(s.getTenantJobs()).extracting(t -> (Class)t.getClass())
+                .containsExactly(ReservationsPreferencesJob.class, ReservationsProcessingJob.class);
     }
 
-    @Override
-    public Duration startIn() {
-        return Duration.ofHours(1);
-    }
-
-    @Override
-    public Duration repeatEvery() {
-        return Duration.ofHours(1);
-    }
 }

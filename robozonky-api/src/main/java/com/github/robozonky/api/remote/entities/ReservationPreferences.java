@@ -17,19 +17,36 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.xml.bind.annotation.XmlElement;
+
+import com.github.robozonky.api.remote.enums.LoanTermInterval;
+import com.github.robozonky.api.remote.enums.Rating;
+import io.vavr.Lazy;
+import io.vavr.Tuple;
 
 public class ReservationPreferences extends BaseEntity {
 
+    public static final Supplier<ReservationPreferences> TOTAL = Lazy.of(() -> {
+        final ReservationPreference[] prefs = Arrays.stream(Rating.values())
+                .flatMap(r -> Arrays.stream(LoanTermInterval.values()).map(i -> Tuple.of(r, i)))
+                .map(t -> new ReservationPreference(t._2, t._1, false))
+                .toArray(ReservationPreference[]::new);
+        return new ReservationPreferences(prefs);
+    });
+
     private boolean reservationsEnabled;
-    private List<ReservationPreference> reservationPreferences;
+    private Set<ReservationPreference> reservationPreferences;
+
     private ReservationPreferences() { // fox JAXB
     }
 
     public ReservationPreferences(final ReservationPreference... reservationPreferences) {
         this.reservationsEnabled = reservationPreferences.length != 0;
-        this.reservationPreferences = Arrays.asList(reservationPreferences);
+        this.reservationPreferences = Arrays.stream(reservationPreferences).collect(Collectors.toSet());
     }
 
     public static boolean isEnabled(final ReservationPreferences reservationPreferences) {
@@ -43,7 +60,25 @@ public class ReservationPreferences extends BaseEntity {
     }
 
     @XmlElement
-    public List<ReservationPreference> getReservationPreferences() {
+    public Set<ReservationPreference> getReservationPreferences() {
         return reservationPreferences;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final ReservationPreferences that = (ReservationPreferences) o;
+        return reservationsEnabled == that.reservationsEnabled &&
+                Objects.equals(reservationPreferences, that.reservationPreferences);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(reservationsEnabled, reservationPreferences);
     }
 }

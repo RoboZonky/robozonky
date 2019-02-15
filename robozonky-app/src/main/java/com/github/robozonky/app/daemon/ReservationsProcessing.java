@@ -40,6 +40,7 @@ final class ReservationsProcessing implements TenantPayload {
             return;
         }
         final Collection<ReservationDescriptor> reservations = tenant.call(Zonky::getPendingReservations)
+                .filter(r -> !tenant.getLoan(r.getId()).getMyInvestment().isPresent())
                 .map(r -> new ReservationDescriptor(r, () -> tenant.getLoan(r.getId())))
                 .collect(Collectors.toList());
         ReservationSession.process(tenant, reservations, strategy);

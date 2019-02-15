@@ -66,4 +66,12 @@ public final class RecommendedReservation
     public int hashCode() {
         return Objects.hash(reservationDescriptor, recommendedInvestmentAmount);
     }
+
+    @Override
+    public String toString() {
+        return "RecommendedReservation{" +
+                "recommendedInvestmentAmount=" + recommendedInvestmentAmount +
+                ", reservationDescriptor=" + reservationDescriptor +
+                '}';
+    }
 }

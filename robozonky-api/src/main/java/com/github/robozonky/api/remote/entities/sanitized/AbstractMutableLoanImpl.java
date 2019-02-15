@@ -21,8 +21,6 @@ import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.internal.util.ToStringBuilder;
-import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +29,6 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> exte
         implements MutableMarketplaceLoan<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractMutableLoanImpl.class);
-    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
     private URL url;
     private MyInvestment myInvestment;
 
@@ -68,8 +65,4 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> exte
         return (T) this;
     }
 
-    @Override
-    public final String toString() {
-        return toString.get();
-    }
 }

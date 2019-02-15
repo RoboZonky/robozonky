@@ -16,52 +16,19 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.ReservationPreference;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.enums.LoanTermInterval;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 final class ReservationsPreferences implements TenantPayload {
 
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private static Stream<Tuple2<Rating, LoanTermInterval>> enumerateAllCategories() {
-        return Arrays.stream(Rating.values())
-                .flatMap(r -> Arrays.stream(LoanTermInterval.values()).map(i -> Tuple.of(r, i)));
-    }
-
-    private static boolean matches(final ReservationPreference preference,
-                                   final Tuple2<Rating, LoanTermInterval> properties) {
-        if (preference.isInsuredOnly()) {
-            return false;
-        } else if (preference.getLoanTermInterval() != properties._2) {
-            return false;
-        } else if (preference.getRatingType() != properties._1) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private static boolean isEnabled(final Collection<ReservationPreference> preferences,
-                                     final Tuple2<Rating, LoanTermInterval> properties) {
-        return preferences.stream().anyMatch(p -> matches(p, properties));
-    }
 
     private static void process(final PowerTenant tenant, final ReservationStrategy strategy) {
         if (strategy.getMode() != ReservationMode.FULL_OWNERSHIP) {
@@ -75,23 +42,16 @@ final class ReservationsPreferences implements TenantPayload {
             return;
         }
         LOGGER.trace("Retrieved reservation preferences: {}.", preferences);
-        final Collection<Tuple2<Rating, LoanTermInterval>> missing = enumerateAllCategories()
-                .filter(t -> !isEnabled(preferences.getReservationPreferences(), t))
-                .collect(Collectors.toList());
-        if (missing.isEmpty()) {
+        if (preferences.equals(ReservationPreferences.TOTAL.get())) {
             LOGGER.debug("Keeping existing reservation preferences on account of them being complete.");
+            return;
         }
-        LOGGER.debug("Reservation preferences missing: {}.", missing);
         enableReservationSystem(tenant);
     }
 
     private static void enableReservationSystem(final PowerTenant tenant) {
         LOGGER.info("Enabling reservation system and overriding existing settings.");
-        final ReservationPreference[] allCategories = enumerateAllCategories()
-                .map(c -> new ReservationPreference(c._2, c._1, false))
-                .toArray(ReservationPreference[]::new);
-        final ReservationPreferences p = new ReservationPreferences(allCategories);
-        tenant.run(z -> z.setReservationPreferences(p));
+        tenant.run(z -> z.setReservationPreferences(ReservationPreferences.TOTAL.get()));
     }
 
     @Override
