@@ -16,16 +16,18 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 
 public class Resolutions extends BaseEntity {
 
-    private Collection<ResolutionRequest> resolutions = Collections.emptyList();
+    private List<ResolutionRequest> resolutions = Collections.emptyList();
 
     public Resolutions(final Collection<ResolutionRequest> resolutions) {
-        this.resolutions = resolutions;
+        this.resolutions = new ArrayList<>(resolutions);
     }
 
     Resolutions() {
@@ -33,7 +35,7 @@ public class Resolutions extends BaseEntity {
     }
 
     @XmlElement
-    public Collection<ResolutionRequest> getResolutions() {
+    public List<ResolutionRequest> getResolutions() {
         return resolutions;
     }
 }
