@@ -52,6 +52,11 @@ class InvestmentTest {
     }
 
     @Test
+    void hasToString() {
+        assertThat(Investment.custom().build().toString()).isNotEmpty();
+    }
+
+    @Test
     @DisplayName("Custom investment works.")
     void custom() {
         final Investment i = Investment.custom().build();

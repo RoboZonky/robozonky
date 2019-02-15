@@ -17,16 +17,12 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.RawReservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -43,106 +39,72 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class LoanTest {
+class ReservationTest {
 
     @Mock
-    private RawLoan mocked;
+    private RawReservation mocked;
 
     @Test
     @DisplayName("Sanitization works.")
     void sanitizing() {
-        assertThat(Loan.sanitized(mocked)).isNotNull();
+        assertThat(Reservation.sanitized(mocked)).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Custom reservation works.")
+    void custom() {
+        assertThat(Reservation.custom().build()).isNotNull();
     }
 
     @Test
     void hasToString() {
-        assertThat(Loan.custom().build().toString()).isNotEmpty();
+        assertThat(Reservation.custom().build().toString()).isNotEmpty();
     }
 
     @Nested
     @DisplayName("Setters for ")
     class SetterTest {
 
-        private final LoanBuilder b = Loan.custom();
+        private final ReservationBuilder b = Reservation.custom();
 
-        private <T> void standard(final LoanBuilder builder, final Function<T, LoanBuilder> setter,
+        private <T> void standard(final ReservationBuilder builder, final Function<T, ReservationBuilder> setter,
                                   final Supplier<T> getter, final T value) {
             assertThat(getter.get()).as("Null before setting.").isNull();
-            final LoanBuilder newBuilder = setter.apply(value);
+            final ReservationBuilder newBuilder = setter.apply(value);
             assertSoftly(softly -> {
                 softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);
                 softly.assertThat(getter.get()).as("Correct value was set.").isEqualTo(value);
             });
         }
 
-        private <T> void bool(final LoanBuilder builder, final Function<Boolean, LoanBuilder> setter,
-                              final Supplier<Boolean> getter) {
+        private void bool(final ReservationBuilder builder, final Function<Boolean, ReservationBuilder> setter,
+                          final Supplier<Boolean> getter) {
             assertThat(getter.get()).as("False before setting.").isFalse();
-            final LoanBuilder newBuilder = setter.apply(true);
+            final ReservationBuilder newBuilder = setter.apply(true);
             assertSoftly(softly -> {
                 softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);
                 softly.assertThat(getter.get()).as("Correct value was set.").isTrue();
             });
         }
 
-        private <T> void integer(final LoanBuilder builder, final Function<Integer, LoanBuilder> setter,
-                                 final Supplier<Integer> getter, final int value) {
-            assertThat(getter.get()).as("Zero before setting.").isLessThanOrEqualTo(0);
-            final LoanBuilder newBuilder = setter.apply(value);
+        private void integer(final ReservationBuilder builder, final Function<Integer, ReservationBuilder> setter,
+                             final Supplier<Integer> getter, final int value) {
+            assertThat(getter.get()).as("False before setting.").isLessThanOrEqualTo(0);
+            final ReservationBuilder newBuilder = setter.apply(value);
             assertSoftly(softly -> {
                 softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);
                 softly.assertThat(getter.get()).as("Correct value was set.").isEqualTo(value);
             });
         }
 
-        private <T> void optional(final LoanBuilder builder, final Function<T, LoanBuilder> setter,
-                                  final Supplier<Optional<T>> getter, final T value) {
-            assertThat(getter.get()).isEmpty();
-            final LoanBuilder newBuilder = setter.apply(value);
-            assertSoftly(softly -> {
-                softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);
-                softly.assertThat(getter.get()).as("Correct value was set.").contains(value);
-            });
-        }
-
         @Test
-        void remainingPrincipalToLoan() {
-            optional(b, b::setRemainingPrincipalToLoan, b::getRemainingPrincipalToLoan, BigDecimal.TEN);
-        }
-
-        @Test
-        void remainingPrincipalToBorrower() {
-            optional(b, b::setRemainingPrincipalToBorrower, b::getRemainingPrincipalToBorrower, BigDecimal.TEN);
-        }
-
-        @Test
-        void totalPrincipalToLoan() {
-            optional(b, b::setTotalPrincipalToLoan, b::getTotalPrincipalToLoan, BigDecimal.TEN);
-        }
-
-        @Test
-        void totalPrincipalToBorrower() {
-            optional(b, b::setTotalPrincipalToBorrower, b::getTotalPrincipalToBorrower, BigDecimal.TEN);
-        }
-
-        @Test
-        void myInvestment() {
-            optional(b, b::setMyInvestment, b::getMyInvestment, mock(MyInvestment.class));
+        void myReservation() {
+            standard(b, b::setMyReservation, b::getMyReservation, mock(MyReservation.class));
         }
 
         @Test
         void mainIncomeType() {
             standard(b, b::setMainIncomeType, b::getMainIncomeType, MainIncomeType.EMPLOYMENT);
-        }
-
-        @Test
-        void borrowerNicknames() {
-            standard(b, b::setKnownBorrowerNicknames, b::getKnownBorrowerNicknames, Collections.singleton("someone"));
-        }
-
-        @Test
-        void emptyBorrowerNicknames() {
-            standard(b, b::setKnownBorrowerNicknames, b::getKnownBorrowerNicknames, Collections.emptySet());
         }
 
         @Test
@@ -269,11 +231,5 @@ class LoanTest {
         void userId() {
             integer(b, b::setUserId, b::getUserId, 1);
         }
-
-        @Test
-        void url() throws MalformedURLException {
-            standard(b, b::setUrl, b::getUrl, new URL("http://www.zonky.cz/"));
-        }
-
     }
 }
