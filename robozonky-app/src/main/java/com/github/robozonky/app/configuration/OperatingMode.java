@@ -93,13 +93,6 @@ final class OperatingMode {
         LOGGER.debug("Notification subsystem initialized: {}.", e);
     }
 
-    private Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final PowerTenant auth,
-                                                       final Investor investor) {
-        final InvestmentMode m = new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), auth, investor,
-                                                          cli.getSecondaryMarketplaceCheckDelay());
-        return Optional.of(m);
-    }
-
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
         final PowerTenant tenant = getTenant(cli, lifecycle, secrets);
         configureNotifications(cli, tenant);
@@ -108,6 +101,7 @@ final class OperatingMode {
                 .map(value -> new Credentials(value, secrets))
                 .map(c -> OperatingMode.getInvestor(tenant, c))
                 .orElse(Optional.of(Investor.build(tenant)))
-                .flatMap(i -> this.getInvestmentMode(cli, tenant, i));
+                .map(i -> new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant, i,
+                                                   cli.getSecondaryMarketplaceCheckDelay()));
     }
 }
