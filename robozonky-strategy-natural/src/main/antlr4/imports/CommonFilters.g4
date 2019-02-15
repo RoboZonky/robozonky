@@ -178,27 +178,27 @@ amountConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     { $result = new LoanAmountCondition(0, $max.result - 1); }
 ;
 
-remainingAmountCondition returns [MarketplaceFilterCondition result]:
+remainingPrincipalCondition returns [MarketplaceFilterCondition result]:
     'zbývající jistina ' (
-        (c1 = remainingAmountConditionRangeOpen { $result = $c1.result; })
-        | (c2 = remainingAmountConditionRangeClosedLeft { $result = $c2.result; })
-        | (c3 = remainingAmountConditionRangeClosedRight { $result = $c3.result; })
+        (c1 = remainingPrincipalConditionRangeOpen { $result = $c1.result; })
+        | (c2 = remainingPrincipalConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = remainingPrincipalConditionRangeClosedRight { $result = $c3.result; })
     ) KC
 ;
 
-remainingAmountConditionRangeOpen returns [MarketplaceFilterCondition result]:
+remainingPrincipalConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new RemainingAmountCondition($min.result, $max.result); }
+    { $result = new RemainingPrincipalCondition($min.result, $max.result); }
 ;
 
-remainingAmountConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+remainingPrincipalConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=intExpr
-    { $result = new RemainingAmountCondition($min.result + 1); }
+    { $result = new RemainingPrincipalCondition($min.result + 1); }
 ;
 
-remainingAmountConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+remainingPrincipalConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
-    { $result = new RemainingAmountCondition(0, $max.result - 1); }
+    { $result = new RemainingPrincipalCondition(0, $max.result - 1); }
 ;
 
 annuityCondition returns [MarketplaceFilterCondition result]:
