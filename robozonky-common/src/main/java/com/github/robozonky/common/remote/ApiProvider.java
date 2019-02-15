@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
+import com.github.robozonky.api.remote.ReservationApi;
 import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
@@ -191,6 +192,15 @@ public class ApiProvider implements AutoCloseable {
      */
     Api<ExportApi> exports(final Supplier<ZonkyApiToken> token) {
         return obtainNormal(ExportApi.class, token);
+    }
+
+    /**
+     * Retrieve user-specific Zonky API which requires authentication and allows to retrieve reservations
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
+     * @return New API instance.
+     */
+    Api<ReservationApi> reservations(final Supplier<ZonkyApiToken> token) {
+        return obtainNormal(ReservationApi.class, token);
     }
 
     /**

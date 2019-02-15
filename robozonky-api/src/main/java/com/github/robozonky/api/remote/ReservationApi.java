@@ -16,36 +16,26 @@
 
 package com.github.robozonky.api.remote;
 
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.LastPublishedLoan;
-import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
+import com.github.robozonky.api.remote.entities.Reservations;
 import com.github.robozonky.internal.api.Defaults;
 
-@Path("/loans")
+@Path("/loans/marketplace/reservations")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface LoanApi extends EntityCollectionApi<RawLoan> {
-
-    /**
-     * @return Every single loan that ever was.
-     * @see <a href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Filtering Zonky.</a>
-     */
-    @GET
-    @Path("marketplace")
-    @Override
-    List<RawLoan> items();
+public interface ReservationApi  {
 
     @GET
-    @Path("last-published")
-    LastPublishedLoan lastPublished();
+    @Path("my-reservations")
+    Reservations items();
 
     @GET
-    @Path("{loanId}")
-    RawLoan item(@PathParam("loanId") int id);
+    @Path("my-preferences")
+    ReservationPreferences preferences();
+
 }

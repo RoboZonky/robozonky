@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.api.remote.enums;
 
-import java.time.Duration;
+public enum LoanTermInterval {
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
+    FROM_0_TO_12(1, 12),
+    FROM_13_TO_24(13, 24),
+    FROM_25_TO_36(25, 36),
+    FROM_37_TO_48(37, 48),
+    FROM_49_TO_60(49, 60),
+    FROM_61_TO_72(61, 72),
+    FROM_73_TO_84(73, 84);
 
-final class ReservationsProcessingJob implements TenantJob {
+    private final int minInclusive;
+    private final int maxInclusive;
 
-    @Override
-    public TenantPayload payload() {
-        return new ReservationsProcessing();
+    LoanTermInterval(final int minInclusive, final int maxInclusive) {
+        this.minInclusive = minInclusive;
+        this.maxInclusive = maxInclusive;
     }
 
-    @Override
-    public Duration startIn() {
-        return Duration.ofHours(2);
+    public int getMinInclusive() {
+        return minInclusive;
     }
 
-    @Override
-    public Duration repeatEvery() {
-        return Duration.ofHours(4);
+    public int getMaxInclusive() {
+        return maxInclusive;
     }
 }

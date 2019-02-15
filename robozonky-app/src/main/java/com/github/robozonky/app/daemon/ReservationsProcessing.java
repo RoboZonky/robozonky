@@ -19,16 +19,26 @@ package com.github.robozonky.app.daemon;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class ReservationsProcessing implements TenantPayload {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private static void process(final PowerTenant tenant, final ReservationStrategy strategy) {
+        final ReservationPreferences preferences = tenant.call(Zonky::getReservationPreferences);
+        if (!ReservationPreferences.isEnabled(preferences)) {
+            LOGGER.info("Reservation system is disabled or there are no active categories.");
+            return;
+        }
         final Collection<ReservationDescriptor> reservations = tenant.call(Zonky::getPendingReservations)
                 .map(r -> new ReservationDescriptor(r, () -> tenant.getLoan(r.getId())))
                 .collect(Collectors.toList());

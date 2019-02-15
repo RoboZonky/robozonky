@@ -26,6 +26,7 @@ import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
@@ -65,6 +66,10 @@ public interface ControlApi {
     @PATCH
     @Path("/loans/marketplace/reservations/my-reservations")
     void accept(Resolutions resolutions);
+
+    @PATCH
+    @Path("/loans/marketplace/reservations/my-preferences")
+    void setReservationPreferences(ReservationPreferences preferences);
 
 }
 

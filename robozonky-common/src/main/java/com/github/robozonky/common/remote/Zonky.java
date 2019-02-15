@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
+import com.github.robozonky.api.remote.ReservationApi;
 import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
@@ -40,6 +41,7 @@ import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -71,6 +73,7 @@ public class Zonky {
 
     private final Api<ControlApi> controlApi;
     private final Api<ExportApi> exports;
+    private final Api<ReservationApi> reservationApi;
     private final PaginatedApi<RawLoan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<RawInvestment, PortfolioApi> portfolioApi;
@@ -82,6 +85,7 @@ public class Zonky {
         this.controlApi = api.control(tokenSupplier);
         this.exports = api.exports(tokenSupplier);
         this.loanApi = api.marketplace(tokenSupplier);
+        this.reservationApi = api.reservations(tokenSupplier);
         this.participationApi = api.secondaryMarketplace(tokenSupplier);
         this.portfolioApi = api.portfolio(tokenSupplier);
         this.walletApi = api.wallet(tokenSupplier);
@@ -136,6 +140,10 @@ public class Zonky {
         controlApi.run(c -> c.accept(rs));
     }
 
+    public void setReservationPreferences(final ReservationPreferences preferences) {
+        controlApi.run(c -> c.setReservationPreferences(preferences));
+    }
+
     public Wallet getWallet() {
         return walletApi.execute(WalletApi::wallet);
     }
@@ -145,7 +153,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Reservation> getPendingReservations() {
-        return loanApi.execute(LoanApi::getPending)
+        return reservationApi.call(ReservationApi::items)
                 .getReservations()
                 .stream()
                 .map(Reservation::sanitized);
@@ -261,6 +269,10 @@ public class Zonky {
      */
     public Stream<Participation> getAvailableParticipations(final Select select) {
         return getStream(participationApi, ParticipationApi::items, select);
+    }
+
+    public ReservationPreferences getReservationPreferences() {
+        return reservationApi.call(ReservationApi::preferences);
     }
 
     public void requestWalletExport() {

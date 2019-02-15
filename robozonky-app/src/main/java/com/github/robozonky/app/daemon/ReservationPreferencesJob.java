@@ -21,20 +21,20 @@ import java.time.Duration;
 import com.github.robozonky.common.jobs.TenantJob;
 import com.github.robozonky.common.jobs.TenantPayload;
 
-final class ReservationsProcessingJob implements TenantJob {
+final class ReservationPreferencesJob implements TenantJob {
 
     @Override
     public TenantPayload payload() {
-        return new ReservationsProcessing();
+        return new ReservationsPreferences();
     }
 
     @Override
     public Duration startIn() {
-        return Duration.ofHours(2);
+        return Duration.ofHours(1);
     }
 
     @Override
     public Duration repeatEvery() {
-        return Duration.ofHours(4);
+        return Duration.ofHours(1);
     }
 }
