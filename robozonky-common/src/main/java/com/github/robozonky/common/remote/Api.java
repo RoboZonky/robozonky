@@ -16,7 +16,6 @@
 
 package com.github.robozonky.common.remote;
 
-import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -35,16 +34,11 @@ class Api<T> {
 
     static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy) {
         LOGGER.trace("Executing...");
-        final BlockingOperation<Z> operation = new BlockingOperation<>(() -> function.apply(proxy));
         try {
-            ForkJoinPool.managedBlock(operation);
-        } catch (final InterruptedException ex) {
-            LOGGER.debug("Remote operation interrupted.", ex);
-            Thread.currentThread().interrupt();
+            return function.apply(proxy);
         } finally {
             LOGGER.trace("... done.");
         }
-        return operation.getResult();
     }
 
     <S> S call(final Function<T, S> function) {
