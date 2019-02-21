@@ -19,7 +19,6 @@ package com.github.robozonky.app;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import org.junit.jupiter.api.Test;
@@ -34,11 +33,8 @@ class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
         final Optional<Consumer<ShutdownHook.Result>> result = rzsn.get();
         assertThat(result).isPresent();
         assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
-        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
+        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK);
         result.get().accept(r);
         assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyEndingEvent.class);
-        final ShutdownHook.Result r2 = new ShutdownHook.Result(ReturnCode.ERROR_SETUP, null);
-        result.get().accept(r2);
-        assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyCrashedEvent.class);
     }
 }

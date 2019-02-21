@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.function.Consumer;
-
 import com.github.robozonky.app.tenant.PowerTenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,13 +27,11 @@ final class Skippable implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(Skippable.class);
 
     private final PowerTenant tenant;
-    private final Consumer<Throwable> shutdownCall;
     private final Runnable toRun;
 
-    public Skippable(final Runnable toRun, final PowerTenant tenant, final Consumer<Throwable> shutdownCall) {
+    public Skippable(final Runnable toRun, final PowerTenant tenant) {
         this.toRun = toRun;
         this.tenant = tenant;
-        this.shutdownCall = shutdownCall;
     }
 
     @Override
@@ -51,9 +47,6 @@ final class Skippable implements Runnable {
         } catch (final Exception ex) {
             LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
             tenant.fire(roboZonkyDaemonFailed(ex));
-        } catch (final Error t) {
-            LOGGER.error("Caught unexpected error, terminating.", t);
-            shutdownCall.accept(t);
         }
         LOGGER.trace("Update finished.");
     }

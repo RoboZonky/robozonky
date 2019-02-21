@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class SkippableTest extends AbstractZonkyLeveragingTest {
@@ -36,7 +35,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final PowerTenant t = mockTenant();
         when(t.isAvailable(any())).thenReturn(false);
         final Consumer<Throwable> c = mock(Consumer.class);
-        final Skippable s = new Skippable(r, t, c);
+        final Skippable s = new Skippable(r, t);
         s.run();
         verify(r, never()).run();
         verify(c, never()).accept(any());
@@ -48,7 +47,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final Runnable r = mock(Runnable.class);
         final PowerTenant t = mockTenant();
         final Consumer<Throwable> c = mock(Consumer.class);
-        final Skippable s = new Skippable(r, t, c);
+        final Skippable s = new Skippable(r, t);
         s.run();
         verify(r).run();
         verify(c, never()).accept(any());
@@ -61,25 +60,12 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(r).run();
         final PowerTenant t = mockTenant();
         final Consumer<Throwable> c = mock(Consumer.class);
-        final Skippable s = new Skippable(r, t, c);
+        final Skippable s = new Skippable(r, t);
         s.run();
         verify(c, never()).accept(any());
         assertThat(this.getEventsRequested()).hasSize(1)
                 .first()
                 .isInstanceOf(RoboZonkyDaemonFailedEvent.class);
-    }
-
-    @Test
-    void shutsDown() {
-        final Runnable r = mock(Runnable.class);
-        final Error e = mock(Error.class);
-        doThrow(e).when(r).run();
-        final PowerTenant t = mockTenant();
-        final Consumer<Throwable> c = mock(Consumer.class);
-        final Skippable s = new Skippable(r, t, c);
-        s.run();
-        verify(c).accept(eq(e));
-        assertThat(this.getEventsRequested()).isEmpty();
     }
 
 }

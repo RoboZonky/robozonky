@@ -34,7 +34,7 @@ class ShutdownHookTest {
         final ShutdownHook s = new ShutdownHook();
         assertThat(s.register(h)).isFalse();
         try {
-            s.execute(new ShutdownHook.Result(ReturnCode.OK, null));
+            s.execute(new ShutdownHook.Result(ReturnCode.OK));
         } catch (final RuntimeException ex) {
             fail("Should not have been thrown.", ex);
         }
@@ -62,7 +62,7 @@ class ShutdownHookTest {
         final ShutdownHook s = new ShutdownHook();
         assertThat(s.register(h)).isTrue();
         try {
-            s.execute(new ShutdownHook.Result(ReturnCode.OK, null));
+            s.execute(new ShutdownHook.Result(ReturnCode.OK));
         } catch (final RuntimeException ex) {
             fail("Should not have been thrown.", ex);
         }
@@ -76,7 +76,7 @@ class ShutdownHookTest {
         when(h.get()).thenReturn(Optional.of(c));
         final ShutdownHook s = new ShutdownHook();
         assertThat(s.register(h)).isTrue();
-        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
+        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK);
         s.execute(r);
         verify(c).accept(eq(r));
     }

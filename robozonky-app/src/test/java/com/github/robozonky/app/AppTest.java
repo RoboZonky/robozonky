@@ -77,7 +77,7 @@ class AppTest extends AbstractEventLeveragingTest {
         try {
             assertThat(main.execute(new MyInvestmentMode())).isEqualTo(ReturnCode.OK);
         } finally { // clean up, shutting down executors etc.
-            main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
+            main.exit(new ShutdownHook.Result(ReturnCode.OK));
         }
         verify(main).ensureLiveness();
         verify(main).actuallyExit(ReturnCode.OK.getCode());
@@ -99,7 +99,7 @@ class AppTest extends AbstractEventLeveragingTest {
         main.execute(new MyInvestmentMode());
         final int countAfter = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
         assertThat(countAfter).isGreaterThan(countBefore);
-        main.exit(new ShutdownHook.Result(ReturnCode.OK, null));
+        main.exit(new ShutdownHook.Result(ReturnCode.OK));
         final int finalCount = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
         assertThat(finalCount).isEqualTo(countBefore);
     }
@@ -117,7 +117,7 @@ class AppTest extends AbstractEventLeveragingTest {
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } finally { // clean up, shutting down executors etc.
             final Scheduler s = Scheduler.inBackground();
-            main.exit(new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, null));
+            main.exit(new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED));
             assertThat(s.isClosed()).isTrue();
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ enum Variables {
     EMAIL_IS_INVESTMENT("isInvestmentNotificationEnabled"),
     EMAIL_IS_BALANCE_OVER_200("isBalanceOver200NotificationEnabled"),
     EMAIL_IS_FAILURE("isFailureNotificationEnabled"),
-    EMAIL_IS_CRITICAL_FAILURE("isCriticalFailureNotificationEnabled"),
     INSTALL_PATH("INSTALL_PATH"),
     IS_DRY_RUN("isDryRun"),
     IS_EMAIL_ENABLED("isEmailEnabled"),

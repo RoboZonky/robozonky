@@ -35,7 +35,7 @@ class DaemonShutdownHook extends Thread {
     public void run() {
         LOGGER.debug("Shutdown requested through {}.", lifecycle);
         // will release the main thread and thus terminate the daemon
-        lifecycle.resumeToShutdown();
+        lifecycle.resume();
         // only allow to shut down after the daemon has been closed by the app
         try {
             shutdownEnabler.waitUntilTriggered();

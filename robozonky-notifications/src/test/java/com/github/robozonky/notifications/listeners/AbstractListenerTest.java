@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -51,7 +50,6 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
@@ -244,7 +242,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.BALANCE_ON_TARGET, new MyExecutionStartedEvent(MAX_PORTFOLIO)),
                 forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
                             new MyExecutionStartedEvent(mockPortfolioOverview(0))),
-                forListener(SupportedListener.CRASHED, new MyRoboZonkyCrashedEvent()),
                 forListener(SupportedListener.DAEMON_FAILED, new MyRoboZonkyDaemonFailedEvent()),
                 forListener(SupportedListener.INITIALIZED, (RoboZonkyInitializedEvent) OffsetDateTime::now),
                 forListener(SupportedListener.ENDING, (RoboZonkyEndingEvent) OffsetDateTime::now),
@@ -347,19 +344,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public Throwable getCause() {
             return new RuntimeException();
-        }
-    }
-
-    private static class MyRoboZonkyCrashedEvent implements RoboZonkyCrashedEvent {
-
-        @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
-        }
-
-        @Override
-        public Optional<Throwable> getCause() {
-            return Optional.of(new RuntimeException());
         }
     }
 
