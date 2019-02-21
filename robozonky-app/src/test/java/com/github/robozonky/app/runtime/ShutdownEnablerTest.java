@@ -43,7 +43,7 @@ class ShutdownEnablerTest {
                 .isInstanceOf(TimeoutException.class); // the thread is blocked
         final Consumer<ShutdownHook.Result> c = se.get()
                 .orElseThrow(() -> new IllegalStateException("Should have returned."));
-        c.accept(new ShutdownHook.Result(ReturnCode.OK, null)); // this unblocks the thread
+        c.accept(new ShutdownHook.Result(ReturnCode.OK)); // this unblocks the thread
         // this should return
         assertTimeout(Duration.ofSeconds(5), (Executable) f::get);
         assertThat(f).isDone();

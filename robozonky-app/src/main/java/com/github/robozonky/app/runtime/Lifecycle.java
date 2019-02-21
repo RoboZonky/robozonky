@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.management.Management;
@@ -41,7 +40,6 @@ public class Lifecycle {
     private final CountDownLatch circuitBreaker;
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
-    private final AtomicReference<Throwable> terminationCause = new AtomicReference<>();
 
     /**
      * For testing purposes only.
@@ -120,7 +118,7 @@ public class Lifecycle {
     }
 
     /**
-     * Suspend thread until either one of {@link #resumeToFail(Throwable)} or {@link #resumeToShutdown()} is called.
+     * Suspend thread until {@link #resume()} is called.
      */
     public void suspend() {
         final Thread t = shutdownHook.get();
@@ -137,26 +135,9 @@ public class Lifecycle {
     /**
      * Triggered by the daemon to make {@link #suspend()} unblock.
      */
-    public void resumeToShutdown() {
+    public void resume() {
         LOGGER.debug("Asking application to shut down cleanly through {}.", this);
         circuitBreaker.countDown();
     }
 
-    /**
-     * Triggered by the deamon to make {@link #suspend()} unblock.
-     * @param t Will become the value in {@link #getTerminationCause()}.
-     */
-    public void resumeToFail(final Throwable t) {
-        LOGGER.debug("Asking application to die through {}.", this);
-        terminationCause.set(t);
-        circuitBreaker.countDown();
-    }
-
-    /**
-     * The reason why the daemon failed, if any.
-     * @return Present if {@link #resumeToFail(Throwable)} had been called previously.
-     */
-    public Optional<Throwable> getTerminationCause() {
-        return Optional.ofNullable(terminationCause.get());
-    }
 }

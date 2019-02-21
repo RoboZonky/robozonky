@@ -42,7 +42,6 @@ import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
@@ -301,12 +300,6 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.getDescriptors()).isEmpty();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
-    }
-
-    @Test
-    void robozonkyCrashed() {
-        final RoboZonkyCrashedEvent e = EventFactory.roboZonkyCrashed(new IllegalArgumentException());
-        assertThat(e.getCause()).isNotNull();
     }
 
     @Test

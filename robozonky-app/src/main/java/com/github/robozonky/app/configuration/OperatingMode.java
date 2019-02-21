@@ -101,7 +101,6 @@ final class OperatingMode {
                 .map(value -> new Credentials(value, secrets))
                 .map(c -> OperatingMode.getInvestor(tenant, c))
                 .orElse(Optional.of(Investor.build(tenant)))
-                .map(i -> new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant, i,
-                                                   cli.getSecondaryMarketplaceCheckDelay()));
+                .map(i -> new DaemonInvestmentMode(tenant, i, cli.getSecondaryMarketplaceCheckDelay()));
     }
 }

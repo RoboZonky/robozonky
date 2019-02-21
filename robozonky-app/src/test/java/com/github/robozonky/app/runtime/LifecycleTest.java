@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,18 +34,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class LifecycleTest extends AbstractEventLeveragingTest {
-
-    @Test
-    void failing() {
-        final Throwable t = new IllegalStateException("Testing exception.");
-        final CountDownLatch c = new CountDownLatch(1);
-        final Lifecycle h = new Lifecycle(c);
-        Assertions.assertTimeout(Duration.ofSeconds(1), () -> h.resumeToFail(t));
-        assertSoftly(softly -> {
-            softly.assertThat(h.getTerminationCause()).contains(t);
-            softly.assertThat(c.getCount()).isEqualTo(0);
-        });
-    }
 
     @Test
     void waitUntilOnline() throws ExecutionException, InterruptedException, TimeoutException {
@@ -87,7 +73,6 @@ class LifecycleTest extends AbstractEventLeveragingTest {
         final Lifecycle h = new Lifecycle(hooks);
         assertSoftly(softly -> {
             softly.assertThat(h.getZonkyApiVersion()).isNotEmpty();
-            softly.assertThat(h.getTerminationCause()).isEmpty();
             softly.assertThat(h.getZonkyApiLastUpdate()).isNotNull();
         });
         verify(hooks).register(any()); // 2 shutdown hooks have been registered

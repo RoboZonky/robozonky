@@ -95,19 +95,13 @@ public class ShutdownHook {
     public static final class Result {
 
         private final ReturnCode returnCode;
-        private final Throwable cause;
 
-        public Result(final ReturnCode code, final Throwable cause) {
+        public Result(final ReturnCode code) {
             this.returnCode = code;
-            this.cause = cause;
         }
 
         public ReturnCode getReturnCode() {
             return returnCode;
-        }
-
-        public Throwable getCause() {
-            return cause;
         }
     }
 }

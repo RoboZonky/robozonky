@@ -33,13 +33,13 @@ class DaemonShutdownHookTest {
         final ShutdownEnabler se = mock(ShutdownEnabler.class);
         final DaemonShutdownHook hook = new DaemonShutdownHook(lifecycle, se);
         hook.start();
-        se.get().ifPresent(c -> c.accept(new ShutdownHook.Result(ReturnCode.OK, null)));
+        se.get().ifPresent(c -> c.accept(new ShutdownHook.Result(ReturnCode.OK)));
         Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
             while (hook.isAlive()) { // wait until the hook to terminate
                 Thread.sleep(1);
             }
             verify(se).waitUntilTriggered();
-            verify(lifecycle).resumeToShutdown();
+            verify(lifecycle).resume();
         });
     }
 }

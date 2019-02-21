@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -37,20 +36,12 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final PowerTenant tenant;
     private final Investor investor;
     private final Duration secondaryMarketplaceCheckPeriod;
-    private final Consumer<Throwable> shutdownCall;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
-                                final Investor investor, final Duration secondaryMarketplaceCheckPeriod) {
+    public DaemonInvestmentMode(final PowerTenant tenant, final Investor investor,
+                                final Duration secondaryMarketplaceCheckPeriod) {
         this.tenant = tenant;
         this.investor = investor;
         this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
-        this.shutdownCall = shutdownCall;
-    }
-
-    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor,
-                         final Duration secondaryMarketplaceCheckPeriod) {
-        this(t -> {
-        }, tenant, investor, secondaryMarketplaceCheckPeriod);
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
@@ -67,7 +58,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter, final Duration initialDelay) {
         LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}.", r, executor, repeatAfter,
                      initialDelay);
-        executor.submit(new Skippable(r, tenant, shutdownCall), repeatAfter, initialDelay);
+        executor.submit(new Skippable(r, tenant), repeatAfter, initialDelay);
     }
 
     private void scheduleJobs(final Scheduler executor) {

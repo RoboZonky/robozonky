@@ -54,9 +54,7 @@ public class App implements Runnable {
 
     private void exit(final ReturnCode returnCode) {
         LOGGER.trace("Exit requested with return code {}.", returnCode);
-        final ShutdownHook.Result r = lifecycle.get().getTerminationCause()
-                .map(t -> new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, t))
-                .orElse(new ShutdownHook.Result(returnCode, null));
+        final ShutdownHook.Result r = new ShutdownHook.Result(returnCode);
         exit(r);
     }
 

@@ -21,7 +21,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.app.events.Events;
@@ -29,7 +28,6 @@ import com.github.robozonky.internal.api.Defaults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyCrashed;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyEnding;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyInitialized;
 
@@ -47,19 +45,12 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
         this.sessionName = session.getName();
     }
 
-    private static CompletableFuture<Void> execute(final ShutdownHook.Result result) {
-        final GlobalEvent toFire = result.getReturnCode() == ReturnCode.OK ?
-                roboZonkyEnding() :
-                roboZonkyCrashed(result.getCause());
-        return Events.global().fire(toFire);
-    }
-
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
         LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
         Events.global().fire(roboZonkyInitialized());
         return Optional.of(result -> {
-            final CompletableFuture<Void> waitUntilFired = execute(result);
+            final CompletableFuture<Void> waitUntilFired = Events.global().fire(roboZonkyEnding());
             try {
                 LOGGER.debug("Waiting for events to be processed.");
                 waitUntilFired.join();
