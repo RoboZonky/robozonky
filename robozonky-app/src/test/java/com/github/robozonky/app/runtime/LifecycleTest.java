@@ -23,8 +23,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

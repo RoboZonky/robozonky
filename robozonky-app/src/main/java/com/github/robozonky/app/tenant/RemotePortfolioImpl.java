@@ -54,12 +54,10 @@ class RemotePortfolioImpl implements RemotePortfolio {
         this.portfolio = Reloadable.with(() -> RemoteData.load(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
                 .finishWith(this::refreshPortfolio)
-                .async() // run the update on the background, momentarily retrieve stale value until finished
                 .build();
         this.atRisk = Reloadable.with(() -> Util.getAmountsAtRisk(tenant))
                 .reloadAfter(Duration.ofMinutes(30)) // not so important, may have a bit of delay
                 .finishWith(this::refreshRisk)
-                .async()
                 .build();
         this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()))
                 .finishWith(po -> LOGGER.debug("New portfolio overview: {}.", po))

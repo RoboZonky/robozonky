@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
@@ -57,13 +58,13 @@ class PowerTenantImpl implements PowerTenant {
     private final Map<OAuthScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(OAuthScope.class);
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
-    private final StrategyProvider strategyProvider;
+    private final Lazy<StrategyProvider> strategyProvider;
     private final Lazy<LoanCache> loanCache = Lazy.of(() -> new LoanCache(this));
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
-                    final StrategyProvider strategyProvider,
+                    final Supplier<StrategyProvider> strategyProvider,
                     final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier) {
-        this.strategyProvider = strategyProvider;
+        this.strategyProvider = Lazy.of(strategyProvider);
         this.apis = apis;
         this.sessionInfo = sessionInfo;
         this.availability = zonkyAvailability;
@@ -109,22 +110,22 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Optional<InvestmentStrategy> getInvestmentStrategy() {
-        return strategyProvider.getToInvest();
+        return strategyProvider.get().getToInvest();
     }
 
     @Override
     public Optional<SellStrategy> getSellStrategy() {
-        return strategyProvider.getToSell();
+        return strategyProvider.get().getToSell();
     }
 
     @Override
     public Optional<PurchaseStrategy> getPurchaseStrategy() {
-        return strategyProvider.getToPurchase();
+        return strategyProvider.get().getToPurchase();
     }
 
     @Override
     public Optional<ReservationStrategy> getReservationStrategy() {
-        return strategyProvider.getForReservations();
+        return strategyProvider.get().getForReservations();
     }
 
     @Override

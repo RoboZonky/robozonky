@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +37,14 @@ class SchedulerImpl implements Scheduler {
     private final ScheduledExecutorService executor;
     private final Runnable onClose;
 
+    private static ScheduledThreadPoolExecutor newSchedulerService(final int parallelism,
+                                                                   final ThreadFactory threadFactory) {
+        final ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(1, threadFactory);
+        stpe.setMaximumPoolSize(parallelism);
+        return stpe;
+    }
+
+
     /**
      * @param poolSize The maximum amount of threads that the scheduler will have available. Minimum is 1 and the
      * scheduler may scale down to that number when it has no need for more threads.
@@ -44,7 +53,7 @@ class SchedulerImpl implements Scheduler {
      * method had been called.
      */
     SchedulerImpl(final int poolSize, final ThreadFactory threadFactory, final Runnable onClose) {
-        this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
+        this.executor = newSchedulerService(poolSize, threadFactory);
         this.onClose = onClose;
     }
 

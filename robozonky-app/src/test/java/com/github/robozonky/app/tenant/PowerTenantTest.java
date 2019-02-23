@@ -16,12 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class PowerTenantTest {
+class PowerTenantTest extends AbstractRoboZonkyTest {
 
     @Test
     void doesNotCopyTransactional() {

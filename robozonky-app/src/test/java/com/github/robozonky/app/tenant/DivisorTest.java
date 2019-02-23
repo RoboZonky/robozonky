@@ -16,11 +16,12 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class DivisorTest {
+class DivisorTest extends AbstractRoboZonkyTest {
 
     @Test
     void calculate() {

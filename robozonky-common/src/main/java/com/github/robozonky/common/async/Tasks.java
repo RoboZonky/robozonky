@@ -66,38 +66,33 @@ public enum Tasks implements AutoCloseable {
     }
 
     public static void closeAll() {
-        Stream.of(values()).forEach(s -> {
-            try {
-                s.close();
-            } catch (final Exception ex) { // nothing much to do here
-                LOGGER.debug("Failed closing scheduler {}.", s, ex);
-            }
-        });
+        Stream.of(values()).forEach(Tasks::close);
     }
 
     private Scheduler newScheduler(final ThreadFactory threadFactory) {
         LOGGER.debug("Instantiating new background scheduler {}.", this);
-        return new SchedulerImpl(Integer.MAX_VALUE, threadFactory, this::cleanBackgroundScheduler);
+        return new SchedulerImpl(Integer.MAX_VALUE, threadFactory, this::clear);
     }
 
-    private void cleanBackgroundScheduler() {
+    private void clear() {
         scheduler.clear();
-        LOGGER.trace("Cleared background scheduler.");
+        LOGGER.debug("Cleared background scheduler: {}.", this);
     }
 
     public Scheduler scheduler() {
         return scheduler.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
     }
 
-    public Thread newThread(final Runnable r) {
-        return threadFactory.newThread(r);
-    }
-
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (!scheduler.hasValue()) {
+            LOGGER.debug("No scheduler to close: {}.", this);
             return;
         }
-        scheduler().close();
+        try {
+            scheduler().close();
+        } catch (final Exception ex) { // nothing we can actually do here
+            LOGGER.debug("Failed closing scheduler {}.", this, ex);
+        }
     }
 }

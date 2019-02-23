@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.async;
+package com.github.robozonky.app.events;
 
-import java.util.concurrent.ScheduledExecutorService;
+import java.time.Duration;
 
-import org.junit.jupiter.api.Test;
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.SimplePayload;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+final class EventFiringJob implements SimpleJob {
 
-class SchedulerServiceTest {
+    @Override
+    public SimplePayload payload() {
+        return new EventFiring();
+    }
 
-    @Test
-    void defaults() {
-        final ScheduledExecutorService expected = mock(ScheduledExecutorService.class);
-        final SchedulerService s = (parallelism, threadFactory) -> expected;
-        final ScheduledExecutorService ses = s.newScheduledExecutorService(1);
-        assertThat(ses).isSameAs(expected);
+    @Override
+    public Duration startIn() {
+        return Duration.ZERO;
+    }
+
+    @Override
+    public Duration repeatEvery() {
+        return Duration.ofSeconds(5);
     }
 }

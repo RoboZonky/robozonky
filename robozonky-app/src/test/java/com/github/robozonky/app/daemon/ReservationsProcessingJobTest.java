@@ -19,11 +19,12 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 
 import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class ReservationsProcessingJobTest {
+class ReservationsProcessingJobTest extends AbstractRoboZonkyTest {
 
     @Test
     void getters() {

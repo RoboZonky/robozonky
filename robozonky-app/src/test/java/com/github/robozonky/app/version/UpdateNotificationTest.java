@@ -22,7 +22,7 @@ import java.util.Objects;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.robozonky.app.AbstractEventLeveragingTest;
+import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

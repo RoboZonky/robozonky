@@ -26,7 +26,6 @@ import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
@@ -79,9 +78,9 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         events.addListener(e);
         events.injectEventListener(l);
         events.fire(s);
-        verify(e).requested(any());
-        verify(e).ready(s, (Class<EventListener<ExecutionCompletedEvent>>)l.getClass());
-        verify(e).fired(s, (Class<EventListener<ExecutionCompletedEvent>>)l.getClass());
+        assertThat(getEventsRequested()).isNotEmpty();
+        assertThat(getEventsReady()).isNotEmpty();
+        assertThat(getEventsFired()).isNotEmpty();
         verify(l).handle(s, SESSION);
     }
 

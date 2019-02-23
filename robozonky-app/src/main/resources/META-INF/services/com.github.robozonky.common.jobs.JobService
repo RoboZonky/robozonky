@@ -15,6 +15,7 @@
 #
 
 com.github.robozonky.app.version.VersionDetectionJobService
+com.github.robozonky.app.events.EventFiringJobService
 com.github.robozonky.app.daemon.SellingJobService
 com.github.robozonky.app.daemon.ReservationsJobService
 com.github.robozonky.app.delinquencies.DelinquencyNotificationJobService

@@ -19,6 +19,7 @@ package com.github.robozonky.app.runtime;
 import java.io.IOException;
 import java.util.UUID;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +31,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-class LivenessCheckTest {
+class LivenessCheckTest extends AbstractRoboZonkyTest {
 
     private static final String SAMPLE = "{\"branch\":\"origin/master\"," +
             "\"commitId\":\"e51d4fcb9eac1a9599a64c93c181325a2c38e779\"," +

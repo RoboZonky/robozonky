@@ -16,29 +16,36 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-class EventFiringQueueTest {
+class EventFiringQueueTest extends AbstractRoboZonkyTest {
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    @AfterEach
+    void shutdown() {
+        executor.shutdownNow();
+    }
 
     @Test
     void test() {
-        final AtomicReference<EventFiringRunnable> currentRunnable = new AtomicReference<>();
-        final Function<BlockingQueue<Runnable>, EventFiringRunnable> supplier = q -> {
-            final EventFiringRunnable r = new EventFiringRunnable(q);
-            currentRunnable.set(r);
-            return r;
-        };
-        final EventFiringQueue q = new EventFiringQueue(supplier);
+        final EventFiringQueue q = new EventFiringQueue();
         final Runnable r = mock(Runnable.class);
         final Runnable r2 = mock(Runnable.class);
         q.fire(r);
-        q.fire(r2).join();
+        final CompletableFuture<Void> f = q.fire(r2);
+        verify(r, never()).run();
+        verify(r2, never()).run();
+        new EventFiring(q.getQueue()).run();
+        f.join();
         verify(r, times(1)).run();
         verify(r2, times(1)).run();
     }

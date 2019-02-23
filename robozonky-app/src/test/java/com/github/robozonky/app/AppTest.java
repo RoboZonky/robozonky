@@ -26,6 +26,7 @@ import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.InvestmentMode;
+import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.async.Tasks;

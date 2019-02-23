@@ -19,13 +19,14 @@ package com.github.robozonky.app;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-class ShutdownHookTest {
+class ShutdownHookTest extends AbstractRoboZonkyTest {
 
     @Test
     void noShutdownHandler() {

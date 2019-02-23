@@ -23,13 +23,14 @@ import java.util.Map;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static org.assertj.core.api.Assertions.*;
 
-class PortfolioOverviewImplTest {
+class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void timestamp() {
