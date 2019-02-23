@@ -27,6 +27,7 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.extensions.JobServiceLoader;
+import com.github.robozonky.common.jobs.Job;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,6 +44,10 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.tenant = tenant;
         this.investor = investor;
         this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
+    }
+
+    private static Scheduler getSchedulerForJob(final Job job) {
+        return job.prioritize() ? Tasks.SUPPORTING.scheduler() : Tasks.BACKGROUND.scheduler();
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
@@ -62,14 +67,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
         executor.submit(new Skippable(r, tenant), repeatAfter, initialDelay);
     }
 
-    private void scheduleJobs(final Scheduler executor) {
+    private void scheduleJobs() {
         // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submit(executor, j.payload(), j.repeatEvery(), j.startIn()));
+                .forEach(j -> submit(getSchedulerForJob(j), j.payload(), j.repeatEvery(), j.startIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
-                .forEach(j -> submit(executor, () -> j.payload().accept(tenant), j.repeatEvery(), j.startIn()));
+                .forEach(j -> submit(getSchedulerForJob(j), () -> j.payload().accept(tenant), j.repeatEvery(),
+                                     j.startIn()));
         LOGGER.debug("Job scheduling over.");
     }
 
@@ -82,7 +88,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     public ReturnCode apply(final Lifecycle lifecycle) {
         return Try.of(() -> {
             // schedule the tasks
-            scheduleJobs(Tasks.BACKGROUND.scheduler());
+            scheduleJobs();
             scheduleDaemons(Tasks.MISSION_CRITICAL.scheduler());
             // block until request to stop the app is received
             lifecycle.suspend();
