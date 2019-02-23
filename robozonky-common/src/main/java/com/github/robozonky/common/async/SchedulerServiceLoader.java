@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,15 @@ import io.vavr.Lazy;
 final class SchedulerServiceLoader {
 
     private static final ServiceLoader<SchedulerService> LOADER = ServiceLoader.load(SchedulerService.class);
-    private static final Lazy<SchedulerService> REAL_SCHEDULER = Lazy.of(() -> (parallelism, threadFactory) -> {
+    private static final Lazy<SchedulerService> REAL_SCHEDULER =
+            Lazy.of(() -> (SchedulerService) SchedulerServiceLoader::newSchedulerService);
+
+    private static ScheduledThreadPoolExecutor newSchedulerService(final int parallelism,
+                                                                   final ThreadFactory threadFactory) {
         final ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(1, threadFactory);
         stpe.setMaximumPoolSize(parallelism);
         return stpe;
-    });
+    }
 
     private SchedulerServiceLoader() {
         // no instances
