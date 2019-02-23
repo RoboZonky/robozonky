@@ -16,12 +16,34 @@
 
 package com.github.robozonky.common.async;
 
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadFactory;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Provides different {@link Scheduler} instances based on the needs of a particular task. There are three categories
+ * of tasks:
+ *
+ * <ul>
+ * <li>{@link #MISSION_CRITICAL} tasks are essentially just the primary and secondary marketplace checks, which
+ * are absolutely necessary, must be scheduled immediately and processed as soon as possible. There will be a fixed
+ * pool of 2 threads always available to execute these tasks, one for each marketplace. These tasks will get
+ * {@link Thread#MAX_PRIORITY}.</li>
+ * <li>{@link #SUPPORTING} tasks carry functionality which is still very important for the robot or for the user,
+ * but can be postponed momentarily. These would be tasks such as selling participations or updating strategies from
+ * a remote server. There will be 1 thread always available to execute these tasks, and it will be given
+ * {@link Thread#NORM_PRIORITY}.</li>
+ * <li>{@link #BACKGROUND} tasks carry functionality which is either unimportant or can be easily postponed. There will
+ * be up to 1 thread available to execute these tasks, and it will be given {@link Thread#MIN_PRIORITY}.</li>
+ * </ul>
+ * <p>
+ * None of these tasks are restricted from spinning up their own threads. In fact, many of the {@link #MISSION_CRITICAL}
+ * and {@link #SUPPORTING} tasks may start entire {@link ForkJoinPool}s as a side-effect of using
+ * {@link Stream#parallel()}.
+ */
 public enum Tasks implements AutoCloseable {
 
     MISSION_CRITICAL(threadGroup("rzCritical", Thread.MAX_PRIORITY)),
