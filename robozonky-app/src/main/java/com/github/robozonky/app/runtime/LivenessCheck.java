@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
 import io.vavr.Lazy;
@@ -57,7 +57,7 @@ class LivenessCheck extends Refreshable<String> {
 
     public static void setup(final MainControl mainThreadControl) {
         final Refreshable<String> liveness = new LivenessCheck(mainThreadControl);
-        Scheduler.inBackground().submit(liveness, Duration.ofSeconds(5));
+        Tasks.SUPPORTING.scheduler().submit(liveness, Duration.ofSeconds(5));
     }
 
     static String read(final String json) throws IOException {

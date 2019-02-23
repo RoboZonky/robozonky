@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import com.github.robozonky.common.async.Reloadable;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,6 +37,7 @@ final class EventFiringQueue {
 
     public static final EventFiringQueue INSTANCE = new EventFiringQueue();
 
+    private static final Tasks SCHEDULER = Tasks.BACKGROUND;
     private static final Logger LOGGER = LogManager.getLogger(EventFiringQueue.class);
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
@@ -54,7 +55,7 @@ final class EventFiringQueue {
         firingThread = Reloadable.with(() -> {
             final Runnable r = threadSupplier.apply(queue);
             LOGGER.debug("Creating new thread with {}.", r);
-            final Thread t = Scheduler.THREAD_FACTORY.newThread(r);
+            final Thread t = SCHEDULER.newThread(r);
             t.start();
             LOGGER.debug("Started event firing thread {}.", t.getName());
             return t;
@@ -124,6 +125,6 @@ final class EventFiringQueue {
         return CompletableFuture.runAsync(() -> {
             await(b, id);
             LOGGER.debug("Event {} processed.", id);
-        }, Scheduler.inBackground().getExecutor());
+        }, SCHEDULER.scheduler().getExecutor());
     }
 }

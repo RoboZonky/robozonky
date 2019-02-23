@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 package com.github.robozonky.common.async;
 
 import java.time.Duration;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -33,61 +31,61 @@ class SchedulerTest {
 
     private static final Runnable RUNNABLE = mock(Runnable.class);
 
+    private static Scheduler getInstance() {
+        return Tasks.BACKGROUND.scheduler();
+    }
+
     @Test
-    void backgroundRestarts() {
-        final Scheduler s = Scheduler.inBackground();
+    void backgroundRestarts() throws Exception {
+        final Scheduler s = getInstance();
         assertThat(s.getExecutor()).isNotNull();
         s.close();
         assertThat(s.getExecutor().isShutdown()).isTrue();
-        try (final Scheduler s2 = Scheduler.inBackground()) {
+        try (final Scheduler s2 = getInstance()) {
             assertThat(s).isNotNull().isNotSameAs(s2);
         }
     }
 
     @Test
-    void submit() {
-        try (final Scheduler s = new Scheduler()) {
+    void submit() throws Exception {
+        try (final Scheduler s = new SchedulerImpl()) {
             final ScheduledFuture<?> f = s.submit(RUNNABLE);
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(Scheduler.inBackground()).isNotNull();
+                softly.assertThat(getInstance()).isNotNull();
                 softly.assertThat((Future<?>) f).isNotNull();
             });
         }
     }
 
     @Test
-    void run() throws InterruptedException, ExecutionException, TimeoutException {
-        try (final Scheduler s = new Scheduler()) {
+    void run() throws Exception {
+        try (final Scheduler s = new SchedulerImpl()) {
             final Future<?> f = s.run(RUNNABLE);
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat((Future<?>) f).isNotNull();
-            });
+            assertThat((Future<?>) f).isNotNull();
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }
     }
 
     @Test
-    void runWithDelay() throws InterruptedException, ExecutionException, TimeoutException {
-        try (final Scheduler s = new Scheduler()) {
+    void runWithDelay() throws Exception {
+        try (final Scheduler s = new SchedulerImpl()) {
             final Future<?> f = s.run(RUNNABLE, Duration.ofSeconds(1));
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat((Future<?>) f).isNotNull();
-            });
+            assertThat((Future<?>) f).isNotNull();
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }
     }
 
     @Test
-    void createsNewOnClose() {
-        final Scheduler s = Scheduler.inBackground();
+    void createsNewOnClose() throws Exception {
+        final Scheduler s = getInstance();
         assertThat(s).isNotNull();
         assertThat(s.isClosed()).isFalse();
         s.close();
-        final Scheduler s2 = Scheduler.inBackground();
+        final Scheduler s2 = getInstance();
         assertThat(s2).isNotNull();
         assertThat(s2).isNotSameAs(s);
         assertThat(s2.isClosed()).isFalse();
-        final Scheduler s3 = Scheduler.inBackground();
+        final Scheduler s3 = getInstance();
         assertThat(s3).isSameAs(s2);
     }
 }

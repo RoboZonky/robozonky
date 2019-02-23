@@ -27,7 +27,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.extensions.StrategyLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +49,7 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
         final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
         final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
         strategy.registerListener(sp);
-        Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
+        Tasks.SUPPORTING.scheduler().submit(strategy); // start strategy refresh after the listener was registered
         return sp;
     }
 

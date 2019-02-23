@@ -27,7 +27,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.api.Settings;
@@ -61,7 +61,7 @@ public final class NotificationListenerService implements ListenerService {
             final String config = value.get();
             readConfig(config).ifPresent(props -> {
                 LOGGER.debug("Initializing notifications for '{}' from {}.", username, config);
-                Scheduler.inBackground().submit(props, Settings.INSTANCE.getRemoteResourceRefreshInterval());
+                Tasks.SUPPORTING.scheduler().submit(props, Settings.INSTANCE.getRemoteResourceRefreshInterval());
                 CONFIGURATIONS.put(username, props);
             });
         }

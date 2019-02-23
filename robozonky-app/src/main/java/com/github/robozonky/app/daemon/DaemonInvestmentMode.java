@@ -25,6 +25,7 @@ import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
@@ -80,10 +81,9 @@ public class DaemonInvestmentMode implements InvestmentMode {
     @Override
     public ReturnCode apply(final Lifecycle lifecycle) {
         return Try.of(() -> {
-            final Scheduler s = Scheduler.inBackground();
             // schedule the tasks
-            scheduleJobs(s);
-            scheduleDaemons(s);
+            scheduleJobs(Tasks.BACKGROUND.scheduler());
+            scheduleDaemons(Tasks.MISSION_CRITICAL.scheduler());
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");

@@ -28,6 +28,7 @@ import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.management.AbstractBaseMBean;
 import com.github.robozonky.common.management.BaseMBean;
 import com.github.robozonky.common.management.Management;
@@ -116,7 +117,7 @@ class AppTest extends AbstractEventLeveragingTest {
             final ReturnCode result = main.execute(new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } finally { // clean up, shutting down executors etc.
-            final Scheduler s = Scheduler.inBackground();
+            final Scheduler s = Tasks.BACKGROUND.scheduler();
             main.exit(new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED));
             assertThat(s.isClosed()).isTrue();
         }
