@@ -26,6 +26,11 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static com.github.robozonky.common.async.TaskConstants.BACKGROUND_THREAD_FACTORY;
+import static com.github.robozonky.common.async.TaskConstants.REALTIME_THREAD_FACTORY;
+import static com.github.robozonky.common.async.TaskConstants.SCHEDULING_THREAD_FACTORY;
+import static com.github.robozonky.common.async.TaskConstants.SUPPORTING_THREAD_FACTORY;
+
 /**
  * Provides different {@link Scheduler} instances based on the needs of a particular task. There are three categories
  * of tasks:
@@ -52,9 +57,9 @@ import org.apache.logging.log4j.Logger;
  */
 public enum Tasks implements AutoCloseable {
 
-    REALTIME(() -> Executors.newFixedThreadPool(2, TaskConstants.REALTIME_THREAD_FACTORY)),
-    SUPPORTING(() -> Executors.newSingleThreadExecutor(TaskConstants.SUPPORTING_THREAD_FACTORY)),
-    BACKGROUND(() -> Executors.newSingleThreadExecutor(TaskConstants.BACKGROUND_THREAD_FACTORY));
+    REALTIME(() -> Executors.newFixedThreadPool(2, REALTIME_THREAD_FACTORY)),
+    SUPPORTING(() -> Executors.newSingleThreadExecutor(SUPPORTING_THREAD_FACTORY)),
+    BACKGROUND(() -> Executors.newSingleThreadExecutor(BACKGROUND_THREAD_FACTORY));
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Reloadable<ScheduledExecutorService> SCHEDULING_EXECUTOR =
@@ -66,7 +71,7 @@ public enum Tasks implements AutoCloseable {
     }
 
     private static ScheduledExecutorService getSchedulingExecutor() {
-        return Executors.newSingleThreadScheduledExecutor(TaskConstants.SCHEDULING_THREAD_FACTORY);
+        return Executors.newSingleThreadScheduledExecutor(SCHEDULING_THREAD_FACTORY);
     }
 
     public static void closeAll() {

@@ -20,10 +20,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Thread factory giving threads RoboZonky-specific names, assigning them to RoboZonky-specific {@link ThreadGroup}s.
- * No other changes are made, although in the future we may decide to alter thread priorities here.
+ * Thread factory giving threads RoboZonky-specific names, assigning them to RoboZonky-specific {@link ThreadGroup}s,
+ * marking them as daemon threads and assigning thread priorities as high as the {@link ThreadGroup} will allow
  */
-public class RoboZonkyThreadFactory implements ThreadFactory {
+final class RoboZonkyThreadFactory implements ThreadFactory {
 
     private final AtomicInteger nextThreadNumber = new AtomicInteger(1);
     private final ThreadGroup threadGroup;

@@ -86,10 +86,16 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
     private void resubmittingTask(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
                                   final Duration delayInBetween) {
         LOGGER.trace("Running {}.", toSchedule);
-        toSchedule.run(); // run the task that was scheduled
-        // schedule its repeat with a given delay
-        schedule(delegating, toSchedule, delayInBetween);
-        LOGGER.trace("Rescheduling complete: {}.", toSchedule);
+        try {
+            // run the task that was scheduled
+            toSchedule.run();
+            // schedule its repeat with a given delay
+            schedule(delegating, toSchedule, delayInBetween);
+            LOGGER.trace("Rescheduling complete: {}.", toSchedule);
+        } catch (final Exception ex) { // mimic behavior of ScheduledExecutorService and don't reschedule on failure
+            LOGGER.trace("Failed executing task {}.", toSchedule, ex);
+            delegating.setCurrent(new FailedScheduledFuture<>(ex));
+        }
     }
 
     private void submitToExecutor(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
