@@ -18,75 +18,53 @@ package com.github.robozonky.common.async;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.github.robozonky.internal.api.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SuppressWarnings("rawtypes")
-class SchedulerImpl implements Scheduler {
+final class ThreadPoolExecutorBasedScheduler implements Scheduler {
 
     private static final Logger LOGGER = LogManager.getLogger(SchedulerImpl.class);
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
-    private final ScheduledExecutorService executor;
+    private final ScheduledExecutorService schedulingExecutor;
+    private final ExecutorService executor;
     private final Runnable onClose;
 
-    private static ScheduledThreadPoolExecutor newSchedulerService(final int parallelism,
-                                                                   final ThreadFactory threadFactory) {
-        final ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(1, threadFactory);
-        stpe.setMaximumPoolSize(parallelism);
-        return stpe;
-    }
-
-
-    /**
-     * @param poolSize The maximum amount of threads that the scheduler will have available. Minimum is 1 and the
-     * scheduler may scale down to that number when it has no need for more threads.
-     * @param threadFactory
-     * @param onClose This exists mostly so that the background scheduler can reload itself after its {@link #close()}
-     * method had been called.
-     */
-    SchedulerImpl(final int poolSize, final ThreadFactory threadFactory, final Runnable onClose) {
-        this.executor = newSchedulerService(poolSize, threadFactory);
+    public ThreadPoolExecutorBasedScheduler(final ScheduledExecutorService schedulingExecutor,
+                                            final ExecutorService actualExecutor, final Runnable onClose) {
+        this.schedulingExecutor = schedulingExecutor;
+        this.executor = actualExecutor;
         this.onClose = onClose;
     }
 
-    SchedulerImpl(final int poolSize, final ThreadFactory threadFactory) {
-        this(poolSize, threadFactory, null);
-    }
-
-    SchedulerImpl() {
-        this(1, Executors.defaultThreadFactory());
+    private Future<?> submitToExecutor(final Runnable toSchedule) {
+        LOGGER.debug("Submitting {} for actual execution.", toSchedule);
+        return executor.submit(toSchedule);
     }
 
     @Override
     public ScheduledFuture<?> submit(final Runnable toSchedule) {
-        return this.submit(toSchedule, REFRESH);
+        return submit(toSchedule, REFRESH);
     }
 
     @Override
     public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween) {
-        return submit(toSchedule, delayInBetween, Duration.ZERO);
+        return submit(toSchedule, REFRESH, Duration.ZERO);
     }
 
     @Override
     public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween,
-                                  final Duration firstDelay) {
+                                     final Duration firstDelay) {
         LOGGER.debug("Scheduling {} every {} ms, starting in {} ms.", toSchedule, delayInBetween.toMillis(),
                      firstDelay.toMillis());
-        /*
-         * it is imperative that tasks be scheduled with fixed delay. if scheduled at fixed rate instead, pausing the
-         * executor would result in tasks queuing up. and since we use this class to schedule tasks as frequently as
-         * every second, such behavior is not acceptable.
-         */
-        return executor.scheduleWithFixedDelay(toSchedule, firstDelay.toNanos(), delayInBetween.toNanos(),
-                                               TimeUnit.NANOSECONDS);
+        final Runnable toSubmit = () -> submitToExecutor(toSchedule);
+        return schedulingExecutor.scheduleWithFixedDelay(toSubmit, firstDelay.toNanos(), delayInBetween.toNanos(),
+                                                         TimeUnit.NANOSECONDS);
     }
 
     @Override

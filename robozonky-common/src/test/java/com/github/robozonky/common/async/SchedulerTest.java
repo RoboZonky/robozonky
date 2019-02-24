@@ -16,7 +16,6 @@
 
 package com.github.robozonky.common.async;
 
-import java.time.Duration;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -60,16 +59,7 @@ class SchedulerTest {
     @Test
     void run() throws Exception {
         try (final Scheduler s = new SchedulerImpl()) {
-            final Future<?> f = s.run(RUNNABLE);
-            assertThat((Future<?>) f).isNotNull();
-            f.get(1, TimeUnit.MINUTES); // make sure it was executed
-        }
-    }
-
-    @Test
-    void runWithDelay() throws Exception {
-        try (final Scheduler s = new SchedulerImpl()) {
-            final Future<?> f = s.run(RUNNABLE, Duration.ofSeconds(1));
+            final Future<?> f = s.getExecutor().submit(RUNNABLE);
             assertThat((Future<?>) f).isNotNull();
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }

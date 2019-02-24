@@ -40,7 +40,7 @@ final class LoanCache implements AutoCloseable {
 
     private final Tenant tenant;
     private final Map<Integer, Tuple2<Loan, Instant>> storage = new ConcurrentHashMap<>(20);
-    private final ScheduledFuture<Void> evictionTask;
+    private final ScheduledFuture<?> evictionTask;
 
     public LoanCache(final Tenant tenant) {
         LOGGER.debug("Starting for {}.", tenant);

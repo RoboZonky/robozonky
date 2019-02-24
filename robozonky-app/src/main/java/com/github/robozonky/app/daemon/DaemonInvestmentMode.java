@@ -89,7 +89,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return Try.of(() -> {
             // schedule the tasks
             scheduleJobs();
-            scheduleDaemons(Tasks.MISSION_CRITICAL.scheduler());
+            scheduleDaemons(Tasks.REALTIME.scheduler());
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");

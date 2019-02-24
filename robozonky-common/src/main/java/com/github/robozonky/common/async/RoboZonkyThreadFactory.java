@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class RoboZonkyThreadFactory implements ThreadFactory {
     public Thread newThread(final Runnable runnable) {
         final String name = threadGroup.getName() + "-" + nextThreadNumber.getAndIncrement();
         final Thread thread = new Thread(threadGroup, runnable, name);
+        thread.setPriority(Thread.MAX_PRIORITY); // the actual priority will be determined by the thread group
         thread.setDaemon(true);
         return thread;
     }
