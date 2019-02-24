@@ -23,8 +23,6 @@ import java.util.concurrent.ScheduledFuture;
 @SuppressWarnings("rawtypes")
 public interface Scheduler extends AutoCloseable {
 
-    ScheduledFuture<?> submit(final Runnable toSchedule);
-
     ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween);
 
     ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay);

@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * This attempts to provide functionality similar to {@link ScheduledExecutorService}, but with a fully configurable
  * underlying {@link ThreadPoolExecutor}. ({@link ScheduledThreadPoolExecutor} does not really allow for scaling the
- * pool size as cached thread pool does.
+ * pool size as cached thread pool does.)
  * <p>
  * This is how it works:
  * <ul>
@@ -53,7 +53,7 @@ import org.apache.logging.log4j.Logger;
  */
 final class ThreadPoolExecutorBasedScheduler implements Scheduler {
 
-    private static final Logger LOGGER = LogManager.getLogger(SchedulerImpl.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executor;
@@ -103,11 +103,6 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
         final Runnable r = () -> resubmittingTask(delegating, toSchedule, delayInBetween);
         LOGGER.debug("Submitting {} for actual execution.", toSchedule);
         executor.submit(r);
-    }
-
-    @Override
-    public ScheduledFuture<?> submit(final Runnable toSchedule) {
-        return submit(toSchedule, REFRESH);
     }
 
     @Override

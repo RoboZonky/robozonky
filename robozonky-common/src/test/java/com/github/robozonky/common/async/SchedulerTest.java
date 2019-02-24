@@ -17,10 +17,9 @@
 package com.github.robozonky.common.async;
 
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -46,19 +45,8 @@ class SchedulerTest {
     }
 
     @Test
-    void submit() throws Exception {
-        try (final Scheduler s = new SchedulerImpl()) {
-            final ScheduledFuture<?> f = s.submit(RUNNABLE);
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(getInstance()).isNotNull();
-                softly.assertThat((Future<?>) f).isNotNull();
-            });
-        }
-    }
-
-    @Test
     void run() throws Exception {
-        try (final Scheduler s = new SchedulerImpl()) {
+        try (final Scheduler s = getInstance()) {
             final Future<?> f = s.getExecutor().submit(RUNNABLE);
             assertThat((Future<?>) f).isNotNull();
             f.get(1, TimeUnit.MINUTES); // make sure it was executed
@@ -77,5 +65,10 @@ class SchedulerTest {
         assertThat(s2.isClosed()).isFalse();
         final Scheduler s3 = getInstance();
         assertThat(s3).isSameAs(s2);
+    }
+
+    @AfterEach
+    void closeAll() {
+        Tasks.closeAll();
     }
 }

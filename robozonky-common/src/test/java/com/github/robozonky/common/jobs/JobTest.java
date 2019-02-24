@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ class JobTest {
             softly.assertThat(j.startIn()).isGreaterThanOrEqualTo(Duration.ZERO);
             softly.assertThat(j.repeatEvery()).isEqualTo(Duration.ZERO);
             softly.assertThat(j.killIn()).isGreaterThan(Duration.ZERO);
+            softly.assertThat(j.prioritize()).isFalse();
         });
     }
 

@@ -58,35 +58,35 @@ import static com.github.robozonky.common.async.TaskConstants.SUPPORTING_THREAD_
 public enum Tasks implements AutoCloseable {
 
     REALTIME(() -> Executors.newFixedThreadPool(2, REALTIME_THREAD_FACTORY)),
-    SUPPORTING(() -> Executors.newSingleThreadExecutor(SUPPORTING_THREAD_FACTORY)),
+    SUPPORTING(() -> Executors.newFixedThreadPool(2, SUPPORTING_THREAD_FACTORY)),
     BACKGROUND(() -> Executors.newSingleThreadExecutor(BACKGROUND_THREAD_FACTORY));
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Reloadable<ScheduledExecutorService> SCHEDULING_EXECUTOR =
-            Reloadable.with(Tasks::getSchedulingExecutor).build();
+            Reloadable.with(Tasks::createSchedulingExecutor).build();
     private final Reloadable<? extends Scheduler> scheduler;
 
     Tasks(final Supplier<ExecutorService> service) {
-        this.scheduler = Reloadable.with(() -> newScheduler(service.get())).build();
+        this.scheduler = Reloadable.with(() -> createScheduler(service.get())).build();
     }
 
-    private static ScheduledExecutorService getSchedulingExecutor() {
+    private static ScheduledExecutorService createSchedulingExecutor() {
         return Executors.newSingleThreadScheduledExecutor(SCHEDULING_THREAD_FACTORY);
     }
 
     public static void closeAll() {
         if (SCHEDULING_EXECUTOR.hasValue()) {
-            getSchedulingExecutor().shutdown();
+            schedulingExecutor().shutdown();
             SCHEDULING_EXECUTOR.clear();
         }
         Stream.of(values()).forEach(Tasks::close);
     }
 
-    public static ScheduledExecutorService schedulingExecutor() {
+    static ScheduledExecutorService schedulingExecutor() {
         return SCHEDULING_EXECUTOR.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
     }
 
-    private Scheduler newScheduler(final ExecutorService actualExecutor) {
+    private Scheduler createScheduler(final ExecutorService actualExecutor) {
         LOGGER.debug("Instantiating new background scheduler {}.", this);
         return new ThreadPoolExecutorBasedScheduler(schedulingExecutor(), actualExecutor, this::clear);
     }
