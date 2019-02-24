@@ -38,8 +38,6 @@ import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.stubbing.Answer;
@@ -54,7 +52,6 @@ import static org.mockito.Mockito.*;
  */
 public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest {
 
-    protected final Logger LOGGER = LogManager.getLogger();
     protected static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
                                                                  false),
             SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);

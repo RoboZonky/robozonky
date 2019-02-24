@@ -52,7 +52,7 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
     private void waitForEventProcessing() {
         while (!EventFiringQueue.INSTANCE.getQueue().isEmpty()) {
-            LOGGER.debug("Sleeping a while to wait for events to be processed.");
+            logger.debug("Sleeping a while to wait for events to be processed.");
             try {
                 Thread.sleep(100);
             } catch (final InterruptedException ex) {

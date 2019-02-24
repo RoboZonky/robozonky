@@ -42,6 +42,7 @@ public final class TenantBuilder {
         try {
             return f.get();
         } catch (final InterruptedException | ExecutionException ex) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(ex);
         }
     }
