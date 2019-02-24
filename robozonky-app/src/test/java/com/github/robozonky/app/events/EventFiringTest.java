@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.mockito.Mockito.*;
 
-class EventFiringRunnableTest extends AbstractRoboZonkyTest {
+class EventFiringTest extends AbstractRoboZonkyTest {
 
     @Test
     void endsLoop() throws InterruptedException {
