@@ -52,30 +52,32 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
-        submit(executor, StrategyExecutor.forInvesting(tenant, investor)::get, Duration.ofSeconds(1));
-        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, secondaryMarketplaceCheckPeriod,
-               Duration.ofMillis(250));
+        submit(executor, StrategyExecutor.forInvesting(tenant, investor)::get, InvestingSession.class,
+               Duration.ofSeconds(1));
+        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, PurchasingSession.class,
+               secondaryMarketplaceCheckPeriod, Duration.ofMillis(250));
     }
 
-    private void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter) {
-        submit(executor, r, repeatAfter, Duration.ZERO);
+    private void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter) {
+        submit(executor, r, type, repeatAfter, Duration.ZERO);
     }
 
-    void submit(final Scheduler executor, final Runnable r, final Duration repeatAfter, final Duration initialDelay) {
-        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}.", r, executor, repeatAfter,
+    void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
+                final Duration initialDelay) {
+        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}.", type, executor, repeatAfter,
                      initialDelay);
-        executor.submit(new Skippable(r, tenant), repeatAfter, initialDelay);
+        executor.submit(new Skippable(r, type, tenant), repeatAfter, initialDelay);
     }
 
     private void scheduleJobs() {
         // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submit(getSchedulerForJob(j), j.payload(), j.repeatEvery(), j.startIn()));
+                .forEach(j -> submit(getSchedulerForJob(j), j.payload(), j.getClass(), j.repeatEvery(), j.startIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
-                .forEach(j -> submit(getSchedulerForJob(j), () -> j.payload().accept(tenant), j.repeatEvery(),
-                                     j.startIn()));
+                .forEach(j -> submit(getSchedulerForJob(j), () -> j.payload().accept(tenant), j.getClass(),
+                                     j.repeatEvery(), j.startIn()));
         LOGGER.debug("Job scheduling over.");
     }
 

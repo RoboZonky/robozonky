@@ -64,15 +64,12 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
         this.onClose = onClose;
     }
 
-    private ScheduledFuture<?> schedule(final Runnable toSchedule, final Duration delayInBetween) {
-        LOGGER.debug("Scheduling {} to happen after {} ms.", toSchedule, delayInBetween.toMillis());
-        return schedulingExecutor.schedule(toSchedule, delayInBetween.toNanos(), TimeUnit.NANOSECONDS);
-    }
-
     private void schedule(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
                           final Duration initialDelay, final Duration delayInBetween) {
         final Runnable toSubmit = () -> submitToExecutor(delegating, toSchedule, delayInBetween);
-        final ScheduledFuture<?> f = schedule(toSubmit, initialDelay);
+        LOGGER.debug("Scheduling {} to happen after {} ms.", toSchedule, initialDelay.toMillis());
+        final ScheduledFuture<?> f = schedulingExecutor.schedule(toSubmit, initialDelay.toNanos(),
+                                                                 TimeUnit.NANOSECONDS);
         delegating.setCurrent(f);
     }
 
@@ -89,7 +86,6 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
             toSchedule.run();
             // schedule its repeat with a given delay
             schedule(delegating, toSchedule, delayInBetween);
-            LOGGER.trace("Rescheduling complete: {}.", toSchedule);
         } catch (final Exception ex) { // mimic behavior of ScheduledExecutorService and don't reschedule on failure
             LOGGER.trace("Failed executing task {}.", toSchedule, ex);
             delegating.setCurrent(new FailedScheduledFuture<>(ex));

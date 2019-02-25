@@ -27,23 +27,31 @@ final class Skippable implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(Skippable.class);
 
     private final PowerTenant tenant;
+    private final Class<?> type;
     private final Runnable toRun;
 
-    public Skippable(final Runnable toRun, final PowerTenant tenant) {
+    public Skippable(final Runnable toRun, final Class<?> type, final PowerTenant tenant) {
         this.toRun = toRun;
+        this.type = type;
+        this.tenant = tenant;
+    }
+
+    Skippable(final Runnable toRun, final PowerTenant tenant) {
+        this.toRun = toRun;
+        this.type = toRun.getClass();
         this.tenant = tenant;
     }
 
     @Override
     public void run() {
         if (!tenant.isAvailable()) {
-            LOGGER.debug("Not running {} on account of Zonky token not being available.", toRun);
+            LOGGER.debug("Not running {} on account of Zonky token not being available.", this);
             return;
         }
-        LOGGER.trace("Running {}.", toRun);
+        LOGGER.trace("Running {}.", this);
         try {
             toRun.run();
-            LOGGER.trace("Finished {}.", toRun);
+            LOGGER.trace("Finished {}.", this);
         } catch (final Exception ex) {
             LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
             tenant.fire(roboZonkyDaemonFailed(ex));
@@ -54,7 +62,7 @@ final class Skippable implements Runnable {
     @Override
     public String toString() {
         return "Skippable{" +
-                "toRun=" + toRun +
+                "type=" + type.getCanonicalName() +
                 '}';
     }
 }
