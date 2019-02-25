@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

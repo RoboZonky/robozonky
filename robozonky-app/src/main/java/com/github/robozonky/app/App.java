@@ -25,7 +25,7 @@ import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.management.Management;
 import io.vavr.Lazy;
 import io.vavr.control.Try;
@@ -89,10 +89,7 @@ public class App implements Runnable {
         Events.global().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
-        shutdownHooks.register(() -> {
-            final Scheduler s = Scheduler.inBackground(); // get it at the start, so we close the right thing at the end
-            return Optional.of(r -> s.close());
-        });
+        shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         return m.apply(getLifecycle());
     }

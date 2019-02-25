@@ -19,7 +19,7 @@ package com.github.robozonky.app.runtime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import com.github.robozonky.app.AbstractEventLeveragingTest;
+import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 

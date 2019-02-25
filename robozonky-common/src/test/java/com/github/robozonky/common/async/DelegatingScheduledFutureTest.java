@@ -16,20 +16,27 @@
 
 package com.github.robozonky.common.async;
 
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class SchedulerServiceTest {
+class DelegatingScheduledFutureTest {
 
     @Test
-    void defaults() {
-        final ScheduledExecutorService expected = mock(ScheduledExecutorService.class);
-        final SchedulerService s = (parallelism, threadFactory) -> expected;
-        final ScheduledExecutorService ses = s.newScheduledExecutorService(1);
-        assertThat(ses).isSameAs(expected);
+    void getters() {
+        final DelegatingScheduledFuture<?> f = new DelegatingScheduledFuture<>();
+        final ScheduledFuture<?> f2 = mock(ScheduledFuture.class);
+        f.setCurrent(f2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(f.getDelay(TimeUnit.NANOSECONDS)).isEqualTo(0);
+            softly.assertThat(f.isCancelled()).isFalse();
+            softly.assertThat(f.isDone()).isFalse();
+            softly.assertThat(f.cancel(true)).isFalse();
+            softly.assertThat(f.compareTo(f2)).isEqualTo(0);
+        });
     }
 }

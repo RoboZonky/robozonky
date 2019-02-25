@@ -18,6 +18,7 @@ package com.github.robozonky.app.tenant;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -27,7 +28,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.extensions.StrategyLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,12 +46,16 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
         // no external instances
     }
 
-    public static StrategyProvider createFor(final String strategyLocation) {
+    public static Future<StrategyProvider> createFor(final String strategyLocation) {
         final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
         final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
         strategy.registerListener(sp);
-        Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
-        return sp;
+        // start strategy refresh after the listener was registered
+        return Tasks.SUPPORTING.scheduler().getExecutor().submit(() -> {
+            // return a future; we only want to read the strategy provider when it's been initialized
+            strategy.run();
+            return sp;
+        });
     }
 
     public static StrategyProvider empty() { // for testing purposes only

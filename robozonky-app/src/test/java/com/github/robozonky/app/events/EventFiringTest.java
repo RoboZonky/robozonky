@@ -21,13 +21,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.mockito.Mockito.*;
 
-class EventFiringRunnableTest {
+class EventFiringTest extends AbstractRoboZonkyTest {
 
     @Test
     void endsLoop() throws InterruptedException {
@@ -43,7 +44,7 @@ class EventFiringRunnableTest {
         q.put(last);
         // will interrupt current thread, therefore run in on a different thread than this
         final CompletableFuture<Void> task = CompletableFuture.runAsync(() -> {
-            final EventFiringRunnable e = new EventFiringRunnable(q);
+            final EventFiring e = new EventFiring(q);
             e.run();
         });
         assertTimeout(Duration.ofSeconds(5), task::join); // make sure it's finished

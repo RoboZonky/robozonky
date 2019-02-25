@@ -17,15 +17,12 @@
 package com.github.robozonky.app.events;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 
-import com.github.robozonky.common.async.Reloadable;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,71 +33,48 @@ import org.apache.logging.log4j.Logger;
 final class EventFiringQueue {
 
     public static final EventFiringQueue INSTANCE = new EventFiringQueue();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final Logger LOGGER = LogManager.getLogger(EventFiringQueue.class);
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-    private final Reloadable<Thread> firingThread;
 
-    private EventFiringQueue() {
-        this(EventFiringRunnable::new);
+    EventFiringQueue() {
+        // no external instances
     }
 
-    /**
-     * Only use for testing purposes.
-     * @param threadSupplier
-     */
-    EventFiringQueue(final Function<BlockingQueue<Runnable>, EventFiringRunnable> threadSupplier) {
-        firingThread = Reloadable.with(() -> {
-            final Runnable r = threadSupplier.apply(queue);
-            LOGGER.debug("Creating new thread with {}.", r);
-            final Thread t = Scheduler.THREAD_FACTORY.newThread(r);
-            t.start();
-            LOGGER.debug("Started event firing thread {}.", t.getName());
-            return t;
-        }).build();
-    }
-
-    private static void await(final CyclicBarrier barrier, final long id) {
+    private static void submittable(final Runnable runnable, final long id, final CountDownLatch latch) {
+        LOGGER.trace("Queue starting event {}.", id);
         try {
-            LOGGER.trace("Await event {}.", id);
-            barrier.await();
-        } catch (final InterruptedException | BrokenBarrierException e) {
-            LOGGER.debug("Event {} interrupted.", id, e);
-            Thread.currentThread().interrupt();
+            runnable.run();
         } finally {
-            LOGGER.trace("Await over for event {}.", id);
+            latch.countDown();
+            LOGGER.trace("Queue finished processing event {}.", id);
         }
     }
 
-    private void ensureConsumerIsAlive() {
-        ensureConsumerIsAlive(false);
-    }
-
-    private void ensureConsumerIsAlive(final boolean isRestarted) {
-        final boolean isReady = firingThread.get().fold(t -> {
-            LOGGER.debug("Failed retrieving event firing thread.", t);
-            return false;
-        }, Thread::isAlive);
-        if (isReady) { // the thread is available
-            return;
-        } else if (isRestarted) { // the thread is not available even though it really should have been by now
-            throw new IllegalStateException("Event firing thread could not be started.");
-        } else {
-            LOGGER.debug("Consumer thread not alive, restarting.");
-            firingThread.clear();
-            ensureConsumerIsAlive(true); // "true" here prevents endless recursion
+    private static void waitForFiring(final long id, final CountDownLatch latch) {
+        try {
+            LOGGER.trace("Await event {}.", id);
+            latch.await();
+        } catch (final InterruptedException e) {
+            LOGGER.debug("Event {} interrupted.", id, e);
+            Thread.currentThread().interrupt();
+        } finally {
+            LOGGER.debug("Event {} processed.", id);
         }
     }
 
     private synchronized void queue(final Runnable runnable, final long id) {
-        ensureConsumerIsAlive(); // lazy creation of the thread that will be emptying the queue
         try {
             queue.put(runnable);
         } catch (final InterruptedException ex) {
             LOGGER.debug("Interrupted while queuing event {}.", id, ex);
             Thread.currentThread().interrupt();
         }
+    }
+
+    BlockingQueue<Runnable> getQueue() {
+        return queue;
     }
 
     /**
@@ -110,20 +84,8 @@ final class EventFiringQueue {
     public CompletableFuture<Void> fire(final Runnable runnable) {
         final long id = counter.getAndIncrement();
         LOGGER.debug("Queueing event {}.", id);
-        final CyclicBarrier b = new CyclicBarrier(2); // the request thread and the processing thread
-        final Runnable toSubmit = () -> {
-            LOGGER.trace("Queue starting event {}.", id);
-            try {
-                runnable.run();
-            } finally {
-                await(b, id);
-                LOGGER.trace("Queue finished processing event {}.", id);
-            }
-        };
-        queue(toSubmit, id);
-        return CompletableFuture.runAsync(() -> {
-            await(b, id);
-            LOGGER.debug("Event {} processed.", id);
-        }, Scheduler.inBackground().getExecutor());
+        final CountDownLatch b = new CountDownLatch(1); // the calling thread will wait for the firing thread
+        queue(() -> submittable(runnable, id, b), id);
+        return CompletableFuture.runAsync(() -> waitForFiring(id, b), Tasks.BACKGROUND.scheduler().getExecutor());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,14 @@ import com.github.robozonky.api.SessionInfo;
 /**
  * Implement in user code to allow handling @{@link Event}s. Different listeners for the same event may be executed
  * by different threads and concurrently. If multiple listeners are somehow interconnected, synchronization between
- * them must be maintained by the listeners themselves.
+ * them must be maintained by the listeners themselves. Users should not expect the listeners to be called immediately
+ * after the event is triggered, as the listeners may be executed on low-priority background threads.
  * @param <E> Event type to handle.
  */
 public interface EventListener<E extends Event> {
 
     /**
-     * Implementation must be thread-safe. Never include any time-consuming logic, since RoboZonky core will block
-     * until all of this code is executed. If you need to submit a long-running task, do it asynchronously and do not
-     * block on the result.
+     * Implementation must be thread-safe.
      * @param event Event that is being listened to.
      * @param sessionInfo Information about the user firing the event.
      */

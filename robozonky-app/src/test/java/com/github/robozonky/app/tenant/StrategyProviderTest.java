@@ -19,16 +19,24 @@ package com.github.robozonky.app.tenant;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.google.common.io.Files;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class StrategyProviderTest {
+class StrategyProviderTest extends AbstractRoboZonkyTest {
 
     private static final String MINIMAL_STRATEGY = "Robot má udržovat konzervativní portfolio.";
+
+    private static File newStrategyFile() throws IOException {
+        final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
+        Files.write(MINIMAL_STRATEGY, strategy, Defaults.CHARSET);
+        return strategy;
+    }
 
     @Test
     void setAndWrong() {
@@ -68,15 +76,9 @@ class StrategyProviderTest {
         });
     }
 
-    private static File newStrategyFile() throws IOException {
-        final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
-        Files.write(MINIMAL_STRATEGY, strategy, Defaults.CHARSET);
-        return strategy;
-    }
-
     @Test
-    void loadStrategyAsFile() throws IOException {
-        final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
+    void loadStrategyAsFile() throws IOException, ExecutionException, InterruptedException {
+        final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath()).get();
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
@@ -86,9 +88,9 @@ class StrategyProviderTest {
     }
 
     @Test
-    void loadWrongStrategyAsFile() throws IOException {
+    void loadWrongStrategyAsFile() throws IOException, ExecutionException, InterruptedException {
         final File tmp = File.createTempFile("robozonky-", ".cfg");
-        final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
+        final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath()).get();
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
@@ -98,9 +100,9 @@ class StrategyProviderTest {
     }
 
     @Test
-    void loadStrategyAsUrl() throws IOException {
+    void loadStrategyAsUrl() throws IOException, ExecutionException, InterruptedException {
         final String url = newStrategyFile().toURI().toURL().toString();
-        final StrategyProvider r = StrategyProvider.createFor(url);
+        final StrategyProvider r = StrategyProvider.createFor(url).get();
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
@@ -119,5 +121,4 @@ class StrategyProviderTest {
             softly.assertThat(r.getForReservations()).isEmpty();
         });
     }
-
 }

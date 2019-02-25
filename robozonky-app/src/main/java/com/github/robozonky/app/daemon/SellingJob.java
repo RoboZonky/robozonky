@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,5 +31,10 @@ final class SellingJob implements TenantJob {
     @Override
     public Duration repeatEvery() {
         return Duration.ofDays(1);
+    }
+
+    @Override
+    public boolean prioritize() {
+        return true; // this is a key feature of the application and only happens once per day, so prioritize
     }
 }

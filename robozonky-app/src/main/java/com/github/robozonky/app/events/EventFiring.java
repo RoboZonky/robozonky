@@ -18,26 +18,32 @@ package com.github.robozonky.app.events;
 
 import java.util.concurrent.BlockingQueue;
 
+import com.github.robozonky.common.jobs.SimplePayload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * Payload for the {@link EventFiringQueue}'s queue-polling thread.
  */
-final class EventFiringRunnable implements Runnable {
+final class EventFiring implements SimplePayload {
 
-    private static final Logger LOGGER = LogManager.getLogger(EventFiringRunnable.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final BlockingQueue<Runnable> queue;
 
-    public EventFiringRunnable(final BlockingQueue<Runnable> queue) {
+    public EventFiring() {
+        this(EventFiringQueue.INSTANCE.getQueue());
+    }
+
+    EventFiring(final BlockingQueue<Runnable> queue) {
         this.queue = queue;
     }
 
     @Override
     public void run() {
+        LOGGER.debug("Starting event firing.");
         boolean repeat = true;
-        do {
+        while (repeat && !queue.isEmpty()) {
             try {
                 queue.take().run();
             } catch (final InterruptedException ex) {
@@ -45,6 +51,7 @@ final class EventFiringRunnable implements Runnable {
                 Thread.currentThread().interrupt();
                 repeat = false;
             }
-        } while (repeat);
+        }
+        LOGGER.debug("Event firing complete.");
     }
 }

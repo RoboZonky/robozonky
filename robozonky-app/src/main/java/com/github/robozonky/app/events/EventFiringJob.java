@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.async;
+package com.github.robozonky.app.events;
 
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
-@SuppressWarnings("rawtypes")
-public interface Scheduler extends AutoCloseable {
+import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.common.jobs.SimplePayload;
 
-    ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween);
+final class EventFiringJob implements SimpleJob {
 
-    ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay);
+    @Override
+    public SimplePayload payload() {
+        return new EventFiring();
+    }
 
-    boolean isClosed();
+    @Override
+    public Duration startIn() {
+        return Duration.ZERO;
+    }
 
-    ExecutorService getExecutor();
+    @Override
+    public Duration repeatEvery() {
+        return Duration.ofSeconds(5);
+    }
 }

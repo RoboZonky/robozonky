@@ -19,12 +19,13 @@ package com.github.robozonky.app.configuration;
 import java.io.File;
 import java.util.Optional;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class SecretProviderFactoryTest {
+class SecretProviderFactoryTest extends AbstractRoboZonkyTest {
 
     private static CommandLine mockCli(final File file, final char... password) {
         final CommandLine delegate = mock(CommandLine.class);
