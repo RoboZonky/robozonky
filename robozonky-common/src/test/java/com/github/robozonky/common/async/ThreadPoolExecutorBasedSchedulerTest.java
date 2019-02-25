@@ -39,8 +39,8 @@ class ThreadPoolExecutorBasedSchedulerTest extends AbstractMinimalRoboZonkyTest 
             s1.shutdown();
             s2.shutdown();
         })) {
-            s.submit(r, Duration.ofMillis(5));
-            Thread.sleep(20);
+            s.submit(r, Duration.ofMillis(1));
+            Thread.sleep(50); // give A LOT OF TIME for the repeat to actually happen
         }
         assertThat(accumulator.longValue()).isGreaterThanOrEqualTo(2);
     }
