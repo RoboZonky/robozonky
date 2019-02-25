@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.github.robozonky.internal.api.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -54,7 +53,6 @@ import org.apache.logging.log4j.Logger;
 final class ThreadPoolExecutorBasedScheduler implements Scheduler {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executor;
     private final Runnable onClose;
