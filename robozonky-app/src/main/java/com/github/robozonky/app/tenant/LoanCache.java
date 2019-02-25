@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.common.async.Scheduler;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
 import io.vavr.Tuple;
@@ -40,12 +40,12 @@ final class LoanCache implements AutoCloseable {
 
     private final Tenant tenant;
     private final Map<Integer, Tuple2<Loan, Instant>> storage = new ConcurrentHashMap<>(20);
-    private final ScheduledFuture<Void> evictionTask;
+    private final ScheduledFuture<?> evictionTask;
 
     public LoanCache(final Tenant tenant) {
         LOGGER.debug("Starting for {}.", tenant);
         this.tenant = tenant;
-        this.evictionTask = Scheduler.inBackground().submit(this::evict, EVICT_EVERY, EVICT_EVERY);
+        this.evictionTask = Tasks.BACKGROUND.scheduler().submit(this::evict, EVICT_EVERY, EVICT_EVERY);
     }
 
     private static boolean isExpired(final Tuple2<Loan, Instant> p) {

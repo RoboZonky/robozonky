@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -32,8 +34,18 @@ public final class TenantBuilder {
     private boolean dryRun = false;
     private SecretProvider secrets = null;
     private Supplier<Lifecycle> lifecycle = null;
-    private StrategyProvider strategyProvider = StrategyProvider.empty();
+    private Supplier<StrategyProvider> strategyProvider = StrategyProvider::empty;
     private ApiProvider api;
+
+    private static StrategyProvider supplyStrategyProvider(final String strategyLocation) {
+        final Future<StrategyProvider> f = StrategyProvider.createFor(strategyLocation);
+        try {
+            return f.get();
+        } catch (final InterruptedException | ExecutionException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(ex);
+        }
+    }
 
     public TenantBuilder withSecrets(final SecretProvider secrets) {
         this.secrets = secrets;
@@ -41,7 +53,7 @@ public final class TenantBuilder {
     }
 
     public TenantBuilder withStrategy(final String strategyLocation) {
-        this.strategyProvider = StrategyProvider.createFor(strategyLocation);
+        this.strategyProvider = () -> TenantBuilder.supplyStrategyProvider(strategyLocation);
         return this;
     }
 
@@ -76,7 +88,6 @@ public final class TenantBuilder {
         final BooleanSupplier zonkyAvailability = lifecycle == null ? () -> true : () -> lifecycle.get().isOnline();
         return new PowerTenantImpl(sessionInfo, apis, zonkyAvailability, strategyProvider, tokenSupplier);
     }
-
 }
 
 

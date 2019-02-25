@@ -20,12 +20,13 @@ import java.time.Duration;
 
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-class DaemonShutdownHookTest {
+class DaemonShutdownHookTest extends AbstractRoboZonkyTest {
 
     @Test
     void runtime() {

@@ -30,6 +30,7 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
@@ -37,7 +38,6 @@ import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
-import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.stubbing.Answer;
@@ -143,8 +143,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     @AfterEach
-    protected void reinitScheduler() {
-        reset(TestingSchedulerService.MOCK_SERVICE);
+    void closeSchedulers() {
+        Tasks.closeAll();
     }
 
     @AfterEach

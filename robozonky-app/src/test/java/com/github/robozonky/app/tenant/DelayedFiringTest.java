@@ -19,12 +19,13 @@ package com.github.robozonky.app.tenant;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class DelayedFiringTest {
+class DelayedFiringTest extends AbstractRoboZonkyTest {
 
     private static void assertCancelled(final DelayedFiring d) {
         assertThatThrownBy(d::run).isInstanceOf(IllegalStateException.class);

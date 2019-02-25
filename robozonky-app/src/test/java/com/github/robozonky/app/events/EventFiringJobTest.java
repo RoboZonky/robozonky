@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.events;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.common.jobs.SimpleJob;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-
-class ReservationsProcessingJobTest extends AbstractRoboZonkyTest {
+class EventFiringJobTest extends AbstractRoboZonkyTest {
 
     @Test
     void getters() {
-        final TenantJob j = new ReservationsProcessingJob();
-        assertThat(j.payload()).isInstanceOf(ReservationsProcessing.class);
-        assertThat(j.startIn()).isEqualTo(Duration.ofHours(2));
-        assertThat(j.repeatEvery())
-                .isGreaterThanOrEqualTo(Duration.ZERO)
-                .isLessThanOrEqualTo(Duration.ofHours(12));
+        final SimpleJob j = new EventFiringJob();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(j.payload()).isInstanceOf(EventFiring.class);
+            softly.assertThat(j.startIn()).isEqualTo(Duration.ZERO);
+            softly.assertThat(j.repeatEvery()).isLessThanOrEqualTo(Duration.ofSeconds(5));
+        });
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
                         logger.warn("Async reload failed, operating with stale value.", t);
                         return null;
                     });
-            return CompletableFuture.runAsync(asyncOperation, Scheduler.inBackground().getExecutor());
+            return CompletableFuture.runAsync(asyncOperation, Tasks.SUPPORTING.scheduler().getExecutor());
         } else {
             logger.trace("Reload already in progress on {} with {}.", this, old);
             return old;

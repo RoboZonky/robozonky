@@ -20,11 +20,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class ReturnCodeTest {
+class ReturnCodeTest extends AbstractRoboZonkyTest {
 
     @Test
     void noReturnCodeTwice() {

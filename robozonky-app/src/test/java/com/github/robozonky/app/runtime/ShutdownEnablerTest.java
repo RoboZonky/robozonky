@@ -26,13 +26,14 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 
-class ShutdownEnablerTest {
+class ShutdownEnablerTest extends AbstractRoboZonkyTest {
 
     @Test
     void standard() {

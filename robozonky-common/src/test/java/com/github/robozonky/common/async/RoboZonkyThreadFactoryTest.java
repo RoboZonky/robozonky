@@ -16,19 +16,22 @@
 
 package com.github.robozonky.common.async;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class RoboZonkyThreadFactoryTest {
 
     @Test
     void daemon() {
         final ThreadGroup tg = new ThreadGroup("testing");
+        tg.setMaxPriority(Thread.MIN_PRIORITY);
         final RoboZonkyThreadFactory f = new RoboZonkyThreadFactory(tg);
         final Thread t = f.newThread(() -> {
         });
-        assertThat(t.isDaemon()).isTrue();
+        SoftAssertions.assertSoftly(softly-> {
+            softly.assertThat(t.isDaemon()).isTrue();
+            softly.assertThat(t.getPriority()).isEqualTo(Thread.MIN_PRIORITY);
+        });
     }
 
 }

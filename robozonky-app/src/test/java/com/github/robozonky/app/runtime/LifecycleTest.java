@@ -23,8 +23,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -74,6 +74,7 @@ class LifecycleTest extends AbstractEventLeveragingTest {
         assertSoftly(softly -> {
             softly.assertThat(h.getZonkyApiVersion()).isNotEmpty();
             softly.assertThat(h.getZonkyApiLastUpdate()).isNotNull();
+            softly.assertThat(h.isOnline()).isTrue();
         });
         verify(hooks).register(any()); // 2 shutdown hooks have been registered
     }

@@ -20,12 +20,13 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class BlockedTest {
+class BlockedTest extends AbstractRoboZonkyTest {
 
     @Test
     void fromBigDecimal() {

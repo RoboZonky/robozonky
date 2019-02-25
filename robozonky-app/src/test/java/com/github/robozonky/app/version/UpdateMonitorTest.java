@@ -18,6 +18,7 @@ package com.github.robozonky.app.version;
 
 import java.util.Collections;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,7 +34,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
-class UpdateMonitorTest {
+class UpdateMonitorTest extends AbstractRoboZonkyTest {
 
     private static ClientAndServer server;
     private static String serverUrl;

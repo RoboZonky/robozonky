@@ -14,32 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.app.events;
 
-import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
 
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.common.jobs.JobService;
+import com.github.robozonky.common.jobs.SimpleJob;
 import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
 
-final class ReservationsProcessingJob implements TenantJob {
+/**
+ * Reads {@link EventFiringQueue} in regular intervals and fires the stored {@link Event}s using {@link EventFiring}.
+ */
+public final class EventFiringJobService implements JobService {
+
+    private static final SimpleJob INSTANCE = new EventFiringJob();
 
     @Override
-    public TenantPayload payload() {
-        return new ReservationsProcessing();
+    public Collection<SimpleJob> getSimpleJobs() {
+        return Collections.singleton(INSTANCE);
     }
 
     @Override
-    public Duration startIn() {
-        return Duration.ofHours(2);
-    }
-
-    @Override
-    public Duration repeatEvery() {
-        return Duration.ofHours(4);
-    }
-
-    @Override
-    public boolean prioritize() {
-        return false; // this is a time-sensitive and infrequent feature, so prioritize
+    public Collection<TenantJob> getTenantJobs() {
+        return Collections.emptyList();
     }
 }
