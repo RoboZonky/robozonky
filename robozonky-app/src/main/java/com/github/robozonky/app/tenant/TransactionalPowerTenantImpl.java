@@ -18,7 +18,6 @@ package com.github.robozonky.app.tenant;
 
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
@@ -57,13 +56,13 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
-    public CompletableFuture<Void> fire(final SessionEvent event) {
+    public Runnable fire(final SessionEvent event) {
         LOGGER.trace("Event stored within transaction: {}.", event);
         return getDelayedFiring().delay(() -> parent.fire(event));
     }
 
     @Override
-    public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
+    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
         LOGGER.trace("Lazy event stored within transaction: {}.", event);
         return getDelayedFiring().delay(() -> parent.fire(event));
     }

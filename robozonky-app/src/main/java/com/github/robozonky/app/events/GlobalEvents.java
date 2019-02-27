@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.GlobalEvent;
@@ -40,12 +40,12 @@ public final class GlobalEvents {
     }
 
     @SuppressWarnings("rawtypes")
-    public CompletableFuture<Void> fire(final LazyEvent<? extends GlobalEvent> event) {
+    public Runnable fire(final LazyEvent<? extends GlobalEvent> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
-        final CompletableFuture[] futures = SessionEvents.all().stream()
+        final Runnable[] futures = SessionEvents.all().stream()
                 .map(s -> s.fireAny(event))
-                .toArray(CompletableFuture[]::new);
-        return CompletableFuture.allOf(futures);
+                .toArray(Runnable[]::new);
+        return () -> Stream.of(futures).forEach(Runnable::run);
     }
 
     /**
@@ -54,8 +54,7 @@ public final class GlobalEvents {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public CompletableFuture<Void> fire(final GlobalEvent event) {
+    public Runnable fire(final GlobalEvent event) {
         return fire(EventFactory.async((Class<GlobalEvent>) event.getClass(), () -> event));
     }
-
 }

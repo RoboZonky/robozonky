@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,11 +40,11 @@ class EventFiringQueueTest extends AbstractRoboZonkyTest {
         final Runnable r = mock(Runnable.class);
         final Runnable r2 = mock(Runnable.class);
         q.fire(r);
-        final CompletableFuture<Void> f = q.fire(r2);
+        final Runnable f = q.fire(r2);
         verify(r, never()).run();
         verify(r2, never()).run();
         new EventFiring(q.getQueue()).run();
-        f.join();
+        f.run();
         verify(r, times(1)).run();
         verify(r2, times(1)).run();
     }

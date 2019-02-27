@@ -16,9 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
@@ -43,12 +40,11 @@ class DelayedFiringTest extends AbstractRoboZonkyTest {
     @Test
     void cancellationDisablesInstance() {
         final DelayedFiring d = new DelayedFiring();
-        final CompletableFuture<Void> result = d.delay(mock(Runnable.class));
+        d.delay(mock(Runnable.class));
         assertThat(d.isPending()).isTrue();
         d.cancel();
         assertThat(d.isPending()).isFalse();
         assertCancelled(d);
-        assertThatThrownBy(result::join).hasCauseInstanceOf(CancellationException.class);
     }
 
 }

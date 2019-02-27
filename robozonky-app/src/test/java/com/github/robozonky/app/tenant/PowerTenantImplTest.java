@@ -153,7 +153,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
                                                                     mockPortfolioOverview(10_000))))
-                    .join();
+                    .run();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)

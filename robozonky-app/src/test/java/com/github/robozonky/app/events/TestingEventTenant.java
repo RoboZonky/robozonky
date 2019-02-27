@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -32,12 +30,12 @@ class TestingEventTenant extends TestingTenant implements PowerTenant {
     }
 
     @Override
-    public CompletableFuture<Void> fire(final SessionEvent event) {
+    public Runnable fire(final SessionEvent event) {
         return Events.forSession(this).fire(event);
     }
 
     @Override
-    public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
+    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
         return Events.forSession(this).fire(event);
     }
 }
