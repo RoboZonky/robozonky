@@ -18,7 +18,6 @@ package com.github.robozonky.app.tenant;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -122,9 +121,9 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
                                                                  .withSecrets(SECRETS)
                                                                  .build());
         try {
-            final CompletableFuture<Void> f = t.fire(roboZonkyDaemonFailed(new IllegalStateException()));
+            final Runnable f = t.fire(roboZonkyDaemonFailed(new IllegalStateException()));
             t.commit();
-            f.join();
+            f.run();
         } finally {
             t.close();
         }
@@ -143,11 +142,10 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
                                                                  .withSecrets(SECRETS)
                                                                  .build());
         try {
-            final CompletableFuture<Void> f =
-                    t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
-                                                                       mockPortfolioOverview(10_000))));
+            final Runnable f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
+                                                                                  mockPortfolioOverview(10_000))));
             t.commit();
-            f.join();
+            f.run();
         } finally {
             t.close();
         }

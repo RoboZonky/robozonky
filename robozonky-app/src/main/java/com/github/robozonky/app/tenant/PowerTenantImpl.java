@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -145,12 +144,12 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public CompletableFuture<Void> fire(final SessionEvent event) {
+    public Runnable fire(final SessionEvent event) {
         return Events.forSession(this).fire(event);
     }
 
     @Override
-    public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
+    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
         return Events.forSession(this).fire(event);
     }
 

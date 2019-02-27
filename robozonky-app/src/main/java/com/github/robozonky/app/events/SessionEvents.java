@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Supplier;
@@ -84,10 +83,10 @@ public final class SessionEvents {
      * @return When complete, all listeners have been notified of all the events.
      */
     @SuppressWarnings("rawtypes")
-    private static CompletableFuture<Void> runAsync(final Stream<Runnable> futures) {
-        final CompletableFuture[] results = futures.map(EventFiringQueue.INSTANCE::fire)
-                .toArray(CompletableFuture[]::new);
-        return CompletableFuture.allOf(results);
+    private static Runnable runAsync(final Stream<Runnable> futures) {
+        final Runnable[] results = futures.map(EventFiringQueue.INSTANCE::fire)
+                .toArray(Runnable[]::new);
+        return () -> Stream.of(results).forEach(Runnable::run);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -117,7 +116,7 @@ public final class SessionEvents {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    CompletableFuture<Void> fireAny(final LazyEvent<? extends Event> event) {
+    Runnable fireAny(final LazyEvent<? extends Event> event) {
         // loan all listeners
         debugListeners.forEach(l -> l.requested(event));
         final Class<? extends Event> eventType = event.getEventType();
@@ -151,12 +150,12 @@ public final class SessionEvents {
         this.injectedDebugListener = listener;
     }
 
-    public CompletableFuture<Void> fire(final LazyEvent<? extends SessionEvent> event) {
+    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
         return fireAny(event);
     }
 
     @SuppressWarnings("unchecked")
-    public CompletableFuture<Void> fire(final SessionEvent event) {
+    public Runnable fire(final SessionEvent event) {
         return fire(EventFactory.async((Class<SessionEvent>) event.getClass(), () -> event));
     }
 }

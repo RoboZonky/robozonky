@@ -17,7 +17,6 @@
 package com.github.robozonky.app;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.SessionInfo;
@@ -50,10 +49,10 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
         LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
         Events.global().fire(roboZonkyInitialized());
         return Optional.of(result -> {
-            final CompletableFuture<Void> waitUntilFired = Events.global().fire(roboZonkyEnding());
+            final Runnable waitUntilFired = Events.global().fire(roboZonkyEnding());
             try {
                 LOGGER.debug("Waiting for events to be processed.");
-                waitUntilFired.join();
+                waitUntilFired.run();
             } catch (final Exception ex) {
                 LOGGER.debug("Exception while waiting for the final event being processed.", ex);
             } finally {

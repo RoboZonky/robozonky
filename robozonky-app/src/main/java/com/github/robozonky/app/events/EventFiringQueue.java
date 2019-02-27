@@ -17,12 +17,10 @@
 package com.github.robozonky.app.events;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.github.robozonky.common.async.Tasks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -81,11 +79,11 @@ final class EventFiringQueue {
      * @param runnable The event to be fired. Must never throw any exception.
      * @return Will be complete when the event has been completely fired or when the operation failed.
      */
-    public CompletableFuture<Void> fire(final Runnable runnable) {
+    public Runnable fire(final Runnable runnable) {
         final long id = counter.getAndIncrement();
         LOGGER.debug("Queueing event {}.", id);
         final CountDownLatch b = new CountDownLatch(1); // the calling thread will wait for the firing thread
         queue(() -> submittable(runnable, id, b), id);
-        return CompletableFuture.runAsync(() -> waitForFiring(id, b), Tasks.BACKGROUND.scheduler().getExecutor());
+        return () -> waitForFiring(id, b);
     }
 }

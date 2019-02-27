@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package com.github.robozonky.app.tenant;
-
-import java.util.concurrent.CompletableFuture;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SessionEvent;
@@ -45,7 +43,7 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
      * @return
      */
     @Override
-    CompletableFuture<Void> fire(SessionEvent event);
+    Runnable fire(SessionEvent event);
 
     /**
      * Do not block on the return value of this method, unless some other thread is still able to call
@@ -54,7 +52,7 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
      * @return
      */
     @Override
-    CompletableFuture<Void> fire(LazyEvent<? extends SessionEvent> event);
+    Runnable fire(LazyEvent<? extends SessionEvent> event);
 
     @Override
     void close();
