@@ -19,7 +19,6 @@ package com.github.robozonky.api.remote.enums;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DynamicTest;
@@ -73,9 +72,7 @@ class SerializationTest {
             tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
         }
         // test that deserialization of invalid value properly fails
-        Stream.of(Purpose.class, MainIncomeType.class)
-                .forEach(clz -> tests.add(dynamicTest("invalid " + clz.getSimpleName(),
-                                                      () -> deserialize(clz))));
+        tests.add(dynamicTest("invalid " + Purpose.class.getSimpleName(), () -> deserialize(Purpose.class)));
         return tests;
     }
 }

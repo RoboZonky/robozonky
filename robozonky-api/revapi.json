@@ -12,9 +12,14 @@
     },
     "ignore": [
       {
-        "code": "java.method.addedToInterface",
-        "new": "method com.github.robozonky.api.remote.entities.LastPublishedLoan com.github.robozonky.api.remote.LoanApi::lastPublished()",
-        "justification": "New Zonky API."
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.MainIncomeType.NEXT_PENSION",
+        "justification": "Made the class resilient to nonsense enum values."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.MainIncomeType.NEXT_WORK",
+        "justification": "Made the class resilient to nonsense enum values."
       }
     ]
   }
