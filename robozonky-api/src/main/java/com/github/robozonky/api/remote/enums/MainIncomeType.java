@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @JsonDeserialize(using = MainIncomeType.MainIncomeTypeDeserializer.class)
 public enum MainIncomeType implements BaseEnum {
@@ -37,21 +39,13 @@ public enum MainIncomeType implements BaseEnum {
     UNEMPLOYED("bez zaměstnání"),
     LIBERAL_PROFESSION("svobodné povolání"),
     RENT("rentiér"),
-    OTHERS_MAIN("jiné"),
-    // there are some loans in the API with these values; it is not documented and has no translation
-    NEXT_WORK("?"),
-    NEXT_PENSION("??");
+    OTHERS_MAIN("jiné");
 
+    private static final Logger LOGGER = LogManager.getLogger(MainIncomeType.class);
+    private final String code;
 
-    static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
-
-        @Override
-        public MainIncomeType deserialize(final JsonParser jsonParser,
-                                          final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            return MainIncomeType.valueOf(id);
-        }
+    MainIncomeType(final String code) {
+        this.code = code;
     }
 
     public static MainIncomeType findByCode(final String code) {
@@ -61,15 +55,26 @@ public enum MainIncomeType implements BaseEnum {
                 .orElseThrow(() -> new IllegalArgumentException("Unknown main income type: " + code));
     }
 
-    private final String code;
-
-    MainIncomeType(final String code) {
-        this.code = code;
-    }
-
     @Override
     public String getCode() {
         return code;
+    }
+
+    static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
+
+        @Override
+        public MainIncomeType deserialize(final JsonParser jsonParser,
+                                          final DeserializationContext deserializationContext)
+                throws IOException {
+            final String id = jsonParser.getText();
+            try {
+                return MainIncomeType.valueOf(id);
+            } catch (final Exception ex) {
+                LOGGER.warn("Received unknown loan region from Zonky: '{}'. This may be a problem, but we continue.",
+                            id);
+                return OTHERS_MAIN;
+            }
+        }
     }
 
 }
