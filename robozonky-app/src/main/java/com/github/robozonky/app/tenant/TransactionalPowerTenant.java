@@ -54,6 +54,4 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
     @Override
     Runnable fire(LazyEvent<? extends SessionEvent> event);
 
-    @Override
-    void close();
 }

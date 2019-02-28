@@ -112,7 +112,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void fires() {
+    void fires() throws Exception {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
@@ -133,7 +133,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void firesLazy() {
+    void firesLazy() throws Exception {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
@@ -171,7 +171,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void doesNotFailOnNoop() {
+    void doesNotFailOnNoop() throws Exception {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);

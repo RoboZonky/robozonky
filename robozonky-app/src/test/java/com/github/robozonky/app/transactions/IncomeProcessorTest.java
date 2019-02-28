@@ -49,12 +49,13 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
             TenantState.of(tenant.getSessionInfo()).in(IncomeProcessor.class);
 
     @Test
-    public void doesNotQueryAtFirstAttempt() {
+    public void doesNotQueryAtFirstAttempt() throws Exception {
         processor.accept(tenant);
         final Select s = new
                 Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusWeeks(1));
         verify(zonky, times(1)).getTransactions(eq(s));
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("-1"); // nothing found
+        verify(tenant).close();
     }
 
     @Test
