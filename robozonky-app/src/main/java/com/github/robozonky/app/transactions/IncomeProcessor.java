@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,12 @@ import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.DateUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class IncomeProcessor implements TenantPayload {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     static final String STATE_KEY = "lastSeenTransactionId";
     private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
@@ -86,7 +90,11 @@ final class IncomeProcessor implements TenantPayload {
             transactional.abort();
             throw ex;
         } finally {
-            transactional.close();
+            try {
+                transactional.close();
+            } catch (final Exception ex) {
+                LOGGER.debug("Failed committing transaction.", ex);
+            }
         }
     }
 }
