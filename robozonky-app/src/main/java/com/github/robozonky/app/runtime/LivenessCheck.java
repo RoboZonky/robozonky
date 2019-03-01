@@ -28,6 +28,7 @@ import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.Lazy;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
@@ -70,7 +71,7 @@ class LivenessCheck extends Refreshable<String> {
     protected String getLatestSource() {
         logger.trace("Running.");
         // need to send parsed version, since the object itself changes every time due to currentApiTime field
-        return Try.withResources(() -> new URL(url).openStream())
+        return Try.withResources(() -> UrlUtil.open(new URL(url)))
                 .of(s -> {
                     final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
                             .collect(Collectors.joining(System.lineSeparator()));

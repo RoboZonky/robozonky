@@ -42,6 +42,7 @@ import javax.xml.xpath.XPathFactory;
 import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.common.jobs.SimplePayload;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -94,7 +95,7 @@ final class UpdateMonitor extends Refreshable<VersionIdentifier> implements Simp
         }
         joiner.add(artifactId)
                 .add("maven-metadata.xml");
-        return new URL(joiner.toString()).openStream();
+        return UrlUtil.open(new URL(joiner.toString()));
     }
 
     private static boolean isStable(final String version) {
