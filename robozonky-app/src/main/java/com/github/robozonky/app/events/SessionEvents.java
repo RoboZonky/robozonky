@@ -86,7 +86,7 @@ public final class SessionEvents {
     private static Runnable runAsync(final Stream<Runnable> futures) {
         final Runnable[] results = futures.map(EventFiringQueue.INSTANCE::fire)
                 .toArray(Runnable[]::new);
-        return () -> Stream.of(results).forEach(Runnable::run);
+        return GlobalEvents.merge(results);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -125,7 +125,7 @@ public final class SessionEvents {
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream()
                 .map(Supplier::get)
-                .flatMap(l -> l.map(Stream::of).orElse(Stream.empty()));
+                .flatMap(l -> l.stream().flatMap(Stream::of));
         final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :
                 Stream.concat(Stream.of(injectedDebugListener), registered);

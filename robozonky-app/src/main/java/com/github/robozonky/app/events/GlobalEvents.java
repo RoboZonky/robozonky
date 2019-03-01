@@ -39,13 +39,17 @@ public final class GlobalEvents {
         return INSTANCE.get();
     }
 
+    static Runnable merge(final Runnable... runnables){
+        return () -> Stream.of(runnables).forEach(Runnable::run);
+    }
+
     @SuppressWarnings("rawtypes")
     public Runnable fire(final LazyEvent<? extends GlobalEvent> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
         final Runnable[] futures = SessionEvents.all().stream()
                 .map(s -> s.fireAny(event))
                 .toArray(Runnable[]::new);
-        return () -> Stream.of(futures).forEach(Runnable::run);
+        return merge(futures);
     }
 
     /**

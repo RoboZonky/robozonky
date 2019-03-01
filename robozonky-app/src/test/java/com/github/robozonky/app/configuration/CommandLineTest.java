@@ -133,6 +133,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
     void getters() {
         final CommandLine cli = new CommandLine(mock(Supplier.class));
         assertThat(cli.getKeystore()).isEmpty();
+        assertThat(cli.getStrategyLocation()).isEmpty();
         assertThat(cli.getNotificationConfigLocation()).isEmpty();
         assertThat(cli.getName()).isEqualTo("Unnamed");
         assertThat(cli.isDryRunEnabled()).isFalse();

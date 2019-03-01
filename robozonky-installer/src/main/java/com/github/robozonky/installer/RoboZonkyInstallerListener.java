@@ -300,9 +300,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     private void prepareRunScript(final CommandLinePart commandLine) {
-        if (System.getProperty("java.version").startsWith("1.8")) { // use G1GC on Java 8
-            commandLine.setJvmArgument("XX:+UseG1GC");
-        }
         commandLine.setJvmArgument("Xmx32m");
         final RunScriptGenerator generator = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS ?
                 RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)

@@ -31,6 +31,7 @@ class ReservationsProcessingJobTest extends AbstractRoboZonkyTest {
         final TenantJob j = new ReservationsProcessingJob();
         assertThat(j.payload()).isInstanceOf(ReservationsProcessing.class);
         assertThat(j.startIn()).isEqualTo(Duration.ofHours(2));
+        assertThat(j.prioritize()).isFalse();
         assertThat(j.repeatEvery())
                 .isGreaterThanOrEqualTo(Duration.ZERO)
                 .isLessThanOrEqualTo(Duration.ofHours(12));
