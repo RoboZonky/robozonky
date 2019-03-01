@@ -94,6 +94,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
+                .parallel()
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     final boolean wasSoldBefore = cache.wasOnceSold(loanId);

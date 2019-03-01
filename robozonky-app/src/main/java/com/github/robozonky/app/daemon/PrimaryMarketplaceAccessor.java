@@ -56,6 +56,7 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
     @Override
     public Collection<LoanDescriptor> getMarketplace() {
         return tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
+                .parallel()
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
                 .map(LoanDescriptor::new)
                 .filter(PrimaryMarketplaceAccessor::isActionable)
