@@ -55,7 +55,7 @@ class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
                 Select().greaterThanOrEquals("transaction.transactionDate", LocalDate.now().minusWeeks(1));
         verify(zonky, times(1)).getTransactions(eq(s));
         assertThat(state.getValue(IncomeProcessor.STATE_KEY)).hasValue("-1"); // nothing found
-        verify(tenant).close();
+        verify(tenant, never()).close();
     }
 
     @Test

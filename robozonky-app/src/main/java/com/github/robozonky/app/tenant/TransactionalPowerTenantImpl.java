@@ -141,8 +141,7 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
-    public void close() throws Exception {
-        parent.close();
+    public void close() {
         if (!stateUpdates.isEmpty()) {
             throw new IllegalStateException("There are uncommitted changes.");
         }
