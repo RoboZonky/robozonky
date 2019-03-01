@@ -24,8 +24,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
+
+import static com.github.robozonky.internal.api.Defaults.CHARSET;
 
 public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
 
@@ -44,7 +46,7 @@ public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
 
     @Override
     protected Optional<ConfigStorage> transform(final String source) {
-        return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)))
+        return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(CHARSET)))
                 .of(baos -> Optional.of(ConfigStorage.create(baos)))
                 .getOrElseGet(ex -> {
                     logger.warn("Failed transforming source.", ex);
@@ -55,7 +57,7 @@ public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
     @Override
     protected String getLatestSource() {
         logger.debug("Reading notification configuration from '{}'.", source);
-        return Try.withResources(() -> new BufferedReader(new InputStreamReader(source.openStream(), Defaults.CHARSET)))
+        return Try.withResources(() -> new BufferedReader(new InputStreamReader(UrlUtil.open(source), CHARSET)))
                 .of(r -> r.lines().collect(Collectors.joining(System.lineSeparator())))
                 .getOrElseGet(t -> {
                     logger.warn("Failed reading notification configuration from '{}' due to '{}'.", source,

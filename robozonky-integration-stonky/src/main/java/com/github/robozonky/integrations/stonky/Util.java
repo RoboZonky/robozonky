@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.UrlUtil;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -112,7 +113,7 @@ public final class Util {
     }
 
     static Optional<File> download(final URL url) {
-        return Try.withResources(url::openStream)
+        return Try.withResources(() -> UrlUtil.open(url))
                 .of(Util::download)
                 .getOrElseGet(t -> {
                     LOGGER.warn("Failed downloading file.", t);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 
@@ -53,7 +54,7 @@ class RefreshableStrategy extends Refreshable<String> {
 
     @Override
     protected String getLatestSource() {
-        return Try.withResources(url::openStream)
+        return Try.withResources(() -> UrlUtil.open(url))
                 .of(s -> IOUtils.toString(s, Defaults.CHARSET))
                 .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
