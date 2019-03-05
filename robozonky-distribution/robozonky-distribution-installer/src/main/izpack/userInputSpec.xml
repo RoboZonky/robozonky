@@ -46,7 +46,8 @@
       <spec txt="Integrovat se Stonky ('Statistics for Zonky'). Vyžaduje Google účet." set="false"/>
     </field>
     <field type="check" variable="isDryRun" summaryKey="Zkušební režim zapnut:">
-      <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat." set="false"/>
+      <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat a bude více logovat."
+            set="${selectDryRunByDefault}"/>
     </field>
     <field type="check" variable="isZonkoidEnabled" summaryKey="Notifikace do aplikace Zonkoid povoleny:">
       <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>

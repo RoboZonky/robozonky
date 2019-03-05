@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -118,6 +119,19 @@ final class Util {
                     } else { // general Java system property to end up on the command line
                         LOGGER.debug("Setting property {}.", e);
                         commandLine.setProperty(key, value);
+                    }
+                });
+        Stream.of(parts)
+                .map(CommandLinePart::getJvmArguments)
+                .flatMap(p -> p.entrySet().stream())
+                .peek(e -> LOGGER.trace("Processing JVM argument {}.", e))
+                .forEach(e -> {
+                    final String key = e.getKey();
+                    final Optional<String> value = e.getValue();
+                    if (value.isPresent()) {
+                        commandLine.setJvmArgument(key, value.get());
+                    } else {
+                        commandLine.setJvmArgument(key);
                     }
                 });
     }
