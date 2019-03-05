@@ -24,6 +24,7 @@ import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.common.tenant.Tenant;
+import jdk.jfr.Event;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
 
@@ -66,5 +67,10 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     @Override
     public Operation<LoanDescriptor, InvestmentStrategy> getOperation() {
         return (a, b, c) -> InvestingSession.invest(investor, a, b, c);
+    }
+
+    @Override
+    public Event newJfrEvent() {
+        return new PrimaryMarketplaceJfrEvent();
     }
 }

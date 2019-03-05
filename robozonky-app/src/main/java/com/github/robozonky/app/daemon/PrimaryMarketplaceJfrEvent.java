@@ -16,26 +16,11 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.JfrConstants;
+import jdk.jfr.Category;
 import jdk.jfr.Event;
 
-interface OperationDescriptor<T, S> {
-
-    boolean isEnabled(final Tenant tenant);
-
-    Optional<S> getStrategy(final Tenant tenant);
-
-    MarketplaceAccessor<T> newMarketplaceAccessor(final Tenant tenant);
-
-    BigDecimal getMinimumBalance(final Tenant tenant);
-
-    long identify(final T descriptor);
-
-    Operation<T, S> getOperation();
-
-    Event newJfrEvent();
+@Category({JfrConstants.BASE_CATEGORY, "Marketplace"})
+final class PrimaryMarketplaceJfrEvent extends Event {
 
 }

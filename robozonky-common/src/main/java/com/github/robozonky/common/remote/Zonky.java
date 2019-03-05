@@ -60,6 +60,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.internal.util.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
+import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -208,7 +209,13 @@ public class Zonky {
     }
 
     public Loan getLoan(final int id) {
-        return Loan.sanitized(loanApi.execute(api -> api.item(id)));
+        final Event event = new ZonkyLoanCallJfrEvent(); // may be triggered by the strategy and we want to measure that
+        try {
+            event.begin();
+            return Loan.sanitized(loanApi.execute(api -> api.item(id)));
+        } finally {
+            event.commit();
+        }
     }
 
     public Optional<Investment> getInvestment(final long id) {

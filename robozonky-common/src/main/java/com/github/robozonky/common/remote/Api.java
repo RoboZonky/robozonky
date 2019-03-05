@@ -19,6 +19,7 @@ package com.github.robozonky.common.remote;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,9 +35,12 @@ class Api<T> {
 
     static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy) {
         LOGGER.trace("Executing...");
+        final Event event = new ZonkyCallJfrEvent();
         try {
+            event.begin();
             return function.apply(proxy);
         } finally {
+            event.commit();
             LOGGER.trace("... done.");
         }
     }
