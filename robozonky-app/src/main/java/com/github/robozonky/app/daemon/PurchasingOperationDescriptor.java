@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.common.tenant.Tenant;
+import jdk.jfr.Event;
 
 class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy> {
 
@@ -57,5 +58,10 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     @Override
     public Operation<ParticipationDescriptor, PurchaseStrategy> getOperation() {
         return PurchasingSession::purchase;
+    }
+
+    @Override
+    public Event newJfrEvent() {
+        return new SecondaryMarketplaceJfrEvent();
     }
 }

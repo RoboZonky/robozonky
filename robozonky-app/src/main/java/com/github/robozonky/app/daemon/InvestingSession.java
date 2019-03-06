@@ -33,6 +33,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.Tenant;
 import io.vavr.control.Either;
+import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,7 +87,13 @@ final class InvestingSession {
         final long balance = portfolioOverview.getCzkAvailable().longValue();
         s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
         if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !s.getAvailable().isEmpty()) {
-            s.invest(strategy);
+            final Event event = new InvestingSessionJfrEvent();
+            try {
+                event.begin();
+                s.invest(strategy);
+            } finally {
+                event.commit();
+            }
         }
         final Collection<Investment> result = s.getResult();
         // make sure we get fresh portfolio reference here

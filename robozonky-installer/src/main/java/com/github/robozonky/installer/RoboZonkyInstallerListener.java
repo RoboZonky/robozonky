@@ -65,10 +65,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    RoboZonkyInstallerListener.OS getOperatingSystem() {
-        return operatingSystem;
-    }
-
     /**
      * Testing OS-specific behavior was proving very difficult, this constructor takes all of that pain away.
      * @param os Fake operating system used for testing.
@@ -124,13 +120,18 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         f.setup();
     }
 
-    private static CommandLinePart prepareCore(final char... keystorePassword) throws SetupFailedException, IOException {
+    private static CommandLinePart prepareCore(
+            final char... keystorePassword) throws SetupFailedException, IOException {
         final String zonkoidId = "zonkoid";
         final CommandLinePart cli = new CommandLinePart()
                 .setOption("-p", String.valueOf(keystorePassword));
         cli.setOption("-g", KEYSTORE_FILE.getAbsolutePath());
         if (Boolean.valueOf(Variables.IS_DRY_RUN.getValue(DATA))) {
             cli.setOption("-d");
+            cli.setJvmArgument("Xmx128m"); // more memory for the JFR recording
+            cli.setJvmArgument("XX:StartFlightRecording=disk=true,dumponexit=true,maxage=1d,path-to-gc-roots=true");
+        } else {
+            cli.setJvmArgument("Xmx64m");
         }
         primeKeyStore(keystorePassword);
         final boolean isZonkoidEnabled = Boolean.parseBoolean(Variables.IS_ZONKOID_ENABLED.getValue(DATA));
@@ -231,10 +232,9 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     private static CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
                                                       final CommandLinePart stonky, final CommandLinePart jmxConfig,
-                                                      final CommandLinePart credentials,
-                                                      final CommandLinePart logging) {
+                                                      final CommandLinePart core, final CommandLinePart logging) {
         try {
-            final File cliConfigFile = assembleCliFile(credentials, strategy, emailConfig);
+            final File cliConfigFile = assembleCliFile(core, strategy, emailConfig);
             // have the CLI file loaded during RoboZonky startup
             final CommandLinePart commandLine = new CommandLinePart()
                     .setOption("@" + cliConfigFile.getAbsolutePath())
@@ -242,7 +242,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                     .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
-            Util.processCommandLine(commandLine, settings, strategy, stonky, jmxConfig, credentials, logging);
+            Util.processCommandLine(commandLine, settings, strategy, stonky, jmxConfig, core, logging);
             // write settings to a file
             Util.writeOutProperties(settings, SETTINGS_FILE);
             return commandLine;
@@ -299,8 +299,11 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    RoboZonkyInstallerListener.OS getOperatingSystem() {
+        return operatingSystem;
+    }
+
     private void prepareRunScript(final CommandLinePart commandLine) {
-        commandLine.setJvmArgument("Xmx32m");
         final RunScriptGenerator generator = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS ?
                 RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
                 : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
@@ -328,12 +331,11 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             progressListener.nextStep("Příprava nastavení JMX.", 4, 1);
             final CommandLinePart jmx = prepareJmx();
             progressListener.nextStep("Příprava nastavení Zonky.", 5, 1);
-            final CommandLinePart credentials = prepareCore();
+            final CommandLinePart core = prepareCore();
             progressListener.nextStep("Příprava nastavení logování.", 6, 1);
             final CommandLinePart logging = prepareLogging();
             progressListener.nextStep("Generování parametrů příkazové řádky.", 7, 1);
-            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, stonky, jmx, credentials,
-                                                              logging);
+            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, stonky, jmx, core, logging);
             progressListener.nextStep("Generování spustitelného souboru.", 8, 1);
             prepareRunScript(result);
             progressListener.stopAction();

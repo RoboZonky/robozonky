@@ -179,6 +179,8 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
     @Override
     public final void handle(final T event, final SessionInfo sessionInfo) {
+        final jdk.jfr.Event jfr = new EmailJfrEvent();
+        jfr.begin();
         try {
             if (!this.shouldNotify(event, sessionInfo)) {
                 logger.debug("Will not notify.");
@@ -196,6 +198,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
                 logger.trace("Finisher failed.", ex);
             } finally {
                 logger.debug("Notified {}.", event);
+                jfr.commit();
             }
         }
     }

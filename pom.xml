@@ -479,6 +479,10 @@
           <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
             <value>-Dfile.encoding=${project.build.sourceEncoding}</value>
           </jvmArgs>
+          <avoidCallsTo>
+            <avoidCallsTo>org.apache.logging.log4j</avoidCallsTo> <!-- don't mutate logging calls -->
+            <avoidCallsTo>jdk.jfr</avoidCallsTo> <!-- don't mutate JFR event triggering, we do not want to test it -->
+          </avoidCallsTo>
         </configuration>
         <executions>
           <execution>

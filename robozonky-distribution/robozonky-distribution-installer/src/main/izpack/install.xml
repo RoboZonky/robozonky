@@ -24,7 +24,6 @@
     <appversion>@{project.version}</appversion>
     <appsubpath>robozonky</appsubpath>
     <url>http://www.robozonky.cz/</url>
-    <javaversion>1.8</javaversion>
     <uninstaller write="no" />
   </info>
 
@@ -32,6 +31,11 @@
     <variable name="TargetPanel.dir.windows" value="C:/RoboZonky/@{project.version}"/>
     <variable name="TargetPanel.dir.unix" value="$USER_HOME/RoboZonky/@{project.version}"/>
   </variables>
+
+  <dynamicvariables>
+    <variable name="selectDryRunByDefault" value="true" condition="isDryRunSelectedByDefault" />
+    <variable name="selectDryRunByDefault" value="false" condition="!isDryRunSelectedByDefault" />
+  </dynamicvariables>
 
   <jar src="robozonky-distribution-installer-@{project.version}-jar-with-dependencies.jar"/>
 
@@ -117,6 +121,29 @@
     <condition type="variable" id="isEmailConfigByUrl">
       <name>emailConfigType</name>
       <value>url</value>
+    </condition>
+    <!-- enable dry run in case we are in alpha/beta/cr/snapshot -->
+    <condition type="contains" id="isAlpha">
+      <string>@{project.version}</string>
+      <value>alpha</value>
+    </condition>
+    <condition type="contains" id="isBeta">
+      <string>@{project.version}</string>
+      <value>beta</value>
+    </condition>
+    <condition type="contains" id="isCandidateRelease">
+      <string>@{project.version}</string>
+      <value>cr</value>
+    </condition>
+    <condition type="contains" id="isSnapshot">
+      <string>@{project.version}</string>
+      <value>SNAPSHOT</value>
+    </condition>
+    <condition type="or" id="isDryRunSelectedByDefault">
+      <condition type="ref" refid="isAlpha" />
+      <condition type="ref" refid="isBeta" />
+      <condition type="ref" refid="isCandidateRelease" />
+      <condition type="ref" refid="isSnapshot" />
     </condition>
   </conditions>
 

@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.daemon;
+package com.github.robozonky.internal.api;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+public final class JfrConstants {
 
-import com.github.robozonky.common.tenant.Tenant;
-import jdk.jfr.Event;
+    public static final String BASE_CATEGORY = "RoboZonky";
+    public static final String ZONKY_REMOTE_CALL = "Zonky";
 
-interface OperationDescriptor<T, S> {
-
-    boolean isEnabled(final Tenant tenant);
-
-    Optional<S> getStrategy(final Tenant tenant);
-
-    MarketplaceAccessor<T> newMarketplaceAccessor(final Tenant tenant);
-
-    BigDecimal getMinimumBalance(final Tenant tenant);
-
-    long identify(final T descriptor);
-
-    Operation<T, S> getOperation();
-
-    Event newJfrEvent();
+    private JfrConstants() {
+        // no instances
+    }
 
 }

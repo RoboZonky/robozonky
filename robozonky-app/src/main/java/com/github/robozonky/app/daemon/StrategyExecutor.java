@@ -31,6 +31,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.util.DateUtil;
+import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -103,8 +104,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         return result;
     }
 
-    @Override
-    public Collection<Investment> get() {
+    private Collection<Investment> actuallyGet() {
         if (!operationDescriptor.isEnabled(tenant)) {
             logger.debug("Access to marketplace disabled by Zonky.");
             return Collections.emptyList();
@@ -121,6 +121,17 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
                     logger.debug("Asleep as there is no strategy.");
                     return Collections.emptyList();
                 });
+    }
+
+    @Override
+    public Collection<Investment> get() {
+        final Event event = operationDescriptor.newJfrEvent();
+        try {
+            event.begin();
+            return actuallyGet();
+        } finally {
+            event.commit();
+        }
     }
 
     /**
