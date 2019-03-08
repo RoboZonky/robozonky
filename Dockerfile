@@ -18,7 +18,7 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
     && chmod +x /tmp/robozonky/robozonky.sh
 
 # ... then restart from a minimal image and copy built binary from previous stage
-FROM adoptopenjdk/openjdk11:alpine-slim
+FROM adoptopenjdk/openjdk11:alpine-jre
 LABEL maintainer="The RoboZonky Project (www.robozonky.cz)"
 ENV INSTALL_DIRECTORY=/opt/robozonky \
      CONFIG_DIRECTORY=/etc/robozonky \
