@@ -211,7 +211,7 @@ public class DriveOverview {
         LOGGER.debug("Will look for Stonky master spreadsheet: {}.", masterId);
         final File upstream = Util.getFile(driveService, masterId);
         final File parent = getOrCreateRoboZonkyFolder();
-        final String expectedName = "My " + upstream.getName(); // such as "My Stonky 0.8 [Public Beta Release]"
+        final String expectedName = "Moje " + upstream.getName(); // such as "Moje Zonky statistika"
         final Optional<File> stonky = listSpreadsheets(getFilesInFolder(driveService, parent))
                 .filter(s -> Objects.equals(s.getName(), expectedName))
                 .findFirst();
