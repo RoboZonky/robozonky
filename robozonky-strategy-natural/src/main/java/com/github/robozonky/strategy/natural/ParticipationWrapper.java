@@ -45,12 +45,12 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public BigDecimal getInterestRate() {
-        return participation.getInterestRate();
+        return adjustRateForStrategy(participation.getInterestRate());
     }
 
     @Override
-    public BigDecimal getRevenueRate() { // TODO check if Participation has this field too
-        return getLoan().getRevenueRate();
+    public BigDecimal getRevenueRate() {
+        return adjustRateForStrategy(getLoan().getRevenueRate());
     }
 
     @Override

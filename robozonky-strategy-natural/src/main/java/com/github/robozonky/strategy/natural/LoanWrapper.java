@@ -56,12 +56,12 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     @Override
     public BigDecimal getInterestRate() {
-        return loan.getInterestRate();
+        return adjustRateForStrategy(loan.getInterestRate());
     }
 
     @Override
     public BigDecimal getRevenueRate() {
-        return loan.getRevenueRate();
+        return adjustRateForStrategy(loan.getRevenueRate());
     }
 
     @Override
