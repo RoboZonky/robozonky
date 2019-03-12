@@ -16,9 +16,14 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.Descriptor;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 
 abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
 
@@ -26,6 +31,17 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
 
     protected AbstractWrapper(final T original) {
         this.original = original;
+    }
+
+    /**
+     * Rates are coming from the API ({@link Investment}, {@link Loan}, {@link Participation}) in the form of a share
+     * (1 % becomes "0.01"), while the strategy excepts them in the format of a percentage (1 & becomes "1"). This
+     * method converts from the former to the latter.
+     * @param bigDecimal
+     * @return
+     */
+    protected static BigDecimal adjustRateForStrategy(final BigDecimal bigDecimal) {
+        return BigDecimalCalculator.times(bigDecimal, 100);
     }
 
     @Override
@@ -50,5 +66,4 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     public int hashCode() {
         return Objects.hash(original);
     }
-
 }

@@ -24,6 +24,7 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import org.junit.jupiter.api.Test;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class WrapperTest {
@@ -34,6 +35,7 @@ class WrapperTest {
                 .setId(1)
                 .setAmount(100_000)
                 .setRevenueRate(BigDecimal.ONE)
+                .setInterestRate(BigDecimal.TEN)
                 .setAnnuity(BigDecimal.ONE)
                 .build();
         final int invested = 200;
@@ -44,8 +46,8 @@ class WrapperTest {
             softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
             softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
-            softly.assertThat(w.getInterestRate()).isEqualTo(loan.getInterestRate());
-            softly.assertThat(w.getRevenueRate()).isEqualTo(investment.getRevenueRate());
+            softly.assertThat(w.getInterestRate()).isEqualTo(times(loan.getInterestRate(), 100));
+            softly.assertThat(w.getRevenueRate()).isEqualTo(times(investment.getRevenueRate(), 100));
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
             softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(invested));

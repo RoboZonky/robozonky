@@ -45,12 +45,12 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public BigDecimal getInterestRate() {
-        return investment.getInterestRate();
+        return adjustRateForStrategy(investment.getInterestRate());
     }
 
     @Override
     public BigDecimal getRevenueRate() {
-        return investment.getRevenueRate();
+        return adjustRateForStrategy(investment.getRevenueRate());
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class InvestmentWrapperTest {
@@ -52,7 +53,7 @@ class InvestmentWrapperTest {
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(INVESTMENT.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(INVESTMENT.getInterestRate());
+            softly.assertThat(w.getInterestRate()).isEqualTo(times(INVESTMENT.getInterestRate(), 100));
             softly.assertThat(w.getRegion()).isEqualTo(LOAN.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(INVESTMENT.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());
