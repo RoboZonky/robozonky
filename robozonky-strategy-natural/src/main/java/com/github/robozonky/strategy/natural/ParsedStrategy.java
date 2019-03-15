@@ -74,7 +74,7 @@ class ParsedStrategy {
                         collect(Collectors.toMap(PortfolioShare::getRating, Function.identity())));
         this.investmentSizes = investmentSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(investmentSizes);
         this.filters = filters;
-        final int shareSum = sumMinimalShares();
+        final long shareSum = sumMinimalShares();
         if (shareSum > 100) {
             throw new IllegalArgumentException("Sum of minimal rating shares in portfolio is over 100 %.");
         } else if (shareSum < 100) {
@@ -91,8 +91,8 @@ class ParsedStrategy {
                 .isPresent();
     }
 
-    private int sumMinimalShares() {
-        return Stream.of(Rating.values()).mapToInt(this::getMinimumShare).sum();
+    private long sumMinimalShares() {
+        return Math.round(Stream.of(Rating.values()).mapToDouble(this::getMinimumShare).sum());
     }
 
     public boolean needsConfirmation(final LoanDescriptor loan) {
@@ -123,7 +123,7 @@ class ParsedStrategy {
         this.minimumVersion = minimumVersion;
     }
 
-    public int getMinimumShare(final Rating rating) {
+    public double getMinimumShare(final Rating rating) {
         if (portfolio.containsKey(rating)) {
             return portfolio.get(rating).getMininumShareInPercent();
         } else { // no minimum share specified; use the one from default portfolio
@@ -131,7 +131,7 @@ class ParsedStrategy {
         }
     }
 
-    public int getMaximumShare(final Rating rating) {
+    public double getMaximumShare(final Rating rating) {
         if (portfolio.containsKey(rating)) {
             return portfolio.get(rating).getMaximumShareInPercent();
         } else { // no maximum share specified; calculate minimum share and use it as maximum too

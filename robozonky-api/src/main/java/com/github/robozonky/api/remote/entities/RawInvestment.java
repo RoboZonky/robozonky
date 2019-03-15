@@ -45,6 +45,7 @@ public class RawInvestment extends BaseInvestment {
     private OffsetDateTime investmentDate = DateUtil.offsetNow();
     private OffsetDateTime nextPaymentDate = investmentDate.plusMonths(1);
     private OffsetDateTime activeTo;
+    private OffsetDateTime smpFeeExpirationDate;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
             duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
             smpFee, paidPenalty = BigDecimal.ZERO;
@@ -85,6 +86,7 @@ public class RawInvestment extends BaseInvestment {
         this.remainingPrincipal = investment.getRemainingPrincipal();
         this.smpSoldFor = investment.getSmpSoldFor().orElse(null);
         this.smpFee = investment.getSmpFee().orElse(null);
+        this.smpFeeExpirationDate = investment.getSmpFeeExpirationDate().orElse(null);
         this.paidPenalty = investment.getPaidPenalty();
         this.rating = investment.getRating();
         this.hasCollectionHistory = false;
@@ -205,6 +207,11 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public OffsetDateTime getActiveTo() {
         return activeTo;
+    }
+
+    @XmlElement
+    public OffsetDateTime getSmpFeeExpirationDate() {
+        return smpFeeExpirationDate;
     }
 
     @XmlElement

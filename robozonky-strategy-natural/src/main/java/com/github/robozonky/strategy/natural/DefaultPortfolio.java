@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,27 +22,28 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 enum DefaultPortfolio {
 
-    CONSERVATIVE(3, 6, 16, 25, 20, 15, 15, 0),
-    BALANCED(1, 3, 17, 20, 25, 20, 12, 2),
-    PROGRESSIVE(0, 2, 13, 15, 20, 25, 20, 5),
-    EMPTY(0, 0, 0, 0, 0, 0, 0, 0);
+    CONSERVATIVE(16, 19, 21, 19, 11, 7, 5, 1.5, 0.5, 0),
+    BALANCED(8, 14, 16, 18, 15, 12, 9, 5, 2, 1),
+    PROGRESSIVE(3, 7, 10, 14, 15, 17, 15, 10, 6, 3),
+    EMPTY(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-    private final EnumMap<Rating, Integer> shares = new EnumMap<>(Rating.class);
+    private final EnumMap<Rating, Double> shares = new EnumMap<>(Rating.class);
 
-    DefaultPortfolio(final int aaaaa, final int aaaa, final int aaa, final int aa, final int a, final int b,
-                     final int c,
-                     final int d) {
+    DefaultPortfolio(final double aaaaa, final double aaaa, final double aaa, final double aae, final double aa,
+                     final double ae, final double a, final double b, final double c, final double d) {
         shares.put(Rating.AAAAA, aaaaa);
         shares.put(Rating.AAAA, aaaa);
         shares.put(Rating.AAA, aaa);
+        shares.put(Rating.AAE, aae);
         shares.put(Rating.AA, aa);
+        shares.put(Rating.AE, ae);
         shares.put(Rating.A, a);
         shares.put(Rating.B, b);
         shares.put(Rating.C, c);
         shares.put(Rating.D, d);
     }
 
-    public int getDefaultShare(final Rating r) {
+    public double getDefaultShare(final Rating r) {
         if (shares.containsKey(r)) {
             return shares.get(r);
         } else {

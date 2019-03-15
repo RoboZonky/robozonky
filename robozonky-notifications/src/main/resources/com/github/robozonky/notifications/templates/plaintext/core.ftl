@@ -10,8 +10,14 @@
         <#case "5.99">
             <#assign label = "5,99">
             <#break>
+        <#case "6.99">
+            <#assign label = "6,99">
+            <#break>
         <#case "8.49">
             <#assign label = "8,49">
+            <#break>
+        <#case "9.49">
+            <#assign label = "9,49">
             <#break>
         <#case "10.99">
             <#assign label = "10,99">

@@ -63,6 +63,8 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
 
     T setSmpFee(BigDecimal smpFee);
 
+    T setSmpFeeExpirationDate(OffsetDateTime smpFeeExpirationDate);
+
     T setNextPaymentDate(OffsetDateTime nextPaymentDate);
 
     T setSmpSoldFor(BigDecimal smpSoldFor);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public class Statistics extends BaseEntity {
         final Statistics s = new Statistics();
         s.currentProfitability = BigDecimal.ZERO;
         s.expectedProfitability = BigDecimal.ZERO;
+        s.profitability = BigDecimal.ZERO;
         s.cashFlow = Collections.emptyList();
         s.riskPortfolio = Collections.emptyList();
         s.expectedPayments = Collections.emptyList();
@@ -43,6 +44,7 @@ public class Statistics extends BaseEntity {
     });
 
     private BigDecimal currentProfitability, expectedProfitability;
+    private BigDecimal profitability;
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
     private OverallPortfolio overallPortfolio;
@@ -64,14 +66,21 @@ public class Statistics extends BaseEntity {
         return possiblyNull == null ? Collections.emptyList() : Collections.unmodifiableList(possiblyNull);
     }
 
+    @Deprecated
     @XmlElement
     public BigDecimal getCurrentProfitability() {
         return currentProfitability;
     }
 
+    @Deprecated
     @XmlElement
     public BigDecimal getExpectedProfitability() {
         return expectedProfitability;
+    }
+
+    @XmlElement
+    public BigDecimal getProfitability() {
+        return profitability;
     }
 
     @XmlElement

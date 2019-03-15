@@ -49,6 +49,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private int loanId, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;
     private OffsetDateTime nextPaymentDate;
+    private OffsetDateTime smpFeeExpirationDate;
     private boolean canBeOffered, isOnSmp, isInsuranceActive, areInstalmentsPostponed;
     private Boolean isInWithdrawal;
     private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
@@ -241,6 +242,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public InvestmentBuilder setSmpFee(final BigDecimal smpFee) {
         this.smpFee = smpFee;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setSmpFeeExpirationDate(final OffsetDateTime smpFeeExpirationDate) {
+        this.smpFeeExpirationDate = smpFeeExpirationDate;
         return this;
     }
 
@@ -438,6 +445,11 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public Optional<BigDecimal> getSmpFee() {
         return Optional.ofNullable(smpFee);
+    }
+
+    @Override
+    public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
+        return Optional.ofNullable(smpFeeExpirationDate);
     }
 
     @Override

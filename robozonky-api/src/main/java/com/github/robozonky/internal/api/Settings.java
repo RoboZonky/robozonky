@@ -52,8 +52,12 @@ public enum Settings {
                 return Settings.Key.CAPTCHA_DELAY_AAAA;
             case AAA:
                 return Settings.Key.CAPTCHA_DELAY_AAA;
+            case AAE:
+                return Settings.Key.CAPTCHA_DELAY_AAE;
             case AA:
                 return Settings.Key.CAPTCHA_DELAY_AA;
+            case AE:
+                return Settings.Key.CAPTCHA_DELAY_AE;
             case A:
                 return Settings.Key.CAPTCHA_DELAY_A;
             case B:
@@ -216,7 +220,9 @@ public enum Settings {
         CAPTCHA_DELAY_AAAAA("robozonky.aaaaa_loan_protection_seconds"),
         CAPTCHA_DELAY_AAAA("robozonky.aaaa_loan_protection_seconds"),
         CAPTCHA_DELAY_AAA("robozonky.aaa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AAE("robozonky.aae_loan_protection_seconds"),
         CAPTCHA_DELAY_AA("robozonky.aa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AE("robozonky.ae_loan_protection_seconds"),
         CAPTCHA_DELAY_A("robozonky.a_loan_protection_seconds"),
         CAPTCHA_DELAY_B("robozonky.b_loan_protection_seconds"),
         CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
