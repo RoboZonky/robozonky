@@ -143,6 +143,13 @@ public interface Investment {
     Optional<BigDecimal> getSmpFee();
 
     /**
+     * Only available from Zonky whew the loan either is present on the secondary marketplace, is ready to be sent there
+     * or was already sold.
+     * @return
+     */
+    Optional<OffsetDateTime> getSmpFeeExpirationDate();
+
+    /**
      * In case of a presently delinquent loan, this always shows the date of the least recent instalment that is
      * delinquent.
      * @return

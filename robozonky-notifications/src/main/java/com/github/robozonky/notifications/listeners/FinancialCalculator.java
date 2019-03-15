@@ -55,7 +55,9 @@ final class FinancialCalculator {
         result.put(Rating.AAAAA, new BigDecimal("0.002"));
         result.put(Rating.AAAA, new BigDecimal("0.005"));
         result.put(Rating.AAA, ONE_PERCENT);
-        result.put(Rating.AA, new BigDecimal("0.025"));
+        result.put(Rating.AAE, new BigDecimal("0.015"));
+        result.put(Rating.AA, new BigDecimal("0.022"));
+        result.put(Rating.AE, new BigDecimal("0.025"));
         result.put(Rating.A, new BigDecimal("0.03"));
         result.put(Rating.B, new BigDecimal("0.035"));
         result.put(Rating.C, new BigDecimal("0.04"));

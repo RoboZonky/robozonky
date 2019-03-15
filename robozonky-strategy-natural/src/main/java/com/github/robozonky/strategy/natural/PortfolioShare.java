@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,10 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 class PortfolioShare {
 
-    private static void assertIsInRange(final int percentage) {
-        if ((percentage < 0) || (percentage > 100)) {
-            throw new IllegalArgumentException("Portfolio share must be in range of <0; 100>.");
-        }
-    }
-
-    private final int mininumShareInPercent, maximumShareInPercent;
+    private final double mininumShareInPercent, maximumShareInPercent;
     private final Rating rating;
 
-    public PortfolioShare(final Rating r, final int min, final int max) {
+    public PortfolioShare(final Rating r, final double min, final double max) {
         this.rating = r;
         PortfolioShare.assertIsInRange(min);
         this.mininumShareInPercent = Math.min(min, max);
@@ -37,15 +31,21 @@ class PortfolioShare {
         this.maximumShareInPercent = Math.max(min, max);
     }
 
-    public PortfolioShare(final Rating r, final int max) {
+    public PortfolioShare(final Rating r, final double max) {
         this(r, max, max);
     }
 
-    public int getMininumShareInPercent() {
+    private static void assertIsInRange(final double percentage) {
+        if ((percentage < 0) || (percentage > 100)) {
+            throw new IllegalArgumentException("Portfolio share must be in range of <0; 100>.");
+        }
+    }
+
+    public double getMininumShareInPercent() {
         return mininumShareInPercent;
     }
 
-    public int getMaximumShareInPercent() {
+    public double getMaximumShareInPercent() {
         return maximumShareInPercent;
     }
 

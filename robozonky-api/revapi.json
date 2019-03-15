@@ -20,6 +20,44 @@
         "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.enums.MainIncomeType.NEXT_WORK",
         "justification": "Made the class resilient to nonsense enum values."
+      },{
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.Rating.A",
+        "new": "field com.github.robozonky.api.remote.enums.Rating.A",
+        "justification": "Zonky introduces new ratings."
+      },
+      {
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.Rating.AA",
+        "new": "field com.github.robozonky.api.remote.enums.Rating.AA",
+        "justification": "Zonky introduces new ratings."
+      },
+      {
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.Rating.B",
+        "new": "field com.github.robozonky.api.remote.enums.Rating.B",
+        "justification": "Zonky introduces new ratings."
+      },
+      {
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.Rating.C",
+        "new": "field com.github.robozonky.api.remote.enums.Rating.C",
+        "justification": "Zonky introduces new ratings."
+      },
+      {
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.Rating.D",
+        "new": "field com.github.robozonky.api.remote.enums.Rating.D",
+        "justification": "Zonky introduces new ratings."
+      },{
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Optional<java.time.OffsetDateTime> com.github.robozonky.api.remote.entities.sanitized.Investment::getSmpFeeExpirationDate()",
+        "justification": "Zonky introduces support for selling participations without fee."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setSmpFeeExpirationDate(java.time.OffsetDateTime)",
+        "justification": "Zonky introduces support for selling participations without fee."
       }
     ]
   }

@@ -117,6 +117,8 @@ floatExpr returns [BigDecimal result] :
     f=FLOAT {
         final String replaced = $f.getText().replaceFirst("\\Q,\\E", ".");
         $result = new BigDecimal(replaced);
+    } | i=intExpr {
+        $result = new BigDecimal($i.result);
     }
 ;
 

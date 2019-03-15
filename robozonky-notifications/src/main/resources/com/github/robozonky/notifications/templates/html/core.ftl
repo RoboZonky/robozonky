@@ -18,9 +18,17 @@
             <#assign label = "5,99">
             <#assign color = "599ebe">
             <#break>
+        <#case "6.99">
+            <#assign label = "6,99">
+            <#assign color = "5abfa0">
+            <#break>
         <#case "8.49">
             <#assign label = "8,49">
             <#assign color = "67cd75">
+            <#break>
+        <#case "9.49">
+            <#assign label = "9,49">
+            <#assign color = "91c95a">
             <#break>
         <#case "10.99">
             <#assign label = "10,99">

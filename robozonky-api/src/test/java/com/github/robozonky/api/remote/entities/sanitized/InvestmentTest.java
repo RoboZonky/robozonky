@@ -207,6 +207,11 @@ class InvestmentTest {
         }
 
         @Test
+        void smpFeeExpirationDate() {
+            optional(b, b::setSmpFeeExpirationDate, b::getSmpFeeExpirationDate, OffsetDateTime.now());
+        }
+
+        @Test
         void nextPaymentDate() {
             optional(b, b::setNextPaymentDate, b::getNextPaymentDate, OffsetDateTime.now());
         }
