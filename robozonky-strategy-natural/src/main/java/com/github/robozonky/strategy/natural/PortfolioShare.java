@@ -16,37 +16,39 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 
 class PortfolioShare {
 
-    private final double mininumShareInPercent, maximumShareInPercent;
+    private final Ratio mininum, maximum;
     private final Rating rating;
 
-    public PortfolioShare(final Rating r, final double min, final double max) {
+    public PortfolioShare(final Rating r, final Ratio min, final Ratio max) {
         this.rating = r;
         PortfolioShare.assertIsInRange(min);
-        this.mininumShareInPercent = Math.min(min, max);
+        this.mininum = min.min(max);
         PortfolioShare.assertIsInRange(max);
-        this.maximumShareInPercent = Math.max(min, max);
+        this.maximum = min.max(max);
     }
 
-    public PortfolioShare(final Rating r, final double max) {
+    public PortfolioShare(final Rating r, final Ratio max) {
         this(r, max, max);
     }
 
-    private static void assertIsInRange(final double percentage) {
-        if ((percentage < 0) || (percentage > 100)) {
+    private static void assertIsInRange(final Ratio ratio) {
+        final double actual = ratio.asPercentage().doubleValue();
+        if (actual < 0 || actual > 100) {
             throw new IllegalArgumentException("Portfolio share must be in range of <0; 100>.");
         }
     }
 
-    public double getMininumShareInPercent() {
-        return mininumShareInPercent;
+    public Ratio getMininum() {
+        return mininum;
     }
 
-    public double getMaximumShareInPercent() {
-        return maximumShareInPercent;
+    public Ratio getMaximum() {
+        return maximum;
     }
 
     public Rating getRating() {
@@ -56,8 +58,8 @@ class PortfolioShare {
     @Override
     public String toString() {
         return "PortfolioShare{" +
-                "mininumShareInPercent=" + mininumShareInPercent +
-                ", maximumShareInPercent=" + maximumShareInPercent +
+                "mininum=" + mininum +
+                ", maximum=" + maximum +
                 ", rating=" + rating +
                 '}';
     }

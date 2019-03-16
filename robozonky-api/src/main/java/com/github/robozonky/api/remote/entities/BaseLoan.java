@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -48,8 +49,9 @@ public abstract class BaseLoan extends BaseEntity {
     private String name;
     private String nickName;
     private String story;
-    private BigDecimal interestRate;
-    private BigDecimal revenueRate;
+    private Ratio interestRate;
+    private Ratio investmentRate;
+    private Ratio revenueRate;
     private BigDecimal annuity;
     private BigDecimal premium;
     private BigDecimal annuityWithInsurance;
@@ -57,7 +59,6 @@ public abstract class BaseLoan extends BaseEntity {
     private OffsetDateTime deadline;
     private Rating rating;
     private Collection<Photo> photos;
-    private BigDecimal investmentRate;
     private BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
     private OtherInvestments myOtherInvestments;
     private MainIncomeType mainIncomeType;
@@ -75,7 +76,7 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getInvestmentRate() {
+    public Ratio getInvestmentRate() {
         return investmentRate;
     }
 
@@ -115,7 +116,7 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getInterestRate() {
+    public Ratio getInterestRate() {
         return interestRate;
     }
 
@@ -232,7 +233,7 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getRevenueRate() {
+    public Ratio getRevenueRate() {
         return revenueRate;
     }
 

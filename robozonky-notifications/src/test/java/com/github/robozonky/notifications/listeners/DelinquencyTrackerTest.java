@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
@@ -55,7 +56,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setAmount(200)
             .setAnnuity(BigDecimal.TEN)
             .setRating(Rating.D)
-            .setInterestRate(new BigDecimal(Rating.D.getCode()))
+            .setInterestRate(Ratio.fromPercentage(Rating.D.getCode()))
             .setPurpose(Purpose.AUTO_MOTO)
             .setRegion(Region.JIHOCESKY)
             .setMainIncomeType(MainIncomeType.EMPLOYMENT)
@@ -70,7 +71,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setAmount(200)
             .setAnnuity(BigDecimal.TEN)
             .setRating(Rating.A)
-            .setInterestRate(new BigDecimal(Rating.A.getCode()))
+            .setInterestRate(Ratio.fromPercentage(Rating.A.getCode()))
             .setPurpose(Purpose.CESTOVANI)
             .setRegion(Region.JIHOMORAVSKY)
             .setMainIncomeType(MainIncomeType.OTHERS_MAIN)

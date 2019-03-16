@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.util.DateUtil;
 import io.vavr.Lazy;
 
@@ -31,7 +32,7 @@ public class Statistics extends BaseEntity {
         final Statistics s = new Statistics();
         s.currentProfitability = BigDecimal.ZERO;
         s.expectedProfitability = BigDecimal.ZERO;
-        s.profitability = BigDecimal.ZERO;
+        s.profitability = Ratio.ZERO;
         s.cashFlow = Collections.emptyList();
         s.riskPortfolio = Collections.emptyList();
         s.expectedPayments = Collections.emptyList();
@@ -43,8 +44,9 @@ public class Statistics extends BaseEntity {
         return s;
     });
 
-    private BigDecimal currentProfitability, expectedProfitability;
-    private BigDecimal profitability;
+    private BigDecimal currentProfitability;
+    private BigDecimal expectedProfitability;
+    private Ratio profitability;
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
     private OverallPortfolio overallPortfolio;
@@ -79,7 +81,7 @@ public class Statistics extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getProfitability() {
+    public Ratio getProfitability() {
         return profitability;
     }
 

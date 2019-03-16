@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -44,13 +45,13 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     }
 
     @Override
-    public BigDecimal getInterestRate() {
-        return adjustRateForStrategy(participation.getInterestRate());
+    public Ratio getInterestRate() {
+        return participation.getInterestRate();
     }
 
     @Override
-    public BigDecimal getRevenueRate() {
-        return adjustRateForStrategy(getLoan().getRevenueRate());
+    public Ratio getRevenueRate() {
+        return getLoan().getRevenueRate();
     }
 
     @Override

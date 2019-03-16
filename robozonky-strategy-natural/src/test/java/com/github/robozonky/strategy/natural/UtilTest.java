@@ -30,6 +30,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
+import static com.github.robozonky.api.Ratio.fromPercentage;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,12 +38,12 @@ import static org.mockito.Mockito.*;
 
 class UtilTest extends AbstractRoboZonkyTest {
 
-    private static PortfolioOverview preparePortfolio(final BigDecimal ratingA, final BigDecimal ratingB,
-                                                      final BigDecimal ratingC) {
+    private static PortfolioOverview preparePortfolio(final Number ratingA, final Number ratingB,
+                                                      final Number ratingC) {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview(10_000);
-        when(portfolioOverview.getShareOnInvestment(eq(Rating.A))).thenReturn(ratingA);
-        when(portfolioOverview.getShareOnInvestment(eq(Rating.B))).thenReturn(ratingB);
-        when(portfolioOverview.getShareOnInvestment(eq(Rating.C))).thenReturn(ratingC);
+        when(portfolioOverview.getShareOnInvestment(eq(Rating.A))).thenReturn(fromPercentage(ratingA));
+        when(portfolioOverview.getShareOnInvestment(eq(Rating.B))).thenReturn(fromPercentage(ratingB));
+        when(portfolioOverview.getShareOnInvestment(eq(Rating.C))).thenReturn(fromPercentage(ratingC));
         return portfolioOverview;
     }
 
@@ -73,27 +74,30 @@ class UtilTest extends AbstractRoboZonkyTest {
         final int targetShareA = 1;
         final int targetShareB = targetShareA * 5;
         final int targetShareC = targetShareB * 5;
-        final ParsedStrategy parsedStrategy = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
-                                                                 Arrays.asList(
-                                                                         new PortfolioShare(Rating.A, targetShareA,
-                                                                                            targetShareA),
-                                                                         new PortfolioShare(Rating.B, targetShareB,
-                                                                                            targetShareB),
-                                                                         new PortfolioShare(Rating.C, targetShareC,
-                                                                                            targetShareC)),
-                                                                 Collections.emptyMap());
+        final ParsedStrategy parsed = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
+                                                         Arrays.asList(
+                                                                 new PortfolioShare(Rating.A,
+                                                                                    fromPercentage(targetShareA),
+                                                                                    fromPercentage(targetShareA)),
+                                                                 new PortfolioShare(Rating.B,
+                                                                                    fromPercentage(targetShareB),
+                                                                                    fromPercentage(targetShareB)),
+                                                                 new PortfolioShare(Rating.C,
+                                                                                    fromPercentage(targetShareC),
+                                                                                    fromPercentage(targetShareC))),
+                                                         Collections.emptyMap());
         // all ratings have zero share; C > B > A
         final Set<Rating> ratings = EnumSet.of(Rating.A, Rating.B, Rating.C);
         PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        assertOrder(Util.rankRatingsByDemand(parsedStrategy, ratings, portfolio), Rating.C, Rating.B, Rating.A);
+        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.C, Rating.B, Rating.A);
 
         // A only; B, C overinvested
         portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.valueOf(10), BigDecimal.valueOf(30));
-        assertOrder(Util.rankRatingsByDemand(parsedStrategy, ratings, portfolio), Rating.A);
+        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.A);
 
         // B > C > A
-        portfolio = preparePortfolio(BigDecimal.valueOf(0.0099), BigDecimal.ZERO, BigDecimal.valueOf(0.249));
-        assertOrder(Util.rankRatingsByDemand(parsedStrategy, ratings, portfolio), Rating.B, Rating.C, Rating.A);
+        portfolio = preparePortfolio(BigDecimal.valueOf(0.99), BigDecimal.ZERO, BigDecimal.valueOf(24.9));
+        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.B, Rating.C, Rating.A);
     }
 
     @Test

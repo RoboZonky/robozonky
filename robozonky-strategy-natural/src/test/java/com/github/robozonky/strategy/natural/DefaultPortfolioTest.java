@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 class DefaultPortfolioTest {
 
     private static void hasValue(final DefaultPortfolio p, final Rating r) {
-        assertThat(p.getDefaultShare(r)).isEqualTo(0);
+        assertThat(p.getDefaultShare(r)).isEqualTo(Ratio.ZERO);
     }
 
     private static void unknownValue(final DefaultPortfolio p) {

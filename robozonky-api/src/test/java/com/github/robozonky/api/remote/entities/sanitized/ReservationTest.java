@@ -22,6 +22,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RawReservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -139,7 +140,7 @@ class ReservationTest {
 
         @Test
         void investmentRate() {
-            standard(b, b::setInvestmentRate, b::getInvestmentRate, BigDecimal.ONE);
+            standard(b, b::setInvestmentRate, b::getInvestmentRate, Ratio.ZERO);
         }
 
         @Test
@@ -149,12 +150,12 @@ class ReservationTest {
 
         @Test
         void revenueRate() {
-            standard(b, b::setRevenueRate, b::getRevenueRate, BigDecimal.ONE);
+            standard(b, b::setRevenueRate, b::getRevenueRate, Ratio.ZERO);
         }
 
         @Test
         void interestRate() {
-            standard(b, b::setInterestRate, b::getInterestRate, BigDecimal.ONE);
+            standard(b, b::setInterestRate, b::getInterestRate, Ratio.ZERO);
         }
 
         @Test

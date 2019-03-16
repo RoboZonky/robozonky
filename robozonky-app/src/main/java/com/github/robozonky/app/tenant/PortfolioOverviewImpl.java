@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.util.DateUtil;
@@ -81,11 +82,11 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     }
 
     @Override
-    public BigDecimal getShareAtRisk() {
+    public Ratio getShareAtRisk() {
         if (isZero(czkInvested)) { // protected against division by zero
-            return BigDecimal.ZERO;
+            return Ratio.ZERO;
         }
-        return divide(czkAtRisk, czkInvested);
+        return Ratio.fromRaw(divide(czkAtRisk, czkInvested));
     }
 
     @Override
@@ -94,21 +95,21 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     }
 
     @Override
-    public BigDecimal getShareOnInvestment(final Rating r) {
+    public Ratio getShareOnInvestment(final Rating r) {
         if (isZero(czkInvested)) { // protected against division by zero
-            return BigDecimal.ZERO;
+            return Ratio.ZERO;
         }
         final BigDecimal investedPerRating = this.getCzkInvested(r);
-        return divide(investedPerRating, czkInvested);
+        return Ratio.fromRaw(divide(investedPerRating, czkInvested));
     }
 
     @Override
-    public BigDecimal getAtRiskShareOnInvestment(final Rating r) {
+    public Ratio getAtRiskShareOnInvestment(final Rating r) {
         final BigDecimal investedPerRating = this.getCzkInvested(r);
         if (isZero(investedPerRating)) { // protected against division by zero
-            return BigDecimal.ZERO;
+            return Ratio.ZERO;
         }
-        return divide(getCzkAtRisk(r), investedPerRating);
+        return Ratio.fromRaw(divide(getCzkAtRisk(r), investedPerRating));
     }
 
     @Override

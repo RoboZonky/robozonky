@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -126,9 +127,9 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
         when(po.getCzkAtRisk()).thenReturn(BigDecimal.ZERO);
         when(po.getCzkAtRisk(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getShareAtRisk()).thenReturn(BigDecimal.ZERO);
-        when(po.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getShareAtRisk()).thenReturn(Ratio.ZERO);
+        when(po.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
+        when(po.getAtRiskShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(po.getTimestamp()).thenReturn(ZonedDateTime.now());
         return po;
     }

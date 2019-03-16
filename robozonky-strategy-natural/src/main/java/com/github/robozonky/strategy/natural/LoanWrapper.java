@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -55,13 +56,13 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
     }
 
     @Override
-    public BigDecimal getInterestRate() {
-        return adjustRateForStrategy(loan.getInterestRate());
+    public Ratio getInterestRate() {
+        return loan.getInterestRate();
     }
 
     @Override
-    public BigDecimal getRevenueRate() {
-        return adjustRateForStrategy(loan.getRevenueRate());
+    public Ratio getRevenueRate() {
+        return loan.getRevenueRate();
     }
 
     @Override

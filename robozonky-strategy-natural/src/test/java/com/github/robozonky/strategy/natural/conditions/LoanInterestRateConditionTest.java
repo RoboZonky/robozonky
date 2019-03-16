@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.junit.jupiter.api.Test;
 
@@ -27,14 +28,14 @@ class LoanInterestRateConditionTest {
 
     @Test
     void leftBoundary() {
-        assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO.subtract(BigDecimal.ONE)))
+        assertThatThrownBy(() -> new LoanInterestRateCondition(Ratio.fromPercentage(-1)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void rightBoundary() {
         final BigDecimal maxInterestRate = BigDecimalCalculator.moreThan(BigDecimal.valueOf(Double.MAX_VALUE));
-        assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO, maxInterestRate))
+        assertThatThrownBy(() -> new LoanInterestRateCondition(Ratio.ZERO, Ratio.fromRaw(maxInterestRate)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

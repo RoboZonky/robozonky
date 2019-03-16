@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -58,7 +59,7 @@ class FinancialCalculatorTest {
 
     private static void expectedInterest(final Rating rating, final int threshold) {
         final Investment i = Investment.fresh(mockLoan(rating), 1000)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setRemainingMonths(50).build();
         final BigDecimal before = FinancialCalculator.expectedInterestAfterFees(i, threshold - 1);
         final BigDecimal after = FinancialCalculator.expectedInterestAfterFees(i, threshold);
@@ -67,7 +68,7 @@ class FinancialCalculatorTest {
 
     private static void expectedInterestRate(final Rating rating, final int threshold) {
         final Investment i = Investment.fresh(mockLoan(rating), 1000)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setRemainingMonths(50);
         final BigDecimal before = FinancialCalculator.expectedInterestRateAfterFees(i, threshold - 1);
         final BigDecimal after = FinancialCalculator.expectedInterestRateAfterFees(i, threshold);
@@ -76,7 +77,7 @@ class FinancialCalculatorTest {
 
     private static void actualInterest(final Rating rating, final int threshold) {
         final Investment i = Investment.fresh(mockLoan(rating), 1000)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setPaidInterest(BigDecimal.valueOf(500))
                 .setPaidPenalty(BigDecimal.ONE)
                 .setRemainingMonths(40)

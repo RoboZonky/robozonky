@@ -21,6 +21,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Map;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
@@ -47,16 +48,16 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(BigDecimal.ZERO);
-            softly.assertThat(po.getShareAtRisk()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(po.getShareAtRisk()).isEqualTo(Ratio.ZERO);
             for (final Rating r : Rating.values()) {
                 softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(BigDecimal.ZERO);
                 softly.assertThat(po.getCzkAtRisk(r)).as(r + " at risk").isEqualTo(BigDecimal.ZERO);
                 softly.assertThat(po.getShareOnInvestment(r))
                         .as(r + " as a share")
-                        .isEqualTo(BigDecimal.ZERO);
+                        .isEqualTo(Ratio.ZERO);
                 softly.assertThat(po.getAtRiskShareOnInvestment(r))
                         .as(r + " at risk as a share")
-                        .isEqualTo(BigDecimal.ZERO);
+                        .isEqualTo(Ratio.ZERO);
             }
         });
     }
@@ -71,7 +72,7 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(adj);
             final BigDecimal share = divide(po.getCzkAtRisk(), po.getCzkInvested());
-            softly.assertThat(po.getShareAtRisk()).isEqualTo(share);
+            softly.assertThat(po.getShareAtRisk()).isEqualTo(Ratio.fromRaw(share));
             for (final Rating r : Rating.values()) {
                 final BigDecimal expectedAbsolute = r == Rating.D ? adj : BigDecimal.ZERO;
                 final BigDecimal expectedRelative = r == Rating.D ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -79,10 +80,10 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
                 softly.assertThat(po.getCzkAtRisk(r)).as(r + " at risk").isEqualTo(expectedAbsolute);
                 softly.assertThat(po.getShareOnInvestment(r))
                         .as(r + " as a share")
-                        .isEqualTo(expectedRelative);
+                        .isEqualTo(Ratio.fromRaw(expectedRelative));
                 softly.assertThat(po.getAtRiskShareOnInvestment(r))
                         .as(r + " at risk as a share")
-                        .isEqualTo(expectedRelative);
+                        .isEqualTo(Ratio.fromRaw(expectedRelative));
             }
         });
     }

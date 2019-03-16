@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -55,12 +56,12 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
     }
 
     @Override
-    public BigDecimal getInterestRate() {
+    public Ratio getInterestRate() {
         return reservation.getInterestRate();
     }
 
     @Override
-    public BigDecimal getRevenueRate() {
+    public Ratio getRevenueRate() {
         return reservation.getRevenueRate();
     }
 

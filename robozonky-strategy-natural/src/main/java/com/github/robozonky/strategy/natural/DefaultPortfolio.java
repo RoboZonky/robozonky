@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.util.EnumMap;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 
 enum DefaultPortfolio {
@@ -27,23 +28,23 @@ enum DefaultPortfolio {
     PROGRESSIVE(3, 7, 10, 14, 15, 17, 15, 10, 6, 3),
     EMPTY(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-    private final EnumMap<Rating, Double> shares = new EnumMap<>(Rating.class);
+    private final EnumMap<Rating, Ratio> shares = new EnumMap<>(Rating.class);
 
     DefaultPortfolio(final double aaaaa, final double aaaa, final double aaa, final double aae, final double aa,
                      final double ae, final double a, final double b, final double c, final double d) {
-        shares.put(Rating.AAAAA, aaaaa);
-        shares.put(Rating.AAAA, aaaa);
-        shares.put(Rating.AAA, aaa);
-        shares.put(Rating.AAE, aae);
-        shares.put(Rating.AA, aa);
-        shares.put(Rating.AE, ae);
-        shares.put(Rating.A, a);
-        shares.put(Rating.B, b);
-        shares.put(Rating.C, c);
-        shares.put(Rating.D, d);
+        shares.put(Rating.AAAAA, Ratio.fromPercentage(aaaaa));
+        shares.put(Rating.AAAA, Ratio.fromPercentage(aaaa));
+        shares.put(Rating.AAA, Ratio.fromPercentage(aaa));
+        shares.put(Rating.AAE, Ratio.fromPercentage(aae));
+        shares.put(Rating.AA, Ratio.fromPercentage(aa));
+        shares.put(Rating.AE, Ratio.fromPercentage(ae));
+        shares.put(Rating.A, Ratio.fromPercentage(a));
+        shares.put(Rating.B, Ratio.fromPercentage(b));
+        shares.put(Rating.C, Ratio.fromPercentage(c));
+        shares.put(Rating.D, Ratio.fromPercentage(d));
     }
 
-    public double getDefaultShare(final Rating r) {
+    public Ratio getDefaultShare(final Rating r) {
         if (shares.containsKey(r)) {
             return shares.get(r);
         } else {

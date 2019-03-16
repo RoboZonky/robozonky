@@ -100,8 +100,7 @@ final class FinancialCalculator {
         }
     }
 
-    public static BigDecimal estimateFeeRate(final Investment investment,
-                                             final long totalInvested) {
+    public static BigDecimal estimateFeeRate(final Investment investment, final long totalInvested) {
         final BigDecimal baseFee = baseFee(investment);
         final BigDecimal feeDiscount = feeDiscount(totalInvested);
         return minus(baseFee, times(baseFee, feeDiscount));
@@ -112,8 +111,8 @@ final class FinancialCalculator {
             return BigDecimal.ZERO;
         }
         final BigDecimal annualFee = estimateFeeRate(investment, totalInvested);
-        return feePaid(investment.getOriginalPrincipal(), investment.getInterestRate(), investment.getOriginalTerm(),
-                       annualFee, totalMonths);
+        return feePaid(investment.getOriginalPrincipal(), investment.getInterestRate().bigDecimalValue(),
+                       investment.getOriginalTerm(), annualFee, totalMonths);
     }
 
     static BigDecimal feePaid(final BigDecimal originalValue, final BigDecimal interestRate,
@@ -131,7 +130,7 @@ final class FinancialCalculator {
     }
 
     private static BigDecimal expectedInterest(final Investment i, final int totalMonths) {
-        final BigDecimal monthlyRate = divide(i.getInterestRate(), 12);
+        final BigDecimal monthlyRate = divide(i.getInterestRate().bigDecimalValue(), 12);
         return IntStream.range(0, totalMonths)
                 .mapToObj(month -> FinancialUtil.ipmt(monthlyRate, month + 1, totalMonths, i.getRemainingPrincipal()))
                 .reduce(BigDecimal.ZERO, BigDecimalCalculator::plus).negate();
@@ -170,7 +169,7 @@ final class FinancialCalculator {
     }
 
     public static BigDecimal expectedInterestRateAfterFees(final Investment investment, final long totalInvested) {
-        final BigDecimal interestRate = investment.getInterestRate();
+        final BigDecimal interestRate = investment.getInterestRate().bigDecimalValue();
         final BigDecimal feeRate = estimateFeeRate(investment, totalInvested);
         return minus(interestRate, feeRate);
     }

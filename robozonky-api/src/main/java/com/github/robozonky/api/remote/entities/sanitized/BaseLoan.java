@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -30,7 +31,7 @@ public interface BaseLoan {
 
     MainIncomeType getMainIncomeType();
 
-    BigDecimal getInvestmentRate();
+    Ratio getInvestmentRate();
 
     Region getRegion();
 
@@ -46,9 +47,9 @@ public interface BaseLoan {
 
     int getTermInMonths();
 
-    BigDecimal getInterestRate();
+    Ratio getInterestRate();
 
-    BigDecimal getRevenueRate();
+    Ratio getRevenueRate();
 
     Rating getRating();
 

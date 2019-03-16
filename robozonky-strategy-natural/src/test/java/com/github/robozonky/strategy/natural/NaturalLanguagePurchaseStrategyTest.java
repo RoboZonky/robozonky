@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -105,7 +106,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
-        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation l = mockParticipation();
         doReturn(Rating.A).when(l).getRating();
         final Stream<RecommendedParticipation> result =
@@ -122,7 +123,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
-        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation participation = mockParticipation();
         doReturn(BigDecimal.valueOf(100000)).when(participation).getRemainingPrincipal(); // not recommended for balance
         doReturn(Rating.A).when(participation).getRating();

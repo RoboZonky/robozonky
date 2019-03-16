@@ -18,27 +18,29 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.api.Ratio;
 
 public class LoanInterestRateCondition extends AbstractRangeCondition {
 
-    private static final BigDecimal MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);
+    private static final Ratio MAX_RATE = Ratio.fromRaw(Double.MAX_VALUE);
 
-    private static void assertIsInRange(final BigDecimal interestRate) {
-        final BigDecimal min = BigDecimal.ZERO;
-        final BigDecimal max = LoanInterestRateCondition.MAX_RATE;
-        if (min.compareTo(interestRate) > 0 || max.compareTo(interestRate) < 0) {
-            throw new IllegalArgumentException("Loan interest rate must be in range of <" + min + "; " + max + ">.");
-        }
-    }
-
-    public LoanInterestRateCondition(final BigDecimal fromInclusive, final BigDecimal toInclusive) {
-        super(Wrapper::getInterestRate, fromInclusive, toInclusive);
+    public LoanInterestRateCondition(final Ratio fromInclusive, final Ratio toInclusive) {
+        super(w -> w.getInterestRate().bigDecimalValue(), fromInclusive.bigDecimalValue(),
+              toInclusive.bigDecimalValue());
         LoanInterestRateCondition.assertIsInRange(fromInclusive);
         LoanInterestRateCondition.assertIsInRange(toInclusive);
     }
 
-    public LoanInterestRateCondition(final BigDecimal fromInclusive) {
+    public LoanInterestRateCondition(final Ratio fromInclusive) {
         this(fromInclusive, LoanInterestRateCondition.MAX_RATE);
+    }
+
+    private static void assertIsInRange(final Ratio interestRate) {
+        final BigDecimal min = BigDecimal.ZERO;
+        final BigDecimal max = LoanInterestRateCondition.MAX_RATE.bigDecimalValue();
+        final BigDecimal target = interestRate.bigDecimalValue();
+        if (min.compareTo(target) > 0 || max.compareTo(target) < 0) {
+            throw new IllegalArgumentException("Loan interest rate must be in range of <" + min + "; " + max + ">.");
+        }
     }
 }

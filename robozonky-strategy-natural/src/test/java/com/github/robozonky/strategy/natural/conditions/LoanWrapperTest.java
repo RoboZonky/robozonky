@@ -16,9 +16,9 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -28,7 +28,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class LoanWrapperTest {
@@ -39,7 +38,7 @@ class LoanWrapperTest {
                 .setInsuranceActive(true)
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setMainIncomeType(MainIncomeType.EMPLOYMENT)
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setRegion(Region.JIHOCESKY)
@@ -50,7 +49,7 @@ class LoanWrapperTest {
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(original);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(l.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(times(l.getInterestRate(), 100));
+            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRegion()).isEqualTo(l.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(l.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(l.getMainIncomeType());
@@ -71,7 +70,7 @@ class LoanWrapperTest {
                 .setInsuranceActive(true)
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setMainIncomeType(MainIncomeType.EMPLOYMENT)
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setRegion(Region.JIHOCESKY)

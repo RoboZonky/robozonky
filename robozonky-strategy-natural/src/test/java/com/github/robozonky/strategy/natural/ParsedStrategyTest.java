@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -142,12 +143,13 @@ class ParsedStrategyTest {
     void shares() {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
-        final PortfolioShare share = new PortfolioShare(Rating.D, 50, 100);
+        final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(50), Ratio.fromPercentage(100));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
                                                            Collections.emptyMap());
+        System.out.println(share);
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(50);
-            softly.assertThat(strategy.getMaximumShare(Rating.D)).isEqualTo(100);
+            softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(Ratio.fromPercentage(50));
+            softly.assertThat(strategy.getMaximumShare(Rating.D)).isEqualTo(Ratio.ONE);
         });
     }
 

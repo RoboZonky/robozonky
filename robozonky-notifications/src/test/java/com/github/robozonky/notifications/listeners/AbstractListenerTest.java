@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -205,7 +206,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .setId(66666)
                 .setAmount(100_000)
                 .setAnnuity(BigDecimal.TEN)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setDatePublished(OffsetDateTime.now().minusMonths(2))
                 .setName("Úvěr")
                 .setRegion(Region.JIHOCESKY)

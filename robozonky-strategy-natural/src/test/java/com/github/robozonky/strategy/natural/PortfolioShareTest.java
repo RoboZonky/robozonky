@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.Test;
 
@@ -26,9 +27,9 @@ class PortfolioShareTest {
     @Test
     void leftBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, -1, 0))
+            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, Ratio.fromPercentage(-1), Ratio.ZERO))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, 0, -1))
+            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, Ratio.ZERO, Ratio.fromPercentage(-1)))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
@@ -36,29 +37,29 @@ class PortfolioShareTest {
     @Test
     void rightBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, 101, 0))
+            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(101), Ratio.ZERO))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, 0, 101))
+            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.ZERO, Ratio.fromPercentage(101)))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
 
     @Test
     void correct() {
-        final PortfolioShare p = new PortfolioShare(Rating.C, 0, 100);
+        final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ZERO, Ratio.ONE);
         assertSoftly(softly -> {
-            softly.assertThat(p.getMininumShareInPercent()).isEqualTo(0);
-            softly.assertThat(p.getMaximumShareInPercent()).isEqualTo(100);
+            softly.assertThat(p.getMininum()).isEqualTo(Ratio.ZERO);
+            softly.assertThat(p.getMaximum()).isEqualTo(Ratio.ONE);
             softly.assertThat(p.getRating()).isEqualTo(Rating.C);
         });
     }
 
     @Test
     void reversed() {
-        final PortfolioShare p = new PortfolioShare(Rating.D, 51, 50);
+        final PortfolioShare p = new PortfolioShare(Rating.D, Ratio.fromPercentage(51), Ratio.fromPercentage(50));
         assertSoftly(softly -> {
-            softly.assertThat(p.getMininumShareInPercent()).isEqualTo(50);
-            softly.assertThat(p.getMaximumShareInPercent()).isEqualTo(51);
+            softly.assertThat(p.getMininum()).isEqualTo(Ratio.fromPercentage(50));
+            softly.assertThat(p.getMaximum()).isEqualTo(Ratio.fromPercentage(51));
             softly.assertThat(p.getRating()).isEqualTo(Rating.D);
         });
     }

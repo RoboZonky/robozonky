@@ -16,9 +16,9 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -38,7 +38,7 @@ class ReservationWrapperTest {
                 .setInsuranceActive(true)
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setMainIncomeType(MainIncomeType.EMPLOYMENT)
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setRegion(Region.JIHOCESKY)
@@ -70,7 +70,7 @@ class ReservationWrapperTest {
                 .setInsuranceActive(true)
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setInterestRate(BigDecimal.TEN)
+                .setInterestRate(Ratio.ONE)
                 .setMainIncomeType(MainIncomeType.EMPLOYMENT)
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setRegion(Region.JIHOCESKY)

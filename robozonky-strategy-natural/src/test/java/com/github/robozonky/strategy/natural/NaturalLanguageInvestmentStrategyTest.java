@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -96,7 +97,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
-        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Loan l = mockLoan(1000);
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(l)),
                                                            portfolio, new Restrictions());
@@ -110,7 +111,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(200));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
-        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Loan l = mockLoan(100_000);
         final Loan l2 = mockLoan(100);
         final LoanDescriptor ld = new LoanDescriptor(l);

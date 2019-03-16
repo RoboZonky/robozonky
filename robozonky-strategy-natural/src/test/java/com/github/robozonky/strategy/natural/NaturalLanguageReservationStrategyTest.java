@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
@@ -102,7 +103,7 @@ class NaturalLanguageReservationStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
-        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Stream<RecommendedReservation> result =
                 s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
                             portfolio, new Restrictions());
@@ -116,7 +117,7 @@ class NaturalLanguageReservationStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(200));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
-        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Reservation l = mockReservation(200);
         final ReservationDescriptor ld = new ReservationDescriptor(l, () -> null);
         final List<RecommendedReservation> result =

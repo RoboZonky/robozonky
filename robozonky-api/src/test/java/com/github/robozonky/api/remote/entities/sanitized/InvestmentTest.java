@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -263,12 +264,12 @@ class InvestmentTest {
 
         @Test
         void interestRate() {
-            standard(b, b::setInterestRate, b::getInterestRate, BigDecimal.ONE);
+            standard(b, b::setInterestRate, b::getInterestRate, Ratio.ONE);
         }
 
         @Test
         void revenueRate() {
-            standard(b, b::setRevenueRate, b::getRevenueRate, BigDecimal.ONE);
+            standard(b, b::setRevenueRate, b::getRevenueRate, Ratio.ONE);
         }
     }
 }

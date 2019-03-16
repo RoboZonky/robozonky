@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -54,9 +55,9 @@ public interface Wrapper<T> {
 
     MainIncomeType getMainIncomeType();
 
-    BigDecimal getInterestRate();
+    Ratio getInterestRate();
 
-    BigDecimal getRevenueRate();
+    Ratio getRevenueRate();
 
     Purpose getPurpose();
 

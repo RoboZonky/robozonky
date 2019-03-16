@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
@@ -46,10 +47,11 @@ public class RawInvestment extends BaseInvestment {
     private OffsetDateTime nextPaymentDate = investmentDate.plusMonths(1);
     private OffsetDateTime activeTo;
     private OffsetDateTime smpFeeExpirationDate;
-    private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
+    private BigDecimal paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
             duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
             smpFee, paidPenalty = BigDecimal.ZERO;
-    private BigDecimal revenueRate;
+    private Ratio interestRate;
+    private Ratio revenueRate;
     private Rating rating;
     private Collection<InsurancePolicyPeriod> insuranceHistory;
 
@@ -215,7 +217,7 @@ public class RawInvestment extends BaseInvestment {
     }
 
     @XmlElement
-    public BigDecimal getInterestRate() {
+    public Ratio getInterestRate() {
         return interestRate;
     }
 
@@ -308,7 +310,7 @@ public class RawInvestment extends BaseInvestment {
     }
 
     @XmlElement
-    public BigDecimal getRevenueRate() {
+    public Ratio getRevenueRate() {
         return revenueRate;
     }
 }

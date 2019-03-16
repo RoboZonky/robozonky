@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -32,7 +33,8 @@ public class Participation extends BaseEntity {
     private int loanId, originalInstalmentCount, remainingInstalmentCount, userId;
     private long id, investmentId;
     private MainIncomeType incomeType;
-    private BigDecimal interestRate, remainingPrincipal;
+    private Ratio interestRate;
+    private BigDecimal remainingPrincipal;
     private String loanName;
     private Purpose purpose;
     private Rating rating;
@@ -85,7 +87,7 @@ public class Participation extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getInterestRate() {
+    public Ratio getInterestRate() {
         return interestRate;
     }
 

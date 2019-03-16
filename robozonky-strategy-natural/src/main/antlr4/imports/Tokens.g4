@@ -8,6 +8,7 @@ grammar Tokens;
     import java.util.Collection;
     import java.util.LinkedHashSet;
     import com.github.robozonky.internal.util.BigDecimalCalculator;
+    import com.github.robozonky.api.Ratio;
     import com.github.robozonky.api.remote.enums.*;
     import com.github.robozonky.api.remote.entities.*;
     import com.github.robozonky.strategy.natural.*;
@@ -41,7 +42,8 @@ interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
     {
         if (needsBothValues) {
             // if the second one is provided, use the range
-            $result = new LoanInterestRateCondition($min.result, $max.result);
+            $result = new LoanInterestRateCondition(Ratio.fromPercentage($min.result),
+                                                    Ratio.fromPercentage($max.result));
         } else {
             // by default, just pick the one rating
             final Rating r = Rating.findByCode($min.result.toString());
@@ -54,12 +56,17 @@ interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
 
 interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=floatExpr
-    { $result = new LoanInterestRateCondition(BigDecimalCalculator.moreThan($min.result)); }
+    {
+        $result = new LoanInterestRateCondition(Ratio.fromPercentage(BigDecimalCalculator.moreThan($min.result)));
+    }
 ;
 
 interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=floatExpr
-    { $result = new LoanInterestRateCondition(BigDecimal.ZERO, BigDecimalCalculator.lessThan($max.result)); }
+    {
+        $result = new LoanInterestRateCondition(Ratio.ZERO,
+                                                Ratio.fromPercentage(BigDecimalCalculator.lessThan($max.result)));
+    }
 ;
 
 interestEnumeratedExpression returns [Collection<Rating> result]:

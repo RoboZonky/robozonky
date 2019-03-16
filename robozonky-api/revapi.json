@@ -11,6 +11,120 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getInterestRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.BaseLoan::getInterestRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getInvestmentRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.BaseLoan::getInvestmentRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getInterestRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.Participation::getInterestRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RawInvestment::getInterestRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.RawInvestment::getInterestRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RawInvestment::getRevenueRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.RawInvestment::getRevenueRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getInterestRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getInterestRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getInvestmentRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getInvestmentRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getRevenueRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getRevenueRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.Investment::getInterestRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.Investment::getInterestRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.Investment::getRevenueRate()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.Investment::getRevenueRate()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setInterestRate(===java.math.BigDecimal===)",
+        "new": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setInterestRate(===com.github.robozonky.api.Ratio===)",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setInvestmentRate(===java.math.BigDecimal===)",
+        "new": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setInvestmentRate(===com.github.robozonky.api.Ratio===)",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setRevenueRate(===java.math.BigDecimal===)",
+        "new": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setRevenueRate(===com.github.robozonky.api.Ratio===)",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setInterestRate(===java.math.BigDecimal===)",
+        "new": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setInterestRate(===com.github.robozonky.api.Ratio===)",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setRevenueRate(===java.math.BigDecimal===)",
+        "new": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setRevenueRate(===com.github.robozonky.api.Ratio===)",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getAtRiskShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getAtRiskShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getShareAtRisk()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareAtRisk()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      }
     ]
   }
 }

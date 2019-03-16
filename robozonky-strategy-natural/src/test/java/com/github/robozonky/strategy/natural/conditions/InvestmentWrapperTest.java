@@ -16,9 +16,9 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -29,7 +29,6 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class InvestmentWrapperTest {
@@ -38,7 +37,7 @@ class InvestmentWrapperTest {
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)
-            .setInterestRate(BigDecimal.TEN)
+            .setInterestRate(Ratio.ONE)
             .setMainIncomeType(MainIncomeType.EMPLOYMENT)
             .setPurpose(Purpose.AUTO_MOTO)
             .setRegion(Region.JIHOCESKY)
@@ -53,7 +52,7 @@ class InvestmentWrapperTest {
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(INVESTMENT.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(times(INVESTMENT.getInterestRate(), 100));
+            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRegion()).isEqualTo(LOAN.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(INVESTMENT.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());

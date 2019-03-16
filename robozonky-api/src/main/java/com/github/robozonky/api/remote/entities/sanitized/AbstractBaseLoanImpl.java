@@ -24,6 +24,7 @@ import java.util.Collections;
 
 import com.github.robozonky.api.remote.entities.BaseLoan;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -41,9 +42,9 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     private int remainingInvestment;
     private int nonReservedRemainingInvestment;
     private String name, nickName, story;
-    private BigDecimal interestRate;
-    private BigDecimal investmentRate;
-    private BigDecimal revenueRate;
+    private Ratio interestRate;
+    private Ratio investmentRate;
+    private Ratio revenueRate;
     private BigDecimal annuity;
     private OffsetDateTime datePublished, deadline;
     private Rating rating;
@@ -99,12 +100,12 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     }
 
     @Override
-    public BigDecimal getInvestmentRate() {
+    public Ratio getInvestmentRate() {
         return investmentRate;
     }
 
     @Override
-    public T setInvestmentRate(final BigDecimal investmentRate) {
+    public T setInvestmentRate(final Ratio investmentRate) {
         this.investmentRate = investmentRate;
         return (T) this;
     }
@@ -187,12 +188,12 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     }
 
     @Override
-    public BigDecimal getInterestRate() {
+    public Ratio getInterestRate() {
         return interestRate;
     }
 
     @Override
-    public T setInterestRate(final BigDecimal interestRate) {
+    public T setInterestRate(final Ratio interestRate) {
         this.interestRate = interestRate;
         return (T) this;
     }
@@ -375,7 +376,7 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     }
 
     @Override
-    public T setRevenueRate(final BigDecimal revenueRate) {
+    public T setRevenueRate(final Ratio revenueRate) {
         this.revenueRate = revenueRate;
         return (T) this;
     }
@@ -387,7 +388,7 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     }
 
     @Override
-    public BigDecimal getRevenueRate() {
+    public Ratio getRevenueRate() {
         return revenueRate;
     }
 

@@ -16,11 +16,11 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -28,11 +28,9 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
@@ -43,7 +41,7 @@ class ParticipationWrapperTest {
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)
-            .setInterestRate(BigDecimal.TEN)
+            .setInterestRate(Ratio.ONE)
             .setMainIncomeType(MainIncomeType.EMPLOYMENT)
             .setPurpose(Purpose.AUTO_MOTO)
             .setRegion(Region.JIHOCESKY)
@@ -54,7 +52,7 @@ class ParticipationWrapperTest {
 
     private static Participation mockParticipation(final Loan loan) {
         final Participation p = mock(Participation.class);
-        when(p.getInterestRate()).thenReturn(BigDecimal.ONE);
+        when(p.getInterestRate()).thenReturn(Ratio.ONE);
         when(p.getPurpose()).thenReturn(loan.getPurpose());
         when(p.getRating()).thenReturn(loan.getRating());
         when(p.getIncomeType()).thenReturn(loan.getMainIncomeType());
@@ -67,7 +65,7 @@ class ParticipationWrapperTest {
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(PARTICIPATION.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(times(PARTICIPATION.getInterestRate(), 100));
+            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRegion()).isEqualTo(LOAN.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(PARTICIPATION.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());
@@ -104,18 +102,16 @@ class ParticipationWrapperTest {
         f.when(Collections.singleton(c));
         final AbstractEnumeratedCondition<MainIncomeType> c2 = new BorrowerIncomeCondition();
         c2.add(MainIncomeType.EMPLOYMENT);
-        final AbstractRangeCondition c3 =
-                new LoanInterestRateCondition(BigDecimal.ZERO, BigDecimalCalculator.lessThan(new BigDecimal("16.0")));
+        final AbstractRangeCondition c3 = new LoanInterestRateCondition(Ratio.ZERO, Ratio.fromPercentage(16));
         f.butNotWhen(Arrays.asList(c2, c3));
         final Loan l = Loan.custom()
                 .setRegion(Region.USTECKY)
                 .build();
         final Participation p = mock(Participation.class);
         when(p.getIncomeType()).thenReturn(MainIncomeType.EMPLOYMENT);
-        when(p.getInterestRate()).thenReturn(new BigDecimal("0.15"));
+        when(p.getInterestRate()).thenReturn(Ratio.fromPercentage(15));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd);
         assertThat(f).rejects(w);
     }
-
 }

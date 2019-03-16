@@ -72,7 +72,7 @@ final class Util {
     }
 
     private static String identifyLoan(final MarketplaceLoan loan) {
-        final BigDecimal interestRate = loan.getInterestRate().multiply(HUNDRED);
+        final BigDecimal interestRate = loan.getInterestRate().asPercentage();
         // string formatting ensures proper locale-specific floating point separator
         return String.format("č. %d (%.2f %% p.a., %d m.)", loan.getId(), interestRate, loan.getTermInMonths());
     }

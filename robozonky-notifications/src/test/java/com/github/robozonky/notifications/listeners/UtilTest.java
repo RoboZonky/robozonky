@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
@@ -95,7 +96,7 @@ class UtilTest {
         final MarketplaceLoanBased l = new InvestmentSkippedEvent() {
             @Override
             public MarketplaceLoan getLoan() {
-                return MarketplaceLoan.custom().setRating(Rating.C).setInterestRate(BigDecimal.TEN).build();
+                return MarketplaceLoan.custom().setRating(Rating.C).setInterestRate(Ratio.ONE).build();
             }
 
             @Override
@@ -121,7 +122,7 @@ class UtilTest {
 
             @Override
             public Loan getLoan() {
-                return Loan.custom().setRating(Rating.D).setInterestRate(BigDecimal.TEN).build();
+                return Loan.custom().setRating(Rating.D).setInterestRate(Ratio.ONE).build();
             }
 
             @Override

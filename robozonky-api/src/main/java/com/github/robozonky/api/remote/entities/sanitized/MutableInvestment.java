@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -33,9 +34,9 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
 
     T setId(long id);
 
-    T setInterestRate(BigDecimal interestRate);
+    T setInterestRate(Ratio interestRate);
 
-    T setRevenueRate(BigDecimal revenueRate);
+    T setRevenueRate(Ratio revenueRate);
 
     T setRating(Rating rating);
 
@@ -86,5 +87,4 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
     T setInstalmentsPostponed(boolean instalmentsPostponed);
 
     T setInsuranceHistory(Collection<InsurancePolicyPeriod> insurancePolicyPeriods);
-
 }

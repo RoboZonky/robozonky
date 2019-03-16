@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -25,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -92,7 +94,11 @@ class ParsedStrategy {
     }
 
     private long sumMinimalShares() {
-        return Math.round(Stream.of(Rating.values()).mapToDouble(this::getMinimumShare).sum());
+        return Math.round(Stream.of(Rating.values())
+                                  .map(this::getMinimumShare)
+                                  .map(Ratio::asPercentage)
+                                  .mapToDouble(BigDecimal::doubleValue)
+                                  .sum());
     }
 
     public boolean needsConfirmation(final LoanDescriptor loan) {
@@ -123,17 +129,17 @@ class ParsedStrategy {
         this.minimumVersion = minimumVersion;
     }
 
-    public double getMinimumShare(final Rating rating) {
+    public Ratio getMinimumShare(final Rating rating) {
         if (portfolio.containsKey(rating)) {
-            return portfolio.get(rating).getMininumShareInPercent();
+            return portfolio.get(rating).getMininum();
         } else { // no minimum share specified; use the one from default portfolio
             return defaults.getPortfolio().getDefaultShare(rating);
         }
     }
 
-    public double getMaximumShare(final Rating rating) {
+    public Ratio getMaximumShare(final Rating rating) {
         if (portfolio.containsKey(rating)) {
-            return portfolio.get(rating).getMaximumShareInPercent();
+            return portfolio.get(rating).getMaximum();
         } else { // no maximum share specified; calculate minimum share and use it as maximum too
             return this.getMinimumShare(rating);
         }

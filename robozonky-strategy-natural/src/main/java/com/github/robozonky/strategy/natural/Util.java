@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -56,22 +55,22 @@ final class Util {
         final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         ratings.forEach(r -> {
-            final BigDecimal currentRatingShare = portfolio.getShareOnInvestment(r);
-            final BigDecimal maximumAllowedShare = divide(strategy.getMaximumShare(r), ONE_HUNDRED);
+            final BigDecimal currentRatingShare = portfolio.getShareOnInvestment(r).asPercentage();
+            final BigDecimal maximumAllowedShare = strategy.getMaximumShare(r).asPercentage();
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
             if (undershare.signum() < 1) { // we over-invested into this rating; do not include
-                final BigDecimal pp = undershare.multiply(ONE_HUNDRED).negate();
-                Decisions.report(logger -> logger.debug("Rating {} over-invested by {} percentage points.", r, pp));
+                final BigDecimal pp = undershare.negate();
+                Decisions.report(logger -> logger.debug("Rating {} over-invested by {} percentage point(s).", r, pp));
                 return;
             }
             // rank the rating
             mostWantedRatings.computeIfAbsent(undershare, k -> EnumSet.noneOf(Rating.class));
             mostWantedRatings.get(undershare).add(r);
             // inform that the rating is under-invested
-            final BigDecimal minimumNeededShare = divide(strategy.getMinimumShare(r), ONE_HUNDRED);
+            final BigDecimal minimumNeededShare = strategy.getMinimumShare(r).asPercentage();
             if (currentRatingShare.compareTo(minimumNeededShare) < 0) {
-                final BigDecimal pp = minimumNeededShare.subtract(currentRatingShare).multiply(ONE_HUNDRED);
-                Decisions.report(logger -> logger.debug("Rating {} under-invested by {} percentage points.", r, pp));
+                final BigDecimal pp = minimumNeededShare.subtract(currentRatingShare);
+                Decisions.report(logger -> logger.debug("Rating {} under-invested by {} percentage point(s).", r, pp));
             }
         });
         return mostWantedRatings.values().stream().flatMap(Collection::stream);

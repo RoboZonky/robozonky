@@ -28,6 +28,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -52,9 +53,10 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private OffsetDateTime smpFeeExpirationDate;
     private boolean canBeOffered, isOnSmp, isInsuranceActive, areInstalmentsPostponed;
     private Boolean isInWithdrawal;
-    private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
-            expectedInterest, paidPenalty, remainingPrincipal, smpFee, smpSoldFor;
-    private BigDecimal revenueRate;
+    private Ratio interestRate;
+    private Ratio revenueRate;
+    private BigDecimal originalPrincipal, paidPrincipal, duePrincipal, paidInterest, dueInterest, expectedInterest,
+            paidPenalty, remainingPrincipal, smpFee, smpSoldFor;
     private Rating rating;
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
@@ -156,13 +158,13 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public InvestmentBuilder setInterestRate(final BigDecimal interestRate) {
+    public InvestmentBuilder setInterestRate(final Ratio interestRate) {
         this.interestRate = interestRate;
         return this;
     }
 
     @Override
-    public InvestmentBuilder setRevenueRate(final BigDecimal revenueRate) {
+    public InvestmentBuilder setRevenueRate(final Ratio revenueRate) {
         this.revenueRate = revenueRate;
         return this;
     }
@@ -394,12 +396,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public BigDecimal getInterestRate() {
+    public Ratio getInterestRate() {
         return interestRate;
     }
 
     @Override
-    public BigDecimal getRevenueRate() {
+    public Ratio getRevenueRate() {
         return revenueRate;
     }
 

@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -30,7 +31,7 @@ public interface MutableBaseLoan<T extends MutableBaseLoan<T>> extends BaseLoan 
 
     T setMainIncomeType(final MainIncomeType mainIncomeType);
 
-    T setInvestmentRate(final BigDecimal investmentRate);
+    T setInvestmentRate(final Ratio investmentRate);
 
     T setRegion(final Region region);
 
@@ -46,9 +47,9 @@ public interface MutableBaseLoan<T extends MutableBaseLoan<T>> extends BaseLoan 
 
     T setTermInMonths(final int termInMonths);
 
-    T setInterestRate(final BigDecimal interestRate);
+    T setInterestRate(final Ratio interestRate);
 
-    T setRevenueRate(final BigDecimal revenueRate);
+    T setRevenueRate(final Ratio revenueRate);
 
     T setAnnuity(final BigDecimal annuity);
 

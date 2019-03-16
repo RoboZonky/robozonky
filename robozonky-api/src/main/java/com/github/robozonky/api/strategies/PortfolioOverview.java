@@ -19,6 +19,7 @@ package com.github.robozonky.api.strategies;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 
 /**
@@ -56,7 +57,7 @@ public interface PortfolioOverview {
      * How much is at risk out of the entire portfolio, in relative terms.
      * @return Percentage.
      */
-    BigDecimal getShareAtRisk();
+    Ratio getShareAtRisk();
 
     /**
      * Sum total of all remaining principal where loans in a given rating are currently overdue.
@@ -70,14 +71,14 @@ public interface PortfolioOverview {
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
-    BigDecimal getShareOnInvestment(final Rating r);
+    Ratio getShareOnInvestment(final Rating r);
 
     /**
      * Retrieve the amounts due in a given rating, divided by {@link #getCzkInvested()}.
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
-    BigDecimal getAtRiskShareOnInvestment(final Rating r);
+    Ratio getAtRiskShareOnInvestment(final Rating r);
 
     /**
      *
