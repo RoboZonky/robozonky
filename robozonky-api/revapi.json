@@ -49,6 +49,12 @@
       },
       {
         "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Statistics::getProfitability()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.Statistics::getProfitability()",
+        "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.returnTypeChanged",
         "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getInterestRate()",
         "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getInterestRate()",
         "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
