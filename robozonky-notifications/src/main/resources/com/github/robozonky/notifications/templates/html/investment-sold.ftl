@@ -9,10 +9,6 @@
     <th style="text-align: right;">Zbývající jistina:</th>
     <td>${data.amountRemaining?string.currency}</td>
   </tr>
-  <tr>
-    <th style="text-align: right;">Dosažený výnos:</th>
-    <td>${data.yield?string.currency}</td>
-  </tr>
 </table>
 
 <#include "additional-loan-info.ftl">

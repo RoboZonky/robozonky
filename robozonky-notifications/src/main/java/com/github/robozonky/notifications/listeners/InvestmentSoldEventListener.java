@@ -17,7 +17,6 @@
 package com.github.robozonky.notifications.listeners;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -42,11 +41,4 @@ public class InvestmentSoldEventListener extends AbstractListener<InvestmentSold
         return "investment-sold.ftl";
     }
 
-    @Override
-    protected Map<String, Object> getData(final InvestmentSoldEvent event) {
-        final Map<String, Object> result = super.getData(event);
-        final int invested = event.getPortfolioOverview().getCzkInvested().intValue();
-        result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), invested, true));
-        return result;
-    }
 }

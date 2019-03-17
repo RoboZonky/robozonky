@@ -19,6 +19,7 @@ package com.github.robozonky.app.tenant;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 
 import com.github.robozonky.api.Ratio;
@@ -36,14 +37,15 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void timestamp() {
         final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.TEN, Collections.emptyMap(),
-                                                               Collections.emptyMap());
+                                                               Collections.emptyMap(), Ratio.ZERO);
         assertThat(po.getTimestamp()).isBeforeOrEqualTo(ZonedDateTime.now());
     }
 
     @Test
     void emptyPortfolio() {
         final BigDecimal balance = BigDecimal.TEN;
-        final PortfolioOverview po = new PortfolioOverviewImpl(balance, Collections.emptyMap(), Collections.emptyMap());
+        final PortfolioOverview po = new PortfolioOverviewImpl(balance, Collections.emptyMap(), Collections.emptyMap(),
+                                                               Ratio.ZERO);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
@@ -63,10 +65,31 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     }
 
     @Test
+    void profitability() {
+        final BigDecimal balance = BigDecimal.TEN;
+        final Map<Rating, BigDecimal> investments = new EnumMap<>(Rating.class);
+        investments.put(Rating.AAAAA, BigDecimal.valueOf(200_000));
+        investments.put(Rating.D, BigDecimal.valueOf(20_000));
+        final PortfolioOverview po = new PortfolioOverviewImpl(balance, investments, Collections.emptyMap(),
+                                                               Ratio.fromPercentage(4));
+        SoftAssertions.assertSoftly(softly -> {
+            // the values tested against have been calculated manually and are guaranteed correct
+            softly.assertThat(po.getAnnualProfitability()).isEqualTo(Ratio.fromPercentage(4));
+            softly.assertThat(po.getMinimalAnnualProfitability().asPercentage().doubleValue())
+                    .isCloseTo(3.72, within(0.01));
+            softly.assertThat(po.getOptimalAnnualProfitability().asPercentage().doubleValue())
+                    .isCloseTo(4.87, within(0.01));
+            softly.assertThat(po.getCzkMonthlyProfit().intValue()).isCloseTo(733, within(1));
+            softly.assertThat(po.getCzkMinimalMonthlyProfit().intValue()).isCloseTo(682, within(1));
+            softly.assertThat(po.getCzkOptimalMonthyProfit().intValue()).isCloseTo(893, within(1));
+        });
+    }
+
+    @Test
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final BigDecimal adj = BigDecimal.TEN;
         final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
-        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, in);
+        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, in, Ratio.ZERO);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);

@@ -124,6 +124,36 @@
         "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
         "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
         "justification": "Plain BigDecimal replaced with Ratio type, to signify the meaning of the number"
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getAnnualProfitability()",
+        "justification": "New functionality in the Portfolio Overview."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkMinimalMonthlyProfit()",
+        "justification": "New functionality in the Portfolio Overview."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkMonthlyProfit()",
+        "justification": "New functionality in the Portfolio Overview."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkOptimalMonthyProfit()",
+        "justification": "New functionality in the Portfolio Overview."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getMinimalAnnualProfitability()",
+        "justification": "New functionality in the Portfolio Overview."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getOptimalAnnualProfitability()",
+        "justification": "New functionality in the Portfolio Overview."
       }
     ]
   }

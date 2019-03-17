@@ -18,20 +18,25 @@ package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.internal.util.DateUtil;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
 
     private final ZonedDateTime timestamp = DateUtil.zonedNow();
+    private final Ratio profitability;
     private final BigDecimal czkAvailable;
     private final BigDecimal czkInvested;
     private final BigDecimal czkAtRisk;
@@ -39,7 +44,8 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private final Map<Rating, BigDecimal> czkAtRiskPerRating;
 
     PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
-                          final Map<Rating, BigDecimal> czkAtRiskPerRating) {
+                          final Map<Rating, BigDecimal> czkAtRiskPerRating, final Ratio profitability) {
+        this.profitability = profitability;
         this.czkAvailable = czkAvailable;
         this.czkInvested = sum(czkInvestedPerRating.values());
         if (isZero(this.czkInvested)) {
@@ -113,6 +119,50 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     }
 
     @Override
+    public Ratio getAnnualProfitability() {
+        return profitability;
+    }
+
+    private BigDecimal calculateProfitability(final Rating r, final Function<Rating, Ratio> metric) {
+        final Ratio ratingShare = getShareOnInvestment(r);
+        final Ratio ratingProfitability = metric.apply(r);
+        return times(ratingShare.bigDecimalValue(), ratingProfitability.bigDecimalValue());
+    }
+
+    private Ratio getProfitability(final Function<Rating, Ratio> metric) {
+        final BigDecimal result = Arrays.stream(Rating.values())
+                .map(r -> calculateProfitability(r, metric))
+                .reduce(BigDecimalCalculator::plus)
+                .orElse(BigDecimal.ZERO);
+        return Ratio.fromRaw(result);
+    }
+
+    @Override
+    public Ratio getMinimalAnnualProfitability() {
+        return getProfitability(r -> r.getMinimalRevenueRate(getCzkInvested().longValue()));
+    }
+
+    @Override
+    public Ratio getOptimalAnnualProfitability() {
+        return getProfitability(r -> r.getMaximalRevenueRate(getCzkInvested().longValue()));
+    }
+
+    @Override
+    public BigDecimal getCzkMonthlyProfit() {
+        return divide(times(profitability.bigDecimalValue(), getCzkInvested()), 12);
+    }
+
+    @Override
+    public BigDecimal getCzkMinimalMonthlyProfit() {
+        return divide(times(getMinimalAnnualProfitability().bigDecimalValue(), getCzkInvested()), 12);
+    }
+
+    @Override
+    public BigDecimal getCzkOptimalMonthyProfit() {
+        return divide(times(getOptimalAnnualProfitability().bigDecimalValue(), getCzkInvested()), 12);
+    }
+
+    @Override
     public ZonedDateTime getTimestamp() {
         return timestamp;
     }
@@ -125,6 +175,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
                 ", czkInvestedPerRating=" + czkInvestedPerRating +
                 ", czkAtRisk=" + czkAtRisk +
                 ", czkAtRiskPerRating=" + czkAtRiskPerRating +
+                ", profitability=" + profitability +
                 ", timestamp=" + timestamp +
                 '}';
     }

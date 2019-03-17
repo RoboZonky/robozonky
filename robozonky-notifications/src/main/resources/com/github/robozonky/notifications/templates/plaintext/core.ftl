@@ -36,8 +36,8 @@
     </#switch>
 ${label?left_pad(5)} % p.a.</#macro>
 <#if data.session.isDryRun>
-POZOR: RoboZonky běží ve zkušebním režimu. Následující informace slouží jen
-pro demonstraci nastavení a nemusí být platné ani úplné!
+POZOR: RoboZonky běží ve zkušebním režimu. Následující informace slouží jen pro demonstraci nastavení a nemusí být
+platné ani úplné!
 ===============================================================================
 </#if>
 
@@ -47,6 +47,11 @@ RoboZonky pro Zonky účet ${data.session.userName} Vás tímto informuje o nás
 
 --
 Tuto zprávu dostáváte, protože je tak Váš robot nakonfigurován. Neodpovídejte na ni.
+
+Údaje v této zprávě jsou pouze orientační a mohou obsahovat chyby. Směrodatná data poskytuje výhradně Zonky dashboard.
+Výnosy jsou uváděny po započtení investorských poplatků vč. případných slev a před zdaněním. Na celé portfolio je
+aplikována aktuální platná výše poplatků, stará portfolia s nižšími poplatky tedy mohou vykazovat výkonnost vyšší než
+uvedenou.
 
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users

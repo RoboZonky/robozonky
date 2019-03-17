@@ -16,9 +16,6 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
@@ -41,14 +38,4 @@ public class ReservationAcceptedEventListener extends AbstractListener<Reservati
         return "reservation-accepted.ftl";
     }
 
-    @Override
-    protected Map<String, Object> getData(final ReservationAcceptedEvent event) {
-        final Investment i = event.getInvestment();
-        final Map<String, Object> result = super.getData(event);
-        final long invested = event.getPortfolioOverview().getCzkInvested().longValue();
-        result.put("yield", FinancialCalculator.expectedInterestAfterFees(i, invested));
-        final BigDecimal interestRate = FinancialCalculator.expectedInterestRateAfterFees(i, invested);
-        result.put("relativeYield", interestRate);
-        return result;
-    }
 }

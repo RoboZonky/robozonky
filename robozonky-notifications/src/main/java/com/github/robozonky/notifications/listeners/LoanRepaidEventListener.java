@@ -16,8 +16,6 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
@@ -38,11 +36,4 @@ public class LoanRepaidEventListener extends AbstractListener<LoanRepaidEvent> {
         return "loan-repaid.ftl";
     }
 
-    @Override
-    protected Map<String, Object> getData(final LoanRepaidEvent event) {
-        final Map<String, Object> result = super.getData(event);
-        final int invested = event.getPortfolioOverview().getCzkInvested().intValue();
-        result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), invested));
-        return result;
-    }
 }

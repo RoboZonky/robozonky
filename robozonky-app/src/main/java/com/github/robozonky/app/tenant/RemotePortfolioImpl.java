@@ -59,7 +59,9 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .reloadAfter(Duration.ofMinutes(30)) // not so important, may have a bit of delay
                 .finishWith(this::refreshRisk)
                 .build();
-        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk()))
+        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(getBalance(), getTotal(), getAtRisk(),
+                                                                                 getRemotePortfolio().getStatistics()
+                                                                                         .getProfitability()))
                 .finishWith(po -> LOGGER.debug("New portfolio overview: {}.", po))
                 .reloadAfter(Duration.ofMinutes(5))
                 .build();

@@ -81,7 +81,44 @@ public interface PortfolioOverview {
     Ratio getAtRiskShareOnInvestment(final Rating r);
 
     /**
-     *
+     * Retrieve annual rate of return of the entire portfolio as reported by Zonky.
+     * @return
+     */
+    Ratio getAnnualProfitability();
+
+    /**
+     * Retrieve minimal annual rate of return of the entire portfolio, assuming Zonky rist cost model holds.
+     * (See {@link Rating#getMinimalRevenueRate(long)}.)
+     * @return
+     */
+    Ratio getMinimalAnnualProfitability();
+
+    /**
+     * Retrieve maximal annual rate of return of the entire portfolio, assuming none of the loans are ever delinquent.
+     * (See {@link Rating#getMaximalRevenueRate(long)}.)
+     * @return
+     */
+    Ratio getOptimalAnnualProfitability();
+
+    /**
+     * Retrieve the expected monthly revenue, based on {@link #getAnnualProfitability()}.
+     * @return Amount in CZK.
+     */
+    BigDecimal getCzkMonthlyProfit();
+
+    /**
+     * Retrieve the expected monthly revenue, based on {@link #getMinimalAnnualProfitability()}.
+     * @return Amount in CZK.
+     */
+    BigDecimal getCzkMinimalMonthlyProfit();
+
+    /**
+     * Retrieve the expected monthly revenue, based on {@link #getOptimalAnnualProfitability()}.
+     * @return Amount in CZK.
+     */
+    BigDecimal getCzkOptimalMonthyProfit();
+
+    /**
      * @return When this instance was created.
      */
     ZonedDateTime getTimestamp();

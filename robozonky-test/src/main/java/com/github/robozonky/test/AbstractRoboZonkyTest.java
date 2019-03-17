@@ -130,6 +130,12 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(po.getShareAtRisk()).thenReturn(Ratio.ZERO);
         when(po.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(po.getAtRiskShareOnInvestment(any())).thenReturn(Ratio.ZERO);
+        when(po.getCzkMinimalMonthlyProfit()).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkMonthlyProfit()).thenReturn(BigDecimal.ONE);
+        when(po.getCzkOptimalMonthyProfit()).thenReturn(BigDecimal.TEN);
+        when(po.getMinimalAnnualProfitability()).thenReturn(Ratio.ZERO);
+        when(po.getAnnualProfitability()).thenReturn(Ratio.fromPercentage(5));
+        when(po.getOptimalAnnualProfitability()).thenReturn(Ratio.ONE);
         when(po.getTimestamp()).thenReturn(ZonedDateTime.now());
         return po;
     }

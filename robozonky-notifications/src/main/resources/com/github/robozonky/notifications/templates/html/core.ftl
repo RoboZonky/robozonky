@@ -79,8 +79,11 @@
             <li><small><@robozonky /> běží ve zkušebním režimu. Uvedené informace slouží jen pro demonstraci nastavení a
                 nemusí být platné ani úplné!</small></li>
         <#else>
-            <li><small>Údaje v této zprávě jsou pouze informativního charakteru a mohou obsahovat chyby. Směrodatná data
-                poskytuje výhradně <@zonky /> dashboard.</small></li>
+            <li><small>Údaje v této zprávě jsou pouze orientační a mohou obsahovat chyby. Směrodatná data poskytuje
+                výhradně <@zonky /> dashboard.</small></li>
+            <li><small>Výnosy jsou uváděny po započtení investorských poplatků vč. případných slev a před zdaněním.
+                Na celé portfolio je aplikována aktuální platná výše poplatků, stará portfolia s nižšími poplatky tedy
+                mohou vykazovat výkonnost vyšší než uvedenou.</small></li>
         </#if>
         <li><small>Dotazy pokládejte
             <a href="https://groups.google.com/forum/#!forum/robozonky-users">v uživatelské skupině</a></small></li>

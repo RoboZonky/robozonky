@@ -151,8 +151,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     private static <T extends Event> void testTriggered(final AbstractTargetHandler h,
                                                         final AbstractListener<T> listener,
                                                         final T event) throws Exception {
-        System.out.println("    ");
-        System.out.println(listener.getSubject(event));
         BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
         verify(h, times(1)).send(eq(SESSION_INFO), notNull(), notNull(), notNull());

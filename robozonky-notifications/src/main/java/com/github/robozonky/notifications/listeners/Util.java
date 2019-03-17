@@ -116,6 +116,12 @@ final class Util {
                 entry("totalRisk", portfolioOverview.getCzkAtRisk()),
                 entry("totalShare", portfolioOverview.getShareAtRisk()),
                 entry("balance", portfolioOverview.getCzkAvailable()),
+                entry("profitability", portfolioOverview.getAnnualProfitability()),
+                entry("monthlyProfit", portfolioOverview.getCzkMonthlyProfit()),
+                entry("minimalProfitability", portfolioOverview.getMinimalAnnualProfitability()),
+                entry("minimalMonthlyProfit", portfolioOverview.getCzkMinimalMonthlyProfit()),
+                entry("optimalProfitability", portfolioOverview.getOptimalAnnualProfitability()),
+                entry("optimalMonthlyProfit", portfolioOverview.getCzkOptimalMonthyProfit()),
                 entry("timestamp", toDate(portfolioOverview.getTimestamp()))
         );
     }
