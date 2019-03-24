@@ -26,11 +26,11 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
     static final String DESCRIPTION = "Change password of the master keystore.";
     @CommandLine.Option(names = {"-n", "--new-secret"},
             description = "Username to use to authenticate with Zonky servers.", required = true, interactive = true)
-    private char[] newSecret = null;
+    private String newSecret = null;
 
     public MasterPasswordFeature(final File keystore, final char[] keystoreSecret, final char... newSecret) {
         super(keystore, keystoreSecret);
-        this.newSecret = newSecret.clone();
+        this.newSecret = new String(newSecret);
     }
 
     MasterPasswordFeature() {
@@ -46,7 +46,7 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
     public void setup() throws SetupFailedException {
         super.setup();
         try {
-            this.getStorage().save(newSecret);
+            this.getStorage().save(newSecret.toCharArray());
         } catch (final Exception ex) {
             throw new SetupFailedException(ex);
         }
@@ -54,6 +54,6 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
 
     @Override
     public void test() throws TestFailedException {
-        super.test(newSecret);
+        super.test(newSecret.toCharArray());
     }
 }

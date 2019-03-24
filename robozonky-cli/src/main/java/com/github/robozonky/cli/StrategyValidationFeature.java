@@ -18,8 +18,6 @@ package com.github.robozonky.cli;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.atomic.LongAdder;
@@ -27,6 +25,7 @@ import java.util.concurrent.atomic.LongAdder;
 import com.github.robozonky.common.extensions.StrategyLoader;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.UrlUtil;
+import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 import picocli.CommandLine;
 
@@ -65,11 +64,9 @@ public final class StrategyValidationFeature extends AbstractFeature {
 
     @Override
     public void setup() throws SetupFailedException {
-        try (final InputStream s = new BufferedInputStream(UrlUtil.open(location))) {
-            text = IOUtils.toString(s, Defaults.CHARSET);
-        } catch (final IOException ex) {
-            throw new SetupFailedException(ex);
-        }
+        text = Try.withResources(() -> new BufferedInputStream(UrlUtil.open(location)))
+                .of(s -> IOUtils.toString(s, Defaults.CHARSET))
+                .getOrElseThrow(SetupFailedException::new);
     }
 
     private void report(final LongAdder adder, final String type) {

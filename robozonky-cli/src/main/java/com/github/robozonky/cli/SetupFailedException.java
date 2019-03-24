@@ -20,11 +20,11 @@ public class SetupFailedException extends Exception {
 
     private static final long serialVersionUID = 42L;
 
-    SetupFailedException(final Exception cause) {
+    SetupFailedException(final Throwable cause) {
         super(cause);
     }
 
-    SetupFailedException(final String message, final Exception cause) {
+    SetupFailedException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

@@ -28,12 +28,12 @@ abstract class KeyStoreLeveragingFeature extends AbstractFeature {
     private File keystore = new File("robozonky.keystore");
     @CommandLine.Option(names = {"-s", "--secret"}, description = "Secret to use to access the keystore.",
             required = true, interactive = true)
-    private char[] secret = null;
+    private String secret = null;
     private KeyStoreHandler storage;
 
     protected KeyStoreLeveragingFeature(final File keystore, final char... secret) {
         this.keystore = keystore;
-        this.secret = secret.clone();
+        this.secret = new String(secret);
     }
 
     protected KeyStoreLeveragingFeature() {
@@ -48,9 +48,9 @@ abstract class KeyStoreLeveragingFeature extends AbstractFeature {
     public void setup() throws SetupFailedException {
         try {
             if (keystore.exists()) {
-                storage = KeyStoreHandler.open(keystore, secret);
+                storage = KeyStoreHandler.open(keystore, secret.toCharArray());
             } else {
-                storage = KeyStoreHandler.create(keystore, secret);
+                storage = KeyStoreHandler.create(keystore, secret.toCharArray());
             }
         } catch (final Exception ex) {
             throw new SetupFailedException(ex);
@@ -67,6 +67,6 @@ abstract class KeyStoreLeveragingFeature extends AbstractFeature {
 
     @Override
     public void test() throws TestFailedException {
-        test(secret);
+        test(secret.toCharArray());
     }
 }

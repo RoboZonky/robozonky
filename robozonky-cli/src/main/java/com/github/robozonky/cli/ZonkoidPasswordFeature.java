@@ -32,7 +32,7 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
     private final String id;
     @CommandLine.Option(names = {"-p", "--password"},
             description = "Code generated in the Zonkoid mobile application.", required = true, interactive = true)
-    private char[] password = null;
+    private String password = null;
 
     public ZonkoidPasswordFeature(final File keystore, final char[] keystoreSecret, final char... password) {
         this(ZONKOID_ID, keystore, keystoreSecret, password);
@@ -41,7 +41,7 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
     ZonkoidPasswordFeature(final String id, final File keystore, final char[] keystoreSecret, final char... password) {
         super(keystore, keystoreSecret);
         this.id = id;
-        this.password = password.clone();
+        this.password = new String(password);
     }
 
     ZonkoidPasswordFeature() {
@@ -60,7 +60,7 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
         final SecretProvider s = SecretProvider.keyStoreBased(this.getStorage());
         try {
             s.getUsername(); // ensure we have Zonky username prepared
-            s.setSecret(id, password);
+            s.setSecret(id, password.toCharArray());
         } catch (final Exception ex) {
             throw new SetupFailedException(ex);
         }

@@ -34,7 +34,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
     private String username = null;
     @CommandLine.Option(names = {"-p", "--password"},
             description = "Password to use to authenticate with Zonky servers.", required = true, interactive = true)
-    private char[] password = null;
+    private String password = null;
 
     public ZonkyPasswordFeature(final File keystore, final char[] keystoreSecret, final String username,
                                 final char... password) {
@@ -46,7 +46,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
         super(keystore, keystoreSecret);
         this.api = apiProvider;
         this.username = username;
-        this.password = password.clone();
+        this.password = new String(password);
     }
 
     ZonkyPasswordFeature() {
@@ -77,7 +77,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
     @Override
     public void setup() throws SetupFailedException {
         super.setup();
-        SecretProvider.keyStoreBased(this.getStorage(), username, password);
+        SecretProvider.keyStoreBased(this.getStorage(), username, password.toCharArray());
     }
 
     @Override
