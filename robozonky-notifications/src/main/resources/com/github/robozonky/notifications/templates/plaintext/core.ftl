@@ -1,6 +1,9 @@
 <#setting locale="cs_CZ">
 <#macro idRating id>
     <#switch id>
+        <#case "2.99">
+            <#assign label = "2,99">
+            <#break>
         <#case "3.99">
             <#assign label = "3,99">
             <#break>

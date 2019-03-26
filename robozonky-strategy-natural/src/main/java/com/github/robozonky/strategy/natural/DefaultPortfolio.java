@@ -23,15 +23,16 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 enum DefaultPortfolio {
 
-    CONSERVATIVE(16, 19, 21, 19, 11, 7, 5, 1.5, 0.5, 0),
-    BALANCED(8, 14, 16, 18, 15, 12, 9, 5, 2, 1),
-    PROGRESSIVE(3, 7, 10, 14, 15, 17, 15, 10, 6, 3),
-    EMPTY(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    CONSERVATIVE(3, 13, 19, 21, 19, 11, 7, 5, 1.5, 0.5, 0),
+    BALANCED(2, 6, 14, 16, 18, 15, 12, 9, 5, 2, 1),
+    PROGRESSIVE(1, 2, 7, 10, 14, 15, 17, 15, 10, 6, 3),
+    EMPTY(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     private final EnumMap<Rating, Ratio> shares = new EnumMap<>(Rating.class);
 
-    DefaultPortfolio(final double aaaaa, final double aaaa, final double aaa, final double aae, final double aa,
-                     final double ae, final double a, final double b, final double c, final double d) {
+    DefaultPortfolio(double aaaaaa, final double aaaaa, final double aaaa, final double aaa, final double aae,
+                     final double aa, final double ae, final double a, final double b, final double c, final double d) {
+        shares.put(Rating.AAAAAA, Ratio.fromPercentage(aaaaaa));
         shares.put(Rating.AAAAA, Ratio.fromPercentage(aaaaa));
         shares.put(Rating.AAAA, Ratio.fromPercentage(aaaa));
         shares.put(Rating.AAA, Ratio.fromPercentage(aaa));

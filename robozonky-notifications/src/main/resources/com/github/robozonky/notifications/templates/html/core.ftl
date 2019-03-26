@@ -6,6 +6,10 @@
 <#macro robozonky><em>RoboZonky</em></#macro>
 <#macro idRating id>
     <#switch id>
+        <#case "2.99">
+            <#assign label = "2,99">
+            <#assign color = "c0498b">
+            <#break>
         <#case "3.99">
             <#assign label = "3,99">
             <#assign color = "8b59be">
