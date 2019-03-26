@@ -25,6 +25,7 @@ import com.github.robozonky.internal.api.Settings;
 public enum Rating implements BaseEnum {
 
     // it is imperative for proper functioning of strategy algorithms that ratings here be ordered best to worst
+    AAAAAA("2.99"),
     AAAAA("3.99"),
     AAAA("4.99"),
     AAA("5.99"),

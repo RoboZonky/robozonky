@@ -46,6 +46,8 @@ public enum Settings {
 
     private static Settings.Key getRatingKey(final Rating r) {
         switch (r) {
+            case AAAAAA:
+                return Settings.Key.CAPTCHA_DELAY_AAAAAA;
             case AAAAA:
                 return Settings.Key.CAPTCHA_DELAY_AAAAA;
             case AAAA:
@@ -217,6 +219,7 @@ public enum Settings {
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
         DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
         DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size"),
+        CAPTCHA_DELAY_AAAAAA("robozonky.aaaaaa_loan_protection_seconds"),
         CAPTCHA_DELAY_AAAAA("robozonky.aaaaa_loan_protection_seconds"),
         CAPTCHA_DELAY_AAAA("robozonky.aaaa_loan_protection_seconds"),
         CAPTCHA_DELAY_AAA("robozonky.aaa_loan_protection_seconds"),

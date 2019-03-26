@@ -52,6 +52,7 @@ final class FinancialCalculator {
             TWENTY_PERCENT = new BigDecimal("0.2");
     private static final Lazy<Map<Rating, BigDecimal>> FEES = Lazy.of(() -> {
         final Map<Rating, BigDecimal> result = new EnumMap<>(Rating.class);
+        result.put(Rating.AAAAAA, new BigDecimal("0.002"));
         result.put(Rating.AAAAA, new BigDecimal("0.002"));
         result.put(Rating.AAAA, new BigDecimal("0.005"));
         result.put(Rating.AAA, ONE_PERCENT);
