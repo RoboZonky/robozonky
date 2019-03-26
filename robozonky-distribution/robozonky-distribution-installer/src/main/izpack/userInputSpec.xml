@@ -104,8 +104,7 @@
     </field>
     <field type="text" variable="emailConfig" conditionid="isEmailConfigByUrl" summaryKey="Konfigurace z webu:">
       <spec txt="Vložte odkaz:" size="30" />
-      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
-                 txt="Odkaz je povinná položka." />
+      <validator class="com.github.robozonky.installer.UrlValidator" txt="Vložte platné URL." />
     </field>
   </panel>
 
@@ -239,8 +238,7 @@
     </field>
     <field type="text" variable="strategy" conditionid="isStrategyByUrl" summaryKey="Strategie z webu:">
       <spec txt="Vložte odkaz:" size="30" />
-      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
-                 txt="Strategie je povinná položka." />
+      <validator class="com.github.robozonky.installer.UrlValidator" txt="Vložte platné URL." />
     </field>
 
     <field type="space" />

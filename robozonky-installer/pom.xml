@@ -53,6 +53,16 @@
       <artifactId>izpack-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.izpack</groupId>
+      <artifactId>izpack-panel</artifactId>
+      <exclusions>
+        <exclusion> <!-- for dependency convergence -->
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>mailapi</artifactId>
     </dependency>
