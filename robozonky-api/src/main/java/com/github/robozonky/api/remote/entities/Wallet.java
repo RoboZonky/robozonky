@@ -24,6 +24,7 @@ public class Wallet extends BaseEntity {
     private int id;
     private BigDecimal balance, availableBalance, blockedBalance, creditSum, debitSum;
     private int variableSymbol;
+    private Object investmentType;
     private BankAccount account;
 
     private Wallet() {
@@ -46,6 +47,7 @@ public class Wallet extends BaseEntity {
         this.blockedBalance = balance.subtract(availableBalance);
         this.creditSum = balance;
         this.debitSum = BigDecimal.ZERO;
+        this.investmentType = null;
     }
 
     @XmlElement
@@ -81,6 +83,12 @@ public class Wallet extends BaseEntity {
     @XmlElement
     public int getVariableSymbol() {
         return variableSymbol;
+    }
+
+    // TODO figure out what this is
+    @XmlElement
+    public Object getInvestmentType() {
+        return investmentType;
     }
 
     @XmlElement

@@ -45,6 +45,7 @@ public abstract class BaseLoan extends BaseEntity {
     private double amount;
     private double remainingInvestment;
     private double reservedAmount;
+    private double zonkyPlusAmount;
     private String name;
     private String nickName;
     private String story;
@@ -206,6 +207,11 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public double getReservedAmount() {
         return reservedAmount;
+    }
+
+    @XmlElement
+    public double getZonkyPlusAmount() {
+        return zonkyPlusAmount;
     }
 
     @XmlElement
