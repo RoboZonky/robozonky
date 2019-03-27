@@ -19,7 +19,6 @@ package com.github.robozonky.app.runtime;
 import java.time.Duration;
 
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ class DaemonShutdownHookTest extends AbstractRoboZonkyTest {
         final ShutdownEnabler se = mock(ShutdownEnabler.class);
         final DaemonShutdownHook hook = new DaemonShutdownHook(lifecycle, se);
         hook.start();
-        se.get().ifPresent(c -> c.accept(new ShutdownHook.Result(ReturnCode.OK)));
+        se.get().ifPresent(c -> c.accept(ReturnCode.OK));
         Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
             while (hook.isAlive()) { // wait until the hook to terminate
                 Thread.sleep(1);

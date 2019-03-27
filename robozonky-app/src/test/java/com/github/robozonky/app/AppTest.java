@@ -28,8 +28,6 @@ import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.common.async.Scheduler;
-import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.management.AbstractBaseMBean;
 import com.github.robozonky.common.management.BaseMBean;
 import com.github.robozonky.common.management.Management;
@@ -79,7 +77,7 @@ class AppTest extends AbstractEventLeveragingTest {
         try {
             assertThat(main.execute(new MyInvestmentMode())).isEqualTo(ReturnCode.OK);
         } finally { // clean up, shutting down executors etc.
-            main.exit(new ShutdownHook.Result(ReturnCode.OK));
+            main.exit(ReturnCode.OK);
         }
         verify(main).ensureLiveness();
         verify(main).actuallyExit(ReturnCode.OK.getCode());
@@ -100,10 +98,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final int countBefore = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
         main.execute(new MyInvestmentMode());
         final int countAfter = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
-        assertThat(countAfter).isGreaterThan(countBefore);
-        main.exit(new ShutdownHook.Result(ReturnCode.OK));
-        final int finalCount = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
-        assertThat(finalCount).isEqualTo(countBefore);
+        assertThat(countAfter).isEqualTo(countBefore);
     }
 
     /**
@@ -118,9 +113,13 @@ class AppTest extends AbstractEventLeveragingTest {
             final ReturnCode result = main.execute(new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } finally { // clean up, shutting down executors etc.
-            final Scheduler s = Tasks.BACKGROUND.scheduler();
-            main.exit(new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED));
-            assertThat(s.isClosed()).isTrue();
+            final List<Event> events = getEventsRequested();
+            assertThat(events).hasSize(3);
+            assertSoftly(softly -> {
+                softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
+                softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
+                softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
+            });
         }
     }
 

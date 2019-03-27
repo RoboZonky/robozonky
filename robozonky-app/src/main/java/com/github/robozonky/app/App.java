@@ -52,12 +52,6 @@ public class App implements Runnable {
         main.run();
     }
 
-    private void exit(final ReturnCode returnCode) {
-        LOGGER.trace("Exit requested with return code {}.", returnCode);
-        final ShutdownHook.Result r = new ShutdownHook.Result(returnCode);
-        exit(r);
-    }
-
     /**
      * Exists so that tests can mock the {@link System#exit(int)} away.
      * @param code
@@ -71,9 +65,9 @@ public class App implements Runnable {
      * so may result in unpredictable behavior of this instance of RoboZonky or future ones.
      * @param result Will be passed to {@link System#exit(int)}.
      */
-    public void exit(final ShutdownHook.Result result) {
-        shutdownHooks.execute(result);
-        actuallyExit(result.getReturnCode().getCode());
+    public void exit(final ReturnCode result) {
+        LOGGER.trace("Exit requested with return code {}.", result);
+        actuallyExit(result.getCode());
     }
 
     ReturnCode execute(final InvestmentMode mode) {
@@ -93,7 +87,15 @@ public class App implements Runnable {
         // will trigger events, therefore needs to come before the above
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
-        return m.apply(getLifecycle());
+        // trigger all shutdown hooks in reverse order, before the token is closed after exiting this method
+        try {
+            final ReturnCode code = m.apply(getLifecycle());
+            shutdownHooks.execute(code);
+            return code;
+        } catch (final Throwable ex) {
+            shutdownHooks.execute(ReturnCode.ERROR_UNEXPECTED); // make sure all is closed even in a failing situation
+            throw new IllegalStateException("Error executing daemon.", ex);
+        }
     }
 
     public Lifecycle getLifecycle() {

@@ -28,12 +28,12 @@ import org.apache.logging.log4j.Logger;
 /**
  * Used for things that need to be executed at app start and shutdown. Use {@link #register(Handler)} to
  * specify
- * such actions and {@link #execute(Result)} ignoreWhen it's time to shut the app down.
+ * such actions and {@link #execute(ReturnCode)} ignoreWhen it's time to shut the app down.
  */
 public class ShutdownHook {
 
     private static final Logger LOGGER = LogManager.getLogger(ShutdownHook.class);
-    private final Deque<Consumer<Result>> stack = new ArrayDeque<>(0);
+    private final Deque<Consumer<ReturnCode>> stack = new ArrayDeque<>(0);
 
     /**
      * Register a handler to call arbitrary code during call.
@@ -45,7 +45,7 @@ public class ShutdownHook {
             throw new IllegalArgumentException("Handler may not be null.");
         }
         try {
-            final Optional<Consumer<Result>> end = handler.get();
+            final Optional<Consumer<ReturnCode>> end = handler.get();
             if (end.isPresent()) {
                 stack.push(end.get());
                 return true;
@@ -64,11 +64,11 @@ public class ShutdownHook {
      * their registration. If any handler throws an exception, it will be ignored.
      * @param result The terminating state of the application.
      */
-    public void execute(final Result result) {
-        LOGGER.debug("RoboZonky terminating with '{}' return code.", result.getReturnCode());
+    public void execute(final ReturnCode result) {
+        LOGGER.debug("RoboZonky terminating with '{}' return code.", result);
         while (!stack.isEmpty()) {
             try {
-                final Consumer<Result> h = stack.pop();
+                final Consumer<ReturnCode> h = stack.pop();
                 LOGGER.trace("Executing {}.", h);
                 h.accept(result);
             } catch (final RuntimeException ex) {
@@ -81,27 +81,15 @@ public class ShutdownHook {
      * Represents a unit of state in the application.
      */
     @FunctionalInterface
-    public interface Handler extends Supplier<Optional<Consumer<Result>>> {
+    public interface Handler extends Supplier<Optional<Consumer<ReturnCode>>> {
 
         /**
          * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
-         * {@link ShutdownHook#execute(Result)}.
+         * {@link ShutdownHook#execute(ReturnCode)}.
          * @return Will be called during app shutdown, if present.
          */
         @Override
-        Optional<Consumer<Result>> get();
+        Optional<Consumer<ReturnCode>> get();
     }
 
-    public static final class Result {
-
-        private final ReturnCode returnCode;
-
-        public Result(final ReturnCode code) {
-            this.returnCode = code;
-        }
-
-        public ReturnCode getReturnCode() {
-            return returnCode;
-        }
-    }
 }
