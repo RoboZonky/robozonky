@@ -88,8 +88,10 @@ public class App implements Runnable {
     private ReturnCode executeSafe(final InvestmentMode m) {
         Events.global().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
-        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
+        // will close event-firing thread == must be triggered last == must be registered first
         shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
+        // will trigger events, therefore needs to come before the above
+        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         return m.apply(getLifecycle());
     }
