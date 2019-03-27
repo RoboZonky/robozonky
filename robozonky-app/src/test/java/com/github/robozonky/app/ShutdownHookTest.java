@@ -35,7 +35,7 @@ class ShutdownHookTest extends AbstractRoboZonkyTest {
         final ShutdownHook s = new ShutdownHook();
         assertThat(s.register(h)).isFalse();
         try {
-            s.execute(new ShutdownHook.Result(ReturnCode.OK));
+            s.execute(ReturnCode.OK);
         } catch (final RuntimeException ex) {
             fail("Should not have been thrown.", ex);
         }
@@ -63,7 +63,7 @@ class ShutdownHookTest extends AbstractRoboZonkyTest {
         final ShutdownHook s = new ShutdownHook();
         assertThat(s.register(h)).isTrue();
         try {
-            s.execute(new ShutdownHook.Result(ReturnCode.OK));
+            s.execute(ReturnCode.OK);
         } catch (final RuntimeException ex) {
             fail("Should not have been thrown.", ex);
         }
@@ -72,12 +72,12 @@ class ShutdownHookTest extends AbstractRoboZonkyTest {
     @SuppressWarnings("unchecked")
     @Test
     void proper() {
-        final Consumer<ShutdownHook.Result> c = mock(Consumer.class);
+        final Consumer<ReturnCode> c = mock(Consumer.class);
         final ShutdownHook.Handler h = mock(ShutdownHook.Handler.class);
         when(h.get()).thenReturn(Optional.of(c));
         final ShutdownHook s = new ShutdownHook();
         assertThat(s.register(h)).isTrue();
-        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK);
+        final ReturnCode r = ReturnCode.OK;
         s.execute(r);
         verify(c).accept(eq(r));
     }

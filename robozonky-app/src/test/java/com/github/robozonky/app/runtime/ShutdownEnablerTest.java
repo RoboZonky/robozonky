@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -42,9 +41,9 @@ class ShutdownEnablerTest extends AbstractRoboZonkyTest {
         final Future<?> f = e.submit(se::waitUntilTriggered);
         assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                 .isInstanceOf(TimeoutException.class); // the thread is blocked
-        final Consumer<ShutdownHook.Result> c = se.get()
+        final Consumer<ReturnCode> c = se.get()
                 .orElseThrow(() -> new IllegalStateException("Should have returned."));
-        c.accept(new ShutdownHook.Result(ReturnCode.OK)); // this unblocks the thread
+        c.accept(ReturnCode.OK); // this unblocks the thread
         // this should return
         assertTimeout(Duration.ofSeconds(5), (Executable) f::get);
         assertThat(f).isDone();

@@ -66,6 +66,10 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
 
     private void schedule(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
                           final Duration initialDelay, final Duration delayInBetween) {
+        if (executor.isShutdown()) {
+            LOGGER.debug("Not scheduling {} as {} shutdown.", toSchedule, this);
+            return;
+        }
         final Runnable toSubmit = () -> submitToExecutor(delegating, toSchedule, delayInBetween);
         LOGGER.debug("Scheduling {} to happen after {} ms.", toSchedule, initialDelay.toMillis());
         final ScheduledFuture<?> f = schedulingExecutor.schedule(toSubmit, initialDelay.toNanos(),
@@ -127,9 +131,18 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
     @Override
     public void close() {
         LOGGER.trace("Shutting down {}.", this);
-        executor.shutdownNow();
-        if (onClose != null) {
-            onClose.run();
+        executor.shutdown();
+        try {
+            LOGGER.debug("Waiting until {} shutdown.", this);
+            executor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            LOGGER.debug("Wait failed.", ex);
+        } finally {
+            LOGGER.trace("Wait over.");
+            if (onClose != null) {
+                onClose.run();
+            }
         }
     }
 }

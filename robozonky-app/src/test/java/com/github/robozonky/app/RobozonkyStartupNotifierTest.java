@@ -31,10 +31,10 @@ class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
     @Test
     void properEventsFired() {
         final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier(SESSION);
-        final Optional<Consumer<ShutdownHook.Result>> result = rzsn.get();
+        final Optional<Consumer<ReturnCode>> result = rzsn.get();
         assertThat(result).isPresent();
         assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
-        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK);
+        final ReturnCode r = ReturnCode.OK;
         result.get().accept(r);
         assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyEndingEvent.class);
     }

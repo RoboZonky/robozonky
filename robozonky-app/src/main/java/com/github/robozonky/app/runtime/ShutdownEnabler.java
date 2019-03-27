@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
+import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +43,7 @@ class ShutdownEnabler implements ShutdownHook.Handler {
     }
 
     @Override
-    public Optional<Consumer<ShutdownHook.Result>> get() {
+    public Optional<Consumer<ReturnCode>> get() {
         return Optional.of((returnCode -> {
             /*
              * when the code gets here during shutdown, control is handed over to the daemon, which is already

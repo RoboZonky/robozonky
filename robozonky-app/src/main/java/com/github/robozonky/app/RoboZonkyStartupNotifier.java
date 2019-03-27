@@ -45,7 +45,7 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     }
 
     @Override
-    public Optional<Consumer<ShutdownHook.Result>> get() {
+    public Optional<Consumer<ReturnCode>> get() {
         LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
         Events.global().fire(roboZonkyInitialized());
         return Optional.of(result -> {
