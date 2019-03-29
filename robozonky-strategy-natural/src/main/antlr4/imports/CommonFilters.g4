@@ -11,6 +11,15 @@ import Tokens;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
+saleFeeCondition returns [MarketplaceFilterCondition result]:
+    'prodej '
+    (
+        ( IS { $result = SmpFeePresenceCondition.PRESENT; } )  |
+        ( 'není ' { $result = SmpFeePresenceCondition.NOT_PRESENT; } )
+    )
+    'zpoplatněn'
+;
+
 regionCondition returns [MarketplaceFilterCondition result]:
     { BorrowerRegionCondition c = new BorrowerRegionCondition(); }
     'kraj klienta ' IS (

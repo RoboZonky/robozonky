@@ -126,7 +126,7 @@ sellFilterExpression returns [Collection<MarketplaceFilter> result]:
     { $result = new ArrayList<>(0); }
     (
         (j=sellMarketplaceFilter { $result.add($j.result); })
-    )*
+    )+
 ;
 
 jointMarketplaceFilter returns [MarketplaceFilter result]:
@@ -149,8 +149,8 @@ secondaryMarketplaceFilter returns [MarketplaceFilter result]:
 
 sellMarketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
-    'Prodat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.when($r.result); }
-    ('(Ale ne když: ' s=secondaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
+    'Prodat participaci, kde: ' r=sellFilterConditions { $result.when($r.result); }
+    ('(Ale ne když: ' s=sellFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
 jointMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
@@ -171,6 +171,13 @@ secondaryMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondit
     { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
     (c1=secondaryMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=secondaryMarketplaceFilterCondition { result.add($c2.result); } DOT
+    { $result = result; }
+;
+
+sellFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
+    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+    (c1=sellMarketplaceFilterCondition { result.add($c1.result); } '; ')*
+    c2=sellMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
@@ -215,4 +222,22 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c13=remainingPrincipalCondition { $result = $c13.result; }
     | c14=annuityCondition { $result = $c14.result; }
     | c15=revenueRateCondition { $result = $c15.result; }
+;
+
+sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
+    c1=regionCondition { $result = $c1.result; }
+    | c3=incomeCondition { $result = $c3.result; }
+    | c4=purposeCondition { $result = $c4.result; }
+    | c5=storyCondition { $result = $c5.result; }
+    | c6=termCondition { $result = $c6.result; }
+    | c7=amountCondition { $result = $c7.result; }
+    | c8=interestCondition { $result = $c8.result; }
+    | c9=relativeTermCondition { $result = $c9.result; }
+    | c10=elapsedTermCondition { $result = $c10.result; }
+    | c11=elapsedRelativeTermCondition { $result = $c11.result; }
+    | c12=insuranceCondition { $result = $c12.result; }
+    | c13=remainingPrincipalCondition { $result = $c13.result; }
+    | c14=annuityCondition { $result = $c14.result; }
+    | c15=revenueRateCondition { $result = $c15.result; }
+    | c16=saleFeeCondition { $result = $c16.result; }
 ;

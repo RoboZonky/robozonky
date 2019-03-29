@@ -87,28 +87,27 @@ complexExpression returns [ParsedStrategy result]
         )
     )
 
-    { boolean emptySellFiltersIsOk = true; }
+    { DefaultValues v = $d.result; }
     (
         (
             DELIM 'Prodej participací'
             s=sellFilterExpression {
+                v.setSellingMode(SellingMode.SELL_FILTERS);
                 sellFilters = $s.result;
-                if (sellFilters.isEmpty()) emptySellFiltersIsOk = false;
+            }
+        ) | (
+            'Prodávat všechny participace bez poplatku, které odpovídají filtrům tržiště.' {
+                v.setSellingMode(SellingMode.FREE_AND_OUTSIDE_STRATEGY);
+                sellFilters = Collections.emptySet();
             }
         ) | (
             'Prodej participací zakázán.' {
                 sellFilters = Collections.emptySet();
             }
         )
-    )? {
-        if (!emptySellFiltersIsOk) {
-            LogManager.getLogger(this.getClass())
-                .warn("Sell filters are missing without excuse. This is deprecated and will eventually break.");
-        }
-    }
+    )
 
     {
-        final DefaultValues v = $d.result;
         $result = new ParsedStrategy(v, portfolioStructures, investmentSizes,
                                      new FilterSupplier(v, primaryFilters, secondaryFilters, sellFilters));
     }

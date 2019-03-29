@@ -87,7 +87,7 @@ class ParsedStrategyTest {
         assertSoftly(softly -> {
             softly.assertThat(strategy.getApplicableLoans(Collections.singleton(ld))).isEmpty();
             softly.assertThat(strategy.getApplicableParticipations(Collections.singleton(pd))).isEmpty();
-            softly.assertThat(strategy.getApplicableInvestments(Collections.singleton(id))).containsOnly(id);
+            softly.assertThat(strategy.getInvestmentsMatchingSellFilters(Collections.singleton(id))).containsOnly(id);
         });
     }
 
@@ -119,7 +119,7 @@ class ParsedStrategyTest {
             softly.assertThat(strategy.getApplicableLoans(Arrays.asList(ldOver, ldUnder))).containsOnly(ldUnder);
             softly.assertThat(strategy.getApplicableParticipations(Arrays.asList(pdOver, pdUnder)))
                     .containsOnly(pdUnder);
-            softly.assertThat(strategy.getApplicableInvestments(Arrays.asList(idOver, idUnder))).isEmpty();
+            softly.assertThat(strategy.getInvestmentsMatchingSellFilters(Arrays.asList(idOver, idUnder))).isEmpty();
         });
     }
 
@@ -146,7 +146,6 @@ class ParsedStrategyTest {
         final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(50), Ratio.fromPercentage(100));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
                                                            Collections.emptyMap());
-        System.out.println(share);
         assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(Ratio.fromPercentage(50));
             softly.assertThat(strategy.getMaximumShare(Rating.D)).isEqualTo(Ratio.ONE);

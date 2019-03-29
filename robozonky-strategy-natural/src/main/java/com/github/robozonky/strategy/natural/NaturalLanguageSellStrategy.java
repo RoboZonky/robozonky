@@ -16,7 +16,9 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
@@ -26,17 +28,37 @@ import com.github.robozonky.api.strategies.SellStrategy;
 
 class NaturalLanguageSellStrategy implements SellStrategy {
 
+    private static final Comparator<RecommendedInvestment> COMPARATOR =
+            Comparator.comparing(r -> r.descriptor().item().getSmpFee().orElse(BigDecimal.ZERO));
     private final ParsedStrategy strategy;
 
     public NaturalLanguageSellStrategy(final ParsedStrategy p) {
         this.strategy = p;
     }
 
+    private static boolean isFree(final InvestmentDescriptor descriptor) {
+        final BigDecimal fee = descriptor.item().getSmpFee().orElse(BigDecimal.ZERO);
+        return fee.signum() == 0;
+    }
+
     @Override
     public Stream<RecommendedInvestment> recommend(final Collection<InvestmentDescriptor> available,
                                                    final PortfolioOverview portfolio) {
-        return strategy.getApplicableInvestments(available)
+        return strategy.getSellingMode()
+                .map(mode -> {
+                    switch (mode) {
+                        case SELL_FILTERS:
+                            return strategy.getInvestmentsMatchingSellFilters(available);
+                        case FREE_AND_OUTSIDE_STRATEGY:
+                            return strategy.getInvestmentsMatchingPrimaryMarketplaceFilters(available)
+                                    .filter(NaturalLanguageSellStrategy::isFree);
+                        default:
+                            throw new IllegalStateException("Impossible.");
+                    }
+                })
+                .orElse(Stream.empty())
                 .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
-                .flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
+                .flatMap(r -> r.map(Stream::of).orElse(Stream.empty()))
+                .sorted(COMPARATOR); // investments without sale fee come first
     }
 }

@@ -82,4 +82,5 @@ Ignorovat vše, kde: délka přesahuje 36 měsíců.
 # Pravidla pro filtry jsou stejná, jako v předchozí sekci.
 - Prodej participací
 
-Prodat participaci, kde: délka přesahuje 36 měsíců.
+Prodat participaci, kde: délka přesahuje 36 měsíců; prodej není zpoplatněn.
+Prodat participaci, kde: úrok přesahuje 10 % p.a.; prodej je zpoplatněn.

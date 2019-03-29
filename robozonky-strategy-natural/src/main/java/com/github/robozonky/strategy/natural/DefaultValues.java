@@ -28,6 +28,7 @@ class DefaultValues {
 
     private final DefaultPortfolio portfolio;
     private ReservationMode reservationMode = null;
+    private SellingMode sellingMode = null;
     private long targetPortfolioSize = Long.MAX_VALUE;
     private long minimumBalance = 0;
     private InvestmentSize investmentSize = new InvestmentSize();
@@ -49,6 +50,14 @@ class DefaultValues {
 
     public void setReservationMode(final ReservationMode reservationMode) {
         this.reservationMode = reservationMode;
+    }
+
+    public Optional<SellingMode> getSellingMode() {
+        return Optional.ofNullable(sellingMode);
+    }
+
+    public void setSellingMode(final SellingMode sellingMode) {
+        this.sellingMode = sellingMode;
     }
 
     public long getMinimumBalance() {
