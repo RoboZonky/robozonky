@@ -46,7 +46,9 @@ class WrapperTest {
                 .setAnnuity(BigDecimal.ONE)
                 .build();
         final int invested = 200;
-        final Investment investment = Investment.fresh(loan, invested).build();
+        final Investment investment = Investment.fresh(loan, invested)
+                .setSmpFee(BigDecimal.ONE)
+                .build();
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan));
         assertSoftly(softly -> {
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
@@ -58,6 +60,7 @@ class WrapperTest {
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
             softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(invested));
+            softly.assertThat(w.saleFee()).contains(BigDecimal.ONE);
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -82,6 +85,7 @@ class WrapperTest {
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(reservation.getAnnuity().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(reservation.getTermInMonths());
             softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
+            softly.assertThat(w.saleFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -106,6 +110,7 @@ class WrapperTest {
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(loan.getTermInMonths());
             softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
+            softly.assertThat(w.saleFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -134,6 +139,7 @@ class WrapperTest {
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(loan.getTermInMonths());
             softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(invested));
+            softly.assertThat(w.saleFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }

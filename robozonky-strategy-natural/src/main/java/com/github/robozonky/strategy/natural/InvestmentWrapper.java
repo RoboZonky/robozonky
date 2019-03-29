@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -87,6 +88,11 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     @Override
     public BigDecimal getRemainingPrincipal() {
         return investment.getRemainingPrincipal();
+    }
+
+    @Override
+    public Optional<BigDecimal> saleFee() {
+        return investment.getSmpFee();
     }
 
     @Override

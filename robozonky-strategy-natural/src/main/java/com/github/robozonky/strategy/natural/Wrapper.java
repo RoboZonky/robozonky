@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -72,6 +73,8 @@ public interface Wrapper<T> {
     int getOriginalAnnuity();
 
     BigDecimal getRemainingPrincipal();
+
+    Optional<BigDecimal> saleFee();
 
     T getOriginal();
 

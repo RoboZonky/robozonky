@@ -16,7 +16,9 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.github.robozonky.api.strategies.Descriptor;
 
@@ -31,6 +33,11 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     @Override
     public T getOriginal() {
         return original;
+    }
+
+    @Override
+    public Optional<BigDecimal> saleFee() {
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
