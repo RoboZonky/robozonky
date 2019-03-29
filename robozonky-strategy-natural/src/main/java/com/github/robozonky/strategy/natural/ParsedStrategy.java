@@ -187,10 +187,6 @@ class ParsedStrategy {
                 .map(Wrapper::getOriginal);
     }
 
-    public boolean isSellingEnabled() {
-        return !filters.getSellFilters().isEmpty();
-    }
-
     public boolean isPurchasingEnabled() {
         return filters.isSecondaryMarketplaceEnabled();
     }
@@ -203,11 +199,23 @@ class ParsedStrategy {
         return defaults.getReservationMode();
     }
 
-    public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> i) {
+    public Optional<SellingMode> getSellingMode() {
+        return defaults.getSellingMode();
+    }
+
+    public Stream<InvestmentDescriptor> getInvestmentsMatchingSellFilters(final Collection<InvestmentDescriptor> i) {
         return i.parallelStream()
                 .map(Wrapper::wrap)
                 .filter(w -> matchesFilter(w, filters.getSellFilters(),
                                            "{} to be sold as it matched sell filter {}."))
+                .map(Wrapper::getOriginal);
+    }
+
+    public Stream<InvestmentDescriptor> getInvestmentsMatchingPrimaryMarketplaceFilters(final Collection<InvestmentDescriptor> i) {
+        return i.parallelStream()
+                .map(Wrapper::wrap)
+                .filter(w -> matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
+                                           "{} sellable as it matched primary marketplace filter {}."))
                 .map(Wrapper::getOriginal);
     }
 

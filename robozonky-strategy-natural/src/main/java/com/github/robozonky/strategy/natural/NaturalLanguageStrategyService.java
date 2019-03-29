@@ -90,7 +90,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     @Override
     public Optional<SellStrategy> toSell(final String strategy) {
-        return getStrategy(strategy, s -> s.isSellingEnabled() ? new NaturalLanguageSellStrategy(s) : null);
+        return getStrategy(strategy, s -> s.getSellingMode().map(m -> new NaturalLanguageSellStrategy(s)).orElse(null));
     }
 
     @Override
