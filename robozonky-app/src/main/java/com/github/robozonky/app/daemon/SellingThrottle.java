@@ -23,8 +23,14 @@ import org.apache.logging.log4j.Logger;
  * not destabilized.
  * <p>
  * This is necessary, since Zonky only recalculates {@link PortfolioOverview} every 2 hours and investments sold before
- * the recalculation therefore cause {@link PortfolioOverview} to become out of sync with reality. This throttle will
- * make sure we only sell so much as to affect the portfolio only by a reasonable amount.
+ * the recalculation therefore cause {@link PortfolioOverview} to become out of sync with reality. Since the selling
+ * operation is fundamentally asynchronous (we offer to sell, then someone in the future may decide to buy), we can not
+ * "fix" portfolio on our side, as that would require us to constantly query for sold investments, making sure we have
+ * included all of them in {@link PortfolioOverview}.
+ * <p>
+ * This throttle will make sure we only sell so much at once as not to affect the portfolio too much.
+ * {@link SellingJob} will ensure that the operation happens often enough that even large selloffs can be accomplished
+ * within days at worst.
  */
 final class SellingThrottle
         implements BiFunction<Stream<RecommendedInvestment>, PortfolioOverview, Stream<RecommendedInvestment>> {
@@ -46,7 +52,7 @@ final class SellingThrottle
         final Set<RecommendedInvestment> included = new HashSet<>();
         // find all the investments that can be sold without reaching over the limit, start with the smallest first
         for (final RecommendedInvestment evaluating : byAmountIncreasing) {
-            final long value = evaluating.descriptor().item().getRemainingPrincipal().longValueExact();
+            final long value = evaluating.descriptor().item().getRemainingPrincipal().longValue();
             final long ifIncluded = czkIncluded + value;
             if (ifIncluded > maxSelloffSizeInCzk) {
                 continue;
@@ -71,7 +77,7 @@ final class SellingThrottle
     private static long getMaxSelloffValue(final PortfolioOverview portfolioOverview, final Rating rating) {
         final BigDecimal invested = portfolioOverview.getCzkInvested(rating);
         final BigDecimal sellable = BigDecimalCalculator.times(invested, MAX_SELLOFF_SHARE_PER_RATING);
-        return sellable.longValueExact();
+        return sellable.longValue();
     }
 
     @Override
