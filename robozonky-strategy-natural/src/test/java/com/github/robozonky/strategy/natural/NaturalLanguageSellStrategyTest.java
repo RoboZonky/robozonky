@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -48,8 +49,13 @@ class NaturalLanguageSellStrategyTest {
     }
 
     private final Investment mockInvestment() {
+        return mockInvestment(BigDecimal.TEN);
+    }
+
+    private final Investment mockInvestment(final BigDecimal fee) {
         return Investment.custom()
                 .setRemainingPrincipal(BigDecimal.TEN)
+                .setSmpFee(fee)
                 .build();
     }
 
@@ -80,5 +86,23 @@ class NaturalLanguageSellStrategyTest {
         final Stream<RecommendedInvestment> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
         assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void feeBasedInvestmentsNotApplicableInSelloffStrategy() {
+        final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
+        v.setSellingMode(SellingMode.FREE_AND_OUTSIDE_STRATEGY);
+        final ParsedStrategy p = spy(new ParsedStrategy(v));
+        doAnswer(e -> {
+            final Collection<InvestmentDescriptor> i = e.getArgument(0);
+            return i.stream();
+        }).when(p).getInvestmentsMatchingPrimaryMarketplaceFilters(any());
+        final SellStrategy s = new NaturalLanguageSellStrategy(p);
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        final Investment i1 = mockInvestment();
+        final Investment i2 = mockInvestment(BigDecimal.ZERO);
+        final Stream<RecommendedInvestment> result =
+                s.recommend(Arrays.asList(mockDescriptor(i1), mockDescriptor(i2)), portfolio);
+        assertThat(result).extracting(d -> d.descriptor().item()).containsOnly(i2);
     }
 }

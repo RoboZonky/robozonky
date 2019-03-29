@@ -59,6 +59,6 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                 .orElse(Stream.empty())
                 .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
                 .flatMap(r -> r.map(Stream::of).orElse(Stream.empty()))
-                .sorted(COMPARATOR);
+                .sorted(COMPARATOR); // investments without sale fee come first
     }
 }

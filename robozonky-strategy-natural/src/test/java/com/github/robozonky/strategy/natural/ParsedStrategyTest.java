@@ -146,7 +146,6 @@ class ParsedStrategyTest {
         final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(50), Ratio.fromPercentage(100));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
                                                            Collections.emptyMap());
-        System.out.println(share);
         assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(Ratio.fromPercentage(50));
             softly.assertThat(strategy.getMaximumShare(Rating.D)).isEqualTo(Ratio.ONE);
