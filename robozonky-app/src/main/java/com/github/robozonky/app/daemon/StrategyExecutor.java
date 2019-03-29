@@ -37,7 +37,7 @@ import org.apache.logging.log4j.Logger;
 
 class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
-    private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(15);
+    private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(30);
     private final Logger logger = LogManager.getLogger(getClass());
     private final PowerTenant tenant;
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
