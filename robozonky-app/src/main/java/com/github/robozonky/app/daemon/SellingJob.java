@@ -30,11 +30,11 @@ final class SellingJob implements TenantJob {
 
     @Override
     public Duration repeatEvery() {
-        return Duration.ofDays(1);
+        return Duration.ofHours(2); // to match the remote Zonky portfolio recalc
     }
 
     @Override
     public boolean prioritize() {
-        return true; // this is a key feature of the application and only happens once per day, so prioritize
+        return true; // this is a key feature of the application and only happens occasionally, so prioritize
     }
 }
