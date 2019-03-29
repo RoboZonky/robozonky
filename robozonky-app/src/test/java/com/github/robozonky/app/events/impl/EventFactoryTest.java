@@ -42,16 +42,22 @@ import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
+import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
+import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
+import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -59,6 +65,8 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
+import com.github.robozonky.api.strategies.RecommendedReservation;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import org.junit.jupiter.api.Test;
 
@@ -82,6 +90,16 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     private static RecommendedInvestment recommendedInvestment() {
         return new InvestmentDescriptor(Investment.custom().setRemainingPrincipal(BigDecimal.TEN).build(),
                                         () -> Loan.custom().build()).recommend().orElse(null);
+    }
+
+    private static RecommendedReservation recommendedReservation() {
+        final Reservation r = Reservation.custom()
+                .setMyReservation(mock(MyReservation.class))
+                .build();
+        final Loan l = Loan.custom().build();
+        return new ReservationDescriptor(r, () -> l)
+                .recommend(BigDecimal.valueOf(r.getMyReservation().getReservedAmount()))
+                .orElse(null);
     }
 
     private static void assertCorrectThreshold(final LoanDelinquentEvent e, final int threshold) {
@@ -212,7 +230,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNoLongerDelinquent() {
         final LoanNoLongerDelinquentEvent e = EventFactory.loanNoLongerDelinquent(Investment.custom().build(),
-                                                                             Loan.custom().build());
+                                                                                  Loan.custom().build());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -298,6 +316,45 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
                                                                         mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getDescriptors()).isEmpty();
+            softly.assertThat(e.getPortfolioOverview()).isNotNull();
+        });
+    }
+
+    @Test
+    void reservationAcceptationRecommended() {
+        final ReservationAcceptationRecommendedEvent e =
+                EventFactory.reservationAcceptationRecommended(recommendedReservation());
+        assertThat(e.getRecommendation()).isNotNull();
+    }
+
+    @Test
+    void reservationAccepted() {
+        final Loan l = Loan.custom().build();
+        final Investment i = Investment.fresh(l, 200).build();
+        final ReservationAcceptedEvent e = EventFactory.reservationAccepted(i, l, mockPortfolioOverview(1000));
+        assertSoftly(softly -> {
+            softly.assertThat(e.getLoan()).isNotNull();
+            softly.assertThat(e.getInvestment()).isNotNull();
+            softly.assertThat(e.getPortfolioOverview()).isNotNull();
+        });
+    }
+
+    @Test
+    void reservationCheckCompleted() {
+        final ReservationCheckCompletedEvent e = EventFactory.reservationCheckCompleted(Collections.emptyList(),
+                                                                                        mockPortfolioOverview());
+        assertSoftly(softly -> {
+            softly.assertThat(e.getInvestments()).isEmpty();
+            softly.assertThat(e.getPortfolioOverview()).isNotNull();
+        });
+    }
+
+    @Test
+    void reservationCheckStarted() {
+        final ReservationCheckStartedEvent e = EventFactory.reservationCheckStarted(Collections.emptyList(),
+                                                                                    mockPortfolioOverview());
+        assertSoftly(softly -> {
+            softly.assertThat(e.getReservationDescriptors()).isEmpty();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }

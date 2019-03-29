@@ -32,6 +32,7 @@ class TransactionProcessingJobTest extends AbstractRoboZonkyTest {
         assertThat(t.payload()).isNotNull()
                 .isInstanceOf(IncomeProcessor.class);
         assertThat(t.repeatEvery()).isEqualTo(Duration.ofHours(1));
+        assertThat(t.prioritize()).isTrue();
     }
 
 }
