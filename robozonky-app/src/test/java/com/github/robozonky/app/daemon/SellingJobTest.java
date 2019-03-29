@@ -32,7 +32,7 @@ class SellingJobTest extends AbstractRoboZonkyTest {
         assertThat(t.payload()).isNotNull()
                 .isInstanceOf(Selling.class);
         assertThat(t.prioritize()).isTrue();
-        assertThat(t.repeatEvery()).isEqualTo(Duration.ofDays(1));
+        assertThat(t.repeatEvery()).isEqualTo(Duration.ofHours(2));
     }
 
 }

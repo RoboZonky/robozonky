@@ -65,6 +65,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
         when(zonky.getDevelopments(anyInt())).thenAnswer(i -> Stream.empty());
+        when(zonky.getInvestments(any())).thenAnswer(i -> Stream.empty());
         return zonky;
     }
 

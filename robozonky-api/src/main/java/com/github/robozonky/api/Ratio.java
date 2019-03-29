@@ -53,7 +53,7 @@ public final class Ratio extends Number implements Comparable<Ratio> {
 
     @Override
     public String toString() {
-        return percentage.toPlainString() + " %";
+        return raw.toPlainString();
     }
 
     @Override
