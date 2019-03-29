@@ -61,7 +61,7 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
                 .setRemainingPrincipal(BigDecimal.ONE)
                 .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview(10_000);
-        when(portfolioOverview.getCzkInvested(eq(rating))).thenReturn(BigDecimal.valueOf(2200));
+        when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.valueOf(2200));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
                 .map(i -> new InvestmentDescriptor(i, () -> null))
                 .map(d -> d.recommend(d.item().getRemainingPrincipal()))

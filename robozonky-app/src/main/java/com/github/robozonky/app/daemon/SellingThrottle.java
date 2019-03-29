@@ -74,8 +74,8 @@ final class SellingThrottle
         }
     }
 
-    private static long getMaxSelloffValue(final PortfolioOverview portfolioOverview, final Rating rating) {
-        final BigDecimal invested = portfolioOverview.getCzkInvested(rating);
+    private static long getMaxSelloffValue(final PortfolioOverview portfolioOverview) {
+        final BigDecimal invested = portfolioOverview.getCzkInvested();
         final BigDecimal sellable = BigDecimalCalculator.times(invested, MAX_SELLOFF_SHARE_PER_RATING);
         return sellable.longValue();
     }
@@ -85,11 +85,12 @@ final class SellingThrottle
                                                final PortfolioOverview portfolioOverview) {
         final Map<Rating, Set<RecommendedInvestment>> eligible = investmentDescriptors
                 .collect(Collectors.groupingBy(t -> t.descriptor().item().getRating(), Collectors.toSet()));
+        final long maxSeloffValue = getMaxSelloffValue(portfolioOverview);
         return eligible.entrySet().stream()
                 .flatMap(e -> {
                     final Rating r = e.getKey();
                     LOGGER.debug("Processing {} investments.", r);
-                    return determineSelloffByRating(e.getValue(), getMaxSelloffValue(portfolioOverview, r));
+                    return determineSelloffByRating(e.getValue(), maxSeloffValue);
                 });
     }
 }
