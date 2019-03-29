@@ -30,6 +30,7 @@ import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -49,6 +50,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     private static Investment mockInvestment(final Loan loan) {
         return Investment.fresh(loan, 200)
+                .setRating(Rating.AAAAA)
                 .setOriginalTerm(1000)
                 .setRemainingPrincipal(BigDecimal.valueOf(100))
                 .setStatus(InvestmentStatus.ACTIVE)

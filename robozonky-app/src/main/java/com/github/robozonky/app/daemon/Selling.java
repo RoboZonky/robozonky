@@ -80,8 +80,10 @@ final class Selling implements TenantPayload {
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
         tenant.fire(sellingStartedLazy(() -> EventFactory.sellingStarted(eligible, overview)));
-        final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
-                .peek(r -> tenant.fire(EventFactory.saleRecommended(r)))
+        final Stream<RecommendedInvestment> recommended = strategy.recommend(eligible, overview)
+                .peek(r -> tenant.fire(EventFactory.saleRecommended(r)));
+        final Stream<RecommendedInvestment> throttled = new SellingThrottle().apply(recommended, overview);
+        final Collection<Investment> investmentsSold = throttled
                 .map(r -> processSale(tenant, r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());

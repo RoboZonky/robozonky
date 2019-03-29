@@ -19,7 +19,9 @@ package com.github.robozonky.common.async;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.LongAccumulator;
 
 import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
@@ -39,7 +41,8 @@ class ThreadPoolExecutorBasedSchedulerTest extends AbstractMinimalRoboZonkyTest 
             s1.shutdown();
             s2.shutdown();
         })) {
-            s.submit(r, Duration.ofMillis(1));
+            final ScheduledFuture<?> f = s.submit(r, Duration.ofMillis(1));
+            assertThat((Future)f).isNotNull();
             Thread.sleep(50); // give A LOT OF TIME for the repeat to actually happen
         }
         assertThat(accumulator.longValue()).isGreaterThanOrEqualTo(2);
