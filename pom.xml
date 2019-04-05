@@ -49,7 +49,7 @@
     <!-- Expected Maven version to execute the build against. -->
     <version.org.apache.maven>3.5.4</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
-    <surefire.version>2.22.1</surefire.version>
+    <surefire.version>3.0.0-M3</surefire.version>
     <version.com.google.apis>1.25.0</version.com.google.apis>
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
@@ -546,25 +546,19 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>
+          <disableModules>true</disableModules> <!-- Modularity in tests brings pain and no obvious benefits. -->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <workingDirectory>${basedir}/target</workingDirectory>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${surefire.version}</version>
+        <configuration>
+          <disableModules>true</disableModules>  <!-- Modularity in tests brings pain and no obvious benefits. -->
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <workingDirectory>${basedir}/target</workingDirectory>
+        </configuration>
         <executions>
           <execution>
             <id>run-integration-tests</id>
@@ -575,22 +569,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <workingDirectory>${basedir}/target</workingDirectory>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
