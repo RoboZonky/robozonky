@@ -368,7 +368,11 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
-        <version>${version.org.apache.logging.log4j}</version>
+        <!--
+          workaround for
+          https://stackoverflow.com/questions/51525069/multi-release-log4j-api-2-11-0-jar-on-the-the-module-path-in-javadoc-10-0-2
+        -->
+        <version>2.10.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
@@ -491,7 +495,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -541,7 +545,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>
-          <disableModules>true</disableModules> <!-- Modularity in tests brings pain and no obvious benefits. -->
+          <useModulePath>false</useModulePath> <!-- Modularity in tests brings pain and no obvious benefits. -->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <workingDirectory>${basedir}/target</workingDirectory>
         </configuration>
@@ -550,7 +554,7 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>
-          <disableModules>true</disableModules>  <!-- Modularity in tests brings pain and no obvious benefits. -->
+          <useModulePath>false</useModulePath> <!-- Modularity in tests brings pain and no obvious benefits. -->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <workingDirectory>${basedir}/target</workingDirectory>
         </configuration>
