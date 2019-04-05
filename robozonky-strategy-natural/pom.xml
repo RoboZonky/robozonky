@@ -26,10 +26,6 @@
   <artifactId>robozonky-strategy-natural</artifactId>
   <name>RoboZonky: Investment strategy based on natural language</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.strategy.natural</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.antlr</groupId>

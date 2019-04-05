@@ -26,10 +26,6 @@
   <artifactId>robozonky-integration-zonkoid</artifactId>
   <name>RoboZonky: Integration with Zonkoid/Zonkios</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.integration.zonkoid</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>

@@ -27,10 +27,6 @@
 
   <name>RoboZonky: Integration with Stonky</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.integrations.stonky</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>

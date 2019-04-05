@@ -27,10 +27,6 @@
 
   <name>RoboZonky: Custom panels for the installer</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.installer</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>

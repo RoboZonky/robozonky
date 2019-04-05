@@ -26,10 +26,6 @@
   <artifactId>robozonky-api</artifactId>
   <name>RoboZonky: Public, stable APIs</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.api</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency> <!-- APIs for RESTEasy -->
       <groupId>org.jboss.spec.javax.ws.rs</groupId>

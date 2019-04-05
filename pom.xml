@@ -41,11 +41,6 @@
     <!-- Default encoding is UTF-8, no matter what platform we're on. -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
-    <!--
-      Default Java 9 automatic module name; modules may override to comply with the module system spec.
-      The RoboZonky-specific rule is that this must match the top-level package in the JAR.
-    -->
-    <project.automatic.module.name>${project.groupId}.${project.artifactId}</project.automatic.module.name>
     <!-- Expected Maven version to execute the build against. -->
     <version.org.apache.maven>3.5.4</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
@@ -579,9 +574,6 @@
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
-            <manifestEntries>
-              <Automatic-Module-Name>${project.automatic.module.name}</Automatic-Module-Name>
-            </manifestEntries>
           </archive>
         </configuration>
         <executions>
