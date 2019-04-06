@@ -25,7 +25,8 @@
 
   <artifactId>robozonky-installer</artifactId>
 
-  <name>RoboZonky: Custom panels for the installer</name>
+  <!-- Installer will be packaged as an uber-jar with IZPack, therefore no need for modularization. -->
+  <name>RoboZonky: Custom panels for the installer (no JPMS)</name>
 
   <dependencies>
     <dependency>
@@ -57,10 +58,6 @@
           <artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.mail</groupId>
-      <artifactId>mailapi</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vavr</groupId>

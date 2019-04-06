@@ -33,11 +33,6 @@
       <artifactId>robozonky-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-api</artifactId>
-      <classifier>tests</classifier>
-    </dependency>
-    <dependency>
       <groupId>com.github.rutledgepaulv</groupId>
       <artifactId>paging-streams</artifactId>
     </dependency>
@@ -64,6 +59,10 @@
         <exclusion>
           <groupId>org.jboss.spec.javax.ws.rs</groupId>
           <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

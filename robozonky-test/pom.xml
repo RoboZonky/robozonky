@@ -33,11 +33,6 @@
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-api</artifactId>
-      <classifier>tests</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-common</artifactId>
     </dependency>
     <dependency>
