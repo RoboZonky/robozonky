@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

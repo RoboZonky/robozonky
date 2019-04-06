@@ -48,7 +48,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 

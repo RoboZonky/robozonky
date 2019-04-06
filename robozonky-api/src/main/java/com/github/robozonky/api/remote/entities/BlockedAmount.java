@@ -22,8 +22,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.TransactionCategory;
-import com.github.robozonky.internal.util.DateUtil;
-import com.github.robozonky.internal.util.RandomUtil;
+import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.test.RandomUtil;
 
 public class BlockedAmount extends BaseEntity {
 

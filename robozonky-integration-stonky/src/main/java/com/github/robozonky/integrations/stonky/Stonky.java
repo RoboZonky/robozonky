@@ -33,7 +33,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.drive.Drive;

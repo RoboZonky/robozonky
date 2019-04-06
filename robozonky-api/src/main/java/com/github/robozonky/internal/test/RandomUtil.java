@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util;
+package com.github.robozonky.internal.test;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -44,12 +44,12 @@ public final class RandomUtil extends Random {
         return RANDOM.get().get();
     }
 
-    static void setRandom(final Random random) {
+    public static void setRandom(final Random random) {
         RANDOM.set(() -> random);
         LOGGER.debug("Set a custom random generator: {}.", random);
     }
 
-    static void resetRandom() {
+    public static void resetRandom() {
         RANDOM.set(DEFAULT);
         LOGGER.debug("Reset to original random generator.");
     }

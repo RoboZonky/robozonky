@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util;
+package com.github.robozonky.test;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -22,6 +22,8 @@ import java.time.Instant;
 import java.util.Random;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.test.RandomUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;

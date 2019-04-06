@@ -38,7 +38,7 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

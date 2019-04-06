@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * This class is an adapted version of {@link RawInvestment}, with some computed fields added and others removed. Most

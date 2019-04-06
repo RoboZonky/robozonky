@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.state.TenantState;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

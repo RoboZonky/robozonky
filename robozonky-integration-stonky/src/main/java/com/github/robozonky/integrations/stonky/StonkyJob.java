@@ -24,7 +24,7 @@ import com.github.robozonky.common.jobs.TenantJob;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 
 final class StonkyJob implements TenantJob {
 

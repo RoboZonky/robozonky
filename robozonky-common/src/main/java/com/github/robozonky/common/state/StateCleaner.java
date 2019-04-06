@@ -21,7 +21,7 @@ import java.util.Set;
 
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

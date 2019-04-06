@@ -24,12 +24,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.LongAccumulator;
 
-import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class ThreadPoolExecutorBasedSchedulerTest extends AbstractMinimalRoboZonkyTest {
+class ThreadPoolExecutorBasedSchedulerTest {
 
     @Test
     void repeating() throws Exception {

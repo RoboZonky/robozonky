@@ -28,7 +28,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;

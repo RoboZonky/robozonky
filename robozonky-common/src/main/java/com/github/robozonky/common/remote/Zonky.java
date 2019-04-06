@@ -58,7 +58,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;

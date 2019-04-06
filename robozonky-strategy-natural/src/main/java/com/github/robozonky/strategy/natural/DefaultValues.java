@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 class DefaultValues {
