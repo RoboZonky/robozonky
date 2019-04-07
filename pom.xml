@@ -59,7 +59,7 @@
     <version.org.mock-server>5.5.1</version.org.mock-server>
     <version.org.apache.logging.log4j>2.11.2</version.org.apache.logging.log4j>
     <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
-    <version.com.sun.mail>1.6.3</version.com.sun.mail>
+    <version.com.sun.mail>1.6.2</version.com.sun.mail>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
@@ -190,7 +190,7 @@
       </dependency>
       <dependency>
         <groupId>com.sun.mail</groupId>
-        <artifactId>jakarta.mail</artifactId>
+        <artifactId>javax.mail</artifactId>
         <version>${version.com.sun.mail}</version>
       </dependency>
       <dependency>
@@ -484,14 +484,6 @@
             </goals>
             <configuration>
               <rules>
-                <bannedDependencies>
-                  <searchTransitive>true</searchTransitive>
-                  <includes>
-                    <include>javax.*</include>
-                    <include>junit</include>
-                  </includes>
-                  <message>A banned dependency or plugin was found!</message>
-                </bannedDependencies>
                 <banDuplicatePomDependencyVersions/>
                 <dependencyConvergence/>
                 <reactorModuleConvergence>
