@@ -43,6 +43,11 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private final Map<Rating, BigDecimal> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> czkAtRiskPerRating;
 
+    PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
+        this(impl.getBalance(), impl.getTotal(), impl.getAtRisk(),
+             impl.getRemotePortfolio().getStatistics().getProfitability());
+    }
+
     PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
                           final Map<Rating, BigDecimal> czkAtRiskPerRating, final Ratio profitability) {
         this.profitability = profitability;

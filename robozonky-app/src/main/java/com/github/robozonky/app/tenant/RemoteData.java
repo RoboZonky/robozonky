@@ -16,11 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
@@ -32,9 +34,9 @@ final class RemoteData {
 
     private final Wallet wallet;
     private final Statistics statistics;
-    private final Map<Integer, Blocked> blocked;
+    private final Map<Rating, BigDecimal> blocked;
 
-    private RemoteData(final Wallet wallet, final Statistics statistics, final Map<Integer, Blocked> blocked) {
+    private RemoteData(final Wallet wallet, final Statistics statistics, final Map<Rating, BigDecimal> blocked) {
         this.wallet = wallet;
         this.statistics = statistics;
         this.blocked = blocked;
@@ -43,7 +45,7 @@ final class RemoteData {
     public static RemoteData load(final Tenant tenant) {
         LOGGER.debug("Loading the latest Zonky portfolio information.");
         final Statistics statistics = tenant.call(Zonky::getStatistics);
-        final Map<Integer, Blocked> blocked = Util.readBlockedAmounts(tenant, statistics);
+        final Map<Rating, BigDecimal> blocked = Util.getAmountsBlocked(tenant, statistics);
         final Wallet wallet = tenant.call(Zonky::getWallet); // goes last as it's a very short call
         LOGGER.debug("Finished.");
         return new RemoteData(wallet, statistics, blocked);
@@ -57,7 +59,7 @@ final class RemoteData {
         return statistics;
     }
 
-    public Map<Integer, Blocked> getBlocked() {
+    public Map<Rating, BigDecimal> getBlocked() {
         return Collections.unmodifiableMap(blocked);
     }
 
