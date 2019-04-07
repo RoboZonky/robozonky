@@ -46,7 +46,7 @@ public enum TemplateProcessor {
         final Map<String, TemplateNumberFormatFactory> customNumberFormats =
                 Collections.singletonMap("interest", InterestNumberFormatFactory.INSTANCE);
         cfg.setCustomNumberFormats(customNumberFormats);
-        cfg.setTemplateLoader(new CustomTemplateLoader(templateRoot, cfg.getLocale()));
+        cfg.setClassForTemplateLoading(templateRoot, "");
         cfg.setLogTemplateExceptions(false);
         /*
          * This is important! We don't control installer's encoding, it will always be selected by the user running the
