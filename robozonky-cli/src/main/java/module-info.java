@@ -13,5 +13,7 @@ module com.github.robozonky.cli {
     requires com.github.robozonky.common;
     requires com.github.robozonky.integration.stonky;
 
+    opens com.github.robozonky.cli to info.picocli;
+
     exports com.github.robozonky.cli;
 }

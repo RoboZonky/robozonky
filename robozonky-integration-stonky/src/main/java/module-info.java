@@ -14,6 +14,8 @@ module com.github.robozonky.integration.stonky {
     requires com.github.robozonky.api;
     requires com.github.robozonky.common;
 
+    opens com.github.robozonky.integrations.stonky to org.apache.commons.lang3;
+
     exports com.github.robozonky.integrations.stonky;
 
     provides com.github.robozonky.common.jobs.JobService with com.github.robozonky.integrations.stonky.StonkyJobService;

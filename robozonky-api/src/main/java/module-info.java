@@ -19,4 +19,9 @@ module com.github.robozonky.api {
     exports com.github.robozonky.internal.api;
     exports com.github.robozonky.internal.test;
     exports com.github.robozonky.internal.util;
+
+    opens com.github.robozonky.api.remote.enums to com.fasterxml.jackson.databind, org.apache.commons.lang3;
+    opens com.github.robozonky.api.remote.entities to com.fasterxml.jackson.databind, org.apache.commons.lang3;
+    opens com.github.robozonky.api.remote.entities.sanitized to org.apache.commons.lang3;
+
 }

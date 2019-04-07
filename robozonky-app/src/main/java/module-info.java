@@ -11,4 +11,7 @@ module com.github.robozonky.app {
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
     requires com.github.robozonky.common;
+
+    opens com.github.robozonky.app.configuration to info.picocli;
+    opens com.github.robozonky.app.events.impl to org.apache.commons.lang3;
 }

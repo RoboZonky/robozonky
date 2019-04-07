@@ -18,5 +18,10 @@ module com.github.robozonky.common {
     exports com.github.robozonky.common.state;
     exports com.github.robozonky.common.tenant;
 
+    uses com.github.robozonky.common.jobs.JobService;
+    uses com.github.robozonky.api.strategies.StrategyService;
+    uses com.github.robozonky.api.confirmations.ConfirmationProviderService;
+    uses com.github.robozonky.api.notifications.ListenerService;
+
     provides com.github.robozonky.common.jobs.JobService with com.github.robozonky.common.state.StateCleanerJobService;
 }
