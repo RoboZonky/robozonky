@@ -67,6 +67,7 @@
     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
     <pit.skip>${skipTests}</pit.skip>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -410,7 +411,11 @@
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-jcl</artifactId>
         <version>${version.org.apache.logging.log4j}</version>
-        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-jul</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
