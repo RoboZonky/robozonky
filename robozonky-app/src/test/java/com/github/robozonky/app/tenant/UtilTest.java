@@ -72,9 +72,9 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final BlockedAmount forLoan = new BlockedAmount(l.getId(), BigDecimal.TEN);
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(fee, forLoan));
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-        final Map<Integer, Blocked> result = Util.readBlockedAmounts(tenant, zonky.getStatistics());
-        assertThat(result).containsOnlyKeys(l.getId());
-        assertThat(result.get(l.getId())).isEqualTo(new Blocked(forLoan, Rating.D));
+        final Map<Rating, BigDecimal> result = Util.getAmountsBlocked(tenant, zonky.getStatistics());
+        assertThat(result).containsOnlyKeys(Rating.D);
+        assertThat(result.get(Rating.D)).isEqualByComparingTo(BigDecimal.TEN);
     }
 
     @Test
@@ -85,7 +85,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final BlockedAmount forLoan = new BlockedAmount(1, BigDecimal.TEN);
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(fee, forLoan));
         doThrow(new NotFoundException()).when(zonky).getLoan(anyInt());
-        assertThatThrownBy(() -> Util.readBlockedAmounts(tenant, zonky.getStatistics()))
+        assertThatThrownBy(() -> Util.getAmountsBlocked(tenant, zonky.getStatistics()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasCauseInstanceOf(NotFoundException.class);
     }
@@ -122,8 +122,8 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         when(zonky.getBlockedAmounts()).thenReturn(Stream.of(first, second));
         final Tenant tenant = mockTenant(zonky);
         final RemoteData data = RemoteData.load(tenant);
-        final Blocked sumOfBoth = new Blocked(first.getAmount().add(second.getAmount()), loan.getRating());
-        assertThat(data.getBlocked()).containsOnly(Maps.entry(loan.getId(), sumOfBoth));
+        final Blocked sumOfBoth = new Blocked(loan.getId(), first.getAmount().add(second.getAmount()), loan.getRating());
+        assertThat(data.getBlocked()).containsOnly(Maps.entry(Rating.D, BigDecimal.valueOf(11)));
     }
 
 }

@@ -27,21 +27,7 @@ import io.vavr.Lazy;
 
 public class Statistics extends BaseEntity {
 
-    private static final Lazy<Statistics> EMPTY = Lazy.of(() -> {
-        final Statistics s = new Statistics();
-        s.currentProfitability = BigDecimal.ZERO;
-        s.expectedProfitability = BigDecimal.ZERO;
-        s.profitability = BigDecimal.ZERO;
-        s.cashFlow = Collections.emptyList();
-        s.riskPortfolio = Collections.emptyList();
-        s.expectedPayments = Collections.emptyList();
-        s.currentOverview = new CurrentOverview();
-        s.overallOverview = new OverallOverview();
-        s.overallPortfolio = new OverallPortfolio(0, 0, 0);
-        s.superInvestorOverview = SuperInvestorOverview.empty();
-        s.timestamp = DateUtil.offsetNow();
-        return s;
-    });
+    private static final Lazy<Statistics> EMPTY = Lazy.of(Statistics::emptyAndFresh);
 
     private BigDecimal currentProfitability, expectedProfitability;
     private BigDecimal profitability;
@@ -60,6 +46,22 @@ public class Statistics extends BaseEntity {
 
     public static Statistics empty() {
         return EMPTY.get();
+    }
+
+    public static Statistics emptyAndFresh() {
+        final Statistics s = new Statistics();
+        s.currentProfitability = BigDecimal.ZERO;
+        s.expectedProfitability = BigDecimal.ZERO;
+        s.profitability = BigDecimal.ZERO;
+        s.cashFlow = Collections.emptyList();
+        s.riskPortfolio = Collections.emptyList();
+        s.expectedPayments = Collections.emptyList();
+        s.currentOverview = new CurrentOverview();
+        s.overallOverview = new OverallOverview();
+        s.overallPortfolio = new OverallPortfolio(0, 0, 0);
+        s.superInvestorOverview = SuperInvestorOverview.empty();
+        s.timestamp = DateUtil.offsetNow();
+        return s;
     }
 
     private static <T> List<T> unmodifiableOrEmpty(final List<T> possiblyNull) {
