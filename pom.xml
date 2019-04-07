@@ -48,6 +48,7 @@
     <jaxb.version>2.3.2</jaxb.version>
     <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
     <version.com.google.apis>1.25.0</version.com.google.apis>
+    <version.jakarta.activation>1.2.1</version.jakarta.activation>
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
     <version.org.jboss.resteasy>3.6.3.Final</version.org.jboss.resteasy>
@@ -58,7 +59,7 @@
     <version.org.mock-server>5.5.1</version.org.mock-server>
     <version.org.apache.logging.log4j>2.11.2</version.org.apache.logging.log4j>
     <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
-    <version.com.sun.mail>1.6.2</version.com.sun.mail>
+    <version.com.sun.mail>1.6.3</version.com.sun.mail>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
@@ -189,7 +190,7 @@
       </dependency>
       <dependency>
         <groupId>com.sun.mail</groupId>
-        <artifactId>javax.mail</artifactId>
+        <artifactId>jakarta.mail</artifactId>
         <version>${version.com.sun.mail}</version>
       </dependency>
       <dependency>
@@ -428,6 +429,11 @@
         <version>${version.org.junit.platform}</version>
       </dependency>
       <dependency>
+        <groupId>com.sun.activation</groupId>
+        <artifactId>jakarta.activation</artifactId>
+        <version>${version.jakarta.activation}</version>
+      </dependency>
+      <dependency>
         <groupId>jakarta.xml.bind</groupId>
         <artifactId>jakarta.xml.bind-api</artifactId>
         <version>${jaxb.version}</version>
@@ -436,6 +442,16 @@
         <groupId>org.glassfish.jaxb</groupId>
         <artifactId>jaxb-runtime</artifactId>
         <version>${jaxb.version}</version>
+        <exclusions>
+          <!--
+            replace with com.sun.activation:jakarta-activation, which includes the API
+            otherwise there are nasty clashes between this and com.sun.mail later
+          -->
+          <exclusion>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>jakarta.ws.rs</groupId>
@@ -468,6 +484,14 @@
             </goals>
             <configuration>
               <rules>
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <includes>
+                    <include>javax.*</include>
+                    <include>junit</include>
+                  </includes>
+                  <message>A banned dependency or plugin was found!</message>
+                </bannedDependencies>
                 <banDuplicatePomDependencyVersions/>
                 <dependencyConvergence/>
                 <reactorModuleConvergence>
@@ -570,6 +594,7 @@
             <configuration>
               <failOnWarning>true</failOnWarning>
               <ignoredUnusedDeclaredDependencies> <!-- Mostly service-loaded stuff, APIs, also some of our own. -->
+                <ignoredUnusedDeclaredDependency>com.sun.activation</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>jakarta.xml.bind</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>

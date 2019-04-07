@@ -41,7 +41,7 @@ final class EventFiringQueue {
     }
 
     private static void submittable(final Runnable runnable, final long id, final CountDownLatch latch) {
-        LOGGER.trace("Queue starting event {}.", id);
+        LOGGER.trace("Queue starting event {} ({}).", id, runnable);
         try {
             runnable.run();
         } finally {
@@ -63,6 +63,7 @@ final class EventFiringQueue {
     }
 
     private synchronized void queue(final Runnable runnable, final long id) {
+        LOGGER.trace("Adding {} to queue as #{}.", runnable, id);
         try {
             queue.put(runnable);
         } catch (final InterruptedException ex) {
@@ -81,7 +82,6 @@ final class EventFiringQueue {
      */
     public Runnable fire(final Runnable runnable) {
         final long id = counter.getAndIncrement();
-        LOGGER.debug("Queueing event {}.", id);
         final CountDownLatch b = new CountDownLatch(1); // the calling thread will wait for the firing thread
         queue(() -> submittable(runnable, id, b), id);
         return () -> waitForFiring(id, b);

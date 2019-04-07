@@ -43,6 +43,7 @@ final class EventFiring implements SimplePayload {
     @Override
     public void run() {
         LOGGER.debug("Starting event firing.");
+        LOGGER.trace("Events in queue: {}.", queue);
         boolean repeat = true;
         while (repeat && !queue.isEmpty()) {
             final Event event = new EventFiringJfrEvent();
