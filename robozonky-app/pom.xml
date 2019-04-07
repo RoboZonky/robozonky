@@ -165,7 +165,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifest>
+            <manifest> <!-- TODO upgrade when https://issues.apache.org/jira/browse/MJAR-238 is released -->
               <mainClass>${mainClass}</mainClass>
             </manifest>
           </archive>
