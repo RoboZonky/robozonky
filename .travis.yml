@@ -21,6 +21,7 @@ os:
   - linux
 jdk: # OpenJDK releases (non-EA) belong here, minimum of Java 11 is required
   - openjdk11
+  - openjdk12
 stages: # order the stages we'll use during this build
   - precache
   - test
