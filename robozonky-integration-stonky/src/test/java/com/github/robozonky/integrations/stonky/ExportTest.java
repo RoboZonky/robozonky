@@ -26,7 +26,9 @@ import javax.ws.rs.core.Response;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
@@ -41,17 +43,22 @@ import static org.mockito.Mockito.*;
 class ExportTest extends AbstractRoboZonkyTest {
 
     private final Zonky zonky = mock(Zonky.class);
-    private ClientAndServer server;
-    private String serverUrl;
+    private static ClientAndServer server;
+    private static String serverUrl;
 
-    @BeforeEach
-    void startServer() {
+    @BeforeAll
+    static void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getLocalPort();
     }
 
     @AfterEach
-    void stopServer() {
+    void resetServer() {
+        server.reset();
+    }
+
+    @AfterAll
+    static void stopServer() {
         server.stop();
     }
 
