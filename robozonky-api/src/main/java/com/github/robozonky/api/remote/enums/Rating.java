@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.Maps;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;

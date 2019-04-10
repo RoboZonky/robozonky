@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.templates.html.HtmlTemplate;
 import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;

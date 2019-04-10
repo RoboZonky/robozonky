@@ -26,10 +26,6 @@
   <artifactId>robozonky-integration-zonkoid</artifactId>
   <name>RoboZonky: Integration with Zonkoid/Zonkios</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.integration.zonkoid</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
@@ -88,6 +84,17 @@
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-core</artifactId>
+      <scope>test</scope>
+      <exclusions> <!-- this comes from elsewhere -->
+        <exclusion>
+          <groupId>javax.mail</groupId>
+          <artifactId>mailapi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

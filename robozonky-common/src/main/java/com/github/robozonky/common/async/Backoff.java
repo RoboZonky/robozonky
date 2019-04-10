@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;

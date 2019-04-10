@@ -26,18 +26,28 @@
   <artifactId>robozonky-api</artifactId>
   <name>RoboZonky: Public, stable APIs</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.api</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency> <!-- APIs for RESTEasy -->
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.xml.bind</groupId>
-      <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <exclusions>
+        <!--
+          replace with com.sun.activation:jakarta-activation, which includes the API
+          otherwise there are nasty clashes between this and com.sun.mail later
+          -->
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.activation</groupId>
+      <artifactId>jakarta.activation</artifactId>
     </dependency>
     <dependency> <!-- Annotations for Jackson -->
       <groupId>com.fasterxml.jackson.core</groupId>

@@ -26,10 +26,6 @@
   <artifactId>robozonky-notifications</artifactId>
   <name>RoboZonky: Sends e-mail notifications</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.notifications</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
@@ -57,15 +53,13 @@
     </dependency>
     <dependency>
       <groupId>com.sun.mail</groupId>
-      <artifactId>smtp</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.mail</groupId>
       <artifactId>javax.mail</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.mail</groupId>
-      <artifactId>mailapi</artifactId>
+      <exclusions>
+        <exclusion> <!-- Already have one, Jakarta EE based. -->
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

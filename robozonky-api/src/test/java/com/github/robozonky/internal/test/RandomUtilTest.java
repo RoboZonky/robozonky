@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util;
+package com.github.robozonky.internal.test;
 
 import java.util.Random;
 
@@ -24,13 +24,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-class RandomUtilTest extends AbstractMinimalRoboZonkyTest {
+class RandomUtilTest {
 
     private final Random random = mock(Random.class);
 
     @BeforeEach
-    void replaceClock() {
-        setRandom(random);
+    void replaceRandom() {
+        RandomUtil.setRandom(random);
+    }
+
+    @BeforeEach
+    void resetRandom() {
+        RandomUtil.resetRandom();
     }
 
     @Test

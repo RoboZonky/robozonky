@@ -18,12 +18,11 @@ package com.github.robozonky.api.notifications;
 
 import java.time.OffsetDateTime;
 
-import com.github.robozonky.internal.util.AbstractMinimalRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class EventTest extends AbstractMinimalRoboZonkyTest {
+class EventTest {
 
     @Test
     void conceptionSameAsCreation() {

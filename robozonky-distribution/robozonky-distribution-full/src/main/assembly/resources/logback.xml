@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 The RoboZonky Project
+  ~ Copyright 2019 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="org.apache.http" level="INFO"/>
-    <logger name="org.jboss" level="INFO"/>
-    <root level="DEBUG">
+    <logger name="javax.mail" level="ERROR" /> <!-- unavoidable modularity-related javamail warning otherwise -->
+    <logger name="com.github.robozonky" level="DEBUG" /> <!-- for a much more verbose logging, change DEBUG to TRACE -->
+    <root level="INFO"> <!-- default level for loggers is INFO; the lines above change that for specific loggers -->
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
     </root>

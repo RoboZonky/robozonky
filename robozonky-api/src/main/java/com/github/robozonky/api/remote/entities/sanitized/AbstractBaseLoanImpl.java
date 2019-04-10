@@ -29,7 +29,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.internal.util.RandomUtil;
+import com.github.robozonky.internal.test.RandomUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
 import io.vavr.Lazy;
 

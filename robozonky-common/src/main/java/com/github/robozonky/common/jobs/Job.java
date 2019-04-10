@@ -18,7 +18,7 @@ package com.github.robozonky.common.jobs;
 
 import java.time.Duration;
 
-import com.github.robozonky.internal.util.RandomUtil;
+import com.github.robozonky.internal.test.RandomUtil;
 
 public interface Job {
 

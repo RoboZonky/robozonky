@@ -25,11 +25,8 @@
 
   <artifactId>robozonky-installer</artifactId>
 
-  <name>RoboZonky: Custom panels for the installer</name>
-
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.installer</project.automatic.module.name>
-  </properties>
+  <!-- Installer will be packaged as an uber-jar with IZPack, therefore no need for modularization. -->
+  <name>RoboZonky: Custom panels for the installer (no JPMS)</name>
 
   <dependencies>
     <dependency>
@@ -63,10 +60,6 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.sun.mail</groupId>
-      <artifactId>mailapi</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.vavr</groupId>
       <artifactId>vavr</artifactId>
     </dependency>
@@ -79,8 +72,8 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>

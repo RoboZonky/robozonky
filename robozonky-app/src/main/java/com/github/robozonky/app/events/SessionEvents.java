@@ -129,7 +129,7 @@ public final class SessionEvents {
         final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :
                 Stream.concat(Stream.of(injectedDebugListener), registered);
-        return runAsync(withInjected.map(l -> () -> fireAny(event, l)));
+        return runAsync(withInjected.map(l -> new EventTriggerRunnable(event, l)));
     }
 
     public boolean addListener(final EventFiringListener listener) {
@@ -157,5 +157,29 @@ public final class SessionEvents {
     @SuppressWarnings("unchecked")
     public Runnable fire(final SessionEvent event) {
         return fire(EventFactory.async((Class<SessionEvent>) event.getClass(), () -> event));
+    }
+
+    private final class EventTriggerRunnable implements Runnable {
+
+        private final LazyEvent<? extends Event> event;
+        private final EventListener listener;
+
+        public EventTriggerRunnable(final LazyEvent<? extends Event> event, final EventListener listener) {
+            this.event = event;
+            this.listener = listener;
+        }
+
+        @Override
+        public void run() {
+            SessionEvents.this.fireAny(event, listener);
+        }
+
+        @Override
+        public String toString() {
+            return "EventTriggerRunnable{" +
+                    "event=" + event.getEventType() +
+                    ", listener=" + listener.getClass() +
+                    '}';
+        }
     }
 }

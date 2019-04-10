@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.remote.enums.OAuthScopes;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * OAuth access token for Zonky API.

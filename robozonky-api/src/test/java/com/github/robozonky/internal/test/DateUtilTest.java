@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util;
+package com.github.robozonky.internal.test;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -24,16 +24,22 @@ import java.time.ZonedDateTime;
 
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class DateUtilTest extends AbstractMinimalRoboZonkyTest {
+class DateUtilTest {
 
     private static final Instant INSTANT = Instant.EPOCH;
 
     @BeforeEach
     void replaceClock() {
-        setClock(Clock.fixed(INSTANT, Defaults.ZONE_ID)); // all dates will be based on this instant
+        DateUtil.setSystemClock(Clock.fixed(INSTANT, Defaults.ZONE_ID)); // all dates will be based on this instant
+    }
+
+    @AfterEach
+    void resetClock() {
+        DateUtil.setSystemClock(Clock.system(Defaults.ZONE_ID));
     }
 
     @Test
@@ -45,5 +51,4 @@ class DateUtilTest extends AbstractMinimalRoboZonkyTest {
             softly.assertThat(DateUtil.zonedNow()).isEqualTo(ZonedDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
         });
     }
-
 }

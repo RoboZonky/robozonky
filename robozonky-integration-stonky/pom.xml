@@ -27,10 +27,6 @@
 
   <name>RoboZonky: Integration with Stonky</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.integrations.stonky</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
@@ -78,8 +74,8 @@
       <artifactId>google-api-services-drive</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -111,6 +107,17 @@
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-core</artifactId>
+      <scope>test</scope>
+      <exclusions> <!-- this comes from elsewhere -->
+        <exclusion>
+          <groupId>javax.mail</groupId>
+          <artifactId>mailapi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

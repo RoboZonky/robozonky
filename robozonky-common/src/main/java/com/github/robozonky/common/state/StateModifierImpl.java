@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 
 final class StateModifierImpl<T> implements StateModifier<T>,
                                             Callable<Boolean> {

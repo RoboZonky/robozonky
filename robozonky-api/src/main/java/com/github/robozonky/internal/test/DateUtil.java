@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util;
+package com.github.robozonky.internal.test;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -45,12 +45,12 @@ public final class DateUtil {
         return CLOCK.get();
     }
 
-    static void setSystemClock(final Clock clock) {
+    public static void setSystemClock(final Clock clock) {
         CLOCK.set(clock);
         LOGGER.debug("Setting system clock: {}.", clock);
     }
 
-    static void resetSystemClock() {
+    public static void resetSystemClock() {
         CLOCK.set(DEFAULT);
         LOGGER.debug("Reset to original system clock.");
     }

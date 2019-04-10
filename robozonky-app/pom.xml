@@ -28,7 +28,6 @@
 
   <properties>
     <mainClass>com.github.robozonky.app.App</mainClass>
-    <project.automatic.module.name>com.github.robozonky.app</project.automatic.module.name>
   </properties>
 
   <dependencies>
@@ -61,12 +60,18 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
+      <exclusions>
+        <exclusion> <!-- We have our own, Jakarta EE based -->
+          <groupId>org.jboss.spec.javax.ws.rs</groupId>
+          <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
@@ -107,6 +112,10 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-to-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-jul</artifactId>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -151,6 +160,12 @@
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-core</artifactId>
       <scope>test</scope>
+      <exclusions> <!-- this comes from elsewhere -->
+        <exclusion>
+          <groupId>javax.mail</groupId>
+          <artifactId>mailapi</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
@@ -160,9 +175,8 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifest>
+            <manifest> <!-- TODO upgrade when https://issues.apache.org/jira/browse/MJAR-238 is released -->
               <mainClass>${mainClass}</mainClass>
-              <addClasspath>true</addClasspath>
             </manifest>
           </archive>
         </configuration>

@@ -20,7 +20,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.internal.util.DateUtil.offsetNow;
+import static com.github.robozonky.internal.test.DateUtil.offsetNow;
 import static org.assertj.core.api.Assertions.*;
 
 class LastPublishedLoanTest {

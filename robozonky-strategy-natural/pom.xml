@@ -26,10 +26,6 @@
   <artifactId>robozonky-strategy-natural</artifactId>
   <name>RoboZonky: Investment strategy based on natural language</name>
 
-  <properties>
-    <project.automatic.module.name>com.github.robozonky.strategy.natural</project.automatic.module.name>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.antlr</groupId>
@@ -46,11 +42,6 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-api</artifactId>
-      <classifier>tests</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

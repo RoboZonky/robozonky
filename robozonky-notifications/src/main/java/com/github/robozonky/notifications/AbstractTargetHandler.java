@@ -32,7 +32,7 @@ public abstract class AbstractTargetHandler {
     private static final String HOURLY_LIMIT = "hourlyMaxEmails";
     protected final Target target;
     final ConfigStorage config;
-    private final Logger LOGGER = LogManager.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final Map<SessionInfo, Counter> notifications = new HashMap<>(0);
     private final Map<SupportedListener, Map<SessionInfo, Counter>> specificNotifications =
             new EnumMap<>(SupportedListener.class);
@@ -122,20 +122,24 @@ public abstract class AbstractTargetHandler {
     }
 
     public void offer(final Submission s) throws Exception {
-        LOGGER.trace("Received submission.");
+        logger.trace("Received submission.");
         final SupportedListener listener = s.getSupportedListener();
         final SessionInfo session = s.getSessionInfo();
         if (!shouldNotify(listener, session)) {
-            LOGGER.debug("Will not notify.");
+            logger.debug("Will not notify.");
             return;
         }
         final Map<String, Object> data = s.getData();
-        LOGGER.trace("Triggering.");
-        send(session, s.getSubject(), s.getMessage(data), s.getFallbackMessage(data));
-        LOGGER.trace("Triggered.");
+        logger.trace("Triggering.");
+        try {
+            send(session, s.getSubject(), s.getMessage(data), s.getFallbackMessage(data));
+        } catch (final ClassNotFoundException ex) {
+            throw new IllegalStateException("Failed sending e-mail.", ex);
+        }
+        logger.trace("Triggered.");
         getSpecificCounter(session, listener).increase();
         getCounter(session).increase();
-        LOGGER.trace("Finished.");
+        logger.trace("Finished.");
     }
 
     public abstract void send(final SessionInfo sessionInfo, final String subject,

@@ -41,16 +41,14 @@
     <!-- Default encoding is UTF-8, no matter what platform we're on. -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
-    <!--
-      Default Java 9 automatic module name; modules may override to comply with the module system spec.
-      The RoboZonky-specific rule is that this must match the top-level package in the JAR.
-    -->
-    <project.automatic.module.name>${project.groupId}.${project.artifactId}</project.automatic.module.name>
     <!-- Expected Maven version to execute the build against. -->
     <version.org.apache.maven>3.5.4</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
-    <surefire.version>2.22.1</surefire.version>
+    <surefire.version>3.0.0-M3</surefire.version>
+    <jaxb.version>2.3.2</jaxb.version>
+    <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
     <version.com.google.apis>1.25.0</version.com.google.apis>
+    <version.jakarta.activation>1.2.1</version.jakarta.activation>
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
     <version.org.jboss.resteasy>3.6.3.Final</version.org.jboss.resteasy>
@@ -69,18 +67,13 @@
     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
     <pit.skip>${skipTests}</pit.skip>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-api</artifactId>
         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-api</artifactId>
-        <version>${project.version}</version>
-        <classifier>tests</classifier>
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>
@@ -142,10 +135,23 @@
       <!-- JAX-RS. -->
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-bom</artifactId>
+        <artifactId>resteasy-client</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <type>pom</type>
-        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jaxrs</artifactId>
+        <version>${version.org.jboss.resteasy}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jaxb-provider</artifactId>
+        <version>${version.org.jboss.resteasy}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jackson2-provider</artifactId>
+        <version>${version.org.jboss.resteasy}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -156,6 +162,21 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
         <version>4.4.10</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${version.com.fasterxml.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${version.com.fasterxml.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${version.com.fasterxml.jackson}</version>
       </dependency>
       <!-- Email notifications. -->
       <dependency>
@@ -171,16 +192,6 @@
       <dependency>
         <groupId>com.sun.mail</groupId>
         <artifactId>javax.mail</artifactId>
-        <version>${version.com.sun.mail}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.mail</groupId>
-        <artifactId>mailapi</artifactId>
-        <version>${version.com.sun.mail}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.mail</groupId>
-        <artifactId>smtp</artifactId>
         <version>${version.com.sun.mail}</version>
       </dependency>
       <dependency>
@@ -262,6 +273,12 @@
         <groupId>com.google.oauth-client</groupId>
         <artifactId>google-oauth-client</artifactId>
         <version>${version.com.google.apis}</version>
+        <exclusions>
+          <exclusion> <!-- comes from javax.annotations already -->
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>com.google.oauth-client</groupId>
@@ -277,6 +294,12 @@
         <groupId>com.google.http-client</groupId>
         <artifactId>google-http-client</artifactId>
         <version>${version.com.google.apis}</version>
+        <exclusions>
+          <exclusion> <!-- comes from javax.annotations already -->
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>com.google.apis</groupId>
@@ -358,7 +381,11 @@
         <artifactId>mockserver-core</artifactId>
         <version>${version.org.mock-server}</version>
         <exclusions>
-          <exclusion>
+          <exclusion> <!-- We have our own, based on Jakarta EE -->
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+          </exclusion>
+          <exclusion> <!-- We use JUnit 5 -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
           </exclusion>
@@ -384,7 +411,11 @@
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-jcl</artifactId>
         <version>${version.org.apache.logging.log4j}</version>
-        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-jul</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
@@ -403,9 +434,34 @@
         <version>${version.org.junit.platform}</version>
       </dependency>
       <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>2.3.1</version>
+        <groupId>com.sun.activation</groupId>
+        <artifactId>jakarta.activation</artifactId>
+        <version>${version.jakarta.activation}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jaxb.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>${jaxb.version}</version>
+        <exclusions>
+          <!--
+            replace with com.sun.activation:jakarta-activation, which includes the API
+            otherwise there are nasty clashes between this and com.sun.mail later
+          -->
+          <exclusion>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>2.1.5</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -496,7 +552,17 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
+        <configuration>
+          <!--
+            workaround for
+            https://stackoverflow.com/questions/51525069/multi-release-log4j-api-2-11-0-jar-on-the-the-module-path-in-javadoc-10-0-2
+
+            this likely means that, even though Javadocs will be published, they will be empty.
+            the fix for this workaround is to use Java 12+, where the Javadoc bug is actually fixed.
+          -->
+          <failOnError>false</failOnError>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -525,16 +591,17 @@
             <configuration>
               <failOnWarning>true</failOnWarning>
               <ignoredUnusedDeclaredDependencies> <!-- Mostly service-loaded stuff, APIs, also some of our own. -->
+                <ignoredUnusedDeclaredDependency>com.sun.activation</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>jakarta.xml.bind</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>ch.qos.logback</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.jboss.spec.javax.xml.bind</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.jboss.spec.javay.ws.rs</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
               <ignoredUsedUndeclaredDependencies>
+                <ignoredUsedUndeclaredDependency>com.sun.mail</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>ch.qos.logback</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>org.slf4j</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
@@ -546,25 +613,19 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>
+          <useModulePath>false</useModulePath> <!-- Modularity in tests brings pain and no obvious benefits. -->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <workingDirectory>${basedir}/target</workingDirectory>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${surefire.version}</version>
+        <configuration>
+          <useModulePath>false</useModulePath> <!-- Modularity in tests brings pain and no obvious benefits. -->
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <workingDirectory>${basedir}/target</workingDirectory>
+        </configuration>
         <executions>
           <execution>
             <id>run-integration-tests</id>
@@ -575,22 +636,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <workingDirectory>${basedir}/target</workingDirectory>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <version>${version.org.junit.platform}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
@@ -601,9 +646,6 @@
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
-            <manifestEntries>
-              <Automatic-Module-Name>${project.automatic.module.name}</Automatic-Module-Name>
-            </manifestEntries>
           </archive>
         </configuration>
         <executions>

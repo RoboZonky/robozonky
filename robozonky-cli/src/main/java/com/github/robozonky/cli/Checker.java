@@ -34,7 +34,7 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.internal.util.DateUtil;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
