@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
@@ -46,7 +47,6 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
     private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
-    private final AtomicReference<BigDecimal> lastKnownBalance = new AtomicReference<>(BigDecimal.ZERO);
     private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
@@ -78,7 +78,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         LOGGER.debug("New remote data: {}.", data);
         LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
-                .filter(e -> e.getValue().isUnreflected(data.getStatistics()))
+                .filter(e -> e.getValue().isPersistent())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         LOGGER.debug("New synthetics: {}.", updatedSynthetics);
         // force overview recalculation now that we have the latest portfolio
@@ -100,12 +100,11 @@ class RemotePortfolioImpl implements RemotePortfolio {
              * synthetic blocked amounts are persistent only during dry runs; otherwise all synthetics will be removed
              * after a remote update of blocked amounts.
              */
-            result.put(loanId, new Blocked(loanId, amount, rating, isDryRun));
+            result.put(loanId, new Blocked(amount, rating, isDryRun));
             return result;
         });
         LOGGER.debug("Synthetic added. New synthetics: {}", updatedSynthetics);
-        // force re-fetch of blocked amounts and portfolio data now that we have registered a change
-        portfolio.clear();
+        // force overview recalculation now that we have the latest portfolio
         portfolioOverview.clear();
     }
 
@@ -119,10 +118,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         final BigDecimal balance = data.getWallet().getAvailableBalance();
         final BigDecimal allBlocked = sum(syntheticByLoanId.get().values());
         final BigDecimal result = balance.subtract(allBlocked);
-        final BigDecimal oldBalance = lastKnownBalance.getAndSet(result);
-        if (result.compareTo(oldBalance) != 0) { // prevent excessive logging
-            LOGGER.debug("New balance: {} CZK available, {} CZK synthetic, {} CZK total.", balance, allBlocked, result);
-        }
+        LOGGER.debug("Balance: {} CZK available, {} CZK synthetic, {} CZK total.", balance, allBlocked, result);
         return result;
     }
 
@@ -135,16 +131,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
                                           RemotePortfolioImpl::sum,
                                           BigDecimal::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
-        LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach((r, amount) -> amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(amount)));
-        LOGGER.debug("Plus remote blocked: {}.", amounts);
-        syntheticByLoanId.get().values().stream()
-                .filter(syntheticBlocked -> syntheticBlocked.isUnreflected(data.getStatistics()))
-                .forEach(syntheticBlocked -> {
-                    final Rating r = syntheticBlocked.getRating();
-                    amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(syntheticBlocked.getAmount()));
+        LOGGER.debug("Before synthetics: {}.", amounts);
+        Stream.concat(syntheticByLoanId.get().values().stream(), data.getBlocked().values().stream())
+                .forEach(b -> {
+                    final Rating r = b.getRating();
+                    final BigDecimal amount = b.getAmount();
+                    amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(amount));
                 });
-        LOGGER.debug("Grand total incl. synthetics: {}.", amounts);
+        LOGGER.debug("Totals: {}.", amounts);
         return Collections.unmodifiableMap(amounts);
     }
 

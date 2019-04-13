@@ -97,12 +97,9 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                 .parallel()
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
-                    if (cache.wasOnceSold(loanId)) {
-                        LOGGER.debug("Loan #{} already sold before, ignoring.", loanId);
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    final boolean wasSoldBefore = cache.wasOnceSold(loanId);
+                    LOGGER.debug("Loan #{} already sold before, ignoring: {}.", loanId, wasSoldBefore);
+                    return !wasSoldBefore;
                 })
                 .map(p -> toDescriptor(p, tenant));
     }

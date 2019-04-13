@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -161,7 +160,6 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
          * portfolio totals must not change, as there was no change - just the synthetic is replaced by real amount
          */
         setClock(Clock.fixed(Instant.now().plus(Duration.ofMinutes(5)), Defaults.ZONE_ID));
-        when(zonky.getStatistics()).thenReturn(Statistics.emptyAndFresh());
         when(zonky.getBlockedAmounts())
                 .thenAnswer(i -> Stream.of(original, new BlockedAmount(l2.getId(), secondAmount)));
         when(zonky.getLoan(eq(l2.getId()))).thenReturn(l2);

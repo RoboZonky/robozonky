@@ -20,34 +20,31 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.util.DateUtil;
 
 final class Blocked {
 
     private final int id;
-    private final long storedOn = DateUtil.now().toEpochMilli();
     private final BigDecimal amount;
     private final Rating rating;
     private final boolean persistent;
 
-    Blocked(final int id, final BigDecimal amount, final Rating rating) {
-        this(id, amount, rating, false);
+    public Blocked(final BigDecimal amount, final Rating rating) {
+        this(amount, rating, true);
     }
 
-    Blocked(final BlockedAmount amount, final Rating rating) {
-        this(amount, rating, false);
+    public Blocked(final BlockedAmount amount, final Rating rating) {
+        this(amount, rating, true);
     }
 
-    public Blocked(final int id, final BigDecimal amount, final Rating rating, final boolean persistent) {
-        this.id = id;
+    public Blocked(final BigDecimal amount, final Rating rating, final boolean persistent) {
+        this.id = -1;
         this.amount = amount.abs();
         this.rating = rating;
         this.persistent = persistent;
     }
 
-    Blocked(final BlockedAmount amount, final Rating rating, final boolean persistent) {
+    public Blocked(final BlockedAmount amount, final Rating rating, final boolean persistent) {
         this.id = amount.getLoanId();
         this.amount = amount.getAmount().abs();
         this.rating = rating;
@@ -67,19 +64,11 @@ final class Blocked {
     }
 
     /**
-     * Zonky updates portfolio every 2 hours, but participations become part of the portfolio immediately, without any
-     * relevant blocked amount. Therefore, this method decides whether a particular blocked amount was already included
-     * in the portfolio by a given time.
-     * @param latestPortfolio The latest portfolio to compare against.
-     * @return True if the blocked amount had shown before the update, or if the blocked amount was set as persistent,
-     * false otherwise.
+     *
+     * @return True if this information should continue to be persisted after the next remote read of blocked amounts.
      */
-    public boolean isUnreflected(final Statistics latestPortfolio) {
-        if (persistent) {
-            return true;
-        }
-        final long lastUpdate = latestPortfolio.getTimestamp().toInstant().toEpochMilli();
-        return lastUpdate < storedOn;
+    public boolean isPersistent() {
+        return persistent;
     }
 
     @Override
@@ -104,11 +93,10 @@ final class Blocked {
     @Override
     public String toString() {
         return "Blocked{" +
-                "id=" + id +
-                ", amount=" + amount +
-                ", rating=" + rating +
-                ", storedOn=" + storedOn +
+                "amount=" + amount +
                 ", persistent=" + persistent +
+                ", id=" + id +
+                ", rating=" + rating +
                 '}';
     }
 }

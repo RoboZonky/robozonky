@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.NotFoundException;
 
@@ -31,7 +32,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
-import io.vavr.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,7 +63,7 @@ final class Util {
                                     }, reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
     }
 
-    static Map<Rating, BigDecimal> getAmountsBlocked(final Tenant tenant, final Statistics stats) {
+    static Map<Integer, Blocked> readBlockedAmounts(final Tenant tenant, final Statistics stats) {
         final long portfolioSize = stats.getCurrentOverview().getPrincipalLeft();
         final Divisor divisor = new Divisor(portfolioSize);
         return tenant.call(Zonky::getBlockedAmounts)
@@ -71,12 +71,27 @@ final class Util {
                 .peek(ba -> LOGGER.debug("Found: {}.", ba))
                 .filter(ba -> ba.getLoanId() > 0)
                 .flatMap(ba -> getLoan(tenant, ba, divisor)
-                        .map(loan -> Stream.of(Tuple.of(ba, loan)))
+                        .map(l -> Stream.of(new Blocked(ba, l.getRating())))
                         .orElse(Stream.empty()))
-                .collect(groupingBy(t -> t._2.getRating(),
-                                    () -> new EnumMap<>(Rating.class),
-                                    mapping(t -> t._1.getAmount(),
-                                            reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
+                .collect(Collectors.toMap(Blocked::getId, b -> b, Util::merge));
+    }
+
+    /**
+     * Two blocked amounts related to the same loan. May happen if robot invests while the user manually invests through
+     * the reservation system as well - that's the only time two investments in one {@link Loan} are possible.
+     * @param a
+     * @param b
+     * @return Sum of both amounts, in the rating that both of the amounts share.
+     * @throws IllegalArgumentException When the ratings of the two amounts don't match. That represents an invalid
+     * situation.
+     */
+    private static Blocked merge(final Blocked a, final Blocked b) {
+        final Rating rating = a.getRating();
+        if (rating != b.getRating()) {
+            throw new IllegalArgumentException("Ratings do not match: " + a + " and " + b);
+        }
+        final BigDecimal total = a.getAmount().add(b.getAmount());
+        return new Blocked(total, rating, a.isPersistent());
     }
 
     static Optional<Loan> getLoan(final Tenant tenant, final BlockedAmount ba, final Divisor divisor) {
