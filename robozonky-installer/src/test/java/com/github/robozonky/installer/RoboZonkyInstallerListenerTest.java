@@ -107,7 +107,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         }
         final File distDir = new File(installDir, "Dist/");
         distDir.mkdirs();
-        final File logback = new File(distDir, "logback.xml");
+        final File logback = new File(distDir, "log4j2.xml");
         logback.createNewFile();
         final File strategy = new File(Variables.STRATEGY_SOURCE.getValue(data));
         strategy.createNewFile();
@@ -275,7 +275,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         listener.afterPacks(Collections.emptyList(), progress);
         // test
         assertSoftly(softly -> {
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "logback.xml")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "log4j2.xml")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.bat")).doesNotExist();
@@ -302,7 +302,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         listener.afterPacks(Collections.emptyList(), progress);
         // test
         assertSoftly(softly -> {
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "logback.xml")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "log4j2.xml")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.sh")).doesNotExist();

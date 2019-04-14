@@ -18,6 +18,7 @@ package com.github.robozonky.installer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -53,7 +54,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     static final char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
     private static final Logger LOGGER = LogManager.getLogger(RoboZonkyInstallerListener.class);
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
-            CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
+            CLI_CONFIG_FILE, LOG4J2_CONFIG_FILE;
     private static InstallData DATA;
     private RoboZonkyInstallerListener.OS operatingSystem = RoboZonkyInstallerListener.OS.OTHER;
 
@@ -91,7 +92,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
         SETTINGS_FILE = new File(INSTALL_PATH, "robozonky.properties");
         CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
-        LOGBACK_CONFIG_FILE = new File(INSTALL_PATH, "logback.xml");
+        LOG4J2_CONFIG_FILE = new File(INSTALL_PATH, "log4j2.xml");
     }
 
     static void resetInstallData() {
@@ -103,7 +104,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         EMAIL_CONFIG_FILE = null;
         SETTINGS_FILE = null;
         CLI_CONFIG_FILE = null;
-        LOGBACK_CONFIG_FILE = null;
+        LOG4J2_CONFIG_FILE = null;
     }
 
     private static void primeKeyStore(final char... keystorePassword) throws SetupFailedException, IOException {
@@ -260,11 +261,12 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     private static CommandLinePart prepareLogging() {
         try {
-            Util.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
+            final InputStream log4j2config = RoboZonkyInstallerListener.class.getResourceAsStream("/log4j2.xml");
+            FileUtils.copyInputStreamToFile(log4j2config, LOG4J2_CONFIG_FILE);
             return new CommandLinePart()
-                    .setProperty("logback.configurationFile", LOGBACK_CONFIG_FILE.getAbsolutePath());
+                    .setProperty("log4j.configurationFile", LOG4J2_CONFIG_FILE.getAbsolutePath());
         } catch (final IOException ex) {
-            throw new IllegalStateException("Failed copying log file.", ex);
+            throw new IllegalStateException("Failed copying Log4j configuration file.", ex);
         }
     }
 

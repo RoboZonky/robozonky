@@ -17,6 +17,7 @@ module com.github.robozonky.common {
     exports com.github.robozonky.common.secrets;
     exports com.github.robozonky.common.state;
     exports com.github.robozonky.common.tenant;
+    exports com.github.robozonky.util;
 
     uses com.github.robozonky.common.jobs.JobService;
     uses com.github.robozonky.api.strategies.StrategyService;

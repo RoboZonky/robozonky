@@ -27,6 +27,7 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.management.Management;
+import com.github.robozonky.util.BootstrapUtil;
 import io.vavr.Lazy;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +49,7 @@ public class App implements Runnable {
     }
 
     public static void main(final String... args) {
+        BootstrapUtil.configureLogging();
         final App main = new App(args);
         main.run();
     }

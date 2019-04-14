@@ -5,8 +5,6 @@ module com.github.robozonky.cli {
     requires google.oauth.client;
     requires info.picocli;
     requires io.vavr;
-    requires logback.classic;
-    requires logback.core;
     requires org.apache.commons.io;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;

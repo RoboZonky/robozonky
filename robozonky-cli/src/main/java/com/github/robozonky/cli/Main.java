@@ -16,9 +16,12 @@
 
 package com.github.robozonky.cli;
 
+import com.github.robozonky.util.BootstrapUtil;
+
 final class Main {
 
     public static void main(final String... args) {
+        BootstrapUtil.configureLogging();
         final ExitCode exit = Cli.parse(args).orElse(ExitCode.NO_OPERATION);
         System.exit(exit.ordinal());
     }
