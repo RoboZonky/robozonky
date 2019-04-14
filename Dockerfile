@@ -26,7 +26,7 @@ ENV INSTALL_DIRECTORY=/opt/robozonky \
 # using different ENV as otherwise the ENV definitions above wouldn't be used
 ENV JAVA_OPTS="$JAVA_OPTS \
     -Drobozonky.properties.file=$CONFIG_DIRECTORY/robozonky.properties \
-    -Dlogback.configurationFile=$CONFIG_DIRECTORY/logback.xml"
+    -Dlog4j.configurationFile=$CONFIG_DIRECTORY/log4j2.xml"
 COPY --from=scratch /tmp/robozonky $INSTALL_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
 ENTRYPOINT $INSTALL_DIRECTORY/robozonky.sh @$CONFIG_DIRECTORY/robozonky.cli
