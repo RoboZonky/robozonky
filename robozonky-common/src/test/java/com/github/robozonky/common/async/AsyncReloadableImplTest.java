@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 import io.vavr.control.Either;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
@@ -30,6 +31,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class AsyncReloadableImplTest {
+
+    @AfterEach
+    void shutdown() {
+        Tasks.closeAll();
+    }
 
     @Test
     void manually() throws InterruptedException {

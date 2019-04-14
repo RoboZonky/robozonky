@@ -64,6 +64,7 @@ final class DelayedFiring implements Runnable {
     public void cancel() {
         ensureNotOver();
         blocksUntilAllUnblock.get().cancel(true);
+        triggersEventFiring.reset();
         isOver.set(true);
         LOGGER.debug("Cancelled.");
     }

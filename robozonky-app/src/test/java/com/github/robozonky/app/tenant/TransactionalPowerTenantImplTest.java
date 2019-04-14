@@ -137,17 +137,12 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final TransactionalPowerTenant t = transactional(new TenantBuilder()
-                                                                 .withApi(api)
-                                                                 .withSecrets(SECRETS)
-                                                                 .build());
-        try {
+        final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
+        try (final TransactionalPowerTenant t = transactional(tenant)) {
             final Runnable f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
                                                                                   mockPortfolioOverview(10_000))));
             t.commit();
             f.run();
-        } finally {
-            t.close();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)
@@ -155,18 +150,18 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void failsWhenEventUncommitted() {
+    void failsWhenEventUncommitted() throws Exception {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky(10_000);
         final ApiProvider api = mockApiProvider(a, z);
-        final TransactionalPowerTenant t = transactional(new TenantBuilder()
-                                                                 .withApi(api)
-                                                                 .withSecrets(SECRETS)
-                                                                 .build());
-        try {
-            t.fire(roboZonkyDaemonFailed(new IllegalStateException()));
-        } finally {
-            assertThatThrownBy(t::close).isInstanceOf(IllegalStateException.class);
+        final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
+        try (final TransactionalPowerTenant t = transactional(tenant)) {
+            try {
+                t.fire(roboZonkyDaemonFailed(new IllegalStateException()));
+                assertThatThrownBy(t::close).isInstanceOf(IllegalStateException.class);
+            } finally {
+                t.commit(); // clean up after itself, else some locks may be left hanging
+            }
         }
     }
 

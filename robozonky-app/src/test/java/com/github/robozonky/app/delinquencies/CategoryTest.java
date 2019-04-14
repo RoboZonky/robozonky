@@ -123,11 +123,8 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void processHopeless() {
         final TransactionalPowerTenant transactional = PowerTenant.transactional(mockTenant(zonky));
-        System.out.println("Processing.");
         HOPELESS.process(transactional, investment);
-        System.out.println("Processed.");
         transactional.commit();
-        System.out.println("Committed.");
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));

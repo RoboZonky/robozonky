@@ -55,7 +55,7 @@ class ZonkoidConfirmationProviderTest {
 
     @AfterAll
     static void stopServer() {
-        server.reset();
+        server.stop();
     }
 
     private void mockServerResponse(final int code) {

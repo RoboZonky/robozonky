@@ -18,6 +18,7 @@ package com.github.robozonky.app.events;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -92,8 +93,8 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     public void startListeningForEvents() { // initialize session and create a listener
         final PowerTenant t = mockTenant();
         Events.forSession(t).addListener(listener);
-        final Runnable r = () -> new EventFiring().run(); // make sure there is something reading the queue
-        service.scheduleAtFixedRate(r, 0, 1, TimeUnit.SECONDS);
+        // make sure there is something reading the queue
+        service.scheduleAtFixedRate(new EventFiring(), 0, 1, TimeUnit.SECONDS);
     }
 
     @AfterEach
@@ -114,6 +115,10 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         Lifecycle.clearShutdownHooks();
     }
 
+    /**
+     * Heavily synchronized as it has been shown to improve stability of tests in exactly the same way that just
+     * converting the {@link ArrayList}s to {@link CopyOnWriteArrayList} did not.
+     */
     private static class MyEventFiringListener implements EventFiringListener {
 
         private final List<Event> eventsFired = new ArrayList<>(0);
@@ -122,39 +127,39 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         private final List<Event> eventsReady = new ArrayList<>(0);
 
         @Override
-        public void requested(final LazyEvent<? extends Event> event) {
+        public synchronized void requested(final LazyEvent<? extends Event> event) {
             eventsRequested.add(event.get());
         }
 
         @Override
-        public <T extends Event> void ready(final T event, final Class<? extends EventListener<T>> listener) {
+        public synchronized <T extends Event> void ready(final T event, final Class<? extends EventListener<T>> listener) {
             eventsReady.add(event);
         }
 
         @Override
-        public <T extends Event> void fired(final T event, final Class<? extends EventListener<T>> listener) {
+        public synchronized <T extends Event> void fired(final T event, final Class<? extends EventListener<T>> listener) {
             eventsFired.add(event);
         }
 
         @Override
-        public <T extends Event> void failed(final LazyEvent<? extends Event> event,
+        public synchronized <T extends Event> void failed(final LazyEvent<? extends Event> event,
                                              final Class<? extends EventListener<T>> listener, final Exception ex) {
             eventsFailed.add(event.get());
         }
 
-        public List<Event> getEventsFired() {
+        public synchronized List<Event> getEventsFired() {
             return eventsFired;
         }
 
-        public List<Event> getEventsRequested() {
+        public synchronized List<Event> getEventsRequested() {
             return eventsRequested;
         }
 
-        public List<Event> getEventsFailed() {
+        public synchronized List<Event> getEventsFailed() {
             return eventsFailed;
         }
 
-        public List<Event> getEventsReady() {
+        public synchronized List<Event> getEventsReady() {
             return eventsReady;
         }
 

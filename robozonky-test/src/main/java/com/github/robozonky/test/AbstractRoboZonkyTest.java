@@ -18,6 +18,8 @@ package com.github.robozonky.test;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -151,7 +153,16 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     @AfterEach
     void closeSchedulers() {
+        logger.debug("Shutting down internal executors.");
         Tasks.closeAll();
+        logger.debug("Awaiting common ForkJoinPool quiescence.");
+        final boolean success = ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.SECONDS);
+        if (success) {
+            logger.debug("All executors shut down.");
+        } else {
+            // our own cleanup may be failing, potentially leaving running threads behind
+            throw new IllegalStateException("Common ForkJoinPool never quiescent, will likely kill all future tests.");
+        }
     }
 
     @AfterEach

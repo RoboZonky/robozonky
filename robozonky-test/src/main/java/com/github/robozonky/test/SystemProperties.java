@@ -31,7 +31,7 @@ enum SystemProperties {
     public void save() {
         originalProperties = System.getProperties();
         System.setProperties(copyOf(originalProperties));
-        logger.debug("Storing properties: {}.", originalProperties);
+        logger.debug("Set new properties.");
     }
 
     private static Properties copyOf(final Properties source) {
@@ -41,7 +41,7 @@ enum SystemProperties {
     }
 
     public void restore() {
-        logger.debug("Overwriting original properties: {}.", System.getProperties());
+        logger.debug("Restoring original properties.");
         System.setProperties(originalProperties);
     }
 }

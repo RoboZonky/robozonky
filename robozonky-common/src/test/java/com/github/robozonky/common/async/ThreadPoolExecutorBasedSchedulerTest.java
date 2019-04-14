@@ -24,11 +24,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.LongAccumulator;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
 class ThreadPoolExecutorBasedSchedulerTest {
+
+    @AfterEach
+    void shutdown() {
+        Tasks.closeAll();
+    }
 
     @Test
     void repeating() throws Exception {
