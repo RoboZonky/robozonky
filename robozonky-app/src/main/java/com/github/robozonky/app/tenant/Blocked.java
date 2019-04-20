@@ -17,20 +17,20 @@
 package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class Blocked {
 
     private final int id;
-    private final long storedOn = DateUtil.now().toEpochMilli();
     private final BigDecimal amount;
     private final Rating rating;
     private final boolean persistent;
+    private final OffsetDateTime storedOn = DateUtil.offsetNow();
 
     Blocked(final int id, final BigDecimal amount, final Rating rating) {
         this(id, amount, rating, false);
@@ -66,20 +66,16 @@ final class Blocked {
         return rating;
     }
 
-    /**
-     * Zonky updates portfolio every 2 hours, but participations become part of the portfolio immediately, without any
-     * relevant blocked amount. Therefore, this method decides whether a particular blocked amount was already included
-     * in the portfolio by a given time.
-     * @param latestPortfolio The latest portfolio to compare against.
-     * @return True if the blocked amount had shown before the update, or if the blocked amount was set as persistent,
-     * false otherwise.
-     */
-    public boolean isUnreflected(final Statistics latestPortfolio) {
-        if (persistent) {
-            return true;
-        }
-        final long lastUpdate = latestPortfolio.getTimestamp().toInstant().toEpochMilli();
-        return lastUpdate < storedOn;
+    public boolean isValidInStatistics(final RemoteData remoteData) {
+        return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp());
+    }
+
+    public boolean isValidInBalance(final RemoteData remoteData) {
+        return persistent || storedOn.isAfter(remoteData.getRetrievedOn());
+    }
+
+    public boolean isValid(final RemoteData remoteData) {
+        return isValidInStatistics(remoteData) || isValidInBalance(remoteData);
     }
 
     @Override
@@ -103,12 +99,12 @@ final class Blocked {
 
     @Override
     public String toString() {
-        return "Blocked{" +
-                "id=" + id +
-                ", amount=" + amount +
+        return "BlockedAmount{" +
+                "amount=" + amount +
+                ", id=" + id +
+                ", persistent=" + persistent +
                 ", rating=" + rating +
                 ", storedOn=" + storedOn +
-                ", persistent=" + persistent +
                 '}';
     }
 }

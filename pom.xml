@@ -554,6 +554,9 @@
             <avoidCallsTo>org.apache.logging.log4j</avoidCallsTo> <!-- don't mutate logging calls -->
             <avoidCallsTo>jdk.jfr</avoidCallsTo> <!-- don't mutate JFR event triggering, we do not want to test it -->
           </avoidCallsTo>
+          <!-- speed up PITest during development -->
+          <maxDependencyDistance>2</maxDependencyDistance>
+          <withHistory>true</withHistory>
         </configuration>
         <executions>
           <execution>

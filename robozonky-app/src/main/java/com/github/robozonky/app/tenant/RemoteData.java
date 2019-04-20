@@ -17,6 +17,7 @@
 package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,6 +37,7 @@ final class RemoteData {
     private final Wallet wallet;
     private final Statistics statistics;
     private final Map<Rating, BigDecimal> blocked;
+    private final OffsetDateTime retrievedOn = DateUtil.offsetNow();
 
     private RemoteData(final Wallet wallet, final Statistics statistics, final Map<Rating, BigDecimal> blocked) {
         this.wallet = wallet;
@@ -49,6 +52,10 @@ final class RemoteData {
         final Wallet wallet = tenant.call(Zonky::getWallet); // goes last as it's a very short call
         LOGGER.debug("Finished.");
         return new RemoteData(wallet, statistics, blocked);
+    }
+
+    public OffsetDateTime getRetrievedOn() {
+        return retrievedOn;
     }
 
     public Wallet getWallet() {
@@ -67,6 +74,7 @@ final class RemoteData {
     public String toString() {
         return "RemoteData{" +
                 "blocked=" + blocked +
+                ", retrievedOn=" + retrievedOn +
                 ", statistics=" + statistics +
                 ", wallet=" + wallet +
                 '}';
