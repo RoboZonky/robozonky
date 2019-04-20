@@ -26,8 +26,10 @@ import java.util.concurrent.atomic.LongAccumulator;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 class ThreadPoolExecutorBasedSchedulerTest {
 
@@ -40,7 +42,7 @@ class ThreadPoolExecutorBasedSchedulerTest {
     void repeating() throws Exception {
         final ScheduledExecutorService s1 = Executors.newSingleThreadScheduledExecutor();
         final ExecutorService s2 = Executors.newCachedThreadPool();
-        final LongAccumulator accumulator = new LongAccumulator((a, b) -> a + b, 0);
+        final LongAccumulator accumulator = new LongAccumulator(Long::sum, 0);
         final Runnable r = () -> accumulator.accumulate(1);
         try (final Scheduler s = new ThreadPoolExecutorBasedScheduler(s1, s2, () -> {
             s1.shutdown();
@@ -48,7 +50,7 @@ class ThreadPoolExecutorBasedSchedulerTest {
         })) {
             final ScheduledFuture<?> f = s.submit(r, Duration.ofMillis(1));
             assertThat((Future)f).isNotNull();
-            Thread.sleep(50); // give A LOT OF TIME for the repeat to actually happen
+            assertTimeout(Duration.ofSeconds(1), (ThrowingSupplier<?>)f::get);
         }
         assertThat(accumulator.longValue()).isGreaterThanOrEqualTo(2);
     }

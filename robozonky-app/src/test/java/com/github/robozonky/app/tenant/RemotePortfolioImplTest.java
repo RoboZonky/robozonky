@@ -184,6 +184,8 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
         final Tenant tenant = mockTenant(zonky, true);
         // one blocked amount coming in remotely
+        final Instant now = Instant.now();
+        setClock(Clock.fixed(now, Defaults.ZONE_ID));
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal()).containsOnly(Maps.entry(Rating.D, firstAmount));
@@ -204,7 +206,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
          * time passed, the same blocked amount is read from Zonky and must be added to the synthetic one from the
          * dry run.
          */
-        setClock(Clock.fixed(Instant.now().plus(Duration.ofMinutes(5)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(6)), Defaults.ZONE_ID));
         when(zonky.getBlockedAmounts())
                 .thenAnswer(i -> Stream.of(original, new BlockedAmount(l2.getId(), secondAmount)));
         when(zonky.getLoan(eq(l2.getId()))).thenReturn(l2);
