@@ -18,7 +18,6 @@ package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
 
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ class BlockedTest extends AbstractRoboZonkyTest {
 
     @Test
     void fromBlockedAmount() {
-        final BlockedAmount a = new BlockedAmount(1, BigDecimal.ONE);
+        final com.github.robozonky.api.remote.entities.BlockedAmount a = new com.github.robozonky.api.remote.entities.BlockedAmount(1, BigDecimal.ONE);
         final Blocked b = new Blocked(a, Rating.D);
         assertSoftly(softly -> {
             softly.assertThat(b.getAmount()).isEqualTo(a.getAmount());

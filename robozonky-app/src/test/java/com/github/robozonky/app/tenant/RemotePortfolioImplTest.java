@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -94,6 +95,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertThat(p.getBalance().intValue()).isEqualTo(10_000);
         p.simulateCharge(1, Rating.D, BigDecimal.TEN);
+        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(9_990)));
         assertThat(p.getBalance().intValue()).isEqualTo(9_990);
     }
 

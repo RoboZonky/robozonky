@@ -18,13 +18,13 @@ package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
@@ -69,8 +69,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
         return BigDecimalCalculator.plus(portfolio.getDue(), portfolio.getUnpaid());
     }
 
-    private static BigDecimal sum(final Collection<Blocked> blockedAmounts) {
-        return blockedAmounts.stream().map(Blocked::getAmount).reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
+    private static BigDecimal sum(final Stream<Blocked> blockedAmounts) {
+        return blockedAmounts.map(Blocked::getAmount).reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
     }
 
     private void refreshPortfolio(final RemoteData data) {
@@ -78,7 +78,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         LOGGER.debug("New remote data: {}.", data);
         LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
-                .filter(e -> e.getValue().isUnreflected(data.getStatistics()))
+                .filter(e -> e.getValue().isValid(data))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         LOGGER.debug("New synthetics: {}.", updatedSynthetics);
         // force overview recalculation now that we have the latest portfolio
@@ -117,7 +117,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
     public BigDecimal getBalance() {
         final RemoteData data = getRemotePortfolio();
         final BigDecimal balance = data.getWallet().getAvailableBalance();
-        final BigDecimal allBlocked = sum(syntheticByLoanId.get().values());
+        final BigDecimal allBlocked =
+                sum(syntheticByLoanId.get().values().stream().filter(s -> s.isValidInBalance(data)));
         final BigDecimal result = balance.subtract(allBlocked);
         final BigDecimal oldBalance = lastKnownBalance.getAndSet(result);
         if (result.compareTo(oldBalance) != 0) { // prevent excessive logging
@@ -139,7 +140,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         data.getBlocked().forEach((r, amount) -> amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(amount)));
         LOGGER.debug("Plus remote blocked: {}.", amounts);
         syntheticByLoanId.get().values().stream()
-                .filter(syntheticBlocked -> syntheticBlocked.isUnreflected(data.getStatistics()))
+                .filter(syntheticBlocked -> syntheticBlocked.isValidInStatistics(data))
                 .forEach(syntheticBlocked -> {
                     final Rating r = syntheticBlocked.getRating();
                     amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(syntheticBlocked.getAmount()));
