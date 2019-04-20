@@ -52,7 +52,7 @@ class ThreadPoolExecutorBasedSchedulerTest {
             assertThat((Future)f).isNotNull();
             assertTimeout(Duration.ofSeconds(1), (ThrowingSupplier<?>)f::get);
         }
-        assertThat(accumulator.longValue()).isGreaterThanOrEqualTo(2);
+        assertThat(accumulator.longValue()).isGreaterThanOrEqualTo(1);
     }
 
 }
