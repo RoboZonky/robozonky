@@ -43,6 +43,7 @@ import com.github.robozonky.common.async.Refreshable;
 import com.github.robozonky.common.jobs.SimplePayload;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.util.UrlUtil;
+import com.github.robozonky.internal.util.XmlUtil;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -134,18 +135,15 @@ final class UpdateMonitor extends Refreshable<VersionIdentifier> implements Simp
      * @throws SAXException Failed reading XML.
      * @throws XPathExpressionException XPath parsing problem.
      */
-    private static VersionIdentifier parseVersionString(final InputStream xml) throws IOException {
-        try {
-            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            final DocumentBuilder builder = factory.newDocumentBuilder();
-            final Document doc = builder.parse(xml);
-            final XPathFactory xPathfactory = XPathFactory.newInstance();
-            final XPath xpath = xPathfactory.newXPath();
-            final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
-            return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
-        } catch (final SAXException | XPathExpressionException | ParserConfigurationException ex) {
-            throw new IOException(ex);
-        }
+    private static VersionIdentifier parseVersionString(final InputStream xml) throws ParserConfigurationException,
+            IOException, SAXException, XPathExpressionException {
+        final DocumentBuilderFactory factory = XmlUtil.getDocumentBuilderFactory();
+        final DocumentBuilder builder = factory.newDocumentBuilder();
+        final Document doc = builder.parse(xml);
+        final XPathFactory xPathfactory = XPathFactory.newInstance();
+        final XPath xpath = xPathfactory.newXPath();
+        final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
+        return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
     }
 
     @Override
