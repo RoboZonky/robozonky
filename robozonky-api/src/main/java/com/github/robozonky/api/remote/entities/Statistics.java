@@ -16,7 +16,6 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +29,6 @@ public class Statistics extends BaseEntity {
 
     private static final Lazy<Statistics> EMPTY = Lazy.of(Statistics::emptyAndFresh);
 
-    private BigDecimal currentProfitability, expectedProfitability;
     private Ratio profitability;
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
@@ -51,8 +49,6 @@ public class Statistics extends BaseEntity {
 
     public static Statistics emptyAndFresh() {
         final Statistics s = new Statistics();
-        s.currentProfitability = BigDecimal.ZERO;
-        s.expectedProfitability = BigDecimal.ZERO;
         s.profitability = Ratio.ZERO;
         s.cashFlow = Collections.emptyList();
         s.riskPortfolio = Collections.emptyList();
@@ -67,18 +63,6 @@ public class Statistics extends BaseEntity {
 
     private static <T> List<T> unmodifiableOrEmpty(final List<T> possiblyNull) {
         return possiblyNull == null ? Collections.emptyList() : Collections.unmodifiableList(possiblyNull);
-    }
-
-    @Deprecated
-    @XmlElement
-    public BigDecimal getCurrentProfitability() {
-        return currentProfitability;
-    }
-
-    @Deprecated
-    @XmlElement
-    public BigDecimal getExpectedProfitability() {
-        return expectedProfitability;
     }
 
     @XmlElement
@@ -121,6 +105,10 @@ public class Statistics extends BaseEntity {
         return unmodifiableOrEmpty(expectedPayments);
     }
 
+    /**
+     * Zonky only recalculates the information within this class every N hours.
+     * @return This method returns the timestamp of the last recalculation.
+     */
     @XmlElement
     public OffsetDateTime getTimestamp() {
         return timestamp;
