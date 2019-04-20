@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
+import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -35,7 +36,7 @@ final class Blocked {
         this(id, amount, rating, false);
     }
 
-    Blocked(final com.github.robozonky.api.remote.entities.BlockedAmount amount, final Rating rating) {
+    Blocked(final BlockedAmount amount, final Rating rating) {
         this(amount, rating, false);
     }
 
@@ -46,8 +47,7 @@ final class Blocked {
         this.persistent = persistent;
     }
 
-    Blocked(final com.github.robozonky.api.remote.entities.BlockedAmount amount, final Rating rating,
-            final boolean persistent) {
+    Blocked(final BlockedAmount amount, final Rating rating, final boolean persistent) {
         this.id = amount.getLoanId();
         this.amount = amount.getAmount().abs();
         this.rating = rating;
@@ -67,19 +67,15 @@ final class Blocked {
     }
 
     public boolean isValidInStatistics(final RemoteData remoteData) {
-        return storedOn.isAfter(remoteData.getStatistics().getTimestamp());
+        return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp());
     }
 
     public boolean isValidInBalance(final RemoteData remoteData) {
-        return storedOn.isAfter(remoteData.getRetrievedOn());
+        return persistent || storedOn.isAfter(remoteData.getRetrievedOn());
     }
 
     public boolean isValid(final RemoteData remoteData) {
         return isValidInStatistics(remoteData) || isValidInBalance(remoteData);
-    }
-
-    protected boolean isPersistent() {
-        return persistent;
     }
 
     @Override
