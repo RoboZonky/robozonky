@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
 
+import com.github.robozonky.api.remote.enums.InvestmentType;
 import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.Events;
@@ -84,6 +85,10 @@ public class App implements Runnable {
     private ReturnCode executeSafe(final InvestmentMode m) {
         Events.global().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
+        final InvestmentType type = m.getInvestmentType();
+        if (type != InvestmentType.N && type != InvestmentType.INVESTOR) {
+            throw new IllegalStateException("Zonky Rentier customers can not use RoboZonky.");
+        }
         // will close event-firing thread == must be triggered last == must be registered first
         shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
         // will trigger events, therefore needs to come before the above

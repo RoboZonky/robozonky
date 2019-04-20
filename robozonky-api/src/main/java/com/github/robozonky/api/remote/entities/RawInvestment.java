@@ -26,6 +26,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
+import com.github.robozonky.api.remote.enums.InvestmentType;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
@@ -53,6 +54,7 @@ public class RawInvestment extends BaseInvestment {
     private Ratio interestRate;
     private Ratio revenueRate;
     private Rating rating;
+    private InvestmentType investmentType;
     private Collection<InsurancePolicyPeriod> insuranceHistory;
 
     RawInvestment() {
@@ -312,5 +314,10 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public Ratio getRevenueRate() {
         return revenueRate;
+    }
+
+    @XmlElement
+    public InvestmentType getInvestmentType() {
+        return investmentType;
     }
 }

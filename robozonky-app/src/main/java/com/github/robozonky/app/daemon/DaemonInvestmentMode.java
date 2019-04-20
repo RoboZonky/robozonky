@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.enums.InvestmentType;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -28,6 +29,7 @@ import com.github.robozonky.common.async.Scheduler;
 import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.extensions.JobServiceLoader;
 import com.github.robozonky.common.jobs.Job;
+import com.github.robozonky.common.remote.Zonky;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,6 +86,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
     @Override
     public SessionInfo getSessionInfo() {
         return tenant.getSessionInfo();
+    }
+
+    @Override
+    public InvestmentType getInvestmentType() {
+        return tenant.call(Zonky::getWallet).getInvestmentType();
     }
 
     @Override

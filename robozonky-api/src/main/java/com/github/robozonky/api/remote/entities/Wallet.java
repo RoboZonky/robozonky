@@ -19,12 +19,14 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.remote.enums.InvestmentType;
+
 public class Wallet extends BaseEntity {
 
     private int id;
     private BigDecimal balance, availableBalance, blockedBalance, creditSum, debitSum;
     private int variableSymbol;
-    private Object investmentType;
+    private InvestmentType investmentType;
     private BankAccount account;
 
     private Wallet() {
@@ -47,7 +49,7 @@ public class Wallet extends BaseEntity {
         this.blockedBalance = balance.subtract(availableBalance);
         this.creditSum = balance;
         this.debitSum = BigDecimal.ZERO;
-        this.investmentType = null;
+        this.investmentType = InvestmentType.INVESTOR;
     }
 
     @XmlElement
@@ -85,9 +87,8 @@ public class Wallet extends BaseEntity {
         return variableSymbol;
     }
 
-    // TODO figure out what this is
     @XmlElement
-    public Object getInvestmentType() {
+    public InvestmentType getInvestmentType() {
         return investmentType;
     }
 
