@@ -51,9 +51,9 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     private String notificationConfigLocation;
     @picocli.CommandLine.Option(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
     private String name = "Unnamed";
-    @picocli.CommandLine.Option(names = {"-p", "--password"}, required = true,
-            description = "Enter Zonky account password or secure storage password.")
-    private String password = null;
+    @picocli.CommandLine.Option(names = {"-p", "--password"}, required = true, interactive = true,
+            arity = "0..1", description = "Enter Zonky account password or secure storage password.")
+    private char[] password = null;
     @picocli.CommandLine.Option(names = {"-d", "--dry"},
             description = "RoboZonky will simulate investments, but never actually spend money.")
     private boolean dryRunEnabled = false;
@@ -119,7 +119,7 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     }
 
     char[] getPassword() {
-        return password.toCharArray();
+        return password;
     }
 
     Optional<File> getKeystore() {

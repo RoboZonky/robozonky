@@ -33,7 +33,8 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
             description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
     @CommandLine.Option(names = {"-p", "--password"},
-            description = "Password to use to authenticate with Zonky servers.", required = true, interactive = true)
+            description = "Password to use to authenticate with Zonky servers.", required = true, interactive = true,
+            arity = "0..1")
     private char[] password = null;
 
     public ZonkyPasswordFeature(final File keystore, final char[] keystoreSecret, final String username,

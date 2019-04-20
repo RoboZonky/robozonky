@@ -27,7 +27,7 @@ abstract class KeyStoreLeveragingFeature extends AbstractFeature {
             required = true)
     private File keystore = new File("robozonky.keystore");
     @CommandLine.Option(names = {"-s", "--secret"}, description = "Secret to use to access the keystore.",
-            required = true, interactive = true)
+            required = true, interactive = true, arity = "0..1")
     private char[] secret = null;
     private KeyStoreHandler storage;
 

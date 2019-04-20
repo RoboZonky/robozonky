@@ -25,7 +25,8 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Change password of the master keystore.";
     @CommandLine.Option(names = {"-n", "--new-secret"},
-            description = "Username to use to authenticate with Zonky servers.", required = true, interactive = true)
+            description = "Username to use to authenticate with Zonky servers.", required = true, interactive = true,
+            arity = "0..1")
     private char[] newSecret = null;
 
     public MasterPasswordFeature(final File keystore, final char[] keystoreSecret, final char... newSecret) {

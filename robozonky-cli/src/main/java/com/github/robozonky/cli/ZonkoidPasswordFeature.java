@@ -31,7 +31,8 @@ public final class ZonkoidPasswordFeature extends KeyStoreLeveragingFeature {
     static final String ZONKOID_ID = "zonkoid";
     private final String id;
     @CommandLine.Option(names = {"-p", "--password"},
-            description = "Code generated in the Zonkoid mobile application.", required = true, interactive = true)
+            description = "Code generated in the Zonkoid mobile application.", required = true, interactive = true,
+            arity = "0..1")
     private char[] password = null;
 
     public ZonkoidPasswordFeature(final File keystore, final char[] keystoreSecret, final char... password) {

@@ -45,14 +45,16 @@ class SecretProviderFactoryTest extends AbstractRoboZonkyTest {
     @Test
     void wrongFormatKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore"); // empty key store
-        final CommandLine cli = SecretProviderFactoryTest.mockCli(tmp, "password".toCharArray());
+        final char[] password = "pass".toCharArray();
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(tmp, password);
         assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
+        assertThat(password).isEqualTo("    ".toCharArray());
     }
 
     @Test
-    void noFallback() {
-        final String password = "pass";
-        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, password.toCharArray());
+    void nullKeystoreProvided() {
+        final char[] password = "pass".toCharArray();
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, password);
         assertThatThrownBy(() -> SecretProviderFactory.getSecretProvider(cli))
                 .isInstanceOf(IllegalStateException.class);
     }

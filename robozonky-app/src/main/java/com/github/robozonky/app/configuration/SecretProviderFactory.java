@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.configuration;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
@@ -37,14 +38,16 @@ final class SecretProviderFactory {
      * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
      */
     public static Optional<SecretProvider> getSecretProvider(final CommandLine cli) {
-        final char[] password = cli.getPassword();
         return cli.getKeystore().map(keystore -> {
+            final char[] password = cli.getPassword();
             try {
                 final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
                 return Optional.of(SecretProvider.keyStoreBased(ksh));
             } catch (final Exception ex) {
                 LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.<SecretProvider>empty();
+            } finally {
+                Arrays.fill(password, ' '); // clear the password from memory
             }
         }).orElseThrow(() -> new IllegalStateException("Could not find keystore."));
     }
