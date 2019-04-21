@@ -59,8 +59,8 @@ final class CashFlowSummary {
                     LOGGER.debug("Skipping cash flow type {}.", cashFlow.getType());
             }
         });
-        return new CashFlowSummary(in.intValue(), inDeposits.intValue(), out.intValue(), outFees.intValue(),
-                                   outWithdrawals.intValue());
+        return new CashFlowSummary(in.intValue(), inDeposits.intValue(), -out.intValue(), -outFees.intValue(),
+                                   -outWithdrawals.intValue());
     }
 
     public int getInTotal() {

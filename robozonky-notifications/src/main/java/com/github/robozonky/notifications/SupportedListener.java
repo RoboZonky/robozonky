@@ -42,6 +42,7 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.notifications.listeners.BalanceOnTargetEventListener;
 import com.github.robozonky.notifications.listeners.BalanceUnderMinimumEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentDelegatedEventListener;
@@ -63,6 +64,7 @@ import com.github.robozonky.notifications.listeners.RoboZonkyInitializedEventLis
 import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyUpdateDetectedEventListener;
 import com.github.robozonky.notifications.listeners.SaleOfferedEventListener;
+import com.github.robozonky.notifications.listeners.WeeklySummaryEventListener;
 import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("rawtypes")
@@ -285,6 +287,17 @@ public enum SupportedListener {
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new BalanceUnderMinimumEventListener(this, targetHandler);
+        }
+    },
+    WEEKLY_SUMMARY {
+        @Override
+        public Class<? extends Event> getEventType() {
+            return WeeklySummaryEvent.class;
+        }
+
+        @Override
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new WeeklySummaryEventListener(this, targetHandler);
         }
     },
     DAEMON_FAILED {

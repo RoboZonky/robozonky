@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.Summary;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -15,11 +15,11 @@ final class SummaryImpl implements Summary {
     private final OffsetDateTime createdOn = DateUtil.offsetNow();
     private final PortfolioOverview portfolioOverview;
     private final CashFlowSummary cashFlowSummary;
-    private final Collection<Investment> incomingInvestments;
-    private final Collection<Investment> outgoingInvestments;
+    private final Collection<LoanAndInvestment> incomingInvestments;
+    private final Collection<LoanAndInvestment> outgoingInvestments;
 
     public SummaryImpl(final PortfolioOverview portfolioOverview, final CashFlowSummary cashFlowSummary,
-                       final Collection<Investment> incoming, final Collection<Investment> outgoing) {
+                       final Collection<LoanAndInvestment> incoming, final Collection<LoanAndInvestment> outgoing) {
         this.portfolioOverview = portfolioOverview;
         this.cashFlowSummary = cashFlowSummary;
         this.incomingInvestments = new ArrayList<>(incoming);
@@ -57,12 +57,12 @@ final class SummaryImpl implements Summary {
     }
 
     @Override
-    public Stream<Investment> getOutgoingInvestments() {
+    public Stream<LoanAndInvestment> getOutgoingInvestments() {
         return incomingInvestments.stream();
     }
 
     @Override
-    public Stream<Investment> getIncomingInvestments() {
+    public Stream<LoanAndInvestment> getIncomingInvestments() {
         return outgoingInvestments.stream();
     }
 

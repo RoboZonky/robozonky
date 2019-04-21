@@ -35,11 +35,11 @@ final class Summarizer implements TenantPayload {
                 .parallel() // there may be tens of thousands of them
                 .forEach(t -> processors.forEach(p -> p.accept(t)));
         // now prepare the summary and trigger the event
-        final Summary summary = new SummaryBuilder()
+        final Summary summary = new SummaryBuilder(tenant)
                 .addCashFlows(cashFlow)
                 .addIncomingInvestments(newInvestmentProcessor)
                 .addOutgoingInvestments(leavingInvestmentProcessor)
-                .build(tenant.getPortfolio().getOverview());
+                .build();
         tenant.fire(EventFactory.weeklySummary(summary));
     }
 

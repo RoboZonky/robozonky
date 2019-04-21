@@ -3,7 +3,6 @@ package com.github.robozonky.api.notifications;
 import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 public interface Summary {
@@ -20,9 +19,9 @@ public interface Summary {
 
     PortfolioOverview getPortfolioOverview();
 
-    Stream<Investment> getOutgoingInvestments();
+    Stream<LoanAndInvestment> getOutgoingInvestments();
 
-    Stream<Investment> getIncomingInvestments();
+    Stream<LoanAndInvestment> getIncomingInvestments();
 
     OffsetDateTime getCreatedOn();
 

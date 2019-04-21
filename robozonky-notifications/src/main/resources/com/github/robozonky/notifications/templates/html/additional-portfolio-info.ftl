@@ -1,33 +1,5 @@
-<h2>Situace na <@zonky /> účtu k ${data.portfolio.timestamp?time?iso_local_ms_nz}</h2>
-
-<table>
-  <caption>Výkonnost portfolia</caption>
-  <thead>
-    <tr>
-        <th></th>
-        <th style="padding: 5px;">Očekáváno</th>
-        <th style="padding: 5px;">Udáváno <@zonky /></th>
-        <th style="padding: 5px;">Ideální</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th style="padding: 5px; text-align: right;">Výnos</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.minimalProfitability?string.@interest} p.a.</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.profitability?string.@interest} p.a.</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.optimalProfitability?string.@interest} p.a.</th>
-    </tr>
-    <tr>
-      <th style="padding: 5px; text-align: right;">Měsíčně</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.minimalMonthlyProfit?string.currency}</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.monthlyProfit?string.currency}</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.optimalMonthlyProfit?string.currency}</th>
-    </tr>
-  </tbody>
-</table>
-
-<table>
-  <caption>Struktura portfolia</caption>
+<table style="width: 60%">
+  <caption>Struktura portfolia k ${data.portfolio.timestamp?time?iso_local_ms_nz}</caption>
   <thead>
     <tr>
         <th style="padding: 5px; text-align: right;">Úrok</th>
