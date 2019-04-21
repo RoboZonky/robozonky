@@ -64,22 +64,28 @@ public class DaemonInvestmentMode implements InvestmentMode {
         submit(executor, r, type, repeatAfter, Duration.ZERO);
     }
 
+    private void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
+                        final Duration initialDelay) {
+        submit(executor, r, type, repeatAfter, initialDelay, Duration.ZERO);
+    }
+
     void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
-                final Duration initialDelay) {
-        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}.", type, executor, repeatAfter,
-                     initialDelay);
-        executor.submit(new Skippable(r, type, tenant), repeatAfter, initialDelay);
+                final Duration initialDelay, final Duration timeout) {
+        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
+                     executor, repeatAfter, initialDelay, timeout);
+        executor.submit(new Skippable(r, type, tenant), repeatAfter, initialDelay, timeout);
     }
 
     private void scheduleJobs() {
         // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submit(getSchedulerForJob(j), j.payload(), j.getClass(), j.repeatEvery(), j.startIn()));
+                .forEach(j -> submit(getSchedulerForJob(j), j.payload(), j.getClass(), j.repeatEvery(), j.startIn(),
+                                     j.killIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
                 .forEach(j -> submit(getSchedulerForJob(j), () -> j.payload().accept(tenant), j.getClass(),
-                                     j.repeatEvery(), j.startIn()));
+                                     j.repeatEvery(), j.startIn(), j.killIn()));
         LOGGER.debug("Job scheduling over.");
     }
 

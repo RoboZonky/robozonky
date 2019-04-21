@@ -58,7 +58,7 @@ final class StonkyJob implements TenantJob {
 
     @Override
     public Duration killIn() {
-        return Duration.ofMinutes(30);
+        return Duration.ofHours(1);
     }
 
     @Override

@@ -27,9 +27,9 @@ final class FailedScheduledFuture<T> implements ScheduledFuture<T> {
 
     private static final Comparator<Delayed> COMPARATOR =
             Comparator.comparing(delayed -> delayed.getDelay(TimeUnit.NANOSECONDS));
-    private final Exception exception;
+    private final Throwable exception;
 
-    public FailedScheduledFuture(final Exception ex) {
+    public FailedScheduledFuture(final Throwable ex) {
         this.exception = ex;
     }
 
