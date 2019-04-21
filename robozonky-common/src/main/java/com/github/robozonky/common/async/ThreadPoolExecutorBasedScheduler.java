@@ -64,57 +64,14 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
         this.onClose = onClose;
     }
 
-    private void schedule(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
-                          final Duration initialDelay, final Duration delayInBetween) {
-        if (executor.isShutdown()) {
-            LOGGER.debug("Not scheduling {} as {} shutdown.", toSchedule, this);
-            return;
-        }
-        final Runnable toSubmit = () -> submitToExecutor(delegating, toSchedule, delayInBetween);
-        LOGGER.debug("Scheduling {} to happen after {} ms.", toSchedule, initialDelay.toMillis());
-        final ScheduledFuture<?> f = schedulingExecutor.schedule(toSubmit, initialDelay.toNanos(),
-                                                                 TimeUnit.NANOSECONDS);
-        delegating.setCurrent(f);
-    }
-
-    private void schedule(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
-                          final Duration delayInBetween) {
-        schedule(delegating, toSchedule, delayInBetween, delayInBetween);
-    }
-
-    private void resubmittingTask(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
-                                  final Duration delayInBetween) {
-        LOGGER.trace("Running {}.", toSchedule);
-        try {
-            // run the task that was scheduled
-            toSchedule.run();
-            // schedule its repeat with a given delay
-            schedule(delegating, toSchedule, delayInBetween);
-        } catch (final Exception ex) { // mimic behavior of ScheduledExecutorService and don't reschedule on failure
-            LOGGER.trace("Failed executing task {}.", toSchedule, ex);
-            delegating.setCurrent(new FailedScheduledFuture<>(ex));
-        }
-    }
-
-    private void submitToExecutor(final DelegatingScheduledFuture<?> delegating, final Runnable toSchedule,
-                                  final Duration delayInBetween) {
-        final Runnable r = () -> resubmittingTask(delegating, toSchedule, delayInBetween);
-        LOGGER.debug("Submitting {} for actual execution.", toSchedule);
-        executor.submit(r);
-    }
-
-    @Override
-    public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween) {
-        return submit(toSchedule, delayInBetween, Duration.ZERO);
-    }
-
     @Override
     public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween,
-                                     final Duration firstDelay) {
-        LOGGER.debug("Scheduling {} every {} ms, starting in {} ms.", toSchedule, delayInBetween.toMillis(),
-                     firstDelay.toMillis());
+                                     final Duration firstDelay, final Duration timeout) {
+        LOGGER.debug("Scheduling {} every {} ns, starting in {} ns.", toSchedule, delayInBetween.toNanos(),
+                     firstDelay.toNanos());
         final DelegatingScheduledFuture<?> delegating = new DelegatingScheduledFuture<>();
-        schedule(delegating, toSchedule, firstDelay, delayInBetween);
+        final TaskDescriptor task = new TaskDescriptor(delegating, toSchedule, firstDelay, delayInBetween, timeout);
+        SchedulerUtil.schedule(task, this, true);
         return delegating;
     }
 
@@ -126,6 +83,11 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
     @Override
     public ExecutorService getExecutor() {
         return executor;
+    }
+
+    @Override
+    public ScheduledExecutorService getSchedulingExecutor() {
+        return schedulingExecutor;
     }
 
     @Override
