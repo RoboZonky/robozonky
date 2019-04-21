@@ -34,6 +34,7 @@ import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,6 +44,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     private final Reloadable<RemoteData> portfolio;
     private final Reloadable<Map<Rating, BigDecimal>> atRisk;
+    private final Reloadable<Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>>> sellable;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
     private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
@@ -58,6 +60,10 @@ class RemotePortfolioImpl implements RemotePortfolio {
         this.atRisk = Reloadable.with(() -> Util.getAmountsAtRisk(tenant))
                 .reloadAfter(Duration.ofMinutes(30)) // not so important, may have a bit of delay
                 .finishWith(this::refreshRisk)
+                .build();
+        this.sellable = Reloadable.with(() -> Util.getAmountsSellable(tenant))
+                .reloadAfter(Duration.ofMinutes(60)) // not so important, possibly very long, allow for delay
+                .finishWith(this::refreshSellable)
                 .build();
         this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(this))
                 .finishWith(po -> LOGGER.debug("New portfolio overview: {}.", po))
@@ -87,7 +93,13 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     private void refreshRisk(final Map<Rating, BigDecimal> data) {
         LOGGER.debug("New risk data: {}.", data);
-        // force overview recalculation now that we have the latest risk data
+        // force overview recalculation now that we have the latest data
+        portfolioOverview.clear();
+    }
+
+    private void refreshSellable(final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> data) {
+        LOGGER.debug("New sellability data: {}.", data);
+        // force overview recalculation now that we have the latest data
         portfolioOverview.clear();
     }
 
@@ -152,6 +164,20 @@ class RemotePortfolioImpl implements RemotePortfolio {
     @Override
     public Map<Rating, BigDecimal> getAtRisk() {
         return atRisk.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote risk data.", t));
+    }
+
+    @Override
+    public Map<Rating, BigDecimal> getSellable() {
+        return sellable.get()
+                .getOrElseThrow(t -> new IllegalStateException("Failed fetching remote sellability data.", t))
+                ._1();
+    }
+
+    @Override
+    public Map<Rating, BigDecimal> getSellableWithoutFee() {
+        return sellable.get()
+                .getOrElseThrow(t -> new IllegalStateException("Failed fetching remote sellability data.", t))
+                ._2();
     }
 
     @Override

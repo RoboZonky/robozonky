@@ -5,14 +5,19 @@
         <th style="padding: 5px; text-align: right;">Úrok</th>
         <th style="padding: 5px;" colspan="2">Investováno</th>
         <th style="padding: 5px;" colspan="2">Ohroženo</th>
+        <th style="padding: 5px;" colspan="2">Prodatelné</th>
+        <th style="padding: 5px;" colspan="2">Prodatelné bez poplatku</th>
     </tr>
   </thead>
   <tfoot>
     <tr>
       <th style="padding: 5px; text-align: right;">Celkem</th>
       <th colspan="2" style="padding: 5px; text-align: right;">${data.portfolio.total?string.currency}</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.totalRisk?string.currency}</th>
-      <th style="padding: 5px; text-align: right;">(${data.portfolio.totalShare?string.@interest})</th>
+      <th colspan="2" style="padding: 5px; text-align: right;">${data.portfolio.totalRisk?string.currency}</th>
+      <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellable?string.currency}</th>
+      <th style="padding: 5px; text-align: right;">(${data.portfolio.totalSellableShare?string.@interest})</th>
+      <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellableFeeless?string.currency})/th>
+      <th style="padding: 5px; text-align: right;">(${data.portfolio.totalSellableFeelessShare?string.@interest})</th>
     </tr>
     <tr>
       <th style="padding: 5px; text-align: right;">Disponibilní zůstatek</th>
@@ -27,11 +32,19 @@
         <#assign rel = data.portfolio.relativeShare[code]>
         <#assign absRisk = data.portfolio.absoluteRisk[code]>
         <#assign relRisk = data.portfolio.relativeRisk[code]>
+        <#assign absSellable = data.portfolio.absoluteSellable[code]>
+        <#assign relSellable = data.portfolio.relativeSellable[code]>
+        <#assign absSellableFeeless = data.portfolio.absoluteSellableFeeless[code]>
+        <#assign relSellableFeeless = data.portfolio.relativeSellableFeeless[code]>
         <td style="padding: 5px; text-align: right;"><@idRating id=code /></td>
         <td style="padding: 5px; text-align: right;">${abs?string.currency}</td>
         <td style="padding: 5px; text-align: right;">(${rel?string.@interest})</td>
         <td style="padding: 5px; text-align: right;">${absRisk?string.currency}</td>
         <td style="padding: 5px; text-align: right;">(${relRisk?string.@interest})</td>
+        <td style="padding: 5px; text-align: right;">${absSellable?string.currency}</td>
+        <td style="padding: 5px; text-align: right;">(${relSellable?string.@interest})</td>
+        <td style="padding: 5px; text-align: right;">${absSellableFeeless?string.currency}</td>
+        <td style="padding: 5px; text-align: right;">(${relSellableFeeless?string.@interest})</td>
       </tr>
     </#list>
   </tbody>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.util.function.Function;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
@@ -40,27 +40,40 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private final BigDecimal czkAvailable;
     private final BigDecimal czkInvested;
     private final BigDecimal czkAtRisk;
+    private final BigDecimal czkSellable;
+    private final BigDecimal czkSellableFeeless;
     private final Map<Rating, BigDecimal> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> czkAtRiskPerRating;
+    private final Map<Rating, BigDecimal> czkSellablePerRating;
+    private final Map<Rating, BigDecimal> czkSellableFeelessPerRating;
 
     PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
-        this(impl.getBalance(), impl.getTotal(), impl.getAtRisk(),
+        this(impl.getBalance(), impl.getTotal(), impl.getAtRisk(), impl.getSellable(), impl.getSellableWithoutFee(),
              impl.getRemotePortfolio().getStatistics().getProfitability());
     }
 
     PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
-                          final Map<Rating, BigDecimal> czkAtRiskPerRating, final Ratio profitability) {
+                          final Map<Rating, BigDecimal> czkAtRiskPerRating,
+                          final Map<Rating, BigDecimal> czkSellablePerRating,
+                          final Map<Rating, BigDecimal> czkSellableFeelessPerRating, final Ratio profitability) {
         this.profitability = profitability;
         this.czkAvailable = czkAvailable;
         this.czkInvested = sum(czkInvestedPerRating.values());
+        this.czkSellable = sum(czkSellablePerRating.values());
+        this.czkSellableFeeless = sum(czkSellableFeelessPerRating.values());
         if (isZero(this.czkInvested)) {
             this.czkInvestedPerRating = Collections.emptyMap();
             this.czkAtRiskPerRating = Collections.emptyMap();
+            this.czkSellablePerRating = Collections.emptyMap();
+            this.czkSellableFeelessPerRating = Collections.emptyMap();
             this.czkAtRisk = BigDecimal.ZERO;
         } else {
             this.czkInvestedPerRating = czkInvestedPerRating;
             this.czkAtRisk = PortfolioOverviewImpl.sum(czkAtRiskPerRating.values());
             this.czkAtRiskPerRating = isZero(czkAtRisk) ? Collections.emptyMap() : czkAtRiskPerRating;
+            this.czkSellablePerRating = isZero(czkSellable) ? Collections.emptyMap() : czkSellablePerRating;
+            this.czkSellableFeelessPerRating =
+                    isZero(czkSellableFeeless) ? Collections.emptyMap() : czkSellableFeelessPerRating;
         }
     }
 
@@ -121,6 +134,60 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
             return Ratio.ZERO;
         }
         return Ratio.fromRaw(divide(getCzkAtRisk(r), investedPerRating));
+    }
+
+    @Override
+    public BigDecimal getCzkSellable() {
+        return czkSellable;
+    }
+
+    @Override
+    public Ratio getShareSellable() {
+        if (isZero(czkInvested)) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(divide(czkSellable, czkInvested));
+    }
+
+    @Override
+    public BigDecimal getCzkSellable(final Rating r) {
+        return czkSellablePerRating.getOrDefault(r, BigDecimal.ZERO);
+    }
+
+    @Override
+    public Ratio getShareSellable(final Rating r) {
+        final BigDecimal investedPerRating = this.getCzkInvested(r);
+        if (isZero(investedPerRating)) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(divide(getShareSellable(r), investedPerRating));
+    }
+
+    @Override
+    public BigDecimal getCzkSellableFeeless() {
+        return czkSellableFeeless;
+    }
+
+    @Override
+    public Ratio getShareSellableFeeless() {
+        if (isZero(czkInvested)) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(divide(czkSellableFeeless, czkInvested));
+    }
+
+    @Override
+    public BigDecimal getCzkSellableFeeless(final Rating r) {
+        return czkSellableFeelessPerRating.getOrDefault(r, BigDecimal.ZERO);
+    }
+
+    @Override
+    public Ratio getShareSellableFeeless(final Rating r) {
+        final BigDecimal investedPerRating = this.getCzkInvested(r);
+        if (isZero(investedPerRating)) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(divide(getShareSellableFeeless(r), investedPerRating));
     }
 
     @Override
