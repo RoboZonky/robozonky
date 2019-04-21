@@ -28,7 +28,6 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
@@ -170,13 +169,6 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     @Override
     public void accept(final Tenant tenant) {
-        final TransactionalPowerTenant transactionalTenant = PowerTenant.transactional((PowerTenant) tenant);
-        try {
-            process(transactionalTenant);
-            transactionalTenant.commit();
-        } catch (final Exception ex) {
-            LOGGER.debug("Aborting transaction.", ex);
-            transactionalTenant.abort();
-        }
+        ((PowerTenant)tenant).inTransaction(this::process);
     }
 }
