@@ -1,4 +1,4 @@
-package com.github.robozonky.app.summaries;
+package com.github.robozonky.api.notifications;
 
 import java.time.OffsetDateTime;
 import java.util.stream.Stream;

@@ -60,6 +60,8 @@ import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
+import com.github.robozonky.api.notifications.Summary;
+import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -220,6 +222,10 @@ public final class EventFactory {
 
     public static RoboZonkyTestingEvent roboZonkyTesting() {
         return new RoboZonkyTestingEventImpl();
+    }
+
+    public static WeeklySummaryEvent weeklySummary(final Summary summary) {
+        return new WeeklySummaryEventImpl(summary);
     }
 
     public static RoboZonkyUpdateDetectedEvent roboZonkyUpdateDetected(final String version) {

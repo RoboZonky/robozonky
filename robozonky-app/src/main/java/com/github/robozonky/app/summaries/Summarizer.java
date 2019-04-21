@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
 
+import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.remote.entities.Transaction;
+import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Select;
@@ -18,7 +20,7 @@ final class Summarizer implements TenantPayload {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private void run(final PowerTenant tenant) {
+    private static void run(final PowerTenant tenant) {
         // assemble processors
         final CashFlowProcessor cashFlow = new CashFlowProcessor();
         final OutgoingInvestmentProcessor leavingInvestmentProcessor = new OutgoingInvestmentProcessor(tenant);
@@ -38,10 +40,11 @@ final class Summarizer implements TenantPayload {
                 .addIncomingInvestments(newInvestmentProcessor)
                 .addOutgoingInvestments(leavingInvestmentProcessor)
                 .build(tenant.getPortfolio().getOverview());
+        tenant.fire(EventFactory.weeklySummary(summary));
     }
 
     @Override
     public void accept(final Tenant tenant) {
-        ((PowerTenant) tenant).inTransaction(this::run);
+        run((PowerTenant) tenant);
     }
 }
