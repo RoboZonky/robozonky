@@ -69,10 +69,9 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
                                      final Duration firstDelay, final Duration timeout) {
         LOGGER.debug("Scheduling {} every {} ns, starting in {} ns.", toSchedule, delayInBetween.toNanos(),
                      firstDelay.toNanos());
-        final DelegatingScheduledFuture<?> delegating = new DelegatingScheduledFuture<>();
-        final TaskDescriptor task = new TaskDescriptor(delegating, toSchedule, firstDelay, delayInBetween, timeout);
-        SchedulerUtil.schedule(task, this, true);
-        return delegating;
+        final TaskDescriptor task = new TaskDescriptor(toSchedule, firstDelay, delayInBetween, timeout);
+        task.schedule(this);
+        return task.getFuture();
     }
 
     @Override
