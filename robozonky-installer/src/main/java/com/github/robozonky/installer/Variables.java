@@ -24,6 +24,7 @@ enum Variables {
     EMAIL_IS_INVESTMENT("isInvestmentNotificationEnabled"),
     EMAIL_IS_BALANCE_OVER_200("isBalanceOver200NotificationEnabled"),
     EMAIL_IS_FAILURE("isFailureNotificationEnabled"),
+    EMAIL_IS_WEEKLY("isWeeklySummaryEnabled"),
     INSTALL_PATH("INSTALL_PATH"),
     IS_DRY_RUN("isDryRun"),
     IS_EMAIL_ENABLED("isEmailEnabled"),
