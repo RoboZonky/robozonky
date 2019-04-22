@@ -69,28 +69,36 @@
   <tbody>
     <tr>
       <th>
-        <table style="width: 100%">
-            <#list data.incomingInvestments as item>
-                <tr>
-                    <th style="padding: 1px; text-align: right;">${item.amountHeld?string.currency}</th>
-                    <th style="padding: 1px; text-align: right;"><@idRating id=item.loanInterestRate /></th>
-                    <th style="padding: 1px; text-align: right;">${item.loanTerm?c} m.</th>
-                    <th style="padding: 1px; text-align: center;"><@idLoan data=item /></th>
-                </tr>
-            </#list>
-        </table>
+        <#list data.incomingInvestments>
+            <table style="width: 100%">
+                <#items as item>
+                    <tr>
+                        <th style="padding: 1px; text-align: right;">${item.amountHeld?string.currency}</th>
+                        <th style="padding: 1px; text-align: right;"><@idRating id=item.loanInterestRate /></th>
+                        <th style="padding: 1px; text-align: right;">${item.loanTerm?c} m.</th>
+                        <th style="padding: 1px; text-align: center;"><@idLoan data=item /></th>
+                    </tr>
+                </#items>
+            </table>
+        <#else>
+            Žádné.
+        </#list>
       </th>
       <th>
-        <table style="width: 100%">
-            <#list data.outgoingInvestments as item>
-                <tr>
-                    <th style="padding: 1px; text-align: right;">${item.amountHeld?string.currency}</th>
-                    <th style="padding: 1px; text-align: right;"><@idRating id=item.loanInterestRate /></th>
-                    <th style="padding: 1px; text-align: right;">${item.loanTerm?c} m.</th>
-                    <th style="padding: 1px; text-align: center;"><@idLoan data=item /></th>
-                </tr>
-            </#list>
-        </table>
+        <#list data.outgoingInvestments>
+            <table style="width: 100%">
+                <#items as item>
+                    <tr>
+                        <th style="padding: 1px; text-align: right;">${item.amountHeld?string.currency}</th>
+                        <th style="padding: 1px; text-align: right;"><@idRating id=item.loanInterestRate /></th>
+                        <th style="padding: 1px; text-align: right;">${item.loanTerm?c} m.</th>
+                        <th style="padding: 1px; text-align: center;"><@idLoan data=item /></th>
+                    </tr>
+                </#items>
+            </table>
+        <#else>
+            Žádné.
+        </#list>
       </th>
     </tr>
   </tbody>
