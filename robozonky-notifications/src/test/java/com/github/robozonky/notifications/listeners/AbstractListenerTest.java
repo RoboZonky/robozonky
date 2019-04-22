@@ -41,6 +41,7 @@ import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
+import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
@@ -58,6 +59,8 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.api.notifications.Summary;
+import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -113,20 +116,10 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .isNotEmpty();
     }
 
-    private static <T extends Event> void testPlainTextProcessing(final AbstractListener<T> listener,
-                                                                  final T event) throws IOException, TemplateException {
+    private <T extends Event> void testPlainTextProcessing(final AbstractListener<T> listener, final T event) throws IOException, TemplateException {
         final String s = TemplateProcessor.INSTANCE.processPlainText(listener.getTemplateFileName(),
                                                                      listener.getData(event, SESSION_INFO));
-        assertThat(s).contains(Defaults.ROBOZONKY_URL);
-        assertThat(s).contains("uživatel"); // check that UTF-8 is properly encoded
-    }
-
-    private static <T extends Event> void testHtmlProcessing(final AbstractListener<T> listener,
-                                                             final T event) throws IOException, TemplateException {
-        final Map<String, Object> data = new HashMap<>(listener.getData(event, SESSION_INFO));
-        data.put("subject", UUID.randomUUID().toString());
-        final String s = TemplateProcessor.INSTANCE.processHtml(listener.getTemplateFileName(),
-                                                                Collections.unmodifiableMap(data));
+        logger.debug("Plain text was: {}.", s);
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
         assertThat(s).contains("uživatel"); // check that UTF-8 is properly encoded
     }
@@ -157,7 +150,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Event> DynamicContainer forListener(final SupportedListener listener,
+    private <T extends Event> DynamicContainer forListener(final SupportedListener listener,
                                                                   final T e) throws IOException {
         final AbstractTargetHandler p = getHandler();
         final AbstractListener<T> l = (AbstractListener<T>) getListener(listener, p);
@@ -168,6 +161,17 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 dynamicTest("triggers the sending code", () -> testTriggered(p, l, e)),
                 dynamicTest("has listener enabled", () -> testListenerEnabled(e))
         ));
+    }
+
+    private <T extends Event> void testHtmlProcessing(final AbstractListener<T> listener,
+                                                      final T event) throws IOException, TemplateException {
+        final Map<String, Object> data = new HashMap<>(listener.getData(event, SESSION_INFO));
+        data.put("subject", UUID.randomUUID().toString());
+        final String s = TemplateProcessor.INSTANCE.processHtml(listener.getTemplateFileName(),
+                                                                Collections.unmodifiableMap(data));
+        logger.debug("HTML text was: {}.", s);
+        assertThat(s).contains(Defaults.ROBOZONKY_URL);
+        assertThat(s).contains("uživatel"); // check that UTF-8 is properly encoded
     }
 
     @BeforeEach
@@ -241,6 +245,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.BALANCE_ON_TARGET, new MyExecutionStartedEvent(MAX_PORTFOLIO)),
                 forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
                             new MyExecutionStartedEvent(mockPortfolioOverview(0))),
+                forListener(SupportedListener.WEEKLY_SUMMARY, new MyWeeklySummaryEvent()),
                 forListener(SupportedListener.DAEMON_FAILED, new MyRoboZonkyDaemonFailedEvent()),
                 forListener(SupportedListener.INITIALIZED, (RoboZonkyInitializedEvent) OffsetDateTime::now),
                 forListener(SupportedListener.ENDING, (RoboZonkyEndingEvent) OffsetDateTime::now),
@@ -905,6 +910,64 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public Investment getInvestment() {
             return i;
+        }
+    }
+
+    private static class MyWeeklySummaryEvent implements WeeklySummaryEvent {
+
+        @Override
+        public Summary getSummary() {
+            return new Summary() {
+                @Override
+                public int getCashInTotal() {
+                    return 0;
+                }
+
+                @Override
+                public int getCashInFromDeposits() {
+                    return 0;
+                }
+
+                @Override
+                public int getCashOutTotal() {
+                    return 0;
+                }
+
+                @Override
+                public int getCashOutFromFees() {
+                    return 0;
+                }
+
+                @Override
+                public int getCashOutFromWithdrawals() {
+                    return 0;
+                }
+
+                @Override
+                public PortfolioOverview getPortfolioOverview() {
+                    return MAX_PORTFOLIO;
+                }
+
+                @Override
+                public Stream<LoanAndInvestment> getLeavingInvestments() {
+                    return Stream.empty();
+                }
+
+                @Override
+                public Stream<LoanAndInvestment> getArrivingInvestments() {
+                    return Stream.empty();
+                }
+
+                @Override
+                public OffsetDateTime getCreatedOn() {
+                    return OffsetDateTime.now();
+                }
+            };
+        }
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
         }
     }
 }

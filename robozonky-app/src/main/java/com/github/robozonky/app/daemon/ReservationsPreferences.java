@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 final class ReservationsPreferences implements TenantPayload {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(ReservationsPreferences.class);
 
     private static void process(final PowerTenant tenant, final ReservationStrategy strategy) {
         if (strategy.getMode() != ReservationMode.FULL_OWNERSHIP) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.github.robozonky.api.remote.enums;
 
+/**
+ * It is important to add new values at the end, as other pieces of code may depend on the existing order.
+ */
 public enum TransactionCategory {
 
     INVESTMENT_FEE,
@@ -27,5 +30,4 @@ public enum TransactionCategory {
     DEPOSIT,
     PAYMENT,
     INVESTMENT_FEE_RETURN
-
 }

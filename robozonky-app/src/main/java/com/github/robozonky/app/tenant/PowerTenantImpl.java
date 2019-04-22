@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -59,6 +60,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Reloadable<Restrictions> restrictions;
     private final Lazy<StrategyProvider> strategyProvider;
     private final Lazy<LoanCache> loanCache = Lazy.of(() -> new LoanCache(this));
+    private final Lazy<InvestmentCache> investmentCaches = Lazy.of(() -> new InvestmentCache(this));
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
                     final Supplier<StrategyProvider> strategyProvider,
@@ -133,6 +135,11 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
+    public Investment getInvestment(final int loanId) {
+        return investmentCaches.get().getInvestment(loanId);
+    }
+
+    @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);
     }
@@ -140,7 +147,9 @@ class PowerTenantImpl implements PowerTenant {
     @Override
     public void close() {
         tokens.forEach((k, v) -> v.close()); // cancel existing tokens
-        loanCache.get().close(); // clean up the cache
+        // clean up the cache
+        loanCache.get().close();
+        investmentCaches.get().close();
     }
 
     @Override

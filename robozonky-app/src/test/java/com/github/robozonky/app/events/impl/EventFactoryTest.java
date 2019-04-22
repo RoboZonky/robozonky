@@ -52,6 +52,8 @@ import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
+import com.github.robozonky.api.notifications.Summary;
+import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
@@ -409,6 +411,15 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         assertSoftly(softly -> {
             softly.assertThat(e.getDescriptors()).isEmpty();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
+        });
+    }
+
+    @Test
+    void weeklySummary() {
+        final WeeklySummaryEvent e = EventFactory.weeklySummary(mock(Summary.class));
+        assertSoftly(softly -> {
+            softly.assertThat(e.getSummary()).isNotNull();
+            softly.assertThat(e.getConceivedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
         });
     }
 }

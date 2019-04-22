@@ -54,7 +54,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             // call all the jobs and daemons we know about
             verify(d, times(2)).submit(any(), any(SimplePayload.class), any(), any(), any(), any());
-            verify(d, times(11)).submit(any(), any(), any(), any(), any(), any());
+            verify(d, times(12)).submit(any(), any(), any(), any(), any(), any());
         } finally {
             e.shutdownNow();
         }

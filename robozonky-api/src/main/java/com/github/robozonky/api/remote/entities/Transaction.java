@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,14 +68,28 @@ public class Transaction extends BaseEntity {
 
     public Transaction(final long id, final Investment investment, final BigDecimal amount,
                        final TransactionCategory category, final TransactionOrientation orientation) {
+        this(id, investment.getLoanId(), investment.getId(), amount, category, orientation);
+    }
+
+    public Transaction(final long id, final BigDecimal amount, final TransactionCategory category) {
+        this(id, 0, 0, amount, category, null);
+    }
+
+    public Transaction(final long id, final BigDecimal amount, final TransactionCategory category,
+                       final TransactionOrientation orientation) {
+        this(id, 0, 0, amount, category, orientation);
+    }
+
+    public Transaction(final long id, final int loanId, final long investmentId, final BigDecimal amount,
+                       final TransactionCategory category, final TransactionOrientation orientation) {
         this.id = id;
         this.amount = amount;
         this.category = category;
         this.orientation = orientation;
         this.transactionDate = DateUtil.offsetNow();
         this.customMessage = "";
-        this.loanId = investment.getLoanId();
-        this.investmentId = investment.getId();
+        this.loanId = loanId;
+        this.investmentId = investmentId;
         this.loanName = "";
         this.nickName = "";
         this.discount = BigDecimal.ZERO;

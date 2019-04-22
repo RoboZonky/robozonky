@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(SecondaryMarketplaceAccessor.class);
 
     private final Tenant tenant;
     private final UnaryOperator<long[]> stateAccessor;

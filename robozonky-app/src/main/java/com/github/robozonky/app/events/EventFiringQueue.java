@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 final class EventFiringQueue {
 
     public static final EventFiringQueue INSTANCE = new EventFiringQueue();
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(EventFiringQueue.class);
 
     private final AtomicLong counter = new AtomicLong(0);
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();

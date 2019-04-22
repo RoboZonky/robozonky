@@ -181,6 +181,9 @@
 
     <field type="staticText" align="left" bold="true" txt="Vyberte notifikace, které si přejete povolit:" />
     <field type="divider" />
+    <field type="check" variable="isWeeklySummaryEnabled" summaryKey="Týdenní shrnutí aktivity na účtu:">
+      <spec txt="Týdenní shrnutí aktivity na účtu." set="true"/>
+    </field>
     <field type="check" variable="isInvestmentNotificationEnabled" summaryKey="Nové investice a zdraví existujících:">
       <spec txt="Nové investice a zdraví existujících." set="false"/>
     </field>

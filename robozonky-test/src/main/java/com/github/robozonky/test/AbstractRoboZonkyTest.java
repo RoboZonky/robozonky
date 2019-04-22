@@ -129,9 +129,17 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
         when(po.getCzkAtRisk()).thenReturn(BigDecimal.ZERO);
         when(po.getCzkAtRisk(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkSellable()).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkSellable(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkSellableFeeless()).thenReturn(BigDecimal.ZERO);
+        when(po.getCzkSellableFeeless(any())).thenReturn(BigDecimal.ZERO);
         when(po.getShareAtRisk()).thenReturn(Ratio.ZERO);
         when(po.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(po.getAtRiskShareOnInvestment(any())).thenReturn(Ratio.ZERO);
+        when(po.getShareSellable()).thenReturn(Ratio.ZERO);
+        when(po.getShareSellable(any())).thenReturn(Ratio.ZERO);
+        when(po.getShareSellableFeeless()).thenReturn(Ratio.ZERO);
+        when(po.getShareSellableFeeless(any())).thenReturn(Ratio.ZERO);
         when(po.getCzkMinimalMonthlyProfit()).thenReturn(BigDecimal.ZERO);
         when(po.getCzkMonthlyProfit()).thenReturn(BigDecimal.ONE);
         when(po.getCzkOptimalMonthyProfit()).thenReturn(BigDecimal.TEN);

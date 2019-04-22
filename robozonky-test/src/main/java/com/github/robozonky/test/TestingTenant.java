@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -93,6 +94,11 @@ public class TestingTenant implements Tenant {
     @Override
     public Loan getLoan(final int loanId) {
         return call(z -> z.getLoan(loanId));
+    }
+
+    @Override
+    public Investment getInvestment(final int loanId) {
+        return call(z -> z.getInvestmentByLoanId(loanId)).orElseThrow();
     }
 
     @Override

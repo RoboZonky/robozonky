@@ -17,9 +17,12 @@
 package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.NotFoundException;
 
@@ -28,10 +31,13 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
 import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.Tuple3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,6 +48,8 @@ import static java.util.stream.Collectors.reducing;
 final class Util {
 
     private static final Logger LOGGER = LogManager.getLogger(Util.class);
+    private static final Collector<BigDecimal, ?, BigDecimal> BIGDECIMAL_REDUCING_COLLECTOR =
+            reducing(BigDecimal.ZERO, BigDecimalCalculator::plus);
 
     private Util() {
         // no instances
@@ -60,7 +68,31 @@ final class Util {
                                         LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
                                                      principalNotYetReturned, i.getLoanId(), i.getId());
                                         return principalNotYetReturned;
-                                    }, reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
+                                    }, BIGDECIMAL_REDUCING_COLLECTOR)));
+    }
+
+    /**
+     * @param tenant
+     * @return First is sellable with or without fee, second just without.
+     */
+    static Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> getAmountsSellable(final Tenant tenant) {
+        final Select select = new Select()
+                .equals("status", "ACTIVE")
+                .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY");
+        final Collection<Tuple3<Rating, BigDecimal, BigDecimal>> sellable = tenant.call(z -> z.getInvestments(select))
+                .parallel() // possibly many pages' worth of results; fetch in parallel
+                .map(i -> Tuple.of(i.getRating(), i.getRemainingPrincipal(), i.getSmpFee().orElse(BigDecimal.ZERO)))
+                .collect(Collectors.toList());
+        final Map<Rating, BigDecimal> justFeeless = sellable.stream()
+                .filter(t -> t._3.signum() == 0)
+                .collect(groupingBy(t -> t._1,
+                                    () -> new EnumMap<>(Rating.class),
+                                    mapping(t -> t._2, BIGDECIMAL_REDUCING_COLLECTOR)));
+        final Map<Rating, BigDecimal> all = sellable.stream()
+                .collect(groupingBy(t -> t._1,
+                                    () -> new EnumMap<>(Rating.class),
+                                    mapping(t -> t._2, BIGDECIMAL_REDUCING_COLLECTOR)));
+        return Tuple.of(all, justFeeless);
     }
 
     static Map<Rating, BigDecimal> getAmountsBlocked(final Tenant tenant, final Statistics stats) {
@@ -75,8 +107,7 @@ final class Util {
                         .orElse(Stream.empty()))
                 .collect(groupingBy(t -> t._2.getRating(),
                                     () -> new EnumMap<>(Rating.class),
-                                    mapping(t -> t._1.getAmount(),
-                                            reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
+                                    mapping(t -> t._1.getAmount(), BIGDECIMAL_REDUCING_COLLECTOR)));
     }
 
     static Optional<Loan> getLoan(final Tenant tenant, final BlockedAmount ba, final Divisor divisor) {

@@ -19,19 +19,12 @@ package com.github.robozonky.app.transactions;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 abstract class TransactionProcessor implements Consumer<Transaction> {
 
     protected final Logger logger = LogManager.getLogger(getClass());
-
-    protected static Investment lookupOrFail(final int loanId, final Tenant auth) {
-        return auth.call(zonky -> zonky.getInvestmentByLoanId(loanId))
-                .orElseThrow(() -> new IllegalStateException("Investment not found for loan #" + loanId));
-    }
 
     abstract boolean isApplicable(final Transaction transaction);
 

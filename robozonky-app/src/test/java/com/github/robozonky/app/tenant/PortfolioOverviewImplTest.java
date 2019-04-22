@@ -37,6 +37,7 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void timestamp() {
         final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.TEN, Collections.emptyMap(),
+                                                               Collections.emptyMap(), Collections.emptyMap(),
                                                                Collections.emptyMap(), Ratio.ZERO);
         assertThat(po.getTimestamp()).isBeforeOrEqualTo(ZonedDateTime.now());
     }
@@ -45,12 +46,17 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     void emptyPortfolio() {
         final BigDecimal balance = BigDecimal.TEN;
         final PortfolioOverview po = new PortfolioOverviewImpl(balance, Collections.emptyMap(), Collections.emptyMap(),
+                                                               Collections.emptyMap(), Collections.emptyMap(),
                                                                Ratio.ZERO);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getShareAtRisk()).isEqualTo(Ratio.ZERO);
+            softly.assertThat(po.getCzkSellable()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(po.getShareSellable()).isEqualTo(Ratio.ZERO);
+            softly.assertThat(po.getCzkSellableFeeless()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(po.getShareSellableFeeless()).isEqualTo(Ratio.ZERO);
             for (final Rating r : Rating.values()) {
                 softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(BigDecimal.ZERO);
                 softly.assertThat(po.getCzkAtRisk(r)).as(r + " at risk").isEqualTo(BigDecimal.ZERO);
@@ -59,6 +65,14 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
                         .isEqualTo(Ratio.ZERO);
                 softly.assertThat(po.getAtRiskShareOnInvestment(r))
                         .as(r + " at risk as a share")
+                        .isEqualTo(Ratio.ZERO);
+                softly.assertThat(po.getCzkSellable(r)).as(r + " sellable").isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(po.getCzkSellableFeeless(r)).as(r + " sellable feeless").isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(po.getShareSellable(r))
+                        .as(r + " as a share sellable")
+                        .isEqualTo(Ratio.ZERO);
+                softly.assertThat(po.getShareSellableFeeless(r))
+                        .as(r + " at as a share sellable feeless")
                         .isEqualTo(Ratio.ZERO);
             }
         });
@@ -71,6 +85,7 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
         investments.put(Rating.AAAAA, BigDecimal.valueOf(200_000));
         investments.put(Rating.D, BigDecimal.valueOf(20_000));
         final PortfolioOverview po = new PortfolioOverviewImpl(balance, investments, Collections.emptyMap(),
+                                                               Collections.emptyMap(), Collections.emptyMap(),
                                                                Ratio.fromPercentage(4));
         SoftAssertions.assertSoftly(softly -> {
             // the values tested against have been calculated manually and are guaranteed correct
@@ -89,7 +104,7 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final BigDecimal adj = BigDecimal.TEN;
         final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
-        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, in, Ratio.ZERO);
+        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, in, in, in, Ratio.ZERO);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);

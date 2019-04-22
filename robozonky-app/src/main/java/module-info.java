@@ -17,6 +17,7 @@ module com.github.robozonky.app {
             com.github.robozonky.app.daemon.SellingJobService,
             com.github.robozonky.app.daemon.ReservationsJobService,
             com.github.robozonky.app.delinquencies.DelinquencyNotificationJobService,
+            com.github.robozonky.app.summaries.SummarizerJobService,
             com.github.robozonky.app.transactions.TransactionProcessingJobService;
 
     opens com.github.robozonky.app.configuration to info.picocli;

@@ -24,18 +24,13 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.common.jobs.TenantPayload;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class IncomeProcessor implements TenantPayload {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     static final String STATE_KEY = "lastSeenTransactionId";
     private static final BinaryOperator<Transaction> DEDUPLICATOR = (a, b) -> a;
@@ -46,14 +41,13 @@ final class IncomeProcessor implements TenantPayload {
                 .orElse(-1);
     }
 
-    private static long processNewTransactions(final TransactionalPowerTenant tenant,
-                                               final Stream<Transaction> transactions,
+    private static long processNewTransactions(final PowerTenant tenant, final Stream<Transaction> transactions,
                                                final long lastSeenTransactionId) {
         final Consumer<Transaction> loansRepaid = new LoanRepaidProcessor(tenant);
         final Consumer<Transaction> participationsSold = new ParticipationSoldProcessor(tenant);
         return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
-                .collect(Collectors.toMap(Transaction::getLoanId, t -> t, DEDUPLICATOR)) // de-duplicate
+                .collect(Collectors.toMap(Transaction::getLoanId, t -> t, IncomeProcessor.DEDUPLICATOR)) // de-duplicate
                 .values()
                 .parallelStream() // possibly thousands of transactions, process them in parallel
                 .peek(loansRepaid)
@@ -63,9 +57,9 @@ final class IncomeProcessor implements TenantPayload {
                 .orElse(lastSeenTransactionId);
     }
 
-    private static void run(final TransactionalPowerTenant tenant) {
+    private static void run(final PowerTenant tenant) {
         final InstanceState<IncomeProcessor> state = tenant.getState(IncomeProcessor.class);
-        final long lastSeenTransactionId = state.getValue(STATE_KEY)
+        final long lastSeenTransactionId = state.getValue(IncomeProcessor.STATE_KEY)
                 .map(Integer::valueOf)
                 .orElse(-1);
         // transactions from overnight processing have timestamps from the midnight of previous day
@@ -75,26 +69,13 @@ final class IncomeProcessor implements TenantPayload {
         final Select sinceLastUpdate = new Select().greaterThanOrEquals("transaction.transactionDate", lastUpdate);
         final Stream<Transaction> transactions = tenant.call(z -> z.getTransactions(sinceLastUpdate));
         final long newLastSeenTransactionId = lastSeenTransactionId >= 0 ?
-                processNewTransactions(tenant, transactions, lastSeenTransactionId) :
-                processAllTransactions(transactions);
-        state.update(m -> m.put(STATE_KEY, String.valueOf(newLastSeenTransactionId)));
+                IncomeProcessor.processNewTransactions(tenant, transactions, lastSeenTransactionId) :
+                IncomeProcessor.processAllTransactions(transactions);
+        state.update(m -> m.put(IncomeProcessor.STATE_KEY, String.valueOf(newLastSeenTransactionId)));
     }
 
     @Override
     public void accept(final Tenant tenant) {
-        final TransactionalPowerTenant transactional = PowerTenant.transactional((PowerTenant) tenant);
-        try {
-            run(transactional);
-            transactional.commit();
-        } catch (final Exception ex) {
-            transactional.abort();
-            throw ex;
-        } finally {
-            try {
-                transactional.close();
-            } catch (final Exception ex) {
-                LOGGER.debug("Failed committing transaction.", ex);
-            }
-        }
+        ((PowerTenant)tenant).inTransaction(IncomeProcessor::run);
     }
 }

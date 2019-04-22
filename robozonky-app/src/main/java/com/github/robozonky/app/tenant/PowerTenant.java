@@ -16,10 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.function.Consumer;
+
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.common.tenant.LazyEvent;
 import com.github.robozonky.common.tenant.Tenant;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This is a {@link Tenant} extension which allows to easily fire {@link SessionEvent}s. Events are fired when requested
@@ -43,9 +46,25 @@ public interface PowerTenant extends Tenant {
         return new TransactionalPowerTenantImpl(tenant);
     }
 
+    default void inTransaction(final Consumer<PowerTenant> toExecute) {
+        final TransactionalPowerTenant transactional = PowerTenant.transactional(this);
+        try {
+            toExecute.accept(transactional);
+            transactional.commit();
+        } catch (final Exception ex) {
+            transactional.abort();
+            throw ex;
+        } finally {
+            try {
+                transactional.close();
+            } catch (final Exception ex) {
+                LogManager.getLogger(PowerTenant.class).debug("Failed committing transaction.", ex);
+            }
+        }
+    }
+
     /**
      * See {@link SessionEvents#fire(SessionEvent)} for the semantics of this method.
-     *
      * @param event
      * @return
      */

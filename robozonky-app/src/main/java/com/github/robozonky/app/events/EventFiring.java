@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
  */
 final class EventFiring implements SimplePayload {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(EventFiring.class);
 
     private final BlockingQueue<Runnable> queue;
 

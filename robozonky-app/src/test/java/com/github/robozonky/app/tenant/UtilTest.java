@@ -29,9 +29,11 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.util.Maps;
+import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -60,6 +62,26 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final Map<Rating, BigDecimal> result = Util.getAmountsAtRisk(tenant);
         assertThat(result).containsOnlyKeys(Rating.D);
         assertThat(result.get(Rating.D).longValue()).isEqualTo(BigDecimal.TEN.longValue());
+    }
+
+    @Test
+    void sellable() {
+        final Investment i = Investment.custom()
+                .setRating(Rating.D)
+                .setRemainingPrincipal(BigDecimal.TEN)
+                .setSmpFee(BigDecimal.ONE)
+                .build();
+        final Investment i2 = Investment.custom()
+                .setRating(Rating.A)
+                .setRemainingPrincipal(BigDecimal.ONE)
+                .setSmpFee(BigDecimal.ZERO)
+                .build();
+        final Zonky zonky = harmlessZonky(10_000);
+        when(zonky.getInvestments((Select)any())).thenReturn(Stream.of(i, i2));
+        final Tenant tenant = mockTenant(zonky);
+        final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> result = Util.getAmountsSellable(tenant);
+        assertThat(result._1).containsOnlyKeys(Rating.D, Rating.A);
+        assertThat(result._2).containsOnlyKeys(Rating.A);
     }
 
     @Test
