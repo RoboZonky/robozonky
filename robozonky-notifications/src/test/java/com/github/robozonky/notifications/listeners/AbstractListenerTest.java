@@ -949,12 +949,12 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 }
 
                 @Override
-                public Stream<LoanAndInvestment> getOutgoingInvestments() {
+                public Stream<LoanAndInvestment> getLeavingInvestments() {
                     return Stream.empty();
                 }
 
                 @Override
-                public Stream<LoanAndInvestment> getIncomingInvestments() {
+                public Stream<LoanAndInvestment> getArrivingInvestments() {
                     return Stream.empty();
                 }
 

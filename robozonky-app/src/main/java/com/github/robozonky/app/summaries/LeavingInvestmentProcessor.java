@@ -18,15 +18,15 @@ package com.github.robozonky.app.summaries;
 
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.tenant.PowerTenant;
 
-final class IncomingInvestmentProcessor extends AbstractTransactionProcessor<Investment> {
+final class LeavingInvestmentProcessor extends AbstractTransactionProcessor<Investment> {
 
     private final PowerTenant tenant;
 
-    IncomingInvestmentProcessor(final PowerTenant tenant) {
+    LeavingInvestmentProcessor(final PowerTenant tenant) {
         this.tenant = tenant;
     }
 
@@ -37,10 +37,20 @@ final class IncomingInvestmentProcessor extends AbstractTransactionProcessor<Inv
 
     @Override
     public boolean test(final Transaction transaction) {
-        if (transaction.getOrientation() != TransactionOrientation.OUT) {
+        if (transaction.getOrientation() != TransactionOrientation.IN) {
             return false;
         }
-        return transaction.getCategory() == TransactionCategory.SMP_BUY ||
-                transaction.getCategory() == TransactionCategory.INVESTMENT;
+        switch (transaction.getCategory()) {
+            case PAYMENT:
+                final int loanId = transaction.getLoanId();
+                final Investment investment = lookupOrFail(loanId, tenant);
+                return investment.getPaymentStatus()
+                        .map(s -> s == PaymentStatus.PAID)
+                        .orElse(false);
+            case SMP_SELL:
+                return true;
+            default:
+                return false;
+        }
     }
 }

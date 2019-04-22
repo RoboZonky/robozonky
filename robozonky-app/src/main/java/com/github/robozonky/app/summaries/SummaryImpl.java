@@ -73,12 +73,12 @@ final class SummaryImpl implements Summary {
     }
 
     @Override
-    public Stream<LoanAndInvestment> getOutgoingInvestments() {
+    public Stream<LoanAndInvestment> getLeavingInvestments() {
         return incomingInvestments.stream();
     }
 
     @Override
-    public Stream<LoanAndInvestment> getIncomingInvestments() {
+    public Stream<LoanAndInvestment> getArrivingInvestments() {
         return outgoingInvestments.stream();
     }
 

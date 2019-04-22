@@ -39,8 +39,8 @@ final class Summarizer implements TenantPayload {
     private static void run(final PowerTenant tenant) {
         // assemble processors
         final CashFlowProcessor cashFlow = new CashFlowProcessor();
-        final OutgoingInvestmentProcessor leavingInvestmentProcessor = new OutgoingInvestmentProcessor(tenant);
-        final IncomingInvestmentProcessor newInvestmentProcessor = new IncomingInvestmentProcessor(tenant);
+        final LeavingInvestmentProcessor leavingInvestmentProcessor = new LeavingInvestmentProcessor(tenant);
+        final ArrivingInvestmentProcessor newInvestmentProcessor = new ArrivingInvestmentProcessor(tenant);
         final Collection<Consumer<Transaction>> processors =
                 Arrays.asList(cashFlow, leavingInvestmentProcessor, newInvestmentProcessor);
         // prepare transactions and process them with all the processors

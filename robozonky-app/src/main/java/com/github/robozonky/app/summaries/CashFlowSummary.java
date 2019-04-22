@@ -22,6 +22,10 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * All amounts returned will be positive, nevermind of their orientation. Therefore, for {@link #getOutFromFees()},
+ * {@link #getOutFromFees()} and {@link #getOutTotal()}, the user will have to negate them if they wish so.
+ */
 final class CashFlowSummary {
 
     private static final Logger LOGGER = LogManager.getLogger();

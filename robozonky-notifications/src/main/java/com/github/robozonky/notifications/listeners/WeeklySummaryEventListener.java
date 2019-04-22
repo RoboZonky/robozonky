@@ -59,10 +59,10 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
                 entry("outFromFees", summary.getCashOutFromFees()),
                 entry("outFromWithdrawals", summary.getCashOutFromWithdrawals()),
                 entry("portfolio", Util.summarizePortfolioStructure(summary.getPortfolioOverview())),
-                entry("incomingInvestments", summary.getIncomingInvestments()
+                entry("incomingInvestments", summary.getArrivingInvestments()
                         .map(WeeklySummaryEventListener::describe)
                         .collect(Collectors.toList())),
-                entry("outgoingInvestments", summary.getOutgoingInvestments()
+                entry("outgoingInvestments", summary.getLeavingInvestments()
                         .map(WeeklySummaryEventListener::describe)
                         .collect(Collectors.toList()))
         );

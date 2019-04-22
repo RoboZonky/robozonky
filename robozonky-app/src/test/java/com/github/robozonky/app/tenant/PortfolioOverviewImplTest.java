@@ -53,6 +53,10 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getShareAtRisk()).isEqualTo(Ratio.ZERO);
+            softly.assertThat(po.getCzkSellable()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(po.getShareSellable()).isEqualTo(Ratio.ZERO);
+            softly.assertThat(po.getCzkSellableFeeless()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(po.getShareSellableFeeless()).isEqualTo(Ratio.ZERO);
             for (final Rating r : Rating.values()) {
                 softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(BigDecimal.ZERO);
                 softly.assertThat(po.getCzkAtRisk(r)).as(r + " at risk").isEqualTo(BigDecimal.ZERO);
@@ -61,6 +65,14 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
                         .isEqualTo(Ratio.ZERO);
                 softly.assertThat(po.getAtRiskShareOnInvestment(r))
                         .as(r + " at risk as a share")
+                        .isEqualTo(Ratio.ZERO);
+                softly.assertThat(po.getCzkSellable(r)).as(r + " sellable").isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(po.getCzkSellableFeeless(r)).as(r + " sellable feeless").isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(po.getShareSellable(r))
+                        .as(r + " as a share sellable")
+                        .isEqualTo(Ratio.ZERO);
+                softly.assertThat(po.getShareSellableFeeless(r))
+                        .as(r + " at as a share sellable feeless")
                         .isEqualTo(Ratio.ZERO);
             }
         });
