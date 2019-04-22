@@ -86,10 +86,10 @@ final class Util {
         p.setProperty("email.balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
         p.setProperty("email.balanceTracker.targetBalance", "200");
         p.setProperty("email.roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));
+        p.setProperty("email.roboZonkyDaemonFailed.hourlyMaxEmails", "20");
         p.setProperty("email.weeklySummary.enabled", toBoolean(Variables.EMAIL_IS_WEEKLY.getValue(data)));
         p.setProperty("email.roboZonkyUpdateDetected.enabled", "true");
         p.setProperty("email.roboZonkyUpdateDetected.maxHourlyEmails", "1");
-        p.setProperty("email.hourlyMaxEmails", "20");
         return p;
     }
 

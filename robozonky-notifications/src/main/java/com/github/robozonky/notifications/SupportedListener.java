@@ -299,6 +299,11 @@ public enum SupportedListener {
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new WeeklySummaryEventListener(this, targetHandler);
         }
+
+        @Override
+        public boolean overrideGlobalGag() {
+            return true; // weekly summary should always be sent
+        }
     },
     DAEMON_FAILED {
         @Override
