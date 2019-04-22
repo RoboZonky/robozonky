@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -119,11 +120,14 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
         final Zonky z = harmlessZonky(10_000);
         final Loan l = Loan.custom().setId(1).build();
+        final Investment i = Investment.fresh(l, 200).build();
         when(z.getLoan(eq(1))).thenReturn(l);
+        when(z.getInvestmentByLoanId(eq(1))).thenReturn(Optional.of(i));
         doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             assertThat(tenant.getLoan(1)).isSameAs(l);
+            assertThat(tenant.getInvestment(1)).isSameAs(i);
             assertThat(tenant.getPortfolio()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
             final Restrictions r = tenant.getRestrictions();
