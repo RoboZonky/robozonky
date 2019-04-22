@@ -44,14 +44,9 @@ final class OutgoingInvestmentProcessor extends AbstractTransactionProcessor<Inv
             case PAYMENT:
                 final int loanId = transaction.getLoanId();
                 final Investment investment = lookupOrFail(loanId, tenant);
-                final boolean paidInFull = investment.getPaymentStatus()
+                return investment.getPaymentStatus()
                         .map(s -> s == PaymentStatus.PAID)
                         .orElse(false);
-                if (!paidInFull) {
-                    logger.debug("Not yet repaid in full: {}.", transaction);
-                    return false;
-                }
-                return true;
             case SMP_SELL:
                 return true;
             default:

@@ -26,6 +26,9 @@ final class LoanAndInvestmentImpl implements LoanAndInvestment {
     private final Loan loan;
 
     public LoanAndInvestmentImpl(final Investment i, final Loan l) {
+        if (i.getLoanId() != l.getId()) { // a bit of defensive programming
+            throw new IllegalArgumentException("Investment and Loan don't match.");
+        }
         this.investment = i;
         this.loan = l;
     }

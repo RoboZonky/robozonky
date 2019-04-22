@@ -33,14 +33,15 @@ final class SummarizerJob implements TenantJob {
     }
 
     @Override
-    public Duration startIn() {
+    public Duration startIn() { // trigger next tuesday, 1am; tuesday as it's the first day after Zonky's weekend recalc
         final LocalDateTime date = DateUtil.localNow()
                 .withHour(1)
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0)
                 .with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY));
-        return Duration.between(DateUtil.localNow(), date);
+        final Duration d = Duration.between(DateUtil.localNow(), date);
+        return d.isNegative() ? d.plusDays(7) : d;
     }
 
     @Override
