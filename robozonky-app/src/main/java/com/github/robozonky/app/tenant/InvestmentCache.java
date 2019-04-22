@@ -34,7 +34,7 @@ import org.apache.logging.log4j.Logger;
 
 final class InvestmentCache implements AutoCloseable {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(InvestmentCache.class);
     private static final Duration EVICT_AFTER = Duration.ofHours(1);
     private static final Duration EVICT_EVERY = Duration.ofMinutes(30);
 

@@ -34,7 +34,7 @@ import org.apache.logging.log4j.Logger;
 
 final class Summarizer implements TenantPayload {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Summarizer.class);
 
     private static void run(final PowerTenant tenant) {
         // assemble processors

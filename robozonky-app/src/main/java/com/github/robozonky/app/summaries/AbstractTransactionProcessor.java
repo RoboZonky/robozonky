@@ -33,7 +33,7 @@ abstract class AbstractTransactionProcessor<T> implements Predicate<Transaction>
                                                           Consumer<Transaction>,
                                                           Supplier<Stream<T>> {
 
-    protected final Logger logger = LogManager.getLogger();
+    protected final Logger logger = LogManager.getLogger(getClass());
     private final Collection<T> values = new CopyOnWriteArraySet<>();
 
     @Override

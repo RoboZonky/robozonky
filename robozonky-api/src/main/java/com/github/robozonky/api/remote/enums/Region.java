@@ -51,7 +51,7 @@ public enum Region implements BaseEnum {
     ZLINSKY("Zlínský"),
     UNKNOWN("N/A");
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Region.class);
     private final String code;
     private final String richCode;
 

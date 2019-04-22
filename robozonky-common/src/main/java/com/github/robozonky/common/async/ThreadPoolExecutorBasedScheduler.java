@@ -52,7 +52,7 @@ import org.apache.logging.log4j.Logger;
  */
 final class ThreadPoolExecutorBasedScheduler implements Scheduler {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(ThreadPoolExecutorBasedScheduler.class);
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executor;
     private final Runnable onClose;

@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
  */
 final class CashFlowSummary {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(CashFlowSummary.class);
 
     private final int inTotal;
     private final int inFromDeposits;

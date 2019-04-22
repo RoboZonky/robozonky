@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(PrimaryMarketplaceAccessor.class);
     /**
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
      */

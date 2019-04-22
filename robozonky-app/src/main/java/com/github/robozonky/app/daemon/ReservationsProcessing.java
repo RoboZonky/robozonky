@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 
 final class ReservationsProcessing implements TenantPayload {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(ReservationsProcessing.class);
 
     private static void process(final PowerTenant tenant, final ReservationStrategy strategy) {
         final ReservationPreferences preferences = tenant.call(Zonky::getReservationPreferences);

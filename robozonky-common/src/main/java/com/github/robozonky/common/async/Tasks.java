@@ -61,7 +61,7 @@ public enum Tasks implements AutoCloseable {
     SUPPORTING(() -> Executors.newFixedThreadPool(2, SUPPORTING_THREAD_FACTORY)),
     BACKGROUND(() -> Executors.newSingleThreadExecutor(BACKGROUND_THREAD_FACTORY));
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Tasks.class);
     private static final Reloadable<ScheduledExecutorService> SCHEDULING_EXECUTOR =
             Reloadable.with(Tasks::createSchedulingExecutor).build();
     private final Reloadable<? extends Scheduler> scheduler;
