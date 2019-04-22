@@ -19,6 +19,7 @@ package com.github.robozonky.app.transactions;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
@@ -72,7 +73,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
         final LoanRepaidProcessor instance = new LoanRepaidProcessor(mockTenant());
         assertThatThrownBy(() -> instance.processApplicable(transfer))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(NoSuchElementException.class);
         assertThat(getEventsRequested()).isEmpty();
     }
 

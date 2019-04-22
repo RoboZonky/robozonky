@@ -32,7 +32,7 @@ final class ArrivingInvestmentProcessor extends AbstractTransactionProcessor<Inv
 
     @Override
     public Investment apply(final Transaction transaction) {
-        return lookupOrFail(transaction.getLoanId(), tenant);
+        return tenant.getInvestment(transaction.getLoanId());
     }
 
     @Override

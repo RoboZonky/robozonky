@@ -25,8 +25,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,12 +35,6 @@ abstract class AbstractTransactionProcessor<T> implements Predicate<Transaction>
 
     protected final Logger logger = LogManager.getLogger();
     private final Collection<T> values = new CopyOnWriteArraySet<>();
-
-    // FIXME cache this
-    protected static Investment lookupOrFail(final int loanId, final Tenant auth) {
-        return auth.call(zonky -> zonky.getInvestmentByLoanId(loanId))
-                .orElseThrow(() -> new IllegalStateException("Investment not found for loan #" + loanId));
-    }
 
     @Override
     public Stream<T> get() {

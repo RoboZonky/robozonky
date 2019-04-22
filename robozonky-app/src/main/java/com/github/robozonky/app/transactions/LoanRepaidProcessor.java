@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class LoanRepaidProcessor extends TransactionProcessor {
     @Override
     void processApplicable(final Transaction transfer) {
         final int loanId = transfer.getLoanId();
-        final Investment investment = lookupOrFail(loanId, tenant);
+        final Investment investment = tenant.getInvestment(loanId);
         final boolean paidInFull = investment.getPaymentStatus()
                 .map(s -> s == PaymentStatus.PAID)
                 .orElse(false);

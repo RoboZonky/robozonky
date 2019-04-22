@@ -32,7 +32,7 @@ final class LeavingInvestmentProcessor extends AbstractTransactionProcessor<Inve
 
     @Override
     public Investment apply(final Transaction transaction) {
-        return lookupOrFail(transaction.getLoanId(), tenant);
+        return tenant.getInvestment(transaction.getLoanId());
     }
 
     @Override
@@ -43,7 +43,7 @@ final class LeavingInvestmentProcessor extends AbstractTransactionProcessor<Inve
         switch (transaction.getCategory()) {
             case PAYMENT:
                 final int loanId = transaction.getLoanId();
-                final Investment investment = lookupOrFail(loanId, tenant);
+                final Investment investment = tenant.getInvestment(loanId);
                 return investment.getPaymentStatus()
                         .map(s -> s == PaymentStatus.PAID)
                         .orElse(false);
