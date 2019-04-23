@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -32,4 +34,17 @@ class RatingTest {
         final Set<String> codes = Stream.of(Rating.values()).map(Rating::getCode).collect(Collectors.toSet());
         assertThat(codes).hasSize(Rating.values().length);
     }
+
+    @Test
+    void maxFeeDiscount() {
+        final Ratio revenue = Rating.D.getMaximalRevenueRate(Long.MAX_VALUE);
+        assertThat(revenue.doubleValue()).isEqualTo(0.1599, Offset.offset(0.0001));
+    }
+
+    @Test
+    void minFeeDiscount() {
+        final Ratio revenue = Rating.AAAAAA.getMinimalRevenueRate();
+        assertThat(revenue.doubleValue()).isEqualTo(0.0234, Offset.offset(0.0001));
+    }
+
 }

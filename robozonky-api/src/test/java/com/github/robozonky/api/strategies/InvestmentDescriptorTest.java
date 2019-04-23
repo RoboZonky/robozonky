@@ -43,6 +43,7 @@ class InvestmentDescriptorTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
+        assertThat(id.item()).isSameAs(i);
         final Optional<RecommendedInvestment> r = id.recommend();
         assertThat(r).isPresent();
         assertSoftly(softly -> {

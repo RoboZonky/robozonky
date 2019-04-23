@@ -23,8 +23,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -124,7 +124,7 @@ class InvestmentTest {
 
         private void integer(final InvestmentBuilder builder, final Function<Integer, InvestmentBuilder> setter,
                              final Supplier<Integer> getter, final int value) {
-            assertThat(getter.get()).as("False before setting.").isLessThanOrEqualTo(0);
+            assertThat(getter.get()).as("Difference before setting.").isNotEqualTo(value);
             final InvestmentBuilder newBuilder = setter.apply(value);
             assertSoftly(softly -> {
                 softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);

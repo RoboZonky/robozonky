@@ -97,7 +97,7 @@ class DevelopmentTest {
 
         private <T> void integer(final DevelopmentBuilder builder, final Function<Integer, DevelopmentBuilder> setter,
                                  final Supplier<Integer> getter, final int value) {
-            assertThat(getter.get()).as("False before setting.").isLessThanOrEqualTo(0);
+            assertThat(getter.get()).as("Difference before setting.").isNotEqualTo(value);
             final DevelopmentBuilder newBuilder = setter.apply(value);
             assertSoftly(softly -> {
                 softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);

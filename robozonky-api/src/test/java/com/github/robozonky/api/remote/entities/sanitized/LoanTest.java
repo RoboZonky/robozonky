@@ -25,8 +25,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -88,7 +88,7 @@ class LoanTest {
 
         private <T> void integer(final LoanBuilder builder, final Function<Integer, LoanBuilder> setter,
                                  final Supplier<Integer> getter, final int value) {
-            assertThat(getter.get()).as("Zero before setting.").isLessThanOrEqualTo(0);
+            assertThat(getter.get()).as("Different before setting.").isNotEqualTo(value);
             final LoanBuilder newBuilder = setter.apply(value);
             assertSoftly(softly -> {
                 softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);
@@ -229,6 +229,11 @@ class LoanTest {
         @Test
         void insuranceActive() {
             bool(b, b::setInsuranceActive, b::isInsuranceActive);
+        }
+
+        @Test
+        void id() {
+            integer(b, b::setId, b::getId, 1);
         }
 
         @Test

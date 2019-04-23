@@ -64,6 +64,7 @@ class LoanDescriptorTest {
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         assertSoftly(softly -> {
             softly.assertThat(ld.item()).isSameAs(mockedLoan);
+            softly.assertThat(ld.item()).isSameAs(ld.related());
             softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime()).isEmpty();
         });
     }
