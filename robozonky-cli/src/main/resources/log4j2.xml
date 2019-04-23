@@ -45,7 +45,6 @@
     <!--
       <RollingFile
           append="false"
-          immediateFlush="false"
           name="TRACE"
           fileName="robozonky.log"
           filePattern="robozonky.%d{yyyyMMddHH}.log.gz">
