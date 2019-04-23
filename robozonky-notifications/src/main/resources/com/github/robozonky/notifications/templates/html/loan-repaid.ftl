@@ -1,15 +1,5 @@
-<p>Půjčka <@idLoan data=data /> byla zcela splacena.</p>
-
-<table>
-  <tr>
-    <th style="text-align: right;">Doba držení:</th>
-    <td>${data.monthsElapsed?c} měsíců</td>
-  </tr>
-  <tr>
-    <th style="text-align: right;">Zaplaceno:</th>
-    <td>${data.amountPaid?string.currency} za půjčených ${data.amountHeld?string.currency}</td>
-  </tr>
-</table>
+<p>Půjčka <@idLoan data=data /> byla zcela splacena. Klient během ${data.monthsElapsed?c} měsíců zaplatil
+${data.amountPaid?string.currency} za půjčených ${data.amountHeld?string.currency}</p>
 
 <#include "additional-loan-info.ftl">
 

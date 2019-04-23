@@ -65,13 +65,10 @@
 
 <body>
     <header>
-        <p><small><@robozonky /> pro <@zonky /> účet <em>${data.session.userName}</em> Vás tímto informuje o
-            následující skutečnosti:</small></p>
-        <hr>
+        <h1>${data.subject}</h1>
     </header>
 
     <main>
-        <h1>${data.subject}</h1>
         <#include embed>
     </main>
 
@@ -93,8 +90,9 @@
             <a href="https://groups.google.com/forum/#!forum/robozonky-users">v uživatelské skupině</a></small></li>
       </ul>
       <p>
-        <small>Vygeneroval <em>${data.session.userAgent}</em> v čase ${timestamp?datetime?iso_local_ms} na základě
-        systémové události vytvořené v čase ${data.conception?datetime?iso_local_ms}.</small>
+        <small>Vygeneroval <em>${data.session.userAgent}</em> pro <@zonky /> účet <em>${data.session.userName}</em>
+        v čase ${timestamp?datetime?iso_local_ms} na základě systémové události vytvořené v čase
+        ${data.conception?datetime?iso_local_ms}.</small>
       </p>
     </footer>
 </body>

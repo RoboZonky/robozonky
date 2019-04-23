@@ -1,11 +1,4 @@
-<p>Půjčka <@idLoan data=data /> byla zainvestována.</p>
-
-<table>
-  <tr>
-    <th style="text-align: right;">Investovaná částka:</th>
-    <td>${data.amountHeld?string.currency}</td>
-  </tr>
-</table>
+<p>Půjčka <@idLoan data=data /> byla zainvestována ve výši ${data.amountHeld?string.currency}.</p>
 
 <#include "additional-loan-info.ftl">
 

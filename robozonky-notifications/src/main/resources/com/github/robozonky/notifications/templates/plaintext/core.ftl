@@ -44,8 +44,6 @@ platné ani úplné!
 ===============================================================================
 </#if>
 
-RoboZonky pro Zonky účet ${data.session.userName} Vás tímto informuje o následující skutečnosti:
-
 <#include embed>
 
 --
@@ -59,5 +57,6 @@ uvedenou.
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users
 
-Vygeneroval ${data.session.userAgent} v čase ${timestamp?datetime?iso_local_ms} na základě systémové události vytvořené v
-čase ${data.conception?datetime?iso_local_ms}.
+Vygeneroval RoboZonky pro Zonky účet ${data.session.userName} ${data.session.userAgent} v čase
+${timestamp?datetime?iso_local_ms} na základě systémové události vytvořené v čase
+${data.conception?datetime?iso_local_ms}.

@@ -1,15 +1,5 @@
-<p>Na sekundárním trhu byla zakoupena participace k půjčce <@idLoan data=data />.</p>
-
-<table>
-  <tr>
-    <th style="text-align: right;">Zbývá splátek:</th>
-    <td>${data.loanTermRemaining?c}</td>
-  </tr>
-  <tr>
-    <th style="text-align: right;">Zbývající jistina:</th>
-    <td>${data.amountHeld?string.currency}</td>
-  </tr>
-</table>
+<p>Na sekundárním trhu byla zakoupena participace k půjčce <@idLoan data=data />.
+Zbývá splatit ${data.amountHeld?string.currency} během ${data.loanTermRemaining?c} měsíců.</p>
 
 <#include "additional-loan-info.ftl">
 
