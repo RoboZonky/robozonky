@@ -86,7 +86,7 @@ public class App implements Runnable {
         Events.global().fire(EventFactory.roboZonkyStarting());
         ensureLiveness();
         final InvestmentType type = m.getInvestmentType();
-        if (type != InvestmentType.N && type != InvestmentType.INVESTOR) {
+        if (type != null && type != InvestmentType.N && type != InvestmentType.INVESTOR) {
             throw new IllegalStateException("Zonky Rentier customers can not use RoboZonky.");
         }
         // will close event-firing thread == must be triggered last == must be registered first
