@@ -40,7 +40,6 @@ import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.Submission;
 import com.github.robozonky.notifications.SupportedListener;
@@ -49,7 +48,7 @@ import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.github.robozonky.internal.util.Maps.entry;
+import static java.util.Map.entry;
 
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
@@ -127,7 +126,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         final Map<String, Object> result = new HashMap<>(this.getData(event));
         // ratings here need to have a stable iteration order, as they will be used to list them in notifications
         result.put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
-        result.put("session", Maps.ofEntries(
+        result.put("session", Map.ofEntries(
                 entry("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername())),
                 entry("userAgent", Defaults.ROBOZONKY_USER_AGENT),
                 entry("isDryRun", sessionInfo.isDryRun())

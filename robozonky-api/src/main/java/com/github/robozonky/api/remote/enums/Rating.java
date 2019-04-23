@@ -20,19 +20,20 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.internal.util.Maps;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
-import static com.github.robozonky.internal.util.Maps.entry;
+import static java.util.Map.entry;
 
 public enum Rating implements BaseEnum {
 
@@ -54,11 +55,11 @@ public enum Rating implements BaseEnum {
     static final Instant MIDNIGHT_2019_03_18 =
             LocalDate.of(2019, 3, 18).atStartOfDay(Defaults.ZONE_ID).toInstant();
     private static final Ratio ONE_PERCENT = Ratio.fromPercentage(1);
-    private static final SortedMap<Integer, Ratio> FEE_DISCOUNTS = Maps.ofEntriesSorted(
+    private static final SortedMap<Integer, Ratio> FEE_DISCOUNTS = new TreeMap<>(Map.ofEntries(
             entry(150_000, Ratio.fromPercentage(5)),
             entry(200_000, Ratio.fromPercentage(10)),
             entry(500_000, Ratio.fromPercentage(15)),
-            entry(1_000_000, Ratio.fromPercentage(20)));
+            entry(1_000_000, Ratio.fromPercentage(20))));
 
     private final String code;
     private final Ratio interestRate;

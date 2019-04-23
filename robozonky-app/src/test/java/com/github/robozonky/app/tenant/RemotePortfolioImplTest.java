@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
@@ -32,7 +33,6 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.Maps;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -142,7 +142,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         // one blocked amount coming in remotely
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertSoftly(softly -> {
-            softly.assertThat(p.getTotal()).containsOnly(Maps.entry(Rating.D, firstAmount));
+            softly.assertThat(p.getTotal()).containsOnly(Map.entry(Rating.D, firstAmount));
             softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount);
         });
         // new blocked amount for a different loan is registered locally
@@ -151,8 +151,8 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         p.simulateCharge(l2.getId(), l2.getRating(), secondAmount);
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal()).containsOnly(
-                    Maps.entry(Rating.D, firstAmount),
-                    Maps.entry(Rating.A, secondAmount)
+                    Map.entry(Rating.D, firstAmount),
+                    Map.entry(Rating.A, secondAmount)
             );
             softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(secondAmount));
         });
@@ -167,8 +167,8 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(l2.getId()))).thenReturn(l2);
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal()).containsOnly(
-                    Maps.entry(Rating.D, firstAmount),
-                    Maps.entry(Rating.A, secondAmount)
+                    Map.entry(Rating.D, firstAmount),
+                    Map.entry(Rating.A, secondAmount)
             );
             softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(secondAmount));
         });
@@ -188,7 +188,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertSoftly(softly -> {
-            softly.assertThat(p.getTotal()).containsOnly(Maps.entry(Rating.D, firstAmount));
+            softly.assertThat(p.getTotal()).containsOnly(Map.entry(Rating.D, firstAmount));
             softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount);
         });
         // new blocked amount for a different loan is registered locally
@@ -197,8 +197,8 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         p.simulateCharge(l2.getId(), l2.getRating(), secondAmount);
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal()).containsOnly(
-                    Maps.entry(Rating.D, firstAmount),
-                    Maps.entry(Rating.A, secondAmount)
+                    Map.entry(Rating.D, firstAmount),
+                    Map.entry(Rating.A, secondAmount)
             );
             softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(secondAmount));
         });
@@ -213,8 +213,8 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final BigDecimal total = secondAmount.add(secondAmount);
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal()).containsOnly(
-                    Maps.entry(Rating.D, firstAmount),
-                    Maps.entry(Rating.A, total)
+                    Map.entry(Rating.D, firstAmount),
+                    Map.entry(Rating.A, total)
             );
             softly.assertThat(p.getOverview().getCzkInvested()).isEqualTo(firstAmount.add(total));
         });

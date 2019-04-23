@@ -16,10 +16,10 @@
 
 package com.github.robozonky.installer;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import com.github.robozonky.internal.util.Maps;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -47,7 +47,7 @@ class UtilTest {
         final CommandLinePart target = new CommandLinePart();
         final Properties settings = new Properties();
         Util.processCommandLine(target, settings, part, part2, part3);
-        assertThat(settings).containsOnly(Maps.entry("robozonky.something", "somethingElse"));
-        assertThat(target.getProperties()).containsOnly(Maps.entry("something", "somethingCompletelyDifferent"));
+        assertThat(settings).containsOnly(Map.entry("robozonky.something", "somethingElse"));
+        assertThat(target.getProperties()).containsOnly(Map.entry("something", "somethingCompletelyDifferent"));
     }
 }

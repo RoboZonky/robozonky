@@ -45,13 +45,11 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.internal.util.Maps;
 
-import static com.github.robozonky.internal.util.Maps.entry;
+import static java.util.Map.entry;
 
 final class Util {
 
-    private static final BigDecimal HUNDRED = BigDecimal.TEN.pow(2);
     private static final String AT = "@";
     private static final Pattern COMPILE = Pattern.compile("\\Q" + AT + "\\E");
 
@@ -86,7 +84,7 @@ final class Util {
     }
 
     public static Map<String, Object> getLoanData(final MarketplaceLoan loan) {
-        return Maps.ofEntries(
+        return Map.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()),
                 entry("loanAnnuity", loan.getAnnuity().intValue()),
@@ -107,7 +105,7 @@ final class Util {
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
-        return Maps.ofEntries(
+        return Map.ofEntries(
                 entry("absoluteShare", perRating(portfolioOverview::getCzkInvested)),
                 entry("relativeShare", perRating(portfolioOverview::getShareOnInvestment)),
                 entry("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk)),
@@ -173,12 +171,22 @@ final class Util {
         result.put("collections", collections.stream()
                 .sorted(Comparator.comparing(Development::getDateFrom).reversed())
                 .limit(5)
-                .map(action -> Maps.ofEntries(
-                        entry("code", action.getType().getCode()),
-                        entry("note", action.getPublicNote().orElse("Bez dalšího vysvětlení.")),
-                        entry("startDate", Util.toDate(action.getDateFrom())),
-                        entry("endDate", action.getDateTo().map(Util::toDate).orElse(null))
-                )).collect(Collectors.toList()));
+                .map(action -> {
+                    final String code = action.getType().getCode();
+                    final String note = action.getPublicNote().orElse("Bez dalšího vysvětlení.");
+                    final Date dateFrom = Util.toDate(action.getDateFrom());
+                    return action.getDateTo()
+                            .map(dateTo -> Map.ofEntries(
+                                    entry("code", code),
+                                    entry("note", note),
+                                    entry("startDate", dateFrom),
+                                    entry("endDate", dateTo)))
+                            .orElseGet(() -> Map.ofEntries(
+                                    entry("code", code),
+                                    entry("note", note),
+                                    entry("startDate", dateFrom)));
+                })
+                .collect(Collectors.toList()));
         return result;
     }
 

@@ -22,11 +22,10 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
-import static com.github.robozonky.internal.util.Maps.entry;
+import static java.util.Map.entry;
 
 public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEvent> {
 
@@ -51,7 +50,7 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
     @Override
     protected Map<String, Object> getData(final WeeklySummaryEvent event) {
         final Summary summary = event.getSummary();
-        return Maps.ofEntries(
+        return Map.ofEntries(
                 entry("inTotal", summary.getCashInTotal()),
                 entry("inFromDeposits", summary.getCashInFromDeposits()),
                 entry("outTotal", summary.getCashOutTotal()),

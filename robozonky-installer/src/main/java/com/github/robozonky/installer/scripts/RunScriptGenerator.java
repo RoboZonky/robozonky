@@ -19,18 +19,18 @@ package com.github.robozonky.installer.scripts;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.installer.CommandLinePart;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.util.Maps;
 import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.github.robozonky.internal.util.Maps.entry;
+import static java.util.Map.entry;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
@@ -69,7 +69,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
     protected File process(final CommandLinePart commandLine, final String templateName,
                            final Function<String, String> finisher) {
         try {
-            final String result = TemplateProcessor.INSTANCE.process(templateName, Maps.ofEntries(
+            final String result = TemplateProcessor.INSTANCE.process(templateName, Map.ofEntries(
                     entry("root", distributionDirectory.getAbsolutePath()),
                     entry("options", configFile.getAbsolutePath()),
                     entry("javaOpts", assembleJavaOpts(commandLine)),

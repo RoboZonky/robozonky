@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.internal.util.Maps;
 import com.github.robozonky.notifications.templates.html.HtmlTemplate;
 import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
 import freemarker.core.TemplateNumberFormatFactory;
@@ -32,7 +31,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-import static com.github.robozonky.internal.util.Maps.entry;
+import static java.util.Map.entry;
 
 public enum TemplateProcessor {
 
@@ -62,7 +61,7 @@ public enum TemplateProcessor {
 
     private static String process(final Configuration configuration, final String embeddedTemplate,
                                   final Map<String, Object> embeddedData) throws IOException, TemplateException {
-        final Map<String, Object> data = Maps.ofEntries(
+        final Map<String, Object> data = Map.ofEntries(
                 entry("timestamp", Date.from(DateUtil.now())),
                 entry("robozonkyUrl", Defaults.ROBOZONKY_URL),
                 entry("embed", embeddedTemplate),

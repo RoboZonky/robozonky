@@ -32,7 +32,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.internal.util.Maps;
 import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 
@@ -144,7 +143,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final RemoteData data = RemoteData.load(tenant);
         final Blocked sumOfBoth = new Blocked(loan.getId(), first.getAmount().add(second.getAmount()), loan.getRating());
-        assertThat(data.getBlocked()).containsOnly(Maps.entry(Rating.D, BigDecimal.valueOf(11)));
+        assertThat(data.getBlocked()).containsOnly(Map.entry(Rating.D, BigDecimal.valueOf(11)));
     }
 
 }
