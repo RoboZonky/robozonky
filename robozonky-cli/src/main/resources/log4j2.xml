@@ -17,7 +17,7 @@
 
   <Properties> <!-- These are the common pattern layouts to be used later in the file. -->
     <Property name="consoleAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level %msg%n</Property>
-    <Property name=   "fileAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level [%t] %logger{-36} - %msg%n%xThrowable</Property>
+    <Property name=   "fileAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level [%t] %logger{-36} - %msg%n</Property>
   </Properties>
 
   <Appenders>

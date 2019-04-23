@@ -75,8 +75,10 @@ final class CashFlowSummary {
                     final DoubleAdder target = isIn ? inDeposits : outWithdrawals;
                     target.add(amount);
                     return;
+                case INVESTMENT: // already processed above
+                    return;
                 default:
-                    LOGGER.debug("Skipping cash flow type {}.", cashFlow.getType());
+                    LOGGER.debug("Skipping unknown cash flow type {}.", cashFlow.getType());
             }
         });
         return new CashFlowSummary(in.intValue(), inDeposits.intValue(), -out.intValue(), -outFees.intValue(),
