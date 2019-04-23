@@ -56,6 +56,8 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
                 entry("inFromDeposits", summary.getCashInFromDeposits()),
                 entry("outTotal", summary.getCashOutTotal()),
                 entry("total", summary.getCashInTotal() - summary.getCashOutTotal()),
+                entry("totalDepositsAndWithdrawals",
+                      summary.getCashInFromDeposits() - summary.getCashOutFromWithdrawals()),
                 entry("outFromFees", summary.getCashOutFromFees()),
                 entry("outFromWithdrawals", summary.getCashOutFromWithdrawals()),
                 entry("portfolio", Util.summarizePortfolioStructure(summary.getPortfolioOverview())),

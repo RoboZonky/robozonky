@@ -1,5 +1,5 @@
 <table style="width: 60%">
-  <caption>Výkonnost portfolia</caption>
+  <caption><h2>Výkonnost portfolia</h2></caption>
   <thead>
     <tr>
         <th></th>
@@ -27,13 +27,13 @@
 <#include "additional-portfolio-info.ftl">
 
 <table style="width: 60%">
-  <caption>Peněžní toky</caption>
+  <caption><h2>Peněžní toky</h2></caption>
   <thead>
     <tr>
         <th></th>
-        <th style="padding: 5px;"></th>
         <th style="padding: 5px; text-align: right;">K Vám</th>
         <th style="padding: 5px; text-align: right;">Od Vás</th>
+        <th style="padding: 5px; text-align: right;">Výsledek</th>
     </tr>
   </thead>
   <tbody>
@@ -41,25 +41,25 @@
       <th style="padding: 5px; text-align: right;">Celkem</th>
       <th style="padding: 5px; text-align: right;">${data.inTotal?string.currency}</th>
       <th style="padding: 5px; text-align: right;">${data.outTotal?string.currency}</th>
+      <th style="padding: 5px; text-align: right;">${data.total?string.currency}</th>
     </tr>
     <tr>
       <th style="padding: 5px; text-align: right;">Pouze převody</th>
       <th style="padding: 5px; text-align: right;">${data.inFromDeposits?string.currency}</th>
       <th style="padding: 5px; text-align: right;">${data.outFromWithdrawals?string.currency}</th>
+      <th style="padding: 5px; text-align: right;">${data.totalDepositsAndWithdrawals?string.currency}</th>
     </tr>
     <tr>
       <th style="padding: 5px; text-align: right;">Pouze poplatky</th>
-      <th colspan="2" style="padding: 5px; text-align: right;">${data.outFromFees?string.currency}</th>
-    </tr>
-    <tr>
-      <th style="padding: 5px; text-align: right;"><strong>Výsledek</strong></th>
-      <th colspan="2" style="padding: 5px; text-align: right;"><strong>${data.total?string.currency}</strong></th>
+      <th style="padding: 5px; text-align: right;">0,- Kč</th>
+      <th style="padding: 5px; text-align: right;">${data.outFromFees?string.currency}</th>
+      <th style="padding: 5px; text-align: right;">-${data.outFromFees?string.currency}</th>
     </tr>
   </tbody>
 </table>
 
 <table style="width: 60%">
-  <caption>Změny v portfoliu</caption>
+  <caption><h2>Změny v portfoliu</h2></caption>
   <thead>
     <tr>
         <th style="padding: 5px; width: 50%;">Nové investice (vč. nákupů)</th>
@@ -76,7 +76,7 @@
                         <th style="padding: 1px; text-align: right;">${item.amountHeld?string.currency}</th>
                         <th style="padding: 1px; text-align: right;"><@idRating id=item.loanInterestRate /></th>
                         <th style="padding: 1px; text-align: right;">${item.loanTerm?c} m.</th>
-                        <th style="padding: 1px; text-align: center;"><@idLoan data=item /></th>
+                        <th style="padding: 1px; text-align: left;"><@idLoan data=item /></th>
                     </tr>
                 </#items>
             </table>
@@ -92,7 +92,7 @@
                         <th style="padding: 1px; text-align: right;">${item.amountHeld?string.currency}</th>
                         <th style="padding: 1px; text-align: right;"><@idRating id=item.loanInterestRate /></th>
                         <th style="padding: 1px; text-align: right;">${item.loanTerm?c} m.</th>
-                        <th style="padding: 1px; text-align: center;"><@idLoan data=item /></th>
+                        <th style="padding: 1px; text-align: left;"><@idLoan data=item /></th>
                     </tr>
                 </#items>
             </table>

@@ -160,7 +160,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         if (isZero(investedPerRating)) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(getShareSellable(r), investedPerRating));
+        return Ratio.fromRaw(divide(getCzkSellable(r), investedPerRating));
     }
 
     @Override
@@ -187,7 +187,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         if (isZero(investedPerRating)) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(getShareSellableFeeless(r), investedPerRating));
+        return Ratio.fromRaw(divide(getCzkSellableFeeless(r), investedPerRating));
     }
 
     @Override
