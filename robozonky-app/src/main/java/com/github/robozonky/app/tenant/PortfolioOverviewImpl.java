@@ -247,6 +247,10 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
                 ", czkInvestedPerRating=" + czkInvestedPerRating +
                 ", czkAtRisk=" + czkAtRisk +
                 ", czkAtRiskPerRating=" + czkAtRiskPerRating +
+                ", czkSellable=" + czkSellable +
+                ", czkSellableFeeless=" + czkSellableFeeless +
+                ", czkSellableFeelessPerRating=" + czkSellableFeelessPerRating +
+                ", czkSellablePerRating=" + czkSellablePerRating +
                 ", profitability=" + profitability +
                 ", timestamp=" + timestamp +
                 '}';

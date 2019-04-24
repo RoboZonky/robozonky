@@ -17,13 +17,13 @@
       <th style="padding: 5px; text-align: right;">(${data.portfolio.totalShare?string.@interest})</th>
       <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellable?string.currency}</th>
       <th style="padding: 5px; text-align: right;">(${data.portfolio.totalSellableShare?string.@interest})</th>
-      <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellableFeeless?string.currency})</th>
+      <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellableFeeless?string.currency}</th>
       <th style="padding: 5px; text-align: right;">(${data.portfolio.totalSellableFeelessShare?string.@interest})</th>
     </tr>
     <tr>
       <th style="padding: 5px; text-align: right;">Disponibilní zůstatek</th>
       <td colspan="8" style="padding: 5px; text-align: right;">${data.portfolio.balance?string.currency}</td>
-    </tr>
+    </tr>qqq
   </tfoot>
   <tbody>
     <#list data.ratings as rating>
