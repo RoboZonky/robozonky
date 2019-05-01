@@ -51,9 +51,9 @@
     </tr>
     <tr>
       <th style="padding: 5px; text-align: right;">Pouze poplatky</th>
-      <th style="padding: 5px; text-align: right;">0,- Kč</th>
+      <th style="padding: 5px; text-align: right;">0,00 Kč</th>
       <th style="padding: 5px; text-align: right;">${data.outFromFees?string.currency}</th>
-      <th style="padding: 5px; text-align: right;">-${data.outFromFees?string.currency}</th>
+      <th style="padding: 5px; text-align: right;"><#if data.outFromFees < 0>-</#if>${data.outFromFees?string.currency}</th>
     </tr>
   </tbody>
 </table>

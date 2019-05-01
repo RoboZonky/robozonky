@@ -23,7 +23,7 @@
     <tr>
       <th style="padding: 5px; text-align: right;">Disponibilní zůstatek</th>
       <td colspan="8" style="padding: 5px; text-align: right;">${data.portfolio.balance?string.currency}</td>
-    </tr>qqq
+    </tr>
   </tfoot>
   <tbody>
     <#list data.ratings as rating>

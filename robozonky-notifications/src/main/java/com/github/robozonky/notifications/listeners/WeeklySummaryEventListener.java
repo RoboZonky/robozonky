@@ -39,7 +39,7 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
 
     @Override
     String getSubject(final WeeklySummaryEvent event) {
-        return "Týdenní shrnutí aktivity na Vašem Zonky účtu";
+        return "Týdenní souhrn aktivity na Vašem Zonky účtu";
     }
 
     @Override

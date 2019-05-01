@@ -1,6 +1,6 @@
 <#setting locale="cs_CZ">
 <#macro idLoan data>
-  <strong><a href="${data.loanUrl}">č. ${data.loanId?c} <q>${data.loanName?cap_first}</q></a></strong>
+  <strong><a href="${data.loanUrl}"><q>${data.loanName?cap_first}</q> (${data.loanId?c})</a></strong>
 </#macro>
 <#macro zonky><em>Zonky</em></#macro>
 <#macro robozonky><em>RoboZonky</em></#macro>
