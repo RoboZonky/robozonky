@@ -33,37 +33,26 @@
       <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
       <PatternLayout pattern="${consoleAppenderPatternLayout}"/>
     </Console>
-    <!-- Log everything to robozonky.log file. Roll the file every hour, compress the results. -->
-    <File name="DEBUG" fileName="robozonky.log" ignoreExceptions="false">
+    <!-- Log everything to robozonky.log file. Roll the file every day, compress the results. -->
+    <RollingFile
+        append="false"
+        name="DEBUG"
+        fileName="robozonky.log"
+        filePattern="robozonky.%d{yyyyMMdd}.log.gz">
       <PatternLayout pattern="${fileAppenderPatternLayout}" />
-    </File>
-    <!--
-      Uncomment the following to get a full TRACE-level logging of RoboZonky, useful for debugging.
-      Don't forget to also uncomment the appender down below.
-      Feel free to use this as an example of configuring file rolling on the hour and compression.
-    -->
-    <!--
-      <RollingFile
-          append="false"
-          name="TRACE"
-          fileName="robozonky.log"
-          filePattern="robozonky.%d{yyyyMMddHH}.log.gz">
-        <PatternLayout pattern="${fileAppenderPatternLayout}" />
-        <Policies>
-          <TimeBasedTriggeringPolicy />
-        </Policies>
-        <DefaultRolloverStrategy max="100" />
-      </RollingFile>
-    -->
+      <Policies>
+        <TimeBasedTriggeringPolicy />
+      </Policies>
+      <DefaultRolloverStrategy max="100" />
+    </RollingFile>
   </Appenders>
   <Loggers>
     <Root level="info">
       <AppenderRef ref="STDOUT"/> <!-- Infos go to the standard output. -->
       <AppenderRef ref="STDERR"/> <!-- Errors and warnings go to the standard error output. -->
       <AppenderRef ref="DEBUG"/>  <!-- All RoboZonky logging goes into a single file. -->
-      <!-- <AppenderRef ref="TRACE"/> -->  <!-- Uncomment to get a very comprehensive RoboZonky log. -->
     </Root>
     <Logger name="javax.mail" level="error" />  <!-- avoid an unkillable useless warning -->
-    <Logger name="com.github.robozonky" level="trace" />
+    <Logger name="com.github.robozonky" level="debug" /> <!-- change "debug" to "trace" for more detailed logging -->
   </Loggers>
 </Configuration>
