@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -35,6 +36,8 @@ public class Transaction extends BaseEntity {
     private TransactionOrientation orientation;
     @XmlElement
     private OffsetDateTime transactionDate;
+    @XmlElement
+    private OffsetDateTime revertedTransactionDate;
     private String customMessage;
     private long id, investmentId;
     private int loanId;
@@ -116,6 +119,10 @@ public class Transaction extends BaseEntity {
 
     public LocalDate getTransactionDate() { // every transaction is placed at 00:00:00.
         return transactionDate.toLocalDate();
+    }
+
+    public Optional<LocalDate> getRevertedTransactionDate() {
+        return Optional.ofNullable(revertedTransactionDate).map(OffsetDateTime::toLocalDate);
     }
 
     @XmlElement
