@@ -46,6 +46,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
 import static java.util.Map.entry;
 
 final class Util {
@@ -151,12 +152,18 @@ final class Util {
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final MarketplaceLoan l) {
+        final BigDecimal totalPaid = getTotalPaid(i);
+        final BigDecimal originalPrincipal = i.getOriginalPrincipal();
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", Util.toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal());
-        loanData.put("amountHeld", i.getOriginalPrincipal());
-        loanData.put("amountPaid", getTotalPaid(i));
+        loanData.put("amountHeld", originalPrincipal);
+        loanData.put("amountPaid", totalPaid);
+        loanData.put("balance", minus(totalPaid, originalPrincipal));
+        loanData.put("interestExpected", i.getExpectedInterest());
+        loanData.put("interestPaid", i.getPaidInterest());
+        loanData.put("penaltiesPaid", i.getPaidPenalty());
         loanData.put("monthsElapsed", getMonthsElapsed(i));
         loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
         loanData.put("postponed", i.areInstalmentsPostponed());

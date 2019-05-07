@@ -65,6 +65,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .build();
     private static final Investment INVESTMENT = Investment.fresh(LOAN, 200)
             .setInvestmentDate(OffsetDateTime.now())
+            .setExpectedInterest(BigDecimal.TEN)
             .build();
     private static final Loan LOAN2 = Loan.custom()
             .setId(2)

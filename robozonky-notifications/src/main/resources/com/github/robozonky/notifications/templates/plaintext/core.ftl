@@ -57,6 +57,6 @@ uvedenou.
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users
 
-Vygeneroval RoboZonky pro Zonky účet ${data.session.userName} ${data.session.userAgent} v čase
+Vygeneroval ${data.session.userAgent} pro Zonky účet ${data.session.userName} v čase
 ${timestamp?datetime?iso_local_ms} na základě systémové události vytvořené v čase
 ${data.conception?datetime?iso_local_ms}.
