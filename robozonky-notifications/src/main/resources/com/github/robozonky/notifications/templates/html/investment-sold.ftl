@@ -1,4 +1,6 @@
-<p>Participace v půjčce <@idLoan data=data /> byla prodána po ${data.monthsElapsed?c} měsících za ${data.amountRemaining?string.currency}.</p>
+<p>Participace v půjčce <@idLoan data=data /> byla prodána.</p>
+
+<#include "additional-investment-info.ftl">
 
 <#include "additional-loan-info.ftl">
 

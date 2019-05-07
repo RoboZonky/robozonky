@@ -1,6 +1,6 @@
-<p>Půjčka <@idLoan data=data /> se uzdravila. V tomto okamžiku zbývá uhradit
-${data.amountRemaining?string.currency} z původních ${data.amountHeld?string.currency} v
-${data.loanTermRemaining?c} splátkách z původních ${data.loanTerm?c}.</p>
+<p>Půjčka <@idLoan data=data /> se uzdravila.</p>
+
+<#include "additional-investment-info.ftl">
 
 <#include "additional-loan-info.ftl">
 

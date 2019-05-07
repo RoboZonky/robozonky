@@ -2,8 +2,8 @@
 <#if items?size == 0>
   <p>Oddělení vymáhání <@zonky /> nedodalo žádné informace.</p>
 <#else>
-  <h2>Informace z oddělení vymáhání <@zonky /></h2>
   <table>
+    <caption><h2>Informace z oddělení vymáhání <@zonky /></h2></caption>
     <thead>
       <tr>
         <th>Časová známka</th>

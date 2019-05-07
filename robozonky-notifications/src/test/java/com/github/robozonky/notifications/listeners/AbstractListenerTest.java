@@ -222,6 +222,8 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = Investment.fresh(loan, 1000)
+                .setExpectedInterest(BigDecimal.TEN)
+                .setPaidPenalty(BigDecimal.ZERO)
                 .setInvestmentDate(OffsetDateTime.now())
                 .build();
         // create events for listeners
