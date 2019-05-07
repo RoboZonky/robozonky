@@ -13,7 +13,8 @@
     <tr>
       <th style="padding: 5px; text-align: right;">Celkem</th>
       <th colspan="2" style="padding: 5px; text-align: right;">${data.portfolio.total?string.currency}</th>
-      <th colspan="2" style="padding: 5px; text-align: right;">${data.portfolio.totalRisk?string.currency}</th>
+      <th style="padding: 5px; text-align: right;">${data.portfolio.totalRisk?string.currency}</th>
+      <th style="padding: 5px; text-align: right;">(${data.portfolio.totalShare?string.@interest})</th>
       <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellable?string.currency}</th>
       <th style="padding: 5px; text-align: right;">(${data.portfolio.totalSellableShare?string.@interest})</th>
       <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellableFeeless?string.currency}</th>
