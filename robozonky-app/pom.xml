@@ -66,16 +66,6 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
-      <exclusions>
-        <exclusion> <!-- We have our own, Jakarta EE based -->
-          <groupId>org.jboss.spec.javax.ws.rs</groupId>
-          <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-jackson2-provider</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

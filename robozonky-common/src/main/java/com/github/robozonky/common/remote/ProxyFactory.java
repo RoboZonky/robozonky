@@ -17,6 +17,7 @@
 package com.github.robozonky.common.remote;
 
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.client.ClientBuilder;
 
 import com.github.robozonky.internal.api.Settings;
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +40,7 @@ final class ProxyFactory {
         LOGGER.debug("Set socket timeout to {} ms.", socketTimeout);
         final long connectionTimeout = settings.getConnectionTimeout().toMillis();
         LOGGER.debug("Set connection timeout to {} ms.", connectionTimeout);
-        final ResteasyClientBuilder builder = new ResteasyClientBuilder()
+        final ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder()
                 .readTimeout(socketTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(connectionTimeout, TimeUnit.MILLISECONDS);
         // setup HTTP proxy when required

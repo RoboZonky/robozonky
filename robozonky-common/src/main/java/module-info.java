@@ -6,7 +6,7 @@ module com.github.robozonky.common {
     requires jdk.jfr;
     requires org.apache.logging.log4j;
     requires paging.streams;
-    requires resteasy.client;
+    requires resteasy.client.api;
     requires com.github.robozonky.api;
 
     exports com.github.robozonky.common.async;
