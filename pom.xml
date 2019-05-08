@@ -222,6 +222,10 @@
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -536,6 +540,16 @@
         <groupId>jakarta.xml.bind</groupId>
         <artifactId>jakarta.xml.bind-api</artifactId>
         <version>${jaxb.version}</version>
+        <exclusions>
+          <!--
+            replace with com.sun.activation:jakarta-activation, which includes the API
+            otherwise there are nasty clashes between this and com.sun.mail later
+            -->
+          <exclusion>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.glassfish.jaxb</groupId>
@@ -561,6 +575,11 @@
         <groupId>jakarta.annotation</groupId>
         <artifactId>jakarta.annotation-api</artifactId>
         <version>1.3.4</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.enterprise</groupId>
+        <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        <version>2.0.1</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -707,6 +726,7 @@
                 <ignoredUnusedDeclaredDependency>com.sun.activation</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>jakarta.xml.bind</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>jakarta.annotation</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>jakarta.enterprise</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
