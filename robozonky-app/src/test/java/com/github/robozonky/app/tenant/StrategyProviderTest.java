@@ -18,12 +18,12 @@ package com.github.robozonky.app.tenant;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import com.google.common.io.Files;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -34,7 +34,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
 
     private static File newStrategyFile() throws IOException {
         final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
-        Files.write(MINIMAL_STRATEGY, strategy, Defaults.CHARSET);
+        Files.write(strategy.toPath(), MINIMAL_STRATEGY.getBytes(Defaults.CHARSET));
         return strategy;
     }
 
