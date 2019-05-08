@@ -47,6 +47,7 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
 import static java.util.Map.entry;
 
 final class Util {
@@ -144,7 +145,9 @@ final class Util {
     }
 
     private static BigDecimal getTotalPaid(final Investment i) {
-        return i.getPaidInterest().add(i.getPaidPrincipal()).add(i.getPaidPenalty());
+        return i.getPaidInterest()
+                .add(i.getPaidPrincipal())
+                .add(i.getPaidPenalty());
     }
 
     private static long getMonthsElapsed(final Investment i) {
@@ -154,13 +157,20 @@ final class Util {
     public static Map<String, Object> getLoanData(final Investment i, final MarketplaceLoan l) {
         final BigDecimal totalPaid = getTotalPaid(i);
         final BigDecimal originalPrincipal = i.getOriginalPrincipal();
+        final BigDecimal balance = i.getSmpSoldFor()
+                .map(soldFor -> {
+                    final BigDecimal partial = minus(totalPaid, originalPrincipal);
+                    final BigDecimal saleFee = i.getSmpFee().orElse(BigDecimal.ZERO);
+                    return minus(plus(partial, soldFor), saleFee);
+                })
+                .orElseGet(() -> minus(totalPaid, originalPrincipal));
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", Util.toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal());
         loanData.put("amountHeld", originalPrincipal);
         loanData.put("amountPaid", totalPaid);
-        loanData.put("balance", minus(totalPaid, originalPrincipal));
+        loanData.put("balance", balance);
         loanData.put("interestExpected", i.getExpectedInterest());
         loanData.put("interestPaid", i.getPaidInterest());
         loanData.put("penaltiesPaid", i.getPaidPenalty());
