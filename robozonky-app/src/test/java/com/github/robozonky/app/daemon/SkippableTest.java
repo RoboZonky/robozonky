@@ -18,6 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import java.util.function.Consumer;
 
+import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -66,6 +67,20 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         assertThat(this.getEventsRequested()).hasSize(1)
                 .first()
                 .isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+    }
+
+    @Test
+    void dies() {
+        final Runnable r = mock(Runnable.class);
+        doThrow(OutOfMemoryError.class).when(r).run();
+        final PowerTenant t = mockTenant();
+        final Consumer<Throwable> c = mock(Consumer.class);
+        final Skippable s = new Skippable(r, t);
+        s.run();
+        verify(c, never()).accept(any());
+        assertThat(this.getEventsRequested()).hasSize(1)
+                .first()
+                .isInstanceOf(RoboZonkyCrashedEvent.class);
     }
 
 }

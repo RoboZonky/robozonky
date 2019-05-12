@@ -39,7 +39,7 @@ class DaemonShutdownHookTest extends AbstractRoboZonkyTest {
                 Thread.sleep(1);
             }
             verify(se).waitUntilTriggered();
-            verify(lifecycle).resume();
+            verify(lifecycle).resumeToShutdown();
         });
     }
 }

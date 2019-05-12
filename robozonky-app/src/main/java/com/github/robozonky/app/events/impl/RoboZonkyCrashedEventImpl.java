@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.app.events.impl;
 
 import java.util.Optional;
 
-/**
- * Fired before the application forcibly terminates due to an error.
- */
-public interface RoboZonkyCrashedEvent extends GlobalEvent {
+import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 
-    Optional<Throwable> getCause();
+final class RoboZonkyCrashedEventImpl extends AbstractEventImpl implements RoboZonkyCrashedEvent {
+
+    private final Throwable cause;
+
+    public RoboZonkyCrashedEventImpl(final Throwable cause) {
+        this.cause = cause;
+    }
+
+    @Override
+    public Optional<Throwable> getCause() {
+        return Optional.ofNullable(this.cause);
+    }
 }

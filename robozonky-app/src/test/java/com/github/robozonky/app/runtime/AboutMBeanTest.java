@@ -40,7 +40,7 @@ class AboutMBeanTest extends AbstractEventLeveragingTest {
             softly.assertThat(r.getLastUpdated()).isBeforeOrEqualTo(OffsetDateTime.now());
         });
         r.stopDaemon();
-        verify(l).resume();
+        verify(l).resumeToShutdown();
     }
 
 }

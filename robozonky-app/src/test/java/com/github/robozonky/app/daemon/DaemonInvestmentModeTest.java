@@ -50,7 +50,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             doNothing().when(d).submit(any(), any(), any(), any(), any(), any());
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
-            lifecycle.resume(); // unblock
+            lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             // call all the jobs and daemons we know about
             verify(d, times(2)).submit(any(), any(SimplePayload.class), any(), any(), any(), any());
