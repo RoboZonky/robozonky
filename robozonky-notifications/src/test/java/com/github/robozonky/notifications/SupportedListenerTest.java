@@ -27,8 +27,9 @@ class SupportedListenerTest {
     @Test
     void globalGagOverride() {
         final SupportedListener[] overriding = new SupportedListener[] {
-                SupportedListener.UPDATE_DETECTED, SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
-                SupportedListener.ENDING, SupportedListener.INITIALIZED, SupportedListener.WEEKLY_SUMMARY
+                SupportedListener.UPDATE_DETECTED, SupportedListener.CRASHED,
+                SupportedListener.EXPERIMENTAL_UPDATE_DETECTED, SupportedListener.ENDING, SupportedListener.INITIALIZED,
+                SupportedListener.WEEKLY_SUMMARY
         };
         Arrays.stream(SupportedListener.values()).forEach(s -> {
             final boolean shouldOverride = Arrays.asList(overriding).contains(s);

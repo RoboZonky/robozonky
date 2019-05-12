@@ -46,6 +46,7 @@ import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedE
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
@@ -364,6 +365,12 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void robozonkyDaemonFailed() {
         final RoboZonkyDaemonFailedEvent e = EventFactory.roboZonkyDaemonFailed(new IllegalArgumentException());
+        assertThat(e.getCause()).isNotNull();
+    }
+
+    @Test
+    void robozonkyCrashed() {
+        final RoboZonkyCrashedEvent e = EventFactory.roboZonkyCrashed(new OutOfMemoryError());
         assertThat(e.getCause()).isNotNull();
     }
 
