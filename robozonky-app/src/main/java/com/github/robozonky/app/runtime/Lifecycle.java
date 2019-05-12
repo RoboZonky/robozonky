@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.Events;
@@ -42,6 +43,7 @@ public class Lifecycle {
     private final CountDownLatch circuitBreaker;
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
+    private final AtomicBoolean failed = new AtomicBoolean(false);
 
     /**
      * For testing purposes only.
@@ -139,10 +141,15 @@ public class Lifecycle {
         circuitBreaker.countDown();
     }
 
+    public boolean isFailed() {
+        return failed.get();
+    }
+
     /**
      * Triggered by the deamon to make {@link #suspend()} unblock.
      */
     public void resumeToFail(final Throwable t) {
+        failed.set(true);
         LOGGER.error("Caught unexpected error, terminating.", t);
         Events.global().fire(EventFactory.roboZonkyCrashed(t));
         LOGGER.debug("Asking application to die through {}.", this);

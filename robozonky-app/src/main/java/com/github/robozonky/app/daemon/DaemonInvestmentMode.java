@@ -117,8 +117,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");
-            // signal the end of standard operation
-            return ReturnCode.OK;
+            // signal the end of operation
+            return (lifecycle.isFailed()) ? ReturnCode.ERROR_UNEXPECTED : ReturnCode.OK;
         }).getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 
