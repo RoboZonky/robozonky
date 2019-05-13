@@ -73,7 +73,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setAnnuity(BigDecimal.TEN)
             .setRating(Rating.A)
             .setInterestRate(Ratio.fromPercentage(Rating.A.getCode()))
-            .setPurpose(Purpose.CESTOVANI)
+            .setPurpose(Purpose.TRAVEL)
             .setRegion(Region.JIHOMORAVSKY)
             .setMainIncomeType(MainIncomeType.OTHERS_MAIN)
             .setName("")

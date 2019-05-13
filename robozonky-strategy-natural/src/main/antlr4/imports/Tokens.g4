@@ -173,17 +173,16 @@ INCOME_STUDENT              : 'student';
 INCOME_UNEMPLOYED           : 'bez zaměstnání';
 
 // loan purpose types
-PURPOSE                         : (PURPOSE_AUTO_MOTO | PURPOSE_CESTOVANI | PURPOSE_DOMACNOST | PURPOSE_ELEKTRONIKA
-                                    | PURPOSE_REFINANCOVANI_PUJCEK | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI
-                                    | PURPOSE_ZDRAVI);
+PURPOSE                         : (PURPOSE_AUTO_MOTO | PURPOSE_TRAVEL | PURPOSE_HOUSEHOLD | PURPOSE_ELECTRONICS
+                                    | PURPOSE_REFINANCING | PURPOSE_OWN_PROJECT | PURPOSE_EDUCATION | PURPOSE_HEALTH);
 PURPOSE_AUTO_MOTO               : 'auto-moto';
-PURPOSE_CESTOVANI               : 'cestování';
-PURPOSE_DOMACNOST               : 'domácnost';
-PURPOSE_ELEKTRONIKA             : 'elektronika';
-PURPOSE_REFINANCOVANI_PUJCEK    : 'refinancování půjček';
-PURPOSE_VLASTNI_PROJEKT         : 'vlastní projekt';
-PURPOSE_VZDELANI                : 'vzdělání';
-PURPOSE_ZDRAVI                  : 'zdraví';
+PURPOSE_TRAVEL                  : 'cestování';
+PURPOSE_HOUSEHOLD               : 'domácnost';
+PURPOSE_ELECTRONICS             : 'elektronika';
+PURPOSE_REFINANCING             : 'refinancování půjček';
+PURPOSE_OWN_PROJECT             : 'vlastní projekt';
+PURPOSE_EDUCATION               : 'vzdělání';
+PURPOSE_HEALTH                  : 'zdraví';
 
 // shared strings
 KC        : ' Kč' ;
