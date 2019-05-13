@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
@@ -40,12 +41,20 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final PowerTenant tenant;
     private final Investor investor;
     private final Duration secondaryMarketplaceCheckPeriod;
+    private final Consumer<Throwable> shutdownCall;
 
-    public DaemonInvestmentMode(final PowerTenant tenant, final Investor investor,
-                                final Duration secondaryMarketplaceCheckPeriod) {
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
+                                final Investor investor, final Duration secondaryMarketplaceCheckPeriod) {
+        this.shutdownCall = shutdownCall;
         this.tenant = tenant;
         this.investor = investor;
         this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
+    }
+
+    DaemonInvestmentMode(final PowerTenant tenant, final Investor investor,
+                         final Duration secondaryMarketplaceCheckPeriod) {
+        this(t -> {
+        }, tenant, investor, secondaryMarketplaceCheckPeriod);
     }
 
     private static Scheduler getSchedulerForJob(final Job job) {
@@ -73,7 +82,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
                 final Duration initialDelay, final Duration timeout) {
         LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
                      executor, repeatAfter, initialDelay, timeout);
-        executor.submit(new Skippable(r, type, tenant), repeatAfter, initialDelay, timeout);
+        executor.submit(new Skippable(r, type, tenant, shutdownCall), repeatAfter, initialDelay, timeout);
     }
 
     private void scheduleJobs() {
@@ -108,8 +117,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");
-            // signal the end of standard operation
-            return ReturnCode.OK;
+            // signal the end of operation
+            return (lifecycle.isFailed()) ? ReturnCode.ERROR_UNEXPECTED : ReturnCode.OK;
         }).getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 

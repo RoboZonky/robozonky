@@ -31,7 +31,7 @@ final class About extends AbstractBaseMBean implements AboutMBean {
 
     @Override
     public void stopDaemon() {
-        lifecycle.resume();
+        lifecycle.resumeToShutdown();
     }
 
     @Override
