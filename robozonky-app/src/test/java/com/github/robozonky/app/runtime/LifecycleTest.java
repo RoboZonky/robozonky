@@ -82,12 +82,16 @@ class LifecycleTest extends AbstractEventLeveragingTest {
     }
 
     @Test
-    void resumeToFail() {
+    void suspendAndResumeToFail() throws InterruptedException {
+        assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNull();
         final MainControl mc = mock(MainControl.class);
-        final CountDownLatch cdl = new CountDownLatch(1);
+        final CountDownLatch cdl = mock(CountDownLatch.class);
+        doThrow(InterruptedException.class).when(cdl).await();
         final Lifecycle c = new Lifecycle(cdl, new ShutdownHook());
-        c.resumeToFail(new OutOfMemoryError());
-        assertThat(cdl.getCount()).isEqualTo(0);
+        assertThat(c.isFailed()).isFalse();
+        c.suspend();
+        verify(cdl).countDown();
+        assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNotNull();
         assertThat(c.isFailed()).isTrue();
         assertThat(getEventsRequested())
                 .hasSize(1)
