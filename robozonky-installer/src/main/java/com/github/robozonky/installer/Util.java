@@ -85,6 +85,8 @@ final class Util {
         p.setProperty("email.loanDefaulted.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
         p.setProperty("email.balanceTracker.targetBalance", "200");
+        p.setProperty("email.roboZonkyCrashed.enabled", "true");
+        p.setProperty("email.roboZonkyCrashed.hourlyMaxEmails", "-1");
         p.setProperty("email.roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));
         p.setProperty("email.roboZonkyDaemonFailed.hourlyMaxEmails", "20");
         p.setProperty("email.weeklySummary.enabled", toBoolean(Variables.EMAIL_IS_WEEKLY.getValue(data)));

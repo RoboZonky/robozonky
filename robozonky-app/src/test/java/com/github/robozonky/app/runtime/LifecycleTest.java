@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,6 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import org.junit.jupiter.api.Assertions;
@@ -77,5 +79,23 @@ class LifecycleTest extends AbstractEventLeveragingTest {
             softly.assertThat(h.isOnline()).isTrue();
         });
         verify(hooks).register(any()); // 2 shutdown hooks have been registered
+    }
+
+    @Test
+    void suspendAndResumeToFail() throws InterruptedException {
+        assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNull();
+        final MainControl mc = mock(MainControl.class);
+        final CountDownLatch cdl = mock(CountDownLatch.class);
+        doThrow(InterruptedException.class).when(cdl).await();
+        final Lifecycle c = new Lifecycle(cdl, new ShutdownHook());
+        assertThat(c.isFailed()).isFalse();
+        c.suspend();
+        verify(cdl).countDown();
+        assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNotNull();
+        assertThat(c.isFailed()).isTrue();
+        assertThat(getEventsRequested())
+                .hasSize(1)
+                .first()
+                .isInstanceOf(RoboZonkyCrashedEvent.class);
     }
 }

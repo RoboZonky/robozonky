@@ -19,17 +19,14 @@ package com.github.robozonky.app.events.impl;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 
 final class ReservationAcceptationRecommendedEventImpl extends AbstractEventImpl
         implements ReservationAcceptationRecommendedEvent {
 
-    private final Reservation reservation;
     private final BigDecimal recommendation;
 
     public ReservationAcceptationRecommendedEventImpl(final RecommendedReservation recommendation) {
-        this.reservation = recommendation.descriptor().item();
         this.recommendation = recommendation.amount();
     }
 
@@ -38,7 +35,4 @@ final class ReservationAcceptationRecommendedEventImpl extends AbstractEventImpl
         return recommendation;
     }
 
-    public Reservation getReservation() {
-        return reservation;
-    }
 }

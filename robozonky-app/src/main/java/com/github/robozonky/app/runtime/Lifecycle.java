@@ -21,8 +21,11 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.common.management.Management;
 import com.github.robozonky.common.management.ManagementBean;
 import io.vavr.Lazy;
@@ -40,6 +43,7 @@ public class Lifecycle {
     private final CountDownLatch circuitBreaker;
     private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
+    private final AtomicBoolean failed = new AtomicBoolean(false);
 
     /**
      * For testing purposes only.
@@ -52,7 +56,7 @@ public class Lifecycle {
         this(new CountDownLatch(1), hooks);
     }
 
-    private Lifecycle(final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
+    Lifecycle(final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
         this(new MainControl(), circuitBreaker, hooks);
     }
 
@@ -114,9 +118,10 @@ public class Lifecycle {
     }
 
     /**
-     * Suspend thread until {@link #resume()} is called.
+     * Suspend thread until either {@link #resumeToShutdown()} or {@link #resumeToFail(Throwable)} is called.
      */
     public void suspend() {
+        Thread.setDefaultUncaughtExceptionHandler((e, err) -> resumeToFail(err));
         final Thread t = shutdownHook.get();
         Runtime.getRuntime().addShutdownHook(t);
         HOOKS.add(t);
@@ -124,15 +129,30 @@ public class Lifecycle {
         try {
             circuitBreaker.await();
         } catch (final InterruptedException ex) {
-            LOGGER.warn("Terminating robot unexpectedly.", ex);
+            resumeToFail(ex);
         }
     }
 
     /**
      * Triggered by the daemon to make {@link #suspend()} unblock.
      */
-    public void resume() {
+    public void resumeToShutdown() {
         LOGGER.debug("Asking application to shut down cleanly through {}.", this);
+        circuitBreaker.countDown();
+    }
+
+    public boolean isFailed() {
+        return failed.get();
+    }
+
+    /**
+     * Triggered by the deamon to make {@link #suspend()} unblock.
+     */
+    public void resumeToFail(final Throwable t) {
+        failed.set(true);
+        LOGGER.error("Caught unexpected error, terminating.", t);
+        Events.global().fire(EventFactory.roboZonkyCrashed(t));
+        LOGGER.debug("Asking application to die through {}.", this);
         circuitBreaker.countDown();
     }
 

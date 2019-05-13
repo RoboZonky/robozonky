@@ -59,13 +59,22 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final Runnable r = mock(Runnable.class);
         doThrow(IllegalStateException.class).when(r).run();
         final PowerTenant t = mockTenant();
-        final Consumer<Throwable> c = mock(Consumer.class);
         final Skippable s = new Skippable(r, t);
         s.run();
-        verify(c, never()).accept(any());
         assertThat(this.getEventsRequested()).hasSize(1)
                 .first()
                 .isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+    }
+
+    @Test
+    void dies() {
+        final Runnable r = mock(Runnable.class);
+        doThrow(OutOfMemoryError.class).when(r).run();
+        final PowerTenant t = mockTenant();
+        final Consumer<Throwable> c = mock(Consumer.class);
+        final Skippable s = new Skippable(r, t, c);
+        assertThatThrownBy(s::run).isInstanceOf(OutOfMemoryError.class);
+        verify(c, only()).accept(any());
     }
 
 }
