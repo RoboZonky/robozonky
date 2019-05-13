@@ -56,7 +56,7 @@ public class Lifecycle {
         this(new CountDownLatch(1), hooks);
     }
 
-    private Lifecycle(final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
+    Lifecycle(final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
         this(new MainControl(), circuitBreaker, hooks);
     }
 

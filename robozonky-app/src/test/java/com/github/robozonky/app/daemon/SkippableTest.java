@@ -73,7 +73,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final PowerTenant t = mockTenant();
         final Consumer<Throwable> c = mock(Consumer.class);
         final Skippable s = new Skippable(r, t, c);
-        s.run();
+        assertThatThrownBy(s::run).isInstanceOf(OutOfMemoryError.class);
         verify(c, only()).accept(any());
     }
 

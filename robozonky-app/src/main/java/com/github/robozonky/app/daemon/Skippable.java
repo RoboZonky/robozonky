@@ -69,6 +69,7 @@ final class Skippable implements Runnable {
             tenant.fire(roboZonkyDaemonFailed(ex));
         } catch (final Error er) {
             shutdownCall.accept(er);
+            throw er; // rethrow the error
         } finally {
             event.commit();
         }
