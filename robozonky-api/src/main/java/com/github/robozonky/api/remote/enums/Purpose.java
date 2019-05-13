@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.enums;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -29,32 +30,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public enum Purpose implements BaseEnum {
 
     AUTO_MOTO("auto-moto"),
-    VZDELANI("vzdělání"),
-    CESTOVANI("cestování"),
-    ELEKTRONIKA("elektronika"),
-    ZDRAVI("zdraví"),
-    REFINANCOVANI_PUJCEK("refinancování půjček"),
-    DOMACNOST("domácnost"),
-    VLASTNI_PROJEKT("vlastní projekt"),
-    JINE("jiné");
-
-    static class PurposeDeserializer extends JsonDeserializer<Purpose> {
-
-        @Override
-        public Purpose deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            final int actualId = Integer.parseInt(id) - 1; // purposes in Zonky API are indexed from 1
-            return Purpose.values()[actualId];
-        }
-    }
-
-    public static Purpose findByCode(final String code) {
-        return Stream.of(Purpose.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown loan purpose: " + code));
-    }
+    EDUCATION("vzdělání"),
+    TRAVEL("cestování"),
+    ELECTRONICS("elektronika"),
+    HEALTH("zdraví"),
+    REFINANCING("refinancování půjček"),
+    HOUSEHOLD("domácnost"),
+    OWN_PROJECT("vlastní projekt"),
+    OTHER("jiné");
 
     private final String code;
 
@@ -62,9 +45,32 @@ public enum Purpose implements BaseEnum {
         this.code = code;
     }
 
+    private static Optional<Purpose> maybeFindByCode(final String code) {
+        return Stream.of(Purpose.values())
+                .filter(r -> Objects.equals(r.code, code))
+                .findFirst();
+    }
+
+    public static Purpose findByCode(final String code) {
+        return maybeFindByCode(code).orElseThrow(() -> new IllegalArgumentException("Unknown loan purpose: " + code));
+    }
+
     @Override
     public String getCode() {
         return code;
     }
 
+    // TODO remove once Zonky finishes migration to the new type
+    static class PurposeDeserializer extends JsonDeserializer<Purpose> {
+
+        @Override
+        public Purpose deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
+                throws IOException {
+            final String id = jsonParser.getText();
+            return maybeFindByCode(id).orElseGet(() -> {
+                final int actualId = Integer.parseInt(id) - 1; // purposes in Zonky API are indexed from 1
+                return Purpose.values()[actualId];
+            });
+        }
+    }
 }

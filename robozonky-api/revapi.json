@@ -216,6 +216,45 @@
         "code": "java.method.addedToInterface",
         "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareSellableFeeless(com.github.robozonky.api.remote.enums.Rating)",
         "justification": "Portfolio now also carries information about sellable participations."
+      },{
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.CESTOVANI",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.DOMACNOST",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.ELEKTRONIKA",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.JINE",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.REFINANCOVANI_PUJCEK",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.VLASTNI_PROJEKT",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.VZDELANI",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Purpose.ZDRAVI",
+        "justification": "Zonky API updates turn Purpose from INT to a real type."
       }
     ]
   }
