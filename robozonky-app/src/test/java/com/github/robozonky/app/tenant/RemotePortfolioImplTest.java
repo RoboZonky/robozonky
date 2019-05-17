@@ -20,6 +20,11 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -33,7 +38,12 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Tuple;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -41,6 +51,59 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
+
+    static Stream<Arguments> parameters() {
+        return Stream.of(
+            Arguments.arguments(0, 0, 2),
+            Arguments.arguments(0, 1, 2),
+            Arguments.arguments(0, 59, 2),
+            Arguments.arguments(1, 0, 2),
+            Arguments.arguments(1, 1, 2),
+            Arguments.arguments(1, 59, 2),
+            Arguments.arguments(2, 0, 2),
+            Arguments.arguments(2, 1, 2),
+            Arguments.arguments(2, 59, 2),
+            Arguments.arguments(7, 0, 7),
+            Arguments.arguments(7, 1, 7),
+            Arguments.arguments(7, 59, 7),
+            Arguments.arguments(8, 0, 11),
+            Arguments.arguments(8, 1, 11),
+            Arguments.arguments(8, 59, 11),
+            Arguments.arguments(9, 0, 11),
+            Arguments.arguments(9, 1, 11),
+            Arguments.arguments(9, 59, 11),
+            Arguments.arguments(10, 0, 11),
+            Arguments.arguments(10, 1, 11),
+            Arguments.arguments(10, 59, 11),
+            Arguments.arguments(11, 0, 11),
+            Arguments.arguments(11, 1, 11),
+            Arguments.arguments(11, 59, 11),
+            Arguments.arguments(22, 0, 22),
+            Arguments.arguments(22, 1, 22),
+            Arguments.arguments(22, 59, 22),
+            Arguments.arguments(23, 0, 2),
+            Arguments.arguments(23, 1, 2),
+            Arguments.arguments(23, 59, 2)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameters")
+    void sellabilityRefresh(final int serverHourWhenChecking, final int serverMinuteWhenChecking,
+                            final int expectedHour) {
+        final ZoneId zone = ZoneId.of("Europe/Prague");
+        final ZonedDateTime checkTime = LocalTime.of(serverHourWhenChecking, serverMinuteWhenChecking, 0)
+                .atDate(LocalDate.now())
+                .atZone(zone);
+        final ZonedDateTime calculationTime = checkTime.minus(RemotePortfolioImpl.SELLABLE_REFRESH);
+        DateUtil.setSystemClock(Clock.fixed(calculationTime.toInstant(), zone));
+        final Duration result =
+                RemotePortfolioImpl.getSellableRefresh(Tuple.of(Collections.emptyMap(), Collections.emptyMap()));
+        final ZonedDateTime actual = calculationTime.plus(result);
+        assertThat(actual.getHour())
+                .as("Refresh not triggered when expected, was: " + actual)
+                .isEqualTo(expectedHour);
+    }
 
     @Test
     void throwsWhenRemoteFails() {

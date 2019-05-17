@@ -44,22 +44,22 @@ class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
     }
 
     @Test
-    void beforeTuesday1am() {
-        final Instant tuesdayEarlyMorning = LocalDateTime.of(2019, 1, 1, 0, 0)
+    void beforeTuesday6am() {
+        final Instant tuesdayEarlyMorning = LocalDateTime.of(2019, 1, 1, 5, 0)
                 .atZone(Defaults.ZONE_ID)
                 .toInstant();
         setClock(Clock.fixed(tuesdayEarlyMorning, Defaults.ZONE_ID));
-        final Duration untilTuesday1am = summarizer.startIn();
-        assertThat(untilTuesday1am).isEqualTo(Duration.ofHours(1));
+        final Duration untilTuesday6am = summarizer.startIn();
+        assertThat(untilTuesday6am).isEqualTo(Duration.ofHours(1));
     }
 
     @Test
-    void afterTuesday1am() {
-        final Instant tuesdayLaterMorning = LocalDateTime.of(2019, 1, 1, 2, 0)
+    void afterTuesday6am() {
+        final Instant tuesdayLaterMorning = LocalDateTime.of(2019, 1, 1, 7, 0)
                 .atZone(Defaults.ZONE_ID)
                 .toInstant();
         setClock(Clock.fixed(tuesdayLaterMorning, Defaults.ZONE_ID));
-        final Duration untilNextTuesday1am = summarizer.startIn();
-        assertThat(untilNextTuesday1am).isEqualTo(Duration.ofDays(7).minusHours(1));
+        final Duration untilNextTuesday6am = summarizer.startIn();
+        assertThat(untilNextTuesday6am).isEqualTo(Duration.ofDays(7).minusHours(1));
     }
 }

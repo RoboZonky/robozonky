@@ -51,3 +51,6 @@
   </tbody>
 </table>
 
+<p><small>Pozn.: Jsou-li pole "Prodatelné" vynulovaná, robot se zrovna trefil do chvíle, kdy Zonky aktualizuje portfolio
+a dočasně vypíná sekundár. Této situaci nelze zcela zabránit. V pozdějších notifikacích by již měla být čísla
+správně.</small></p>

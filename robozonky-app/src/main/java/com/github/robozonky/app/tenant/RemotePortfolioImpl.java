@@ -18,6 +18,10 @@ package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -33,6 +37,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.common.async.Reloadable;
 import com.github.robozonky.common.tenant.RemotePortfolio;
 import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 class RemotePortfolioImpl implements RemotePortfolio {
 
     private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
+    static final Duration SELLABLE_REFRESH = Duration.ofHours(1);
 
     private final Reloadable<RemoteData> portfolio;
     private final Reloadable<Map<Rating, BigDecimal>> atRisk;
@@ -63,7 +69,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .async()
                 .build();
         this.sellable = Reloadable.with(() -> Util.getAmountsSellable(tenant))
-                .reloadAfter(Duration.ofMinutes(60)) // not so important, possibly very long, allow for delay
+                .reloadAfter(RemotePortfolioImpl::getSellableRefresh)
                 .finishWith(this::refreshSellable)
                 .async()
                 .build();
@@ -71,6 +77,43 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .finishWith(po -> LOGGER.debug("New portfolio overview: {}.", po))
                 .reloadAfter(Duration.ofMinutes(5))
                 .build();
+    }
+
+    /**
+     * Zonky portfolio refresh usually runs at midnight and at 9am. During that time, Zonky portfolio will report
+     * zero sellable participations, as participation sale is forbidden at the time. Therefore we will avoid updating
+     * sellables during that time.
+     * @param old
+     * @return Duration from now until such a time when the sellable info needs to be refreshed.
+     */
+    static Duration getSellableRefresh(final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> old) {
+        final OffsetDateTime now = DateUtil.offsetNow();
+        final ZoneId zonkyZone = ZoneId.of("Europe/Prague");
+        final ZonedDateTime zonkyServerTimeWhenNextRefresh = now.atZoneSameInstant(zonkyZone)
+                .plus(SELLABLE_REFRESH);
+        final int refreshHour = zonkyServerTimeWhenNextRefresh.getHour();
+        if (refreshHour > 22) { // ignore 23:00-23:59
+            LOGGER.debug("Sellable refresh will wait until 2am the next day.");
+            final ZonedDateTime target = LocalTime.of(2, 00)
+                    .atDate(now.toLocalDate().plusDays(1))
+                    .atZone(zonkyZone);
+            return Duration.between(now, target);
+        } else if (refreshHour < 2) { // ignore 0:00-02:00
+            LOGGER.debug("Sellable refresh will wait until 2am.");
+            final ZonedDateTime target = LocalTime.of(2, 00)
+                    .atDate(now.toLocalDate())
+                    .atZone(zonkyZone);
+            return Duration.between(now, target);
+        } else if (refreshHour > 7 && refreshHour < 11) { // ignore 8:00-11:00
+            LOGGER.debug("Sellable refresh will wait until 11am.");
+            final ZonedDateTime target = LocalTime.of(11, 00)
+                    .atDate(now.toLocalDate())
+                    .atZone(zonkyZone);
+            return Duration.between(now, target);
+        } else { // check an hour from now
+            LOGGER.debug("Sellable refresh will wait for {}.", SELLABLE_REFRESH);
+            return Duration.between(now, zonkyServerTimeWhenNextRefresh);
+        }
     }
 
     private static BigDecimal sum(final OverallPortfolio portfolio) {
