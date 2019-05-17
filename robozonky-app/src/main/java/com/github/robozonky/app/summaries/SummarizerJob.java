@@ -33,9 +33,14 @@ final class SummarizerJob implements TenantJob {
     }
 
     @Override
-    public Duration startIn() { // trigger next tuesday, 1am; tuesday as it's the first day after Zonky's weekend recalc
+    public Duration startIn() {
+        /*
+         * trigger next tuesday, 6am; tuesday as it's the first day after Zonky's weekend recalc; 6am is important,
+         * since it's long after midnight, when Zonky recalculates. triggering any such code during recalculation is
+         * likely to bring some strange inconsistent values.
+         */
         final LocalDateTime date = DateUtil.localNow()
-                .withHour(1)
+                .withHour(6)
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0)

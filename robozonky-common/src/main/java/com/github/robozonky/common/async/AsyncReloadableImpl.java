@@ -42,16 +42,20 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
         super(supplier, reloader, runWhenReloaded, reloadAfter);
     }
 
-    CompletableFuture<Void> refreshIfNotAlreadyRefreshing(final CompletableFuture<Void> old) {
-        if (old == null || old.isDone()) {
+    private synchronized void asyncReload() {
             logger.trace("Starting async reload.");
-            final Runnable asyncOperation = () -> Try.ofSupplier(() -> getOperation().apply(value.get()))
+            Try.ofSupplier(() -> getOperation().apply(value.get()))
                     .peek(v -> processRetrievedValue(v, value::set)) // set the value on success
                     .getOrElseGet(t -> {
-                        logger.warn("Async reload failed, operating with stale value.", t);
+                        logger.debug("Async reload failed, operating with stale value.", t);
                         return null;
                     });
-            return CompletableFuture.runAsync(asyncOperation, Tasks.SUPPORTING.scheduler().getExecutor());
+            logger.trace("Finished async reload.");
+    }
+
+    CompletableFuture<Void> refreshIfNotAlreadyRefreshing(final CompletableFuture<Void> old) {
+        if (old == null || old.isDone()) {
+            return CompletableFuture.runAsync(this::asyncReload, Tasks.SUPPORTING.scheduler().getExecutor());
         } else {
             logger.trace("Reload already in progress on {} with {}.", this, old);
             return old;
@@ -72,10 +76,8 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
             }
         }
         if (needsReload()) { // trigger value retrieval on the background
-            synchronized (this) {
-                final CompletableFuture<Void> currentFuture = future.getAndUpdate(this::refreshIfNotAlreadyRefreshing);
-                logger.debug("Retrieved potentially stale value on {}, while {}.", this, currentFuture);
-            }
+            final CompletableFuture<Void> currentFuture = future.getAndUpdate(this::refreshIfNotAlreadyRefreshing);
+            logger.debug("Retrieved potentially stale value on {}, while {}.", this, currentFuture);
         }
         // return the current value
         return Either.right(value.get());
