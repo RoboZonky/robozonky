@@ -81,7 +81,7 @@ final class TaskDescriptor {
         final Runnable toSubmit = () -> submit(scheduler);
         final Duration delay = firstCall ? initialDelay : delayInBetween;
         final long totalNanos = delay.toNanos();
-        LOGGER.debug("Scheduling {} to happen after {} ns.", toSchedule, totalNanos);
+        LOGGER.trace("Scheduling {} to happen after {} ns.", toSchedule, totalNanos);
         final ScheduledFuture<?> f =
                 scheduler.getSchedulingExecutor().schedule(toSubmit, totalNanos, TimeUnit.NANOSECONDS);
         schedulingCount.increment();
@@ -105,7 +105,7 @@ final class TaskDescriptor {
 
     private Void rescheduleOrFail(final Scheduler scheduler, final Void result, final Throwable failure) {
         if (failure == null) { // reschedule
-            LOGGER.debug("Completed {} successfully.", toSchedule);
+            LOGGER.trace("Completed {} successfully.", toSchedule);
             schedule(scheduler, false);
             successCount.increment();
         } else {
