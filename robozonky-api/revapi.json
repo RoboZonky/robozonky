@@ -216,7 +216,8 @@
         "code": "java.method.addedToInterface",
         "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareSellableFeeless(com.github.robozonky.api.remote.enums.Rating)",
         "justification": "Portfolio now also carries information about sellable participations."
-      },{
+      },
+      {
         "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.enums.Purpose.CESTOVANI",
         "justification": "Zonky API updates turn Purpose from INT to a real type."
@@ -255,6 +256,26 @@
         "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.enums.Purpose.ZDRAVI",
         "justification": "Zonky API updates turn Purpose from INT to a real type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Currency com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getCurrency()",
+        "justification": "Zonky introduces currency on some of the entities."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Currency com.github.robozonky.api.remote.entities.sanitized.Investment::getCurrency()",
+        "justification": "Zonky introduces currency on some of the entities."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setCurrency(java.util.Currency)",
+        "justification": "Zonky introduces currency on some of the entities."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setCurrency(java.util.Currency)",
+        "justification": "Zonky introduces currency on some of the entities."
       }
     ]
   }

@@ -42,4 +42,5 @@ final class MutableReservationImpl extends AbstractBaseLoanImpl<ReservationBuild
     public MyReservation getMyReservation() {
         return myReservation;
     }
+
 }

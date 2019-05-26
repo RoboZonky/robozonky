@@ -22,13 +22,14 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -63,6 +64,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
     // default value for investment date, in case it is null
     private Supplier<LocalDate> investmentDateSupplier = () -> DateUtil.localNow().toLocalDate();
+    private Currency currency;
 
     MutableInvestmentImpl() {
         this.id = RandomUtil.getNextInt(); // simplifies tests which do not have to generate random IDs themselves
@@ -77,6 +79,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     MutableInvestmentImpl(final RawInvestment investment,
                           final Function<Investment, LocalDate> investmentDateSupplier) {
         LOGGER.trace("Sanitizing investment #{} for loan #{}.", investment.getId(), investment.getLoanId());
+        this.currency = investment.getCurrency();
         this.loanId = investment.getLoanId();
         this.id = investment.getId();
         this.currentTerm = investment.getCurrentTerm();
@@ -137,6 +140,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInsuranceActive = loan.isInsuranceActive();
         this.areInstalmentsPostponed = false;
         this.setInsuranceHistory(loan.getInsuranceHistory());
+    }
+
+    @Override
+    public InvestmentBuilder setCurrency(final Currency currency) {
+        this.currency = currency;
+        return this;
     }
 
     @Override
@@ -318,6 +327,11 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         final boolean isEmpty = insurancePolicyPeriods == null || insurancePolicyPeriods.isEmpty();
         this.insuranceHistory = isEmpty ? Collections.emptyList() : new ArrayList<>(insurancePolicyPeriods);
         return this;
+    }
+
+    @Override
+    public Currency getCurrency() {
+        return currency;
     }
 
     @Override

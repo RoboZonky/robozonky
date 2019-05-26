@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Currency;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -27,8 +28,11 @@ import com.github.robozonky.internal.test.RandomUtil;
 
 public class BlockedAmount extends BaseEntity {
 
-    private BigDecimal amount, discount;
-    private int id, loanId;
+    private BigDecimal amount;
+    private BigDecimal discount;
+    private Currency currency;
+    private int id;
+    private int loanId;
     private TransactionCategory category;
     private String loanName;
     private OffsetDateTime dateStart;
@@ -52,6 +56,11 @@ public class BlockedAmount extends BaseEntity {
 
     private BlockedAmount() {
         // for JAXB
+    }
+
+    @XmlElement
+    public Currency getCurrency() {
+        return currency;
     }
 
     @XmlElement

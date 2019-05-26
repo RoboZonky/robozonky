@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.Currency;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -47,6 +48,7 @@ public abstract class BaseLoan extends BaseEntity {
     private double remainingInvestment;
     private double reservedAmount;
     private double zonkyPlusAmount;
+    private Currency currency;
     private String name;
     private String nickName;
     private String story;
@@ -69,6 +71,11 @@ public abstract class BaseLoan extends BaseEntity {
 
     protected BaseLoan() {
         // for JAXB
+    }
+
+    @XmlElement
+    public Currency getCurrency() {
+        return currency;
     }
 
     @XmlElement

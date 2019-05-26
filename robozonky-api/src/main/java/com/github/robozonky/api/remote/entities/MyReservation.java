@@ -17,17 +17,24 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
+import java.util.Currency;
 import javax.xml.bind.annotation.XmlElement;
 
 public class MyReservation extends BaseEntity {
 
     private long id;
+    private Currency currency;
     private OffsetDateTime timeCreated;
     private OffsetDateTime deadline;
     private int reservedAmount;
 
     MyReservation() {
         // for JAXB
+    }
+
+    @XmlElement
+    public Currency getCurrency() {
+        return currency;
     }
 
     @XmlElement
