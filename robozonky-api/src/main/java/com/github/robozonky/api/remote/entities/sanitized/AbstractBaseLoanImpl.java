@@ -21,10 +21,11 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
-import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -52,12 +53,14 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     private Region region;
     private Purpose purpose;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
+    private Currency currency;
 
     AbstractBaseLoanImpl() {
         this.id = RandomUtil.getNextInt(Integer.MAX_VALUE); // simplifies tests which do not need to set IDs themselves
     }
 
     AbstractBaseLoanImpl(final BaseLoan original) {
+        this.currency = original.getCurrency();
         this.activeLoansCount = original.getActiveLoansCount();
         this.amount = (int) original.getAmount();
         this.datePublished = original.getDatePublished();
@@ -87,6 +90,18 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
         this.userId = original.getUserId();
         setInsuranceHistory(original.getInsuranceHistory());
     }
+
+    @Override
+    public T setCurrency(final Currency currency) {
+        this.currency = currency;
+        return (T) this;
+    }
+
+    @Override
+    public Currency getCurrency() {
+        return currency;
+    }
+
 
     @Override
     public MainIncomeType getMainIncomeType() {

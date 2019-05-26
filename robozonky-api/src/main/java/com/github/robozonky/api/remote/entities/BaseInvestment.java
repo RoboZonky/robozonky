@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Currency;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -31,7 +32,10 @@ abstract class BaseInvestment extends BaseEntity {
 
     private long id;
     private int loanId;
-    private BigDecimal amount, additionalAmount, firstAmount;
+    private Currency currency;
+    private BigDecimal amount;
+    private BigDecimal additionalAmount;
+    private BigDecimal firstAmount;
     private InvestmentStatus status;
     private OffsetDateTime timeCreated = OffsetDateTime.MIN;
 
@@ -41,6 +45,7 @@ abstract class BaseInvestment extends BaseEntity {
 
     BaseInvestment(final Investment investment) {
         this.id = investment.getId();
+        this.currency = investment.getCurrency();
         this.loanId = investment.getLoanId();
         this.amount = investment.getOriginalPrincipal();
         this.additionalAmount = BigDecimal.ZERO;
@@ -76,6 +81,11 @@ abstract class BaseInvestment extends BaseEntity {
     @XmlElement
     public BigDecimal getFirstAmount() {
         return firstAmount;
+    }
+
+    @XmlElement
+    public Currency getCurrency() {
+        return currency;
     }
 
     @XmlElement

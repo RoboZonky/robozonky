@@ -20,12 +20,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.Currency;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -82,6 +83,8 @@ public interface Investment {
                 .setInvestmentDate(DateUtil.offsetNow())
                 .build();
     }
+
+    Currency getCurrency();
 
     int getLoanId();
 

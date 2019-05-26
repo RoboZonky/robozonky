@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Currency;
 import java.util.Objects;
 import java.util.Optional;
 import javax.xml.bind.annotation.XmlElement;
@@ -31,7 +32,8 @@ import com.github.robozonky.internal.test.DateUtil;
 
 public class Transaction extends BaseEntity {
 
-    private BigDecimal amount, discount;
+    private BigDecimal amount;
+    private BigDecimal discount;
     private TransactionCategory category;
     private TransactionOrientation orientation;
     @XmlElement
@@ -39,8 +41,10 @@ public class Transaction extends BaseEntity {
     @XmlElement
     private OffsetDateTime revertedTransactionDate;
     private String customMessage;
-    private long id, investmentId;
+    private long id;
+    private long investmentId;
     private int loanId;
+    private Currency currency;
     private String loanName;
     private String nickName;
 
@@ -100,6 +104,11 @@ public class Transaction extends BaseEntity {
 
     private Transaction() {
         // for JAXB
+    }
+
+    @XmlElement
+    public Currency getCurrency() {
+        return currency;
     }
 
     @XmlElement
