@@ -28,7 +28,7 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.async.Tasks;
 import com.github.robozonky.common.management.Management;
-import com.github.robozonky.util.BootstrapUtil;
+import com.github.robozonky.internal.util.BootstrapUtil;
 import io.vavr.Lazy;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;

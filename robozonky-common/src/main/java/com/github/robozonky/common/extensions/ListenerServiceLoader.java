@@ -28,7 +28,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.common.state.TenantState;
-import com.github.robozonky.util.StreamUtil;
+import com.github.robozonky.internal.util.StreamUtil;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

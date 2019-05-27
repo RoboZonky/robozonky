@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.cli;
+package com.github.robozonky.internal.util;
 
-import com.github.robozonky.internal.util.BootstrapUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-final class Main {
+public final class BootstrapUtil {
 
-    public static void main(final String... args) {
-        BootstrapUtil.configureLogging();
-        final ExitCode exit = Cli.parse(args).orElse(ExitCode.NO_OPERATION);
-        System.exit(exit.ordinal());
+    private BootstrapUtil() {
+        // no instances
+    }
+
+    /**
+     * Transfers java.util.logging to Log4j. Make sure no {@link Logger} is instantiated before this method is called.
+     */
+    public static void configureLogging() {
+        System.getProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+        LogManager.getLogger(BootstrapUtil.class).debug("Attempted to forward java.util.logging to Log4j.");
     }
 }

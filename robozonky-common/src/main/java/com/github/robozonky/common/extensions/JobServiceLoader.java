@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.common.jobs.JobService;
 import com.github.robozonky.common.jobs.SimpleJob;
 import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.util.StreamUtil;
+import com.github.robozonky.internal.util.StreamUtil;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

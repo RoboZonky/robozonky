@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.ConfirmationProviderService;
-import com.github.robozonky.util.StreamUtil;
+import com.github.robozonky.internal.util.StreamUtil;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

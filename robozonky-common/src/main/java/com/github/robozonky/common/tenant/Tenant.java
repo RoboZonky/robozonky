@@ -31,7 +31,7 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.util.StreamUtil;
+import com.github.robozonky.internal.util.StreamUtil;
 
 /**
  * Base tenant functionality. All changes made via these methods will be immediately persisted, unless the instance
