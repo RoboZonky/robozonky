@@ -28,11 +28,11 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.state.TenantState;
-import com.github.robozonky.common.tenant.RemotePortfolio;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.remote.Zonky;
+import com.github.robozonky.internal.api.state.InstanceState;
+import com.github.robozonky.internal.api.state.TenantState;
+import com.github.robozonky.internal.api.tenant.RemotePortfolio;
+import com.github.robozonky.internal.api.tenant.Tenant;
 
 public class TestingTenant implements Tenant {
 

@@ -18,7 +18,7 @@ package com.github.robozonky.app.version;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.SimpleJob;
+import com.github.robozonky.internal.api.jobs.SimpleJob;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

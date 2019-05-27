@@ -20,9 +20,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.common.jobs.JobService;
-import com.github.robozonky.common.jobs.SimpleJob;
-import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.internal.api.jobs.JobService;
+import com.github.robozonky.internal.api.jobs.SimpleJob;
+import com.github.robozonky.internal.api.jobs.TenantJob;
 
 /**
  * Reads {@link EventFiringQueue} in regular intervals and fires the stored {@link Event}s using {@link EventFiring}.

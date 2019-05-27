@@ -23,9 +23,9 @@ import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.common.jobs.TenantPayload;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.jobs.TenantPayload;
+import com.github.robozonky.internal.api.remote.Zonky;
+import com.github.robozonky.internal.api.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

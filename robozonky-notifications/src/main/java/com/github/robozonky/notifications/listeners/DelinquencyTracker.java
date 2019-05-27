@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.robozonky.notifications.listeners;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.state.TenantState;
+import com.github.robozonky.internal.api.state.TenantState;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.notifications.Target;
 

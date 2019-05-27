@@ -18,8 +18,8 @@ package com.github.robozonky.app.transactions;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
+import com.github.robozonky.internal.api.jobs.TenantJob;
+import com.github.robozonky.internal.api.jobs.TenantPayload;
 
 final class TransactionProcessingJob implements TenantJob {
 

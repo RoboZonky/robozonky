@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.tenant.Tenant;
 
 final class SummaryBuilder {
 

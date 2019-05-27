@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.common.async.Tasks;
-import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.api.async.Refreshable;
+import com.github.robozonky.internal.api.async.Tasks;
+import com.github.robozonky.internal.api.remote.ApiProvider;
 import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.Lazy;
 import io.vavr.control.Try;

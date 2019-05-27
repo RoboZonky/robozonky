@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.async.Reloadable;
-import com.github.robozonky.common.remote.Select;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.async.Reloadable;
+import com.github.robozonky.internal.api.remote.Select;
+import com.github.robozonky.internal.api.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

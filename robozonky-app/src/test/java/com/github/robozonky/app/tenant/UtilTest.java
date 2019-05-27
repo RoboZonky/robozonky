@@ -29,9 +29,9 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.remote.Select;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.remote.Select;
+import com.github.robozonky.internal.api.remote.Zonky;
+import com.github.robozonky.internal.api.tenant.Tenant;
 import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 

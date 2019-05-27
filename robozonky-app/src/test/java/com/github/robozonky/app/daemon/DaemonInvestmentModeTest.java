@@ -27,7 +27,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.common.jobs.SimplePayload;
+import com.github.robozonky.internal.api.jobs.SimplePayload;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

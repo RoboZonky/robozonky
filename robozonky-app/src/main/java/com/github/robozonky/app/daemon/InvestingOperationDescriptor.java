@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.tenant.Tenant;
 import jdk.jfr.Event;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {

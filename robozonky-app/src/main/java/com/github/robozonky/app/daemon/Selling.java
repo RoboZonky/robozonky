@@ -30,9 +30,9 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.common.jobs.TenantPayload;
-import com.github.robozonky.common.remote.Select;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.jobs.TenantPayload;
+import com.github.robozonky.internal.api.remote.Select;
+import com.github.robozonky.internal.api.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

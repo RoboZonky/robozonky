@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.common.async.Refreshable;
+import com.github.robozonky.internal.api.async.Refreshable;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;

@@ -19,7 +19,7 @@ package com.github.robozonky.notifications;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.common.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.api.extensions.ListenerServiceLoader;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

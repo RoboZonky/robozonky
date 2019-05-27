@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.state.StateModifier;
+import com.github.robozonky.internal.api.state.InstanceState;
+import com.github.robozonky.internal.api.state.StateModifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

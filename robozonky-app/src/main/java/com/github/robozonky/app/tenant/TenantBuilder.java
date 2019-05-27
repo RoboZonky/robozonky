@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.internal.api.remote.ApiProvider;
+import com.github.robozonky.internal.api.secrets.SecretProvider;
 
 public final class TenantBuilder {
 

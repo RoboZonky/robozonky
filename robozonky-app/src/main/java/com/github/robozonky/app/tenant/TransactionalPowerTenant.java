@@ -18,9 +18,9 @@ package com.github.robozonky.app.tenant;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.common.tenant.LazyEvent;
-import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.common.tenant.TransactionalTenant;
+import com.github.robozonky.internal.api.tenant.LazyEvent;
+import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.api.tenant.TransactionalTenant;
 
 /**
  * This add the semantics of {@link TransactionalTenant} to firing {@link Event}s as well. Unless {@link #commit()} is

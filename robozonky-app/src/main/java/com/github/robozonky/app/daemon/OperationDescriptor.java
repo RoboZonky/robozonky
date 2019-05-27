@@ -19,7 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.tenant.Tenant;
 import jdk.jfr.Event;
 
 interface OperationDescriptor<T, S> {

@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.async.Tasks;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.api.async.Tasks;
+import com.github.robozonky.internal.api.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;

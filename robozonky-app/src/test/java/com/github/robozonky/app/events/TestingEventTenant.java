@@ -19,8 +19,8 @@ package com.github.robozonky.app.events;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.internal.api.remote.Zonky;
+import com.github.robozonky.internal.api.tenant.LazyEvent;
 import com.github.robozonky.test.TestingTenant;
 
 class TestingEventTenant extends TestingTenant implements PowerTenant {

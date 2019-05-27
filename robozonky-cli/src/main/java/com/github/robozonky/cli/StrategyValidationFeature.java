@@ -22,8 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.atomic.LongAdder;
 
-import com.github.robozonky.common.extensions.StrategyLoader;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.api.extensions.StrategyLoader;
 import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;

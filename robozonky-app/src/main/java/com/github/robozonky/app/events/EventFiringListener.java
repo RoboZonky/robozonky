@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.robozonky.app.events;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.internal.api.tenant.LazyEvent;
 
 /**
  * Allows to track movement of an {@link Event} through the event pipeline.

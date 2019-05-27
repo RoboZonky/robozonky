@@ -20,9 +20,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.common.jobs.JobService;
-import com.github.robozonky.common.jobs.SimpleJob;
-import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.internal.api.jobs.JobService;
+import com.github.robozonky.internal.api.jobs.SimpleJob;
+import com.github.robozonky.internal.api.jobs.TenantJob;
 
 public final class ReservationsJobService implements JobService {
 

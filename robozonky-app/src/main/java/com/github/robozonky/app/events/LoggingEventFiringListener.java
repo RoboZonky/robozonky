@@ -19,7 +19,7 @@ package com.github.robozonky.app.events;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.internal.api.tenant.LazyEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

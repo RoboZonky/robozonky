@@ -27,9 +27,9 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.common.async.Tasks;
-import com.github.robozonky.common.extensions.StrategyLoader;
+import com.github.robozonky.internal.api.async.Refreshable;
+import com.github.robozonky.internal.api.async.Tasks;
+import com.github.robozonky.internal.api.extensions.StrategyLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

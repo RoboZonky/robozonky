@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.common.async.Refreshable;
+import com.github.robozonky.internal.api.async.Refreshable;
 import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
 
