@@ -24,9 +24,9 @@ import java.time.OffsetDateTime;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

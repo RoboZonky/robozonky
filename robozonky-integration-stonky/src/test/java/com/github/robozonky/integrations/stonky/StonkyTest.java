@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.drive.model.File;

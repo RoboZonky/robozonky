@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import com.github.robozonky.internal.api.jobs.JobService;
+import com.github.robozonky.internal.jobs.JobService;
 
 module com.github.robozonky.integration.stonky {
     requires java.ws.rs;

@@ -18,8 +18,8 @@ package com.github.robozonky.app.delinquencies;
 
 import java.time.Duration;
 
-import com.github.robozonky.internal.api.jobs.TenantJob;
-import com.github.robozonky.internal.api.jobs.TenantPayload;
+import com.github.robozonky.internal.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.TenantPayload;
 
 class DelinquencyNotificationJob implements TenantJob {
 

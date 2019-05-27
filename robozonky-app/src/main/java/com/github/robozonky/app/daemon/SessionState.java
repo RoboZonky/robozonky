@@ -23,8 +23,8 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import com.github.robozonky.internal.api.state.InstanceState;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

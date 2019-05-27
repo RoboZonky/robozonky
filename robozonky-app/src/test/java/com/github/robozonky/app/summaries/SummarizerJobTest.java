@@ -21,8 +21,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.jobs.TenantJob;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;

@@ -19,7 +19,7 @@ package com.github.robozonky.app.events;
 import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.tenant.Tenant;
 
 public interface Events {
 

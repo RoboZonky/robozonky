@@ -19,8 +19,8 @@ package com.github.robozonky.app.configuration;
 import java.util.Arrays;
 import java.util.Optional;
 
-import com.github.robozonky.internal.api.secrets.KeyStoreHandler;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

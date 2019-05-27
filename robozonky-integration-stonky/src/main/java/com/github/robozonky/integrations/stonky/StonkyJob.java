@@ -20,10 +20,10 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 
-import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.jobs.TenantJob;
-import com.github.robozonky.internal.api.jobs.TenantPayload;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.TenantPayload;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class StonkyJob implements TenantJob {

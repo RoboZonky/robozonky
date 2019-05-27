@@ -17,8 +17,8 @@
 package com.github.robozonky.app.tenant;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

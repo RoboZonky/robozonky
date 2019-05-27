@@ -39,9 +39,9 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.async.Refreshable;
-import com.github.robozonky.internal.api.jobs.SimplePayload;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.async.Refreshable;
+import com.github.robozonky.internal.jobs.SimplePayload;
 import com.github.robozonky.internal.util.UrlUtil;
 import com.github.robozonky.internal.util.XmlUtil;
 import io.vavr.control.Try;

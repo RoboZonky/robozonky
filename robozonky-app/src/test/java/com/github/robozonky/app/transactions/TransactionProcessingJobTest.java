@@ -18,7 +18,7 @@ package com.github.robozonky.app.transactions;
 
 import java.time.Duration;
 
-import com.github.robozonky.internal.api.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

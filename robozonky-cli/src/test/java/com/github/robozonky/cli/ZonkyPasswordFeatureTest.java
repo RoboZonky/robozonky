@@ -24,11 +24,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.internal.api.remote.ApiProvider;
-import com.github.robozonky.internal.api.remote.OAuth;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.secrets.KeyStoreHandler;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.OAuth;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

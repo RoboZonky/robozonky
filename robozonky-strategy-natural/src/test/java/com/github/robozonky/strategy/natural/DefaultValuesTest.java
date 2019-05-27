@@ -21,9 +21,9 @@ import java.time.Instant;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

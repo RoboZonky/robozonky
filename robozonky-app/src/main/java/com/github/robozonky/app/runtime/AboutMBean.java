@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
-import com.github.robozonky.internal.api.management.BaseMBean;
+import com.github.robozonky.internal.management.BaseMBean;
 
 public interface AboutMBean extends BaseMBean {
 

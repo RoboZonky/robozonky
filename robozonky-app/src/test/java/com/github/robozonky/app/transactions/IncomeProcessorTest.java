@@ -29,10 +29,10 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.api.remote.Select;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.state.InstanceState;
-import com.github.robozonky.internal.api.state.TenantState;
+import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.state.TenantState;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

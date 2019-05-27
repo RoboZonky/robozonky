@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.internal.api.jobs.JobService;
+import com.github.robozonky.internal.jobs.JobService;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

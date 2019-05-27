@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
 
-import com.github.robozonky.internal.api.secrets.KeyStoreHandler;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

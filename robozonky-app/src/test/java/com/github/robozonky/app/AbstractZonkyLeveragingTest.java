@@ -25,7 +25,7 @@ import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.Settings;
 
 import static org.mockito.Mockito.*;
 

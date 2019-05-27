@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.cli.Checker;
-import com.github.robozonky.internal.api.extensions.ConfirmationProviderLoader;
+import com.github.robozonky.internal.extensions.ConfirmationProviderLoader;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 

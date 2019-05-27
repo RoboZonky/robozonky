@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.UUID;
 
-import com.github.robozonky.internal.api.secrets.KeyStoreHandler;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

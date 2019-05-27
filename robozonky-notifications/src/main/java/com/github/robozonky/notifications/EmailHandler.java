@@ -17,7 +17,7 @@
 package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.logging.log4j.LogManager;

@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;

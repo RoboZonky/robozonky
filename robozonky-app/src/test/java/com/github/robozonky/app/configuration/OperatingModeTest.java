@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

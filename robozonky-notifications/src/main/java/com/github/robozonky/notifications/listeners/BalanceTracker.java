@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.api.state.TenantState;
+import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.notifications.Target;
 
 class BalanceTracker {

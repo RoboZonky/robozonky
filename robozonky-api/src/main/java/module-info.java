@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import com.github.robozonky.internal.api.jobs.JobService;
-import com.github.robozonky.internal.api.state.StateCleanerJobService;
+import com.github.robozonky.internal.jobs.JobService;
+import com.github.robozonky.internal.state.StateCleanerJobService;
 
 module com.github.robozonky.api {
     requires java.management;
@@ -40,15 +40,15 @@ module com.github.robozonky.api {
     exports com.github.robozonky.api.remote.entities.sanitized;
     exports com.github.robozonky.api.remote.enums;
     exports com.github.robozonky.api.strategies;
-    exports com.github.robozonky.internal.api;
-    exports com.github.robozonky.internal.api.async;
-    exports com.github.robozonky.internal.api.extensions;
-    exports com.github.robozonky.internal.api.jobs;
-    exports com.github.robozonky.internal.api.management;
-    exports com.github.robozonky.internal.api.remote;
-    exports com.github.robozonky.internal.api.secrets;
-    exports com.github.robozonky.internal.api.state;
-    exports com.github.robozonky.internal.api.tenant;
+    exports com.github.robozonky.internal;
+    exports com.github.robozonky.internal.async;
+    exports com.github.robozonky.internal.extensions;
+    exports com.github.robozonky.internal.jobs;
+    exports com.github.robozonky.internal.management;
+    exports com.github.robozonky.internal.remote;
+    exports com.github.robozonky.internal.secrets;
+    exports com.github.robozonky.internal.state;
+    exports com.github.robozonky.internal.tenant;
     exports com.github.robozonky.internal.test;
     exports com.github.robozonky.internal.util;
 

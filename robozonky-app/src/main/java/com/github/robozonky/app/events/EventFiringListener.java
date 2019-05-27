@@ -18,7 +18,7 @@ package com.github.robozonky.app.events;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.internal.api.tenant.LazyEvent;
+import com.github.robozonky.internal.tenant.LazyEvent;
 
 /**
  * Allows to track movement of an {@link Event} through the event pipeline.

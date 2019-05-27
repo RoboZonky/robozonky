@@ -28,11 +28,11 @@ import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TenantBuilder;
-import com.github.robozonky.internal.api.extensions.ConfirmationProviderLoader;
-import com.github.robozonky.internal.api.extensions.ListenerServiceLoader;
-import com.github.robozonky.internal.api.secrets.Credentials;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.extensions.ConfirmationProviderLoader;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.secrets.Credentials;
+import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

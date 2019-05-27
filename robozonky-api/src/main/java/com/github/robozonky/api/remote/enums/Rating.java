@@ -27,8 +27,8 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.test.DateUtil;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;

@@ -23,7 +23,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.app.events.Events;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

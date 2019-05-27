@@ -19,9 +19,9 @@ package com.github.robozonky.cli;
 import java.io.File;
 import java.util.Optional;
 
-import com.github.robozonky.internal.api.remote.ApiProvider;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "zonky-credentials", description = ZonkyPasswordFeature.DESCRIPTION)

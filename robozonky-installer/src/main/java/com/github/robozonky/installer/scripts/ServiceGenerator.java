@@ -22,7 +22,7 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import freemarker.template.TemplateException;
 
 import static java.util.Map.entry;

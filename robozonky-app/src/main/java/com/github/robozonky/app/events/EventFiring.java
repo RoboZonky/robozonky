@@ -18,7 +18,7 @@ package com.github.robozonky.app.events;
 
 import java.util.concurrent.BlockingQueue;
 
-import com.github.robozonky.internal.api.jobs.SimplePayload;
+import com.github.robozonky.internal.jobs.SimplePayload;
 import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

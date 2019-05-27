@@ -30,8 +30,8 @@ import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
-import com.github.robozonky.internal.api.ApiConstants;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.ApiConstants;
+import com.github.robozonky.internal.Defaults;
 
 @Path("/")
 @Produces(Defaults.MEDIA_TYPE)

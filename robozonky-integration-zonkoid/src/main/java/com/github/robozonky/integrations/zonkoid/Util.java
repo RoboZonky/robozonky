@@ -19,7 +19,7 @@ package com.github.robozonky.integrations.zonkoid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.apache.http.HttpEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

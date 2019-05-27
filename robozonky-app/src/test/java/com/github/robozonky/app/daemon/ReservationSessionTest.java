@@ -33,8 +33,8 @@ import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.tenant.RemotePortfolio;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.RemotePortfolio;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 

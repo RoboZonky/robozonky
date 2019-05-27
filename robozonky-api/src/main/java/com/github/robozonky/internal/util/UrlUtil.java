@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.Settings;
 
 public final class UrlUtil {
 

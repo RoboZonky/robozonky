@@ -22,7 +22,7 @@ import java.nio.file.Files;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

@@ -18,7 +18,7 @@ package com.github.robozonky.cli;
 
 import java.io.File;
 
-import com.github.robozonky.internal.api.secrets.KeyStoreHandler;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import picocli.CommandLine;
 
 abstract class KeyStoreLeveragingFeature extends AbstractFeature {

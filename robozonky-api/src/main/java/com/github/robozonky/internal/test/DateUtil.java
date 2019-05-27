@@ -23,7 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

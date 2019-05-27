@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.SessionEvents;
-import com.github.robozonky.internal.api.tenant.LazyEvent;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.tenant.LazyEvent;
+import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 
 /**

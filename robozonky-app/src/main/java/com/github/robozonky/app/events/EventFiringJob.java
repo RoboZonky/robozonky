@@ -18,8 +18,8 @@ package com.github.robozonky.app.events;
 
 import java.time.Duration;
 
-import com.github.robozonky.internal.api.jobs.SimpleJob;
-import com.github.robozonky.internal.api.jobs.SimplePayload;
+import com.github.robozonky.internal.jobs.SimpleJob;
+import com.github.robozonky.internal.jobs.SimplePayload;
 
 final class EventFiringJob implements SimpleJob {
 

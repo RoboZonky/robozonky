@@ -32,11 +32,11 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.api.remote.ApiProvider;
-import com.github.robozonky.internal.api.remote.OAuth;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.OAuth;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;

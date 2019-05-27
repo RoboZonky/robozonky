@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import com.github.robozonky.internal.api.state.InstanceState;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Tenant;
 
 final class Storage {
 

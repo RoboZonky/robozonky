@@ -20,8 +20,8 @@ import java.io.File;
 import java.util.Optional;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.internal.api.extensions.ConfirmationProviderLoader;
-import com.github.robozonky.internal.api.secrets.SecretProvider;
+import com.github.robozonky.internal.extensions.ConfirmationProviderLoader;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "zonkoid-credentials", description = ZonkoidPasswordFeature.DESCRIPTION)

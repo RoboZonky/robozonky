@@ -31,11 +31,11 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.internal.api.async.Reloadable;
-import com.github.robozonky.internal.api.remote.Zonky;
-import com.github.robozonky.internal.api.state.InstanceState;
-import com.github.robozonky.internal.api.tenant.LazyEvent;
-import com.github.robozonky.internal.api.tenant.RemotePortfolio;
+import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.LazyEvent;
+import com.github.robozonky.internal.tenant.RemotePortfolio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

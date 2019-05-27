@@ -24,9 +24,9 @@ import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.internal.api.remote.ApiProvider;
-import com.github.robozonky.internal.api.remote.OAuth;
-import com.github.robozonky.internal.api.remote.Zonky;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.OAuth;
+import com.github.robozonky.internal.remote.Zonky;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.Test;

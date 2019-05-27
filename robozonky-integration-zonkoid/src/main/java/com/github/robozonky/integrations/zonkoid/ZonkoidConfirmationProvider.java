@@ -26,7 +26,7 @@ import java.util.StringJoiner;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import io.vavr.control.Try;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

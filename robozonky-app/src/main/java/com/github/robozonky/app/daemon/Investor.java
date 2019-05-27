@@ -25,7 +25,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.internal.api.tenant.Tenant;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.control.Either;
 import org.apache.logging.log4j.LogManager;
