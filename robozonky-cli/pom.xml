@@ -32,10 +32,6 @@
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-common</artifactId>
-    </dependency>
     <!-- these are normally runtime dependencies, but we need them present in order to validate their settings -->
     <dependency>
       <groupId>com.github.robozonky</groupId>

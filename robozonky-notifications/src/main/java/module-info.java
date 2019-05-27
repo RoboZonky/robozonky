@@ -7,7 +7,6 @@ module com.github.robozonky.notifications {
     requires org.apache.commons.lang3;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
-    requires com.github.robozonky.common;
 
     // hidden freemarker dependencies
     requires java.sql;

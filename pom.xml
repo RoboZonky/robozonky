@@ -27,7 +27,6 @@
     <module>robozonky-integration-stonky</module>
     <module>robozonky-notifications</module>
     <module>robozonky-extensions</module>
-    <module>robozonky-common</module>
     <module>robozonky-strategy-natural</module>
     <module>robozonky-test</module>
     <module>robozonky-distribution</module>
@@ -80,11 +79,6 @@
       <dependency>
         <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-api</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-common</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

@@ -30,7 +30,6 @@ module com.github.robozonky.integration.stonky {
     requires org.apache.commons.io;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
-    requires com.github.robozonky.common;
 
     opens com.github.robozonky.integrations.stonky to org.apache.commons.lang3;
 
