@@ -32,6 +32,9 @@ module com.github.robozonky.api {
     requires paging.streams;
     requires resteasy.client.api;
 
+    /*
+     * Public APIs are available for everyone.
+     */
     exports com.github.robozonky.api;
     exports com.github.robozonky.api.confirmations;
     exports com.github.robozonky.api.notifications;
@@ -40,17 +43,46 @@ module com.github.robozonky.api {
     exports com.github.robozonky.api.remote.entities.sanitized;
     exports com.github.robozonky.api.remote.enums;
     exports com.github.robozonky.api.strategies;
-    exports com.github.robozonky.internal;
-    exports com.github.robozonky.internal.async;
-    exports com.github.robozonky.internal.extensions;
-    exports com.github.robozonky.internal.jobs;
-    exports com.github.robozonky.internal.management;
-    exports com.github.robozonky.internal.remote;
-    exports com.github.robozonky.internal.secrets;
-    exports com.github.robozonky.internal.state;
-    exports com.github.robozonky.internal.tenant;
-    exports com.github.robozonky.internal.test;
-    exports com.github.robozonky.internal.util;
+    /*
+     * Internal APIs are only ever shared to other known RoboZonky modules, unless otherwise stated. We do not want to
+     * maintain API compatibility with for other implementors.
+     */
+    exports com.github.robozonky.internal to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.async to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.jobs to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.management to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.remote to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.secrets to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.state to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.tenant to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.test to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    exports com.github.robozonky.internal.util to com.github.robozonky.notifications, com.github.robozonky.cli,
+            com.github.robozonky.app, com.github.robozonky.integration.stonky, com.github.robozonky.integration.zonkoid,
+            com.github.robozonky.strategy.natural, com.github.robozonky.test;
+    /*
+     * Extensions are managed by app and cli modules. Notifications are added as there is a slightly hackish
+     * implementation of config sharing that wouldn't otherwise be possible.
+     */
+    exports com.github.robozonky.internal.extensions to com.github.robozonky.app, com.github.robozonky.cli,
+            com.github.robozonky.notifications;
 
     uses JobService;
     uses com.github.robozonky.api.strategies.StrategyService;
