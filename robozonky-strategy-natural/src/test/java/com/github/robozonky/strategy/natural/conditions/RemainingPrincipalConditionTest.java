@@ -30,11 +30,11 @@ class RemainingPrincipalConditionTest {
     @Test
     void leftBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(-1, 0))
+            softly.assertThatThrownBy(() -> RemainingPrincipalCondition.exact(-1, 0))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(0, -1))
+            softly.assertThatThrownBy(() -> RemainingPrincipalCondition.exact(0, -1))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(-1, -1))
+            softly.assertThatThrownBy(() -> RemainingPrincipalCondition.exact(-1, -1))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
@@ -43,7 +43,7 @@ class RemainingPrincipalConditionTest {
     void boundaryCorrect() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
-        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(0, 0);
+        final MarketplaceFilterConditionImpl condition = RemainingPrincipalCondition.exact(0, 0);
         assertThat(condition.test(l)).isTrue();
     }
 
@@ -51,7 +51,7 @@ class RemainingPrincipalConditionTest {
     void leftOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
-        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(1, 1);
+        final MarketplaceFilterConditionImpl condition = RemainingPrincipalCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
@@ -59,7 +59,7 @@ class RemainingPrincipalConditionTest {
     void rightOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(2));
-        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(1, 1);
+        final MarketplaceFilterConditionImpl condition = RemainingPrincipalCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 }

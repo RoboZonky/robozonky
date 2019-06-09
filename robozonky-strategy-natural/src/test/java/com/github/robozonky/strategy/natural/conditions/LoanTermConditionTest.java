@@ -28,16 +28,16 @@ class LoanTermConditionTest {
     @Test
     void leftBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new LoanTermCondition(-1, 0)).isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new LoanTermCondition(0, -1)).isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> LoanTermCondition.exact(-1, 0)).isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> LoanTermCondition.exact(0, -1)).isInstanceOf(IllegalArgumentException.class);
         });
     }
 
     @Test
     void rightBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new LoanTermCondition(85, 0)).isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new LoanTermCondition(0, 85)).isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> LoanTermCondition.exact(85, 0)).isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> LoanTermCondition.exact(0, 85)).isInstanceOf(IllegalArgumentException.class);
         });
     }
 
@@ -45,7 +45,7 @@ class LoanTermConditionTest {
     void boundaryCorrect() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(1);
-        final LoanTermCondition condition = new LoanTermCondition(1, 1);
+        final LoanTermCondition condition = LoanTermCondition.exact(1, 1);
         assertThat(condition.test(l)).isTrue();
     }
 
@@ -53,7 +53,7 @@ class LoanTermConditionTest {
     void leftOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(0);
-        final LoanTermCondition condition = new LoanTermCondition(1, 1);
+        final LoanTermCondition condition = LoanTermCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
@@ -61,7 +61,7 @@ class LoanTermConditionTest {
     void rightOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(2);
-        final LoanTermCondition condition = new LoanTermCondition(1, 1);
+        final LoanTermCondition condition = LoanTermCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 }

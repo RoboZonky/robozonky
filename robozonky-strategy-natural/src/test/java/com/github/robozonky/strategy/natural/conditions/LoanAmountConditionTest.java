@@ -28,11 +28,11 @@ class LoanAmountConditionTest {
     @Test
     void leftBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new LoanAmountCondition(-1, 0))
+            softly.assertThatThrownBy(() -> LoanAmountCondition.exact(-1, 0))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new LoanAmountCondition(0, -1))
+            softly.assertThatThrownBy(() -> LoanAmountCondition.exact(0, -1))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new LoanAmountCondition(-1, -1))
+            softly.assertThatThrownBy(() -> LoanAmountCondition.exact(-1, -1))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
@@ -41,7 +41,7 @@ class LoanAmountConditionTest {
     void boundaryCorrect() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getOriginalAmount()).thenReturn(0);
-        final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(0, 0);
+        final MarketplaceFilterConditionImpl condition = LoanAmountCondition.exact(0, 0);
         assertThat(condition.test(l)).isTrue();
     }
 
@@ -49,7 +49,7 @@ class LoanAmountConditionTest {
     void leftOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getOriginalAmount()).thenReturn(0);
-        final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
+        final MarketplaceFilterConditionImpl condition = LoanAmountCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
@@ -57,7 +57,7 @@ class LoanAmountConditionTest {
     void rightOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getOriginalAmount()).thenReturn(2);
-        final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
+        final MarketplaceFilterConditionImpl condition = LoanAmountCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 }

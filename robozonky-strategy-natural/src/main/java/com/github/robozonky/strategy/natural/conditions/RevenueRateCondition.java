@@ -16,29 +16,28 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
-
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public class RevenueRateCondition extends AbstractRangeCondition {
+public final class RevenueRateCondition extends AbstractRangeCondition<Ratio> {
 
-    private static final BigDecimal MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);
-
-    public RevenueRateCondition(final BigDecimal fromInclusive, final BigDecimal toInclusive) {
-        super(Wrapper::getRevenueRate, fromInclusive, toInclusive);
-        RevenueRateCondition.assertIsInRange(fromInclusive);
-        RevenueRateCondition.assertIsInRange(toInclusive);
+    private RevenueRateCondition(final NewRangeCondition<Ratio> condition) {
+        super(condition);
     }
 
-    public RevenueRateCondition(final BigDecimal fromInclusive) {
-        this(fromInclusive, RevenueRateCondition.MAX_RATE);
+    public static RevenueRateCondition lessThan(final Ratio threshold) {
+        final NewRangeCondition<Ratio> c = NewRangeCondition.lessThan(Wrapper::getRevenueRate, RATE_DOMAIN, threshold);
+        return new RevenueRateCondition(c);
     }
 
-    private static void assertIsInRange(final BigDecimal interestRate) {
-        final BigDecimal min = BigDecimal.ZERO;
-        final BigDecimal max = RevenueRateCondition.MAX_RATE;
-        if (min.compareTo(interestRate) > 0 || max.compareTo(interestRate) < 0) {
-            throw new IllegalArgumentException("Revenue rate must be in range of <" + min + "; " + max + ">.");
-        }
+    public static RevenueRateCondition moreThan(final Ratio threshold) {
+        final NewRangeCondition<Ratio> c = NewRangeCondition.moreThan(Wrapper::getRevenueRate, RATE_DOMAIN, threshold);
+        return new RevenueRateCondition(c);
+    }
+
+    public static RevenueRateCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
+        final NewRangeCondition<Ratio> c = NewRangeCondition.exact(Wrapper::getRevenueRate, RATE_DOMAIN,
+                                                                   minimumThreshold, maximumThreshold);
+        return new RevenueRateCondition(c);
     }
 }

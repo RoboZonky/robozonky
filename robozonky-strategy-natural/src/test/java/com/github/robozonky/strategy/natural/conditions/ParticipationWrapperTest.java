@@ -102,7 +102,7 @@ class ParticipationWrapperTest {
         f.when(Collections.singleton(c));
         final AbstractEnumeratedCondition<MainIncomeType> c2 = new BorrowerIncomeCondition();
         c2.add(MainIncomeType.EMPLOYMENT);
-        final AbstractRangeCondition c3 = new LoanInterestRateCondition(Ratio.ZERO, Ratio.fromPercentage(16));
+        final AbstractRangeCondition c3 = LoanInterestRateCondition.exact(Ratio.ZERO, Ratio.fromPercentage(16));
         f.butNotWhen(Arrays.asList(c2, c3));
         final Loan l = Loan.custom()
                 .setRegion(Region.USTECKY)

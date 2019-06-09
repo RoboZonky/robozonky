@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,34 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-public class ElapsedLoanTermCondition extends AbstractRangeCondition {
+import com.github.robozonky.strategy.natural.Wrapper;
 
-    private static final int MIN_TERM = 0, MAX_TERM = 84;
+public final class ElapsedLoanTermCondition extends AbstractRangeCondition<Integer> {
 
-    private static void assertIsInRange(final int months) {
-        if ((months < ElapsedLoanTermCondition.MIN_TERM) || (months > ElapsedLoanTermCondition.MAX_TERM)) {
-            throw new IllegalArgumentException(
-                    "Loan term must be in range of <" + ElapsedLoanTermCondition.MIN_TERM + "; "
-                            + ElapsedLoanTermCondition.MAX_TERM + ">, but was " + months);
-        }
+    private ElapsedLoanTermCondition(final NewRangeCondition<Integer> condition) {
+        super(condition);
     }
 
-    public ElapsedLoanTermCondition(final int fromInclusive, final int toInclusive) {
-        super(w -> w.getOriginalTermInMonths() - w.getRemainingTermInMonths(), fromInclusive, toInclusive);
-        ElapsedLoanTermCondition.assertIsInRange(fromInclusive);
-        ElapsedLoanTermCondition.assertIsInRange(toInclusive);
+    private static int getElapsedTerm(final Wrapper<?> w) {
+        return w.getOriginalTermInMonths() - w.getRemainingTermInMonths();
     }
 
-    public ElapsedLoanTermCondition(final int fromInclusive) {
-        this(fromInclusive, ElapsedLoanTermCondition.MAX_TERM);
+    public static ElapsedLoanTermCondition lessThan(final int threshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.lessThan(ElapsedLoanTermCondition::getElapsedTerm,
+                                                                        LOAN_TERM_DOMAIN, threshold);
+        return new ElapsedLoanTermCondition(c);
+    }
+
+    public static ElapsedLoanTermCondition moreThan(final int threshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.moreThan(ElapsedLoanTermCondition::getElapsedTerm,
+                                                                        LOAN_TERM_DOMAIN, threshold);
+        return new ElapsedLoanTermCondition(c);
+    }
+
+    public static ElapsedLoanTermCondition exact(final int minimumThreshold, final int maximumThreshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.exact(ElapsedLoanTermCondition::getElapsedTerm,
+                                                                     LOAN_TERM_DOMAIN, minimumThreshold,
+                                                                     maximumThreshold);
+        return new ElapsedLoanTermCondition(c);
     }
 }

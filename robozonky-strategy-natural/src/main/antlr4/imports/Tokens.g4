@@ -42,8 +42,8 @@ interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
     {
         if (needsBothValues) {
             // if the second one is provided, use the range
-            $result = new LoanInterestRateCondition(Ratio.fromPercentage($min.result),
-                                                    Ratio.fromPercentage($max.result));
+            $result = LoanInterestRateCondition.exact(Ratio.fromPercentage($min.result),
+                                                      Ratio.fromPercentage($max.result));
         } else {
             // by default, just pick the one rating
             final Rating r = Rating.findByCode($min.result.toString());
@@ -57,15 +57,14 @@ interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
 interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=floatExpr
     {
-        $result = new LoanInterestRateCondition(Ratio.fromPercentage(BigDecimalCalculator.moreThan($min.result)));
+        $result = LoanInterestRateCondition.moreThan(Ratio.fromPercentage(BigDecimalCalculator.moreThan($min.result)));
     }
 ;
 
 interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=floatExpr
     {
-        $result = new LoanInterestRateCondition(Ratio.ZERO,
-                                                Ratio.fromPercentage(BigDecimalCalculator.lessThan($max.result)));
+        $result = LoanInterestRateCondition.lessThan(Ratio.fromPercentage(BigDecimalCalculator.moreThan($max.result)));
     }
 ;
 

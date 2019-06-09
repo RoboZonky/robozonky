@@ -18,16 +18,27 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public class LoanAnnuityCondition extends AbstractRangeCondition {
+public final class LoanAnnuityCondition extends AbstractRangeCondition<Integer> {
 
-    public LoanAnnuityCondition(final int fromInclusive, final int toInclusive) {
-        super(Wrapper::getOriginalAnnuity, fromInclusive, toInclusive);
-        if (fromInclusive < 0 || toInclusive < 0) {
-            throw new IllegalArgumentException("Either values need to be 0 or more.");
-        }
+    private LoanAnnuityCondition(final NewRangeCondition<Integer> condition) {
+        super(condition);
     }
 
-    public LoanAnnuityCondition(final int fromInclusive) {
-        this(fromInclusive, Integer.MAX_VALUE);
+    public static LoanAnnuityCondition lessThan(final int threshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.lessThan(Wrapper::getOriginalAnnuity, AMOUNT_DOMAIN,
+                                                                        threshold);
+        return new LoanAnnuityCondition(c);
+    }
+
+    public static LoanAnnuityCondition moreThan(final int threshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.moreThan(Wrapper::getOriginalAnnuity, AMOUNT_DOMAIN,
+                                                                        threshold);
+        return new LoanAnnuityCondition(c);
+    }
+
+    public static LoanAnnuityCondition exact(final int minimumThreshold, final int maximumThreshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.exact(Wrapper::getOriginalAnnuity, AMOUNT_DOMAIN,
+                                                                     minimumThreshold, maximumThreshold);
+        return new LoanAnnuityCondition(c);
     }
 }

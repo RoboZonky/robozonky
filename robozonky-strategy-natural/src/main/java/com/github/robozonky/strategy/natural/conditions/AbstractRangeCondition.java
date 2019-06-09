@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,28 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.function.Function;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
 
-abstract class AbstractRangeCondition extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
+abstract class AbstractRangeCondition<T extends Number & Comparable<T>> extends MarketplaceFilterConditionImpl
+        implements MarketplaceFilterCondition {
 
-    private final RangeCondition<Wrapper<?>> rangeCondition;
+    protected static final Domain<Integer> LOAN_TERM_DOMAIN = new Domain<>(Integer.class, 0, 84);
+    protected static final Domain<Integer> AMOUNT_DOMAIN = new Domain<>(Integer.class, 0, null);
+    protected static final Domain<BigDecimal> PRINCIPAL_DOMAIN = new Domain<>(BigDecimal.class, BigDecimal.ZERO, null);
+    protected static final Domain<Ratio> RATE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, null);
+    private final NewRangeCondition<T> rangeCondition;
 
-    protected AbstractRangeCondition(final Function<Wrapper<?>, Number> targetAccessor, final Number minValueInclusive,
-                                     final Number maxValueInclusive) {
-        this.rangeCondition = new RangeCondition<>(targetAccessor, minValueInclusive, maxValueInclusive);
+    protected AbstractRangeCondition(final NewRangeCondition<T> condition) {
+        this.rangeCondition = condition;
     }
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of(
-                "Range: <" + rangeCondition.getMinInclusive() + "; " + rangeCondition.getMaxInclusive() + ">.");
+        return Optional.of(rangeCondition.toString());
     }
 
     @Override

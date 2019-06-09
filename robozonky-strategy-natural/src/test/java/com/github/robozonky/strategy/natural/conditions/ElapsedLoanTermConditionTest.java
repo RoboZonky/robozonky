@@ -28,9 +28,9 @@ class ElapsedLoanTermConditionTest {
     @Test
     void leftBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new ElapsedLoanTermCondition(-1, 0)).isInstanceOf(
+            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(-1, 0)).isInstanceOf(
                     IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new ElapsedLoanTermCondition(0, -1)).isInstanceOf(
+            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(0, -1)).isInstanceOf(
                     IllegalArgumentException.class);
         });
     }
@@ -38,9 +38,9 @@ class ElapsedLoanTermConditionTest {
     @Test
     void rightBoundWrong() {
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new ElapsedLoanTermCondition(85, 0)).isInstanceOf(
+            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(85, 0)).isInstanceOf(
                     IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new ElapsedLoanTermCondition(0, 85)).isInstanceOf(
+            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(0, 85)).isInstanceOf(
                     IllegalArgumentException.class);
         });
     }
@@ -50,7 +50,7 @@ class ElapsedLoanTermConditionTest {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         when(l.getOriginalTermInMonths()).thenReturn(2);
-        final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
         assertThat(condition.test(l)).isTrue();
     }
 
@@ -58,7 +58,7 @@ class ElapsedLoanTermConditionTest {
     void leftOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(0);
-        final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
@@ -66,13 +66,13 @@ class ElapsedLoanTermConditionTest {
     void rightOutOfBounds() {
         final Wrapper<?> l = mock(Wrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(2);
-        final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
     @Test
     void hasDescription() {
-        final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
         assertThat(condition.getDescription()).isNotEmpty();
     }
 }

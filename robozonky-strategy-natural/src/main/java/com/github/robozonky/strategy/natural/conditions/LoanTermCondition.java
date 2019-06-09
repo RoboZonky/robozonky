@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,32 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public class LoanTermCondition extends AbstractRangeCondition {
+public class LoanTermCondition extends AbstractRangeCondition<Integer> {
 
-    private static final int MIN_TERM = 0, MAX_TERM = 84;
-
-    private static void assertIsInRange(final long months) {
-        if ((months < LoanTermCondition.MIN_TERM) || (months > LoanTermCondition.MAX_TERM)) {
-            throw new IllegalArgumentException("Loan term must be in range of <" + LoanTermCondition.MIN_TERM + "; "
-                                                       + LoanTermCondition.MAX_TERM + ">, but was " + months);
-        }
+    private LoanTermCondition(final NewRangeCondition<Integer> condition) {
+        super(condition);
     }
 
-    public LoanTermCondition(final long fromInclusive, final long toInclusive) {
-        super(Wrapper::getRemainingTermInMonths, fromInclusive, toInclusive);
-        LoanTermCondition.assertIsInRange(fromInclusive);
-        LoanTermCondition.assertIsInRange(toInclusive);
+    private static int getElapsedTerm(final Wrapper<?> w) {
+        return w.getOriginalTermInMonths() - w.getRemainingTermInMonths();
     }
 
-    public LoanTermCondition(final long fromInclusive) {
-        this(fromInclusive, LoanTermCondition.MAX_TERM);
+    public static LoanTermCondition lessThan(final int threshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.lessThan(Wrapper::getRemainingTermInMonths,
+                                                                        LOAN_TERM_DOMAIN, threshold);
+        return new LoanTermCondition(c);
+    }
+
+    public static LoanTermCondition moreThan(final int threshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.moreThan(Wrapper::getRemainingTermInMonths,
+                                                                        LOAN_TERM_DOMAIN, threshold);
+        return new LoanTermCondition(c);
+    }
+
+    public static LoanTermCondition exact(final int minimumThreshold, final int maximumThreshold) {
+        final NewRangeCondition<Integer> c = NewRangeCondition.exact(Wrapper::getRemainingTermInMonths,
+                                                                     LOAN_TERM_DOMAIN, minimumThreshold,
+                                                                     maximumThreshold);
+        return new LoanTermCondition(c);
     }
 }

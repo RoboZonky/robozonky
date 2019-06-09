@@ -82,17 +82,17 @@ termCondition returns [MarketplaceFilterCondition result]:
 
 termConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new LoanTermCondition($min.result, $max.result); }
+    { $result = LoanTermCondition.exact($min.result, $max.result); }
 ;
 
 termConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=intExpr
-    { $result = new LoanTermCondition($min.result + 1); }
+    { $result = LoanTermCondition.moreThan($min.result); }
 ;
 
 termConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
-    { $result = new LoanTermCondition(0, $max.result - 1); }
+    { $result = LoanTermCondition.lessThan($max.result); }
 ;
 
 relativeTermCondition returns [MarketplaceFilterCondition result]:
@@ -128,17 +128,17 @@ elapsedTermCondition returns [MarketplaceFilterCondition result]:
 
 elapsedTermConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new ElapsedLoanTermCondition($min.result, $max.result); }
+    { $result = ElapsedLoanTermCondition.exact($min.result, $max.result); }
 ;
 
 elapsedTermConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     'více než' min=intExpr
-    { $result = new ElapsedLoanTermCondition($min.result + 1); }
+    { $result = ElapsedLoanTermCondition.moreThan($min.result); }
 ;
 
 elapsedTermConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     'méně než' max=intExpr
-    { $result = new ElapsedLoanTermCondition(0, $max.result - 1); }
+    { $result = ElapsedLoanTermCondition.lessThan($max.result); }
 ;
 
 elapsedRelativeTermCondition returns [MarketplaceFilterCondition result]:
@@ -174,17 +174,17 @@ amountCondition returns [MarketplaceFilterCondition result]:
 
 amountConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new LoanAmountCondition($min.result, $max.result); }
+    { $result = LoanAmountCondition.exact($min.result, $max.result); }
 ;
 
 amountConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=intExpr
-    { $result = new LoanAmountCondition($min.result + 1); }
+    { $result = LoanAmountCondition.moreThan($min.result); }
 ;
 
 amountConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
-    { $result = new LoanAmountCondition(0, $max.result - 1); }
+    { $result = LoanAmountCondition.lessThan($max.result); }
 ;
 
 remainingPrincipalCondition returns [MarketplaceFilterCondition result]:
@@ -197,17 +197,17 @@ remainingPrincipalCondition returns [MarketplaceFilterCondition result]:
 
 remainingPrincipalConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new RemainingPrincipalCondition($min.result, $max.result); }
+    { $result = RemainingPrincipalCondition.exact($min.result, $max.result); }
 ;
 
 remainingPrincipalConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=intExpr
-    { $result = new RemainingPrincipalCondition($min.result + 1); }
+    { $result = RemainingPrincipalCondition.moreThan($min.result); }
 ;
 
 remainingPrincipalConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
-    { $result = new RemainingPrincipalCondition(0, $max.result - 1); }
+    { $result = RemainingPrincipalCondition.lessThan($max.result); }
 ;
 
 annuityCondition returns [MarketplaceFilterCondition result]:
@@ -220,17 +220,17 @@ annuityCondition returns [MarketplaceFilterCondition result]:
 
 annuityConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new LoanAnnuityCondition($min.result, $max.result); }
+    { $result = LoanAnnuityCondition.exact($min.result, $max.result); }
 ;
 
 annuityConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=intExpr
-    { $result = new LoanAnnuityCondition($min.result + 1); }
+    { $result = LoanAnnuityCondition.moreThan($min.result); }
 ;
 
 annuityConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
-    { $result = new LoanAnnuityCondition(0, $max.result - 1); }
+    { $result = LoanAnnuityCondition.lessThan($max.result); }
 ;
 
 revenueRateCondition returns [MarketplaceFilterCondition result]:
@@ -243,16 +243,16 @@ revenueRateCondition returns [MarketplaceFilterCondition result]:
 
 revenueRateConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=floatExpr UP_TO max=floatExpr {
-        $result = new RevenueRateCondition($min.result, $max.result);
+        $result = RevenueRateCondition.exact(Ratio.fromPercentage($min.result), Ratio.fromPercentage($max.result));
     }
 ;
 
 revenueRateConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=floatExpr
-    { $result = new RevenueRateCondition(BigDecimalCalculator.moreThan($min.result)); }
+    { $result = RevenueRateCondition.moreThan(Ratio.fromPercentage($min.result)); }
 ;
 
 revenueRateConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=floatExpr
-    { $result = new RevenueRateCondition(BigDecimal.ZERO, BigDecimalCalculator.lessThan($max.result)); }
+    { $result = RevenueRateCondition.lessThan(Ratio.fromPercentage($max.result)); }
 ;
