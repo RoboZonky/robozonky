@@ -31,8 +31,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

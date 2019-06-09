@@ -21,8 +21,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
-import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

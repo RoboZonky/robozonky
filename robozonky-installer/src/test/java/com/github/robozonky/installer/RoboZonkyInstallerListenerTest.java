@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.github.robozonky.cli.SetupFailedException;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.event.InstallerListener;

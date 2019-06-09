@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.common.remote.Select;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

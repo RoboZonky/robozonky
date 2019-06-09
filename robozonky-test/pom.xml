@@ -31,10 +31,6 @@
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-common</artifactId>
-    </dependency>
     <dependency> <!-- All tests will log. -->
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>

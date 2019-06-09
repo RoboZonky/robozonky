@@ -27,7 +27,7 @@ import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.izforge.izpack.api.data.InstallData;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;

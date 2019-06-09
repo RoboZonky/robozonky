@@ -37,10 +37,6 @@
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-strategy-natural</artifactId>
       <scope>runtime</scope>
     </dependency>

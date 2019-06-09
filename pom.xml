@@ -27,7 +27,6 @@
     <module>robozonky-integration-stonky</module>
     <module>robozonky-notifications</module>
     <module>robozonky-extensions</module>
-    <module>robozonky-common</module>
     <module>robozonky-strategy-natural</module>
     <module>robozonky-test</module>
     <module>robozonky-distribution</module>
@@ -80,11 +79,6 @@
       <dependency>
         <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-api</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-common</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -262,6 +256,11 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
+        <version>${version.com.fasterxml.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+        <artifactId>jackson-jaxrs-json-provider</artifactId>
         <version>${version.com.fasterxml.jackson}</version>
       </dependency>
       <!-- Email notifications. -->
@@ -732,9 +731,11 @@
                 <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.jaxrs</ignoredUsedUndeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
               <ignoredUsedUndeclaredDependencies>
                 <ignoredUsedUndeclaredDependency>com.sun.mail</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
             </configuration>
           </execution>

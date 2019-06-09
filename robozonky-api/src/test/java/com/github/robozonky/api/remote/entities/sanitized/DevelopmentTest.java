@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.remote.entities.DateDescriptor;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.enums.DevelopmentType;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

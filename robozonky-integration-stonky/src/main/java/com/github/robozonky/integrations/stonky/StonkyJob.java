@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
-import com.github.robozonky.common.tenant.Tenant;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.TenantPayload;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class StonkyJob implements TenantJob {

@@ -19,7 +19,7 @@ package com.github.robozonky.notifications.templates;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import freemarker.core.Environment;
 import freemarker.core.InvalidFormatParametersException;
 import freemarker.core.TemplateNumberFormat;

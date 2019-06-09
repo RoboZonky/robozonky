@@ -32,10 +32,6 @@
       <artifactId>robozonky-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-common</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>

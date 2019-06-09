@@ -23,10 +23,10 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.OAuthScope;
-import com.github.robozonky.common.async.Reloadable;
-import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

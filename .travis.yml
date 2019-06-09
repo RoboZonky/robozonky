@@ -8,7 +8,6 @@ env:
   matrix:
     # mandatory modules first
     - MODULE=robozonky-api
-    - MODULE=robozonky-common
     - MODULE=robozonky-notifications
     - MODULE=robozonky-app
     - MODULE=robozonky-cli

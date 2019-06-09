@@ -29,10 +29,10 @@ import com.github.robozonky.api.remote.enums.InvestmentType;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.common.management.AbstractBaseMBean;
-import com.github.robozonky.common.management.BaseMBean;
-import com.github.robozonky.common.management.Management;
-import com.github.robozonky.common.management.ManagementBean;
+import com.github.robozonky.internal.management.AbstractBaseMBean;
+import com.github.robozonky.internal.management.BaseMBean;
+import com.github.robozonky.internal.management.Management;
+import com.github.robozonky.internal.management.ManagementBean;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

@@ -76,7 +76,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.internal.tenant.LazyEvent;
 
 /**
  * Events which require an instance of {@link PortfolioOverview} or {@link Loan} are prime candidates for lazy

@@ -21,8 +21,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
+import com.github.robozonky.internal.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class SummarizerJob implements TenantJob {

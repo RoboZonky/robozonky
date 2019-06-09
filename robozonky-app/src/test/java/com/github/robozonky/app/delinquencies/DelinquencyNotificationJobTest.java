@@ -18,7 +18,7 @@ package com.github.robozonky.app.delinquencies;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

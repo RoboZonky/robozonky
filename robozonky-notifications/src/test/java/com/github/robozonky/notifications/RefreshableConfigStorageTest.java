@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Properties;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

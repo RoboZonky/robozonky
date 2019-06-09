@@ -24,7 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.StrategyService;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;

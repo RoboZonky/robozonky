@@ -19,9 +19,9 @@ package com.github.robozonky.app.daemon;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.common.jobs.JobService;
-import com.github.robozonky.common.jobs.SimpleJob;
-import com.github.robozonky.common.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.JobService;
+import com.github.robozonky.internal.jobs.SimpleJob;
+import com.github.robozonky.internal.jobs.TenantJob;
 
 public final class SellingJobService implements JobService {
 

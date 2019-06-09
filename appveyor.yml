@@ -4,7 +4,6 @@ environment:
   matrix: # execution per-module so that PITest doesn't timeout the build
       # mandatory modules first
       - MODULE: robozonky-api
-      - MODULE: robozonky-common
       - MODULE: robozonky-notifications
       - MODULE: robozonky-app
       - MODULE: robozonky-cli

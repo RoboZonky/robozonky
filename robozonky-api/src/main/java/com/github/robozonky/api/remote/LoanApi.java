@@ -25,7 +25,7 @@ import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 
 @Path("/loans")
 @Produces(Defaults.MEDIA_TYPE)

@@ -22,8 +22,8 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.robozonky.common.async.Refreshable;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.async.Refreshable;
 import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;

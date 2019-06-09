@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.internal.api.JfrConstants;
+import com.github.robozonky.internal.JfrConstants;
 import jdk.jfr.Category;
 import jdk.jfr.Event;
 

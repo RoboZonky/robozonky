@@ -16,7 +16,7 @@
 
 package com.github.robozonky.integrations.stonky;
 
-import com.github.robozonky.common.jobs.JobService;
+import com.github.robozonky.internal.jobs.JobService;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.Settings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

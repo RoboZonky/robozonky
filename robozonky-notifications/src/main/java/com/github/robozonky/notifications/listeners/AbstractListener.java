@@ -39,7 +39,7 @@ import com.github.robozonky.api.notifications.MarketplaceInvestmentBased;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.Submission;
 import com.github.robozonky.notifications.SupportedListener;

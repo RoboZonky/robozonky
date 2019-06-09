@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.internal.api.ApiConstants;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.ApiConstants;
+import com.github.robozonky.internal.Defaults;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)

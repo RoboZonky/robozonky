@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 

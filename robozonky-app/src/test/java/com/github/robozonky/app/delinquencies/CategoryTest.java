@@ -27,7 +27,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TransactionalPowerTenant;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.remote.Zonky;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -34,7 +34,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.test.RandomUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;

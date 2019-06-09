@@ -24,10 +24,10 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.common.jobs.TenantPayload;
-import com.github.robozonky.common.remote.Select;
-import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.jobs.TenantPayload;
+import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class IncomeProcessor implements TenantPayload {

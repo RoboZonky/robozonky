@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.common.async.Refreshable;
+import com.github.robozonky.internal.async.Refreshable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

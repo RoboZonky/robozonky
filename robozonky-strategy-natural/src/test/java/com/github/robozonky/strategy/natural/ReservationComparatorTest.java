@@ -23,7 +23,7 @@ import java.util.Comparator;
 
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;

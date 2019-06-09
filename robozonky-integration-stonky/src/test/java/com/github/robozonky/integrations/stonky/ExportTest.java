@@ -23,8 +23,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.ws.rs.core.Response;
 
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;

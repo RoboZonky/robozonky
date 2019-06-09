@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.robozonky.notifications.templates;
 
 import java.util.Locale;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.notifications.templates.html.HtmlTemplate;
 import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
 import freemarker.template.Configuration;

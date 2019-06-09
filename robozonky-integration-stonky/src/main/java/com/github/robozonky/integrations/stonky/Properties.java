@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.robozonky.integrations.stonky;
 
 import java.util.Optional;
 
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.Settings;
 import com.google.api.client.http.HttpTransport;
 
 public enum Properties {

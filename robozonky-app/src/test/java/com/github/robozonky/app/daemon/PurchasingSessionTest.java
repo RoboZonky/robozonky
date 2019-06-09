@@ -32,8 +32,8 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.RemotePortfolio;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.RemotePortfolio;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 

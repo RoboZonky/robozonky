@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.common.async.Reloadable;
+import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
 

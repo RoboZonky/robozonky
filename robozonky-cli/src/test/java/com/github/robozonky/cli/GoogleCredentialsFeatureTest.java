@@ -20,7 +20,7 @@ import java.io.InputStream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.integrations.stonky.CredentialProvider;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.testing.http.MockHttpTransport;
 import org.apache.commons.io.IOUtils;

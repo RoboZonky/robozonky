@@ -35,7 +35,7 @@ import com.github.robozonky.cli.ZonkoidPasswordFeature;
 import com.github.robozonky.cli.ZonkyPasswordFeature;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.Settings;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.AfterEach;

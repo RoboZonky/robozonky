@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
-import com.github.robozonky.common.tenant.LazyEvent;
+import com.github.robozonky.internal.tenant.LazyEvent;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

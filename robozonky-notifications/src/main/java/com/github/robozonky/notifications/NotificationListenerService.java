@@ -27,10 +27,10 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.common.async.Tasks;
-import com.github.robozonky.common.extensions.ListenerServiceLoader;
-import com.github.robozonky.common.state.TenantState;
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.internal.Settings;
+import com.github.robozonky.internal.async.Tasks;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.state.TenantState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

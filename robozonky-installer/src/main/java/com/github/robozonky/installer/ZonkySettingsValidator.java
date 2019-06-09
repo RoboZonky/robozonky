@@ -21,7 +21,7 @@ import javax.ws.rs.ServerErrorException;
 
 import com.github.robozonky.cli.TestFailedException;
 import com.github.robozonky.cli.ZonkyPasswordFeature;
-import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.internal.remote.ApiProvider;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 

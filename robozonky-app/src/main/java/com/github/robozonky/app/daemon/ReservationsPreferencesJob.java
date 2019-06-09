@@ -18,8 +18,8 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 
-import com.github.robozonky.common.jobs.TenantJob;
-import com.github.robozonky.common.jobs.TenantPayload;
+import com.github.robozonky.internal.jobs.TenantJob;
+import com.github.robozonky.internal.jobs.TenantPayload;
 
 final class ReservationsPreferencesJob implements TenantJob {
 

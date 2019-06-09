@@ -26,9 +26,9 @@ import java.util.function.Function;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.enums.OAuthScope;
-import com.github.robozonky.common.async.Backoff;
-import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.tenant.Tenant;
+import com.github.robozonky.internal.async.Backoff;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

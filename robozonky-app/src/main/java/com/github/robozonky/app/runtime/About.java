@@ -18,8 +18,8 @@ package com.github.robozonky.app.runtime;
 
 import java.time.OffsetDateTime;
 
-import com.github.robozonky.common.management.AbstractBaseMBean;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.management.AbstractBaseMBean;
 
 final class About extends AbstractBaseMBean implements AboutMBean {
 

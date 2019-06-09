@@ -21,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import com.github.robozonky.api.confirmations.RequestId;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.assertj.core.api.SoftAssertions;

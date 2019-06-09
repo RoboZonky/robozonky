@@ -21,7 +21,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Random;
 
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.test.RandomUtil;
 import org.apache.logging.log4j.LogManager;
