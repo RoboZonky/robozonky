@@ -69,6 +69,8 @@ reservationExpression returns [ReservationMode result] :
 ;
 
 confirmationExpression returns [MarketplaceFilterCondition result] :
-    'Potvrzovat mobilem investice do úvěrů, kde ' s=interestCondition DOT { $result = $s.result; }
+    'Potvrzovat mobilem investice do úvěrů, kde ' s=interestCondition DOT {
+        $result = $s.result;
+    }
 ;
 

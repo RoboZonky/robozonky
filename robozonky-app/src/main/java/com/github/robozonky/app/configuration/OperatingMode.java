@@ -73,6 +73,7 @@ final class OperatingMode {
     }
 
     private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials) {
+        LOGGER.warn("Investment confirmation via cell phone is deprecated and will be removed later.");
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
                 .map(provider -> OperatingMode.getInvestor(tenant, credentials, provider))

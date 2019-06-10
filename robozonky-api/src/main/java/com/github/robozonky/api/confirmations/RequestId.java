@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Objects;
 /**
  * Identification of this instance of RoboZonky to the remote confirmation endpoint.
  */
+@Deprecated(forRemoval = true, since = "5.3.0")
 public final class RequestId {
 
     private static char[] makeDefensiveCopy(final char... password) {

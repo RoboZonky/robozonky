@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 /**
  * Fired immediately after {@link ConfirmationProvider} delegated a given investment.
  */
+@Deprecated(forRemoval = true, since = "5.3.0")
 public interface InvestmentDelegatedEvent extends MarketplaceLoanBased, Recommending {
 
     String getConfirmationProviderId();

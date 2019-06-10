@@ -49,11 +49,11 @@
       <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat a bude více logovat."
             set="${selectDryRunByDefault}"/>
     </field>
-    <field type="check" variable="isZonkoidEnabled" summaryKey="Notifikace do aplikace Zonkoid povoleny:">
-      <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>
-    </field>
     <field type="check" variable="isJmxEnabled" summaryKey="Vzdálená správa povolena:">
       <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
+    </field>
+    <field type="check" variable="isZonkoidEnabled" summaryKey="Notifikace do aplikace Zonkoid povoleny:">
+      <spec txt="Notifikovat do mobilní aplikace Zonkoid. (Zastaralé, bude odstraněno.)" set="false"/>
     </field>
 
     <field type="space" />

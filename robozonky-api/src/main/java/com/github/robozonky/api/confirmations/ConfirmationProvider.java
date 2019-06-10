@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.robozonky.api.confirmations;
 /**
  * Remote endpoint to provide confirmations on investments.
  */
+@Deprecated(forRemoval = true, since = "5.3.0")
 public interface ConfirmationProvider {
 
     /**

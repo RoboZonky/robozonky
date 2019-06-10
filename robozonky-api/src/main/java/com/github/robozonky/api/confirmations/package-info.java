@@ -13,23 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.github.robozonky.api.confirmations;
-
-import java.util.Optional;
-import java.util.ServiceLoader;
-
-/**
- * Use Java's {@link ServiceLoader} to load different confirmation providers.
- */
 @Deprecated(forRemoval = true, since = "5.3.0")
-public interface ConfirmationProviderService {
-
-    /**
-     * Prepare the confirmation for being used by the app.
-     * @param providerId ID of the confirmation provider.
-     * @return Instance of the confirmation provider, ready for accepting confirmation requests, if the service
-     * supports it.
-     */
-    Optional<ConfirmationProvider> find(String providerId);
-}
+package com.github.robozonky.api.confirmations;
