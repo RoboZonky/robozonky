@@ -105,17 +105,17 @@ relativeTermCondition returns [MarketplaceFilterCondition result]:
 
 relativeTermConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new RelativeLoanTermCondition($min.result, $max.result); }
+    { $result = RelativeLoanTermCondition.exact(Ratio.fromPercentage($min.result), Ratio.fromPercentage($max.result)); }
 ;
 
 relativeTermConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=intExpr
-    { $result = new RelativeLoanTermCondition($min.result + 1); }
+    { $result = RelativeLoanTermCondition.moreThan(Ratio.fromPercentage($min.result)); }
 ;
 
 relativeTermConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
-    { $result = new RelativeLoanTermCondition(0, $max.result - 1); }
+    { $result = RelativeLoanTermCondition.lessThan(Ratio.fromPercentage($max.result)); }
 ;
 
 elapsedTermCondition returns [MarketplaceFilterCondition result]:
@@ -151,17 +151,17 @@ elapsedRelativeTermCondition returns [MarketplaceFilterCondition result]:
 
 elapsedRelativeTermConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
-    { $result = new RelativeElapsedLoanTermCondition($min.result, $max.result); }
+    { $result = RelativeElapsedLoanTermCondition.exact(Ratio.fromPercentage($min.result), Ratio.fromPercentage($max.result)); }
 ;
 
 elapsedRelativeTermConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     'více než' min=intExpr
-    { $result = new RelativeElapsedLoanTermCondition($min.result + 1); }
+    { $result = RelativeElapsedLoanTermCondition.moreThan(Ratio.fromPercentage($min.result)); }
 ;
 
 elapsedRelativeTermConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     'méně než' max=intExpr
-    { $result = new RelativeElapsedLoanTermCondition(0, $max.result - 1); }
+    { $result = RelativeElapsedLoanTermCondition.lessThan(Ratio.fromPercentage($max.result)); }
 ;
 
 amountCondition returns [MarketplaceFilterCondition result]:

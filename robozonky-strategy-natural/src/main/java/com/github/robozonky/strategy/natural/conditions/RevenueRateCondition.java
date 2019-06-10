@@ -21,23 +21,23 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public final class RevenueRateCondition extends AbstractRangeCondition<Ratio> {
 
-    private RevenueRateCondition(final NewRangeCondition<Ratio> condition) {
+    private RevenueRateCondition(final RangeCondition<Ratio> condition) {
         super(condition);
     }
 
     public static RevenueRateCondition lessThan(final Ratio threshold) {
-        final NewRangeCondition<Ratio> c = NewRangeCondition.lessThan(Wrapper::getRevenueRate, RATE_DOMAIN, threshold);
+        final RangeCondition<Ratio> c = RangeCondition.lessThan(Wrapper::getRevenueRate, RATE_DOMAIN, threshold);
         return new RevenueRateCondition(c);
     }
 
     public static RevenueRateCondition moreThan(final Ratio threshold) {
-        final NewRangeCondition<Ratio> c = NewRangeCondition.moreThan(Wrapper::getRevenueRate, RATE_DOMAIN, threshold);
+        final RangeCondition<Ratio> c = RangeCondition.moreThan(Wrapper::getRevenueRate, RATE_DOMAIN, threshold);
         return new RevenueRateCondition(c);
     }
 
     public static RevenueRateCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
-        final NewRangeCondition<Ratio> c = NewRangeCondition.exact(Wrapper::getRevenueRate, RATE_DOMAIN,
-                                                                   minimumThreshold, maximumThreshold);
+        final RangeCondition<Ratio> c = RangeCondition.exact(Wrapper::getRevenueRate, RATE_DOMAIN,
+                                                             minimumThreshold, maximumThreshold);
         return new RevenueRateCondition(c);
     }
 }

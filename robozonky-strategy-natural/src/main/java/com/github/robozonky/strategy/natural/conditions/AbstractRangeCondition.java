@@ -29,9 +29,9 @@ abstract class AbstractRangeCondition<T extends Number & Comparable<T>> extends 
     protected static final Domain<Integer> AMOUNT_DOMAIN = new Domain<>(Integer.class, 0, null);
     protected static final Domain<BigDecimal> PRINCIPAL_DOMAIN = new Domain<>(BigDecimal.class, BigDecimal.ZERO, null);
     protected static final Domain<Ratio> RATE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, null);
-    private final NewRangeCondition<T> rangeCondition;
+    private final RangeCondition<T> rangeCondition;
 
-    protected AbstractRangeCondition(final NewRangeCondition<T> condition) {
+    protected AbstractRangeCondition(final RangeCondition<T> condition) {
         this.rangeCondition = condition;
     }
 

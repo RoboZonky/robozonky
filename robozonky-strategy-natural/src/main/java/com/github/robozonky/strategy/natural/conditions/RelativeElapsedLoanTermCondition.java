@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,37 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
 
 public class RelativeElapsedLoanTermCondition extends AbstractRelativeRangeCondition {
 
-    private static final int MAX = 100;
-
-    public RelativeElapsedLoanTermCondition(final int fromInclusive, final int toInclusive) {
-        super(w -> w.getOriginalTermInMonths() - w.getRemainingTermInMonths(), Wrapper::getRemainingTermInMonths,
-              fromInclusive, toInclusive);
+    private RelativeElapsedLoanTermCondition(final RangeCondition<Ratio> condition) {
+        super(condition);
     }
 
-    public RelativeElapsedLoanTermCondition(final int fromInclusive) {
-        this(fromInclusive, MAX);
+    private static int getElapsedTerm(final Wrapper<?> w) {
+        return w.getOriginalTermInMonths() - w.getRemainingTermInMonths();
+    }
+
+    public static RelativeElapsedLoanTermCondition lessThan(final Ratio threshold) {
+        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeElapsedLoanTermCondition::getElapsedTerm,
+                                                                        Wrapper::getRemainingTermInMonths,
+                                                                        threshold);
+        return new RelativeElapsedLoanTermCondition(c);
+    }
+
+    public static RelativeElapsedLoanTermCondition moreThan(final Ratio threshold) {
+        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeElapsedLoanTermCondition::getElapsedTerm,
+                                                                        Wrapper::getRemainingTermInMonths,
+                                                                        threshold);
+        return new RelativeElapsedLoanTermCondition(c);
+    }
+
+    public static RelativeElapsedLoanTermCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
+        final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeElapsedLoanTermCondition::getElapsedTerm,
+                                                                     Wrapper::getRemainingTermInMonths,
+                                                                     minimumThreshold, maximumThreshold);
+        return new RelativeElapsedLoanTermCondition(c);
     }
 }

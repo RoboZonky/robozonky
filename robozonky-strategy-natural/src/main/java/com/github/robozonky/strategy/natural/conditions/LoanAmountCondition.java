@@ -20,25 +20,25 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public final class LoanAmountCondition extends AbstractRangeCondition<Integer> {
 
-    private LoanAmountCondition(final NewRangeCondition<Integer> condition) {
+    private LoanAmountCondition(final RangeCondition<Integer> condition) {
         super(condition);
     }
 
     public static LoanAmountCondition lessThan(final int threshold) {
-        final NewRangeCondition<Integer> c = NewRangeCondition.lessThan(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
-                                                                        threshold);
+        final RangeCondition<Integer> c = RangeCondition.lessThan(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
+                                                                  threshold);
         return new LoanAmountCondition(c);
     }
 
     public static LoanAmountCondition moreThan(final int threshold) {
-        final NewRangeCondition<Integer> c = NewRangeCondition.moreThan(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
-                                                                        threshold);
+        final RangeCondition<Integer> c = RangeCondition.moreThan(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
+                                                                  threshold);
         return new LoanAmountCondition(c);
     }
 
     public static LoanAmountCondition exact(final int minimumThreshold, final int maximumThreshold) {
-        final NewRangeCondition<Integer> c = NewRangeCondition.exact(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
-                                                                     minimumThreshold, maximumThreshold);
+        final RangeCondition<Integer> c = RangeCondition.exact(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
+                                                               minimumThreshold, maximumThreshold);
         return new LoanAmountCondition(c);
     }
 }

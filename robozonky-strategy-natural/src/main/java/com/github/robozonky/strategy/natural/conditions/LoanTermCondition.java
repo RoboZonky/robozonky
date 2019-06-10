@@ -20,7 +20,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public class LoanTermCondition extends AbstractRangeCondition<Integer> {
 
-    private LoanTermCondition(final NewRangeCondition<Integer> condition) {
+    private LoanTermCondition(final RangeCondition<Integer> condition) {
         super(condition);
     }
 
@@ -29,21 +29,21 @@ public class LoanTermCondition extends AbstractRangeCondition<Integer> {
     }
 
     public static LoanTermCondition lessThan(final int threshold) {
-        final NewRangeCondition<Integer> c = NewRangeCondition.lessThan(Wrapper::getRemainingTermInMonths,
-                                                                        LOAN_TERM_DOMAIN, threshold);
+        final RangeCondition<Integer> c = RangeCondition.lessThan(Wrapper::getRemainingTermInMonths,
+                                                                  LOAN_TERM_DOMAIN, threshold);
         return new LoanTermCondition(c);
     }
 
     public static LoanTermCondition moreThan(final int threshold) {
-        final NewRangeCondition<Integer> c = NewRangeCondition.moreThan(Wrapper::getRemainingTermInMonths,
-                                                                        LOAN_TERM_DOMAIN, threshold);
+        final RangeCondition<Integer> c = RangeCondition.moreThan(Wrapper::getRemainingTermInMonths,
+                                                                  LOAN_TERM_DOMAIN, threshold);
         return new LoanTermCondition(c);
     }
 
     public static LoanTermCondition exact(final int minimumThreshold, final int maximumThreshold) {
-        final NewRangeCondition<Integer> c = NewRangeCondition.exact(Wrapper::getRemainingTermInMonths,
-                                                                     LOAN_TERM_DOMAIN, minimumThreshold,
-                                                                     maximumThreshold);
+        final RangeCondition<Integer> c = RangeCondition.exact(Wrapper::getRemainingTermInMonths,
+                                                               LOAN_TERM_DOMAIN, minimumThreshold,
+                                                               maximumThreshold);
         return new LoanTermCondition(c);
     }
 }

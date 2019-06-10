@@ -22,30 +22,30 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public final class RemainingPrincipalCondition extends AbstractRangeCondition<BigDecimal> {
 
-    private RemainingPrincipalCondition(final NewRangeCondition<BigDecimal> condition) {
+    private RemainingPrincipalCondition(final RangeCondition<BigDecimal> condition) {
         super(condition);
     }
 
     public static RemainingPrincipalCondition lessThan(final int threshold) {
-        final NewRangeCondition<BigDecimal> c = NewRangeCondition.lessThan(Wrapper::getRemainingPrincipal,
-                                                                           PRINCIPAL_DOMAIN,
-                                                                           BigDecimal.valueOf(threshold));
+        final RangeCondition<BigDecimal> c = RangeCondition.lessThan(Wrapper::getRemainingPrincipal,
+                                                                     PRINCIPAL_DOMAIN,
+                                                                     BigDecimal.valueOf(threshold));
         return new RemainingPrincipalCondition(c);
     }
 
     public static RemainingPrincipalCondition moreThan(final int threshold) {
-        final NewRangeCondition<BigDecimal> c = NewRangeCondition.moreThan(Wrapper::getRemainingPrincipal,
-                                                                           PRINCIPAL_DOMAIN,
-                                                                           BigDecimal.valueOf(threshold));
+        final RangeCondition<BigDecimal> c = RangeCondition.moreThan(Wrapper::getRemainingPrincipal,
+                                                                     PRINCIPAL_DOMAIN,
+                                                                     BigDecimal.valueOf(threshold));
         return new RemainingPrincipalCondition(c);
     }
 
     public static RemainingPrincipalCondition exact(final int minimumThreshold,
                                                     final int maximumThreshold) {
-        final NewRangeCondition<BigDecimal> c = NewRangeCondition.exact(Wrapper::getRemainingPrincipal,
-                                                                        PRINCIPAL_DOMAIN,
-                                                                        BigDecimal.valueOf(minimumThreshold),
-                                                                        BigDecimal.valueOf(maximumThreshold));
+        final RangeCondition<BigDecimal> c = RangeCondition.exact(Wrapper::getRemainingPrincipal,
+                                                                  PRINCIPAL_DOMAIN,
+                                                                  BigDecimal.valueOf(minimumThreshold),
+                                                                  BigDecimal.valueOf(maximumThreshold));
         return new RemainingPrincipalCondition(c);
     }
 }

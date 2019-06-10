@@ -21,23 +21,23 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public final class LoanInterestRateCondition extends AbstractRangeCondition<Ratio> {
 
-    private LoanInterestRateCondition(final NewRangeCondition<Ratio> condition) {
+    private LoanInterestRateCondition(final RangeCondition<Ratio> condition) {
         super(condition);
     }
 
     public static LoanInterestRateCondition lessThan(final Ratio threshold) {
-        final NewRangeCondition<Ratio> c = NewRangeCondition.lessThan(Wrapper::getInterestRate, RATE_DOMAIN, threshold);
+        final RangeCondition<Ratio> c = RangeCondition.lessThan(Wrapper::getInterestRate, RATE_DOMAIN, threshold);
         return new LoanInterestRateCondition(c);
     }
 
     public static LoanInterestRateCondition moreThan(final Ratio threshold) {
-        final NewRangeCondition<Ratio> c = NewRangeCondition.moreThan(Wrapper::getInterestRate, RATE_DOMAIN, threshold);
+        final RangeCondition<Ratio> c = RangeCondition.moreThan(Wrapper::getInterestRate, RATE_DOMAIN, threshold);
         return new LoanInterestRateCondition(c);
     }
 
     public static LoanInterestRateCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
-        final NewRangeCondition<Ratio> c = NewRangeCondition.exact(Wrapper::getInterestRate, RATE_DOMAIN,
-                                                                   minimumThreshold, maximumThreshold);
+        final RangeCondition<Ratio> c = RangeCondition.exact(Wrapper::getInterestRate, RATE_DOMAIN,
+                                                             minimumThreshold, maximumThreshold);
         return new LoanInterestRateCondition(c);
     }
 }
