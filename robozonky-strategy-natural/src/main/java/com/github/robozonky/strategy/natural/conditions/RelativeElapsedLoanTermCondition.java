@@ -31,21 +31,21 @@ public class RelativeElapsedLoanTermCondition extends AbstractRelativeRangeCondi
 
     public static RelativeElapsedLoanTermCondition lessThan(final Ratio threshold) {
         final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeElapsedLoanTermCondition::getElapsedTerm,
-                                                                        Wrapper::getRemainingTermInMonths,
+                                                                        Wrapper::getOriginalTermInMonths,
                                                                         threshold);
         return new RelativeElapsedLoanTermCondition(c);
     }
 
     public static RelativeElapsedLoanTermCondition moreThan(final Ratio threshold) {
         final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeElapsedLoanTermCondition::getElapsedTerm,
-                                                                        Wrapper::getRemainingTermInMonths,
+                                                                        Wrapper::getOriginalTermInMonths,
                                                                         threshold);
         return new RelativeElapsedLoanTermCondition(c);
     }
 
     public static RelativeElapsedLoanTermCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
         final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeElapsedLoanTermCondition::getElapsedTerm,
-                                                                     Wrapper::getRemainingTermInMonths,
+                                                                     Wrapper::getOriginalTermInMonths,
                                                                      minimumThreshold, maximumThreshold);
         return new RelativeElapsedLoanTermCondition(c);
     }

@@ -17,16 +17,44 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class LoanInterestRateConditionTest {
 
     @Test
-    void leftBoundary() {
-        assertThatThrownBy(() -> LoanInterestRateCondition.moreThan(Ratio.fromPercentage(-1)))
-                .isInstanceOf(IllegalArgumentException.class);
+    void lessThan() {
+        final MarketplaceFilterCondition condition = LoanInterestRateCondition.lessThan(Ratio.fromPercentage(1));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getInterestRate()).thenReturn(Ratio.ZERO);
+        assertThat(condition).accepts(w);
+        when(w.getInterestRate()).thenReturn(Ratio.fromPercentage(2));
+        assertThat(condition).rejects(w);
+    }
+
+    @Test
+    void moreThan() {
+        final MarketplaceFilterCondition condition = LoanInterestRateCondition.moreThan(Ratio.ZERO);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getInterestRate()).thenReturn(Ratio.ZERO);
+        assertThat(condition).rejects(w);
+        when(w.getInterestRate()).thenReturn(Ratio.fromPercentage(1));
+        assertThat(condition).accepts(w);
+    }
+
+    @Test
+    void exact() {
+        final MarketplaceFilterCondition condition = LoanInterestRateCondition.exact(Ratio.ZERO, Ratio.fromPercentage(1));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getInterestRate()).thenReturn(Ratio.ZERO);
+        assertThat(condition).accepts(w);
+        when(w.getInterestRate()).thenReturn(Ratio.fromPercentage(1));
+        assertThat(condition).accepts(w);
+        when(w.getInterestRate()).thenReturn(Ratio.ONE);
+        assertThat(condition).rejects(w);
     }
 
 }

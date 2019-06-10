@@ -36,12 +36,12 @@ abstract class AbstractRangeCondition<T extends Number & Comparable<T>> extends 
     }
 
     @Override
-    public Optional<String> getDescription() {
+    public final Optional<String> getDescription() {
         return Optional.of(rangeCondition.toString());
     }
 
     @Override
-    public boolean test(final Wrapper<?> item) {
+    public final boolean test(final Wrapper<?> item) {
         return rangeCondition.test(item);
     }
 }

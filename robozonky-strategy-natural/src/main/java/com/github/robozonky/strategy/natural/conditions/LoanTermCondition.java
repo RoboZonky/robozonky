@@ -24,10 +24,6 @@ public class LoanTermCondition extends AbstractRangeCondition<Integer> {
         super(condition);
     }
 
-    private static int getElapsedTerm(final Wrapper<?> w) {
-        return w.getOriginalTermInMonths() - w.getRemainingTermInMonths();
-    }
-
     public static LoanTermCondition lessThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.lessThan(Wrapper::getRemainingTermInMonths,
                                                                   LOAN_TERM_DOMAIN, threshold);

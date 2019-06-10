@@ -25,27 +25,23 @@ public class RelativeLoanTermCondition extends AbstractRelativeRangeCondition {
         super(condition);
     }
 
-    private static int getElapsedTerm(final Wrapper<?> w) {
-        return w.getOriginalTermInMonths() - w.getRemainingTermInMonths();
-    }
-
     public static RelativeLoanTermCondition lessThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(Wrapper::getOriginalTermInMonths,
-                                                                        Wrapper::getRemainingTermInMonths,
+        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(Wrapper::getRemainingTermInMonths,
+                                                                        Wrapper::getOriginalTermInMonths,
                                                                         threshold);
         return new RelativeLoanTermCondition(c);
     }
 
     public static RelativeLoanTermCondition moreThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(Wrapper::getOriginalTermInMonths,
-                                                                        Wrapper::getRemainingTermInMonths,
+        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(Wrapper::getRemainingTermInMonths,
+                                                                        Wrapper::getOriginalTermInMonths,
                                                                         threshold);
         return new RelativeLoanTermCondition(c);
     }
 
     public static RelativeLoanTermCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeExact(Wrapper::getOriginalTermInMonths,
-                                                                     Wrapper::getRemainingTermInMonths,
+        final RangeCondition<Ratio> c = RangeCondition.relativeExact(Wrapper::getRemainingTermInMonths,
+                                                                     Wrapper::getOriginalTermInMonths,
                                                                      minimumThreshold, maximumThreshold);
         return new RelativeLoanTermCondition(c);
     }

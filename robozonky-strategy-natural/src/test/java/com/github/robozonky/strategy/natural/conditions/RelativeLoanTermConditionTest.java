@@ -16,43 +16,50 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class LoanAnnuityConditionTest {
+class RelativeLoanTermConditionTest {
 
     @Test
     void lessThan() {
-        final MarketplaceFilterCondition condition = LoanAnnuityCondition.lessThan(1);
+        final MarketplaceFilterCondition condition = RelativeLoanTermCondition.lessThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getOriginalAnnuity()).thenReturn(0);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(0);
         assertThat(condition).accepts(w);
-        when(w.getOriginalAnnuity()).thenReturn(1);
+        when(w.getRemainingTermInMonths()).thenReturn(1);
         assertThat(condition).rejects(w);
     }
 
     @Test
     void moreThan() {
-        final MarketplaceFilterCondition condition = LoanAnnuityCondition.moreThan(0);
+        final MarketplaceFilterCondition condition = RelativeLoanTermCondition.moreThan(Ratio.fromPercentage(9));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getOriginalAnnuity()).thenReturn(0);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(0);
         assertThat(condition).rejects(w);
-        when(w.getOriginalAnnuity()).thenReturn(1);
+        when(w.getRemainingTermInMonths()).thenReturn(1);
         assertThat(condition).accepts(w);
     }
 
     @Test
     void exact() {
-        final MarketplaceFilterCondition condition = LoanAnnuityCondition.exact(0, 1);
+        final MarketplaceFilterCondition condition = RelativeLoanTermCondition.exact(Ratio.fromPercentage(0),
+                                                                                     Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getOriginalAnnuity()).thenReturn(0);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(0);
         assertThat(condition).accepts(w);
-        when(w.getOriginalAnnuity()).thenReturn(1);
+        when(w.getRemainingTermInMonths()).thenReturn(1);
         assertThat(condition).accepts(w);
-        when(w.getOriginalAnnuity()).thenReturn(2);
+        when(w.getRemainingTermInMonths()).thenReturn(2);
         assertThat(condition).rejects(w);
     }
+
 }
+

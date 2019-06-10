@@ -20,54 +20,43 @@ import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class ElapsedLoanTermConditionTest {
 
     @Test
-    void leftBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(-1, 0)).isInstanceOf(
-                    IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(0, -1)).isInstanceOf(
-                    IllegalArgumentException.class);
-        });
+    void lessThan() {
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.lessThan(1);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(10);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(9);
+        assertThat(condition).rejects(w);
     }
 
     @Test
-    void rightBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(85, 0)).isInstanceOf(
-                    IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> ElapsedLoanTermCondition.exact(0, 85)).isInstanceOf(
-                    IllegalArgumentException.class);
-        });
+    void moreThan() {
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.moreThan(0);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(10);
+        assertThat(condition).rejects(w);
+        when(w.getRemainingTermInMonths()).thenReturn(9);
+        assertThat(condition).accepts(w);
     }
 
     @Test
-    void boundaryCorrect() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getRemainingTermInMonths()).thenReturn(1);
-        when(l.getOriginalTermInMonths()).thenReturn(2);
-        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
-        assertThat(condition.test(l)).isTrue();
-    }
-
-    @Test
-    void leftOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getRemainingTermInMonths()).thenReturn(0);
-        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
-        assertThat(condition.test(l)).isFalse();
-    }
-
-    @Test
-    void rightOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getRemainingTermInMonths()).thenReturn(2);
-        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
-        assertThat(condition.test(l)).isFalse();
+    void exact() {
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(0, 1);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(10);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(9);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(8);
+        assertThat(condition).rejects(w);
     }
 
     @Test
