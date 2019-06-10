@@ -20,7 +20,7 @@ import com.github.robozonky.api.Ratio;
 
 abstract class AbstractRelativeRangeCondition extends AbstractRangeCondition<Ratio> {
 
-    protected static Domain<Ratio> RELATIVE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, Ratio.ONE);
+    protected static final Domain<Ratio> RELATIVE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, Ratio.ONE);
 
     protected AbstractRelativeRangeCondition(final RangeCondition<Ratio> condition) {
         super(condition);
