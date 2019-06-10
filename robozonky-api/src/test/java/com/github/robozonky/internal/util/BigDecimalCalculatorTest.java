@@ -78,15 +78,4 @@ class BigDecimalCalculatorTest {
         assertThat(result.scale()).isEqualTo(8);
     }
 
-    @Test
-    void moreThan() {
-        final BigDecimal result = BigDecimalCalculator.moreThan(BigDecimal.ONE);
-        assertThat(result).isEqualTo(new BigDecimal("1.00000001"));
-    }
-
-    @Test
-    void lessThan() {
-        final BigDecimal result = BigDecimalCalculator.lessThan(BigDecimal.ONE);
-        assertThat(result).isEqualTo(new BigDecimal("0.99999999"));
-    }
 }

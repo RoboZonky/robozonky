@@ -22,7 +22,6 @@ import java.math.RoundingMode;
 public final class BigDecimalCalculator {
 
     static final int DEFAULT_SCALE = 8;
-    private static final BigDecimal MINIMAL_INCREMENT = BigDecimal.ONE.divide(BigDecimal.TEN.pow(DEFAULT_SCALE));
 
     private BigDecimalCalculator() {
         // no instances
@@ -108,11 +107,4 @@ public final class BigDecimalCalculator {
         return toScale(number).stripTrailingZeros();
     }
 
-    public static BigDecimal lessThan(final BigDecimal number) {
-        return minus(number, MINIMAL_INCREMENT);
-    }
-
-    public static BigDecimal moreThan(final BigDecimal number) {
-        return plus(number, MINIMAL_INCREMENT);
-    }
 }

@@ -7,7 +7,6 @@ import Tokens;
     import java.util.ArrayList;
     import java.util.Map;
     import java.util.HashMap;
-    import com.github.robozonky.internal.util.BigDecimalCalculator;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
