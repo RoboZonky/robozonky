@@ -88,8 +88,8 @@ class FilterSupplier {
     private static Collection<MarketplaceFilter> supplyFilters(final Collection<MarketplaceFilter> filters,
                                                                final long monthsBeforeExit) {
         if (monthsBeforeExit > -1) { // ignore marketplace items that go over the exit date
-            final long filteredTerms = Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
-            final MarketplaceFilterCondition c = new LoanTermCondition(filteredTerms);
+            final int filteredTerms = (int)Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
+            final MarketplaceFilterCondition c = LoanTermCondition.moreThan(filteredTerms);
             final MarketplaceFilter f = MarketplaceFilter.of(c);
             final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size());
             result.add(f);

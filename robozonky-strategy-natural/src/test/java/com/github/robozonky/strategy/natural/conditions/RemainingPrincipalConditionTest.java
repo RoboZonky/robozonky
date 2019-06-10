@@ -22,44 +22,39 @@ import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class RemainingPrincipalConditionTest {
 
     @Test
-    void leftBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(-1, 0))
-                    .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(0, -1))
-                    .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RemainingPrincipalCondition(-1, -1))
-                    .isInstanceOf(IllegalArgumentException.class);
-        });
+    void lessThan() {
+        final MarketplaceFilterCondition condition = RemainingPrincipalCondition.lessThan(1);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.ONE);
+        assertThat(condition).rejects(w);
     }
 
     @Test
-    void boundaryCorrect() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
-        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(0, 0);
-        assertThat(condition.test(l)).isTrue();
+    void moreThan() {
+        final MarketplaceFilterCondition condition = RemainingPrincipalCondition.moreThan(0);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
+        assertThat(condition).rejects(w);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.ONE);
+        assertThat(condition).accepts(w);
     }
 
     @Test
-    void leftOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
-        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(1, 1);
-        assertThat(condition.test(l)).isFalse();
-    }
-
-    @Test
-    void rightOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(2));
-        final MarketplaceFilterConditionImpl condition = new RemainingPrincipalCondition(1, 1);
-        assertThat(condition.test(l)).isFalse();
+    void exact() {
+        final MarketplaceFilterCondition condition = RemainingPrincipalCondition.exact(0, 1);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.ZERO);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.ONE);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        assertThat(condition).rejects(w);
     }
 }

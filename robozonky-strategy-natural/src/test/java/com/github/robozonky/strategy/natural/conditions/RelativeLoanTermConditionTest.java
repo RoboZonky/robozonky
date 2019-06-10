@@ -16,59 +16,50 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class RelativeLoanTermConditionTest {
 
     @Test
-    void leftBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(-1, 0)).isInstanceOf(
-                    IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(0, -1)).isInstanceOf(
-                    IllegalArgumentException.class);
-        });
+    void lessThan() {
+        final MarketplaceFilterCondition condition = RelativeLoanTermCondition.lessThan(Ratio.fromPercentage(10));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(0);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(1);
+        assertThat(condition).rejects(w);
     }
 
     @Test
-    void rightBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(101, 0)).isInstanceOf(
-                    IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(0, 101)).isInstanceOf(
-                    IllegalArgumentException.class);
-        });
+    void moreThan() {
+        final MarketplaceFilterCondition condition = RelativeLoanTermCondition.moreThan(Ratio.fromPercentage(9));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(0);
+        assertThat(condition).rejects(w);
+        when(w.getRemainingTermInMonths()).thenReturn(1);
+        assertThat(condition).accepts(w);
     }
 
     @Test
-    void boundaryCorrect() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getOriginalTermInMonths()).thenReturn(2);
-        when(l.getRemainingTermInMonths()).thenReturn(1);
-        final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(0, 100);
-        assertThat(condition.test(l)).isTrue();
+    void exact() {
+        final MarketplaceFilterCondition condition = RelativeLoanTermCondition.exact(Ratio.fromPercentage(0),
+                                                                                     Ratio.fromPercentage(10));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(0);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(1);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(2);
+        assertThat(condition).rejects(w);
     }
 
-    @Test
-    void leftOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getOriginalTermInMonths()).thenReturn(2);
-        when(l.getRemainingTermInMonths()).thenReturn(0);
-        final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(1, 100);
-        assertThat(condition.test(l)).isFalse();
-    }
-
-    @Test
-    void rightOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getOriginalTermInMonths()).thenReturn(2);
-        when(l.getRemainingTermInMonths()).thenReturn(1);
-        final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(0, 20);
-        assertThat(condition.test(l)).isFalse();
-    }
 }
+

@@ -16,65 +16,55 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class RelativeElapsedLoanTermConditionTest {
 
     @Test
-    void leftBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new RelativeElapsedLoanTermCondition(-1, 0)).isInstanceOf(
-                    IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RelativeElapsedLoanTermCondition(0, -1)).isInstanceOf(
-                    IllegalArgumentException.class);
-        });
+    void lessThan() {
+        final MarketplaceFilterCondition condition = RelativeElapsedLoanTermCondition.lessThan(Ratio.fromPercentage(10));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(10);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(9);
+        assertThat(condition).rejects(w);
     }
 
     @Test
-    void rightBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new RelativeElapsedLoanTermCondition(101, 0)).isInstanceOf(
-                    IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new RelativeElapsedLoanTermCondition(0, 101)).isInstanceOf(
-                    IllegalArgumentException.class);
-        });
+    void moreThan() {
+        final MarketplaceFilterCondition condition = RelativeElapsedLoanTermCondition.moreThan(Ratio.fromPercentage(9));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(10);
+        assertThat(condition).rejects(w);
+        when(w.getRemainingTermInMonths()).thenReturn(9);
+        assertThat(condition).accepts(w);
     }
 
     @Test
-    void boundaryCorrect() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getOriginalTermInMonths()).thenReturn(2);
-        when(l.getRemainingTermInMonths()).thenReturn(1);
-        final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(0, 100);
-        assertThat(condition.test(l)).isTrue();
-    }
-
-    @Test
-    void leftOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getOriginalTermInMonths()).thenReturn(2);
-        when(l.getRemainingTermInMonths()).thenReturn(0);
-        final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(1, 100);
-        assertThat(condition.test(l)).isFalse();
-    }
-
-    @Test
-    void rightOutOfBounds() {
-        final Wrapper<?> l = mock(Wrapper.class);
-        when(l.getOriginalTermInMonths()).thenReturn(2);
-        when(l.getRemainingTermInMonths()).thenReturn(1);
-        final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(0, 20);
-        assertThat(condition.test(l)).isFalse();
+    void exact() {
+        final MarketplaceFilterCondition condition = RelativeElapsedLoanTermCondition.exact(Ratio.fromPercentage(0),
+                                                                                            Ratio.fromPercentage(10));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(10);
+        when(w.getRemainingTermInMonths()).thenReturn(10);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(9);
+        assertThat(condition).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(8);
+        assertThat(condition).rejects(w);
     }
 
     @Test
     void hasDescription() {
-        final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(0, 20);
+        final MarketplaceFilterCondition condition = ElapsedLoanTermCondition.exact(1, 1);
         assertThat(condition.getDescription()).isNotEmpty();
     }
 }
+

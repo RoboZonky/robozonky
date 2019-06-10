@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,89 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
-
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class RangeConditionTest {
 
     @Test
-    void constructor() {
-        final RangeCondition<Wrapper<?>> c = new RangeCondition<>((w) -> 0, 0, 1);
-        assertSoftly(softly -> {
-            softly.assertThat(c.getMinInclusive()).isEqualTo(BigDecimal.ZERO);
-            softly.assertThat(c.getMaxInclusive()).isEqualTo(BigDecimal.ONE);
-        });
+    void moreThan() {
+        final RangeCondition<Integer> c =
+                RangeCondition.moreThan(Wrapper::getOriginalTermInMonths, new Domain<>(Integer.class, 0, null), 5);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(5);
+        assertThat(c).rejects(w);
+        when(w.getOriginalTermInMonths()).thenReturn(6);
+        assertThat(c).accepts(w);
     }
 
     @Test
-    void constructorReversed() {
-        final RangeCondition<Wrapper<?>> c = new RangeCondition<>((w) -> 0, 1, 0);
-        assertSoftly(softly -> {
-            softly.assertThat(c.getMinInclusive()).isEqualTo(BigDecimal.ZERO);
-            softly.assertThat(c.getMaxInclusive()).isEqualTo(BigDecimal.ONE);
-        });
+    void lessThan() {
+        final RangeCondition<Integer> c =
+                RangeCondition.lessThan(Wrapper::getOriginalTermInMonths, new Domain<>(Integer.class, 0, null), 5);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(5);
+        assertThat(c).rejects(w);
+        when(w.getOriginalTermInMonths()).thenReturn(4);
+        assertThat(c).accepts(w);
     }
+
+    @Test
+    void exact() {
+        final RangeCondition<Integer> c =
+                RangeCondition.exact(Wrapper::getOriginalTermInMonths, new Domain<>(Integer.class, 0, null), 5, 5);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(5);
+        assertThat(c).accepts(w);
+        when(w.getOriginalTermInMonths()).thenReturn(4);
+        assertThat(c).rejects(w);
+        when(w.getOriginalTermInMonths()).thenReturn(6);
+        assertThat(c).rejects(w);
+    }
+
+    @Test
+    void relativeMoreThan() {
+        final RangeCondition<Ratio> c =
+                RangeCondition.relativeMoreThan(Wrapper::getRemainingTermInMonths, Wrapper::getOriginalTermInMonths,
+                                                Ratio.fromPercentage(15));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(100);
+        when(w.getRemainingTermInMonths()).thenReturn(15);
+        assertThat(c).rejects(w);
+        when(w.getRemainingTermInMonths()).thenReturn(16);
+        assertThat(c).accepts(w);
+    }
+
+    @Test
+    void relativeLessThan() {
+        final RangeCondition<Ratio> c =
+                RangeCondition.relativeLessThan(Wrapper::getRemainingTermInMonths, Wrapper::getOriginalTermInMonths,
+                                                Ratio.fromPercentage(15));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(100);
+        when(w.getRemainingTermInMonths()).thenReturn(15);
+        assertThat(c).rejects(w);
+        when(w.getRemainingTermInMonths()).thenReturn(14);
+        assertThat(c).accepts(w);
+    }
+
+    @Test
+    void relativeExact() {
+        final RangeCondition<Ratio> c =
+                RangeCondition.relativeExact(Wrapper::getRemainingTermInMonths, Wrapper::getOriginalTermInMonths,
+                                                Ratio.fromPercentage(15), Ratio.fromPercentage(15));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getOriginalTermInMonths()).thenReturn(100);
+        when(w.getRemainingTermInMonths()).thenReturn(15);
+        assertThat(c).accepts(w);
+        when(w.getRemainingTermInMonths()).thenReturn(14);
+        assertThat(c).rejects(w);
+        when(w.getRemainingTermInMonths()).thenReturn(16);
+        assertThat(c).rejects(w);
+    }
+
 }

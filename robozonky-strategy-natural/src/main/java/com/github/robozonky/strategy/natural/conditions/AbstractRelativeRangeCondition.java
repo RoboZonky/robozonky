@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,55 +16,14 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-import java.util.function.Function;
+import com.github.robozonky.api.Ratio;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+abstract class AbstractRelativeRangeCondition extends AbstractRangeCondition<Ratio> {
 
-abstract class AbstractRelativeRangeCondition extends MarketplaceFilterConditionImpl
-        implements MarketplaceFilterCondition {
+    protected static final Domain<Ratio> RELATIVE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, Ratio.ONE);
 
-    private final Function<Wrapper<?>, Number> sumAccessor, partAccessor;
-    private final Number minInclusive, maxInclusive;
-
-    protected AbstractRelativeRangeCondition(final Function<Wrapper<?>, Number> sumAccessor,
-                                             final Function<Wrapper<?>, Number> partAccessor,
-                                             final Number minValueInclusive, final Number maxValueInclusive) {
-        assertIsInRange(minValueInclusive);
-        assertIsInRange(maxValueInclusive);
-        this.sumAccessor = sumAccessor;
-        this.partAccessor = partAccessor;
-        this.minInclusive = minValueInclusive;
-        this.maxInclusive = maxValueInclusive;
+    protected AbstractRelativeRangeCondition(final RangeCondition<Ratio> condition) {
+        super(condition);
     }
 
-    private static BigDecimal toBigDecimal(final Number num) {
-        return new BigDecimal(num.toString());
-    }
-
-    private static BigDecimal getActualValue(final Number sum, final Number percentage) {
-        final BigDecimal s = toBigDecimal(sum);
-        final BigDecimal p = toBigDecimal(percentage);
-        return s.multiply(p).scaleByPowerOfTen(-2);
-    }
-
-    private static void assertIsInRange(final Number percentage) {
-        final double num = toBigDecimal(percentage).doubleValue();
-        if (num < 0 || num > 100) {
-            throw new IllegalArgumentException("Relative value must be in range of <0; 100> %, but was " + percentage);
-        }
-    }
-
-    @Override
-    public Optional<String> getDescription() {
-        return Optional.of("Relative range: <" + minInclusive + "; " + maxInclusive + "> %.");
-    }
-
-    @Override
-    public boolean test(final Wrapper<?> item) {
-        final BigDecimal realMinInclusive = getActualValue(sumAccessor.apply(item), minInclusive);
-        final BigDecimal realMaxInclusive = getActualValue(sumAccessor.apply(item), maxInclusive);
-        return new RangeCondition<>(partAccessor, realMinInclusive, realMaxInclusive).test(item);
-    }
 }

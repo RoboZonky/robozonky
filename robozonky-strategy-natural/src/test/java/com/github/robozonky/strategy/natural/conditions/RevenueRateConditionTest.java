@@ -16,25 +16,45 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
-
-import com.github.robozonky.internal.util.BigDecimalCalculator;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class RevenueRateConditionTest {
 
     @Test
-    void leftBoundary() {
-        assertThatThrownBy(() -> new RevenueRateCondition(BigDecimal.ZERO.subtract(BigDecimal.ONE)))
-                .isInstanceOf(IllegalArgumentException.class);
+    void lessThan() {
+        final MarketplaceFilterCondition condition = RevenueRateCondition.lessThan(Ratio.fromPercentage(1));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRevenueRate()).thenReturn(Ratio.ZERO);
+        assertThat(condition).accepts(w);
+        when(w.getRevenueRate()).thenReturn(Ratio.fromPercentage(2));
+        assertThat(condition).rejects(w);
     }
 
     @Test
-    void rightBoundary() {
-        final BigDecimal maxInterestRate = BigDecimalCalculator.moreThan(BigDecimal.valueOf(Double.MAX_VALUE));
-        assertThatThrownBy(() -> new RevenueRateCondition(BigDecimal.ZERO, maxInterestRate))
-                .isInstanceOf(IllegalArgumentException.class);
+    void moreThan() {
+        final MarketplaceFilterCondition condition = RevenueRateCondition.moreThan(Ratio.ZERO);
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRevenueRate()).thenReturn(Ratio.ZERO);
+        assertThat(condition).rejects(w);
+        when(w.getRevenueRate()).thenReturn(Ratio.fromPercentage(1));
+        assertThat(condition).accepts(w);
     }
+
+    @Test
+    void exact() {
+        final MarketplaceFilterCondition condition = RevenueRateCondition.exact(Ratio.ZERO, Ratio.fromPercentage(1));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRevenueRate()).thenReturn(Ratio.ZERO);
+        assertThat(condition).accepts(w);
+        when(w.getRevenueRate()).thenReturn(Ratio.fromPercentage(1));
+        assertThat(condition).accepts(w);
+        when(w.getRevenueRate()).thenReturn(Ratio.ONE);
+        assertThat(condition).rejects(w);
+    }
+
 }

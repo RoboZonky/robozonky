@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,27 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public class LoanAmountCondition extends AbstractRangeCondition {
+public final class LoanAmountCondition extends AbstractRangeCondition<Integer> {
 
-    public LoanAmountCondition(final int fromInclusive, final int toInclusive) {
-        super(Wrapper::getOriginalAmount, fromInclusive, toInclusive);
-        if (fromInclusive < 0 || toInclusive < 0) {
-            throw new IllegalArgumentException("Either values need to be 0 or more.");
-        }
+    private LoanAmountCondition(final RangeCondition<Integer> condition) {
+        super(condition);
     }
 
-    public LoanAmountCondition(final int fromInclusive) {
-        this(fromInclusive, Integer.MAX_VALUE);
+    public static LoanAmountCondition lessThan(final int threshold) {
+        final RangeCondition<Integer> c = RangeCondition.lessThan(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
+                                                                  threshold);
+        return new LoanAmountCondition(c);
+    }
+
+    public static LoanAmountCondition moreThan(final int threshold) {
+        final RangeCondition<Integer> c = RangeCondition.moreThan(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
+                                                                  threshold);
+        return new LoanAmountCondition(c);
+    }
+
+    public static LoanAmountCondition exact(final int minimumThreshold, final int maximumThreshold) {
+        final RangeCondition<Integer> c = RangeCondition.exact(Wrapper::getOriginalAmount, AMOUNT_DOMAIN,
+                                                               minimumThreshold, maximumThreshold);
+        return new LoanAmountCondition(c);
     }
 }

@@ -16,18 +16,36 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public class RemainingPrincipalCondition extends AbstractRangeCondition {
+public final class RemainingPrincipalCondition extends AbstractRangeCondition<BigDecimal> {
 
-    public RemainingPrincipalCondition(final int fromInclusive, final int toInclusive) {
-        super(Wrapper::getRemainingPrincipal, fromInclusive, toInclusive);
-        if (fromInclusive < 0 || toInclusive < 0) {
-            throw new IllegalArgumentException("Either values need to be 0 or more.");
-        }
+    private RemainingPrincipalCondition(final RangeCondition<BigDecimal> condition) {
+        super(condition);
     }
 
-    public RemainingPrincipalCondition(final int fromInclusive) {
-        this(fromInclusive, Integer.MAX_VALUE);
+    public static RemainingPrincipalCondition lessThan(final int threshold) {
+        final RangeCondition<BigDecimal> c = RangeCondition.lessThan(Wrapper::getRemainingPrincipal,
+                                                                     PRINCIPAL_DOMAIN,
+                                                                     BigDecimal.valueOf(threshold));
+        return new RemainingPrincipalCondition(c);
+    }
+
+    public static RemainingPrincipalCondition moreThan(final int threshold) {
+        final RangeCondition<BigDecimal> c = RangeCondition.moreThan(Wrapper::getRemainingPrincipal,
+                                                                     PRINCIPAL_DOMAIN,
+                                                                     BigDecimal.valueOf(threshold));
+        return new RemainingPrincipalCondition(c);
+    }
+
+    public static RemainingPrincipalCondition exact(final int minimumThreshold,
+                                                    final int maximumThreshold) {
+        final RangeCondition<BigDecimal> c = RangeCondition.exact(Wrapper::getRemainingPrincipal,
+                                                                  PRINCIPAL_DOMAIN,
+                                                                  BigDecimal.valueOf(minimumThreshold),
+                                                                  BigDecimal.valueOf(maximumThreshold));
+        return new RemainingPrincipalCondition(c);
     }
 }
