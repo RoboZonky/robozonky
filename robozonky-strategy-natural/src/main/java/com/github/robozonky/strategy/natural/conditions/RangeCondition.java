@@ -66,8 +66,6 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
     private static <X extends Number & Comparable<X>> Ratio getValueAccessor(final Wrapper<?> w,
                                                                              final Function<Wrapper<?>, X> part,
                                                                              final Function<Wrapper<?>, X> sum) {
-        System.out.println(part.apply(w) + " " + sum.apply(w));
-        System.out.println(getActualValue(part.apply(w), sum.apply(w)));
         return getActualValue(part.apply(w), sum.apply(w));
     }
 
