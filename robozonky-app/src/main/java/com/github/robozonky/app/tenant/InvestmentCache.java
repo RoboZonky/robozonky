@@ -54,15 +54,13 @@ final class InvestmentCache implements AutoCloseable {
         return expiration.isBefore(now);
     }
 
-    private void evict() {
+    private synchronized void evict() {
         LOGGER.trace("Evicting investments.");
-        storage.entrySet().stream()
-                .filter(e -> isExpired(e.getValue()))
-                .forEach(e -> storage.remove(e.getKey()));
+        storage.entrySet().removeIf(e -> isExpired(e.getValue()));
         LOGGER.trace("Evicted.");
     }
 
-    Optional<Investment> getFromCache(final int loanId) {
+    synchronized Optional<Investment> getFromCache(final int loanId) {
         final Tuple2<Investment, Instant> result = storage.get(loanId);
         if (result == null || isExpired(result)) {
             LOGGER.trace("Miss for loan #{}.", loanId);
@@ -73,7 +71,7 @@ final class InvestmentCache implements AutoCloseable {
         }
     }
 
-    private void add(final int loanId, final Investment item) {
+    private synchronized void add(final int loanId, final Investment item) {
         storage.put(loanId, Tuple.of(item, DateUtil.now()));
     }
 

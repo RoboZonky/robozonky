@@ -54,15 +54,13 @@ final class LoanCache implements AutoCloseable {
         return expiration.isBefore(now);
     }
 
-    private void evict() {
+    private synchronized void evict() {
         LOGGER.trace("Evicting loans.");
-        storage.entrySet().stream()
-                .filter(e -> isExpired(e.getValue()))
-                .forEach(e -> storage.remove(e.getKey()));
+        storage.entrySet().removeIf(e -> isExpired(e.getValue()));
         LOGGER.trace("Evicted.");
     }
 
-    Optional<Loan> getLoanFromCache(final int loanId) {
+    synchronized Optional<Loan> getLoanFromCache(final int loanId) {
         final Tuple2<Loan, Instant> result = storage.get(loanId);
         if (result == null || isExpired(result)) {
             LOGGER.trace("Miss for loan #{}.", loanId);
@@ -73,7 +71,7 @@ final class LoanCache implements AutoCloseable {
         }
     }
 
-    private void addLoan(final int loanId, final Loan loan) {
+    private synchronized void addLoan(final int loanId, final Loan loan) {
         storage.put(loanId, Tuple.of(loan, DateUtil.now()));
     }
 
