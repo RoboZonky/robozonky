@@ -24,13 +24,15 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.test.DateUtil;
 
 final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescriptor> {
 
     private final Participation participation;
 
-    public ParticipationWrapper(final ParticipationDescriptor descriptor) {
-        super(descriptor);
+    public ParticipationWrapper(final ParticipationDescriptor descriptor, final PortfolioOverview portfolioOverview) {
+        super(descriptor, portfolioOverview);
         this.participation = descriptor.item();
     }
 
@@ -51,7 +53,7 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public Ratio getRevenueRate() {
-        return getLoan().getRevenueRate();
+        return getLoan().getRevenueRate(DateUtil.now(), getPortfolioOverview().getCzkInvested().longValue());
     }
 
     @Override

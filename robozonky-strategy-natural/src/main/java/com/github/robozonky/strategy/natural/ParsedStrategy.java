@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
@@ -101,8 +102,8 @@ class ParsedStrategy {
                                   .sum());
     }
 
-    public boolean needsConfirmation(final LoanDescriptor loan) {
-        return defaults.needsConfirmation(loan);
+    public boolean needsConfirmation(final LoanDescriptor loan, final PortfolioOverview portfolioOverview) {
+        return defaults.needsConfirmation(loan, portfolioOverview);
     }
 
     public long getMinimumBalance() {
@@ -166,20 +167,23 @@ class ParsedStrategy {
                 .map(Wrapper::getOriginal);
     }
 
-    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> l) {
-        return getApplicable(l.parallelStream().map(Wrapper::wrap));
+    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> l,
+                                                     final PortfolioOverview portfolioOverview) {
+        return getApplicable(l.parallelStream().map(d -> Wrapper.wrap(d, portfolioOverview)));
     }
 
-    public Stream<ReservationDescriptor> getApplicableReservations(final Collection<ReservationDescriptor> r) {
-        return getApplicable(r.parallelStream().map(Wrapper::wrap));
+    public Stream<ReservationDescriptor> getApplicableReservations(final Collection<ReservationDescriptor> r,
+                                                                   final PortfolioOverview portfolioOverview) {
+        return getApplicable(r.parallelStream().map(d -> Wrapper.wrap(d, portfolioOverview)));
     }
 
-    public Stream<ParticipationDescriptor> getApplicableParticipations(final Collection<ParticipationDescriptor> p) {
+    public Stream<ParticipationDescriptor> getApplicableParticipations(final Collection<ParticipationDescriptor> p,
+                                                                       final PortfolioOverview portfolioOverview) {
         if (!isPurchasingEnabled()) {
             return Stream.empty();
         }
         return p.parallelStream()
-                .map(Wrapper::wrap)
+                .map(d -> Wrapper.wrap(d, portfolioOverview))
                 .filter(w -> !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
                                             "{} to be ignored as it matched secondary marketplace filter {}."))
                 .filter(w -> !matchesFilter(w, filters.getSellFilters(),
@@ -203,17 +207,19 @@ class ParsedStrategy {
         return defaults.getSellingMode();
     }
 
-    public Stream<InvestmentDescriptor> getInvestmentsMatchingSellFilters(final Collection<InvestmentDescriptor> i) {
+    public Stream<InvestmentDescriptor> getMatchingSellFilters(final Collection<InvestmentDescriptor> i,
+                                                               final PortfolioOverview portfolioOverview) {
         return i.parallelStream()
-                .map(Wrapper::wrap)
+                .map(d -> Wrapper.wrap(d, portfolioOverview))
                 .filter(w -> matchesFilter(w, filters.getSellFilters(),
                                            "{} to be sold as it matched sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
-    public Stream<InvestmentDescriptor> getInvestmentsMatchingPrimaryMarketplaceFilters(final Collection<InvestmentDescriptor> i) {
+    public Stream<InvestmentDescriptor> getMatchingPrimaryMarketplaceFilters(final Collection<InvestmentDescriptor> i,
+                                                                             final PortfolioOverview portfolioOverview) {
         return i.parallelStream()
-                .map(Wrapper::wrap)
+                .map(d -> Wrapper.wrap(d, portfolioOverview))
                 .filter(w -> matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
                                            "{} sellable as it matched primary marketplace filter {}."))
                 .map(Wrapper::getOriginal);

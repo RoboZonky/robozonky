@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,20 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.github.robozonky.api.strategies.Descriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
 abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
 
     private final T original;
+    private final PortfolioOverview portfolioOverview;
 
-    protected AbstractWrapper(final T original) {
+    protected AbstractWrapper(final T original, final PortfolioOverview portfolioOverview) {
         this.original = original;
+        this.portfolioOverview = portfolioOverview;
+    }
+
+    protected PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 
     @Override

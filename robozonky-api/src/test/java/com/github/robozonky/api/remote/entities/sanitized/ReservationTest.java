@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -98,6 +99,17 @@ class ReservationTest {
             });
         }
 
+        private <T> void optional(final ReservationBuilder builder, final Function<T, ReservationBuilder> setter,
+                                  final Supplier<Optional<T>> getter, final T value) {
+            assertThat(getter.get()).isEmpty();
+            final ReservationBuilder newBuilder = setter.apply(value);
+            assertSoftly(softly -> {
+                softly.assertThat(newBuilder).as("Setter returned itself.").isSameAs(builder);
+                softly.assertThat(getter.get()).as("Correct value was set.").contains(value);
+            });
+        }
+
+
         @Test
         void myReservation() {
             standard(b, b::setMyReservation, b::getMyReservation, mock(MyReservation.class));
@@ -150,7 +162,7 @@ class ReservationTest {
 
         @Test
         void revenueRate() {
-            standard(b, b::setRevenueRate, b::getRevenueRate, Ratio.ZERO);
+            optional(b, b::setRevenueRate, b::getRevenueRate, Ratio.ZERO);
         }
 
         @Test

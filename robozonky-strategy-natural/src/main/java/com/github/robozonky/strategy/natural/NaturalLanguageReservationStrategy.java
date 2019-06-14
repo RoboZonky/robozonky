@@ -55,7 +55,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
         }
         // split available marketplace into buckets per rating
         final Map<Rating, List<ReservationDescriptor>> splitByRating =
-                Util.sortByRating(strategy.getApplicableReservations(available), d -> d.item().getRating());
+                Util.sortByRating(strategy.getApplicableReservations(available, portfolio), d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
