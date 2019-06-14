@@ -25,13 +25,14 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
 
     private final Investment investment;
 
-    public InvestmentWrapper(final InvestmentDescriptor original) {
-        super(original);
+    public InvestmentWrapper(final InvestmentDescriptor original, final PortfolioOverview portfolioOverview) {
+        super(original, portfolioOverview);
         this.investment = original.item();
     }
 
@@ -52,7 +53,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Ratio getRevenueRate() {
-        return investment.getRevenueRate();
+        return investment.getRevenueRate().orElseGet(() -> estimateRevenueRate(investment.getInvestmentDate()));
     }
 
     @Override

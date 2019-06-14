@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.Descriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
 abstract class AbstractLoanWrapper<T extends Descriptor<?, ?, ?>> extends AbstractWrapper<T> {
 
     private final Supplier<MarketplaceLoan> loan;
 
-    protected AbstractLoanWrapper(final T original) {
-        super(original);
+    protected AbstractLoanWrapper(final T original, final PortfolioOverview portfolioOverview) {
+        super(original, portfolioOverview);
         this.loan = original::related;
     }
 
@@ -44,5 +45,4 @@ abstract class AbstractLoanWrapper<T extends Descriptor<?, ?, ?>> extends Abstra
     public String getStory() {
         return getLoan().getStory();
     }
-
 }

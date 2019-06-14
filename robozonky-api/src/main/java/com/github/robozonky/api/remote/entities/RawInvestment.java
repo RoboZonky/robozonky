@@ -80,7 +80,7 @@ public class RawInvestment extends BaseInvestment {
         this.investmentDate = investment.getInvestmentDate();
         this.nextPaymentDate = investment.getNextPaymentDate().orElse(null);
         this.interestRate = investment.getInterestRate();
-        this.revenueRate = investment.getRevenueRate();
+        this.revenueRate = investment.getRevenueRate().orElse(null);
         this.paidInterest = investment.getPaidInterest();
         this.dueInterest = investment.getDueInterest();
         this.paidPrincipal = investment.getPaidPrincipal();

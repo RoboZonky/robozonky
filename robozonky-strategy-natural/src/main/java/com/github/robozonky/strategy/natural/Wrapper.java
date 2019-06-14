@@ -27,26 +27,29 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 
 public interface Wrapper<T> {
 
-    static Wrapper<LoanDescriptor> wrap(final LoanDescriptor descriptor) {
-        return new LoanWrapper(descriptor);
+    static Wrapper<LoanDescriptor> wrap(final LoanDescriptor descriptor, final PortfolioOverview portfolioOverview) {
+        return new LoanWrapper(descriptor, portfolioOverview);
     }
 
-    static Wrapper<InvestmentDescriptor> wrap(final InvestmentDescriptor descriptor) {
-        return new InvestmentWrapper(descriptor);
+    static Wrapper<InvestmentDescriptor> wrap(final InvestmentDescriptor descriptor,
+                                              final PortfolioOverview portfolioOverview) {
+        return new InvestmentWrapper(descriptor, portfolioOverview);
     }
 
-    static Wrapper<ParticipationDescriptor> wrap(final ParticipationDescriptor descriptor) {
-        return new ParticipationWrapper(descriptor);
+    static Wrapper<ParticipationDescriptor> wrap(final ParticipationDescriptor descriptor,
+                                                 final PortfolioOverview portfolioOverview) {
+        return new ParticipationWrapper(descriptor, portfolioOverview);
     }
 
-    static Wrapper<ReservationDescriptor> wrap(final ReservationDescriptor descriptor) {
-        return new ReservationWrapper(descriptor);
+    static Wrapper<ReservationDescriptor> wrap(final ReservationDescriptor descriptor,
+                                               final PortfolioOverview portfolioOverview) {
+        return new ReservationWrapper(descriptor, portfolioOverview);
     }
-
 
     boolean isInsuranceActive();
 
@@ -77,5 +80,4 @@ public interface Wrapper<T> {
     Optional<BigDecimal> saleFee();
 
     T getOriginal();
-
 }

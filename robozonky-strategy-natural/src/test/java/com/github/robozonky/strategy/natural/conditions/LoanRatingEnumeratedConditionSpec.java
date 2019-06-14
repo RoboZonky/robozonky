@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,14 @@ package com.github.robozonky.strategy.natural.conditions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
 
+import static org.mockito.Mockito.*;
+
 class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Rating> {
+
+    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     @Override
     public AbstractEnumeratedCondition<Rating> getImplementation() {
@@ -31,7 +36,7 @@ class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTe
     @Override
     public Wrapper<?> getMocked() {
         final Loan loan = Loan.custom().setRating(this.getTriggerItem()).build();
-        return Wrapper.wrap(new LoanDescriptor(loan));
+        return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }
 
     @Override

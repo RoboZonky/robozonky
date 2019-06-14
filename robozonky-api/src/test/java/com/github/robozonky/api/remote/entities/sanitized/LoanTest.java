@@ -188,7 +188,7 @@ class LoanTest {
 
         @Test
         void revenueRate() {
-            standard(b, b::setRevenueRate, b::getRevenueRate, Ratio.ONE);
+            optional(b, b::setRevenueRate, b::getRevenueRate, Ratio.ONE);
         }
 
         @Test

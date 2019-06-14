@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                 .map(mode -> {
                     switch (mode) {
                         case SELL_FILTERS:
-                            return strategy.getInvestmentsMatchingSellFilters(available);
+                            return strategy.getMatchingSellFilters(available, portfolio);
                         case FREE_AND_OUTSIDE_STRATEGY:
-                            return strategy.getInvestmentsMatchingPrimaryMarketplaceFilters(available)
+                            return strategy.getMatchingPrimaryMarketplaceFilters(available, portfolio)
                                     .filter(NaturalLanguageSellStrategy::isFree);
                         default:
                             throw new IllegalStateException("Impossible.");

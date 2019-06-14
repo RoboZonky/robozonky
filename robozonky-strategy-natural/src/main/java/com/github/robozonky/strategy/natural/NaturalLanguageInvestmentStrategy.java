@@ -50,7 +50,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         }
         // split available marketplace into buckets per rating
         final Map<Rating, List<LoanDescriptor>> splitByRating =
-                Util.sortByRating(strategy.getApplicableLoans(available), d -> d.item().getRating());
+                Util.sortByRating(strategy.getApplicableLoans(available, portfolio), d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
         final BigDecimal balance = portfolio.getCzkAvailable();
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
@@ -60,7 +60,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final int recommendedAmount = recommender.apply(d.item(), balance.intValue(), restrictions);
                     if (recommendedAmount > 0) {
-                        return d.recommend(recommendedAmount, strategy.needsConfirmation(d))
+                        return d.recommend(recommendedAmount, strategy.needsConfirmation(d, portfolio))
                                 .map(Stream::of)
                                 .orElse(Stream.empty());
                     } else {

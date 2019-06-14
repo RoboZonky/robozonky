@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Currency;
+import java.util.Optional;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
@@ -52,7 +53,12 @@ public interface BaseLoan {
 
     Ratio getInterestRate();
 
-    Ratio getRevenueRate();
+    /**
+     * Present on loans while the loan is still on the marketplace. Otherwise only present if the user has an investment
+     * in the loan.
+     * @return
+     */
+    Optional<Ratio> getRevenueRate();
 
     Rating getRating();
 

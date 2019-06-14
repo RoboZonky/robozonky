@@ -108,7 +108,7 @@ public enum Rating implements BaseEnum {
         return dateForFees.isBefore(MIDNIGHT_2019_03_18);
     }
 
-    private static Ratio discount(final Ratio ratio, final long totalInvested) {
+    private static Ratio getDiscountedFee(final Ratio ratio, final long totalInvested) {
         final BigDecimal baseFee = ratio.bigDecimalValue();
         final BigDecimal feeDiscount = feeDiscount(totalInvested).bigDecimalValue();
         return Ratio.fromRaw(minus(baseFee, times(baseFee, feeDiscount)));
@@ -134,11 +134,11 @@ public enum Rating implements BaseEnum {
         if (isInvalid(dateForFees)) {
             return Ratio.ZERO;
         } else if (dateForFees.isBefore(MIDNIGHT_2017_09_01)) {
-            return discount(ONE_PERCENT, totalInvested);
+            return getDiscountedFee(ONE_PERCENT, totalInvested);
         } else if (isBeforeLatestFeeChange(dateForFees)) {
-            return discount(feeBeforeMarch2019, totalInvested);
+            return getDiscountedFee(feeBeforeMarch2019, totalInvested);
         } else {
-            return discount(currentFee, totalInvested);
+            return getDiscountedFee(currentFee, totalInvested);
         }
     }
 
