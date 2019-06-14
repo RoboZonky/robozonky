@@ -53,8 +53,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Ratio getRevenueRate() {
-        return investment.getRevenueRate(investment.getInvestmentDate().toInstant(),
-                                         getPortfolioOverview().getCzkInvested().longValue());
+        return investment.getRevenueRate().orElseGet(() -> estimateRevenueRate(investment.getInvestmentDate()));
     }
 
     @Override

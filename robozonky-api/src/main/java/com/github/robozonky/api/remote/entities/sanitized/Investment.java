@@ -17,7 +17,6 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -100,10 +99,6 @@ public interface Investment {
      * @return
      */
     Optional<Ratio> getRevenueRate();
-
-    default Ratio getRevenueRate(final Instant dateForFees, final long totalInvested) {
-        return getRevenueRate().orElseGet(() -> getRating().getMaximalRevenueRate(dateForFees, totalInvested));
-    }
 
     Rating getRating();
 

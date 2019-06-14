@@ -20,12 +20,12 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.test.DateUtil;
 
 final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescriptor> {
 
@@ -53,7 +53,8 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public Ratio getRevenueRate() {
-        return getLoan().getRevenueRate(DateUtil.now(), getPortfolioOverview().getCzkInvested().longValue());
+        final MarketplaceLoan loan = getLoan();
+        return loan.getRevenueRate().orElseGet(this::estimateRevenueRate);
     }
 
     @Override

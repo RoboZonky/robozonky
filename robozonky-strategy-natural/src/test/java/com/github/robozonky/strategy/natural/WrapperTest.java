@@ -32,6 +32,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -69,6 +70,20 @@ class WrapperTest {
     }
 
     @Test
+    void fromInvestmentWithoutRevenueRate() {
+        final Loan loan = Loan.custom()
+                .setRating(Rating.A)
+                .build();
+        final int invested = 200;
+        final Investment investment = Investment.fresh(loan, invested)
+                .setSmpFee(BigDecimal.ONE)
+                .build();
+        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan), FOLIO);
+        when(FOLIO.getCzkInvested()).thenReturn(BigDecimal.ZERO);
+        assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("7.99"));
+    }
+
+    @Test
     void fromReservation() {
         final Reservation reservation = Reservation.custom()
                 .setAnnuity(BigDecimal.ONE)
@@ -94,6 +109,17 @@ class WrapperTest {
     }
 
     @Test
+    void fromReservationWithoutRevenueRate() {
+        final Reservation reservation = Reservation.custom()
+                .setRating(Rating.B)
+                .build();
+        final Wrapper<ReservationDescriptor> w = Wrapper.wrap(new ReservationDescriptor(reservation, () -> null),
+                                                              FOLIO);
+        when(FOLIO.getCzkInvested()).thenReturn(BigDecimal.ZERO);
+        assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("9.99"));
+    }
+
+    @Test
     void fromLoan() {
         final Loan loan = Loan.custom()
                 .setId(1)
@@ -116,6 +142,16 @@ class WrapperTest {
             softly.assertThat(w.saleFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
+    }
+
+    @Test
+    void fromLoanWithoutRevenueRate() {
+        final Loan loan = Loan.custom()
+                .setRating(Rating.D)
+                .build();
+        final Wrapper<LoanDescriptor> w = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
+        when(FOLIO.getCzkInvested()).thenReturn(BigDecimal.ZERO);
+        assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("14.99"));
     }
 
     @Test
@@ -145,6 +181,21 @@ class WrapperTest {
             softly.assertThat(w.saleFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
+    }
+
+    @Test
+    void fromParticipationWithoutRevenueRate() {
+        final Loan loan = Loan.custom()
+                .setRating(Rating.C)
+                .build();
+        final int invested = 200;
+        final Participation p = mock(Participation.class);
+        when(p.getRating()).thenReturn(loan.getRating());
+        when(p.getInterestRate()).thenReturn(Ratio.ONE);
+        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(invested));
+        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(new ParticipationDescriptor(p, () -> loan), FOLIO);
+        when(FOLIO.getCzkInvested()).thenReturn(BigDecimal.ZERO);
+        assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("11.49"));
     }
 
     @Test

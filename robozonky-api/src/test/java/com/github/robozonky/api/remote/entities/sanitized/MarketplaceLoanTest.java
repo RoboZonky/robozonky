@@ -16,11 +16,7 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import java.time.Instant;
-
-import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,11 +40,8 @@ class MarketplaceLoanTest {
     @Test
     @DisplayName("Custom loan works.")
     void custom() {
-        final MarketplaceLoan l = MarketplaceLoan.custom()
-                .setRating(Rating.D)
-                .build();
-        assertThat(l.getRevenueRate()).isEmpty();
-        assertThat(l.getRevenueRate(Instant.EPOCH, 1_000_000)).isEqualTo(Ratio.fromRaw("0.1919"));
+        final MarketplaceLoan l = MarketplaceLoan.custom().build();
+        assertThat(l).isNotNull();
 
     }
 

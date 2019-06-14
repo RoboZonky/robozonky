@@ -45,5 +45,4 @@ abstract class AbstractLoanWrapper<T extends Descriptor<?, ?, ?>> extends Abstra
     public String getStory() {
         return getLoan().getStory();
     }
-
 }

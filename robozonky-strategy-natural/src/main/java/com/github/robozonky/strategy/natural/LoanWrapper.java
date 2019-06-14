@@ -63,8 +63,7 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     @Override
     public Ratio getRevenueRate() {
-        return loan.getRevenueRate(loan.getDatePublished().toInstant(),
-                                   getPortfolioOverview().getCzkInvested().longValue());
+        return loan.getRevenueRate().orElseGet(this::estimateRevenueRate);
     }
 
     @Override
@@ -106,5 +105,4 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
     public String toString() {
         return "Wrapper for loan #" + loan.getId();
     }
-
 }
