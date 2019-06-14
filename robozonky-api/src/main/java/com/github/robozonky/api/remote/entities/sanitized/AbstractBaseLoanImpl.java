@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.Optional;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
@@ -403,8 +404,8 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     }
 
     @Override
-    public Ratio getRevenueRate() {
-        return revenueRate;
+    public Optional<Ratio> getRevenueRate() {
+        return Optional.ofNullable(revenueRate);
     }
 
     @Override

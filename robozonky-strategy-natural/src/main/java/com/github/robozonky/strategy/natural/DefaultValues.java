@@ -20,6 +20,7 @@ import java.time.Period;
 import java.util.Optional;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
@@ -119,8 +120,8 @@ class DefaultValues {
         this.investmentSize = investmentSize;
     }
 
-    public boolean needsConfirmation(final LoanDescriptor loan) {
-        return confirmationCondition.test(Wrapper.wrap(loan));
+    public boolean needsConfirmation(final LoanDescriptor loan, final PortfolioOverview portfolioOverview) {
+        return confirmationCondition.test(Wrapper.wrap(loan, portfolioOverview));
     }
 
     public void setConfirmationCondition(final MarketplaceFilterCondition confirmationCondition) {

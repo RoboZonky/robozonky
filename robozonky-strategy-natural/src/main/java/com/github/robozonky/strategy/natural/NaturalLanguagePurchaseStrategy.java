@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         }
         // split available marketplace into buckets per rating
         final Map<Rating, List<ParticipationDescriptor>> splitByRating =
-                Util.sortByRating(strategy.getApplicableParticipations(available), d -> d.item().getRating());
+                Util.sortByRating(strategy.getApplicableParticipations(available, portfolio), d -> d.item().getRating());
         // recommend amount to invest per strategy
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))

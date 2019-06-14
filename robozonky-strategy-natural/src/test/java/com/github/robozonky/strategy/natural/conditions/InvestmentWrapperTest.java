@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
 
 class InvestmentWrapperTest {
 
@@ -45,11 +47,12 @@ class InvestmentWrapperTest {
             .setTermInMonths(20)
             .build();
     private static final Investment INVESTMENT = Investment.fresh(LOAN, 2_000);
+    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     @Test
     void values() {
         final InvestmentDescriptor original = new InvestmentDescriptor(INVESTMENT, () -> LOAN);
-        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original);
+        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(INVESTMENT.isInsuranceActive());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
@@ -70,11 +73,11 @@ class InvestmentWrapperTest {
     @Test
     void equality() {
         final InvestmentDescriptor original = new InvestmentDescriptor(INVESTMENT, () -> LOAN);
-        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original);
+        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w);
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(original));
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(new InvestmentDescriptor(INVESTMENT, () -> LOAN)));
+            softly.assertThat(w).isEqualTo(Wrapper.wrap(original, FOLIO));
+            softly.assertThat(w).isEqualTo(Wrapper.wrap(new InvestmentDescriptor(INVESTMENT, () -> LOAN), FOLIO));
             softly.assertThat(w).isNotEqualTo(null);
         });
     }

@@ -25,13 +25,14 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     private final MarketplaceLoan loan;
 
-    public LoanWrapper(final LoanDescriptor original) {
-        super(original);
+    public LoanWrapper(final LoanDescriptor original, final PortfolioOverview portfolioOverview) {
+        super(original, portfolioOverview);
         this.loan = original.item();
     }
 
@@ -62,7 +63,7 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     @Override
     public Ratio getRevenueRate() {
-        return loan.getRevenueRate();
+        return loan.getRevenueRate().orElseGet(this::estimateRevenueRate);
     }
 
     @Override
@@ -104,5 +105,4 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
     public String toString() {
         return "Wrapper for loan #" + loan.getId();
     }
-
 }

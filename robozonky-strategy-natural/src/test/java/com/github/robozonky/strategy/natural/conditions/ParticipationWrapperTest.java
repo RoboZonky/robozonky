@@ -28,6 +28,7 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
@@ -36,6 +37,8 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class ParticipationWrapperTest {
+
+    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     private static final Loan LOAN = Loan.custom()
             .setInsuranceActive(true)
@@ -62,7 +65,7 @@ class ParticipationWrapperTest {
     @Test
     void values() {
         final ParticipationDescriptor original = new ParticipationDescriptor(PARTICIPATION, () -> LOAN);
-        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original);
+        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(PARTICIPATION.isInsuranceActive());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
@@ -83,11 +86,11 @@ class ParticipationWrapperTest {
     @Test
     void equality() {
         final ParticipationDescriptor original = new ParticipationDescriptor(PARTICIPATION, () -> LOAN);
-        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original);
+        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w);
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(original));
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(new ParticipationDescriptor(PARTICIPATION, () -> LOAN)));
+            softly.assertThat(w).isEqualTo(Wrapper.wrap(original, FOLIO));
+            softly.assertThat(w).isEqualTo(Wrapper.wrap(new ParticipationDescriptor(PARTICIPATION, () -> LOAN), FOLIO));
             softly.assertThat(w).isNotEqualTo(null);
         });
     }
@@ -111,7 +114,7 @@ class ParticipationWrapperTest {
         when(p.getIncomeType()).thenReturn(MainIncomeType.EMPLOYMENT);
         when(p.getInterestRate()).thenReturn(Ratio.fromPercentage(15));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd);
+        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd, FOLIO);
         assertThat(f).rejects(w);
     }
 }

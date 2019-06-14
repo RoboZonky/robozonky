@@ -18,17 +18,21 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class MarketplaceFilterConditionImplTest {
+
+    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     @Test
     void doubleNegation() {
         final MarketplaceFilterCondition negated = AlwaysAcceptingCondition.INSTANCE.negate();
-        assertThat(negated.test(Wrapper.wrap(new LoanDescriptor(Loan.custom().build())))).isFalse();
+        assertThat(negated.test(Wrapper.wrap(new LoanDescriptor(Loan.custom().build()), FOLIO))).isFalse();
         final MarketplaceFilterCondition doubleNegated = negated.negate();
         assertThat(doubleNegated).isSameAs(AlwaysAcceptingCondition.INSTANCE);
     }

@@ -64,7 +64,7 @@ class NaturalLanguageSellStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         v.setSellingMode(SellingMode.SELL_FILTERS);
         final ParsedStrategy p = spy(new ParsedStrategy(v));
-        doReturn(Stream.empty()).when(p).getInvestmentsMatchingSellFilters(any());
+        doReturn(Stream.empty()).when(p).getMatchingSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Stream<RecommendedInvestment> result =
@@ -80,7 +80,7 @@ class NaturalLanguageSellStrategyTest {
         doAnswer(e -> {
             final Collection<InvestmentDescriptor> i = e.getArgument(0);
             return i.stream();
-        }).when(p).getInvestmentsMatchingSellFilters(any());
+        }).when(p).getMatchingSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Stream<RecommendedInvestment> result =
@@ -96,7 +96,7 @@ class NaturalLanguageSellStrategyTest {
         doAnswer(e -> {
             final Collection<InvestmentDescriptor> i = e.getArgument(0);
             return i.stream();
-        }).when(p).getInvestmentsMatchingPrimaryMarketplaceFilters(any());
+        }).when(p).getMatchingPrimaryMarketplaceFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Investment i1 = mockInvestment();

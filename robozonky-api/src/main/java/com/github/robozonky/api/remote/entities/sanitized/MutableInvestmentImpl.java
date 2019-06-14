@@ -126,7 +126,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isOnSmp = false;
         this.originalPrincipal = originalPrincipal;
         this.interestRate = loan.getInterestRate();
-        this.revenueRate = loan.getRevenueRate();
+        this.revenueRate = loan.getRevenueRate().orElse(null);
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.ZERO;
         this.paidInterest = BigDecimal.ZERO;
@@ -415,8 +415,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public Ratio getRevenueRate() {
-        return revenueRate;
+    public Optional<Ratio> getRevenueRate() {
+        return Optional.ofNullable(revenueRate);
     }
 
     @Override

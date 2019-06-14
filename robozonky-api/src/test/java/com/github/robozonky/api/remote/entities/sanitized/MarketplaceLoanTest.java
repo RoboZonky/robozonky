@@ -40,7 +40,9 @@ class MarketplaceLoanTest {
     @Test
     @DisplayName("Custom loan works.")
     void custom() {
-        assertThat(MarketplaceLoan.custom().build()).isNotNull();
+        final MarketplaceLoan l = MarketplaceLoan.custom().build();
+        assertThat(l).isNotNull();
+
     }
 
     @Test

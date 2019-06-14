@@ -24,14 +24,15 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 
 final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     private final Reservation reservation;
 
-    public ReservationWrapper(final ReservationDescriptor original) {
-        super(original);
+    public ReservationWrapper(final ReservationDescriptor original, final PortfolioOverview portfolioOverview) {
+        super(original, portfolioOverview);
         this.reservation = original.item();
     }
 
@@ -62,7 +63,7 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     @Override
     public Ratio getRevenueRate() {
-        return reservation.getRevenueRate();
+        return reservation.getRevenueRate().orElseGet(this::estimateRevenueRate);
     }
 
     @Override
@@ -104,5 +105,4 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
     public String toString() {
         return "Wrapper for reservation #" + reservation.getId();
     }
-
 }

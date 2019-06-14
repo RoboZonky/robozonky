@@ -94,7 +94,11 @@ public interface Investment {
 
     Ratio getInterestRate();
 
-    Ratio getRevenueRate();
+    /**
+     * See {@link BaseLoan#getRevenueRate()}.
+     * @return
+     */
+    Optional<Ratio> getRevenueRate();
 
     Rating getRating();
 

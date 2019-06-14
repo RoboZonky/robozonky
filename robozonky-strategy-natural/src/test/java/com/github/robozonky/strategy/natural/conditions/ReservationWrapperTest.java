@@ -24,13 +24,17 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
 
 class ReservationWrapperTest {
+
+    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     @Test
     void values() {
@@ -46,7 +50,7 @@ class ReservationWrapperTest {
                 .setTermInMonths(20)
                 .build();
         final ReservationDescriptor original = new ReservationDescriptor(l, () -> null);
-        final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original);
+        final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(l.isInsuranceActive());
             softly.assertThat(w.getInterestRate()).isEqualTo(l.getInterestRate());
@@ -78,13 +82,14 @@ class ReservationWrapperTest {
                 .setTermInMonths(20)
                 .build();
         final ReservationDescriptor original = new ReservationDescriptor(l, () -> null);
-        final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original);
+        final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w);
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(original));
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(new ReservationDescriptor(l, () -> null)));
+            softly.assertThat(w).isEqualTo(Wrapper.wrap(original, FOLIO));
+            softly.assertThat(w).isEqualTo(Wrapper.wrap(new ReservationDescriptor(l, () -> null), FOLIO));
             softly.assertThat(w)
-                    .isNotEqualTo(Wrapper.wrap(new ReservationDescriptor(Reservation.custom().build(), () -> null)));
+                    .isNotEqualTo(
+                            Wrapper.wrap(new ReservationDescriptor(Reservation.custom().build(), () -> null), FOLIO));
             softly.assertThat(w).isNotEqualTo(null);
         });
     }
