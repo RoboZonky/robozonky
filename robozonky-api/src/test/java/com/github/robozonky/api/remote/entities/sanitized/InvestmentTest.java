@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -67,9 +68,13 @@ class InvestmentTest {
     @Test
     @DisplayName("Fresh from Loan works.")
     void freshFromLoan() {
-        final Loan l = Loan.custom().build();
+        final Loan l = Loan.custom()
+                .setRating(Rating.D)
+                .build();
         final Investment i = Investment.fresh(l, 1000);
         assertThat(i.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(1000));
+        assertThat(i.getRevenueRate()).isEmpty();
+        assertThat(i.getRevenueRate(Instant.EPOCH, 1_000_000)).isEqualTo(Ratio.fromRaw("0.1919"));
     }
 
     @Test
