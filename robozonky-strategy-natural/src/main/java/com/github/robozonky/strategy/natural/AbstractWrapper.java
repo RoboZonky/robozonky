@@ -25,9 +25,12 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
 
+    private final Logger logger = LogManager.getLogger(getClass());
     private final T original;
     private final PortfolioOverview portfolioOverview;
 
@@ -37,8 +40,10 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     }
 
     protected Ratio estimateRevenueRate(final OffsetDateTime dateForFees) {
-        return getRating().getMaximalRevenueRate(dateForFees.toInstant(),
-                                                 portfolioOverview.getCzkInvested().longValue());
+        final Ratio r = getRating().getMaximalRevenueRate(dateForFees.toInstant(),
+                                                          portfolioOverview.getCzkInvested().longValue());
+        logger.trace("Revenue rate for {} was estimated to be {}.", this, r);
+        return r;
     }
 
     protected Ratio estimateRevenueRate() {

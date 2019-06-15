@@ -18,14 +18,12 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 
-import com.github.robozonky.strategy.natural.Wrapper;
-
 public class RevenueRateCondition extends AbstractRangeCondition {
 
     private static final BigDecimal MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);
 
     public RevenueRateCondition(final BigDecimal fromInclusive, final BigDecimal toInclusive) {
-        super(Wrapper::getRevenueRate, fromInclusive, toInclusive);
+        super(w -> w.getRevenueRate().asPercentage(), fromInclusive, toInclusive);
         RevenueRateCondition.assertIsInRange(fromInclusive);
         RevenueRateCondition.assertIsInRange(toInclusive);
     }

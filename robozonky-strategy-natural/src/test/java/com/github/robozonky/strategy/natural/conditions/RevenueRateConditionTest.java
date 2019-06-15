@@ -18,12 +18,25 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
+import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class RevenueRateConditionTest {
+
+    @Test
+    void correctness() {
+        final RevenueRateCondition c = new RevenueRateCondition(BigDecimal.ZERO, new BigDecimal("3.99"));
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRevenueRate()).thenReturn(Ratio.fromPercentage("4.0"));
+        assertThat(c).rejects(w);
+        when(w.getRevenueRate()).thenReturn(Ratio.fromPercentage("3.99"));
+        assertThat(c).accepts(w);
+    }
 
     @Test
     void leftBoundary() {
