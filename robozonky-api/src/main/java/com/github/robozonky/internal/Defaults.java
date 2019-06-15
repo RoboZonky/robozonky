@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
@@ -34,6 +35,7 @@ public final class Defaults {
 
     private static final Logger LOGGER = LogManager.getLogger(Defaults.class);
 
+    public static final Currency CURRENCY = Currency.getInstance("CZK");
     public static final String MEDIA_TYPE = MediaType.APPLICATION_JSON + "; charset=UTF-8";
     public static final Locale LOCALE = Locale.forLanguageTag("cs-CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;

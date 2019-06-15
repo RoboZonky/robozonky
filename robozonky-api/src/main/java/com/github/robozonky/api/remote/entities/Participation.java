@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Currency;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -40,6 +41,7 @@ public class Participation extends BaseEntity {
     private Rating rating;
     private boolean willExceedLoanInvestmentLimit, insuranceActive;
     private Object loanInvestments;
+    private Currency currency;
 
     @XmlElement
     public OffsetDateTime getDeadline() {
@@ -109,6 +111,11 @@ public class Participation extends BaseEntity {
     @XmlElement
     public Rating getRating() {
         return rating;
+    }
+
+    @XmlElement
+    public Currency getCurrency() {
+        return currency;
     }
 
     @XmlElement

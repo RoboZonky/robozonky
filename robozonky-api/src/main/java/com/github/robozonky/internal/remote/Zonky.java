@@ -19,6 +19,7 @@ package com.github.robozonky.internal.remote;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -41,6 +42,7 @@ import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.RawReservation;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Resolutions;
@@ -57,6 +59,7 @@ import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
@@ -115,6 +118,14 @@ public class Zonky {
                 .build();
     }
 
+    private static <T> Stream<T> excludeNonCZK(final Stream<T> data,
+                                               final Function<T, Currency> extractor) {
+        return data.filter(i -> {
+            final Currency extracted = extractor.apply(i);
+            return extracted == null || extracted.equals(Defaults.CURRENCY);
+        });
+    }
+
     public void invest(final Investment investment) {
         LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.invest(new RawInvestment(investment)));
@@ -141,10 +152,6 @@ public class Zonky {
         controlApi.run(c -> c.accept(rs));
     }
 
-    public void setReservationPreferences(final ReservationPreferences preferences) {
-        controlApi.run(c -> c.setReservationPreferences(preferences));
-    }
-
     public Wallet getWallet() {
         return walletApi.execute(WalletApi::wallet);
     }
@@ -154,9 +161,9 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Reservation> getPendingReservations() {
-        return reservationApi.call(ReservationApi::items)
-                .getReservations()
-                .stream()
+        return excludeNonCZK(reservationApi.call(ReservationApi::items).getReservations().stream(),
+                             RawReservation::getCurrency)
+                .filter(r -> r.getCurrency().equals(Defaults.CURRENCY))
                 .map(Reservation::sanitized);
     }
 
@@ -165,7 +172,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<BlockedAmount> getBlockedAmounts() {
-        return getStream(walletApi, WalletApi::items);
+        return excludeNonCZK(getStream(walletApi, WalletApi::items), BlockedAmount::getCurrency);
     }
 
     /**
@@ -197,7 +204,7 @@ public class Zonky {
             LOGGER.debug("Date for investment #{} (loan #{}) was determined to be {}.", i.getId(), i.getLoanId(), d);
             return d;
         };
-        return getStream(portfolioApi, PortfolioApi::items, select)
+        return excludeNonCZK(getStream(portfolioApi, PortfolioApi::items, select), RawInvestment::getCurrency)
                 .map(raw -> Investment.sanitized(raw, investmentDateSupplier));
     }
 
@@ -238,7 +245,8 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<MarketplaceLoan> getAvailableLoans(final Select select) {
-        return getStream(loanApi, LoanApi::items, select).map(MarketplaceLoan::sanitized);
+        return excludeNonCZK(getStream(loanApi, LoanApi::items, select), RawLoan::getCurrency)
+                .map(MarketplaceLoan::sanitized);
     }
 
     /**
@@ -247,7 +255,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded, filtered.
      */
     public Stream<Transaction> getTransactions(final Select select) {
-        return getStream(transactions, TransactionApi::items, select);
+        return excludeNonCZK(getStream(transactions, TransactionApi::items, select), Transaction::getCurrency);
     }
 
     /**
@@ -275,11 +283,15 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Participation> getAvailableParticipations(final Select select) {
-        return getStream(participationApi, ParticipationApi::items, select);
+        return excludeNonCZK(getStream(participationApi, ParticipationApi::items, select), Participation::getCurrency);
     }
 
     public ReservationPreferences getReservationPreferences() {
         return reservationApi.call(ReservationApi::preferences);
+    }
+
+    public void setReservationPreferences(final ReservationPreferences preferences) {
+        controlApi.run(c -> c.setReservationPreferences(preferences));
     }
 
     public void requestWalletExport() {
