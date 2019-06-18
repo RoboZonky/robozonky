@@ -7,7 +7,7 @@
 
 ## Odkazy
 
-* [Ke stažení](http://www.robozonky.cz) nebo [v Dockeru](https://hub.docker.com/r/robozonky/robozonky/).
+* [Ke stažení](http://www.robozonky.cz), [v Dockeru](https://hub.docker.com/r/robozonky/robozonky/) nebo [přes Ansible](https://github.com/v6ak/robozonky-ansible).
 * [Dokumentace](https://github.com/RoboZonky/robozonky/wiki).
 * [Uživatelská podpora](https://groups.google.com/forum/#!forum/robozonky-users) pro dotazy a diskusi.
 * [Hlášení chyb](https://github.com/RoboZonky/robozonky/issues) přímo na Githubu.
