@@ -25,6 +25,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @JsonDeserialize(using = Purpose.PurposeDeserializer.class)
 public enum Purpose implements BaseEnum {
@@ -39,6 +41,7 @@ public enum Purpose implements BaseEnum {
     OWN_PROJECT("vlastní projekt"),
     OTHER("jiné");
 
+    private static final Logger LOGGER = LogManager.getLogger(Purpose.class);
     private final String code;
 
     Purpose(final String code) {
@@ -60,17 +63,19 @@ public enum Purpose implements BaseEnum {
         return code;
     }
 
-    // TODO remove once Zonky finishes migration to the new type
     static class PurposeDeserializer extends JsonDeserializer<Purpose> {
 
         @Override
         public Purpose deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
                 throws IOException {
             final String id = jsonParser.getText();
-            return maybeFindByCode(id).orElseGet(() -> {
-                final int actualId = Integer.parseInt(id) - 1; // purposes in Zonky API are indexed from 1
-                return Purpose.values()[actualId];
-            });
+            try {
+                return Purpose.valueOf(id);
+            } catch (final Exception ex) {
+                LOGGER.warn("Received unknown loan purpose from Zonky: '{}'. This may be a problem, but we continue.",
+                            id);
+                return OTHER;
+            }
         }
     }
 }
