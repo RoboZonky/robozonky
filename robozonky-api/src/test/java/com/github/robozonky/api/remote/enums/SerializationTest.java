@@ -68,7 +68,7 @@ class SerializationTest {
         }
         // test deserialization of all purposes
         for (final Purpose toSerialize : Purpose.values()) {
-            final String serialized = escape(toSerialize.ordinal() + 1);
+            final String serialized = escape(toSerialize.name());
             tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
         }
         // test deserialization of all regions
@@ -76,8 +76,6 @@ class SerializationTest {
             final String serialized = escape(toSerialize.ordinal() + 1);
             tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
         }
-        // test that deserialization of invalid value properly fails
-        tests.add(dynamicTest("invalid " + Purpose.class.getSimpleName(), () -> deserialize(Purpose.class)));
         return tests;
     }
 }
