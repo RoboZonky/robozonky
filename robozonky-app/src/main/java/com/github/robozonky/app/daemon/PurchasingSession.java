@@ -118,7 +118,8 @@ final class PurchasingSession {
             LOGGER.info("Purchased a participation worth {} CZK.", participation.getRemainingPrincipal());
             return true;
         } catch (final Exception ex) {
-            LOGGER.debug("Failed purchasing {}. Likely someone's beaten us to it.", ex);
+            LOGGER.debug("Failed purchasing a participation worth {} CZK.. Likely someone's beaten us to it.",
+                         participation.getRemainingPrincipal(), ex);
             return false;
         }
     }
