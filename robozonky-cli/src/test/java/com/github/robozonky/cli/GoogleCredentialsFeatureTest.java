@@ -16,6 +16,7 @@
 
 package com.github.robozonky.cli;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -23,7 +24,6 @@ import com.github.robozonky.integrations.stonky.CredentialProvider;
 import com.github.robozonky.internal.Defaults;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.testing.http.MockHttpTransport;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +34,13 @@ class GoogleCredentialsFeatureTest {
 
     private final InputStream originalSystemIn = System.in;
 
+    private static InputStream toInputStream(final String input) {
+        return new ByteArrayInputStream(input.getBytes(Defaults.CHARSET));
+    }
+
     @BeforeEach
     void replaceSystemIn() {
-        System.setIn(IOUtils.toInputStream("", Defaults.CHARSET));
+        System.setIn(toInputStream(""));
     }
 
     @AfterEach

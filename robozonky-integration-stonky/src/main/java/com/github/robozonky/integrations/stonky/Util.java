@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
@@ -35,7 +37,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.sheets.v4.Sheets;
 import io.vavr.control.Try;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -122,10 +123,10 @@ public final class Util {
     }
 
     static Optional<File> download(final InputStream stream) {
-        try {
-            final File f = File.createTempFile("robozonky-", ".download");
-            FileUtils.copyInputStreamToFile(stream, f);
-            return Optional.of(f);
+        try (stream) {
+            final Path p = Files.createTempFile("robozonky-", ".download");
+            stream.transferTo(Files.newOutputStream(p));
+            return Optional.of(p.toFile());
         } catch (final Exception ex) {
             LOGGER.warn("Failed downloading file.", ex);
             return Optional.empty();

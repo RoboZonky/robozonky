@@ -22,11 +22,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.atomic.LongAdder;
 
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.extensions.StrategyLoader;
+import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
-import org.apache.commons.io.IOUtils;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "strategy-validator", description = StrategyValidationFeature.DESCRIPTION)
@@ -65,7 +64,7 @@ public final class StrategyValidationFeature extends AbstractFeature {
     @Override
     public void setup() throws SetupFailedException {
         text = Try.withResources(() -> new BufferedInputStream(UrlUtil.open(location)))
-                .of(s -> IOUtils.toString(s, Defaults.CHARSET))
+                .of(s -> StringUtil.toString(s))
                 .getOrElseThrow(SetupFailedException::new);
     }
 

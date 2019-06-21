@@ -42,10 +42,10 @@ import javax.xml.xpath.XPathFactory;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.async.Refreshable;
 import com.github.robozonky.internal.jobs.SimplePayload;
+import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 import com.github.robozonky.internal.util.XmlUtil;
 import io.vavr.control.Try;
-import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -150,7 +150,7 @@ final class UpdateMonitor extends Refreshable<VersionIdentifier> implements Simp
     protected String getLatestSource() {
         return Try.withResources(() -> UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
                                                                          this.mavenCentralHostname))
-                .of(s -> IOUtils.toString(s, Defaults.CHARSET))
+                .of(StringUtil::toString)
                 .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 

@@ -27,7 +27,6 @@ module com.github.robozonky.integration.stonky {
     requires google.oauth.client.java6;
     requires google.oauth.client.jetty;
     requires io.vavr;
-    requires org.apache.commons.io;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
 

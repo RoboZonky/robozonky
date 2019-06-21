@@ -24,7 +24,6 @@ module com.github.robozonky.app {
     requires io.vavr;
     requires jdk.jfr;
     requires maven.artifact;
-    requires org.apache.commons.io;
     requires org.apache.commons.lang3;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;

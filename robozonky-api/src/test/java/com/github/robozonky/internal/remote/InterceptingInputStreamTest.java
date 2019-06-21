@@ -23,8 +23,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.github.robozonky.internal.Defaults;
-import org.apache.commons.io.IOUtils;
+import com.github.robozonky.internal.util.StringUtil;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -39,7 +38,7 @@ class InterceptingInputStreamTest {
             // first check content has been intercepted
             assertThat(s2.getContents()).isEqualTo(contents);
             // then check content is still available
-            assertThat(IOUtils.toString(s2, Defaults.CHARSET)).isEqualTo(contents);
+            assertThat(StringUtil.toString(s2)).isEqualTo(contents);
         }
     }
 

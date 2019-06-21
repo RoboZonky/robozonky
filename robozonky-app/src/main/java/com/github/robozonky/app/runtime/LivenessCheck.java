@@ -20,18 +20,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.async.Refreshable;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.Lazy;
 import io.vavr.control.Try;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Periodically queries remote Zonky API, checking whether it's accessible.
@@ -73,8 +71,7 @@ class LivenessCheck extends Refreshable<String> {
         // need to send parsed version, since the object itself changes every time due to currentApiTime field
         return Try.withResources(() -> UrlUtil.open(new URL(url)))
                 .of(s -> {
-                    final String source = IOUtils.readLines(s, Defaults.CHARSET).stream()
-                            .collect(Collectors.joining(System.lineSeparator()));
+                    final String source = StringUtil.toString(s);
                     logger.trace("API info coming from Zonky: {}.", source);
                     return read(source);
                 })

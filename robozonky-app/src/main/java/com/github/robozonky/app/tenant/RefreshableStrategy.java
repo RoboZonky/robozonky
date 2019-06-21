@@ -22,11 +22,10 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.async.Refreshable;
+import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 import io.vavr.control.Try;
-import org.apache.commons.io.IOUtils;
 
 class RefreshableStrategy extends Refreshable<String> {
 
@@ -55,7 +54,7 @@ class RefreshableStrategy extends Refreshable<String> {
     @Override
     protected String getLatestSource() {
         return Try.withResources(() -> UrlUtil.open(url))
-                .of(s -> IOUtils.toString(s, Defaults.CHARSET))
+                .of(StringUtil::toString)
                 .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
     }
 

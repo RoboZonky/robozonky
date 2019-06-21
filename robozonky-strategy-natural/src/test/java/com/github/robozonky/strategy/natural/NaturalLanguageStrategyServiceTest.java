@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Optional;
@@ -25,7 +24,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.Defaults;
-import org.apache.commons.io.IOUtils;
+import com.github.robozonky.internal.util.StringUtil;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -59,9 +58,9 @@ class NaturalLanguageStrategyServiceTest {
         return strategy.getStrategy().apply(str);
     }
 
-    private static void test(final Type strategy) throws IOException {
+    private static void test(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("only-whitespace");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         assertThat(actualStrategy).isEmpty();
     }
@@ -76,10 +75,10 @@ class NaturalLanguageStrategyServiceTest {
         }
     }
 
-    private static void windows1250WindowsNewlines(final Type strategy) throws IOException {
+    private static void windows1250WindowsNewlines(final Type strategy) {
         // https://github.com/RoboZonky/robozonky/issues/181#issuecomment-346653495
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("newlines-ansi-windows");
-        final String str = IOUtils.toString(s, Charset.forName("windows-1250"));
+        final String str = StringUtil.toString(s, Charset.forName("windows-1250"));
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.SELLING || strategy == Type.RESERVATIONS) {
             assertThat(actualStrategy).isEmpty();
@@ -88,10 +87,10 @@ class NaturalLanguageStrategyServiceTest {
         }
     }
 
-    private static void windows1250UnixNewlines(final Type strategy) throws IOException {
+    private static void windows1250UnixNewlines(final Type strategy) {
         // https://github.com/RoboZonky/robozonky/issues/181#issuecomment-346653495
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("newlines-ansi-unix");
-        final String str = IOUtils.toString(s, Charset.forName("windows-1250"));
+        final String str = StringUtil.toString(s, Charset.forName("windows-1250"));
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.SELLING || strategy == Type.RESERVATIONS) {
             assertThat(actualStrategy).isEmpty();
@@ -100,16 +99,16 @@ class NaturalLanguageStrategyServiceTest {
         }
     }
 
-    private static void complex(final Type strategy) throws IOException {
+    private static void complex(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         assertThat(actualStrategy).isPresent();
     }
 
-    private static void simplest(final Type strategy) throws IOException {
+    private static void simplest(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("simplest");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.SELLING || strategy == Type.RESERVATIONS) {
             assertThat(actualStrategy).isEmpty();
@@ -118,16 +117,16 @@ class NaturalLanguageStrategyServiceTest {
         }
     }
 
-    private static void disabled(final Type strategy) throws IOException {
+    private static void disabled(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("disabled-filters");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         assertThat(actualStrategy).isEmpty();
     }
 
-    private static void enabled(final Type strategy) throws IOException {
+    private static void enabled(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("enabled-filters");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.SELLING) {
             assertThat(actualStrategy).isEmpty();
@@ -141,16 +140,16 @@ class NaturalLanguageStrategyServiceTest {
      * end without error, but whatever was written there was silently ignored. This resulted in an empty strategy,
      * leading the robot to invest into and purchase everything.
      */
-    private static void missingHeaders(final Type strategy) throws IOException {
+    private static void missingHeaders(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("no-headers");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         assertThat(actualStrategy).isEmpty();
     }
 
-    private static void missingFilters1(final Type strategy) throws IOException {
+    private static void missingFilters1(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters1");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.SELLING || strategy == Type.RESERVATIONS) {
             assertThat(actualStrategy).isEmpty();
@@ -159,9 +158,9 @@ class NaturalLanguageStrategyServiceTest {
         }
     }
 
-    private static void missingFilters2(final Type strategy) throws IOException {
+    private static void missingFilters2(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters2");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.RESERVATIONS) {
             assertThat(actualStrategy).isEmpty();
@@ -170,9 +169,9 @@ class NaturalLanguageStrategyServiceTest {
         }
     }
 
-    private static void missingFilters3(final Type strategy) throws IOException {
+    private static void missingFilters3(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters3");
-        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.SELLING || strategy == Type.RESERVATIONS) {
             assertThat(actualStrategy).isEmpty();
@@ -215,7 +214,6 @@ class NaturalLanguageStrategyServiceTest {
         };
 
         protected abstract Function<String, Optional<?>> getStrategy();
-
     }
 }
 
