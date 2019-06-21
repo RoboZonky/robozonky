@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http,//www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,12 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
@@ -132,16 +128,13 @@ public enum DevelopmentType implements BaseEnum {
         return ids;
     }
 
-    static class CollectionActionTypeDeserializer extends JsonDeserializer<DevelopmentType> {
+    static final class CollectionActionTypeDeserializer extends AbstractDeserializer<DevelopmentType> {
 
-        @Override
-        public DevelopmentType deserialize(final JsonParser jsonParser,
-                                           final DeserializationContext ctxt) throws IOException {
-            final String id = jsonParser.getText();
-            return Stream.of(DevelopmentType.values())
-                    .filter(t -> t.getIds().contains(id))
+        public CollectionActionTypeDeserializer() {
+            super(s -> Stream.of(DevelopmentType.values())
+                    .filter(t -> t.getIds().contains(s))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Unknown enum value: " + id));
+                    .orElseThrow(() -> new IllegalStateException("Unknown enum value: " + s)), OTHER);
         }
     }
 }

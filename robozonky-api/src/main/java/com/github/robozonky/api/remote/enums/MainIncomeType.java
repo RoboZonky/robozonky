@@ -16,16 +16,10 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @JsonDeserialize(using = MainIncomeType.MainIncomeTypeDeserializer.class)
 public enum MainIncomeType implements BaseEnum {
@@ -41,7 +35,6 @@ public enum MainIncomeType implements BaseEnum {
     RENT("rentiér"),
     OTHERS_MAIN("jiné");
 
-    private static final Logger LOGGER = LogManager.getLogger(MainIncomeType.class);
     private final String code;
 
     MainIncomeType(final String code) {
@@ -60,21 +53,12 @@ public enum MainIncomeType implements BaseEnum {
         return code;
     }
 
-    static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
+    static final class MainIncomeTypeDeserializer extends AbstractDeserializer<MainIncomeType> {
 
-        @Override
-        public MainIncomeType deserialize(final JsonParser jsonParser,
-                                          final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            try {
-                return MainIncomeType.valueOf(id);
-            } catch (final Exception ex) {
-                LOGGER.warn("Received unknown loan region from Zonky: '{}'. This may be a problem, but we continue.",
-                            id);
-                return OTHERS_MAIN;
-            }
+        public MainIncomeTypeDeserializer() {
+            super(MainIncomeType::valueOf, OTHERS_MAIN);
         }
+
     }
 
 }

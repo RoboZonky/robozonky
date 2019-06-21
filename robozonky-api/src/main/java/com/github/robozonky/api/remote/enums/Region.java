@@ -16,16 +16,10 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
@@ -51,7 +45,6 @@ public enum Region implements BaseEnum {
     ZLINSKY("Zlínský"),
     UNKNOWN("N/A");
 
-    private static final Logger LOGGER = LogManager.getLogger(Region.class);
     private final String code;
     private final String richCode;
 
@@ -84,20 +77,13 @@ public enum Region implements BaseEnum {
         return richCode;
     }
 
-    static class RegionDeserializer extends JsonDeserializer<Region> {
+    static final class RegionDeserializer extends AbstractDeserializer<Region> {
 
-        @Override
-        public Region deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            try {
-                final int actualId = Integer.parseInt(id) - 1; // regions in Zonky API are indexed from 1
+        public RegionDeserializer() {
+            super(s -> {
+                final int actualId = Integer.parseInt(s) - 1; // regions in Zonky API are indexed from 1
                 return Region.values()[actualId];
-            } catch (final Exception ex) {
-                LOGGER.warn("Received unknown loan region from Zonky: '{}'. This may be a problem, but we continue.",
-                            id);
-                return UNKNOWN;
-            }
+            }, UNKNOWN);
         }
     }
 }
