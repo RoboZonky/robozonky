@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -29,6 +30,7 @@ public class Statistics extends BaseEntity {
 
     private static final Lazy<Statistics> EMPTY = Lazy.of(Statistics::emptyAndFresh);
 
+    @XmlElement
     private Ratio profitability;
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
@@ -65,9 +67,12 @@ public class Statistics extends BaseEntity {
         return possiblyNull == null ? Collections.emptyList() : Collections.unmodifiableList(possiblyNull);
     }
 
-    @XmlElement
-    public Ratio getProfitability() {
-        return profitability;
+    /**
+     *
+     * @return Empty if the user is relatively new on Zonky and they don't calculate this for them yet.
+     */
+    public Optional<Ratio> getProfitability() {
+        return Optional.ofNullable(profitability);
     }
 
     @XmlElement

@@ -4,7 +4,7 @@
     <tr>
         <th></th>
         <th style="padding: 5px; text-align: right;">Očekáváno</th>
-        <th style="padding: 5px; text-align: right;">Udáváno <@zonky /></th>
+        <th style="padding: 5px; text-align: right;">Udáváno <@zonky />*</th>
         <th style="padding: 5px; text-align: right;">Ideální</th>
     </tr>
   </thead>
@@ -23,6 +23,9 @@
     </tr>
   </tbody>
 </table>
+
+<p><small>* Pro relativně nové investory Zonky nepočítá výkonnost portfolia. Zde je tato situace reprezentována nulovou
+hodnotou.</small></p>
 
 <#include "additional-portfolio-info.ftl">
 
