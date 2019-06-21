@@ -50,9 +50,10 @@ class DevelopmentTypeTest {
     }
 
     @Test
-    void deserializeWrong() {
+    void deserializeWrong() throws IOException {
         final String json = "\"\"";
-        assertThatThrownBy(() -> new ObjectMapper().readValue(json, DevelopmentType.class))
-                .isInstanceOf(IllegalStateException.class);
+        DevelopmentType item = new ObjectMapper().readValue(json, DevelopmentType.class);
+        assertThat(item).isEqualTo(DevelopmentType.OTHER);
+
     }
 }
