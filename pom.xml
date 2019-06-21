@@ -41,7 +41,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
     <!-- Expected Maven version to execute the build against. -->
-    <version.org.apache.maven>3.5.4</version.org.apache.maven>
+    <version.org.apache.maven>3.6.1</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
     <surefire.version>3.0.0-M3</surefire.version>
     <jaxb.version>2.3.2</jaxb.version>
