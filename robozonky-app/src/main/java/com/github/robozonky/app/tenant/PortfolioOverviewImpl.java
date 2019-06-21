@@ -49,7 +49,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
 
     PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
         this(impl.getBalance(), impl.getTotal(), impl.getAtRisk(), impl.getSellable(), impl.getSellableWithoutFee(),
-             impl.getRemotePortfolio().getStatistics().getProfitability());
+             impl.getRemotePortfolio().getStatistics().getProfitability().orElse(Ratio.ZERO));
     }
 
     PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,

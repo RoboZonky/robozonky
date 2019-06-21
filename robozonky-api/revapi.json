@@ -13,15 +13,16 @@
     "ignore": [
       {
         "code": "java.method.returnTypeChanged",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getRevenueRate()",
-        "new": "method java.util.Optional<com.github.robozonky.api.Ratio> com.github.robozonky.api.remote.entities.sanitized.BaseLoan::getRevenueRate()",
-        "justification": "Fixing a bug in our implementation of Zonky API."
+        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.Statistics::getProfitability()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Ratio> com.github.robozonky.api.remote.entities.Statistics::getProfitability()",
+        "justification": "Fix the type to conform to how Zonky actually serves it."
       },
       {
-        "code": "java.method.returnTypeChanged",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.sanitized.Investment::getRevenueRate()",
-        "new": "method java.util.Optional<com.github.robozonky.api.Ratio> com.github.robozonky.api.remote.entities.sanitized.Investment::getRevenueRate()",
-        "justification": "Fixing a bug in our implementation of Zonky API."
+        "code": "java.annotation.removed",
+        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.Statistics::getProfitability()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Ratio> com.github.robozonky.api.remote.entities.Statistics::getProfitability()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Fix the type to conform to how Zonky actually serves it."
       }
     ]
   }
