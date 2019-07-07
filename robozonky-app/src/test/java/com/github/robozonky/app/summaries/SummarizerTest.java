@@ -61,7 +61,7 @@ class SummarizerTest extends AbstractZonkyLeveragingTest {
         final WeeklySummaryEvent evt = (WeeklySummaryEvent)this.getEventsRequested().get(0);
         final Summary summary = evt.getSummary();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(summary.getCashInTotal()).isEqualTo(5 + 7 + 8); // investment fee return counts below...
+            softly.assertThat(summary.getCashInTotal()).isEqualTo(5 + 7 + 8 + 10); // investment fee return counts below...
             softly.assertThat(summary.getCashInFromDeposits()).isEqualTo(7);
             softly.assertThat(summary.getCashOutTotal()).isEqualTo(1 + 2 + 3 + 4 + 6 - 9); //... here
             softly.assertThat(summary.getCashOutFromFees()).isEqualTo(1 + 4 - 9);
