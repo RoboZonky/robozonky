@@ -43,6 +43,7 @@ final class CashFlowProcessor extends AbstractTransactionProcessor<CashFlow> {
             case INVESTMENT_FEE:
                 return CashFlow.fee(getOutgoingAmount(transaction));
             case PAYMENT:
+            case PAYMENT_REVERT:
             case SMP_SELL:
                 return CashFlow.investment(getIncomingAmount(transaction));
             case INVESTMENT:

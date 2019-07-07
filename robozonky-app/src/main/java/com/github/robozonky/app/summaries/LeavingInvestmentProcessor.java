@@ -42,11 +42,16 @@ final class LeavingInvestmentProcessor extends AbstractTransactionProcessor<Inve
         }
         switch (transaction.getCategory()) {
             case PAYMENT:
+            case PAYMENT_REVERT:
                 final int loanId = transaction.getLoanId();
-                final Investment investment = tenant.getInvestment(loanId);
-                return investment.getPaymentStatus()
-                        .map(s -> s == PaymentStatus.PAID)
-                        .orElse(false);
+                try {
+                    final Investment investment = tenant.getInvestment(loanId);
+                    return investment.getPaymentStatus()
+                            .map(s -> s == PaymentStatus.PAID)
+                            .orElse(false);
+                } catch (final Exception ex) { // TODO: do payment reverts have associated investments?
+                    logger.warn("Could not find investment for loan #{}.", loanId, ex);
+                }
             case SMP_SELL:
                 return true;
             default:

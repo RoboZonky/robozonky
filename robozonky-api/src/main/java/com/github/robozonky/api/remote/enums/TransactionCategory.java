@@ -29,5 +29,6 @@ public enum TransactionCategory {
     SMP_BUY,
     DEPOSIT,
     PAYMENT,
-    INVESTMENT_FEE_RETURN
+    INVESTMENT_FEE_RETURN,
+    PAYMENT_REVERT
 }
