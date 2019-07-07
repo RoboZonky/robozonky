@@ -42,10 +42,10 @@ class CashFlowProcessorTest {
                 .containsOnly(BigDecimal.valueOf(1).negate(), BigDecimal.valueOf(2).negate(),
                               BigDecimal.valueOf(3).negate(), BigDecimal.valueOf(4).negate(), BigDecimal.valueOf(5),
                               BigDecimal.valueOf(6).negate(), BigDecimal.valueOf(7), BigDecimal.valueOf(8),
-                              BigDecimal.valueOf(9));
+                              BigDecimal.valueOf(9), BigDecimal.valueOf(10));
         final CashFlowSummary summary = CashFlowSummary.from(p.get());
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(summary.getInTotal()).isEqualTo(5 + 7 + 8); // investment fee return counts below...
+            softly.assertThat(summary.getInTotal()).isEqualTo(5 + 7 + 8 + 10); // investment fee return counts below...
             softly.assertThat(summary.getInFromDeposits()).isEqualTo(7);
             softly.assertThat(summary.getOutTotal()).isEqualTo(1 + 2 + 3 + 4 + 6 - 9); //... here
             softly.assertThat(summary.getOutFromFees()).isEqualTo(1 + 4 - 9);
