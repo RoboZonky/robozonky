@@ -50,7 +50,7 @@
     <version.jakarta.activation>1.2.1</version.jakarta.activation>
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
-    <version.org.jboss.resteasy>4.0.0.Final</version.org.jboss.resteasy>
+    <version.org.jboss.resteasy>4.1.0.Final</version.org.jboss.resteasy>
     <version.org.junit5>4.2</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
