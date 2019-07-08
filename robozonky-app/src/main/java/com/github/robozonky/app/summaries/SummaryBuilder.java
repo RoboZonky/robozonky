@@ -18,15 +18,17 @@ package com.github.robozonky.app.summaries;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.common.tenant.Tenant;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 final class SummaryBuilder {
 
@@ -45,18 +47,17 @@ final class SummaryBuilder {
 
     private static Stream<Investment> deduplicate(final Stream<Investment> investmentStream) {
         return investmentStream
-                .collect(Collectors.groupingBy(Investment::getLoanId, HashMap::new, Collectors.toList()))
+                .collect(toMap(Investment::getLoanId, Function.identity(), (a, b) -> a))
                 .values()
-                .stream()
-                .map(l -> l.get(0));
+                .stream();
     }
 
     private Collection<LoanAndInvestment> expand(final Stream<Investment> investmentStream) {
         return investmentStream
                 .parallel() // load the loans from Zonky in parallel
                 .sorted(LEAST_RECENT_FIRST)
-                .map(i -> new LoanAndInvestmentImpl(i, tenant.getLoan(i.getLoanId())))
-                .collect(Collectors.toList());
+                .map(i -> new LoanAndInvestmentImpl(i, tenant::getLoan))
+                .collect(toList());
     }
 
     public SummaryBuilder addCashFlows(final Supplier<Stream<CashFlow>> cashFlows) {
