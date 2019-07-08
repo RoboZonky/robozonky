@@ -29,6 +29,11 @@ final class SellingJob implements TenantJob {
     }
 
     @Override
+    public Duration killIn() {
+        return Duration.ofMinutes(10);
+    }
+
+    @Override
     public Duration repeatEvery() {
         return Duration.ofHours(2); // to match the remote Zonky portfolio recalc
     }
