@@ -16,21 +16,21 @@
 
 package com.github.robozonky.app.summaries;
 
+import java.util.function.IntFunction;
+
 import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import io.vavr.Lazy;
 
 final class LoanAndInvestmentImpl implements LoanAndInvestment {
 
     private final Investment investment;
-    private final Loan loan;
+    private final Lazy<Loan> loan;
 
-    public LoanAndInvestmentImpl(final Investment i, final Loan l) {
-        if (i.getLoanId() != l.getId()) { // a bit of defensive programming
-            throw new IllegalArgumentException("Investment and Loan don't match.");
-        }
+    public LoanAndInvestmentImpl(final Investment i, final IntFunction<Loan> loanSupplier) {
         this.investment = i;
-        this.loan = l;
+        this.loan = Lazy.of(() -> loanSupplier.apply(i.getLoanId()));
     }
 
     @Override
@@ -40,6 +40,6 @@ final class LoanAndInvestmentImpl implements LoanAndInvestment {
 
     @Override
     public Loan getLoan() {
-        return loan;
+        return loan.get();
     }
 }
