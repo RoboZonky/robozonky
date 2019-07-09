@@ -39,7 +39,7 @@ public class Transaction extends BaseEntity {
     @XmlElement
     private OffsetDateTime transactionDate;
     @XmlElement
-    private OffsetDateTime revertedTransactionDate;
+    private LocalDate revertedTransactionDate;
     private String customMessage;
     private long id;
     private long investmentId;
@@ -131,7 +131,7 @@ public class Transaction extends BaseEntity {
     }
 
     public Optional<LocalDate> getRevertedTransactionDate() {
-        return Optional.ofNullable(revertedTransactionDate).map(OffsetDateTime::toLocalDate);
+        return Optional.ofNullable(revertedTransactionDate);
     }
 
     @XmlElement
