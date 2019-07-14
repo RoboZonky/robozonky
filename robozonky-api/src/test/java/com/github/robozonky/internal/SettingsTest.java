@@ -56,9 +56,9 @@ class SettingsTest {
                             .matches(new TemporalPredicate(0)));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(60));
+                    .matches(new SettingsTest.TemporalPredicate(10));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(60));
+                    .matches(new SettingsTest.TemporalPredicate(10));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(50);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(443);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).isEmpty();
