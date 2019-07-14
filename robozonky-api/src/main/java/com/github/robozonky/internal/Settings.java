@@ -168,11 +168,11 @@ public enum Settings {
     }
 
     public Duration getSocketTimeout() {
-        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_SOCKET_TIMEOUT, 60));
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_SOCKET_TIMEOUT, 10));
     }
 
     public Duration getConnectionTimeout() {
-        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 60));
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 10));
     }
 
     public Duration getCaptchaDelay(final Rating r) {
