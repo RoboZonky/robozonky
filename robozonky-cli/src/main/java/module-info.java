@@ -1,6 +1,6 @@
 module com.github.robozonky.cli {
-    requires google.api.services.drive.v3.rev153;
-    requires google.api.services.sheets.v4.rev565;
+    requires google.api.services.drive.v3.rev173;
+    requires google.api.services.sheets.v4.rev581;
     requires google.http.client;
     requires google.oauth.client;
     requires info.picocli;
