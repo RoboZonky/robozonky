@@ -47,10 +47,10 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky(10_000);
         final Tenant t = mockTenant(z);
-        final InvestmentCache c = new InvestmentCache(t);
+        final Cache<Investment> c = Cache.forInvestment(t);
         assertThat(c.getFromCache(loanId)).isEmpty(); // nothing returned at first
         when(z.getInvestmentByLoanId(eq(loanId))).thenReturn(Optional.of(investment));
-        assertThat(c.getInvestment(loanId)).isEqualTo(investment); // return the freshly retrieved investment
+        assertThat(c.get(loanId)).isEqualTo(investment); // return the freshly retrieved investment
     }
 
     @Test
@@ -63,13 +63,13 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         when(z.getInvestmentByLoanId(eq(loanId))).thenReturn(Optional.of(investment));
         final Tenant t = mockTenant(z);
-        final InvestmentCache c = new InvestmentCache(t);
-        assertThat(c.getInvestment(loanId)).isEqualTo(investment); // return the freshly retrieved investment
+        final Cache<Investment> c = Cache.forInvestment(t);
+        assertThat(c.get(loanId)).isEqualTo(investment); // return the freshly retrieved investment
         verify(z).getInvestmentByLoanId(eq(loanId));
         assertThat(c.getFromCache(loanId)).contains(investment);
         verify(z, times(1)).getInvestmentByLoanId(eq(loanId));
         // and now test eviction
-        setClock(Clock.fixed(instant.plus(Duration.ofHours(2)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(instant.plus(Duration.ofHours(25)), Defaults.ZONE_ID));
         assertThat(c.getFromCache(loanId)).isEmpty();
     }
 }

@@ -59,8 +59,8 @@ class PowerTenantImpl implements PowerTenant {
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final Lazy<StrategyProvider> strategyProvider;
-    private final Lazy<LoanCache> loanCache = Lazy.of(() -> new LoanCache(this));
-    private final Lazy<InvestmentCache> investmentCaches = Lazy.of(() -> new InvestmentCache(this));
+    private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
+    private final Lazy<Cache<Investment>> investmentCaches = Lazy.of(() -> Cache.forInvestment(this));
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
                     final Supplier<StrategyProvider> strategyProvider,
@@ -131,12 +131,12 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Loan getLoan(final int loanId) {
-        return loanCache.get().getLoan(loanId);
+        return loanCache.get().get(loanId);
     }
 
     @Override
     public Investment getInvestment(final int loanId) {
-        return investmentCaches.get().getInvestment(loanId);
+        return investmentCaches.get().get(loanId);
     }
 
     @Override
