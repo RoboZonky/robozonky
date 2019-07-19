@@ -17,16 +17,24 @@
 package com.github.robozonky.cli;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import picocli.CommandLine;
 
 abstract class AbstractFeature implements Feature {
 
     protected final Logger logger = LogManager.getLogger(this.getClass());
+    private final AtomicInteger exitCode = new AtomicInteger(CommandLine.ExitCode.OK);
 
     @Override
-    public ExitCode call() {
+    public int getExitCode() {
+        return exitCode.get();
+    }
+
+    @Override
+    public void run() {
         logger.info("Welcome to the RoboZonky command-line configuration and validation tool.");
         logger.warn("This is a tool for the brave. Create a backup copy of RoboZonky " +
                             "or use RoboZonky installer instead.");
@@ -38,13 +46,12 @@ abstract class AbstractFeature implements Feature {
             logger.info("--- Executed, running test of the new setup.");
             test();
             logger.info("--- Success.");
-            return ExitCode.SUCCESS;
         } catch (final SetupFailedException | IOException e) {
             logger.error("Could not perform setup, configuration may have been corrupted.", e);
-            return ExitCode.SETUP_FAIL;
+            exitCode.set(CommandLine.ExitCode.SOFTWARE);
         } catch (final TestFailedException e) {
             logger.error("Could not test setup, configuration may have been corrupted.", e);
-            return ExitCode.TEST_FAIL;
+            exitCode.set(CommandLine.ExitCode.SOFTWARE + 1);
         }
     }
 }

@@ -80,7 +80,9 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     public static Optional<InvestmentMode> parse(final App main) {
         // parse the arguments
         final CommandLine cli = new CommandLine(main::getLifecycle);
-        final Optional<InvestmentMode> result = picocli.CommandLine.call(cli, main.getArgs());
+        final picocli.CommandLine pico = new picocli.CommandLine(cli);
+        pico.execute(main.getArgs());
+        final Optional<InvestmentMode> result = pico.getExecutionResult();
         return Objects.isNull(result) ? Optional.empty() : result;
     }
 

@@ -20,11 +20,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import picocli.CommandLine;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -39,64 +39,64 @@ class CliTest {
 
     @Test
     void noArguments() {
-        final Optional<ExitCode> exit = Cli.parse();
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse();
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 
     @Test
     void nonExistentCommand() {
-        final Optional<ExitCode> exit = Cli.parse(UUID.randomUUID().toString());
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse(UUID.randomUUID().toString());
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 
     @Test
     void nonExistentOption() {
-        final Optional<ExitCode> exit = Cli.parse("-" + UUID.randomUUID());
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse("-" + UUID.randomUUID());
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 
     @Test
     void basicHelp() {
-        final Optional<ExitCode> exit = Cli.parse("help");
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse("help");
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.OK);
     }
 
     @Test
     void helpWithSubcommand() {
-        final Optional<ExitCode> exit = Cli.parse("help", "strategy-validator");
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse("help", "strategy-validator");
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.OK);
     }
 
     @Test
     void correctSubcommandNoArguments() {
-        final Optional<ExitCode> exit = Cli.parse("strategy-validator");
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse("strategy-validator");
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 
     @Test
     void correctSubcommandWrongArgument() {
-        final Optional<ExitCode> exit = Cli.parse("strategy-validator ", "--location=a.txt");
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse("strategy-validator ", "--location=a.txt");
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 
     @Test
     void correctSubcommandCorrectArgumentWrongValue() {
         System.setIn(new ByteArrayInputStream("\n".getBytes()));
-        final Optional<ExitCode> exit = Cli.parse("strategy-validator", "--location=file:///a.txt");
-        assertThat(exit).contains(ExitCode.SETUP_FAIL);
+        final int exit = Cli.parse("strategy-validator", "--location=file:///a.txt");
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.SOFTWARE);
     }
 
     @Test
     void correctSubcommandCorrectArgumentCorrectValue() throws IOException {
         File f = File.createTempFile("robozonky-", ".tmp");
         System.setIn(new ByteArrayInputStream("\n".getBytes()));
-        final Optional<ExitCode> exit = Cli.parse("strategy-validator", "--location=" + f.toURI().toURL());
-        assertThat(exit).contains(ExitCode.TEST_FAIL);
+        final int exit = Cli.parse("strategy-validator", "--location=" + f.toURI().toURL());
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.SOFTWARE + 1);
     }
 
     @Test
     void helpWithNonexistentSubcommand() {
-        final Optional<ExitCode> exit = Cli.parse("help", UUID.randomUUID().toString());
-        assertThat(exit).contains(ExitCode.NO_OPERATION);
+        final int exit = Cli.parse("help", UUID.randomUUID().toString());
+        assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 }

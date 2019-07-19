@@ -50,6 +50,7 @@
     <version.jakarta.activation>1.2.1</version.jakarta.activation>
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
+    <version.info.picocli>4.0.1</version.info.picocli>
     <version.org.jboss.resteasy>4.1.1.Final</version.org.jboss.resteasy>
     <version.org.junit5>5.0</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
@@ -335,7 +336,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>3.9.6</version>
+        <version>${version.info.picocli}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -797,7 +798,21 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <release>11</release>
+          <release>11</release> <!-- minimum supported version of the JRE -->
+          <!--
+            picocli's support for compile-time error checking and GraalVM native images, more on this here:
+            https://github.com/remkop/picocli/releases#4.0.0-annotation-processor
+          -->
+          <annotationProcessorPaths>
+            <path>
+              <groupId>info.picocli</groupId>
+              <artifactId>picocli-codegen</artifactId>
+              <version>${version.info.picocli}</version>
+            </path>
+          </annotationProcessorPaths>
+          <compilerArgs>
+            <arg>-Aproject=${groupId}/${artifactId}</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>

@@ -59,8 +59,8 @@ class AbstractFeatureTest {
     void success() {
         System.setIn(new ByteArrayInputStream("\n".getBytes()));
         final AbstractFeature f = new MyTestingFeature();
-        final ExitCode e = f.call();
-        assertThat(e).isEqualTo(ExitCode.SUCCESS);
+        f.run();
+        assertThat(f.getExitCode()).isEqualTo(CommandLine.ExitCode.OK);
     }
 
     private static final class MyTestingFeature extends AbstractFeature {
