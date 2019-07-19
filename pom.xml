@@ -394,12 +394,12 @@
       <dependency>
         <groupId>com.google.apis</groupId>
         <artifactId>google-api-services-sheets</artifactId>
-        <version>v4-rev565-${version.com.google.apis}</version>
+        <version>v4-rev581-${version.com.google.apis}</version>
       </dependency>
       <dependency>
         <groupId>com.google.apis</groupId>
         <artifactId>google-api-services-drive</artifactId>
-        <version>v3-rev153-${version.com.google.apis}</version>
+        <version>v3-rev173-${version.com.google.apis}</version>
       </dependency>
       <!-- Testing. -->
       <dependency>

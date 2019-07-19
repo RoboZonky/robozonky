@@ -19,8 +19,8 @@ import com.github.robozonky.internal.jobs.JobService;
 module com.github.robozonky.integration.stonky {
     requires java.ws.rs;
     requires google.api.client;
-    requires google.api.services.drive.v3.rev153;
-    requires google.api.services.sheets.v4.rev565;
+    requires google.api.services.drive.v3.rev173;
+    requires google.api.services.sheets.v4.rev581;
     requires google.http.client;
     requires google.http.client.jackson2;
     requires google.oauth.client;

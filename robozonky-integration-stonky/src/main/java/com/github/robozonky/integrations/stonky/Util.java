@@ -123,13 +123,15 @@ public final class Util {
     }
 
     static Optional<File> download(final InputStream stream) {
-        try (stream) {
-            final Path p = Files.createTempFile("robozonky-", ".download");
-            stream.transferTo(Files.newOutputStream(p));
-            return Optional.of(p.toFile());
-        } catch (final Exception ex) {
-            LOGGER.warn("Failed downloading file.", ex);
-            return Optional.empty();
-        }
+        return Try.withResources(() -> stream)
+                .of(s -> {
+                    final Path p = Files.createTempFile("robozonky-", ".download");
+                    s.transferTo(Files.newOutputStream(p));
+                    return Optional.of(p.toFile());
+                })
+                .getOrElseGet(ex -> {
+                    LOGGER.warn("Failed downloading file.", ex);
+                    return Optional.empty();
+                });
     }
 }
