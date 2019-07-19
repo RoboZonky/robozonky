@@ -38,7 +38,7 @@ public interface Job {
     Duration repeatEvery();
 
     /**
-     * Longest possible time duration that the task will be allowed to run for. A ceiling of 1 hour will be enforced.
+     * Longest possible time duration that the task will be allowed to run for.
      * @return
      */
     default Duration killIn() {
