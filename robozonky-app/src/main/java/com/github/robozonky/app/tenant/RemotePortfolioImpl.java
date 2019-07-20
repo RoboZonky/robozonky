@@ -45,9 +45,8 @@ import org.apache.logging.log4j.Logger;
 
 class RemotePortfolioImpl implements RemotePortfolio {
 
-    private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
     static final Duration SELLABLE_REFRESH = Duration.ofHours(1);
-
+    private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
     private final Reloadable<RemoteData> portfolio;
     private final Reloadable<Map<Rating, BigDecimal>> atRisk;
     private final Reloadable<Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>>> sellable;
@@ -212,22 +211,24 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     @Override
-    public Map<Rating, BigDecimal> getSellable() {
-        return sellable.get()
-                .getOrElseThrow(t -> new IllegalStateException("Failed fetching remote sellability data.", t))
-                ._1();
-    }
-
-    @Override
-    public Map<Rating, BigDecimal> getSellableWithoutFee() {
-        return sellable.get()
-                .getOrElseThrow(t -> new IllegalStateException("Failed fetching remote sellability data.", t))
-                ._2();
-    }
-
-    @Override
     public PortfolioOverview getOverview() {
         return portfolioOverview.get()
                 .getOrElseThrow(t -> new IllegalStateException("Failed calculating portfolio overview.", t));
     }
+
+    private Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> getSellabilityData() {
+        return sellable.get()
+                .getOrElseThrow(t -> new IllegalStateException("Failed fetching remote sellability data.", t));
+    }
+
+    @Override
+    public Map<Rating, BigDecimal> getSellable() {
+        return getSellabilityData()._1();
+    }
+
+    @Override
+    public Map<Rating, BigDecimal> getSellableWithoutFee() {
+        return getSellabilityData()._2();
+    }
+
 }

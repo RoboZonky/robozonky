@@ -71,4 +71,20 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(instant.plus(Duration.ofHours(25)), Defaults.ZONE_ID));
         assertThat(c.getFromCache(loanId)).isEmpty();
     }
+
+    @Test
+    void fail() {
+        final Instant instant = Instant.now();
+        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        final Loan loan = Loan.custom().build();
+        final int loanId = loan.getId();
+        final Zonky z = harmlessZonky(10_000);
+        doThrow(IllegalStateException.class).when(z).getLoan(eq(loanId));
+        final Tenant t = mockTenant(z);
+        final Cache<Loan> c = Cache.forLoan(t);
+        assertThatThrownBy(() -> c.get(loanId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Loan")
+                .hasMessageContaining(String.valueOf(loanId));
+    }
 }

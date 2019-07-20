@@ -72,7 +72,7 @@ final class Cache<T> implements AutoCloseable {
         public Either<Exception, Investment> getItem(final int id, final Tenant tenant) {
             return tenant.call(zonky -> zonky.getInvestmentByLoanId(id))
                     .map(Either::<Exception, Investment>right)
-                    .orElseGet(() -> Either.left(new NoSuchElementException(getItemClass() + " #" + id)));
+                    .orElseGet(() -> Either.left(new NoSuchElementException(identify(getItemClass(), id))));
         }
 
         @Override
@@ -127,7 +127,11 @@ final class Cache<T> implements AutoCloseable {
     }
 
     private String identify(final int id) {
-        return backend.getItemClass() + " #" + id;
+        return identify(backend.getItemClass(), id);
+    }
+
+    private static String identify(final Class<?> clz, final int id) {
+        return clz.getCanonicalName() + " #" + id;
     }
 
     private void add(final int id, final T item) {
