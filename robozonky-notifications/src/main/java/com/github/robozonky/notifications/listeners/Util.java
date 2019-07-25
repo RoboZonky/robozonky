@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -42,6 +43,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
@@ -120,6 +122,27 @@ final class Util {
                 entry("optimalMonthlyProfit", portfolioOverview.getCzkOptimalMonthyProfit()),
                 entry("timestamp", toDate(portfolioOverview.getTimestamp()))
         );
+    }
+
+    public static Map<String, Object> summarizePortfolioStructure(final ExtendedPortfolioOverview portfolioOverview) {
+        final Map<String, Object> entries =
+                new LinkedHashMap<>(summarizePortfolioStructure((PortfolioOverview) portfolioOverview));
+        entries.putAll(Map.ofEntries(
+                entry("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk)),
+                entry("relativeRisk", perRating(portfolioOverview::getAtRiskShareOnInvestment)),
+                entry("absoluteSellable", perRating(portfolioOverview::getCzkSellable)),
+                entry("relativeSellable", perRating(portfolioOverview::getShareSellable)),
+                entry("absoluteSellableFeeless", perRating(portfolioOverview::getCzkSellableFeeless)),
+                entry("relativeSellableFeeless", perRating(portfolioOverview::getShareSellableFeeless)),
+                entry("totalRisk", portfolioOverview.getCzkAtRisk()),
+                entry("totalSellable", portfolioOverview.getCzkSellable()),
+                entry("totalSellableFeeless", portfolioOverview.getCzkSellableFeeless()),
+                entry("totalShare", portfolioOverview.getShareAtRisk()),
+                entry("totalSellableShare", portfolioOverview.getShareSellable()),
+                entry("totalSellableFeelessShare", portfolioOverview.getShareSellableFeeless()),
+                entry("timestamp", toDate(portfolioOverview.getTimestamp()))
+        ));
+        return entries;
     }
 
     public static boolean isNetworkProblem(final Throwable ex) {
