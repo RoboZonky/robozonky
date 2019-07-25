@@ -19,21 +19,17 @@ package com.github.robozonky.app.summaries;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class LoanAndInvestmentImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void basics() {
         final Loan l = Loan.custom().build();
-        final Tenant t = mockTenant();
-        doReturn(l).when(t).getLoan(anyInt());
         final Investment i = Investment.fresh(l, 200).build();
-        final LoanAndInvestmentImpl li = new LoanAndInvestmentImpl(i, t::getLoan);
+        final LoanAndInvestmentImpl li = new LoanAndInvestmentImpl(i, l);
         assertSoftly(softly -> {
             softly.assertThat(li.getInvestment()).isEqualTo(i);
             softly.assertThat(li.getLoan()).isEqualTo(l);

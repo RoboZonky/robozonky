@@ -62,7 +62,7 @@ final class SummaryBuilder {
         return investmentStream
                 .parallel() // load the loans from Zonky in parallel
                 .sorted(LEAST_RECENT_FIRST)
-                .map(i -> new LoanAndInvestmentImpl(i, tenant::getLoan))
+                .map(i -> new LoanAndInvestmentImpl(i, tenant.getLoan(i.getLoanId())))
                 .collect(toList());
     }
 
