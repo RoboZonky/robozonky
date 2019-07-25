@@ -26,7 +26,6 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
@@ -65,13 +64,6 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
 
     private static BigDecimal sum(final Collection<BigDecimal> vals) {
         return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public ExtendedPortfolioOverview extend(final Map<Rating, BigDecimal> czkAtRiskPerRating,
-                                            final Map<Rating, BigDecimal> czkSellablePerRating,
-                                            final Map<Rating, BigDecimal> czkSellableFeelessPerRating) {
-        return new ExtendedPortfolioOverviewImpl(this, czkAtRiskPerRating, czkSellablePerRating,
-                                                 czkSellableFeelessPerRating);
     }
 
     @Override

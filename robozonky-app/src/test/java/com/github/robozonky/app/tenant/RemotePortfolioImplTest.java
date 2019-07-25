@@ -20,17 +20,11 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -38,12 +32,8 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Tuple;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -87,24 +77,6 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    void sellabilityRefresh(final int serverHourWhenChecking, final int serverMinuteWhenChecking,
-                            final int expectedHour) {
-        final ZoneId zone = ZoneId.of("Europe/Prague");
-        final ZonedDateTime checkTime = LocalTime.of(serverHourWhenChecking, serverMinuteWhenChecking, 0)
-                .atDate(LocalDate.now())
-                .atZone(zone);
-        final ZonedDateTime calculationTime = checkTime.minus(RemotePortfolioImpl.SELLABLE_REFRESH);
-        DateUtil.setSystemClock(Clock.fixed(calculationTime.toInstant(), zone));
-        final Duration result =
-                RemotePortfolioImpl.getSellableRefresh(Tuple.of(Collections.emptyMap(), Collections.emptyMap()));
-        final ZonedDateTime actual = calculationTime.plus(result);
-        assertThat(actual.getHour())
-                .as("Refresh not triggered when expected, was: " + actual)
-                .isEqualTo(expectedHour);
-    }
-
     @Test
     void throwsWhenRemoteFails() {
         final Zonky zonky = harmlessZonky(10_000);
@@ -127,26 +99,12 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void amountsAtRisk() {
-        final Loan l1 = Loan.custom().setRating(Rating.A).setAmount(10_000).build();
-        final Zonky zonky = harmlessZonky(10_000);
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(
-                Investment.fresh(l1, BigDecimal.ONE).build()
-        ));
-        final Tenant tenant = mockTenant(zonky);
-        final RemotePortfolio p = new RemotePortfolioImpl(tenant);
-        assertThat(p.getAtRisk()).containsOnlyKeys(Rating.A)
-                .containsValues(BigDecimal.ONE);
-    }
-
-    @Test
     void chargesAffectAmounts() {
         final Zonky zonky = harmlessZonky(10_000);
         final Tenant tenant = mockTenant(zonky);
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertThat(p.getTotal()).isEmpty();
         assertThat(p.getOverview().getCzkInvested()).isEqualTo(BigDecimal.ZERO);
-        assertThat(p.getOverview().getCzkAtRisk()).isEqualTo(BigDecimal.ZERO);
         assertThat(p.getOverview().getCzkAvailable()).isEqualTo(BigDecimal.valueOf(10_000));
         p.simulateCharge(1, Rating.D, BigDecimal.TEN);
         assertThat(p.getTotal()).containsOnlyKeys(Rating.D)

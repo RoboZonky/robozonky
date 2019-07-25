@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.tenant;
+package com.github.robozonky.app.summaries;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -59,6 +59,14 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
             this.czkSellableFeelessPerRating =
                     isZero(czkSellableFeeless) ? Collections.emptyMap() : czkSellableFeelessPerRating;
         }
+    }
+
+    public static ExtendedPortfolioOverview extend(final PortfolioOverview parent,
+                                                   final Map<Rating, BigDecimal> czkAtRiskPerRating,
+                                                   final Map<Rating, BigDecimal> czkSellablePerRating,
+                                                   final Map<Rating, BigDecimal> czkSellableFeelessPerRating) {
+        return new ExtendedPortfolioOverviewImpl(parent, czkAtRiskPerRating, czkSellablePerRating,
+                                                 czkSellableFeelessPerRating);
     }
 
     private static boolean isZero(final BigDecimal bigDecimal) {

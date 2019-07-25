@@ -16,8 +16,10 @@
 
 package com.github.robozonky.app.summaries;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -25,7 +27,11 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.tenant.Tenant;
+import io.vavr.Tuple2;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -75,10 +81,17 @@ final class SummaryBuilder {
         return this;
     }
 
+    private ExtendedPortfolioOverview extend(final PortfolioOverview portfolioOverview) {
+        final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> amountsSellable =
+                Util.getAmountsSellable(tenant);
+        return ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
+                Util.getAmountsAtRisk(tenant), amountsSellable._1(), amountsSellable._2());
+    }
+
     public Summary build() {
         final CashFlowSummary cashFlowSummary = CashFlowSummary.from(cashFlows.get());
         final Collection<LoanAndInvestment> incoming = expand(deduplicate(incomingInvestments.get()));
         final Collection<LoanAndInvestment> outgoing = expand(deduplicate(outgoingInvestments.get()));
-        return new SummaryImpl(tenant.getPortfolio().getOverview(), cashFlowSummary, incoming, outgoing);
+        return new SummaryImpl(extend(tenant.getPortfolio().getOverview()), cashFlowSummary, incoming, outgoing);
     }
 }
