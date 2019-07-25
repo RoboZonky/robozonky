@@ -113,11 +113,12 @@ final class TaskDescriptor {
              * mimic behavior of ScheduledExecutorService and don't reschedule on failure; timeout is not
              * considered a failure and will cause the task to be rescheduled.
              */
-            LOGGER.debug("Failed executing task {}.", toSchedule, failure);
             if (failure instanceof TimeoutException) {
+                LOGGER.debug("Failed executing task {}, rescheduling.", toSchedule, failure);
                 schedule(scheduler, false);
                 timeoutCount.increment();
             } else {
+                LOGGER.warn("No longer scheduling {}.", toSchedule, failure);
                 future.setCurrent(new FailedScheduledFuture<Void>(failure));
                 failureCount.increment();
             }
