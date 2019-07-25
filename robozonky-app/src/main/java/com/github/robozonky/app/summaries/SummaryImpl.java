@@ -23,18 +23,18 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.Summary;
-import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class SummaryImpl implements Summary {
 
     private final OffsetDateTime createdOn = DateUtil.offsetNow();
-    private final PortfolioOverview portfolioOverview;
+    private final ExtendedPortfolioOverview portfolioOverview;
     private final CashFlowSummary cashFlowSummary;
     private final Collection<LoanAndInvestment> incomingInvestments;
     private final Collection<LoanAndInvestment> outgoingInvestments;
 
-    public SummaryImpl(final PortfolioOverview portfolioOverview, final CashFlowSummary cashFlowSummary,
+    public SummaryImpl(final ExtendedPortfolioOverview portfolioOverview, final CashFlowSummary cashFlowSummary,
                        final Collection<LoanAndInvestment> incoming, final Collection<LoanAndInvestment> outgoing) {
         this.portfolioOverview = portfolioOverview;
         this.cashFlowSummary = cashFlowSummary;
@@ -68,7 +68,7 @@ final class SummaryImpl implements Summary {
     }
 
     @Override
-    public PortfolioOverview getPortfolioOverview() {
+    public ExtendedPortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
     }
 

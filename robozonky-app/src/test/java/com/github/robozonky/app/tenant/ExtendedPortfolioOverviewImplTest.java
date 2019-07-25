@@ -24,31 +24,30 @@ import java.util.Map;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
+class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void timestamp() {
-        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.TEN, Collections.emptyMap(),
-                                                               Collections.emptyMap(), Collections.emptyMap(),
-                                                               Collections.emptyMap(), Ratio.ZERO);
+        final ExtendedPortfolioOverview po =
+                new PortfolioOverviewImpl(BigDecimal.TEN, Collections.emptyMap(), Ratio.ZERO)
+                        .extend(Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
         assertThat(po.getTimestamp()).isBeforeOrEqualTo(ZonedDateTime.now());
     }
 
     @Test
     void emptyPortfolio() {
         final BigDecimal balance = BigDecimal.TEN;
-        final PortfolioOverview po = new PortfolioOverviewImpl(balance, Collections.emptyMap(), Collections.emptyMap(),
-                                                               Collections.emptyMap(), Collections.emptyMap(),
-                                                               Ratio.ZERO);
-        SoftAssertions.assertSoftly(softly -> {
+        final ExtendedPortfolioOverview po = new PortfolioOverviewImpl(balance, Collections.emptyMap(), Ratio.ZERO)
+                .extend(Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
+        assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(BigDecimal.ZERO);
@@ -84,10 +83,9 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
         final Map<Rating, BigDecimal> investments = new EnumMap<>(Rating.class);
         investments.put(Rating.AAAAA, BigDecimal.valueOf(200_000));
         investments.put(Rating.D, BigDecimal.valueOf(20_000));
-        final PortfolioOverview po = new PortfolioOverviewImpl(balance, investments, Collections.emptyMap(),
-                                                               Collections.emptyMap(), Collections.emptyMap(),
-                                                               Ratio.fromPercentage(4));
-        SoftAssertions.assertSoftly(softly -> {
+        final ExtendedPortfolioOverview po = new PortfolioOverviewImpl(balance, investments, Ratio.fromPercentage(4))
+                .extend(Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
+        assertSoftly(softly -> {
             // the values tested against have been calculated manually and are guaranteed correct
             softly.assertThat(po.getAnnualProfitability()).isEqualTo(Ratio.fromPercentage(4));
             softly.assertThat(po.getMinimalAnnualProfitability().asPercentage().doubleValue())
@@ -104,8 +102,9 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final BigDecimal adj = BigDecimal.TEN;
         final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
-        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, in, in, in, Ratio.ZERO);
-        SoftAssertions.assertSoftly(softly -> {
+        final ExtendedPortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, Ratio.ZERO)
+                .extend(in, in, in);
+        assertSoftly(softly -> {
             softly.assertThat(po.getCzkAvailable()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);
             softly.assertThat(po.getCzkAtRisk()).isEqualTo(adj);

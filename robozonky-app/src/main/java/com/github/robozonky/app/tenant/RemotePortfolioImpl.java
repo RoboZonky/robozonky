@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -52,7 +52,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final Reloadable<Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>>> sellable;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
-    private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
+    private final Reloadable<ExtendedPortfolioOverview> portfolioOverview;
     private final AtomicReference<BigDecimal> lastKnownBalance = new AtomicReference<>(BigDecimal.ZERO);
     private final boolean isDryRun;
 
@@ -72,7 +72,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .finishWith(this::refreshSellable)
                 .async()
                 .build();
-        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(this))
+        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(this)
+                .extend(getAtRisk(), getSellable(), getSellableWithoutFee()))
                 .finishWith(po -> LOGGER.debug("New portfolio overview: {}.", po))
                 .reloadAfter(Duration.ofMinutes(5))
                 .build();
@@ -211,7 +212,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     @Override
-    public PortfolioOverview getOverview() {
+    public ExtendedPortfolioOverview getOverview() {
         return portfolioOverview.get()
                 .getOrElseThrow(t -> new IllegalStateException("Failed calculating portfolio overview.", t));
     }
@@ -230,5 +231,4 @@ class RemotePortfolioImpl implements RemotePortfolio {
     public Map<Rating, BigDecimal> getSellableWithoutFee() {
         return getSellabilityData()._2();
     }
-
 }

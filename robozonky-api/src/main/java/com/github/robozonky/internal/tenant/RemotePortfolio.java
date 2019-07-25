@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 
 public interface RemotePortfolio {
 
@@ -47,5 +47,5 @@ public interface RemotePortfolio {
      * Takes {@link #getBalance()}, {@link #getTotal()} and {@link #getAtRisk()} and summarizes them.
      * @return
      */
-    PortfolioOverview getOverview();
+    ExtendedPortfolioOverview getOverview();
 }

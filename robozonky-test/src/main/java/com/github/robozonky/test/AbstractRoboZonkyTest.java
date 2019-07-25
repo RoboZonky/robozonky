@@ -32,7 +32,7 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
@@ -122,8 +122,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         SystemProperties.INSTANCE.save();
     }
 
-    protected static PortfolioOverview mockPortfolioOverview(final int balance) {
-        final PortfolioOverview po = mock(PortfolioOverview.class);
+    protected static ExtendedPortfolioOverview mockPortfolioOverview(final int balance) {
+        final ExtendedPortfolioOverview po = mock(ExtendedPortfolioOverview.class);
         when(po.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance));
         when(po.getCzkInvested()).thenReturn(BigDecimal.ZERO);
         when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
@@ -150,7 +150,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         return po;
     }
 
-    protected static PortfolioOverview mockPortfolioOverview() {
+    protected static ExtendedPortfolioOverview mockPortfolioOverview() {
         return mockPortfolioOverview(0);
     }
 
