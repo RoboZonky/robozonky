@@ -19,7 +19,6 @@ package com.github.robozonky.app.tenant;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,6 +30,8 @@ import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.isZero;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.sum;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
@@ -56,14 +57,6 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         } else {
             this.czkInvestedPerRating = czkInvestedPerRating;
         }
-    }
-
-    private static boolean isZero(final BigDecimal bigDecimal) {
-        return bigDecimal.compareTo(BigDecimal.ZERO) == 0;
-    }
-
-    private static BigDecimal sum(final Collection<BigDecimal> vals) {
-        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override

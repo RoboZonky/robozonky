@@ -18,7 +18,6 @@ package com.github.robozonky.app.summaries;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -28,6 +27,8 @@ import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.isZero;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.sum;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
@@ -53,7 +54,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
             this.czkSellableFeelessPerRating = Collections.emptyMap();
             this.czkAtRisk = BigDecimal.ZERO;
         } else {
-            this.czkAtRisk = ExtendedPortfolioOverviewImpl.sum(czkAtRiskPerRating.values());
+            this.czkAtRisk = sum(czkAtRiskPerRating.values());
             this.czkAtRiskPerRating = isZero(czkAtRisk) ? Collections.emptyMap() : czkAtRiskPerRating;
             this.czkSellablePerRating = isZero(czkSellable) ? Collections.emptyMap() : czkSellablePerRating;
             this.czkSellableFeelessPerRating =
@@ -67,14 +68,6 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
                                                    final Map<Rating, BigDecimal> czkSellableFeelessPerRating) {
         return new ExtendedPortfolioOverviewImpl(parent, czkAtRiskPerRating, czkSellablePerRating,
                                                  czkSellableFeelessPerRating);
-    }
-
-    private static boolean isZero(final BigDecimal bigDecimal) {
-        return bigDecimal.compareTo(BigDecimal.ZERO) == 0;
-    }
-
-    private static BigDecimal sum(final Collection<BigDecimal> vals) {
-        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
