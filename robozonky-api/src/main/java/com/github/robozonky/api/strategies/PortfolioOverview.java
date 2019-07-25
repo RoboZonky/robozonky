@@ -90,7 +90,7 @@ public interface PortfolioOverview {
      * Retrieve the expected monthly revenue, based on {@link #getOptimalAnnualProfitability()}.
      * @return Amount in CZK.
      */
-    BigDecimal getCzkOptimalMonthyProfit();
+    BigDecimal getCzkOptimalMonthlyProfit();
 
     /**
      * @return When this instance was created.

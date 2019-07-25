@@ -29,7 +29,6 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.isZero;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.sum;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
@@ -106,12 +105,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
     @Override
     public Ratio getShareOnInvestment(final Rating r) {
-        final BigDecimal czkInvested = getCzkInvested();
-        if (isZero(czkInvested)) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        final BigDecimal investedPerRating = this.getCzkInvested(r);
-        return Ratio.fromRaw(divide(investedPerRating, czkInvested));
+        return parent.getShareOnInvestment(r);
     }
 
     @Override
@@ -205,8 +199,8 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public BigDecimal getCzkOptimalMonthyProfit() {
-        return divide(times(getOptimalAnnualProfitability().bigDecimalValue(), getCzkInvested()), 12);
+    public BigDecimal getCzkOptimalMonthlyProfit() {
+        return parent.getCzkOptimalMonthlyProfit();
     }
 
     @Override

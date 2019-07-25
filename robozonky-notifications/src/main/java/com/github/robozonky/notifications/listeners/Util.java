@@ -119,7 +119,7 @@ final class Util {
                 entry("minimalProfitability", portfolioOverview.getMinimalAnnualProfitability()),
                 entry("minimalMonthlyProfit", portfolioOverview.getCzkMinimalMonthlyProfit()),
                 entry("optimalProfitability", portfolioOverview.getOptimalAnnualProfitability()),
-                entry("optimalMonthlyProfit", portfolioOverview.getCzkOptimalMonthyProfit()),
+                entry("optimalMonthlyProfit", portfolioOverview.getCzkOptimalMonthlyProfit()),
                 entry("timestamp", toDate(portfolioOverview.getTimestamp()))
         );
     }

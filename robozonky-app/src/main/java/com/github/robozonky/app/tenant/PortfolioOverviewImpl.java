@@ -123,7 +123,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     }
 
     @Override
-    public BigDecimal getCzkOptimalMonthyProfit() {
+    public BigDecimal getCzkOptimalMonthlyProfit() {
         return divide(times(getOptimalAnnualProfitability().bigDecimalValue(), getCzkInvested()), 12);
     }
 
