@@ -208,7 +208,7 @@ public enum Settings {
     }
 
     public int getDefaultApiPageSize() {
-        return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 50);
+        return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 100);
     }
 
     public enum Key {
