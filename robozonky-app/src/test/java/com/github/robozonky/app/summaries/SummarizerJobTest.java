@@ -37,7 +37,6 @@ class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
     void basics() {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(summarizer.payload()).isInstanceOf(Summarizer.class);
-            softly.assertThat(summarizer.prioritize()).isFalse();
             softly.assertThat(summarizer.killIn()).isGreaterThanOrEqualTo(Duration.ofHours(1));
             softly.assertThat(summarizer.repeatEvery()).isEqualTo(Duration.ofDays(7));
         });

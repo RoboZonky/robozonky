@@ -31,7 +31,6 @@ class JobTest {
             softly.assertThat(j.startIn()).isGreaterThanOrEqualTo(Duration.ZERO);
             softly.assertThat(j.repeatEvery()).isEqualTo(Duration.ZERO);
             softly.assertThat(j.killIn()).isGreaterThan(Duration.ZERO);
-            softly.assertThat(j.prioritize()).isFalse();
         });
     }
 

@@ -61,7 +61,7 @@ public final class NotificationListenerService implements ListenerService {
             final String config = value.get();
             readConfig(config).ifPresent(props -> {
                 LOGGER.debug("Initializing notifications for '{}' from {}.", username, config);
-                Tasks.SUPPORTING.scheduler().submit(props, Settings.INSTANCE.getRemoteResourceRefreshInterval());
+                Tasks.INSTANCE.scheduler().submit(props, Settings.INSTANCE.getRemoteResourceRefreshInterval());
                 CONFIGURATIONS.put(username, props);
             });
         }

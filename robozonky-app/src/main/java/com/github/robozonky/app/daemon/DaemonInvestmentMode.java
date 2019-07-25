@@ -29,7 +29,6 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.async.Scheduler;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.extensions.JobServiceLoader;
-import com.github.robozonky.internal.jobs.Job;
 import com.github.robozonky.internal.remote.Zonky;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
@@ -55,10 +54,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
                          final Duration secondaryMarketplaceCheckPeriod) {
         this(t -> {
         }, tenant, investor, secondaryMarketplaceCheckPeriod);
-    }
-
-    private static Scheduler getSchedulerForJob(final Job job) {
-        return job.prioritize() ? Tasks.SUPPORTING.scheduler() : Tasks.BACKGROUND.scheduler();
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
@@ -89,11 +84,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
         // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submit(getSchedulerForJob(j), j.payload(), j.getClass(), j.repeatEvery(), j.startIn(),
+                .forEach(j -> submit(Tasks.INSTANCE.scheduler(), j.payload(), j.getClass(), j.repeatEvery(), j.startIn(),
                                      j.killIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
-                .forEach(j -> submit(getSchedulerForJob(j), () -> j.payload().accept(tenant), j.getClass(),
+                .forEach(j -> submit(Tasks.INSTANCE.scheduler(), () -> j.payload().accept(tenant), j.getClass(),
                                      j.repeatEvery(), j.startIn(), j.killIn()));
         LOGGER.debug("Job scheduling over.");
     }
@@ -113,7 +108,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return Try.of(() -> {
             // schedule the tasks
             scheduleJobs();
-            scheduleDaemons(Tasks.REALTIME.scheduler());
+            scheduleDaemons(Tasks.INSTANCE.scheduler());
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");

@@ -35,7 +35,7 @@ class TaskDescriptorTest {
     void timeout() {
         final TaskDescriptor task = new TaskDescriptor(new EndlessRunnable(), Duration.ZERO, Duration.ofMillis(1),
                                                        Duration.ofMillis(10));
-        task.schedule(Tasks.REALTIME.scheduler());
+        task.schedule(Tasks.INSTANCE.scheduler());
         Assertions.assertTimeout(Duration.ofSeconds(1), () -> {
             while (task.getTimeoutCount() < 1) {
                 Thread.sleep(1);
@@ -54,7 +54,7 @@ class TaskDescriptorTest {
         final TaskDescriptor task = new TaskDescriptor(() -> {
             throw new IllegalStateException();
         }, Duration.ZERO, Duration.ofMillis(1), Duration.ZERO);
-        task.schedule(Tasks.SUPPORTING.scheduler());
+        task.schedule(Tasks.INSTANCE.scheduler());
         Assertions.assertTimeout(Duration.ofSeconds(1), () -> {
             while (task.getFailureCount() < 1) {
                 Thread.sleep(1);
@@ -73,7 +73,7 @@ class TaskDescriptorTest {
     void success() {
         final TaskDescriptor task = new TaskDescriptor(() -> { /* NOOP */ }, Duration.ZERO, Duration.ofMillis(1),
                                                        Duration.ZERO);
-        task.schedule(Tasks.BACKGROUND.scheduler());
+        task.schedule(Tasks.INSTANCE.scheduler());
         Assertions.assertTimeout(Duration.ofSeconds(1), () -> {
             while (task.getSuccessCount() < 1) {
                 Thread.sleep(1);

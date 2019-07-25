@@ -38,8 +38,4 @@ final class SellingJob implements TenantJob {
         return Duration.ofHours(2); // to match the remote Zonky portfolio recalc
     }
 
-    @Override
-    public boolean prioritize() {
-        return true; // this is a key feature of the application and only happens occasionally, so prioritize
-    }
 }

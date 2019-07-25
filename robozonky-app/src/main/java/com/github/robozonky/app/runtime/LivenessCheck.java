@@ -56,7 +56,7 @@ class LivenessCheck extends Refreshable<String> {
 
     public static void setup(final MainControl mainThreadControl) {
         final Refreshable<String> liveness = new LivenessCheck(mainThreadControl);
-        Tasks.SUPPORTING.scheduler().submit(liveness, Duration.ofSeconds(5));
+        Tasks.INSTANCE.scheduler().submit(liveness, Duration.ofSeconds(5));
         liveness.run(); // for testing purposes, making sure the refresh was started
     }
 

@@ -29,11 +29,6 @@ final class TransactionProcessingJob implements TenantJob {
     }
 
     @Override
-    public boolean prioritize() {
-        return true; // sold participations may have implications elsewhere in the app, so prioritize
-    }
-
-    @Override
     public Duration repeatEvery() {
         return Duration.ofHours(1);
     }
