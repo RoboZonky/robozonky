@@ -37,14 +37,8 @@ public interface RemotePortfolio {
 
     Map<Rating, BigDecimal> getTotal();
 
-    Map<Rating, BigDecimal> getAtRisk();
-
-    Map<Rating, BigDecimal> getSellable();
-
-    Map<Rating, BigDecimal> getSellableWithoutFee();
-
     /**
-     * Takes {@link #getBalance()}, {@link #getTotal()} and {@link #getAtRisk()} and summarizes them.
+     * Takes {@link #getBalance()}, and {@link #getTotal()} and summarizes them.
      * @return
      */
     PortfolioOverview getOverview();

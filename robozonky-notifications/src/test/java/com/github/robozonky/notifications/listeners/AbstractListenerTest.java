@@ -70,6 +70,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -99,7 +100,7 @@ import static org.mockito.Mockito.*;
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static final RoboZonkyTestingEvent EVENT = OffsetDateTime::now;
-    private static final PortfolioOverview MAX_PORTFOLIO = mockPortfolioOverview(Integer.MAX_VALUE);
+    private static final ExtendedPortfolioOverview MAX_PORTFOLIO = mockPortfolioOverview(Integer.MAX_VALUE);
     private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,
@@ -962,7 +963,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 }
 
                 @Override
-                public PortfolioOverview getPortfolioOverview() {
+                public ExtendedPortfolioOverview getPortfolioOverview() {
                     return MAX_PORTFOLIO;
                 }
 

@@ -16,21 +16,18 @@
 
 package com.github.robozonky.app.summaries;
 
-import java.util.function.IntFunction;
-
 import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import io.vavr.Lazy;
 
 final class LoanAndInvestmentImpl implements LoanAndInvestment {
 
     private final Investment investment;
-    private final Lazy<Loan> loan;
+    private final Loan loan;
 
-    public LoanAndInvestmentImpl(final Investment i, final IntFunction<Loan> loanSupplier) {
+    public LoanAndInvestmentImpl(final Investment i, final Loan l) {
         this.investment = i;
-        this.loan = Lazy.of(() -> loanSupplier.apply(i.getLoanId()));
+        this.loan = l;
     }
 
     @Override
@@ -40,6 +37,6 @@ final class LoanAndInvestmentImpl implements LoanAndInvestment {
 
     @Override
     public Loan getLoan() {
-        return loan.get();
+        return loan;
     }
 }

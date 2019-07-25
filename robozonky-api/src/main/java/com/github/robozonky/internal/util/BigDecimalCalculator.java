@@ -18,6 +18,7 @@ package com.github.robozonky.internal.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 
 public final class BigDecimalCalculator {
 
@@ -106,5 +107,14 @@ public final class BigDecimalCalculator {
     private static BigDecimal finish(final BigDecimal number) {
         return toScale(number).stripTrailingZeros();
     }
+
+    public static boolean isZero(final BigDecimal bigDecimal) {
+        return bigDecimal.signum() == 0;
+    }
+
+    public static BigDecimal sum(final Collection<BigDecimal> vals) {
+        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
 
 }

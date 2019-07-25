@@ -19,7 +19,7 @@ package com.github.robozonky.api.notifications;
 import java.time.OffsetDateTime;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 
 public interface Summary {
 
@@ -33,7 +33,7 @@ public interface Summary {
 
     int getCashOutFromWithdrawals();
 
-    PortfolioOverview getPortfolioOverview();
+    ExtendedPortfolioOverview getPortfolioOverview();
 
     Stream<LoanAndInvestment> getLeavingInvestments();
 
