@@ -51,7 +51,7 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
         final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
         strategy.registerListener(sp);
         // start strategy refresh after the listener was registered
-        return Tasks.SUPPORTING.scheduler().getExecutor().submit(() -> {
+        return Tasks.INSTANCE.scheduler().getExecutor().submit(() -> {
             // return a future; we only want to read the strategy provider when it's been initialized
             strategy.run();
             return sp;

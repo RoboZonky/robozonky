@@ -38,8 +38,4 @@ final class ReservationsProcessingJob implements TenantJob {
         return Duration.ofHours(4);
     }
 
-    @Override
-    public boolean prioritize() {
-        return false; // this is a time-sensitive and infrequent feature, so prioritize
-    }
 }

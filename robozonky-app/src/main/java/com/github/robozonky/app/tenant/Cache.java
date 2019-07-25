@@ -90,7 +90,7 @@ final class Cache<T> implements AutoCloseable {
         LOGGER.debug("Starting {} cache for {}.", backend.getItemClass(), tenant);
         this.tenant = tenant;
         this.backend = backend;
-        this.evictionTask = Tasks.BACKGROUND.scheduler().submit(this::evict, EVICT_EVERY, EVICT_EVERY);
+        this.evictionTask = Tasks.INSTANCE.scheduler().submit(this::evict, EVICT_EVERY, EVICT_EVERY);
     }
 
     public static Cache<Loan> forLoan(final Tenant tenant) {

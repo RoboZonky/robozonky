@@ -18,7 +18,6 @@ package com.github.robozonky.internal.async;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -26,35 +25,9 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Provides different {@link Scheduler} instances based on the needs of a particular task. There are three categories
- * of tasks:
- *
- * <ul>
- * <li>{@link #REALTIME} tasks are essentially just the primary and secondary marketplace checks, which
- * are absolutely necessary, must be scheduled immediately and processed as soon as possible. There will be a fixed
- * pool of 2 threads always available to execute these tasks, one for each marketplace. These tasks will get
- * {@link Thread#MAX_PRIORITY}.</li>
- * <li>{@link #SUPPORTING} tasks carry functionality which is still very important for the robot or for the user,
- * but can be postponed momentarily. These would be tasks such as selling participations or updating strategies from
- * a remote server. There will be 2 threads always available to execute these tasks, and they will be given
- * {@link Thread#NORM_PRIORITY}.</li>
- * <li>{@link #BACKGROUND} tasks carry functionality which is either unimportant or can be easily postponed. There will
- * be up to 1 thread available to execute these tasks, and it will be given {@link Thread#MIN_PRIORITY}.</li>
- * </ul>
- * <p>
- * None of these tasks are restricted from spinning up their own threads. In fact, many of the {@link #REALTIME}
- * and {@link #SUPPORTING} tasks may start entire {@link ForkJoinPool}s as a side-effect of using
- * {@link Stream#parallel()}.
- * <p>
- * Each of these tasks will use {@link ThreadPoolExecutorBasedScheduler} as its underlying {@link Scheduler}
- * implementation.
- */
 public enum Tasks implements AutoCloseable {
 
-    REALTIME(() -> Executors.newFixedThreadPool(2, TaskConstants.REALTIME_THREAD_FACTORY)),
-    SUPPORTING(() -> Executors.newFixedThreadPool(2, TaskConstants.SUPPORTING_THREAD_FACTORY)),
-    BACKGROUND(() -> Executors.newSingleThreadExecutor(TaskConstants.BACKGROUND_THREAD_FACTORY));
+    INSTANCE(Executors::newCachedThreadPool);
 
     private static final Logger LOGGER = LogManager.getLogger(Tasks.class);
     private static final Reloadable<ScheduledExecutorService> SCHEDULING_EXECUTOR =
@@ -66,7 +39,7 @@ public enum Tasks implements AutoCloseable {
     }
 
     private static ScheduledExecutorService createSchedulingExecutor() {
-        return Executors.newSingleThreadScheduledExecutor(TaskConstants.SCHEDULING_THREAD_FACTORY);
+        return Executors.newSingleThreadScheduledExecutor();
     }
 
     public static void closeAll() {

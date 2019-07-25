@@ -30,7 +30,7 @@ class SchedulerTest {
     private static final Runnable RUNNABLE = mock(Runnable.class);
 
     private static Scheduler getInstance() {
-        return Tasks.BACKGROUND.scheduler();
+        return Tasks.INSTANCE.scheduler();
     }
 
     @Test

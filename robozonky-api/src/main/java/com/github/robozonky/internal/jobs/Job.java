@@ -45,12 +45,4 @@ public interface Job {
         return Duration.ofMinutes(1);
     }
 
-    /**
-     *
-     * @return If true, signals to the calling code that this task should be given a priority thread, if possible.
-     */
-    default boolean prioritize() {
-        return false;
-    }
-
 }
