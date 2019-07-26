@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -125,6 +126,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
+        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ONE));
         final Tenant tenant = mockTenant(zonky, false);
         // one blocked amount coming in remotely
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
@@ -169,6 +171,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
+        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ONE));
         final Tenant tenant = mockTenant(zonky, true);
         // one blocked amount coming in remotely
         final Instant now = Instant.now();

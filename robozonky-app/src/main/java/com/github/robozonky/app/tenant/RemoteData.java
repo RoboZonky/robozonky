@@ -30,6 +30,8 @@ import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.isZero;
+
 final class RemoteData {
 
     private static final Logger LOGGER = LogManager.getLogger(RemoteData.class);
@@ -48,8 +50,11 @@ final class RemoteData {
     public static RemoteData load(final Tenant tenant) {
         LOGGER.debug("Loading the latest Zonky portfolio information.");
         final Statistics statistics = tenant.call(Zonky::getStatistics);
-        final Map<Rating, BigDecimal> blocked = Util.getAmountsBlocked(tenant, statistics);
-        final Wallet wallet = tenant.call(Zonky::getWallet); // goes last as it's a very short call
+        final Wallet wallet = tenant.call(Zonky::getWallet);
+        // save one Zonky request in case we know there are no blocked amounts
+        final Map<Rating, BigDecimal> blocked = isZero(wallet.getBlockedBalance()) ?
+                Collections.emptyMap() :
+                Collections.unmodifiableMap(Util.getAmountsBlocked(tenant, statistics));
         LOGGER.debug("Finished.");
         return new RemoteData(wallet, statistics, blocked);
     }
@@ -67,7 +72,7 @@ final class RemoteData {
     }
 
     public Map<Rating, BigDecimal> getBlocked() {
-        return Collections.unmodifiableMap(blocked);
+        return blocked;
     }
 
     @Override
