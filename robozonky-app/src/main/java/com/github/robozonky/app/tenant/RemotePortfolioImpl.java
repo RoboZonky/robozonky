@@ -33,13 +33,14 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.sum;
+
 class RemotePortfolioImpl implements RemotePortfolio {
 
-    static final Duration SELLABLE_REFRESH = Duration.ofHours(1);
     private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
     private final Reloadable<RemoteData> portfolio;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
@@ -60,12 +61,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .build();
     }
 
-    private static BigDecimal sum(final OverallPortfolio portfolio) {
-        return BigDecimalCalculator.plus(portfolio.getDue(), portfolio.getUnpaid());
-    }
-
-    private static BigDecimal sum(final Stream<Blocked> blockedAmounts) {
-        return blockedAmounts.map(Blocked::getAmount).reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
+    private static BigDecimal sumOutstanding(final OverallPortfolio portfolio) {
+        return plus(portfolio.getDue(), portfolio.getUnpaid());
     }
 
     private void refreshPortfolio(final RemoteData data) {
@@ -106,8 +103,10 @@ class RemotePortfolioImpl implements RemotePortfolio {
     public BigDecimal getBalance() {
         final RemoteData data = getRemotePortfolio();
         final BigDecimal balance = data.getWallet().getAvailableBalance();
-        final BigDecimal allBlocked =
-                sum(syntheticByLoanId.get().values().stream().filter(s -> s.isValidInBalance(data)));
+        final Stream<BigDecimal> blockedAmonts = syntheticByLoanId.get().values().stream()
+                .filter(s -> s.isValidInBalance(data))
+                .map(Blocked::getAmount);
+        final BigDecimal allBlocked = sum(blockedAmonts);
         final BigDecimal result = balance.subtract(allBlocked);
         final BigDecimal oldBalance = lastKnownBalance.getAndSet(result);
         if (result.compareTo(oldBalance) != 0) { // prevent excessive logging
@@ -122,7 +121,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         LOGGER.debug("Remote data used: {}.", data);
         final Map<Rating, BigDecimal> amounts = data.getStatistics().getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating,
-                                          RemotePortfolioImpl::sum,
+                                          RemotePortfolioImpl::sumOutstanding,
                                           BigDecimal::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
