@@ -1,4 +1,4 @@
-<table style="width: 60%">
+<table>
   <caption><h2>Struktura portfolia k ${data.portfolio.timestamp?time?iso_local_ms_nz}</h2></caption>
   <thead>
     <tr>
