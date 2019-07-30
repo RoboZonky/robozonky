@@ -108,11 +108,12 @@ final class Cache<T> implements AutoCloseable {
     }
 
     private void evict() {
-        LOGGER.trace("Evicting {}.", backend.getItemClass());
-        storage.entrySet().stream()
+        LOGGER.trace("Evicting {}, total: {}.", backend.getItemClass(), storage.size());
+        final long evictedCount = storage.entrySet().stream()
                 .filter(e -> isExpired(e.getValue()))
-                .forEach(e -> storage.remove(e.getKey()));
-        LOGGER.trace("Evicted.");
+                .peek(e -> storage.remove(e.getKey()))
+                .count();
+        LOGGER.trace("Evicted {} items.", evictedCount);
     }
 
     Optional<T> getFromCache(final int id) {
