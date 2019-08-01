@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package com.github.robozonky.api.notifications;
 
 /**
- * Fired when an event was skipped by the investment algorithm due to CAPTCHA, to be evaluated later after CAPTCHA
- * expires.
+ * Fired when a loan was skipped by the investment algorithm, perhaps due to CAPTCHA or overinvestment. The loan may be
+ * re-evaluated later.
  */
 public interface InvestmentSkippedEvent extends MarketplaceLoanBased,
                                                 Recommending {

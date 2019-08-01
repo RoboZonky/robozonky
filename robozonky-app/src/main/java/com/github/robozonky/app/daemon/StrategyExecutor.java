@@ -49,9 +49,8 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         this.operationDescriptor = operationDescriptor;
     }
 
-    public static StrategyExecutor<LoanDescriptor, InvestmentStrategy> forInvesting(final PowerTenant tenant,
-                                                                                    final Investor investor) {
-        return new Investing(tenant, investor);
+    public static StrategyExecutor<LoanDescriptor, InvestmentStrategy> forInvesting(final PowerTenant tenant) {
+        return new Investing(tenant);
     }
 
     public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> forPurchasing(final PowerTenant tenant) {
@@ -140,8 +139,8 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
      */
     private static final class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
-        public Investing(final PowerTenant tenant, final Investor investor) {
-            super(tenant, new InvestingOperationDescriptor(investor));
+        public Investing(final PowerTenant tenant) {
+            super(tenant, new InvestingOperationDescriptor(Investor.build(tenant)));
         }
     }
 

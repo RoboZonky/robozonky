@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
@@ -41,10 +40,8 @@ import static com.github.robozonky.app.events.impl.EventFactory.executionComplet
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompletedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.executionStarted;
 import static com.github.robozonky.app.events.impl.EventFactory.executionStartedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentDelegated;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentRejected;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentRequested;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentSkipped;
 import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
@@ -62,14 +59,13 @@ final class InvestingSession {
     private final Collection<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;
-    private final SessionState<LoanDescriptor> discarded, seen;
+    private final SessionState<LoanDescriptor> discarded;
     private final PowerTenant tenant;
 
     InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor, final PowerTenant tenant) {
         this.investor = investor;
         this.tenant = tenant;
         this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
-        this.seen = newSessionState(tenant, marketplace, "seenLoans");
         this.loansStillAvailable = new ArrayList<>(marketplace);
     }
 
@@ -112,11 +108,11 @@ final class InvestingSession {
 
     /**
      * Get loans that are available to be evaluated by the strategy. These are loans that come from the marketplace,
-     * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
+     * minus loans that are already invested into.
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
     Collection<LoanDescriptor> getAvailable() {
-        loansStillAvailable.removeIf(d -> seen.contains(d) || discarded.contains(d));
+        loansStillAvailable.removeIf(discarded::contains);
         return Collections.unmodifiableCollection(loansStillAvailable);
     }
 
@@ -138,46 +134,15 @@ final class InvestingSession {
         return true;
     }
 
-    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation, final InvestmentFailure reason) {
-        final String providerId = investor.getConfirmationProvider().map(ConfirmationProvider::getId).orElse("-");
+    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation) {
         final LoanDescriptor loan = recommendation.descriptor();
-        switch (reason) {
-            case FAILED:
-                discard(loan);
-                break;
-            case REJECTED:
-                if (investor.getConfirmationProvider().isPresent()) {
-                    tenant.fire(investmentRejected(recommendation, providerId));
-                    // rejected through a confirmation provider => forget
-                    discard(loan);
-                } else {
-                    // rejected due to no confirmation provider => make available for direct investment later
-                    tenant.fire(investmentSkipped(recommendation));
-                    final int loanId = loan.item().getId();
-                    LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
-                    skip(loan);
-                }
-                break;
-            case DELEGATED:
-                tenant.fire(investmentDelegated(recommendation, providerId));
-                if (recommendation.isConfirmationRequired()) {
-                    // confirmation required, delegation successful => forget
-                    discard(loan);
-                } else {
-                    // confirmation not required, delegation successful => make available for direct investment later
-                    skip(loan);
-                }
-                break;
-            case SEEN_BEFORE: // still protected by CAPTCHA
-                break;
-            default:
-                throw new IllegalStateException("Not possible.");
-        }
+        tenant.fire(investmentSkipped(recommendation));
+        final int loanId = loan.item().getId();
         return false;
     }
 
     /**
-     * Request {@link ControlApi} to invest in a given loan, leveraging the {@link ConfirmationProvider}.
+     * Request {@link ControlApi} to invest in a given loan.
      * @param recommendation Loan to invest into.
      * @return True if investment successful. The investment is reflected in {@link #getResult()}.
      */
@@ -191,10 +156,9 @@ final class InvestingSession {
             return false;
         }
         tenant.fire(investmentRequested(recommendation));
-        final boolean seenBefore = seen.contains(loan);
-        final Either<InvestmentFailure, BigDecimal> response = investor.invest(recommendation, seenBefore);
+        final Either<Exception, BigDecimal> response = investor.invest(recommendation);
         LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        return response.fold(reason -> unsuccessfulInvestment(recommendation, reason),
+        return response.fold(__ -> unsuccessfulInvestment(recommendation),
                              amount -> successfulInvestment(recommendation, amount));
     }
 
@@ -204,11 +168,6 @@ final class InvestingSession {
     }
 
     private void discard(final LoanDescriptor loan) {
-        skip(loan);
         discarded.put(loan);
-    }
-
-    private void skip(final LoanDescriptor loan) {
-        seen.put(loan);
     }
 }

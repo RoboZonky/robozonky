@@ -43,9 +43,8 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
     @Test
     void get() throws Exception {
         final PowerTenant a = mockTenant(harmlessZonky(10_000), true);
-        final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a, b, ONE_SECOND))) {
+        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a, ONE_SECOND))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
             doNothing().when(d).submit(any(), any(), any(), any(), any(), any());
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
