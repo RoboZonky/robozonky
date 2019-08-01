@@ -16,7 +16,6 @@ defaultExpression returns [DefaultValues result]:
  (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
  (s=defaultInvestmentShareExpression { $result.setInvestmentShare($s.result); })?
  (b=targetBalanceExpression { $result.setMinimumBalance($b.result); })?
- (c=confirmationExpression { $result.setConfirmationCondition($c.result); })?
 ;
 
 portfolioExpression returns [DefaultPortfolio result] :
@@ -67,10 +66,3 @@ reservationExpression returns [ReservationMode result] :
         }
     )
 ;
-
-confirmationExpression returns [MarketplaceFilterCondition result] :
-    'Potvrzovat mobilem investice do úvěrů, kde ' s=interestCondition DOT {
-        $result = $s.result;
-    }
-;
-

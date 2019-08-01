@@ -19,9 +19,6 @@ package com.github.robozonky.strategy.natural;
 import java.time.Clock;
 import java.time.Instant;
 
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -29,11 +26,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
-
-    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     @Test
     void construct() {
@@ -42,7 +36,6 @@ class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
         assertSoftly(softly -> {
             softly.assertThat(sut.getPortfolio()).isSameAs(p);
             softly.assertThat(sut.getInvestmentSize().getMinimumInvestmentInCzk()).isEqualTo(0);
-            softly.assertThat(sut.needsConfirmation(new LoanDescriptor(Loan.custom().build()), FOLIO)).isFalse();
         });
     }
 
