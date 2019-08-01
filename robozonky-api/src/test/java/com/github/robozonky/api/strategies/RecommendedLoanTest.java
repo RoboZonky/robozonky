@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,18 +40,17 @@ class RecommendedLoanTest {
     void constructor() {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = 200;
-        final RecommendedLoan r = new RecommendedLoan(ld, amount, true);
+        final RecommendedLoan r = new RecommendedLoan(ld, amount);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.descriptor()).isSameAs(ld);
             softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(amount));
-            softly.assertThat(r.isConfirmationRequired()).isTrue();
         });
     }
 
     @Test
     void constructorNoLoanDescriptor() {
         final int amount = 200;
-        assertThatThrownBy(() -> new RecommendedLoan(null, amount, true))
+        assertThatThrownBy(() -> new RecommendedLoan(null, amount))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -59,21 +58,17 @@ class RecommendedLoanTest {
     void equalsSame() {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = 200;
-        final boolean confirmationRequired = true;
-        final RecommendedLoan r1 = new RecommendedLoan(ld, amount, confirmationRequired);
+        final RecommendedLoan r1 = new RecommendedLoan(ld, amount);
         assertThat(r1).isEqualTo(r1);
-        final RecommendedLoan r2 = new RecommendedLoan(ld, amount, confirmationRequired);
+        final RecommendedLoan r2 = new RecommendedLoan(ld, amount);
         assertThat(r1).isEqualTo(r2);
     }
 
     @Test
     void notEqualsDifferentLoanDescriptor() {
         final int amount = 200;
-        final boolean confirmationRequired = true;
-        final RecommendedLoan r1 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), amount,
-                                                       confirmationRequired);
-        final RecommendedLoan r2 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), amount,
-                                                       confirmationRequired);
+        final RecommendedLoan r1 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), amount);
+        final RecommendedLoan r2 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), amount);
         assertThat(r1).isNotEqualTo(r2);
     }
 
@@ -81,24 +76,14 @@ class RecommendedLoanTest {
     void notEqualsDifferentAmount() {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = 200;
-        final boolean confirmationRequired = true;
-        final RecommendedLoan r1 = new RecommendedLoan(ld, amount, confirmationRequired);
-        final RecommendedLoan r2 = new RecommendedLoan(ld, amount + 1, confirmationRequired);
-        assertThat(r1).isNotEqualTo(r2);
-    }
-
-    @Test
-    void notEqualsDifferentConfirmationRequirements() {
-        final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
-        final int amount = 200;
-        final RecommendedLoan r1 = new RecommendedLoan(ld, amount, true);
-        final RecommendedLoan r2 = new RecommendedLoan(ld, amount, false);
+        final RecommendedLoan r1 = new RecommendedLoan(ld, amount);
+        final RecommendedLoan r2 = new RecommendedLoan(ld, amount + 1);
         assertThat(r1).isNotEqualTo(r2);
     }
 
     @Test
     void notEqualsDifferentJavaType() {
-        final RecommendedLoan r1 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), 200, true);
+        final RecommendedLoan r1 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), 200);
         assertThat(r1).isNotEqualTo(r1.toString());
     }
 }

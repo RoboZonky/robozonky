@@ -36,7 +36,6 @@ module com.github.robozonky.api {
      * Public APIs are available for everyone.
      */
     exports com.github.robozonky.api;
-    exports com.github.robozonky.api.confirmations;
     exports com.github.robozonky.api.notifications;
     exports com.github.robozonky.api.remote;
     exports com.github.robozonky.api.remote.entities;
@@ -66,7 +65,6 @@ module com.github.robozonky.api {
 
     uses JobService;
     uses com.github.robozonky.api.strategies.StrategyService;
-    uses com.github.robozonky.api.confirmations.ConfirmationProviderService;
     uses com.github.robozonky.api.notifications.ListenerService;
 
     provides JobService with StateCleanerJobService;

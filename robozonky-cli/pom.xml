@@ -35,10 +35,6 @@
     <!-- these are normally runtime dependencies, but we need them present in order to validate their settings -->
     <dependency>
       <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-integration-zonkoid</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-integration-stonky</artifactId>
     </dependency>
     <dependency>

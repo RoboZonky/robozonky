@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import org.apache.logging.log4j.LogManager;
@@ -89,25 +88,14 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
         return loan;
     }
 
-    /**
-     * Convert the descriptor into an actual investment recommendation. This will be executed by the
-     * {@link InvestmentStrategy}.
-     * @param amount The amount recommended to invest.
-     * @param confirmationRequired Whether or not {@link ConfirmationProvider} is required to confirm the investment.
-     * @return Empty if amount is out of bounds.
-     */
-    public Optional<RecommendedLoan> recommend(final int amount, final boolean confirmationRequired) {
+    public Optional<RecommendedLoan> recommend(final int toInvest) {
         final int remaining = loan.getNonReservedRemainingInvestment();
-        if (amount <= remaining) {
-            return Optional.of(new RecommendedLoan(this, amount, confirmationRequired));
+        if (toInvest <= remaining) {
+            return Optional.of(new RecommendedLoan(this, toInvest));
         } else {
-            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount, remaining, loan.getId());
+            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", toInvest, remaining, loan.getId());
             return Optional.empty();
         }
-    }
-
-    public Optional<RecommendedLoan> recommend(final int toInvest) {
-        return recommend(toInvest, false);
     }
 
     @Override

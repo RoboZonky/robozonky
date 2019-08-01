@@ -17,7 +17,6 @@
 package com.github.robozonky.internal.secrets;
 
 import java.security.KeyStore;
-import java.util.Optional;
 
 /**
  * Implementations provide various ways of storing sensitive information, such as passwords or access tokens.
@@ -71,21 +70,6 @@ public interface SecretProvider {
      * @return The username.
      */
     String getUsername();
-
-    /**
-     * Retrieve a secret stored through {@link #setSecret(String, char[])}.
-     * @param secretId ID of the secret to retrieve.
-     * @return The secret, if found.
-     */
-    Optional<char[]> getSecret(final String secretId);
-
-    /**
-     * Store a secret.
-     * @param secretId ID of the secret.
-     * @param secret The secret to store.
-     * @return True if successful.
-     */
-    boolean setSecret(final String secretId, final char... secret);
 
     /**
      * Whether or not this provider will store all data in such a way that it survives JVM restart.

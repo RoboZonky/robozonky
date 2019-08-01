@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package com.github.robozonky.api.strategies;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 
@@ -30,23 +29,13 @@ public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanD
 
     private final LoanDescriptor loanDescriptor;
     private final int recommendedInvestmentAmount;
-    private final boolean confirmationRequired;
 
-    RecommendedLoan(final LoanDescriptor loanDescriptor, final int amount, final boolean confirmationRequired) {
+    RecommendedLoan(final LoanDescriptor loanDescriptor, final int amount) {
         if (loanDescriptor == null) {
             throw new IllegalArgumentException("Loan descriptor must not be null.");
         }
         this.loanDescriptor = loanDescriptor;
         this.recommendedInvestmentAmount = amount;
-        this.confirmationRequired = confirmationRequired;
-    }
-
-    /**
-     * Whether or not a {@link ConfirmationProvider} is required to confirm the decision.
-     * @return True if required.
-     */
-    public boolean isConfirmationRequired() {
-        return confirmationRequired;
     }
 
     @Override
@@ -58,13 +47,12 @@ public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanD
         }
         final RecommendedLoan that = (RecommendedLoan) o;
         return recommendedInvestmentAmount == that.recommendedInvestmentAmount &&
-                confirmationRequired == that.confirmationRequired &&
                 Objects.equals(loanDescriptor, that.loanDescriptor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(loanDescriptor, recommendedInvestmentAmount, confirmationRequired);
+        return Objects.hash(loanDescriptor, recommendedInvestmentAmount);
     }
 
     @Override
@@ -72,7 +60,6 @@ public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanD
         return "Recommendation{" +
                 "loanDescriptor=" + loanDescriptor +
                 ", recommendedInvestmentAmount=" + recommendedInvestmentAmount +
-                ", confirmationRequired=" + confirmationRequired +
                 '}';
     }
 

@@ -221,7 +221,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .setUrl(new URL("http://www.robozonky.cz"))
                 .build();
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
-        final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
+        final RecommendedLoan recommendation = loanDescriptor.recommend(1200).get();
         final Investment i = Investment.fresh(loan, 1000)
                 .setExpectedInterest(BigDecimal.TEN)
                 .setPaidPenalty(BigDecimal.ZERO)

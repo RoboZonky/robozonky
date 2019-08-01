@@ -85,10 +85,6 @@ class KeyStoreSecretProviderTest {
         final String pwd = "somethingElse";
         assertThat(p.setPassword(pwd.toCharArray())).isTrue();
         assertThat(p.getPassword()).isEqualTo(pwd.toCharArray());
-        // set some secrets
-        final String key = "key", value = "value";
-        assertThat(p.setSecret(key, value.toCharArray())).isTrue();
-        assertThat(p.getSecret(key)).contains(value.toCharArray());
         assertThat(p.isPersistent()).isTrue();
     }
 

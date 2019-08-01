@@ -17,9 +17,6 @@
 package com.github.robozonky.internal.secrets;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Plain-text in-memory ephemeral secret storage. Should only ever be used for testing purposes.
@@ -28,7 +25,6 @@ final class FallbackSecretProvider implements SecretProvider {
 
     private final String username;
     private final char[] password;
-    private final Map<String, char[]> secrets = new HashMap<>(0);
 
     public FallbackSecretProvider(final String username, final char... password) {
         this.username = username;
@@ -43,17 +39,6 @@ final class FallbackSecretProvider implements SecretProvider {
     @Override
     public String getUsername() {
         return this.username;
-    }
-
-    @Override
-    public Optional<char[]> getSecret(final String secretId) {
-        return Optional.ofNullable(this.secrets.get(secretId));
-    }
-
-    @Override
-    public boolean setSecret(final String secretId, final char... secret) {
-        this.secrets.put(secretId, secret);
-        return true;
     }
 
     @Override

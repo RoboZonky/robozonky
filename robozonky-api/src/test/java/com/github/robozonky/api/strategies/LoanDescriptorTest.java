@@ -90,7 +90,6 @@ class LoanDescriptorTest {
         assertSoftly(softly -> {
             softly.assertThat(recommendation.descriptor()).isSameAs(ld);
             softly.assertThat(recommendation.amount()).isEqualTo(BigDecimal.valueOf(200));
-            softly.assertThat(recommendation.isConfirmationRequired()).isFalse();
         });
     }
 
