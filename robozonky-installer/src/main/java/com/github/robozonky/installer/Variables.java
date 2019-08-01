@@ -35,7 +35,6 @@ enum Variables {
     IS_STONKY_ENABLED("isStonkyEnabled"),
     GOOGLE_CALLBACK_HOST("callbackHost"),
     GOOGLE_CALLBACK_PORT("callbackPort"),
-    IS_ZONKOID_ENABLED("isZonkoidEnabled"),
     SMTP_AUTH("isSmtpAuthenticationEnabled"),
     SMTP_TO("smtpTo"),
     SMTP_USERNAME("smtpUsername"),
@@ -48,7 +47,6 @@ enum Variables {
     JMX_PORT("jmxPort"),
     STRATEGY_SOURCE("strategy"),
     STRATEGY_TYPE("strategyType"),
-    ZONKOID_TOKEN("zonkoidToken"),
     ZONKY_USERNAME("zonkyUsername"),
     ZONKY_PASSWORD("zonkyPassword");
 

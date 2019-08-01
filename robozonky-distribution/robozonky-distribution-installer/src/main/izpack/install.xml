@@ -53,10 +53,6 @@
   </resources>
 
   <conditions>
-    <condition type="variable" id="enableZonkoidPanel">
-      <name>isZonkoidEnabled</name>
-      <value>true</value>
-    </condition>
     <condition type="variable" id="enableStonkyPanel">
       <name>showStonkyPanel</name>
       <value>true</value>
@@ -178,9 +174,6 @@
     </panel>
     <!-- Settings for various integrations -->
     <panel classname="UserInputPanel" id="stonkyEnablement" condition="enableStonkyPanel" />
-    <panel classname="UserInputPanel" id="zonkoidUserInput" condition="enableZonkoidPanel">
-      <validator classname="com.github.robozonky.installer.ZonkoidSettingsValidator"/>
-    </panel>
     <panel classname="UserInputPanel" id="jmxUserInput" condition="enableJmxPanel" />
     <panel classname="SummaryPanel"/>
     <panel classname="InstallPanel"/>

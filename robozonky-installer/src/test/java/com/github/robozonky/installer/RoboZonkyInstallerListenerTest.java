@@ -214,16 +214,12 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
         when(localData.getVariable(Variables.IS_DRY_RUN.getKey())).thenReturn("true");
-        when(localData.getVariable(Variables.IS_ZONKOID_ENABLED.getKey())).thenReturn("true");
-        when(localData.getVariable(Variables.ZONKOID_TOKEN.getKey())).thenReturn("123456");
         RoboZonkyInstallerListener.setInstallData(localData);
         // execute SUT
         final CommandLinePart clp = RoboZonkyInstallerListener.prepareCore();
         // test
         assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                    .containsKey("-d")
-                    .containsKey("-x");
+            softly.assertThat(clp.getOptions()).containsKey("-d");
             softly.assertThat(clp.getOptions().get("-p"))
                     .containsOnly(String.valueOf(RoboZonkyInstallerListener.KEYSTORE_PASSWORD));
         });
