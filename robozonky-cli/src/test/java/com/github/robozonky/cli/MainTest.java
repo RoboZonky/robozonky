@@ -16,7 +16,8 @@
 
 package com.github.robozonky.cli;
 
-class CheckerTest {
+class MainTest {
+
+
 
 }
-

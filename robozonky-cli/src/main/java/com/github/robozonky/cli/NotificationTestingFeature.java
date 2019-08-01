@@ -17,8 +17,17 @@
 package com.github.robozonky.cli;
 
 import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.test.DateUtil;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "notification-tester", description = NotificationTestingFeature.DESCRIPTION)
@@ -41,6 +50,25 @@ public final class NotificationTestingFeature extends AbstractFeature {
         // for Picocli
     }
 
+    static boolean notifications(final SessionInfo sessionInfo, final URL configurationLocation) {
+        ListenerServiceLoader.registerConfiguration(sessionInfo, configurationLocation);
+        return notifications(sessionInfo, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
+    }
+
+    static boolean notifications(final SessionInfo sessionInfo,
+                                 final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
+        final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
+                .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()))
+                .collect(Collectors.toSet());
+        if (listeners.isEmpty()) {
+            return false;
+        } else {
+            final RoboZonkyTestingEvent evt = DateUtil::offsetNow;
+            listeners.forEach(l -> l.handle(evt, sessionInfo));
+            return true;
+        }
+    }
+
     @Override
     public String describe() {
         return DESCRIPTION;
@@ -53,7 +81,7 @@ public final class NotificationTestingFeature extends AbstractFeature {
 
     @Override
     public void test() throws TestFailedException {
-        final boolean success = Checker.notifications(new SessionInfo(username), location);
+        final boolean success = notifications(new SessionInfo(username), location);
         if (!success) {
             throw new TestFailedException("No notifications have been sent. Check log for possible problems.");
         }

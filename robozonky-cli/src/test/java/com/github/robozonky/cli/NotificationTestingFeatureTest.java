@@ -18,13 +18,33 @@ package com.github.robozonky.cli;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.state.TenantState;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class NotificationTestingFeatureTest {
+
+    private static final SessionInfo SESSION_INFO = new SessionInfo(UUID.randomUUID().toString());
+    @Mock
+    private EventListener<RoboZonkyTestingEvent> l;
 
     @Test
     void noNotifications() throws MalformedURLException, SetupFailedException {
@@ -35,4 +55,28 @@ class NotificationTestingFeatureTest {
         assertThatThrownBy(f::test).isInstanceOf(TestFailedException.class);
     }
 
+    @Test
+    void notificationsEmptyOnInput() {
+        assertThat(NotificationTestingFeature.notifications(SESSION_INFO, Collections.emptyList())).isFalse();
+    }
+
+    @Test
+    void notificationsEmptyByDefault() throws MalformedURLException {
+        assertThat(NotificationTestingFeature.notifications(SESSION_INFO, new URL("file:///something"))).isFalse();
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(SESSION_INFO)).isNotEmpty();
+    }
+
+    @BeforeEach
+    @AfterEach
+    void destroyState() {
+        TenantState.destroyAll();
+    }
+
+    @Test
+    void notificationsProper() {
+        final EventListenerSupplier<RoboZonkyTestingEvent> r = () -> Optional.of(l);
+        assertThat(NotificationTestingFeature.notifications(SESSION_INFO, Collections.singletonList(r))).isTrue();
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(SESSION_INFO)).isEmpty();
+        Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
+    }
 }
