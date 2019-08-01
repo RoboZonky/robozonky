@@ -19,10 +19,8 @@ package com.github.robozonky.notifications;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
@@ -46,10 +44,8 @@ import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.notifications.listeners.BalanceOnTargetEventListener;
 import com.github.robozonky.notifications.listeners.BalanceUnderMinimumEventListener;
-import com.github.robozonky.notifications.listeners.InvestmentDelegatedEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentMadeEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentPurchasedEventListener;
-import com.github.robozonky.notifications.listeners.InvestmentRejectedEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentSkippedEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentSoldEventListener;
 import com.github.robozonky.notifications.listeners.LoanDefaultedEventListener;
@@ -103,28 +99,6 @@ public enum SupportedListener {
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentSkippedEventListener(this, targetHandler);
-        }
-    },
-    INVESTMENT_DELEGATED {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return InvestmentDelegatedEvent.class;
-        }
-
-        @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new InvestmentDelegatedEventListener(this, targetHandler);
-        }
-    },
-    INVESTMENT_REJECTED {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return InvestmentRejectedEvent.class;
-        }
-
-        @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new InvestmentRejectedEventListener(this, targetHandler);
         }
     },
     INVESTMENT_PURCHASED {
