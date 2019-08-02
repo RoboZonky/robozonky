@@ -268,9 +268,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                 // reuse the same code for this as we do in CLI
                 LOGGER.debug("Preparing Google credentials.");
                 final String username = Variables.ZONKY_USERNAME.getValue(DATA);
-                final GoogleCredentialsFeature google = new GoogleCredentialsFeature(username);
-                google.setHost(host);
-                google.setPort(Integer.parseInt(port));
+                final GoogleCredentialsFeature google = new GoogleCredentialsFeature(username, host, Integer.parseInt(port));
                 google.runGoogleCredentialCheck();
                 LOGGER.debug("Credential check over.");
                 // copy credentials to the correct directory

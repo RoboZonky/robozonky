@@ -65,15 +65,9 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
         this(Util.createTransport());
     }
 
-    public GoogleCredentialsFeature(final String username) {
+    public GoogleCredentialsFeature(final String username, final String host, final int port) {
         this(username, Util.createTransport());
-    }
-
-    public void setHost(final String host) {
         this.host = host;
-    }
-
-    public void setPort(final int port) {
         this.port = port;
     }
 
