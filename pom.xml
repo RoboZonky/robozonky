@@ -45,7 +45,7 @@
     <!-- Various dependency versions to be used later. -->
     <surefire.version>3.0.0-M3</surefire.version>
     <jaxb.version>2.3.2</jaxb.version>
-    <version.com.fasterxml.jackson>2.9.9</version.com.fasterxml.jackson>
+    <version.com.fasterxml.jackson>2.10.0.pr1</version.com.fasterxml.jackson>
     <version.com.google.apis>1.25.0</version.com.google.apis>
     <version.jakarta.activation>1.2.1</version.jakarta.activation>
     <version.org.antlr>4.7.2</version.org.antlr>
