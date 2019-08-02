@@ -41,9 +41,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     @picocli.CommandLine.Option(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")
     String strategyLocation = "";
-    @picocli.CommandLine.Option(names = {"-x", "--external"},
-            description = "Use external tool to confirm investments.")
-    String confirmationCredentials;
     @picocli.CommandLine.Option(names = {"-h", "--help"}, usageHelp = true, description = "Print usage end exit.")
     private boolean help;
     @picocli.CommandLine.Option(names = {"-i", "--inform"},
@@ -90,10 +87,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
         return Duration.ofSeconds(secondaryMarketplaceCheckDelay);
     }
 
-    Optional<String> getConfirmationCredentials() {
-        return Optional.ofNullable(confirmationCredentials);
-    }
-
     boolean isDryRunEnabled() {
         return dryRunEnabled;
     }
@@ -136,6 +129,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     public Optional<InvestmentMode> call() {
         final OperatingMode mode = new OperatingMode(lifecycle);
         return SecretProviderFactory.getSecretProvider(this)
-                .flatMap(secrets -> mode.configure(this, secrets));
+                .map(secrets -> mode.configure(this, secrets));
     }
 }

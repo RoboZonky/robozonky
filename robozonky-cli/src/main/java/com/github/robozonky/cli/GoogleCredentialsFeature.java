@@ -53,23 +53,21 @@ public final class GoogleCredentialsFeature extends AbstractFeature {
                 credentialProvider);
     }
 
-    private GoogleCredentialsFeature(final HttpTransport transport) {
-        this("", transport, null);
+    private GoogleCredentialsFeature(final String username, final HttpTransport transport) {
+        this(username, transport, null);
     }
 
-    public GoogleCredentialsFeature() {
+    private GoogleCredentialsFeature(final HttpTransport transport) {
+        this("", transport);
+    }
+
+    GoogleCredentialsFeature() { // for Picocli
         this(Util.createTransport());
     }
 
-    public GoogleCredentialsFeature(final String username) {
-        this(username, Util.createTransport(), null);
-    }
-
-    public void setHost(final String host) {
+    public GoogleCredentialsFeature(final String username, final String host, final int port) {
+        this(username, Util.createTransport());
         this.host = host;
-    }
-
-    public void setPort(final int port) {
         this.port = port;
     }
 

@@ -69,8 +69,6 @@ class ParsedStrategyTest {
                     .isEqualTo(portfolio.getDefaultShare(Rating.B));
             softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.C)).isEqualTo(0);
             softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(20_000);
-            softly.assertThat(
-                    strategy.needsConfirmation(new LoanDescriptor(ParsedStrategyTest.mockLoan(2)), FOLIO)).isFalse();
         });
     }
 

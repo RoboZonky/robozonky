@@ -24,10 +24,8 @@ import java.util.Collections;
 
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
@@ -148,16 +146,6 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void investmentDelegated() {
-        final InvestmentDelegatedEvent e = EventFactory.investmentDelegated(recommendedLoan(), "something");
-        assertSoftly(softly -> {
-            softly.assertThat(e.getLoan()).isNotNull();
-            softly.assertThat(e.getRecommendation()).isNotNull();
-            softly.assertThat(e.getConfirmationProviderId()).isNotNull();
-        });
-    }
-
-    @Test
     void investmentMade() {
         final InvestmentMadeEvent e = EventFactory.investmentMade(Investment.custom().build(), Loan.custom().build(),
                                                                   mockPortfolioOverview());
@@ -177,16 +165,6 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
-        });
-    }
-
-    @Test
-    void investmentRejected() {
-        final InvestmentRejectedEvent e = EventFactory.investmentRejected(recommendedLoan(), "something");
-        assertSoftly(softly -> {
-            softly.assertThat(e.getLoan()).isNotNull();
-            softly.assertThat(e.getRecommendation()).isNotNull();
-            softly.assertThat(e.getConfirmationProviderId()).isNotNull();
         });
     }
 

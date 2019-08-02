@@ -99,4 +99,5 @@ class CliTest {
         final int exit = Cli.parse("help", UUID.randomUUID().toString());
         assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
+
 }

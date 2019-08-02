@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.cli.Feature;
 import com.github.robozonky.cli.GoogleCredentialsFeature;
 import com.github.robozonky.cli.SetupFailedException;
-import com.github.robozonky.cli.ZonkoidPasswordFeature;
 import com.github.robozonky.cli.ZonkyPasswordFeature;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
@@ -115,15 +114,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         f.setup();
     }
 
-    private static void prepareZonkoid(final char... keystorePassword) throws SetupFailedException {
-        final Feature f = new ZonkoidPasswordFeature(KEYSTORE_FILE, keystorePassword,
-                                                     Variables.ZONKOID_TOKEN.getValue(DATA).toCharArray());
-        f.setup();
-    }
-
     private static CommandLinePart prepareCore(
             final char... keystorePassword) throws SetupFailedException, IOException {
-        final String zonkoidId = "zonkoid";
         final CommandLinePart cli = new CommandLinePart()
                 .setOption("-p", String.valueOf(keystorePassword));
         cli.setOption("-g", KEYSTORE_FILE.getAbsolutePath());
@@ -135,11 +127,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             cli.setJvmArgument("Xmx64m");
         }
         primeKeyStore(keystorePassword);
-        final boolean isZonkoidEnabled = Boolean.parseBoolean(Variables.IS_ZONKOID_ENABLED.getValue(DATA));
-        if (isZonkoidEnabled) {
-            prepareZonkoid(keystorePassword);
-            cli.setOption("-x", zonkoidId);
-        }
         return cli;
     }
 
@@ -281,9 +268,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                 // reuse the same code for this as we do in CLI
                 LOGGER.debug("Preparing Google credentials.");
                 final String username = Variables.ZONKY_USERNAME.getValue(DATA);
-                final GoogleCredentialsFeature google = new GoogleCredentialsFeature(username);
-                google.setHost(host);
-                google.setPort(Integer.parseInt(port));
+                final GoogleCredentialsFeature google = new GoogleCredentialsFeature(username, host, Integer.parseInt(port));
                 google.runGoogleCredentialCheck();
                 LOGGER.debug("Credential check over.");
                 // copy credentials to the correct directory

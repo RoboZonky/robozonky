@@ -16,23 +16,17 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.app.daemon.DaemonInvestmentMode;
-import com.github.robozonky.app.daemon.Investor;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TenantBuilder;
-import com.github.robozonky.internal.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
-import com.github.robozonky.internal.secrets.Credentials;
 import com.github.robozonky.internal.secrets.SecretProvider;
-import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,29 +54,6 @@ final class OperatingMode {
                 .build();
     }
 
-    private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials,
-                                                  final ConfirmationProvider provider) {
-        final String svcId = credentials.getToolId();
-        LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
-        return credentials.getToken()
-                .map(token -> Optional.of(Investor.build(tenant, provider, token)))
-                .orElseGet(() -> {
-                    LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
-                    return Optional.empty();
-                });
-    }
-
-    private static Optional<Investor> getInvestor(final Tenant tenant, final Credentials credentials) {
-        LOGGER.warn("Investment confirmation via cell phone is deprecated and will be removed later.");
-        final String svcId = credentials.getToolId();
-        return ConfirmationProviderLoader.load(svcId)
-                .map(provider -> OperatingMode.getInvestor(tenant, credentials, provider))
-                .orElseGet(() -> {
-                    LOGGER.error("Confirmation provider '{}' not found, yet it is required.", svcId);
-                    return Optional.empty();
-                });
-    }
-
     private static void configureNotifications(final CommandLine cli, final PowerTenant tenant) {
         // unregister if registered
         final SessionInfo session = tenant.getSessionInfo();
@@ -94,15 +65,11 @@ final class OperatingMode {
         LOGGER.debug("Notification subsystem initialized: {}.", e);
     }
 
-    public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
+    public InvestmentMode configure(final CommandLine cli, final SecretProvider secrets) {
         final PowerTenant tenant = getTenant(cli, lifecycle, secrets);
         configureNotifications(cli, tenant);
         // and now initialize the chosen mode of operation
-        return cli.getConfirmationCredentials()
-                .map(value -> new Credentials(value, secrets))
-                .map(c -> OperatingMode.getInvestor(tenant, c))
-                .orElse(Optional.of(Investor.build(tenant)))
-                .map(i -> new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant, i,
-                                                   cli.getSecondaryMarketplaceCheckDelay()));
+        return new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant,
+                                        cli.getSecondaryMarketplaceCheckDelay());
     }
 }

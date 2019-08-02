@@ -12,80 +12,39 @@
     },
     "ignore": [
       {
-        "code": "java.method.returnTypeChangedCovariantly",
-        "old": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.notifications.Summary::getPortfolioOverview()",
-        "new": "method com.github.robozonky.api.strategies.ExtendedPortfolioOverview com.github.robozonky.api.notifications.Summary::getPortfolioOverview()",
-        "justification": "Some part of PortfolioOverview move into a new type."
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.confirmations.ConfirmationProvider",
+        "justification": "Confirmation API and Zonkoid integration removed after earlier deprecation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.confirmations.ConfirmationProviderService",
+        "justification": "Confirmation API and Zonkoid integration removed after earlier deprecation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.confirmations.RequestId",
+        "justification": "Confirmation API and Zonkoid integration removed after earlier deprecation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.InvestmentDelegatedEvent",
+        "justification": "Confirmation API and Zonkoid integration removed after earlier deprecation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.InvestmentRejectedEvent",
+        "justification": "Confirmation API and Zonkoid integration removed after earlier deprecation."
       },
       {
         "code": "java.method.removed",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getAtRiskShareOnInvestment(com.github.robozonky.api.remote.enums.Rating)",
-        "justification": "Some part of PortfolioOverview move into a new type."
+        "old": "method java.util.Optional<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.LoanDescriptor::recommend(int, boolean)",
+        "justification": "Confirmation API and Zonkoid integration removed after earlier deprecation."
       },
       {
         "code": "java.method.removed",
-        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk()",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAtRisk(com.github.robozonky.api.remote.enums.Rating)",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkSellable()",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkSellable(com.github.robozonky.api.remote.enums.Rating)",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkSellableFeeless()",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkSellableFeeless(com.github.robozonky.api.remote.enums.Rating)",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareAtRisk()",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareSellable()",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareSellable(com.github.robozonky.api.remote.enums.Rating)",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareSellableFeeless()",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.strategies.PortfolioOverview::getShareSellableFeeless(com.github.robozonky.api.remote.enums.Rating)",
-        "justification": "Some part of PortfolioOverview move into a new type."
-      },
-      {
-        "code": "java.method.addedToInterface",
-        "new": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkOptimalMonthlyProfit()",
-        "justification": "Fixed typo in the method name."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkOptimalMonthyProfit()",
-        "justification": "Fixed typo in the method name."
+        "old": "method boolean com.github.robozonky.api.strategies.RecommendedLoan::isConfirmationRequired()",
+        "justification": "Confirmation API and Zonkoid integration removed after earlier deprecation."
       }
     ]
   }

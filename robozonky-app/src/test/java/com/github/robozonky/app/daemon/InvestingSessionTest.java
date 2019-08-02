@@ -26,16 +26,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import javax.ws.rs.ServiceUnavailableException;
 
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
-import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -53,18 +48,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
-
-    private static ConfirmationProvider CP = new ConfirmationProvider() {
-        @Override
-        public boolean requestConfirmation(RequestId auth, int loanId, int amount) {
-            return true;
-        }
-
-        @Override
-        public String getId() {
-            return "something";
-        }
-    };
 
     private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
         return (l, p, r) -> l.stream()
@@ -152,108 +135,9 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = mock(Investor.class);
-        doThrow(thrown).when(p).invest(eq(r), anyBoolean());
+        doThrow(thrown).when(p).invest(eq(r));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
         assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
-    }
-
-    @Test
-    void investmentRejected() {
-        final Zonky z = harmlessZonky(10_000);
-        final PowerTenant auth = mockTenant(z);
-        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
-        final Investor p = mock(Investor.class);
-        doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
-        doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
-        final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
-        final boolean result = t.invest(r);
-        assertSoftly(softly -> {
-            softly.assertThat(result).isFalse();
-            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
-        });
-        // validate event
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(2);
-        assertSoftly(softly -> {
-            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentRejectedEvent.class);
-        });
-    }
-
-    @Test
-    void investmentDelegated() {
-        final LoanDescriptor ld = mockLoanDescriptor();
-        final RecommendedLoan r = ld.recommend(200).get();
-        final Zonky z = harmlessZonky(10_000);
-        final PowerTenant auth = mockTenant(z);
-        final Investor p = mock(Investor.class);
-        doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
-        doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
-        final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final InvestingSession t = new InvestingSession(new LinkedHashSet<>(availableLoans), p, auth);
-        final boolean result = t.invest(r);
-        assertSoftly(softly -> {
-            softly.assertThat(result).isFalse();
-            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
-        });
-        // validate event
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(2);
-        assertSoftly(softly -> {
-            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentDelegatedEvent.class);
-        });
-    }
-
-    @Test
-    void investmentDelegatedButExpectedConfirmed() {
-        final LoanDescriptor ld = mockLoanDescriptor();
-        final RecommendedLoan r = ld.recommend(200, true).get();
-        final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final Zonky z = harmlessZonky(10_000);
-        final PowerTenant auth = mockTenant(z);
-        final Investor p = mock(Investor.class);
-        doReturn(Either.left(InvestmentFailure.DELEGATED)).when(p).invest(eq(r), anyBoolean());
-        doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
-        final InvestingSession t = new InvestingSession(new LinkedHashSet<>(availableLoans), p, auth);
-        final boolean result = t.invest(r);
-        assertSoftly(softly -> {
-            softly.assertThat(result).isFalse();
-            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
-        });
-        // validate event
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(2);
-        assertSoftly(softly -> {
-            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentDelegatedEvent.class);
-        });
-    }
-
-    @Test
-    void investmentIgnoredWhenNoConfirmationProviderAndCaptcha() {
-        final LoanDescriptor ld = mockLoanDescriptor();
-        final RecommendedLoan r = ld.recommend(200).get();
-        final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        // setup APIs
-        final Zonky z = harmlessZonky(10_000);
-        final PowerTenant auth = mockTenant(z);
-        final Investor p = mock(Investor.class);
-        doReturn(Either.left(InvestmentFailure.REJECTED)).when(p).invest(eq(r), anyBoolean());
-        doReturn(Optional.empty()).when(p).getConfirmationProvider();
-        final InvestingSession t = new InvestingSession(new LinkedHashSet<>(availableLoans), p, auth);
-        final boolean result = t.invest(r);
-        assertSoftly(softly -> {
-            softly.assertThat(result).isFalse();
-            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
-        });
-        // validate event
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(2);
-        assertSoftly(softly -> {
-            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentSkippedEvent.class);
-        });
     }
 
     @Test
@@ -264,8 +148,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(oldBalance);
         final PowerTenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
-        doReturn(Either.right(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r), anyBoolean());
-        doReturn(Optional.of(CP)).when(p).getConfirmationProvider();
+        doReturn(Either.right(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {

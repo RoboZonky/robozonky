@@ -19,11 +19,8 @@ package com.github.robozonky.strategy.natural;
 import java.time.Period;
 import java.util.Optional;
 
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 class DefaultValues {
 
@@ -35,7 +32,6 @@ class DefaultValues {
     private InvestmentSize investmentSize = new InvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private ExitProperties exitProperties;
-    private MarketplaceFilterCondition confirmationCondition = MarketplaceFilterCondition.neverAccepting();
 
     public DefaultValues(final DefaultPortfolio portfolio) {
         this.portfolio = portfolio;
@@ -120,17 +116,6 @@ class DefaultValues {
         this.investmentSize = investmentSize;
     }
 
-    public boolean needsConfirmation(final LoanDescriptor loan, final PortfolioOverview portfolioOverview) {
-        return confirmationCondition.test(Wrapper.wrap(loan, portfolioOverview));
-    }
-
-    public void setConfirmationCondition(final MarketplaceFilterCondition confirmationCondition) {
-        if (confirmationCondition == null) {
-            throw new IllegalArgumentException("Confirmation condition must be provided.");
-        }
-        this.confirmationCondition = confirmationCondition;
-    }
-
     @Override
     public String toString() {
         return "DefaultValues{" +
@@ -141,7 +126,6 @@ class DefaultValues {
                 ", investmentSize=" + investmentSize +
                 ", investmentShare=" + investmentShare +
                 ", exitProperties=" + exitProperties +
-                ", confirmationCondition=" + confirmationCondition +
                 '}';
     }
 }

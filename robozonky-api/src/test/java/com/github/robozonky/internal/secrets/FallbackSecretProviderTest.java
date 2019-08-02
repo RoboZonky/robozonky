@@ -32,11 +32,6 @@ class FallbackSecretProviderTest {
         // make sure original values were set
         assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
         assertThat(p.getPassword()).isEqualTo(FallbackSecretProviderTest.PWD.toCharArray());
-        // set some secrets
-        final String key = "key", value = "value";
-        assertThat(p.getSecret(key)).isEmpty();
-        assertThat(p.setSecret(key, value.toCharArray())).isTrue();
-        assertThat(p.getSecret(key)).contains(value.toCharArray());
         assertThat(p.isPersistent()).isFalse();
     }
 }

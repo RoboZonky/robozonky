@@ -102,10 +102,6 @@ class ParsedStrategy {
                                   .sum());
     }
 
-    public boolean needsConfirmation(final LoanDescriptor loan, final PortfolioOverview portfolioOverview) {
-        return defaults.needsConfirmation(loan, portfolioOverview);
-    }
-
     public long getMinimumBalance() {
         return defaults.getMinimumBalance();
     }

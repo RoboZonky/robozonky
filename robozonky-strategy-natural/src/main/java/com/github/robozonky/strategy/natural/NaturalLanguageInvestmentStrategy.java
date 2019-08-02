@@ -60,9 +60,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final int recommendedAmount = recommender.apply(d.item(), balance.intValue(), restrictions);
                     if (recommendedAmount > 0) {
-                        return d.recommend(recommendedAmount, strategy.needsConfirmation(d, portfolio))
-                                .map(Stream::of)
-                                .orElse(Stream.empty());
+                        return d.recommend(recommendedAmount).stream();
                     } else {
                         return Stream.empty();
                     }

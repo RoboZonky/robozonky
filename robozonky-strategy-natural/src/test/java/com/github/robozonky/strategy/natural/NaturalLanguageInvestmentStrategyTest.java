@@ -123,7 +123,6 @@ class NaturalLanguageInvestmentStrategyTest {
         assertSoftly(softly -> {
             softly.assertThat(r.descriptor()).isEqualTo(ld);
             softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(200));
-            softly.assertThat(r.isConfirmationRequired()).isFalse();
         });
     }
 }

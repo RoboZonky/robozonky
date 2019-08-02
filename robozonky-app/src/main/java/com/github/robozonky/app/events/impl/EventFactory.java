@@ -23,10 +23,8 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
@@ -98,11 +96,6 @@ public final class EventFactory {
         return new ExecutionStartedEventImpl(loans, portfolioOverview);
     }
 
-    public static InvestmentDelegatedEvent investmentDelegated(final RecommendedLoan recommendation,
-                                                               final String confirmationProviderId) {
-        return new InvestmentDelegatedEventImpl(recommendation, confirmationProviderId);
-    }
-
     public static InvestmentMadeEvent investmentMade(final Investment investment, final MarketplaceLoan loan,
                                                      final PortfolioOverview portfolioOverview) {
         return new InvestmentMadeEventImpl(investment, loan, portfolioOverview);
@@ -111,11 +104,6 @@ public final class EventFactory {
     public static InvestmentPurchasedEvent investmentPurchased(final Investment investment, final Loan loan,
                                                                final PortfolioOverview portfolioOverview) {
         return new InvestmentPurchasedEventImpl(investment, loan, portfolioOverview);
-    }
-
-    public static InvestmentRejectedEvent investmentRejected(final RecommendedLoan recommendation,
-                                                             final String confirmationProviderId) {
-        return new InvestmentRejectedEventImpl(recommendation, confirmationProviderId);
     }
 
     public static InvestmentRequestedEvent investmentRequested(final RecommendedLoan recommendation) {

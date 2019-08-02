@@ -16,8 +16,6 @@
 
 package com.github.robozonky.internal.secrets;
 
-import java.util.Optional;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,10 +34,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
             throw new IllegalArgumentException("KeyStoreHandler must be provided.");
         }
         this.ksh = ksh;
-    }
-
-    private static String getSecretIdentifier(final String secretId) {
-        return "sct-" + secretId;
     }
 
     /**
@@ -87,16 +81,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
 
     public boolean setUsername(final String username) {
         return this.set(ALIAS_USERNAME, username);
-    }
-
-    @Override
-    public Optional<char[]> getSecret(final String secretId) {
-        return this.ksh.get(getSecretIdentifier(secretId));
-    }
-
-    @Override
-    public boolean setSecret(final String secretId, final char... secret) {
-        return this.set(getSecretIdentifier(secretId), secret);
     }
 
     @Override

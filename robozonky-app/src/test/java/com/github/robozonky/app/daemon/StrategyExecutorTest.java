@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
@@ -49,7 +48,6 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -252,36 +250,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(builder, ld);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec = new StrategyExecutor<>(tenant, d);
         assertThat(exec.get()).isEmpty();
-    }
-
-    @Test
-    void investingRejected() {
-        final Loan loan = Loan.custom()
-                .setAmount(100_000)
-                .setRating(Rating.D)
-                .setNonReservedRemainingInvestment(100_000)
-                .setMyInvestment(mockMyInvestment())
-                .setDatePublished(OffsetDateTime.now())
-                .build();
-        final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky z = harmlessZonky(9000);
-        final PowerTenant tenant = mockTenant(z);
-        when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY));
-        final Investor investor = mock(Investor.class);
-        when(investor.getConfirmationProvider()).thenReturn(Optional.of(mock(ConfirmationProvider.class)));
-        when(investor.invest(any(), anyBoolean())).thenReturn(Either.left(InvestmentFailure.REJECTED));
-        when(z.getLoan(eq(loan.getId()))).thenReturn(loan);
-        final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(investor, ld);
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec = new StrategyExecutor<>(tenant, d);
-        assertThat(exec.get()).isEmpty();
-        verify(investor, times(1)).invest(any(), anyBoolean()); // call to invest
-        verify(z, never()).invest(any()); // does not propagate to Zonky
-        // now try again, the same loan should now be discarded and therefore not even attempted
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec2 = new StrategyExecutor<>(tenant, d);
-        assertThat(exec2.get()).isEmpty();
-        verify(investor, times(1)).invest(any(), anyBoolean()); // call to invest
-        final List<Event> evt = getEventsRequested();
-        assertThat(evt).isNotEmpty();
     }
 
     @Test

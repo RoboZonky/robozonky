@@ -16,70 +16,24 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.daemon.DaemonInvestmentMode;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class OperatingModeTest extends AbstractZonkyLeveragingTest {
 
-    private static final String SERVICE = "zonkoid", SERVICE_TOKEN = "123456";
-
     @Test
-    void withConfirmation() {
-        final CommandLine cli = mock(CommandLine.class);
-        when(cli.isDryRunEnabled()).thenReturn(true);
-        when(cli.getStrategyLocation()).thenReturn("");
-        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
-        when(cli.getConfirmationCredentials()).thenReturn(Optional.of(SERVICE + ":" + SERVICE_TOKEN));
-        final OperatingMode mode = new OperatingMode(mock(Supplier.class));
-        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
-        assertSoftly(softly -> {
-            softly.assertThat(config).containsInstanceOf(DaemonInvestmentMode.class);
-            softly.assertThat(secretProvider.getSecret(SERVICE)).contains(SERVICE_TOKEN.toCharArray());
-        });
-    }
-
-    @Test
-    void withConfirmationAndUnknownId() {
-        final CommandLine cli = mock(CommandLine.class);
-        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
-        when(cli.getConfirmationCredentials()).thenReturn(Optional.of(UUID.randomUUID().toString()));
-        when(cli.getStrategyLocation()).thenReturn("file:///tmp/something");
-        final OperatingMode mode = new OperatingMode(mock(Supplier.class));
-        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
-        assertThat(config).isEmpty();
-        assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
-    }
-
-    @Test
-    void withConfirmationAndNoSecret() {
-        final CommandLine cli = mock(CommandLine.class);
-        final SecretProvider secretProvider = SecretProvider.inMemory("user", "pass".toCharArray());
-        when(cli.getConfirmationCredentials()).thenReturn(Optional.of(SERVICE));
-        when(cli.getStrategyLocation()).thenReturn("file:///tmp/something");
-        final OperatingMode mode = new OperatingMode(mock(Supplier.class));
-        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
-        assertThat(config).isEmpty();
-        assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
-    }
-
-    @Test
-    void withoutConfirmation() {
+    void basic() {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getStrategyLocation()).thenReturn("");
         final SecretProvider secretProvider = SecretProvider.inMemory("user", new char[0]);
         final OperatingMode mode = new OperatingMode(mock(Supplier.class));
-        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
-        assertThat(config).isPresent();
-        assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
+        final InvestmentMode config = mode.configure(cli, secretProvider);
+        assertThat(config).isNotNull();
     }
 }

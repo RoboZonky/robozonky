@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -96,7 +95,7 @@ final class PurchasingSession {
 
     /**
      * Get loans that are available to be evaluated by the strategy. These are loans that come from the marketplace,
-     * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
+     * minus loans that are already invested into.
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
     Collection<ParticipationDescriptor> getAvailable() {

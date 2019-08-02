@@ -36,10 +36,8 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.notifications.LoanAndInvestment;
@@ -223,7 +221,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .setUrl(new URL("http://www.robozonky.cz"))
                 .build();
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
-        final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
+        final RecommendedLoan recommendation = loanDescriptor.recommend(1200).get();
         final Investment i = Investment.fresh(loan, 1000)
                 .setExpectedInterest(BigDecimal.TEN)
                 .setPaidPenalty(BigDecimal.ZERO)
@@ -232,12 +230,9 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         // create events for listeners
         return Stream.of(
                 forListener(SupportedListener.RESERVATION_ACCEPTED, new MyReservationAcceptedEvent(loan, i)),
-                forListener(SupportedListener.INVESTMENT_DELEGATED,
-                            new MyInvestmentDelegatedEvent(recommendation, loan)),
                 forListener(SupportedListener.INVESTMENT_MADE, new MyInvestmentMadeEvent(loan, i)),
                 forListener(SupportedListener.INVESTMENT_SOLD, new MyInvestmentSoldEvent(loan, i)),
                 forListener(SupportedListener.INVESTMENT_SKIPPED, new MyInvestmentSkippedEvent(recommendation, loan)),
-                forListener(SupportedListener.INVESTMENT_REJECTED, new MyInvestmentRejectedEvent(recommendation, loan)),
                 forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, new MyLoanNoLongerDelinquentEvent(loan, i)),
                 forListener(SupportedListener.LOAN_DEFAULTED, new MyLoanDefaultedEvent(loan, i)),
                 forListener(SupportedListener.LOAN_LOST, new MyLoanLostEvent(loan, i)),
@@ -370,37 +365,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         }
     }
 
-    private static class MyInvestmentDelegatedEvent implements InvestmentDelegatedEvent {
-
-        private final RecommendedLoan recommendation;
-        private final Loan loan;
-
-        public MyInvestmentDelegatedEvent(RecommendedLoan recommendation, Loan loan) {
-            this.recommendation = recommendation;
-            this.loan = loan;
-        }
-
-        @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
-        }
-
-        @Override
-        public BigDecimal getRecommendation() {
-            return recommendation.amount();
-        }
-
-        @Override
-        public Loan getLoan() {
-            return loan;
-        }
-
-        @Override
-        public String getConfirmationProviderId() {
-            return "random";
-        }
-    }
-
     private static class MyInvestmentPurchasedEvent implements InvestmentPurchasedEvent {
 
         private final Loan loan;
@@ -455,37 +419,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public Investment getInvestment() {
             return i;
-        }
-    }
-
-    private static class MyInvestmentRejectedEvent implements InvestmentRejectedEvent {
-
-        private final RecommendedLoan recommendation;
-        private final Loan loan;
-
-        public MyInvestmentRejectedEvent(final RecommendedLoan recommendation, final Loan loan) {
-            this.recommendation = recommendation;
-            this.loan = loan;
-        }
-
-        @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
-        }
-
-        @Override
-        public BigDecimal getRecommendation() {
-            return recommendation.amount();
-        }
-
-        @Override
-        public Loan getLoan() {
-            return loan;
-        }
-
-        @Override
-        public String getConfirmationProviderId() {
-            return "random";
         }
     }
 
