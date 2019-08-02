@@ -6,13 +6,15 @@ env:
     - JAVA_OPTS=-Xmx2g
     - MAVEN_OPTS=$JAVA_OPTS
   matrix:
-    # mandatory modules first
+    # API module first, as all modules depend on it
     - MODULE=robozonky-api
-    - MODULE=robozonky-notifications
+    # App module second; by far the longest, other builders can work on subsequent modules in the meantime
     - MODULE=robozonky-app
+    # Other distributables next
     - MODULE=robozonky-cli
     - MODULE=robozonky-installer
     # then plugin modules
+    - MODULE=robozonky-notifications
     - MODULE=robozonky-strategy-natural
     - MODULE=robozonky-integration-stonky
 os:
