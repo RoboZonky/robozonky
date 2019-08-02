@@ -135,9 +135,7 @@ final class InvestingSession {
     }
 
     private boolean unsuccessfulInvestment(final RecommendedLoan recommendation) {
-        final LoanDescriptor loan = recommendation.descriptor();
         tenant.fire(investmentSkipped(recommendation));
-        final int loanId = loan.item().getId();
         return false;
     }
 
