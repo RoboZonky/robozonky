@@ -159,6 +159,7 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     @XmlElement
+    @Deprecated(forRemoval = true)
     public boolean isFastcash() {
         return fastcash;
     }
