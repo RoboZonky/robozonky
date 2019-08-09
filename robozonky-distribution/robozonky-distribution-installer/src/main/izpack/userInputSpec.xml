@@ -42,15 +42,18 @@
     <field type="check" variable="isEmailEnabled" summaryKey="Notifikovat e-mailem:">
       <spec txt="Notifikovat e-mailem." set="true"/>
     </field>
-    <field type="check" variable="showStonkyPanel" summaryKey="Integrace se Stonky povolena:">
-      <spec txt="Integrovat se Stonky ('Statistics for Zonky'). Vyžaduje Google účet." set="false"/>
-    </field>
     <field type="check" variable="isDryRun" summaryKey="Zkušební režim zapnut:">
       <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat a bude více logovat."
             set="${selectDryRunByDefault}"/>
     </field>
     <field type="check" variable="isJmxEnabled" summaryKey="Vzdálená správa povolena:">
       <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
+    </field>
+    <field type="check" variable="showStonkyPanel" summaryKey="Integrace se Stonky povolena:">
+      <spec txt="Integrovat se Stonky. Vyžaduje Google účet. (Zastaralé, bude odstraněno.)" set="false"/>
+    </field>
+    <field type="check" variable="showStonkyPanel" summaryKey="Integrace se Stonky povolena:">
+      <spec txt="Integrovat se Stonky ('Statistics for Zonky'). Vyžaduje Google účet." set="false"/>
     </field>
 
     <field type="space" />

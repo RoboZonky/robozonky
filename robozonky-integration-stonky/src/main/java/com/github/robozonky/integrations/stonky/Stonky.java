@@ -200,6 +200,7 @@ class Stonky implements Function<Tenant, Optional<String>> {
                             sessionInfo.getUsername());
                 return Optional.empty();
             }
+            LOGGER.warn("Stonky integration is deprecated and will eventually be removed. Please stop using it.");
             return Optional.ofNullable(run(tenant));
         } catch (final Exception ex) {
             LOGGER.warn("Failed integrating with Stonky.", ex);
