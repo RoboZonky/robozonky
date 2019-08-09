@@ -38,7 +38,6 @@ public abstract class BaseLoan extends BaseEntity {
     private boolean insuranceActive;
     private boolean additionallyInsured;
     private boolean multicash;
-    private boolean fastcash;
     private int id;
     private int termInMonths;
     private int investmentsCount;
@@ -157,12 +156,6 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public boolean isMulticash() {
         return multicash;
-    }
-
-    @XmlElement
-    @Deprecated(forRemoval = true)
-    public boolean isFastcash() {
-        return fastcash;
     }
 
     @XmlElement
