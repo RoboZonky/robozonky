@@ -36,6 +36,7 @@ public abstract class BaseLoan extends BaseEntity {
     private boolean published;
     private boolean questionsAllowed;
     private boolean insuranceActive;
+    private boolean additionallyInsured;
     private boolean multicash;
     private boolean fastcash;
     private int id;
@@ -223,9 +224,22 @@ public abstract class BaseLoan extends BaseEntity {
         return zonkyPlusAmount;
     }
 
+    /**
+     * @return True if the loan is insured at this very moment. Uninsured loans will have both this and
+     * {@link #isAdditionallyInsured()} return false.
+     */
     @XmlElement
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    /**
+     * @return If the loan is insured, but did not start this way. Uninsured loans will have both this and
+     * {@link #isInsuranceActive()} return false.
+     */
+    @XmlElement
+    public boolean isAdditionallyInsured() {
+        return additionallyInsured;
     }
 
     @XmlElement

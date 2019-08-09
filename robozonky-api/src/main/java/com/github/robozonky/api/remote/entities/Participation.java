@@ -39,7 +39,9 @@ public class Participation extends BaseEntity {
     private String loanName;
     private Purpose purpose;
     private Rating rating;
-    private boolean willExceedLoanInvestmentLimit, insuranceActive;
+    private boolean willExceedLoanInvestmentLimit;
+    private boolean insuranceActive;
+    private boolean additionallyInsured;
     private Object loanInvestments;
     private Currency currency;
 
@@ -123,9 +125,22 @@ public class Participation extends BaseEntity {
         return willExceedLoanInvestmentLimit;
     }
 
+    /**
+     * Semantics is identical to {@link BaseLoan#isInsuranceActive()} ()}.
+     * @return
+     */
     @XmlElement
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    /**
+     * Semantics is identical to {@link BaseLoan#isAdditionallyInsured()}.
+     * @return
+     */
+    @XmlElement
+    public boolean isAdditionallyInsured() {
+        return additionallyInsured;
     }
 
     @XmlElement
