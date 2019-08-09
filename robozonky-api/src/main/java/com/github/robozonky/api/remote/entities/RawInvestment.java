@@ -39,8 +39,14 @@ import com.github.robozonky.internal.test.DateUtil;
 public class RawInvestment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
-    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal, hasCollectionHistory, insuranceActive,
-            instalmentPostponement;
+    private boolean smpRelated;
+    private boolean onSmp;
+    private boolean canBeOffered;
+    private boolean inWithdrawal;
+    private boolean hasCollectionHistory;
+    private boolean insuranceActive;
+    private boolean additionallyInsured;
+    private boolean instalmentPostponement;
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
     private String loanName, nickname, firstName, surname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
@@ -291,9 +297,22 @@ public class RawInvestment extends BaseInvestment {
         return insuranceStatus;
     }
 
+    /**
+     * Semantics is identical to {@link BaseLoan#isInsuranceActive()} ()}.
+     * @return
+     */
     @XmlElement
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    /**
+     * Semantics is identical to {@link BaseLoan#isAdditionallyInsured()}.
+     * @return
+     */
+    @XmlElement
+    public boolean isAdditionallyInsured() {
+        return additionallyInsured;
     }
 
     @XmlElement
