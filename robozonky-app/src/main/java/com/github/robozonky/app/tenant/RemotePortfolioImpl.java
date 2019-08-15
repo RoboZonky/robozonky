@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
@@ -37,7 +36,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.sum;
 
 class RemotePortfolioImpl implements RemotePortfolio {
 
@@ -46,7 +44,6 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
             new AtomicReference<>(new LinkedHashMap<>(0));
     private final Reloadable<PortfolioOverview> portfolioOverview;
-    private final AtomicReference<BigDecimal> lastKnownBalance = new AtomicReference<>(BigDecimal.ZERO);
     private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
@@ -97,22 +94,6 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     RemoteData getRemotePortfolio() {
         return portfolio.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
-    }
-
-    @Override
-    public BigDecimal getBalance() {
-        final RemoteData data = getRemotePortfolio();
-        final BigDecimal balance = data.getWallet().getAvailableBalance();
-        final Stream<BigDecimal> blockedAmonts = syntheticByLoanId.get().values().stream()
-                .filter(s -> s.isValidInBalance(data))
-                .map(Blocked::getAmount);
-        final BigDecimal allBlocked = sum(blockedAmonts);
-        final BigDecimal result = balance.subtract(allBlocked);
-        final BigDecimal oldBalance = lastKnownBalance.getAndSet(result);
-        if (result.compareTo(oldBalance) != 0) { // prevent excessive logging
-            LOGGER.debug("New balance: {} CZK available, {} CZK synthetic, {} CZK total.", balance, allBlocked, result);
-        }
-        return result;
     }
 
     @Override

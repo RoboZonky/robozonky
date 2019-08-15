@@ -35,7 +35,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
@@ -91,14 +90,12 @@ import org.junit.jupiter.api.TestFactory;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static final RoboZonkyTestingEvent EVENT = OffsetDateTime::now;
-    private static final ExtendedPortfolioOverview MAX_PORTFOLIO = mockPortfolioOverview(Integer.MAX_VALUE);
+    private static final ExtendedPortfolioOverview MAX_PORTFOLIO = mockPortfolioOverview();
     private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,
@@ -145,7 +142,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     private static <T extends Event> void testTriggered(final AbstractTargetHandler h,
                                                         final AbstractListener<T> listener,
                                                         final T event) throws Exception {
-        BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
         verify(h, times(1)).send(eq(SESSION_INFO), notNull(), notNull(), notNull());
     }
@@ -242,9 +238,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.LOAN_DELINQUENT_60_PLUS, new MyLoanDelinquent60Plus(loan, i)),
                 forListener(SupportedListener.LOAN_DELINQUENT_90_PLUS, new MyLoanDelinquent90Plus(loan, i)),
                 forListener(SupportedListener.LOAN_REPAID, new MyLoanRepaidEvent(loan, i)),
-                forListener(SupportedListener.BALANCE_ON_TARGET, new MyExecutionStartedEvent(MAX_PORTFOLIO)),
-                forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
-                            new MyExecutionStartedEvent(mockPortfolioOverview(0))),
                 forListener(SupportedListener.WEEKLY_SUMMARY, new MyWeeklySummaryEvent()),
                 forListener(SupportedListener.DAEMON_FAILED, new MyRoboZonkyDaemonFailedEvent()),
                 forListener(SupportedListener.CRASHED, new MyRoboZonkyCrashedEvent()),
@@ -286,30 +279,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         String getTemplateFileName() {
             return "testing.ftl";
-        }
-    }
-
-    private static class MyExecutionStartedEvent implements ExecutionStartedEvent {
-
-        private final PortfolioOverview portfolioOverview;
-
-        public MyExecutionStartedEvent(final PortfolioOverview portfolioOverview) {
-            this.portfolioOverview = portfolioOverview;
-        }
-
-        @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
-        }
-
-        @Override
-        public PortfolioOverview getPortfolioOverview() {
-            return portfolioOverview;
-        }
-
-        @Override
-        public Collection<LoanDescriptor> getLoanDescriptors() {
-            return Collections.emptyList();
         }
     }
 

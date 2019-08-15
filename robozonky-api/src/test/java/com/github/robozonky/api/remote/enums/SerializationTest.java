@@ -43,12 +43,6 @@ class SerializationTest {
         assertThat(result).isSameAs(value);
     }
 
-    private static void deserialize(final Class<? extends Enum<?>> value) {
-        final ObjectMapper mapper = new ObjectMapper();
-        assertThatThrownBy(() -> mapper.readValue(String.valueOf(Integer.MAX_VALUE), value))
-                .isInstanceOf(RuntimeException.class);
-    }
-
     private static String deserializeTestName(final Enum<?> instance) {
         return instance.getClass().getSimpleName() + '.' + instance;
     }

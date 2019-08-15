@@ -49,11 +49,6 @@ class KeyStoreSecretProviderTest {
         }
     }
 
-    static KeyStoreSecretProvider newProvider() {
-        final KeyStoreHandler ksh = KeyStoreSecretProviderTest.getKeyStoreHandler();
-        return (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh);
-    }
-
     private static KeyStoreSecretProvider newProvider(final String username, final String password) {
         final KeyStoreHandler ksh = KeyStoreSecretProviderTest.getKeyStoreHandler();
         return (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh, username, password.toCharArray());

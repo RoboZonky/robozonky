@@ -31,7 +31,6 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class NaturalLanguageSellStrategyTest {
@@ -48,11 +47,11 @@ class NaturalLanguageSellStrategyTest {
         return new InvestmentDescriptor(investment, () -> l);
     }
 
-    private final Investment mockInvestment() {
+    private static Investment mockInvestment() {
         return mockInvestment(BigDecimal.TEN);
     }
 
-    private final Investment mockInvestment(final BigDecimal fee) {
+    private static Investment mockInvestment(final BigDecimal fee) {
         return Investment.custom()
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setSmpFee(fee)

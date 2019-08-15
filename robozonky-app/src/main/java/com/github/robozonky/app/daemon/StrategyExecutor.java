@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
@@ -40,7 +39,6 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(30);
     private final Logger logger = LogManager.getLogger(getClass());
     private final PowerTenant tenant;
-    private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
     private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
     private final OperationDescriptor<T, S> operationDescriptor;
 
@@ -57,18 +55,8 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         return new Purchasing(tenant);
     }
 
-    private static boolean isBiggerThan(final BigDecimal left, final BigDecimal right) {
-        return left.compareTo(right) > 0;
-    }
-
     private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
-        final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
-        final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
-        final boolean balanceChangedMeaningfully = isBiggerThan(currentBalance, lastCheckedBalance);
-        if (balanceChangedMeaningfully) {
-            logger.debug("Waking up due to a balance increase.");
-            return false;
-        } else if (marketplace.hasUpdates()) {
+        if (marketplace.hasUpdates()) {
             logger.debug("Waking up due to a change in marketplace.");
             return false;
         } else if (needsToForceMarketplaceCheck()) {
@@ -106,12 +94,6 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     private Collection<Investment> actuallyGet() {
         if (!operationDescriptor.isEnabled(tenant)) {
             logger.debug("Access to marketplace disabled by Zonky.");
-            return Collections.emptyList();
-        }
-        final BigDecimal currentBalance = tenant.getPortfolio().getBalance();
-        final BigDecimal minimum = operationDescriptor.getMinimumBalance(tenant);
-        if (isBiggerThan(minimum, currentBalance)) {
-            logger.debug("Asleep due to balance being at or below than minimum. ({} <= {})", currentBalance, minimum);
             return Collections.emptyList();
         }
         return operationDescriptor.getStrategy(tenant)

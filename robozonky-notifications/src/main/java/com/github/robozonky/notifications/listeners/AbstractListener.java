@@ -17,7 +17,6 @@
 package com.github.robozonky.notifications.listeners;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,7 +52,6 @@ import static java.util.Map.entry;
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
     protected final Logger logger = LogManager.getLogger(this.getClass());
-    final BalanceTracker balanceTracker;
     final DelinquencyTracker delinquencyTracker;
     private final AbstractTargetHandler handler;
     private final SupportedListener listener;
@@ -61,7 +59,6 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     protected AbstractListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         this.listener = listener;
         this.handler = handler;
-        this.balanceTracker = new BalanceTracker(handler.getTarget());
         this.delinquencyTracker = new DelinquencyTracker(handler.getTarget());
     }
 
@@ -72,10 +69,6 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
      * @param sessionInfo
      */
     protected void finish(final T event, final SessionInfo sessionInfo) {
-        if (event instanceof Financial) { // register balance
-            final BigDecimal balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
-            balanceTracker.setLastKnownBalance(sessionInfo, balance);
-        }
         if (event instanceof DelinquencyBased) {
             delinquencyTracker.setDelinquent(sessionInfo, ((DelinquencyBased) event).getInvestment());
         } else if (event instanceof LoanLostEvent || event instanceof LoanRepaidEvent ||

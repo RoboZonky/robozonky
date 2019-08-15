@@ -52,8 +52,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
@@ -106,7 +104,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void purchasingNoneAccepted() {
-        final Zonky zonky = harmlessZonky(9_000);
+        final Zonky zonky = harmlessZonky();
         final Loan loan = Loan.custom().setId(1).setAmount(200).build();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         final Participation mock = mock(Participation.class);
@@ -136,7 +134,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .setMyInvestment(mockMyInvestment())
                 .setDatePublished(OffsetDateTime.now())
                 .build();
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Participation mock = mock(Participation.class);
         when(mock.getId()).thenReturn(1L);
@@ -174,7 +172,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .setMyInvestment(mockMyInvestment())
                 .setDatePublished(OffsetDateTime.now())
                 .build();
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         doThrow(BadRequestException.class).when(zonky).purchase(any());
         final Participation mock = mock(Participation.class);
@@ -192,7 +190,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void purchasingNoItems() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final PowerTenant tenant = mockTenant(zonky);
         final PurchasingOperationDescriptor d = mockPurchasingOperationDescriptor();
         final StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> exec = new StrategyExecutor<>(tenant, d);
@@ -210,7 +208,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .setAmount(2)
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec = new StrategyExecutor<>(tenant, d);
@@ -222,7 +220,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingNoItems() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY));
         final Investor builder = Investor.build(tenant);
@@ -242,7 +240,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .setDatePublished(OffsetDateTime.now())
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky z = harmlessZonky(9000);
+        final Zonky z = harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_INVESTMENT_STRATEGY));
         final Investor builder = Investor.build(tenant);
@@ -260,7 +258,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .setNonReservedRemainingInvestment(20_000)
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final int loanId = loan.getId(); // will be random, to avoid problems with caching
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final PowerTenant tenant = mockTenant(z);
@@ -280,24 +278,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void doesNotInvestUnderBalance() {
-        final Loan loan = Loan.custom().build();
-        final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky zonky = harmlessZonky(1);
-        final PowerTenant tenant = mockTenant(zonky);
-        final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
-        doReturn(true).when(d).isEnabled(any());
-        doReturn(BigDecimal.ONE).when(d).getMinimumBalance(any());
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
-        assertThat(e.get()).isEmpty();
-        verify(d, never()).getOperation();
-        final List<Event> evt = getEventsRequested();
-        assertThat(evt).isEmpty();
-    }
-
-    @Test
     void doesNotInvestWhenDisabled() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final PowerTenant tenant = mockTenant(zonky);
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = mock(OperationDescriptor.class);
         when(d.isEnabled(any())).thenReturn(false);
@@ -313,7 +295,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     void forcesMarketplaceCheck() {
         final Instant now = Instant.now();
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Loan loan = Loan.custom()
                 .setDatePublished(DateUtil.offsetNow().minusMinutes(10)) // avoid CAPTCHA
                 .setRating(Rating.D)
@@ -326,12 +308,9 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = new InvestingOperationDescriptor(investor);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
-        verify(zonky, never()).getLastPublishedLoanInfo();
-        verify(zonky, times(1)).getAvailableLoans(any());
-        assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked
         verify(zonky, times(1)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
-        assertThat(e.get()).isEmpty(); // the third time, marketplace wasn't checked but the cache was
+        assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked but the cache was
         verify(zonky, times(2)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
         setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONE_ID));

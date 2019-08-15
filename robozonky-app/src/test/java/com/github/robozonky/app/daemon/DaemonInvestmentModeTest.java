@@ -31,7 +31,6 @@ import com.github.robozonky.internal.jobs.SimplePayload;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
@@ -42,7 +41,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void get() throws Exception {
-        final PowerTenant a = mockTenant(harmlessZonky(10_000), true);
+        final PowerTenant a = mockTenant(harmlessZonky(), true);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a, ONE_SECOND))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());

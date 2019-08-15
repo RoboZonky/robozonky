@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class DecisionsTest {

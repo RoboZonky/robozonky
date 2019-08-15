@@ -59,25 +59,12 @@ class NaturalLanguagePurchaseStrategyTest {
     }
 
     @Test
-    void unacceptablePortfolioDueToLowBalance() {
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
-        final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
-        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.ZERO);
-        when(portfolio.getCzkInvested()).thenReturn(BigDecimal.ZERO);
-        final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
-        assertThat(result).isEmpty();
-    }
-
-    @Test
     void unacceptablePortfolioDueToOverInvestment() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
         final ParsedStrategy p = new ParsedStrategy(v);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk()));
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
@@ -92,7 +79,6 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), w);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
@@ -104,7 +90,6 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation l = mockParticipation();
@@ -121,7 +106,6 @@ class NaturalLanguagePurchaseStrategyTest {
                                                     new FilterSupplier(v, null, Collections.emptySet()));
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation participation = mockParticipation();

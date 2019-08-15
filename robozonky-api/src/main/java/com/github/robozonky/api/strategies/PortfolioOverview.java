@@ -29,12 +29,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 public interface PortfolioOverview {
 
     /**
-     * Available balance in the wallet.
-     * @return Amount in CZK.
-     */
-    BigDecimal getCzkAvailable();
-
-    /**
      * Sum total of all amounts yet unpaid.
      * @return Amount in CZK.
      */

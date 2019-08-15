@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
@@ -82,7 +81,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
         final int loanId = transfer.getLoanId();
         final Loan loan = Loan.custom().setId(loanId).build();
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
                 .setPaymentStatus(PaymentStatus.OK)
@@ -99,7 +98,7 @@ class LoanRepaidProcessorTest extends AbstractZonkyLeveragingTest {
         final Transaction transfer = filteredTransfer(TransactionCategory.PAYMENT);
         final int loanId = transfer.getLoanId();
         final Loan loan = Loan.custom().setId(loanId).build();
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
                 .setPaymentStatus(PaymentStatus.PAID)

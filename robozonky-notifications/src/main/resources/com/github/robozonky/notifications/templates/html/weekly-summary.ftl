@@ -49,10 +49,6 @@ hodnotou.</small></p>
       <th style="padding: 5px; text-align: right;">${data.portfolio.totalSellableFeeless?string.currency}</th>
       <th style="padding: 5px; text-align: right;">(${data.portfolio.totalSellableFeelessShare?string.@interest})</th>
     </tr>
-    <tr>
-      <th style="padding: 5px; text-align: right;">Disponibilní zůstatek</th>
-      <td colspan="8" style="padding: 5px; text-align: right;">${data.portfolio.balance?string.currency}</td>
-    </tr>
   </tfoot>
   <tbody>
     <#list data.ratings as rating>

@@ -39,7 +39,7 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void freshAccessorEveryTimeButTheyShareState() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
         final Tenant t = mockTenant(z);
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();

@@ -34,53 +34,16 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
 
-    static Stream<Arguments> parameters() {
-        return Stream.of(
-            Arguments.arguments(0, 0, 2),
-            Arguments.arguments(0, 1, 2),
-            Arguments.arguments(0, 59, 2),
-            Arguments.arguments(1, 0, 2),
-            Arguments.arguments(1, 1, 2),
-            Arguments.arguments(1, 59, 2),
-            Arguments.arguments(2, 0, 2),
-            Arguments.arguments(2, 1, 2),
-            Arguments.arguments(2, 59, 2),
-            Arguments.arguments(7, 0, 7),
-            Arguments.arguments(7, 1, 7),
-            Arguments.arguments(7, 59, 7),
-            Arguments.arguments(8, 0, 11),
-            Arguments.arguments(8, 1, 11),
-            Arguments.arguments(8, 59, 11),
-            Arguments.arguments(9, 0, 11),
-            Arguments.arguments(9, 1, 11),
-            Arguments.arguments(9, 59, 11),
-            Arguments.arguments(10, 0, 11),
-            Arguments.arguments(10, 1, 11),
-            Arguments.arguments(10, 59, 11),
-            Arguments.arguments(11, 0, 11),
-            Arguments.arguments(11, 1, 11),
-            Arguments.arguments(11, 59, 11),
-            Arguments.arguments(22, 0, 22),
-            Arguments.arguments(22, 1, 22),
-            Arguments.arguments(22, 59, 22),
-            Arguments.arguments(23, 0, 2),
-            Arguments.arguments(23, 1, 2),
-            Arguments.arguments(23, 59, 2)
-        );
-    }
-
     @Test
     void throwsWhenRemoteFails() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         doThrow(IllegalStateException.class).when(zonky).getStatistics();
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
@@ -90,23 +53,12 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void balanceReflectsCharges() {
-        final Zonky zonky = harmlessZonky(10_000);
-        final Tenant tenant = mockTenant(zonky);
-        final RemotePortfolio p = new RemotePortfolioImpl(tenant);
-        assertThat(p.getBalance().intValue()).isEqualTo(10_000);
-        p.simulateCharge(1, Rating.D, BigDecimal.TEN);
-        assertThat(p.getBalance().intValue()).isEqualTo(9_990);
-    }
-
-    @Test
     void chargesAffectAmounts() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertThat(p.getTotal()).isEmpty();
         assertThat(p.getOverview().getCzkInvested()).isEqualTo(BigDecimal.ZERO);
-        assertThat(p.getOverview().getCzkAvailable()).isEqualTo(BigDecimal.valueOf(10_000));
         p.simulateCharge(1, Rating.D, BigDecimal.TEN);
         assertThat(p.getTotal()).containsOnlyKeys(Rating.D)
                 .containsValues(BigDecimal.TEN);
@@ -123,7 +75,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final BigDecimal firstAmount = BigDecimal.ONE;
         final Loan l = Loan.custom().setRating(Rating.D).build();
         final BlockedAmount original = new BlockedAmount(l.getId(), firstAmount);
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ONE));
@@ -168,7 +120,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final BigDecimal firstAmount = BigDecimal.ONE;
         final Loan l = Loan.custom().setRating(Rating.D).build();
         final BlockedAmount original = new BlockedAmount(l.getId(), firstAmount);
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.of(original));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ONE));

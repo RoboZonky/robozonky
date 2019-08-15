@@ -30,7 +30,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class LoanCacheTest extends AbstractZonkyLeveragingTest {
@@ -45,7 +44,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
                 .setId(loanId)
                 .setMyInvestment(mi)
                 .build();
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
         final Cache<Loan> c = Cache.forLoan(t);
         assertThat(c.getFromCache(loanId)).isEmpty(); // nothing returned at first
@@ -59,7 +58,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final Loan loan = Loan.custom().build();
         final int loanId = loan.getId();
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant t = mockTenant(z);
         final Cache<Loan> c = Cache.forLoan(t);
@@ -78,7 +77,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final Loan loan = Loan.custom().build();
         final int loanId = loan.getId();
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         doThrow(IllegalStateException.class).when(z).getLoan(eq(loanId));
         final Tenant t = mockTenant(z);
         final Cache<Loan> c = Cache.forLoan(t);

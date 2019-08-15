@@ -30,15 +30,13 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class UtilTest extends AbstractZonkyLeveragingTest {
 
    @Test
     void ignoresBlockedAmountsFromZonky() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final com.github.robozonky.api.remote.entities.BlockedAmount fee = new com.github.robozonky.api.remote.entities.BlockedAmount(BigDecimal.ONE);
         final Loan l = Loan.custom().setRating(Rating.D).build();
@@ -52,7 +50,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void handles404thrownByZonky() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final com.github.robozonky.api.remote.entities.BlockedAmount fee = new com.github.robozonky.api.remote.entities.BlockedAmount(BigDecimal.ONE);
         final com.github.robozonky.api.remote.entities.BlockedAmount forLoan = new com.github.robozonky.api.remote.entities.BlockedAmount(1, BigDecimal.TEN);
@@ -66,7 +64,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
     @Test
     void zonky404handlingGoesOver() {
         final Divisor d = new Divisor(2000); // to match 5 per mille
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final com.github.robozonky.api.remote.entities.BlockedAmount forLoan = new com.github.robozonky.api.remote.entities.BlockedAmount(1, BigDecimal.TEN);
         doThrow(new NotFoundException()).when(zonky).getLoan(anyInt());
@@ -78,7 +76,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
     @Test
     void zonky404handlingGoesUnder() {
         final Divisor d = new Divisor(2001); // to go slightly under 5 per mille
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final com.github.robozonky.api.remote.entities.BlockedAmount forLoan = new com.github.robozonky.api.remote.entities.BlockedAmount(1, BigDecimal.TEN);
         doThrow(new NotFoundException()).when(zonky).getLoan(anyInt());
@@ -90,13 +88,12 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final Loan loan = Loan.custom().setRating(Rating.D).build();
         final com.github.robozonky.api.remote.entities.BlockedAmount first = new com.github.robozonky.api.remote.entities.BlockedAmount(loan.getId(), BigDecimal.TEN);
         final com.github.robozonky.api.remote.entities.BlockedAmount second = new com.github.robozonky.api.remote.entities.BlockedAmount(loan.getId(), BigDecimal.ONE);
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         when(zonky.getBlockedAmounts()).thenReturn(Stream.of(first, second));
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ONE));
         final Tenant tenant = mockTenant(zonky);
         final RemoteData data = RemoteData.load(tenant);
-        final Blocked sumOfBoth = new Blocked(loan.getId(), first.getAmount().add(second.getAmount()), loan.getRating());
         assertThat(data.getBlocked()).containsOnly(Map.entry(Rating.D, BigDecimal.valueOf(11)));
     }
 

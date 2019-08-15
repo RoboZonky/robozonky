@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
@@ -74,7 +73,7 @@ class ParticipationSoldProcessorTest extends AbstractZonkyLeveragingTest {
         final Transaction transfer = new Transaction(loan, BigDecimal.TEN, TransactionCategory.SMP_SELL,
                                                      TransactionOrientation.IN);
         final int loanId = loan.getId();
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Investment investment = Investment.fresh(loan, transfer.getAmount())
                 .setPaymentStatus(PaymentStatus.PAID)

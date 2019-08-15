@@ -313,7 +313,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     void reservationAccepted() {
         final Loan l = Loan.custom().build();
         final Investment i = Investment.fresh(l, 200).build();
-        final ReservationAcceptedEvent e = EventFactory.reservationAccepted(i, l, mockPortfolioOverview(1000));
+        final ReservationAcceptedEvent e = EventFactory.reservationAccepted(i, l, mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();

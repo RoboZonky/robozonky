@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import com.github.robozonky.internal.tenant.Tenant;
@@ -29,8 +28,6 @@ interface OperationDescriptor<T, S> {
     Optional<S> getStrategy(final Tenant tenant);
 
     MarketplaceAccessor<T> newMarketplaceAccessor(final Tenant tenant);
-
-    BigDecimal getMinimumBalance(final Tenant tenant);
 
     long identify(final T descriptor);
 

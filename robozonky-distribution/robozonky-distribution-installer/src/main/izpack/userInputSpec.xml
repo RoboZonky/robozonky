@@ -167,9 +167,6 @@
     <field type="check" variable="isInvestmentNotificationEnabled" summaryKey="Nové investice a zdraví existujících:">
       <spec txt="Nové investice a zdraví existujících." set="false"/>
     </field>
-    <field type="check" variable="isBalanceOver200NotificationEnabled" summaryKey="Zůstatek přesáhl 200,- Kč:">
-      <spec txt="Zůstatek v peněžence přesáhl 200,- Kč." set="false"/>
-    </field>
     <field type="check" variable="isFailureNotificationEnabled" summaryKey="Notifikace o chybách:">
       <spec txt="Chyba RoboZonky, robot pravděpodobně pokračuje." set="false"/>
     </field>

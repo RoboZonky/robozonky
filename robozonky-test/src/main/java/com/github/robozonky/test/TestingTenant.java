@@ -43,7 +43,7 @@ public class TestingTenant implements Tenant {
     public TestingTenant(final SessionInfo sessionInfo, final Zonky zonky) {
         this.sessionInfo = sessionInfo;
         this.zonky = zonky;
-        this.portfolio = AbstractRoboZonkyTest.mockPortfolio(zonky);
+        this.portfolio = AbstractRoboZonkyTest.mockPortfolio();
     }
 
     @Override

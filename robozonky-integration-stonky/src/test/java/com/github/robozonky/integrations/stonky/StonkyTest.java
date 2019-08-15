@@ -39,7 +39,6 @@ import org.mockserver.model.HttpResponse;
 import org.mockserver.socket.PortFactory;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class StonkyTest extends AbstractRoboZonkyTest {

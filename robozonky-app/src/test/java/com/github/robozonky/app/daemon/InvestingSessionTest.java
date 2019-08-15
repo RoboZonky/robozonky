@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import javax.ws.rs.ServiceUnavailableException;
 
@@ -55,9 +54,13 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
                 .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
     }
 
+    private static Investor getInvestor(final Tenant auth) {
+        return Investor.build(auth);
+    }
+
     @Test
     void constructor() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final LoanDescriptor ld = mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
@@ -68,14 +71,10 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         });
     }
 
-    private Investor getInvestor(final Tenant auth) {
-        return Investor.build(auth);
-    }
-
     @Test
     void makeInvestment() {
         // setup APIs
-        final Zonky z = harmlessZonky(200);
+        final Zonky z = harmlessZonky();
         // run test
         final int amount = 200;
         final LoanDescriptor ld = mockLoanDescriptorWithoutCaptcha();
@@ -98,39 +97,8 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void underBalance() {
-        // setup APIs
-        final Zonky z = harmlessZonky(199);
-        final PowerTenant auth = mockTenant(z);
-        // run test
-        final InvestingSession it = new InvestingSession(Collections.emptySet(), getInvestor(auth), auth);
-        final Optional<RecommendedLoan> recommendation = mockLoanDescriptor()
-                .recommend(BigDecimal.valueOf(200));
-        final boolean result = it.invest(recommendation.get());
-        // verify result
-        assertThat(result).isFalse();
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).isEmpty();
-    }
-
-    @Test
-    void underAmount() {
-        final Zonky z = harmlessZonky(0);
-        final PowerTenant auth = mockTenant(z);
-        final RecommendedLoan recommendation =
-                mockLoanDescriptor().recommend(200).get();
-        final InvestingSession t = new InvestingSession(Collections.singleton(recommendation.descriptor()),
-                                                        getInvestor(auth), auth);
-        final boolean result = t.invest(recommendation);
-        // verify result
-        assertThat(result).isFalse();
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).isEmpty();
-    }
-
-    @Test
     void investmentFailed() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
         final Exception thrown = new ServiceUnavailableException();
@@ -142,10 +110,9 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentSuccessful() {
-        final int oldBalance = 10_000;
         final int amountToInvest = 200;
         final RecommendedLoan r = mockLoanDescriptor().recommend(amountToInvest).get();
-        final Zonky z = harmlessZonky(oldBalance);
+        final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(Either.right(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r));
@@ -165,9 +132,5 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
             softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentMadeEvent.class);
         });
-        // validate event contents
-        final InvestmentMadeEvent e = (InvestmentMadeEvent) newEvents.get(1);
-        assertThat(e.getPortfolioOverview().getCzkAvailable())
-                .isEqualTo(BigDecimal.valueOf(oldBalance - amountToInvest));
     }
 }

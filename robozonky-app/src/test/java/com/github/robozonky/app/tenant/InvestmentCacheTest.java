@@ -32,7 +32,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
@@ -45,7 +44,7 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final Loan loan = Loan.custom().build();
         final Investment investment = Investment.fresh(loan, 200).build();
         final int loanId = loan.getId();
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
         final Cache<Investment> c = Cache.forInvestment(t);
         assertThat(c.getFromCache(loanId)).isEmpty(); // nothing returned at first
@@ -60,7 +59,7 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final Loan loan = Loan.custom().build();
         final Investment investment = Investment.fresh(loan, 200).build();
         final int loanId = loan.getId();
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getInvestmentByLoanId(eq(loanId))).thenReturn(Optional.of(investment));
         final Tenant t = mockTenant(z);
         final Cache<Investment> c = Cache.forInvestment(t);
@@ -78,9 +77,8 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final Loan loan = Loan.custom().build();
-        final Investment investment = Investment.fresh(loan, 200).build();
         final int loanId = loan.getId();
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getInvestmentByLoanId(eq(loanId))).thenReturn(Optional.empty());
         final Tenant t = mockTenant(z);
         final Cache<Investment> c = Cache.forInvestment(t);

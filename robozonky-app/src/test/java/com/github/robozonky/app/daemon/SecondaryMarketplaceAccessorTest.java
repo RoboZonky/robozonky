@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
@@ -51,7 +50,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     void readsMarketplace() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final Tenant tenant = mockTenant(zonky);
         final MarketplaceAccessor<ParticipationDescriptor> d = new SecondaryMarketplaceAccessor(tenant,
@@ -68,7 +67,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     void hasUpdatesWhenCurrentAndPreviousEmpty() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final Tenant tenant = mockTenant(zonky);
         final AtomicReference<long[]> state = new AtomicReference<>(new long[0]);

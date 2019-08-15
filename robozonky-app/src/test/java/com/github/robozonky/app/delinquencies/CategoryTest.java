@@ -39,12 +39,11 @@ import static com.github.robozonky.app.delinquencies.Category.NEW;
 import static com.github.robozonky.app.delinquencies.Category.SEVERE;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class CategoryTest extends AbstractZonkyLeveragingTest {
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final Loan loan = Loan.custom().build();
     private final Investment investment = Investment.fresh(loan, 200).build();
 

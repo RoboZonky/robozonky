@@ -56,25 +56,12 @@ class NaturalLanguageReservationStrategyTest {
     }
 
     @Test
-    void unacceptablePortfolioDueToLowBalance() {
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
-        final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
-        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(p.getMinimumBalance() - 1));
-        final Stream<RecommendedReservation> result =
-                s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
-                            portfolio, new Restrictions());
-        assertThat(result).isEmpty();
-    }
-
-    @Test
     void unacceptablePortfolioDueToOverInvestment() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk()));
         final Stream<RecommendedReservation> result =
                 s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
@@ -88,7 +75,6 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         final Stream<RecommendedReservation> result =
                 s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
@@ -101,7 +87,6 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10_000));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Stream<RecommendedReservation> result =
@@ -115,7 +100,6 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(200));
         when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(p.getMaximumInvestmentSizeInCzk() - 1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Reservation l = mockReservation(200);

@@ -70,11 +70,6 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public BigDecimal getCzkAvailable() {
-        return parent.getCzkAvailable();
-    }
-
-    @Override
     public BigDecimal getCzkInvested() {
         return parent.getCzkInvested();
     }

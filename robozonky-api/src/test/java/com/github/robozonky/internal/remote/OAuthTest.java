@@ -25,7 +25,6 @@ import com.github.robozonky.api.remote.enums.OAuthScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class OAuthTest {

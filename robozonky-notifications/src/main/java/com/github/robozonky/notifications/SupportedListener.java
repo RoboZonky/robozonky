@@ -18,7 +18,6 @@ package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
@@ -42,8 +41,6 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.notifications.listeners.BalanceOnTargetEventListener;
-import com.github.robozonky.notifications.listeners.BalanceUnderMinimumEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentMadeEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentPurchasedEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentSkippedEventListener;
@@ -231,38 +228,6 @@ public enum SupportedListener {
         @Override
         public Class<? extends Event> getEventType() {
             return LoanRepaidEvent.class;
-        }
-    },
-    BALANCE_ON_TARGET {
-        @Override
-        public String getLabel() {
-            return "balanceTracker";
-        }
-
-        @Override
-        public Class<? extends Event> getEventType() {
-            return ExecutionStartedEvent.class;
-        }
-
-        @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new BalanceOnTargetEventListener(this, targetHandler);
-        }
-    },
-    BALANCE_UNDER_MINIMUM {
-        @Override
-        public String getLabel() {
-            return "balanceTracker";
-        }
-
-        @Override
-        public Class<? extends Event> getEventType() {
-            return ExecutionStartedEvent.class;
-        }
-
-        @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new BalanceUnderMinimumEventListener(this, targetHandler);
         }
     },
     WEEKLY_SUMMARY {

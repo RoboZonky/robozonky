@@ -33,14 +33,13 @@ import org.junit.jupiter.api.Test;
 import static com.github.robozonky.api.Ratio.fromPercentage;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class UtilTest extends AbstractRoboZonkyTest {
 
     private static PortfolioOverview preparePortfolio(final Number ratingA, final Number ratingB,
                                                       final Number ratingC) {
-        final PortfolioOverview portfolioOverview = mockPortfolioOverview(10_000);
+        final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getShareOnInvestment(eq(Rating.A))).thenReturn(fromPercentage(ratingA));
         when(portfolioOverview.getShareOnInvestment(eq(Rating.B))).thenReturn(fromPercentage(ratingB));
         when(portfolioOverview.getShareOnInvestment(eq(Rating.C))).thenReturn(fromPercentage(ratingC));
@@ -103,9 +102,8 @@ class UtilTest extends AbstractRoboZonkyTest {
     @Test
     void acceptable() {
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMinimumBalance()).thenReturn(999l);
         when(s.getMaximumInvestmentSizeInCzk()).thenReturn(1000l);
-        final PortfolioOverview p = mockPortfolioOverview(1_000);
+        final PortfolioOverview p = mockPortfolioOverview();
         when(p.getCzkInvested()).thenReturn(BigDecimal.valueOf(999));
         assertThat(Util.isAcceptable(s, p)).isTrue();
     }
@@ -113,18 +111,10 @@ class UtilTest extends AbstractRoboZonkyTest {
     @Test
     void unacceptableDueToCeiling() {
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMinimumBalance()).thenReturn(0l);
         when(s.getMaximumInvestmentSizeInCzk()).thenReturn(10_000l);
-        final PortfolioOverview p = mockPortfolioOverview(10_000);
+        final PortfolioOverview p = mockPortfolioOverview();
         when(p.getCzkInvested()).thenReturn(BigDecimal.valueOf(10_000));
         assertThat(Util.isAcceptable(s, p)).isFalse();
     }
 
-    @Test
-    void unacceptableDueToLowBalance() {
-        final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMinimumBalance()).thenReturn(1000l);
-        final PortfolioOverview p = mockPortfolioOverview(1000);
-        assertThat(Util.isAcceptable(s, p)).isFalse();
-    }
 }
