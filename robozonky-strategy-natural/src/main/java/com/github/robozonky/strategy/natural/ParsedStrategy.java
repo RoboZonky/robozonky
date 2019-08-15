@@ -102,10 +102,6 @@ class ParsedStrategy {
                                   .sum());
     }
 
-    public long getMinimumBalance() {
-        return defaults.getMinimumBalance();
-    }
-
     public int getMinimumInvestmentShareInPercent() {
         return defaults.getInvestmentShare().getMinimumShareInPercent();
     }

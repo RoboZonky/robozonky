@@ -28,7 +28,6 @@ class DefaultValues {
     private ReservationMode reservationMode = null;
     private SellingMode sellingMode = null;
     private long targetPortfolioSize = Long.MAX_VALUE;
-    private long minimumBalance = 0;
     private InvestmentSize investmentSize = new InvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private ExitProperties exitProperties;
@@ -55,14 +54,6 @@ class DefaultValues {
 
     public void setSellingMode(final SellingMode sellingMode) {
         this.sellingMode = sellingMode;
-    }
-
-    public long getMinimumBalance() {
-        return minimumBalance;
-    }
-
-    public void setMinimumBalance(final long minimumBalance) {
-        this.minimumBalance = minimumBalance;
     }
 
     public void setExitProperties(final ExitProperties properties) {
@@ -122,7 +113,6 @@ class DefaultValues {
                 "portfolio=" + portfolio +
                 ",reservationMode=" + reservationMode +
                 ", targetPortfolioSize=" + targetPortfolioSize +
-                ", minimumBalance=" + minimumBalance +
                 ", investmentSize=" + investmentSize +
                 ", investmentShare=" + investmentShare +
                 ", exitProperties=" + exitProperties +

@@ -102,7 +102,6 @@ class UtilTest extends AbstractRoboZonkyTest {
     @Test
     void acceptable() {
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMinimumBalance()).thenReturn(999l);
         when(s.getMaximumInvestmentSizeInCzk()).thenReturn(1000l);
         final PortfolioOverview p = mockPortfolioOverview();
         when(p.getCzkInvested()).thenReturn(BigDecimal.valueOf(999));
@@ -112,18 +111,10 @@ class UtilTest extends AbstractRoboZonkyTest {
     @Test
     void unacceptableDueToCeiling() {
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMinimumBalance()).thenReturn(0l);
         when(s.getMaximumInvestmentSizeInCzk()).thenReturn(10_000l);
         final PortfolioOverview p = mockPortfolioOverview();
         when(p.getCzkInvested()).thenReturn(BigDecimal.valueOf(10_000));
         assertThat(Util.isAcceptable(s, p)).isFalse();
     }
 
-    @Test
-    void unacceptableDueToLowBalance() {
-        final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMinimumBalance()).thenReturn(1000l);
-        final PortfolioOverview p = mockPortfolioOverview();
-        assertThat(Util.isAcceptable(s, p)).isFalse();
-    }
 }

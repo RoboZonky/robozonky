@@ -107,7 +107,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final RecommendedLoan r = result.get(0);
         assertSoftly(softly -> {
             softly.assertThat(r.descriptor()).isEqualTo(ld);
-            softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(200));
+            softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(20_000)); // maximum allowed investment
         });
     }
 }

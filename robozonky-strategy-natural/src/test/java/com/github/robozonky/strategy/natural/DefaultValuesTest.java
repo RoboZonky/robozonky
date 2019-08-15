@@ -40,15 +40,6 @@ class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
     }
 
     @Test
-    void setMinimumBalance() {
-        final DefaultPortfolio p = DefaultPortfolio.BALANCED;
-        final DefaultValues sut = new DefaultValues(p);
-        assertThat(sut.getMinimumBalance()).isEqualTo(0);
-        sut.setMinimumBalance(400);
-        assertThat(sut.getMinimumBalance()).isEqualTo(400);
-    }
-
-    @Test
     void setTargetPortfolioSize() {
         final DefaultPortfolio p = DefaultPortfolio.PROGRESSIVE;
         final DefaultValues sut = new DefaultValues(p);

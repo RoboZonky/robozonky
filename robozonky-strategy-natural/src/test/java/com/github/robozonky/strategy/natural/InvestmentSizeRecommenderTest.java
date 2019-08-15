@@ -59,13 +59,6 @@ class InvestmentSizeRecommenderTest {
         final int actualInvestment = r.apply(loan, restrictions);
         // at most 1 percent of 50000, rounded down to nearest increment of 200
         assertThat(actualInvestment).isEqualTo(400);
-
-        // with balance less that the recommendation, recommend less than 400 but more than 0; 200 only possible
-        final int investmentOnLowBalance = r.apply(loan, restrictions);
-        assertThat(investmentOnLowBalance).isEqualTo(actualInvestment - restrictions.getInvestmentStep());
-        // with no balance, don't make a recommendation
-        final int investmentOnNoBalance = r.apply(loan, restrictions);
-        assertThat(investmentOnNoBalance).isEqualTo(0);
     }
 
     @Test
@@ -74,12 +67,9 @@ class InvestmentSizeRecommenderTest {
         final ParsedStrategy s = getStrategy();
         final Loan l = mockLoan(100_000);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
-        // with unlimited balance, make maximum possible recommendation
+        // make maximum possible recommendation
         final int actualInvestment = r.apply(l, restrictions);
         assertThat(actualInvestment).isEqualTo(MAXIMUM_INVESTMENT);
-        // with balance less that the recommendation, go just under maximum
-        final int investmentOnLowBalance = r.apply(l, restrictions);
-        assertThat(investmentOnLowBalance).isEqualTo(MAXIMUM_INVESTMENT - restrictions.getInvestmentStep());
     }
 
     @Test
@@ -91,19 +81,6 @@ class InvestmentSizeRecommenderTest {
         // with unlimited balance, make maximum possible recommendation
         final int actualInvestment = r.apply(l, restrictions);
         assertThat(actualInvestment).isEqualTo(0);
-    }
-
-    @Test
-    void minimumOverBalance() {
-        final Loan l = mockLoan(100_000);
-        final ParsedStrategy s = mock(ParsedStrategy.class);
-        final int minimumInvestment = 1000;
-        when(s.getMinimumInvestmentSizeInCzk(eq(l.getRating()))).thenReturn(minimumInvestment);
-        when(s.getMaximumInvestmentSizeInCzk(eq(l.getRating())))
-                .thenReturn(minimumInvestment * 2);
-        when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
-        final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
-        assertThat(r.apply(l, new Restrictions())).isEqualTo(0);
     }
 
     @Test
