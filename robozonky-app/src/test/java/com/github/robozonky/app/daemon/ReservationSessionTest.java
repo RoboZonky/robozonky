@@ -19,11 +19,8 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -35,11 +32,9 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
-import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class ReservationSessionTest extends AbstractZonkyLeveragingTest {
@@ -58,27 +53,6 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final PowerTenant auth = mockTenant(z);
         final Collection<Investment> i = ReservationSession.process(auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
-    }
-
-    @Test
-    void underBalance() {
-        final Reservation p = mockReservation();
-        final Loan l = Loan.custom().build();
-        final ReservationStrategy s = mock(ReservationStrategy.class);
-        final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Zonky z = harmlessZonky();
-        final PowerTenant auth = mockTenant(z);
-        final Collection<Investment> i = ReservationSession.process(auth, Collections.singleton(pd), s);
-        assertSoftly(softly -> {
-            softly.assertThat(i).isEmpty();
-            softly.assertThat(getEventsRequested()).has(new Condition<List<? extends Event>>() {
-                @Override
-                public boolean matches(final List<? extends Event> events) {
-                    return events.stream().noneMatch(e -> e instanceof ReservationAcceptationRecommendedEvent);
-                }
-            });
-        });
-        verify(s, never()).recommend(any(), any(), any());
     }
 
     @Test

@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -52,11 +51,6 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     @Override
     public MarketplaceAccessor<LoanDescriptor> newMarketplaceAccessor(final Tenant tenant) {
         return new PrimaryMarketplaceAccessor(tenant, lastChecked::getAndSet);
-    }
-
-    @Override
-    public BigDecimal getMinimumBalance(final Tenant tenant) {
-        return BigDecimal.valueOf(tenant.getRestrictions().getMinimumInvestmentAmount());
     }
 
     @Override

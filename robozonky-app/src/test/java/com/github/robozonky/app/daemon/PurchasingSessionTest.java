@@ -19,11 +19,8 @@ package com.github.robozonky.app.daemon;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -34,11 +31,9 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
-import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
@@ -49,34 +44,6 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final PowerTenant auth = mockTenant(z);
         final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
-    }
-
-    @Test
-    void underBalance() {
-        final Participation p = mock(Participation.class);
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
-        final Loan l = Loan.custom().build();
-        final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any()))
-                .thenAnswer(i -> {
-                    final Collection<ParticipationDescriptor> participations = i.getArgument(0);
-                    return participations.stream()
-                            .map(ParticipationDescriptor::recommend)
-                            .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
-                });
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Zonky z = harmlessZonky();
-        final PowerTenant auth = mockTenant(z);
-        final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
-        assertSoftly(softly -> {
-            softly.assertThat(i).isEmpty();
-            softly.assertThat(getEventsRequested()).has(new Condition<List<? extends Event>>() {
-                @Override
-                public boolean matches(final List<? extends Event> events) {
-                    return events.stream().noneMatch(e -> e instanceof PurchaseRequestedEvent);
-                }
-            });
-        });
     }
 
     @Test

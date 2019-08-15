@@ -98,21 +98,18 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final Reservation simple = Reservation.custom().setId(1).setMyReservation(mockMyReservation()).build();
         final Reservation withInvestment = Reservation.custom().setId(2).setMyReservation(mockMyReservation()).build();
-        final Reservation simple2 = Reservation.custom().setId(3).setMyReservation(mockMyReservation()).build();
         final MyInvestment i = mockMyInvestment();
         final Loan loanWithInvestment = Loan.custom().setMyInvestment(i).build();
         when(z.getLoan(eq(simple.getId()))).thenReturn(Loan.custom().build());
-        when(z.getLoan(eq(simple2.getId()))).thenReturn(Loan.custom().build());
         when(z.getLoan(eq(withInvestment.getId()))).thenReturn(loanWithInvestment);
         when(z.getReservationPreferences()).thenReturn(new ReservationPreferences(SOME_PREFERENCE));
-        when(z.getPendingReservations()).thenReturn(Stream.of(withInvestment, simple, simple2));
+        when(z.getPendingReservations()).thenReturn(Stream.of(withInvestment, simple));
         final Tenant t = mockTenant(z, false);
         when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final TenantPayload p = new ReservationsProcessing();
         p.accept(t);
         verify(z).accept(eq(simple));
         verify(z, never()).accept(eq(withInvestment)); // already had investment
-        verify(z, never()).accept(eq(simple2)); // was under balance by then
         assertThat(getEventsRequested()).hasSize(4);
     }
 

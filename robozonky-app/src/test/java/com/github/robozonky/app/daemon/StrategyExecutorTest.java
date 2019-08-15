@@ -278,22 +278,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void doesNotInvestUnderBalance() {
-        final Loan loan = Loan.custom().build();
-        final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky zonky = harmlessZonky();
-        final PowerTenant tenant = mockTenant(zonky);
-        final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
-        doReturn(true).when(d).isEnabled(any());
-        doReturn(BigDecimal.ONE).when(d).getMinimumBalance(any());
-        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
-        assertThat(e.get()).isEmpty();
-        verify(d, never()).getOperation();
-        final List<Event> evt = getEventsRequested();
-        assertThat(evt).isEmpty();
-    }
-
-    @Test
     void doesNotInvestWhenDisabled() {
         final Zonky zonky = harmlessZonky();
         final PowerTenant tenant = mockTenant(zonky);
@@ -324,12 +308,9 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = new InvestingOperationDescriptor(investor);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
-        verify(zonky, never()).getLastPublishedLoanInfo();
-        verify(zonky, times(1)).getAvailableLoans(any());
-        assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked
         verify(zonky, times(1)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
-        assertThat(e.get()).isEmpty(); // the third time, marketplace wasn't checked but the cache was
+        assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked but the cache was
         verify(zonky, times(2)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
         setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONE_ID));

@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import javax.ws.rs.ServiceUnavailableException;
 
@@ -55,6 +54,10 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
                 .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
     }
 
+    private static Investor getInvestor(final Tenant auth) {
+        return Investor.build(auth);
+    }
+
     @Test
     void constructor() {
         final Zonky z = harmlessZonky();
@@ -66,10 +69,6 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(it.getAvailable()).containsExactly(ld);
             softly.assertThat(it.getResult()).isEmpty();
         });
-    }
-
-    private Investor getInvestor(final Tenant auth) {
-        return Investor.build(auth);
     }
 
     @Test
@@ -95,37 +94,6 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(newEvents.get(3)).isInstanceOf(InvestmentMadeEvent.class);
             softly.assertThat(newEvents.get(4)).isInstanceOf(ExecutionCompletedEvent.class);
         });
-    }
-
-    @Test
-    void underBalance() {
-        // setup APIs
-        final Zonky z = harmlessZonky();
-        final PowerTenant auth = mockTenant(z);
-        // run test
-        final InvestingSession it = new InvestingSession(Collections.emptySet(), getInvestor(auth), auth);
-        final Optional<RecommendedLoan> recommendation = mockLoanDescriptor()
-                .recommend(BigDecimal.valueOf(200));
-        final boolean result = it.invest(recommendation.get());
-        // verify result
-        assertThat(result).isFalse();
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).isEmpty();
-    }
-
-    @Test
-    void underAmount() {
-        final Zonky z = harmlessZonky();
-        final PowerTenant auth = mockTenant(z);
-        final RecommendedLoan recommendation =
-                mockLoanDescriptor().recommend(200).get();
-        final InvestingSession t = new InvestingSession(Collections.singleton(recommendation.descriptor()),
-                                                        getInvestor(auth), auth);
-        final boolean result = t.invest(recommendation);
-        // verify result
-        assertThat(result).isFalse();
-        final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).isEmpty();
     }
 
     @Test

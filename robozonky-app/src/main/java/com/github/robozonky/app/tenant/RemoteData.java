@@ -18,11 +18,9 @@ package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.Map;
 
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -30,19 +28,15 @@ import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.isZero;
-
 final class RemoteData {
 
     private static final Logger LOGGER = LogManager.getLogger(RemoteData.class);
 
-    private final Wallet wallet;
     private final Statistics statistics;
     private final Map<Rating, BigDecimal> blocked;
     private final OffsetDateTime retrievedOn = DateUtil.offsetNow();
 
-    private RemoteData(final Wallet wallet, final Statistics statistics, final Map<Rating, BigDecimal> blocked) {
-        this.wallet = wallet;
+    private RemoteData(final Statistics statistics, final Map<Rating, BigDecimal> blocked) {
         this.statistics = statistics;
         this.blocked = blocked;
     }
@@ -50,21 +44,13 @@ final class RemoteData {
     public static RemoteData load(final Tenant tenant) {
         LOGGER.debug("Loading the latest Zonky portfolio information.");
         final Statistics statistics = tenant.call(Zonky::getStatistics);
-        final Wallet wallet = tenant.call(Zonky::getWallet);
-        // save one Zonky request in case we know there are no blocked amounts
-        final Map<Rating, BigDecimal> blocked = isZero(wallet.getBlockedBalance()) ?
-                Collections.emptyMap() :
-                Collections.unmodifiableMap(Util.getAmountsBlocked(tenant, statistics));
+        final Map<Rating, BigDecimal> blocked = Util.getAmountsBlocked(tenant, statistics);
         LOGGER.debug("Finished.");
-        return new RemoteData(wallet, statistics, blocked);
+        return new RemoteData(statistics, blocked);
     }
 
     public OffsetDateTime getRetrievedOn() {
         return retrievedOn;
-    }
-
-    public Wallet getWallet() {
-        return wallet;
     }
 
     public Statistics getStatistics() {
@@ -81,7 +67,6 @@ final class RemoteData {
                 "blocked=" + blocked +
                 ", retrievedOn=" + retrievedOn +
                 ", statistics=" + statistics +
-                ", wallet=" + wallet +
                 '}';
     }
 }

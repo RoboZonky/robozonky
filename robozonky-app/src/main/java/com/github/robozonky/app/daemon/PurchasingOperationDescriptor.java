@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -43,11 +42,6 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     @Override
     public MarketplaceAccessor<ParticipationDescriptor> newMarketplaceAccessor(final Tenant tenant) {
         return new SecondaryMarketplaceAccessor(tenant, lastChecked::getAndSet, this::identify);
-    }
-
-    @Override
-    public BigDecimal getMinimumBalance(final Tenant tenant) {
-        return BigDecimal.ONE;
     }
 
     @Override
