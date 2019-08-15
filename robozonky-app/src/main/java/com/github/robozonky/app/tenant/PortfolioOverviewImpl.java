@@ -38,30 +38,22 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
 
     private final ZonedDateTime timestamp = DateUtil.zonedNow();
     private final Ratio profitability;
-    private final BigDecimal czkAvailable;
     private final BigDecimal czkInvested;
     private final Map<Rating, BigDecimal> czkInvestedPerRating;
 
     PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
-        this(impl.getBalance(), impl.getTotal(),
+        this(impl.getTotal(),
              impl.getRemotePortfolio().getStatistics().getProfitability().orElse(Ratio.ZERO));
     }
 
-    PortfolioOverviewImpl(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
-                          final Ratio profitability) {
+    PortfolioOverviewImpl(final Map<Rating, BigDecimal> czkInvestedPerRating, final Ratio profitability) {
         this.profitability = profitability;
-        this.czkAvailable = czkAvailable;
         this.czkInvested = sum(czkInvestedPerRating.values());
         if (isZero(this.czkInvested)) {
             this.czkInvestedPerRating = Collections.emptyMap();
         } else {
             this.czkInvestedPerRating = czkInvestedPerRating;
         }
-    }
-
-    @Override
-    public BigDecimal getCzkAvailable() {
-        return this.czkAvailable;
     }
 
     @Override
@@ -135,8 +127,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     @Override
     public String toString() {
         return "PortfolioOverviewImpl{" +
-                "czkAvailable=" + czkAvailable +
-                ", czkInvested=" + czkInvested +
+                "czkInvested=" + czkInvested +
                 ", czkInvestedPerRating=" + czkInvestedPerRating +
                 ", profitability=" + profitability +
                 ", timestamp=" + timestamp +

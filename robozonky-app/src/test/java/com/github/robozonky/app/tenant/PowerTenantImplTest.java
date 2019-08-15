@@ -44,7 +44,6 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
@@ -69,7 +68,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void closesWithTokens() {
         final OAuth a = mock(OAuth.class);
         when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build()) {
             final Statistics s = tenant.call(Zonky::getStatistics);
@@ -118,7 +117,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void getters() throws Exception {
         final OAuth a = mock(OAuth.class);
         when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final Loan l = Loan.custom().setId(1).build();
         final Investment i = Investment.fresh(l, 200).build();
         when(z.getLoan(eq(1))).thenReturn(l);
@@ -139,7 +138,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void fires() throws Exception {
         final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             tenant.fire(roboZonkyDaemonFailed(new IllegalStateException()));
@@ -152,11 +151,11 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void firesLazy() throws Exception {
         final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
-                                                                    mockPortfolioOverview(10_000))))
+                                                                    mockPortfolioOverview())))
                     .run();
         }
         assertThat(this.getEventsRequested())

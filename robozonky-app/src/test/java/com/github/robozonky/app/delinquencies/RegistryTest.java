@@ -27,12 +27,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.assumeThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class RegistryTest extends AbstractRoboZonkyTest {
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final Tenant tenant = mockTenant(zonky);
     private final Investment i = Investment.custom().build();
 

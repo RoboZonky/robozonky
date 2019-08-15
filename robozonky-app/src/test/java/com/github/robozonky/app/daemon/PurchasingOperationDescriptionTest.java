@@ -45,7 +45,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     void freshAccessorEveryTimeButTheyShareState() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getAvailableParticipations(any())).thenAnswer(i -> Stream.of(p));
         final Tenant t = mockTenant(z);
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();

@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class LifecycleTest extends AbstractEventLeveragingTest {
@@ -84,7 +83,6 @@ class LifecycleTest extends AbstractEventLeveragingTest {
     @Test
     void suspendAndResumeToFail() throws InterruptedException {
         assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNull();
-        final MainControl mc = mock(MainControl.class);
         final CountDownLatch cdl = mock(CountDownLatch.class);
         doThrow(InterruptedException.class).when(cdl).await();
         final Lifecycle c = new Lifecycle(cdl, new ShutdownHook());

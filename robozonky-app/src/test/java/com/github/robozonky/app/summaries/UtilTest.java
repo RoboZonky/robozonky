@@ -50,7 +50,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final RiskPortfolio r = new RiskPortfolio(i.getRating(), 0, 0, i.getRemainingPrincipal().longValue());
         when(stats.getRiskPortfolio()).thenReturn(Collections.singletonList(r));
         when(stats.getCurrentOverview()).thenReturn(mock(CurrentOverview.class));
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getStatistics()).thenReturn(stats);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i));
         final Tenant tenant = mockTenant(zonky);
@@ -71,7 +71,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
                 .setRemainingPrincipal(BigDecimal.ONE)
                 .setSmpFee(BigDecimal.ZERO)
                 .build();
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getInvestments((Select)any())).thenReturn(Stream.of(i, i2));
         final Tenant tenant = mockTenant(zonky);
         final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> result = Util.getAmountsSellable(tenant);

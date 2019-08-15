@@ -25,7 +25,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.*;
 
 class PaginatedApiImplTest<S, T> {

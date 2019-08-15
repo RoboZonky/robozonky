@@ -19,11 +19,6 @@ targetPortfolioSizeExpression returns [long result] :
     {$result = $maximumInvestmentInCzk.result;}
 ;
 
-targetBalanceExpression returns [long result] :
-    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=longExpr KC DOT
-    {$result = $balance.result;}
-;
-
 interestCondition returns [MarketplaceFilterCondition result]:
     'úrok ' (
         (c1 = interestConditionRangeOpen { $result = $c1.result; })

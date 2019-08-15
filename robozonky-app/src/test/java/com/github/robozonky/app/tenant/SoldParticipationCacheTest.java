@@ -27,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.*;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
@@ -59,7 +58,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void retrieves() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final Investment i1 = Investment.custom().setLoanId(2).build();
         when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));

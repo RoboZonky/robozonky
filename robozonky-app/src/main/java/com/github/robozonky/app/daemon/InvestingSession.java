@@ -80,9 +80,8 @@ final class InvestingSession {
                                                 final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, investor, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
-        final long balance = portfolioOverview.getCzkAvailable().longValue();
         s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
-        if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !s.getAvailable().isEmpty()) {
+        if (!s.getAvailable().isEmpty()) {
             final Event event = new InvestingSessionJfrEvent();
             try {
                 event.begin();
@@ -148,11 +147,6 @@ final class InvestingSession {
         LOGGER.debug("Will attempt to invest in {}.", recommendation);
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
-        if (tenant.getPortfolio().getBalance().compareTo(recommendation.amount()) < 0) {
-            // should not be allowed by the calling code
-            LOGGER.debug("Balance was less than recommendation.");
-            return false;
-        }
         tenant.fire(investmentRequested(recommendation));
         final Either<Exception, BigDecimal> response = investor.invest(recommendation);
         LOGGER.debug("Response for loan {}: {}.", loanId, response);

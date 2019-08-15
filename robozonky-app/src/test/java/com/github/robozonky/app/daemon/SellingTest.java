@@ -69,7 +69,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final PowerTenant tenant = mockTenant(zonky);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         new Selling().accept(tenant);
@@ -88,7 +88,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .setId(1)
                 .build();
         final Investment i = mockInvestment(loan);
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         final PowerTenant tenant = mockTenant(zonky);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_STRATEGY));
@@ -107,7 +107,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .setId(1)
                 .build();
         final Investment i = mockInvestment(loan);
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
         final PowerTenant tenant = mockTenant(zonky, isDryRun);

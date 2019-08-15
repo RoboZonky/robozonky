@@ -32,7 +32,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
@@ -48,7 +47,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
                 .setRating(Rating.A)
                 .setNonReservedRemainingInvestment(1)
                 .build();
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableLoans(any())).thenReturn(Stream.of(alreadyInvested, normal));
         final Tenant tenant = mockTenant(zonky);
         final MarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant, UnaryOperator.identity());
@@ -61,7 +60,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void detectsUpdates() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
         final Tenant t = mockTenant(z);
         final AtomicReference<LastPublishedLoan> state = new AtomicReference<>(null);
@@ -72,7 +71,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void failsDetection() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getLastPublishedLoanInfo()).thenThrow(IllegalStateException.class);
         final Tenant t = mockTenant(z);
         final AtomicReference<LastPublishedLoan> state = new AtomicReference<>(null);

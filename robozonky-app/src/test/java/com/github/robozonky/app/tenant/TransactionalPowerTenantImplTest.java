@@ -45,14 +45,13 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static com.github.robozonky.app.tenant.PowerTenant.transactional;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
     private final TransactionalPowerTenant transactional = transactional(tenant);
 
@@ -114,7 +113,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void fires() throws Exception {
         final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         final TransactionalPowerTenant t = transactional(new TenantBuilder()
                                                                  .withApi(api)
@@ -135,12 +134,12 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void firesLazy() throws Exception {
         final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
         try (final TransactionalPowerTenant t = transactional(tenant)) {
             final Runnable f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
-                                                                                  mockPortfolioOverview(10_000))));
+                                                                                  mockPortfolioOverview())));
             t.commit();
             f.run();
         }
@@ -152,7 +151,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void failsWhenEventUncommitted() throws Exception {
         final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
         try (final TransactionalPowerTenant t = transactional(tenant)) {
@@ -168,7 +167,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void doesNotFailOnNoop() throws Exception {
         final OAuth a = mock(OAuth.class);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
                                                                       .withApi(api)

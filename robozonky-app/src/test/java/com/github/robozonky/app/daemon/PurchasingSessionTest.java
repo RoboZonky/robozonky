@@ -45,7 +45,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void empty() {
-        final Zonky z = harmlessZonky(0);
+        final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
@@ -65,7 +65,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Zonky z = harmlessZonky(0);
+        final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
         assertSoftly(softly -> {
@@ -98,7 +98,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                     .map(ParticipationDescriptor::recommend)
                     .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
         });
-        final Zonky z = harmlessZonky(100_000);
+        final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);

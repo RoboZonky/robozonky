@@ -70,7 +70,7 @@ class InvestmentSizeRecommender {
         return new int[]{minimumInvestment, maximumInvestment};
     }
 
-    public Integer apply(final MarketplaceLoan loan, final Integer balance, final Restrictions restrictions) {
+    public Integer apply(final MarketplaceLoan loan, final Restrictions restrictions) {
         final int id = loan.getId();
         final int[] recommended = getInvestmentBounds(strategy, loan, restrictions);
         final int minimumRecommendation = recommended[0];
@@ -79,14 +79,11 @@ class InvestmentSizeRecommender {
                                       minimumRecommendation, maximumRecommendation));
         // round to nearest lower increment
         final int loanRemaining = loan.getNonReservedRemainingInvestment();
-        if (minimumRecommendation > balance) {
-            Decisions.report(l -> l.debug("Not recommending loan #{} due to minimum over balance.", id));
-            return 0;
-        } else if (minimumRecommendation > loanRemaining) {
+        if (minimumRecommendation > loanRemaining) {
             Decisions.report(l -> l.debug("Not recommending loan #{} due to minimum over remaining.", id));
             return 0;
         }
-        final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
+        final int recommendedAmount = Math.min(maximumRecommendation, loanRemaining);
         final int r = roundToNearestIncrement(recommendedAmount, restrictions.getInvestmentStep());
         if (r < minimumRecommendation) {
             Decisions.report(l -> l.debug("Not recommending loan #{} due to recommendation below minimum.", id));

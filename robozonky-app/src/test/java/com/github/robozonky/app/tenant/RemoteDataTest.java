@@ -27,7 +27,7 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void getters() {
-        final Zonky zonky = harmlessZonky(10_000);
+        final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final RemoteData data = RemoteData.load(tenant);
         assertThat(data.getWallet()).isNotNull();

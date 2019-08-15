@@ -69,7 +69,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noStrategy() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
         final TenantPayload p = new ReservationsPreferences();
         p.accept(t);
@@ -78,7 +78,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void disabled() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(WRONG_STRATEGY));
         final TenantPayload p = new ReservationsPreferences();
@@ -88,7 +88,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void enable() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getReservationPreferences()).thenReturn(new ReservationPreferences()); // disabled
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(CORRECT_STRATEGY));
@@ -100,7 +100,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void enabledAndDoesNotNeedChanging() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getReservationPreferences()).thenReturn(ReservationPreferences.TOTAL.get());
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(CORRECT_STRATEGY));
@@ -113,7 +113,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
     @Test
     void enabledAndNeedsChanging() {
         final ReservationPreference rp = new ReservationPreference(LoanTermInterval.FROM_0_TO_12, Rating.AAAAA, false);
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getReservationPreferences()).thenReturn(new ReservationPreferences(rp));
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(CORRECT_STRATEGY));

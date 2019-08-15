@@ -88,9 +88,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
     }
 
     private Stream<ParticipationDescriptor> readMarketplace() {
-        final long balance = tenant.getPortfolio().getBalance().longValue();
         final Select s = new Select()
-                .lessThanOrEquals("remainingPrincipal", balance)
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))

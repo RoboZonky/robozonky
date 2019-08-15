@@ -54,7 +54,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void empty() {
-        final Zonky z = harmlessZonky(0);
+        final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final Collection<Investment> i = ReservationSession.process(auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
@@ -66,7 +66,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final Loan l = Loan.custom().build();
         final ReservationStrategy s = mock(ReservationStrategy.class);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Zonky z = harmlessZonky(0);
+        final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final Collection<Investment> i = ReservationSession.process(auth, Collections.singleton(pd), s);
         assertSoftly(softly -> {
@@ -99,7 +99,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
                             .map(r -> r.recommend(BigDecimal.valueOf(200)))
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final Zonky z = harmlessZonky(100_000);
+        final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
@@ -129,7 +129,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
                             .map(r -> r.recommend(BigDecimal.valueOf(200)))
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final Zonky z = harmlessZonky(100_000);
+        final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
@@ -159,7 +159,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
                             .map(r -> r.recommend(BigDecimal.valueOf(200)))
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final Zonky z = harmlessZonky(100_000);
+        final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         doThrow(IllegalStateException.class).when(z).accept(any());
         final PowerTenant auth = mockTenant(z, false);

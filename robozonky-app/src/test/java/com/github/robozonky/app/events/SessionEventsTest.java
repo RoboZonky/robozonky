@@ -32,12 +32,11 @@ import com.github.robozonky.internal.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class SessionEventsTest extends AbstractEventLeveragingTest {
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky, false);
     private final PowerTenant tenantDry = mockTenant(zonky, true);
 
@@ -71,7 +70,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @Test
     void callsListeners() {
         final ExecutionCompletedEvent s =
-                EventFactory.executionCompleted(Collections.emptyList(), mockPortfolioOverview(10_000));
+                EventFactory.executionCompleted(Collections.emptyList(), mockPortfolioOverview());
         final SessionEvents events = Events.forSession(tenant);
         final EventFiringListener e = mock(EventFiringListener.class);
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
@@ -88,7 +87,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @Test
     void callsListenersOnError() {
         final ExecutionCompletedEvent s =
-                EventFactory.executionCompleted(Collections.emptyList(), mockPortfolioOverview(10_000));
+                EventFactory.executionCompleted(Collections.emptyList(), mockPortfolioOverview());
         final SessionEvents events = Events.forSession(tenant);
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         doThrow(IllegalStateException.class).when(l).handle(any(), any());

@@ -15,7 +15,6 @@ defaultExpression returns [DefaultValues result]:
  (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
  (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
  (s=defaultInvestmentShareExpression { $result.setInvestmentShare($s.result); })?
- (b=targetBalanceExpression { $result.setMinimumBalance($b.result); })?
 ;
 
 portfolioExpression returns [DefaultPortfolio result] :

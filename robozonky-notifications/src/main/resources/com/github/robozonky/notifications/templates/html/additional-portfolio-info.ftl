@@ -11,10 +11,6 @@
       <th style="padding: 5px; text-align: right;">Celkem</th>
       <td colspan="2" style="padding: 5px; text-align: right;">${data.portfolio.total?string.currency}</td>
     </tr>
-    <tr>
-      <th style="padding: 5px; text-align: right;">Disponibilní zůstatek</th>
-      <td colspan="2" style="padding: 5px; text-align: right;">${data.portfolio.balance?string.currency}</td>
-    </tr>
   </tfoot>
   <tbody>
     <#list data.ratings as rating>

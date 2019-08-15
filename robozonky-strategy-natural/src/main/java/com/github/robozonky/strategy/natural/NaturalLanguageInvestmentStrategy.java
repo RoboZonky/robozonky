@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -52,13 +51,12 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         final Map<Rating, List<LoanDescriptor>> splitByRating =
                 Util.sortByRating(strategy.getApplicableLoans(available, portfolio), d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
-        final BigDecimal balance = portfolio.getCzkAvailable();
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
                 .flatMap(d -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = recommender.apply(d.item(), balance.intValue(), restrictions);
+                    final int recommendedAmount = recommender.apply(d.item(), restrictions);
                     if (recommendedAmount > 0) {
                         return d.recommend(recommendedAmount).stream();
                     } else {

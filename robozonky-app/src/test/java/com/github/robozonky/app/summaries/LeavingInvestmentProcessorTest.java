@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 
 class LeavingInvestmentProcessorTest extends AbstractZonkyLeveragingTest {
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
 
     @Test

@@ -30,7 +30,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.internal.async.Tasks;
@@ -44,8 +43,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.stubbing.Answer;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 /**
@@ -58,10 +55,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
                                                                  false),
             SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
 
-    protected static Zonky harmlessZonky(final int availableBalance) {
+    protected static Zonky harmlessZonky() {
         final Zonky zonky = mock(Zonky.class);
-        final BigDecimal balance = BigDecimal.valueOf(availableBalance);
-        when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
         when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
@@ -70,7 +65,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         return zonky;
     }
 
-    public static RemotePortfolio mockPortfolio(final Zonky zonky) {
+    public static RemotePortfolio mockPortfolio() {
         final AtomicReference<BigDecimal> change = new AtomicReference<>(BigDecimal.ZERO);
         final RemotePortfolio p = mock(RemotePortfolio.class);
         doAnswer(i -> {
@@ -78,9 +73,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
             change.updateAndGet(old -> old.add(amount));
             return null;
         }).when(p).simulateCharge(anyInt(), any(), any());
-        final Supplier<BigDecimal> balance = () -> zonky.getWallet().getBalance().subtract(change.get());
-        when(p.getBalance()).thenAnswer(i -> balance.get());
-        when(p.getOverview()).thenAnswer(i -> mockPortfolioOverview(balance.get().intValue()));
+        when(p.getOverview()).thenAnswer(i -> mockPortfolioOverview());
         return p;
     }
 
@@ -94,7 +87,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     protected static Tenant mockTenant() {
-        return mockTenant(harmlessZonky(10_000));
+        return mockTenant(harmlessZonky());
     }
 
     protected static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
@@ -122,9 +115,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         SystemProperties.INSTANCE.save();
     }
 
-    protected static ExtendedPortfolioOverview mockPortfolioOverview(final int balance) {
+    protected static ExtendedPortfolioOverview mockPortfolioOverview() {
         final ExtendedPortfolioOverview po = mock(ExtendedPortfolioOverview.class);
-        when(po.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance));
         when(po.getCzkInvested()).thenReturn(BigDecimal.ZERO);
         when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
         when(po.getCzkAtRisk()).thenReturn(BigDecimal.ZERO);
@@ -148,10 +140,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(po.getOptimalAnnualProfitability()).thenReturn(Ratio.ONE);
         when(po.getTimestamp()).thenReturn(ZonedDateTime.now());
         return po;
-    }
-
-    protected static ExtendedPortfolioOverview mockPortfolioOverview() {
-        return mockPortfolioOverview(0);
     }
 
     @AfterEach

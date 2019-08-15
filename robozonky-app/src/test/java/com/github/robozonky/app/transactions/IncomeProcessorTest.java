@@ -36,13 +36,11 @@ import com.github.robozonky.internal.state.TenantState;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class IncomeProcessorTest extends AbstractZonkyLeveragingTest {
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
     private final IncomeProcessor processor = new IncomeProcessor();
     private final InstanceState<IncomeProcessor> state =

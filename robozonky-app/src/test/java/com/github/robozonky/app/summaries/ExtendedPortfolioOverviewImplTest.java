@@ -33,13 +33,12 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void delegating() {
-        final PortfolioOverview portfolioOverview = mockPortfolioOverview(10_000);
+        final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         final ExtendedPortfolioOverview tested = ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
                                                                                       Collections.emptyMap(),
                                                                                       Collections.emptyMap(),
                                                                                       Collections.emptyMap());
         assertSoftly(softly -> {
-            softly.assertThat(tested.getCzkAvailable()).isEqualTo(BigDecimal.valueOf(10_000));
             softly.assertThat(tested.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(tested.getCzkInvested(Rating.A)).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(tested.getShareOnInvestment(Rating.A)).isEqualTo(Ratio.ZERO);
@@ -54,7 +53,7 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void risk() {
-        final PortfolioOverview portfolioOverview = mockPortfolioOverview(10_000);
+        final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getCzkInvested(eq(Rating.A))).thenReturn(BigDecimal.TEN);
         when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.TEN);
         final ExtendedPortfolioOverview tested =
@@ -74,7 +73,7 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void sellable() {
-        final PortfolioOverview portfolioOverview = mockPortfolioOverview(10_000);
+        final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getCzkInvested(eq(Rating.A))).thenReturn(BigDecimal.TEN);
         when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.TEN);
         final ExtendedPortfolioOverview tested =
@@ -94,7 +93,7 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void sellableFeeless() {
-        final PortfolioOverview portfolioOverview = mockPortfolioOverview(10_000);
+        final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getCzkInvested(eq(Rating.A))).thenReturn(BigDecimal.TEN);
         when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.TEN);
         final ExtendedPortfolioOverview tested =

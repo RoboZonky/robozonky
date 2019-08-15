@@ -35,16 +35,14 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void timestamp() {
-        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.TEN, Collections.emptyMap(), Ratio.ZERO);
+        final PortfolioOverview po = new PortfolioOverviewImpl(Collections.emptyMap(), Ratio.ZERO);
         assertThat(po.getTimestamp()).isBeforeOrEqualTo(ZonedDateTime.now());
     }
 
     @Test
     void emptyPortfolio() {
-        final BigDecimal balance = BigDecimal.TEN;
-        final PortfolioOverview po = new PortfolioOverviewImpl(balance, Collections.emptyMap(), Ratio.ZERO);
+        final PortfolioOverview po = new PortfolioOverviewImpl(Collections.emptyMap(), Ratio.ZERO);
         assertSoftly(softly -> {
-            softly.assertThat(po.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
             for (final Rating r : Rating.values()) {
                 softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(BigDecimal.ZERO);
@@ -57,11 +55,10 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void profitability() {
-        final BigDecimal balance = BigDecimal.TEN;
         final Map<Rating, BigDecimal> investments = new EnumMap<>(Rating.class);
         investments.put(Rating.AAAAA, BigDecimal.valueOf(200_000));
         investments.put(Rating.D, BigDecimal.valueOf(20_000));
-        final PortfolioOverview po = new PortfolioOverviewImpl(balance, investments, Ratio.fromPercentage(4));
+        final PortfolioOverview po = new PortfolioOverviewImpl(investments, Ratio.fromPercentage(4));
         assertSoftly(softly -> {
             // the values tested against have been calculated manually and are guaranteed correct
             softly.assertThat(po.getAnnualProfitability()).isEqualTo(Ratio.fromPercentage(4));
@@ -79,9 +76,8 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final BigDecimal adj = BigDecimal.TEN;
         final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
-        final PortfolioOverview po = new PortfolioOverviewImpl(BigDecimal.ZERO, in, Ratio.ZERO);
+        final PortfolioOverview po = new PortfolioOverviewImpl(in, Ratio.ZERO);
         assertSoftly(softly -> {
-            softly.assertThat(po.getCzkAvailable()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(po.getCzkInvested()).isEqualTo(adj);
             for (final Rating r : Rating.values()) {
                 final BigDecimal expectedAbsolute = r == Rating.D ? adj : BigDecimal.ZERO;

@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -48,7 +47,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         return new int[]{minimumInvestment, maximumInvestment};
     }
 
-    boolean sizeMatchesStrategy(final Participation participation, final BigDecimal balance) {
+    boolean sizeMatchesStrategy(final Participation participation) {
         final int id = participation.getLoanId();
         final long participationId = participation.getId();
         final int[] recommended = getRecommendationBoundaries(participation);
@@ -58,10 +57,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                                                 participationId, minimumRecommendation, maximumRecommendation));
         // round to nearest lower increment
         final double price = participation.getRemainingPrincipal().doubleValue();
-        if (balance.doubleValue() < price) {
-            Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; over balance.",
-                                                    id, participationId));
-        } else if (minimumRecommendation > price) {
+        if (minimumRecommendation > price) {
             Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; below minimum.",
                                                     id, participationId));
         } else if (price > maximumRecommendation) {
@@ -89,7 +85,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
-                .filter(d -> sizeMatchesStrategy(d.item(), portfolio.getCzkAvailable()))
+                .filter(d -> sizeMatchesStrategy(d.item()))
                 .flatMap(d -> d.recommend().map(Stream::of).orElse(Stream.empty()));
     }
 }

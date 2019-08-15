@@ -74,7 +74,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noStrategy() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
         final TenantPayload p = new ReservationsProcessing();
         p.accept(t);
@@ -83,7 +83,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void disabledOnline() {
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         when(z.getReservationPreferences()).thenReturn(new ReservationPreferences()); // disabled by default
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
@@ -95,7 +95,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void enabled() {
-        final Zonky z = harmlessZonky(399);
+        final Zonky z = harmlessZonky();
         final Reservation simple = Reservation.custom().setId(1).setMyReservation(mockMyReservation()).build();
         final Reservation withInvestment = Reservation.custom().setId(2).setMyReservation(mockMyReservation()).build();
         final Reservation simple2 = Reservation.custom().setId(3).setMyReservation(mockMyReservation()).build();
@@ -118,7 +118,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void skipsInvestmentsProperly() { // simulate skipping investments by introducing one of them twice
-        final Zonky z = harmlessZonky(599);
+        final Zonky z = harmlessZonky();
         final Reservation simple = Reservation.custom().setId(1).setMyReservation(mockMyReservation()).build();
         final Reservation simple2 = Reservation.custom().setId(2).setMyReservation(mockMyReservation()).build();
         when(z.getLoan(eq(simple.getId()))).thenReturn(Loan.custom().build());

@@ -113,7 +113,6 @@ final class Util {
                 entry("absoluteShare", perRating(portfolioOverview::getCzkInvested)),
                 entry("relativeShare", perRating(portfolioOverview::getShareOnInvestment)),
                 entry("total", portfolioOverview.getCzkInvested()),
-                entry("balance", portfolioOverview.getCzkAvailable()),
                 entry("profitability", portfolioOverview.getAnnualProfitability()),
                 entry("monthlyProfit", portfolioOverview.getCzkMonthlyProfit()),
                 entry("minimalProfitability", portfolioOverview.getMinimalAnnualProfitability()),

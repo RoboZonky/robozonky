@@ -38,8 +38,6 @@ import static java.util.stream.Collectors.toList;
 
 final class Util {
 
-    private static final BigDecimal ONE_HUNDRED = BigDecimal.TEN.pow(2);
-
     private Util() {
         // no instances
     }
@@ -77,11 +75,6 @@ final class Util {
     }
 
     static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
-        final long balance = portfolio.getCzkAvailable().longValue();
-        if (balance < strategy.getMinimumBalance()) {
-            Decisions.report(logger -> logger.debug("Not recommending any loans due to balance under minimum."));
-            return false;
-        }
         final long invested = portfolio.getCzkInvested().longValue();
         final long investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
         if (invested >= investmentCeiling) {

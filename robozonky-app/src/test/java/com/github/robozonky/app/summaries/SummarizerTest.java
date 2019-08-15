@@ -38,12 +38,11 @@ import static org.mockito.Mockito.*;
 
 class SummarizerTest extends AbstractZonkyLeveragingTest {
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
 
     @Test
     void basics() {
-        final AbstractTransactionProcessor<CashFlow> p = new CashFlowProcessor();
         final Collection<Transaction> transactions = new HashSet<>();
         final Transaction transaction0 = new Transaction(0, BigDecimal.ZERO, TransactionCategory.PAYMENT);
         transactions.add(transaction0);

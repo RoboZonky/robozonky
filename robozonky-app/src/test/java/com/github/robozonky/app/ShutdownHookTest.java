@@ -23,7 +23,6 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class ShutdownHookTest extends AbstractRoboZonkyTest {

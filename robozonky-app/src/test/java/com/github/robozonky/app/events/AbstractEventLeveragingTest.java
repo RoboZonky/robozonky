@@ -40,7 +40,7 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     private final MyEventFiringListener listener = new MyEventFiringListener();
 
     protected static PowerTenant mockTenant() {
-        return mockTenant(harmlessZonky(10_000));
+        return mockTenant(harmlessZonky());
     }
 
     protected static PowerTenant mockTenant(final Zonky zonky) {

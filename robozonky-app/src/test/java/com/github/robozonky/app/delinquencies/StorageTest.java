@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 class StorageTest extends AbstractRoboZonkyTest {
 
-    private final Zonky zonky = harmlessZonky(10_000);
+    private final Zonky zonky = harmlessZonky();
     private final Tenant tenant = mockTenant(zonky);
 
     @Test

@@ -28,8 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class TenantBuilderTest extends AbstractZonkyLeveragingTest {
@@ -38,7 +36,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
     void apiProvided() {
         final OAuth o = mock(OAuth.class);
         when(o.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky();
         final ApiProvider a = mockApiProvider(o, z);
         final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
         final Tenant t = new TenantBuilder()

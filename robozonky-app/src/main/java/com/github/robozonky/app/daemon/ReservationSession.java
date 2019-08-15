@@ -63,9 +63,8 @@ final class ReservationSession {
                                                  final ReservationStrategy strategy) {
         final ReservationSession s = new ReservationSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
-        final long balance = portfolioOverview.getCzkAvailable().longValue();
         s.tenant.fire(reservationCheckStarted(loans, portfolioOverview));
-        if (balance >= tenant.getRestrictions().getMinimumInvestmentAmount() && !s.getAvailable().isEmpty()) {
+        if (!s.getAvailable().isEmpty()) {
             s.process(strategy);
         }
         // make sure we get fresh portfolio reference here
@@ -77,7 +76,6 @@ final class ReservationSession {
         boolean invested;
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
-                    .filter(r -> tenant.getPortfolio().getBalance().compareTo(r.amount()) >= 0)
                     .peek(r -> tenant.fire(reservationAcceptationRecommended(r)))
                     .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);
