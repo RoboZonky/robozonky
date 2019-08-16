@@ -30,6 +30,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.remote.FailureType;
 import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.control.Either;
 import jdk.jfr.Event;
@@ -133,7 +134,7 @@ final class InvestingSession {
         return true;
     }
 
-    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation) {
+    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation, final FailureType failureType) {
         tenant.fire(investmentSkipped(recommendation));
         return false;
     }
@@ -148,9 +149,9 @@ final class InvestingSession {
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
         tenant.fire(investmentRequested(recommendation));
-        final Either<Exception, BigDecimal> response = investor.invest(recommendation);
+        final Either<FailureType, BigDecimal> response = investor.invest(recommendation);
         LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        return response.fold(__ -> unsuccessfulInvestment(recommendation),
+        return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
                              amount -> successfulInvestment(recommendation, amount));
     }
 

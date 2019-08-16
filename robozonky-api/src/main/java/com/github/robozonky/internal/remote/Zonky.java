@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.CollectionsApi;
@@ -126,9 +127,20 @@ public class Zonky {
         });
     }
 
-    public void invest(final Investment investment) {
+    /**
+     *
+     * @param investment
+     * @return Success or one of known investment failures.
+     * @throws Exception Non-investment related failures, such as expired authentication.
+     */
+    public Result invest(final Investment investment) {
         LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
-        controlApi.run(api -> api.invest(new RawInvestment(investment)));
+        try {
+            controlApi.run(api -> api.invest(new RawInvestment(investment)));
+            return Result.success();
+        } catch (final ClientErrorException ex) {
+            return Result.failure(ex);
+        }
     }
 
     public void cancel(final Investment investment) {
