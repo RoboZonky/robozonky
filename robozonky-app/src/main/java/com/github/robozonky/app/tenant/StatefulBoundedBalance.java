@@ -52,9 +52,10 @@ final class StatefulBoundedBalance {
     }
 
     public synchronized void set(final long value) {
-        currentValue.set(value);
+        final long newValue = Math.max(1, value); // if < 1, the multiplication in get() does not increase balance
+        currentValue.set(newValue);
         lastModificationDate.set(DateUtil.now());
-        state.update(m -> m.put(VALUE_KEY, Long.toString(value)));
+        state.update(m -> m.put(VALUE_KEY, Long.toString(newValue)));
     }
 
     public synchronized long get() {
@@ -73,8 +74,12 @@ final class StatefulBoundedBalance {
         final long nanosPeriod = BALANCE_INCREASE_INTERVAL_STEP.toNanos();
         final long nanosBetween = timeBetweenLastBalanceCheckAndNow.toNanos();
         final long elapsedCycles = nanosBetween / nanosPeriod;
+        if (elapsedCycles > 4) {
+            LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
+            return Long.MAX_VALUE;
+        }
         final long newBalance = balance * 2 * elapsedCycles;
-        LOGGER.trace("Changing balance upper bound from {} to {} CZK", balance, newBalance);
+        LOGGER.trace("Changing balance upper bound from {} to {} CZK.", balance, newBalance);
         return newBalance;
     }
 }

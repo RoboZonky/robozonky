@@ -64,6 +64,11 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
+    public long getMinimumBalance(final Tenant tenant) {
+        return tenant.getRestrictions().getMinimumInvestmentAmount();
+    }
+
+    @Override
     public Event newJfrEvent() {
         return new PrimaryMarketplaceJfrEvent();
     }

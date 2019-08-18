@@ -33,6 +33,8 @@ interface OperationDescriptor<T, S> {
 
     Operation<T, S> getOperation();
 
+    long getMinimumBalance(final Tenant tenant);
+
     Event newJfrEvent();
 
 }
