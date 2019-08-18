@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class StatefulBoundBalance extends AbstractRoboZonkyTest {
+class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
 
     private final Tenant tenant = mockTenant();
 
