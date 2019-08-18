@@ -26,7 +26,7 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public enum FailureType implements Predicate<ClientErrorException> {
+public enum InvestmentFailureType implements Predicate<ClientErrorException> {
 
     CAPTCHA_REQUIRED("CAPTCHA_REQUIRED"),
     INSUFFICIENT_BALANCE("insufficientBalance"),
@@ -38,20 +38,20 @@ public enum FailureType implements Predicate<ClientErrorException> {
     ALREADY_COVERED("alreadyCovered"),
     UNKNOWN(NotFoundException.class);
 
-    private static final Logger LOGGER = LogManager.getLogger(FailureType.class);
+    private static final Logger LOGGER = LogManager.getLogger(InvestmentFailureType.class);
     private final String reason;
     private final Class<? extends ClientErrorException> expectedException;
 
-    FailureType(final String reason, final Class<? extends ClientErrorException> expectedException) {
+    InvestmentFailureType(final String reason, final Class<? extends ClientErrorException> expectedException) {
         this.reason = reason;
         this.expectedException = expectedException;
     }
 
-    FailureType(final Class<? extends ClientErrorException> expectedException) {
+    InvestmentFailureType(final Class<? extends ClientErrorException> expectedException) {
         this(null, expectedException);
     }
 
-    FailureType(final String reason) {
+    InvestmentFailureType(final String reason) {
         this(reason, BadRequestException.class);
     }
 

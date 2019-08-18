@@ -24,38 +24,38 @@ import org.assertj.core.api.SoftAssertions;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.internal.remote.FailureType.INSUFFICIENT_BALANCE;
-import static com.github.robozonky.internal.remote.FailureType.UNKNOWN;
+import static com.github.robozonky.internal.remote.InvestmentFailureType.INSUFFICIENT_BALANCE;
+import static com.github.robozonky.internal.remote.InvestmentFailureType.UNKNOWN;
 import static org.assertj.core.api.Assertions.*;
 
-class ResultTest {
+class InvestmentResultTest {
 
     @Test
     void success() {
-        final Result result = Result.success();
+        final InvestmentResult result = InvestmentResult.success();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.isSuccess()).isTrue();
             softly.assertThat(result.getFailureType()).isEmpty();
             softly.assertThat(result).isEqualTo(result);
-            softly.assertThat(result).isSameAs(Result.success());
+            softly.assertThat(result).isSameAs(InvestmentResult.success());
         });
     }
 
     @Test
     void sameCauseEquals() {
-        assertThat(Result.failure(new BadRequestException())).isEqualTo(Result.failure(new BadRequestException()));
+        assertThat(InvestmentResult.failure(new BadRequestException())).isEqualTo(InvestmentResult.failure(new BadRequestException()));
     }
 
     @Test
     void nullException() {
-        assertThat(Result.failure(null))
+        assertThat(InvestmentResult.failure(null))
                 .matches(r -> !r.isSuccess())
                 .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == UNKNOWN);
     }
 
     @Test
     void unknownException() {
-        assertThat(Result.failure(new ClientErrorException(410)))
+        assertThat(InvestmentResult.failure(new ClientErrorException(410)))
                 .matches(r -> !r.isSuccess())
                 .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == UNKNOWN);
     }
@@ -66,7 +66,7 @@ class ResultTest {
                 .status(400)
                 .build();
         final ClientErrorException ex = new BadRequestException(response);
-        assertThat(Result.failure(ex))
+        assertThat(InvestmentResult.failure(ex))
                 .matches(r -> !r.isSuccess())
                 .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == UNKNOWN);
     }
@@ -78,7 +78,7 @@ class ResultTest {
                 .entity(INSUFFICIENT_BALANCE.getReason().get())
                 .build();
         final ClientErrorException ex = new BadRequestException(response);
-        assertThat(Result.failure(ex))
+        assertThat(InvestmentResult.failure(ex))
                 .matches(r -> !r.isSuccess())
                 .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == INSUFFICIENT_BALANCE);
     }

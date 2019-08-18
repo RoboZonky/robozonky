@@ -16,40 +16,36 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import javax.ws.rs.ClientErrorException;
 
-public final class Result {
+abstract class Result<T extends Predicate<ClientErrorException>> {
 
-    private static final Result SUCCESS = new Result();
-    private final FailureType failureType;
+    private final T failureType;
 
-    private Result() {
+    protected Result() {
         this.failureType = null;
     }
 
-    private Result(final FailureType type) {
-        this.failureType = type;
-    }
-
-    public static Result success() {
-        return SUCCESS;
-    }
-
-    public static Result failure(final ClientErrorException ex) {
+    protected Result(final ClientErrorException ex) {
         if (ex == null) {
-            return new Result(FailureType.UNKNOWN);
+            this.failureType = getForUnknown();
+        } else {
+            this.failureType = getAll()
+                    .filter(f -> f.test(ex))
+                    .findFirst()
+                    .orElse(getForUnknown());
         }
-        final FailureType failure = Arrays.stream(FailureType.values())
-                .filter(f -> f.test(ex))
-                .findFirst()
-                .orElse(FailureType.UNKNOWN);
-        return new Result(failure);
     }
 
-    public Optional<FailureType> getFailureType() {
+    protected abstract T getForUnknown();
+
+    protected abstract Stream<T> getAll();
+
+    public Optional<T> getFailureType() {
         return Optional.ofNullable(failureType);
     }
 
@@ -65,8 +61,8 @@ public final class Result {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final Result result = (Result) o;
-        return failureType == result.failureType;
+        final Result<T> result = (Result<T>) o;
+        return Objects.equals(failureType, result.failureType);
     }
 
     @Override

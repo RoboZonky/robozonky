@@ -133,13 +133,13 @@ public class Zonky {
      * @return Success or one of known investment failures.
      * @throws Exception Non-investment related failures, such as expired authentication.
      */
-    public Result invest(final Investment investment) {
+    public InvestmentResult invest(final Investment investment) {
         LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
         try {
             controlApi.run(api -> api.invest(new RawInvestment(investment)));
-            return Result.success();
+            return InvestmentResult.success();
         } catch (final ClientErrorException ex) {
-            return Result.failure(ex);
+            return InvestmentResult.failure(ex);
         }
     }
 
