@@ -16,8 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.function.Consumer;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,15 +23,12 @@ import org.apache.logging.log4j.Logger;
  * The purpose of this class is so that all possible reasons for a strategy to reject/accept a loan are properly logged
  * using the same logger. This will help find these messages in the usually very long logs.
  */
-final class Decisions {
+final class Audit {
 
-    private static final Logger LOGGER = LogManager.getLogger(Decisions.class);
+    static final Logger LOGGER = LogManager.getLogger(Audit.class);
 
-    private Decisions() {
+    private Audit() {
         // no instances
     }
 
-    public static void report(final Consumer<Logger> log) {
-        log.accept(LOGGER);
-    }
 }

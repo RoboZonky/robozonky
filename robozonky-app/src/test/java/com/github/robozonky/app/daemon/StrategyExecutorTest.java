@@ -50,6 +50,7 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.test.DateUtil;
+import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -311,6 +312,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final PowerTenant tenant = mockTenant(zonky);
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = mock(OperationDescriptor.class);
+        when(d.getLogger()).thenReturn(LogManager.getLogger());
         when(d.isEnabled(any())).thenReturn(false);
         when(d.newJfrEvent()).thenReturn(new TestingEvent());
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);

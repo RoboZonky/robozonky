@@ -29,6 +29,8 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
+import static com.github.robozonky.strategy.natural.Audit.LOGGER;
+
 class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private static final Comparator<LoanDescriptor> COMPARATOR = new PrimaryMarketplaceComparator();
@@ -52,9 +54,9 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 Util.sortByRating(strategy.getApplicableLoans(available, portfolio), d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
-                .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
+                .peek(rating -> LOGGER.trace("Processing rating {}.", rating))
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
-                .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
+                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final int recommendedAmount = recommender.apply(d.item(), restrictions);
                     if (recommendedAmount > 0) {

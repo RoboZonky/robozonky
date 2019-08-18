@@ -30,15 +30,17 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
+import static com.github.robozonky.strategy.natural.Audit.LOGGER;
+
 class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     private static final Comparator<ParticipationDescriptor> COMPARATOR = new SecondaryMarketplaceComparator();
+
     private final ParsedStrategy strategy;
 
     public NaturalLanguagePurchaseStrategy(final ParsedStrategy p) {
         this.strategy = p;
     }
-
 
     private int[] getRecommendationBoundaries(final Participation participation) {
         final Rating rating = participation.getRating();
@@ -53,19 +55,16 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         final int[] recommended = getRecommendationBoundaries(participation);
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
-        Decisions.report(logger -> logger.trace("Loan #{} (participation #{}) recommended range <{}; {}> CZK.", id,
-                                                participationId, minimumRecommendation, maximumRecommendation));
+        LOGGER.trace("Loan #{} (participation #{}) recommended range <{}; {}> CZK.", id, participationId,
+                     minimumRecommendation, maximumRecommendation);
         // round to nearest lower increment
         final double price = participation.getRemainingPrincipal().doubleValue();
         if (minimumRecommendation > price) {
-            Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; below minimum.",
-                                                    id, participationId));
+            LOGGER.debug("Loan #{} (participation #{}) not recommended; below minimum.", id, participationId);
         } else if (price > maximumRecommendation) {
-            Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; over maximum.",
-                                                    id, participationId));
+            LOGGER.debug("Loan #{} (participation #{}) not recommended; over maximum.", id, participationId);
         } else {
-            Decisions.report(logger -> logger.debug("Final recommendation: buy loan #{} (participation #{}).", id,
-                                                    participationId));
+            LOGGER.debug("Final recommendation: buy loan #{} (participation #{}).", id, participationId);
             return true;
         }
         return false;
@@ -80,11 +79,12 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         }
         // split available marketplace into buckets per rating
         final Map<Rating, List<ParticipationDescriptor>> splitByRating =
-                Util.sortByRating(strategy.getApplicableParticipations(available, portfolio), d -> d.item().getRating());
+                Util.sortByRating(strategy.getApplicableParticipations(available, portfolio),
+                                  d -> d.item().getRating());
         // recommend amount to invest per strategy
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
-                .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
+                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> sizeMatchesStrategy(d.item()))
                 .flatMap(d -> d.recommend().map(Stream::of).orElse(Stream.empty()));
     }

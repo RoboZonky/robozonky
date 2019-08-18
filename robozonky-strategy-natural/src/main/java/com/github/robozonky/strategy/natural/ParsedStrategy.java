@@ -89,7 +89,7 @@ class ParsedStrategy {
                                          final String logMessage) {
         return filters.stream()
                 .filter(f -> f.test(item))
-                .peek(f -> Decisions.report(logger -> logger.debug(logMessage, item, f)))
+                .peek(f -> Audit.LOGGER.debug(logMessage, item, f))
                 .findFirst()
                 .isPresent();
     }
