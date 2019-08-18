@@ -66,7 +66,10 @@ final class StatefulBoundedBalance {
 
     public synchronized void set(final long value) {
         final long newValue = Math.max(1, value); // if < 1, the multiplication in get() does not increase balance
-        currentValue.set(newValue);
+        final long oldValue = currentValue.getAndSet(newValue);
+        if (oldValue == newValue) { // don't update the timestamp, so that the auto-increases in get() work properly
+            return;
+        }
         lastModificationDate.set(DateUtil.now());
         state.update(m -> m.put(VALUE_KEY, Long.toString(newValue)));
     }
