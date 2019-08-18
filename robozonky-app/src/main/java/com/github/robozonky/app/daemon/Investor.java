@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 abstract class Investor {
 
-    private static final Logger LOGGER = Logging.investing();
+    private static final Logger LOGGER = Audit.investing();
 
     private Investor() {
         // no external instances

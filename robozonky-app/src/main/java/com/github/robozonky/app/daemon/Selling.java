@@ -43,7 +43,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingStartedLa
  */
 final class Selling implements TenantPayload {
 
-    private static final Logger LOGGER = Logging.selling();
+    private static final Logger LOGGER = Audit.selling();
 
     private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant tenant) {
         return new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId()));

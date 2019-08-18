@@ -50,7 +50,7 @@ import org.apache.logging.log4j.Logger;
 final class SellingThrottle
         implements BiFunction<Stream<RecommendedInvestment>, PortfolioOverview, Stream<RecommendedInvestment>> {
 
-    private static final Logger LOGGER = Logging.selling();
+    private static final Logger LOGGER = Audit.selling();
     private static final Ratio MAX_SELLOFF_SHARE_PER_RATING = Ratio.fromPercentage(0.5);
 
     private static Stream<RecommendedInvestment> determineSelloffByRating(final Set<RecommendedInvestment> eligible,

@@ -55,7 +55,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
  */
 final class InvestingSession {
 
-    private static final Logger LOGGER = Logging.investing();
+    private static final Logger LOGGER = Audit.investing();
     private final Collection<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;

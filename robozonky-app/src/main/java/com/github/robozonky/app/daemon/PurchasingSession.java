@@ -50,7 +50,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarte
  */
 final class PurchasingSession {
 
-    private static final Logger LOGGER = Logging.purchasing();
+    private static final Logger LOGGER = Audit.purchasing();
 
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);

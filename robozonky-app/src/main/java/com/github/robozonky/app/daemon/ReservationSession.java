@@ -45,7 +45,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationCheck
  */
 final class ReservationSession {
 
-    private static final Logger LOGGER = Logging.reservations();
+    private static final Logger LOGGER = Audit.reservations();
     private final Collection<ReservationDescriptor> reservationsStillAvailable;
     private final List<Investment> reservationsAccepted = new ArrayList<>(0);
     private final SessionState<ReservationDescriptor> seen;

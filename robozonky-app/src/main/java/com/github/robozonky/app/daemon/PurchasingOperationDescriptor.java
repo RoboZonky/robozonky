@@ -67,6 +67,6 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
 
     @Override
     public Logger getLogger() {
-        return Logging.purchasing();
+        return Audit.purchasing();
     }
 }

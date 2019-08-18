@@ -24,9 +24,9 @@ import org.apache.logging.log4j.Logger;
  * similar operations can be easily queried. To facilitate this, all investing code must log through
  * {@link #investing()} etc.
  */
-final class Logging {
+final class Audit {
 
-    private Logging() {
+    private Audit() {
         // no external instances
     }
 

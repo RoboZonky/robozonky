@@ -76,6 +76,6 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     @Override
     public Logger getLogger() {
-        return Logging.investing();
+        return Audit.investing();
     }
 }
