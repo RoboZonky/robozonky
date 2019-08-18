@@ -56,7 +56,7 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
 
     @Override
     public long getMinimumBalance(final Tenant tenant) {
-        return 0;
+        return 1;
     }
 
     @Override

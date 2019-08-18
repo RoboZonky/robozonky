@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
@@ -54,10 +53,6 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
     public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> forPurchasing(final PowerTenant tenant) {
         return new Purchasing(tenant);
-    }
-
-    private static boolean isBiggerThan(final BigDecimal left, final BigDecimal right) {
-        return left.compareTo(right) > 0;
     }
 
     private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
@@ -104,8 +99,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         final long currentBalance = tenant.getKnownBalanceUpperBound();
         final long minimum = operationDescriptor.getMinimumBalance(tenant);
         if (currentBalance < minimum) {
-            logger.debug("Asleep due to estimated balance being at or below than minimum. ({} <= {})", currentBalance,
-                         minimum);
+            logger.debug("Asleep due to estimated balance being below minimum. ({} < {})", currentBalance, minimum);
             return Collections.emptyList();
         }
         return operationDescriptor.getStrategy(tenant)
