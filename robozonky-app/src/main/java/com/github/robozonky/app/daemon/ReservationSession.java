@@ -77,6 +77,7 @@ final class ReservationSession {
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
                     .peek(r -> tenant.fire(reservationAcceptationRecommended(r)))
+                    .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                     .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -93,30 +94,37 @@ final class ReservationSession {
             tenant.run(z -> z.accept(recommendation.descriptor().item()));
             LOGGER.info("Accepted reservation of loan #{}.", loanId);
             return true;
-        } catch (final Exception ex) {
+        } catch (final Exception ex) { // TODO distinguish between low balance and other rare causes of failure
             LOGGER.debug("Failed accepting reservation of loan #{}.", loanId, ex);
             return false;
         }
     }
 
+    private boolean isBalanceAcceptable(final RecommendedReservation reservation) {
+        return reservation.amount().intValue() <= tenant.getKnownBalanceUpperBound();
+    }
+
     boolean accept(final RecommendedReservation recommendation) {
+        if (!isBalanceAcceptable(recommendation)) {
+            LOGGER.debug("Will not accept reservation {} due to balance ({} CZK) likely too low.", recommendation,
+                         tenant.getKnownBalanceUpperBound());
+            return false;
+        }
         LOGGER.debug("Will attempt to accept reservation {}.", recommendation);
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actuallyAccept(recommendation);
         skip(recommendation.descriptor()); // never show again
         if (!succeeded) {
+            tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
             return false;
         }
         final int confirmedAmount = recommendation.amount().intValue();
         final MarketplaceLoan l = recommendation.descriptor().related();
         final Investment i = Investment.fresh(l, confirmedAmount);
-        markSuccessfulInvestment(i);
-        tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(i, l, tenant.getPortfolio().getOverview())));
-        return true;
-    }
-
-    private void markSuccessfulInvestment(final Investment i) {
         reservationsAccepted.add(i);
         tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - recommendation.amount().longValue());
+        tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(i, l, tenant.getPortfolio().getOverview())));
+        return true;
     }
 
     private void skip(final ReservationDescriptor reservations) {
