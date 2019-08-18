@@ -62,18 +62,14 @@ abstract class Investor {
     private static Either<InvestmentFailureType, BigDecimal> invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
         LOGGER.debug("Executing investment: {}.", recommendedLoan);
         final Investment i = convertToInvestment(recommendedLoan);
-        try {
-            final InvestmentResult r = auth.call(zonky -> zonky.invest(i));
-            if (r.isSuccess()) {
-                LOGGER.info("Invested {} CZK into loan #{}.", recommendedLoan.amount(), i.getLoanId());
-                return Either.right(recommendedLoan.amount());
-            } else {
-                return Either.left(r.getFailureType().get()); // get() while !isSuccess() guaranteed by Result contract
-            }
-        } catch (final Exception ex) {
-            LOGGER.debug("Failed investing {} CZK into loan #{} for an unknown reason.",
-                         recommendedLoan.amount(), i.getId(), ex);
-            return Either.left(InvestmentFailureType.UNKNOWN);
+        final InvestmentResult r = auth.call(zonky -> zonky.invest(i));
+        if (r.isSuccess()) {
+            LOGGER.info("Invested {} CZK into loan #{}.", recommendedLoan.amount(), i.getLoanId());
+            return Either.right(recommendedLoan.amount());
+        } else {
+            LOGGER.debug("Failed investing {} CZK into loan #{}, reason: {}.",
+                         recommendedLoan.amount(), i.getLoanId(), r.getFailureType());
+            return Either.left(r.getFailureType().get()); // get() while !isSuccess() guaranteed by Result contract
         }
     }
 

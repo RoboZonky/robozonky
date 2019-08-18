@@ -28,16 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
 
-    private final Investor investor;
     private final AtomicReference<LastPublishedLoan> lastChecked = new AtomicReference<>(null);
-
-    public InvestingOperationDescriptor(final Investor investor) {
-        this.investor = investor;
-    }
-
-    public InvestingOperationDescriptor() {
-        this(null);
-    }
 
     @Override
     public boolean isEnabled(final Tenant tenant) {
@@ -61,7 +52,7 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     @Override
     public Operation<LoanDescriptor, InvestmentStrategy> getOperation() {
-        return (a, b, c) -> InvestingSession.invest(investor, a, b, c);
+        return InvestingSession::invest;
     }
 
     @Override

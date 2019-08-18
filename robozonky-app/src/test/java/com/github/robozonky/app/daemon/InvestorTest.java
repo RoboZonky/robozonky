@@ -38,6 +38,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -107,11 +108,10 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(zonky).invest(any());
         final Investor i = Investor.build(t);
         final RecommendedLoan r = DESCRIPTOR.recommend(200).orElse(null);
-        final Either<InvestmentFailureType, BigDecimal> result = i.invest(r);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
-            assertThat(result).containsOnRight(BigDecimal.valueOf(200));
+            assertThat(i.invest(r)).containsOnRight(BigDecimal.valueOf(200));
         } else {
-            assertThat(result).containsOnLeft(InvestmentFailureType.UNKNOWN);
+            assertThatThrownBy(() -> i.invest(r)).isInstanceOf(IllegalStateException.class);
         }
     }
 

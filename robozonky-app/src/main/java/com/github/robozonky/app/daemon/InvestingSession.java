@@ -52,16 +52,16 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
 
     private final Investor investor;
 
-    InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor, final PowerTenant tenant) {
+    InvestingSession(final Collection<LoanDescriptor> marketplace, final PowerTenant tenant) {
         super(marketplace, tenant, new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedLoans"),
               Audit.investing());
-        this.investor = investor;
+        this.investor = Investor.build(tenant);
     }
 
-    public static Collection<Investment> invest(final Investor investor, final PowerTenant tenant,
+    public static Collection<Investment> invest(final PowerTenant tenant,
                                                 final Collection<LoanDescriptor> loans,
                                                 final InvestmentStrategy strategy) {
-        final InvestingSession s = new InvestingSession(loans, investor, tenant);
+        final InvestingSession s = new InvestingSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
         if (!s.getAvailable().isEmpty()) {
@@ -106,7 +106,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     private boolean unsuccessfulInvestment(final RecommendedLoan recommendation,
                                            final InvestmentFailureType failureType) {
         if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
-            logger.debug("Failed investing into {}. We don't have enough account balance.", recommendation);
             tenant.setKnownBalanceUpperBound(recommendation.amount().intValue() - 1);
         }
         tenant.fire(investmentSkipped(recommendation));
