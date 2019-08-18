@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
@@ -46,6 +47,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.test.DateUtil;
 import org.junit.jupiter.api.Test;
@@ -174,7 +176,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
-        doThrow(BadRequestException.class).when(zonky).purchase(any());
+        doReturn(PurchaseResult.failure(new ClientErrorException(410))).when(zonky).purchase(any());
         final Participation mock = mock(Participation.class);
         when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loan.getId());
@@ -186,6 +188,33 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final PurchasingOperationDescriptor d = mockPurchasingOperationDescriptor(pd);
         final StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> exec = new StrategyExecutor<>(tenant, d);
         assertThat(exec.get()).isEmpty();
+    }
+
+    @Test
+    void tryPurchaseButZonkyUnknownFailPassthrough() {
+        final int loanId = 1;
+        final Loan loan = Loan.custom()
+                .setId(loanId)
+                .setAmount(100_000)
+                .setRating(Rating.D)
+                .setNonReservedRemainingInvestment(1000)
+                .setMyInvestment(mockMyInvestment())
+                .setDatePublished(OffsetDateTime.now())
+                .build();
+        final Zonky zonky = harmlessZonky();
+        when(zonky.getLoan(eq(loanId))).thenReturn(loan);
+        doThrow(BadRequestException.class).when(zonky).purchase(any());
+        final Participation mock = mock(Participation.class);
+        when(mock.getId()).thenReturn(1L);
+        when(mock.getLoanId()).thenReturn(loan.getId());
+        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        when(mock.getRating()).thenReturn(loan.getRating());
+        final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
+        final PowerTenant tenant = mockTenant(zonky, false);
+        when(tenant.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_PURCHASE_STRATEGY));
+        final PurchasingOperationDescriptor d = mockPurchasingOperationDescriptor(pd);
+        final StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> exec = new StrategyExecutor<>(tenant, d);
+        assertThatThrownBy(exec::get).isNotNull();
     }
 
     @Test

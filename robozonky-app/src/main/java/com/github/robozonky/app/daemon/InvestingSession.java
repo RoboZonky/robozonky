@@ -131,7 +131,9 @@ final class InvestingSession {
         final int confirmedAmount = amount.intValue();
         final MarketplaceLoan l = recommendation.descriptor().item();
         final Investment i = Investment.fresh(l, confirmedAmount);
-        markSuccessfulInvestment(i);
+        investmentsMadeNow.add(i);
+        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - confirmedAmount);
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
         return true;
@@ -143,6 +145,7 @@ final class InvestingSession {
 
     private boolean unsuccessfulInvestment(final RecommendedLoan recommendation, final InvestmentFailureType failureType) {
         if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
+            LOGGER.debug("Failed investing into {}. We don't have enough account balance.", recommendation);
             tenant.setKnownBalanceUpperBound(recommendation.amount().intValue() - 1);
         }
         tenant.fire(investmentSkipped(recommendation));
@@ -168,11 +171,6 @@ final class InvestingSession {
         LOGGER.debug("Response for loan {}: {}.", loanId, response);
         return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
                              amount -> successfulInvestment(recommendation, amount));
-    }
-
-    private void markSuccessfulInvestment(final Investment i) {
-        investmentsMadeNow.add(i);
-        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
     }
 
     private void discard(final LoanDescriptor loan) {

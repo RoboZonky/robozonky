@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.remote.PurchaseResult;
 import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,6 +90,7 @@ final class PurchasingSession {
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
                     .peek(r -> tenant.fire(purchaseRecommended(r)))
+                    .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -111,18 +114,37 @@ final class PurchasingSession {
     }
 
     private boolean actualPurchase(final Participation participation) {
-        try {
-            tenant.run(zonky -> zonky.purchase(participation));
+        final PurchaseResult result = tenant.call(zonky -> zonky.purchase(participation));
+        if (result.isSuccess()) {
             LOGGER.info("Purchased a participation worth {} CZK.", participation.getRemainingPrincipal());
             return true;
-        } catch (final Exception ex) {
-            LOGGER.debug("Failed purchasing a participation worth {} CZK.. Likely someone's beaten us to it.",
-                         participation.getRemainingPrincipal(), ex);
-            return false;
+        }
+        final BigDecimal amount = participation.getRemainingPrincipal();
+        switch (result.getFailureType().get()) {
+            case INSUFFICIENT_BALANCE:
+                LOGGER.debug("Failed purchasing a participation worth {} CZK. We don't have enough account balance.",
+                             amount);
+                tenant.setKnownBalanceUpperBound(amount.longValue() - 1);
+                return false;
+            case ALREADY_HAVE_INVESTMENT:
+                LOGGER.debug("Failed purchasing a participation worth {} CZK. Someone's beaten us to it.", amount);
+                return false;
+            default:
+                LOGGER.debug("Failed purchasing a participation worth {} CZK for an unknown reason.", amount);
+                return false;
         }
     }
 
+    private boolean isBalanceAcceptable(final RecommendedParticipation participation) {
+        return participation.amount().intValue() <= tenant.getKnownBalanceUpperBound();
+    }
+
     private boolean purchase(final RecommendedParticipation recommendation) {
+        if (!isBalanceAcceptable(recommendation)) {
+            LOGGER.debug("Will not purchase {} due to balance ({} CZK) likely too low.", recommendation,
+                         tenant.getKnownBalanceUpperBound());
+            return false;
+        }
         tenant.fire(purchaseRequested(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan l = recommendation.descriptor().related();
@@ -130,14 +152,11 @@ final class PurchasingSession {
         final Investment i = Investment.fresh(participation, l, recommendation.amount());
         discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
         if (succeeded) {
-            markSuccessfulPurchase(i);
+            investmentsMadeNow.add(i);
+            tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
+            tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - recommendation.amount().longValue());
             tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(i, l, tenant.getPortfolio().getOverview())));
         }
         return succeeded;
-    }
-
-    private void markSuccessfulPurchase(final Investment i) {
-        investmentsMadeNow.add(i);
-        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
     }
 }

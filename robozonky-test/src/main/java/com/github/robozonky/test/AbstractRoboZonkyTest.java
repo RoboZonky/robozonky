@@ -34,7 +34,9 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.OAuth;
+import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
@@ -57,6 +59,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     protected static Zonky harmlessZonky() {
         final Zonky zonky = mock(Zonky.class);
+        when(zonky.invest(any())).thenReturn(InvestmentResult.success());
+        when(zonky.purchase(any())).thenReturn(PurchaseResult.success());
         when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());

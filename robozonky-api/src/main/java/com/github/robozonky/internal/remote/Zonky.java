@@ -148,9 +148,14 @@ public class Zonky {
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
-    public void purchase(final Participation participation) {
+    public PurchaseResult purchase(final Participation participation) {
         LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
-        controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
+        try {
+            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
+            return PurchaseResult.success();
+        } catch (final ClientErrorException ex) {
+            return PurchaseResult.failure(ex);
+        }
     }
 
     public void sell(final Investment investment) {

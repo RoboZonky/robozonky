@@ -24,33 +24,27 @@ import javax.ws.rs.NotFoundException;
 
 /**
  * Due to the inability for enums to extend a base shared class, this enum has its twin in
- * {@link PurchaseFailureType}. {@link Result} will assume the behavior of the two to be completely identical.
+ * {@link InvestmentFailureType}. {@link Result} will assume the behavior of the two to be completely identical.
  */
-public enum InvestmentFailureType implements Predicate<ClientErrorException> {
+public enum PurchaseFailureType implements Predicate<ClientErrorException> {
 
-    CAPTCHA_REQUIRED("CAPTCHA_REQUIRED"),
-    INSUFFICIENT_BALANCE("insufficientBalance"),
-    CANCELLED("cancelled"),
-    WITHDRAWN("withdrawn"),
-    RESERVED_INVESTMENT_ONLY("reservedInvestmentOnly"),
-    OVER_INVESTMENT("overInvestment"),
-    MULTIPLE_INVESTMENT("multipleInvestment"),
-    ALREADY_COVERED("alreadyCovered"),
+    INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE"),
+    ALREADY_HAVE_INVESTMENT("ALREADY_HAVE_INVESTMENT"),
     UNKNOWN(NotFoundException.class);
 
     private final String reason;
     private final Class<? extends ClientErrorException> expectedException;
 
-    InvestmentFailureType(final String reason, final Class<? extends ClientErrorException> expectedException) {
+    PurchaseFailureType(final String reason, final Class<? extends ClientErrorException> expectedException) {
         this.reason = reason;
         this.expectedException = expectedException;
     }
 
-    InvestmentFailureType(final Class<? extends ClientErrorException> expectedException) {
+    PurchaseFailureType(final Class<? extends ClientErrorException> expectedException) {
         this(null, expectedException);
     }
 
-    InvestmentFailureType(final String reason) {
+    PurchaseFailureType(final String reason) {
         this(reason, BadRequestException.class);
     }
 
