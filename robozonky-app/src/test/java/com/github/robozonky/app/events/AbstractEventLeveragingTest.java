@@ -27,6 +27,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TestingPowerTenant;
 import com.github.robozonky.internal.management.Management;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.LazyEvent;
@@ -48,7 +49,7 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     }
 
     protected static PowerTenant mockTenant(final Zonky zonky, final boolean isDryRun) {
-        return Mockito.spy(new TestingEventTenant(isDryRun ? SESSION_DRY : SESSION, zonky));
+        return Mockito.spy(new TestingPowerTenant(isDryRun ? SESSION_DRY : SESSION, zonky));
     }
 
     private void waitForEventProcessing() {

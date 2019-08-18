@@ -98,10 +98,13 @@ final class InvestingSession {
     }
 
     private void invest(final InvestmentStrategy strategy) {
+        LOGGER.debug("Starting the investing mechanism with balance upper bound of {} CZK.",
+                     tenant.getKnownBalanceUpperBound());
         boolean invested;
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
                     .peek(r -> tenant.fire(loanRecommended(r)))
+                    .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
@@ -134,7 +137,14 @@ final class InvestingSession {
         return true;
     }
 
+    private boolean isBalanceAcceptable(final RecommendedLoan loan) {
+        return loan.amount().intValue() <= tenant.getKnownBalanceUpperBound();
+    }
+
     private boolean unsuccessfulInvestment(final RecommendedLoan recommendation, final FailureType failureType) {
+        if (failureType == FailureType.INSUFFICIENT_BALANCE) {
+            tenant.setKnownBalanceUpperBound(recommendation.amount().intValue() - 1);
+        }
         tenant.fire(investmentSkipped(recommendation));
         return false;
     }
@@ -145,6 +155,11 @@ final class InvestingSession {
      * @return True if investment successful. The investment is reflected in {@link #getResult()}.
      */
     boolean invest(final RecommendedLoan recommendation) {
+        if (!isBalanceAcceptable(recommendation)) {
+            LOGGER.debug("Will not invest in {} due to balance ({} CZK) likely too low.", recommendation,
+                         tenant.getKnownBalanceUpperBound());
+            return false;
+        }
         LOGGER.debug("Will attempt to invest in {}.", recommendation);
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();

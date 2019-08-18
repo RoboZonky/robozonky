@@ -14,19 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.events;
+package com.github.robozonky.app.tenant;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.test.TestingTenant;
 
-class TestingEventTenant extends TestingTenant implements PowerTenant {
+public class TestingPowerTenant extends TestingTenant implements PowerTenant {
 
-    public TestingEventTenant(final SessionInfo sessionInfo, final Zonky zonky) {
+    private final StatefulBoundedBalance balance = new StatefulBoundedBalance(this);
+
+    public TestingPowerTenant(final SessionInfo sessionInfo, final Zonky zonky) {
         super(sessionInfo, zonky);
+    }
+
+    @Override
+    public long getKnownBalanceUpperBound() {
+        return balance.get();
+    }
+
+    @Override
+    public void setKnownBalanceUpperBound(final long knownBalanceUpperBound) {
+        balance.set(knownBalanceUpperBound);
     }
 
     @Override
