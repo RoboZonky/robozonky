@@ -34,7 +34,6 @@ import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.control.Either;
 import jdk.jfr.Event;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
@@ -56,7 +55,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
  */
 final class InvestingSession {
 
-    private static final Logger LOGGER = LogManager.getLogger(InvestingSession.class);
+    private static final Logger LOGGER = Logging.investing();
     private final Collection<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;

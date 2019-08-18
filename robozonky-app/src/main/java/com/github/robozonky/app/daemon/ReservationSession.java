@@ -28,7 +28,6 @@ import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptationRecommended;
@@ -46,7 +45,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationCheck
  */
 final class ReservationSession {
 
-    private static final Logger LOGGER = LogManager.getLogger(ReservationSession.class);
+    private static final Logger LOGGER = Logging.reservations();
     private final Collection<ReservationDescriptor> reservationsStillAvailable;
     private final List<Investment> reservationsAccepted = new ArrayList<>(0);
     private final SessionState<ReservationDescriptor> seen;

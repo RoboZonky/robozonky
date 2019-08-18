@@ -31,13 +31,12 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.test.DateUtil;
 import jdk.jfr.Event;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
     private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(30);
-    private final Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger;
     private final PowerTenant tenant;
     private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
     private final OperationDescriptor<T, S> operationDescriptor;
@@ -45,6 +44,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S> operationDescriptor) {
         this.tenant = tenant;
         this.operationDescriptor = operationDescriptor;
+        this.logger = operationDescriptor.getLogger();
     }
 
     public static StrategyExecutor<LoanDescriptor, InvestmentStrategy> forInvesting(final PowerTenant tenant) {
@@ -99,7 +99,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         final long currentBalance = tenant.getKnownBalanceUpperBound();
         final long minimum = operationDescriptor.getMinimumBalance(tenant);
         if (currentBalance < minimum) {
-            logger.debug("Asleep due to estimated balance being below minimum. ({} < {})", currentBalance, minimum);
+            logger.debug("Asleep due to balance estimated below minimum. ({} < {})", currentBalance, minimum);
             return Collections.emptyList();
         }
         return operationDescriptor.getStrategy(tenant)

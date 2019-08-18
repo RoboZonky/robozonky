@@ -24,12 +24,11 @@ import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.control.Either;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 abstract class Investor {
 
-    private static final Logger LOGGER = LogManager.getLogger(Investor.class);
+    private static final Logger LOGGER = Logging.investing();
 
     private Investor() {
         // no external instances

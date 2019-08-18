@@ -28,12 +28,11 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.SoldParticipationCache;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
 
-    private static final Logger LOGGER = LogManager.getLogger(SecondaryMarketplaceAccessor.class);
+    private static final Logger LOGGER = Logging.purchasing();
 
     private final Tenant tenant;
     private final UnaryOperator<long[]> stateAccessor;

@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import com.github.robozonky.internal.tenant.Tenant;
 import jdk.jfr.Event;
+import org.apache.logging.log4j.Logger;
 
 interface OperationDescriptor<T, S> {
 
@@ -36,5 +37,7 @@ interface OperationDescriptor<T, S> {
     long getMinimumBalance(final Tenant tenant);
 
     Event newJfrEvent();
+
+    Logger getLogger();
 
 }

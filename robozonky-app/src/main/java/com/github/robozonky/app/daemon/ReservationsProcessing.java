@@ -26,12 +26,11 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 final class ReservationsProcessing implements TenantPayload {
 
-    private static final Logger LOGGER = LogManager.getLogger(ReservationsProcessing.class);
+    private static final Logger LOGGER = Logging.reservations();
 
     private static void process(final PowerTenant tenant, final ReservationStrategy strategy) {
         final ReservationPreferences preferences = tenant.call(Zonky::getReservationPreferences);

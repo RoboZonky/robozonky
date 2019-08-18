@@ -28,12 +28,11 @@ import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
 
-    private static final Logger LOGGER = LogManager.getLogger(PrimaryMarketplaceAccessor.class);
+    private static final Logger LOGGER = Logging.investing();
     /**
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
      */

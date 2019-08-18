@@ -28,6 +28,19 @@ import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * On Zonky, we do not know the user's current account balance. However, in order for the robot to be able to function
+ * effectively and not repeat useless Zonky calls etc., some information about balance is still required. This class
+ * helps with that.
+ * <p>
+ * By default, the balance is {@link Long#MAX_VALUE}. Every time {@link #set(long)} is called, the balance is set to
+ * this new value. Also, a timer is reset - unless {@link #set(long)} is called within reasonable time, the balance
+ * as returned by {@link #get()} will be gradually increasing to simulate the user's possible real-life balance changes.
+ * <p>
+ * The external code is expected to {@link #set(long)} whatever value it thinks may still be available. For example, if
+ * we attempt to invest 600 and Zonky gives us an insufficient balance error, we should {@link #set(long)} 599 as that
+ * is a value that can still be available.
+ */
 final class StatefulBoundedBalance {
 
     private static final Duration BALANCE_INCREASE_INTERVAL_STEP = Duration.ofHours(1);

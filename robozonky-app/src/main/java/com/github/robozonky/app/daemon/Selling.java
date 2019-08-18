@@ -33,7 +33,6 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
@@ -44,7 +43,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingStartedLa
  */
 final class Selling implements TenantPayload {
 
-    private static final Logger LOGGER = LogManager.getLogger(Selling.class);
+    private static final Logger LOGGER = Logging.selling();
 
     private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant tenant) {
         return new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId()));

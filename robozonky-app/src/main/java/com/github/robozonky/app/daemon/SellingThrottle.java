@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -51,7 +50,7 @@ import org.apache.logging.log4j.Logger;
 final class SellingThrottle
         implements BiFunction<Stream<RecommendedInvestment>, PortfolioOverview, Stream<RecommendedInvestment>> {
 
-    private static final Logger LOGGER = LogManager.getLogger(SellingThrottle.class);
+    private static final Logger LOGGER = Logging.selling();
     private static final Ratio MAX_SELLOFF_SHARE_PER_RATING = Ratio.fromPercentage(0.5);
 
     private static Stream<RecommendedInvestment> determineSelloffByRating(final Set<RecommendedInvestment> eligible,

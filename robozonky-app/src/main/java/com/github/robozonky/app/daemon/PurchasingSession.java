@@ -31,7 +31,6 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseResult;
 import jdk.jfr.Event;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
@@ -51,7 +50,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarte
  */
 final class PurchasingSession {
 
-    private static final Logger LOGGER = LogManager.getLogger(PurchasingSession.class);
+    private static final Logger LOGGER = Logging.purchasing();
 
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new ArrayList<>(0);

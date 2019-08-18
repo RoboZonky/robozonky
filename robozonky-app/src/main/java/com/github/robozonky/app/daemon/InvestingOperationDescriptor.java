@@ -24,6 +24,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.tenant.Tenant;
 import jdk.jfr.Event;
+import org.apache.logging.log4j.Logger;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
 
@@ -71,5 +72,10 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     @Override
     public Event newJfrEvent() {
         return new PrimaryMarketplaceJfrEvent();
+    }
+
+    @Override
+    public Logger getLogger() {
+        return Logging.investing();
     }
 }

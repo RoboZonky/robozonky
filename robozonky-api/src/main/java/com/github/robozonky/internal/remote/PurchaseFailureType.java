@@ -48,7 +48,7 @@ public enum PurchaseFailureType implements Predicate<ClientErrorException> {
         this(reason, BadRequestException.class);
     }
 
-    Optional<String> getReason() {
+    public Optional<String> getReason() {
         return Optional.ofNullable(reason);
     }
 
