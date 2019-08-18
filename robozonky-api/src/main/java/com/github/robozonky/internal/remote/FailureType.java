@@ -16,6 +16,7 @@
 
 package com.github.robozonky.internal.remote;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
@@ -62,6 +63,10 @@ public enum FailureType implements Predicate<ClientErrorException> {
         final String contents = response.readEntity(String.class);
         LOGGER.debug("Response body is: {}", contents);
         return contents;
+    }
+
+    public Optional<String> getReason() {
+        return Optional.ofNullable(reason);
     }
 
     @Override

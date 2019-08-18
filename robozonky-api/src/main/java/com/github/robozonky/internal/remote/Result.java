@@ -39,6 +39,9 @@ public final class Result {
     }
 
     public static Result failure(final ClientErrorException ex) {
+        if (ex == null) {
+            return new Result(FailureType.UNKNOWN);
+        }
         final FailureType failure = Arrays.stream(FailureType.values())
                 .filter(f -> f.test(ex))
                 .findFirst()
