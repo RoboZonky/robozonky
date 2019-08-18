@@ -312,7 +312,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final PowerTenant tenant = mockTenant(zonky);
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = mock(OperationDescriptor.class);
         when(d.isEnabled(any())).thenReturn(false);
-        when(d.newJfrEvent()).thenReturn(mock(jdk.jfr.Event.class));
+        when(d.newJfrEvent()).thenReturn(new TestingEvent());
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
         verify(d, never()).newMarketplaceAccessor(any());
@@ -346,5 +346,9 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(e.get()).isEmpty(); // after 1 minute, marketplace was force-checked
         verify(zonky, times(3)).getLastPublishedLoanInfo();
         verify(zonky, times(2)).getAvailableLoans(any());
+    }
+
+    private static final class TestingEvent extends jdk.jfr.Event {
+
     }
 }
