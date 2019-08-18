@@ -105,7 +105,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Investor p = mock(Investor.class);
         doThrow(thrown).when(p).invest(eq(r));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
-        assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
+        assertThatThrownBy(() -> t.accept(r)).isSameAs(thrown);
     }
 
     @Test
@@ -117,7 +117,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Investor p = mock(Investor.class);
         doReturn(Either.right(BigDecimal.valueOf(amountToInvest))).when(p).invest(eq(r));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), p, auth);
-        final boolean result = t.invest(r);
+        final boolean result = t.accept(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isTrue();
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
