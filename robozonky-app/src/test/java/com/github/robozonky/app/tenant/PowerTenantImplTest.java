@@ -136,6 +136,15 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void keepsBalance() throws Exception {
+        try (final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS).build()) {
+            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Long.MAX_VALUE);
+            tenant.setKnownBalanceUpperBound(100);
+            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(100);
+        }
+    }
+
+    @Test
     void fires() throws Exception {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();

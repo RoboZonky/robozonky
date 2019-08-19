@@ -97,14 +97,14 @@ final class PurchasingSession extends
                 logger.debug("Failed purchasing a participation worth {} CZK. We don't have enough account balance.",
                              amount);
                 tenant.setKnownBalanceUpperBound(amount.longValue() - 1);
-                return false;
+                break;
             case ALREADY_HAVE_INVESTMENT:
                 logger.debug("Failed purchasing a participation worth {} CZK. Someone's beaten us to it.", amount);
-                return false;
+                break;
             default:
-                logger.debug("Failed purchasing a participation worth {} CZK for an unknown reason.", amount);
-                return false;
+                logger.debug("Failed purchasing a participation worth {} CZK. Reason unknown.", amount);
         }
+        return false;
     }
 
     @Override
