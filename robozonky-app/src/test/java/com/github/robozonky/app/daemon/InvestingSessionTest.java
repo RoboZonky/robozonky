@@ -119,7 +119,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final ClientErrorException thrown = new BadRequestException(response);
         when(z.invest(any())).thenReturn(InvestmentResult.failure(thrown));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
-        t.accept(r);
+        assertThat(t.accept(r)).isFalse();
         assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(199);
     }
 
