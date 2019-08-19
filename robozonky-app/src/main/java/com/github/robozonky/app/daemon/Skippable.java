@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.tenant.PowerTenant;
-import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -54,8 +53,6 @@ final class Skippable implements Runnable {
 
     @Override
     public void run() {
-        final Event event = new SkippableJfrEvent();
-        event.begin();
         if (!tenant.isAvailable()) {
             LOGGER.debug("Not running {} on account of Zonky token not being available.", this);
             return;
@@ -70,8 +67,6 @@ final class Skippable implements Runnable {
         } catch (final Error er) {
             shutdownCall.accept(er);
             throw er; // rethrow the error
-        } finally {
-            event.commit();
         }
     }
 

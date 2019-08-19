@@ -19,7 +19,6 @@ package com.github.robozonky.app.events;
 import java.util.concurrent.BlockingQueue;
 
 import com.github.robozonky.internal.jobs.SimplePayload;
-import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,16 +45,12 @@ final class EventFiring implements SimplePayload {
         LOGGER.trace("Events in queue: {}.", queue);
         boolean repeat = true;
         while (repeat && !queue.isEmpty()) {
-            final Event event = new EventFiringJfrEvent();
             try {
-                event.begin();
                 queue.take().run();
             } catch (final InterruptedException ex) {
                 LOGGER.debug("Interrupted while waiting for an event to fire.", ex);
                 Thread.currentThread().interrupt();
                 repeat = false;
-            } finally {
-                event.commit();
             }
         }
         LOGGER.debug("Event firing complete.");

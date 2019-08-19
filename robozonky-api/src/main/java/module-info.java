@@ -21,7 +21,6 @@ module com.github.robozonky.api {
     requires java.management;
     requires java.ws.rs;
     requires java.xml.bind;
-    requires jdk.jfr;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;

@@ -29,7 +29,6 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import io.vavr.control.Either;
-import jdk.jfr.Event;
 
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompletedLazy;
@@ -65,13 +64,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
         if (!s.getAvailable().isEmpty()) {
-            final Event event = new InvestingSessionJfrEvent();
-            try {
-                event.begin();
-                s.invest(strategy);
-            } finally {
-                event.commit();
-            }
+            s.invest(strategy);
         }
         final Collection<Investment> result = s.getResult();
         // make sure we get fresh portfolio reference here

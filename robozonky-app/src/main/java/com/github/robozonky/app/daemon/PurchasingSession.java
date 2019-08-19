@@ -28,7 +28,6 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseResult;
-import jdk.jfr.Event;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
@@ -63,13 +62,7 @@ final class PurchasingSession extends
             return Collections.emptyList();
         }
         s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(c, auth.getPortfolio().getOverview())));
-        final Event event = new PurchasingSessionJfrEvent();
-        try {
-            event.begin();
-            s.purchase(strategy);
-        } finally {
-            event.commit();
-        }
+        s.purchase(strategy);
         final Collection<Investment> result = s.getResult();
         s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio().getOverview())));
         return Collections.unmodifiableCollection(result);

@@ -309,7 +309,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = mock(OperationDescriptor.class);
         when(d.getLogger()).thenReturn(LogManager.getLogger());
         when(d.isEnabled(any())).thenReturn(false);
-        when(d.newJfrEvent()).thenReturn(new TestingEvent());
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
         verify(d, never()).newMarketplaceAccessor(any());
@@ -344,7 +343,4 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         verify(zonky, times(2)).getAvailableLoans(any());
     }
 
-    private static final class TestingEvent extends jdk.jfr.Event {
-
-    }
 }
