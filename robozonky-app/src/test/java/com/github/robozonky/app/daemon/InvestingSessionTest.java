@@ -23,7 +23,10 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServiceUnavailableException;
+import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
@@ -37,7 +40,10 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.remote.InvestmentFailureType;
+import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -91,7 +97,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void investmentFailed() {
+    void failedDueToUnknownError() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
         final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
@@ -102,7 +108,23 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void investmentSuccessful() {
+    void failedDueToLowBalance() {
+        final Zonky z = harmlessZonky();
+        final PowerTenant auth = mockTenant(z, false);
+        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
+        final Response response = new ResponseBuilderImpl()
+                .status(400)
+                .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason().get())
+                .build();
+        final ClientErrorException thrown = new BadRequestException(response);
+        when(z.invest(any())).thenReturn(InvestmentResult.failure(thrown));
+        final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
+        t.accept(r);
+        assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(199);
+    }
+
+    @Test
+    void successful() {
         final int amountToInvest = 200;
         final RecommendedLoan r = mockLoanDescriptor().recommend(amountToInvest).get();
         final Zonky z = harmlessZonky();
