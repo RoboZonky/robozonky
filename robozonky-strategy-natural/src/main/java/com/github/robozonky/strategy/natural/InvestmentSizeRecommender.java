@@ -23,6 +23,8 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 
+import static com.github.robozonky.strategy.natural.Audit.LOGGER;
+
 class InvestmentSizeRecommender {
 
     private final ParsedStrategy strategy;
@@ -52,12 +54,12 @@ class InvestmentSizeRecommender {
                                                                       restrictions.getInvestmentStep());
         final int maximumInvestmentAmount = restrictions.getMaximumInvestmentAmount();
         if (maximumUserRecommendation > maximumInvestmentAmount) {
-            Decisions.report(l -> l.info("Maximum investment amount reduced to {} by Zonky.", maximumInvestmentAmount));
+            LOGGER.info("Maximum investment amount reduced to {} by Zonky.", maximumInvestmentAmount);
         }
         final int maximumRecommendation = Math.min(maximumUserRecommendation, maximumInvestmentAmount);
         final int loanId = loan.getId();
-        Decisions.report(l -> l.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId,
-                                      minimumRecommendation, maximumRecommendation));
+        LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId, minimumRecommendation,
+                     maximumRecommendation);
         final int minimumInvestmentByShare =
                 getPercentage(loan.getAmount(), strategy.getMinimumInvestmentShareInPercent());
         final int minimumInvestment =
@@ -75,21 +77,21 @@ class InvestmentSizeRecommender {
         final int[] recommended = getInvestmentBounds(strategy, loan, restrictions);
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
-        Decisions.report(l -> l.debug("Recommended investment range for loan #{} is <{}; {}> CZK.", id,
-                                      minimumRecommendation, maximumRecommendation));
+        LOGGER.debug("Recommended investment range for loan #{} is <{}; {}> CZK.", id, minimumRecommendation,
+                     maximumRecommendation);
         // round to nearest lower increment
         final int loanRemaining = loan.getNonReservedRemainingInvestment();
         if (minimumRecommendation > loanRemaining) {
-            Decisions.report(l -> l.debug("Not recommending loan #{} due to minimum over remaining.", id));
+            LOGGER.debug("Not recommending loan #{} due to minimum over remaining.", id);
             return 0;
         }
         final int recommendedAmount = Math.min(maximumRecommendation, loanRemaining);
         final int r = roundToNearestIncrement(recommendedAmount, restrictions.getInvestmentStep());
         if (r < minimumRecommendation) {
-            Decisions.report(l -> l.debug("Not recommending loan #{} due to recommendation below minimum.", id));
+            LOGGER.debug("Not recommending loan #{} due to recommendation below minimum.", id);
             return 0;
         } else {
-            Decisions.report(l -> l.debug("Final recommendation for loan #{} is {} CZK.", id, r));
+            LOGGER.debug("Final recommendation for loan #{} is {} CZK.", id, r);
             return r;
         }
     }

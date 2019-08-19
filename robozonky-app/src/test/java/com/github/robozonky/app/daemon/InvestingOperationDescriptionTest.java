@@ -35,6 +35,7 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final Loan l = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(d.identify(ld)).isEqualTo(l.getId());
+        assertThat(d.getMinimumBalance(mockTenant())).isEqualTo(200);
     }
 
     @Test

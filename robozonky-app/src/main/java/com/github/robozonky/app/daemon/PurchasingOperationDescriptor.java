@@ -23,6 +23,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.internal.tenant.Tenant;
 import jdk.jfr.Event;
+import org.apache.logging.log4j.Logger;
 
 class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy> {
 
@@ -55,7 +56,17 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
+    public long getMinimumBalance(final Tenant tenant) {
+        return 1;
+    }
+
+    @Override
     public Event newJfrEvent() {
         return new SecondaryMarketplaceJfrEvent();
+    }
+
+    @Override
+    public Logger getLogger() {
+        return Audit.purchasing();
     }
 }

@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote;
+package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.internal.JfrConstants;
-import jdk.jfr.Category;
-import jdk.jfr.Event;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Category({JfrConstants.BASE_CATEGORY, JfrConstants.ZONKY_REMOTE_CALL})
-final class ZonkyLoanCallJfrEvent extends Event {
+/**
+ * The purpose of this class is so that all possible reasons for a strategy to reject/accept a loan are properly logged
+ * using the same logger. This will help find these messages in the usually very long logs.
+ */
+final class Audit {
+
+    static final Logger LOGGER = LogManager.getLogger(Audit.class);
+
+    private Audit() {
+        // no instances
+    }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,15 +67,15 @@ final class Blocked {
     }
 
     public boolean isValidInStatistics(final RemoteData remoteData) {
-        return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp());
+        return storedOn.isAfter(remoteData.getStatistics().getTimestamp());
     }
 
     public boolean isValidInBalance(final RemoteData remoteData) {
-        return persistent || storedOn.isAfter(remoteData.getRetrievedOn());
+        return storedOn.isAfter(remoteData.getRetrievedOn());
     }
 
     public boolean isValid(final RemoteData remoteData) {
-        return isValidInStatistics(remoteData) || isValidInBalance(remoteData);
+        return persistent || isValidInStatistics(remoteData) || isValidInBalance(remoteData);
     }
 
     @Override

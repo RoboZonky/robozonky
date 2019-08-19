@@ -57,6 +57,16 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
+    public void setKnownBalanceUpperBound(final long knownBalanceUpperBound) {
+        parent.setKnownBalanceUpperBound(knownBalanceUpperBound);
+    }
+
+    @Override
+    public long getKnownBalanceUpperBound() {
+        return parent.getKnownBalanceUpperBound();
+    }
+
+    @Override
     public Runnable fire(final SessionEvent event) {
         LOGGER.trace("Event stored within transaction: {}.", event);
         return getDelayedFiring().delay(() -> parent.fire(event));

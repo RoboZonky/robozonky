@@ -17,12 +17,9 @@
 package com.github.robozonky.app.daemon;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -30,11 +27,9 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.remote.InvestmentFailureType;
 import io.vavr.control.Either;
 import jdk.jfr.Event;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompletedLazy;
@@ -53,32 +48,20 @@ import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
  * Instances of this class are supposed to be short-lived, as the marketplace and Zonky account balance can change
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
  */
-final class InvestingSession {
+final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
 
-    private static final Logger LOGGER = LogManager.getLogger(InvestingSession.class);
-    private final Collection<LoanDescriptor> loansStillAvailable;
-    private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Investor investor;
-    private final SessionState<LoanDescriptor> discarded;
-    private final PowerTenant tenant;
 
-    InvestingSession(final Collection<LoanDescriptor> marketplace, final Investor investor, final PowerTenant tenant) {
-        this.investor = investor;
-        this.tenant = tenant;
-        this.discarded = newSessionState(tenant, marketplace, "discardedLoans");
-        this.loansStillAvailable = new ArrayList<>(marketplace);
+    InvestingSession(final Collection<LoanDescriptor> marketplace, final PowerTenant tenant) {
+        super(marketplace, tenant, new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedLoans"),
+              Audit.investing());
+        this.investor = Investor.build(tenant);
     }
 
-    private static SessionState<LoanDescriptor> newSessionState(final Tenant tenant,
-                                                                final Collection<LoanDescriptor> marketplace,
-                                                                final String key) {
-        return new SessionState<>(tenant, marketplace, d -> d.item().getId(), key);
-    }
-
-    public static Collection<Investment> invest(final Investor investor, final PowerTenant tenant,
+    public static Collection<Investment> invest(final PowerTenant tenant,
                                                 final Collection<LoanDescriptor> loans,
                                                 final InvestmentStrategy strategy) {
-        final InvestingSession s = new InvestingSession(loans, investor, tenant);
+        final InvestingSession s = new InvestingSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
         if (!s.getAvailable().isEmpty()) {
@@ -97,69 +80,52 @@ final class InvestingSession {
     }
 
     private void invest(final InvestmentStrategy strategy) {
+        logger.debug("Starting the investing mechanism with balance upper bound of {} CZK.",
+                     tenant.getKnownBalanceUpperBound());
         boolean invested;
         do {
             invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
                     .peek(r -> tenant.fire(loanRecommended(r)))
-                    .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
+                    .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
+                    .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);
-    }
-
-    /**
-     * Get loans that are available to be evaluated by the strategy. These are loans that come from the marketplace,
-     * minus loans that are already invested into.
-     * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
-     */
-    Collection<LoanDescriptor> getAvailable() {
-        loansStillAvailable.removeIf(discarded::contains);
-        return Collections.unmodifiableCollection(loansStillAvailable);
-    }
-
-    /**
-     * Get investments made during this session.
-     * @return Investments made so far during this session. Unmodifiable.
-     */
-    List<Investment> getResult() {
-        return Collections.unmodifiableList(investmentsMadeNow);
     }
 
     private boolean successfulInvestment(final RecommendedLoan recommendation, final BigDecimal amount) {
         final int confirmedAmount = amount.intValue();
         final MarketplaceLoan l = recommendation.descriptor().item();
         final Investment i = Investment.fresh(l, confirmedAmount);
-        markSuccessfulInvestment(i);
+        result.add(i);
+        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - confirmedAmount);
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
         return true;
     }
 
-    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation) {
+    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation,
+                                           final InvestmentFailureType failureType) {
+        if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
+            tenant.setKnownBalanceUpperBound(recommendation.amount().intValue() - 1);
+        }
         tenant.fire(investmentSkipped(recommendation));
         return false;
     }
 
-    /**
-     * Request {@link ControlApi} to invest in a given loan.
-     * @param recommendation Loan to invest into.
-     * @return True if investment successful. The investment is reflected in {@link #getResult()}.
-     */
-    boolean invest(final RecommendedLoan recommendation) {
-        LOGGER.debug("Will attempt to invest in {}.", recommendation);
+    @Override
+    protected boolean accept(final RecommendedLoan recommendation) {
+        if (!isBalanceAcceptable(recommendation)) {
+            logger.debug("Will not invest in {} due to balance ({} CZK) likely too low.", recommendation,
+                         tenant.getKnownBalanceUpperBound());
+            return false;
+        }
+        logger.debug("Will attempt to invest in {}.", recommendation);
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
         tenant.fire(investmentRequested(recommendation));
-        final Either<Exception, BigDecimal> response = investor.invest(recommendation);
-        LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        return response.fold(__ -> unsuccessfulInvestment(recommendation),
+        final Either<InvestmentFailureType, BigDecimal> response = investor.invest(recommendation);
+        logger.debug("Response for loan {}: {}.", loanId, response);
+        return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
                              amount -> successfulInvestment(recommendation, amount));
-    }
-
-    private void markSuccessfulInvestment(final Investment i) {
-        investmentsMadeNow.add(i);
-        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
-    }
-
-    private void discard(final LoanDescriptor loan) {
-        discarded.put(loan);
     }
 }

@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.CollectionsApi;
@@ -63,7 +64,6 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
-import jdk.jfr.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -126,9 +126,20 @@ public class Zonky {
         });
     }
 
-    public void invest(final Investment investment) {
+    /**
+     *
+     * @param investment
+     * @return Success or one of known investment failures.
+     * @throws Exception Non-investment related failures, such as expired authentication.
+     */
+    public InvestmentResult invest(final Investment investment) {
         LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
-        controlApi.run(api -> api.invest(new RawInvestment(investment)));
+        try {
+            controlApi.run(api -> api.invest(new RawInvestment(investment)));
+            return InvestmentResult.success();
+        } catch (final ClientErrorException ex) {
+            return InvestmentResult.failure(ex);
+        }
     }
 
     public void cancel(final Investment investment) {
@@ -136,9 +147,14 @@ public class Zonky {
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
-    public void purchase(final Participation participation) {
+    public PurchaseResult purchase(final Participation participation) {
         LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
-        controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
+        try {
+            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
+            return PurchaseResult.success();
+        } catch (final ClientErrorException ex) {
+            return PurchaseResult.failure(ex);
+        }
     }
 
     public void sell(final Investment investment) {
@@ -216,13 +232,7 @@ public class Zonky {
     }
 
     public Loan getLoan(final int id) {
-        final Event event = new ZonkyLoanCallJfrEvent(); // may be triggered by the strategy and we want to measure that
-        try {
-            event.begin();
-            return Loan.sanitized(loanApi.execute(api -> api.item(id)));
-        } finally {
-            event.commit();
-        }
+        return Loan.sanitized(loanApi.execute(api -> api.item(id)));
     }
 
     public Optional<Investment> getInvestment(final long id) {

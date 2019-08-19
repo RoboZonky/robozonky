@@ -39,6 +39,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final Loan l = Loan.custom().build();
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         assertThat(d.identify(pd)).isEqualTo(1);
+        assertThat(d.getMinimumBalance(null)).isEqualTo(1);
     }
 
     @Test

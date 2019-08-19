@@ -31,13 +31,12 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.test.DateUtil;
 import jdk.jfr.Event;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
     private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(30);
-    private final Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger;
     private final PowerTenant tenant;
     private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
     private final OperationDescriptor<T, S> operationDescriptor;
@@ -45,14 +44,15 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S> operationDescriptor) {
         this.tenant = tenant;
         this.operationDescriptor = operationDescriptor;
+        this.logger = operationDescriptor.getLogger();
     }
 
     public static StrategyExecutor<LoanDescriptor, InvestmentStrategy> forInvesting(final PowerTenant tenant) {
-        return new Investing(tenant);
+        return new StrategyExecutor<>(tenant, new InvestingOperationDescriptor());
     }
 
     public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> forPurchasing(final PowerTenant tenant) {
-        return new Purchasing(tenant);
+        return new StrategyExecutor<>(tenant, new PurchasingOperationDescriptor());
     }
 
     private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
@@ -96,6 +96,12 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
             logger.debug("Access to marketplace disabled by Zonky.");
             return Collections.emptyList();
         }
+        final long currentBalance = tenant.getKnownBalanceUpperBound();
+        final long minimum = operationDescriptor.getMinimumBalance(tenant);
+        if (currentBalance < minimum) {
+            logger.debug("Asleep due to balance estimated below minimum. ({} < {})", currentBalance, minimum);
+            return Collections.emptyList();
+        }
         return operationDescriptor.getStrategy(tenant)
                 .map(this::invest)
                 .orElseGet(() -> {
@@ -115,25 +121,4 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         }
     }
 
-    /**
-     * The reason for this class' existence is so that the logger in the superclass indicates the type of strategy
-     * being executed.
-     */
-    private static final class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
-
-        public Investing(final PowerTenant tenant) {
-            super(tenant, new InvestingOperationDescriptor(Investor.build(tenant)));
-        }
-    }
-
-    /**
-     * The reason for this class' existence is so that the logger in the superclass indicates the type of strategy
-     * being executed.
-     */
-    private static final class Purchasing extends StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> {
-
-        public Purchasing(final PowerTenant tenant) {
-            super(tenant, new PurchasingOperationDescriptor());
-        }
-    }
 }

@@ -111,20 +111,24 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void keepsBalance() {
+        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(Long.MAX_VALUE);
+        transactional.setKnownBalanceUpperBound(100);
+        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(100);
+    }
+
+    @Test
     void fires() throws Exception {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        final TransactionalPowerTenant t = transactional(new TenantBuilder()
-                                                                 .withApi(api)
-                                                                 .withSecrets(SECRETS)
-                                                                 .build());
-        try {
+        try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
+                                                                      .withApi(api)
+                                                                      .withSecrets(SECRETS)
+                                                                      .build())) {
             final Runnable f = t.fire(roboZonkyDaemonFailed(new IllegalStateException()));
             t.commit();
             f.run();
-        } finally {
-            t.close();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)

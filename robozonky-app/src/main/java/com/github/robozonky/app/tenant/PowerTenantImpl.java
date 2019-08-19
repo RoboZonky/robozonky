@@ -61,6 +61,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Lazy<StrategyProvider> strategyProvider;
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
     private final Lazy<Cache<Investment>> investmentCaches = Lazy.of(() -> Cache.forInvestment(this));
+    private final StatefulBoundedBalance balance;
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
                     final Supplier<StrategyProvider> strategyProvider,
@@ -74,6 +75,7 @@ class PowerTenantImpl implements PowerTenant {
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
                 .reloadAfter(Duration.ofHours(1))
                 .build();
+        this.balance = new StatefulBoundedBalance(this);
     }
 
     @Override
@@ -150,6 +152,16 @@ class PowerTenantImpl implements PowerTenant {
         // clean up the cache
         loanCache.get().close();
         investmentCaches.get().close();
+    }
+
+    @Override
+    public void setKnownBalanceUpperBound(final long knownBalanceUpperBound) {
+        balance.set(knownBalanceUpperBound);
+    }
+
+    @Override
+    public long getKnownBalanceUpperBound() {
+        return balance.get();
     }
 
     @Override

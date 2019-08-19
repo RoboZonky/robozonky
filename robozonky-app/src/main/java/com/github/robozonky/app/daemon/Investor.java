@@ -20,14 +20,15 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.internal.remote.InvestmentFailureType;
+import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.control.Either;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 abstract class Investor {
 
-    private static final Logger LOGGER = LogManager.getLogger(Investor.class);
+    private static final Logger LOGGER = Audit.investing();
 
     private Investor() {
         // no external instances
@@ -42,7 +43,7 @@ abstract class Investor {
         if (auth.getSessionInfo().isDryRun()) {
             return new Investor() {
                 @Override
-                public Either<Exception, BigDecimal> invest(final RecommendedLoan r) {
+                public Either<InvestmentFailureType, BigDecimal> invest(final RecommendedLoan r) {
                     LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", r);
                     return Either.right(r.amount());
                 }
@@ -51,26 +52,26 @@ abstract class Investor {
             return new Investor() {
 
                 @Override
-                public Either<Exception, BigDecimal> invest(final RecommendedLoan r) {
+                public Either<InvestmentFailureType, BigDecimal> invest(final RecommendedLoan r) {
                     return Investor.invest(auth, r);
                 }
             };
         }
     }
 
-    private static Either<Exception, BigDecimal> invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
+    private static Either<InvestmentFailureType, BigDecimal> invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
         LOGGER.debug("Executing investment: {}.", recommendedLoan);
         final Investment i = convertToInvestment(recommendedLoan);
-        try {
-            auth.run(zonky -> zonky.invest(i));
+        final InvestmentResult r = auth.call(zonky -> zonky.invest(i));
+        if (r.isSuccess()) {
             LOGGER.info("Invested {} CZK into loan #{}.", recommendedLoan.amount(), i.getLoanId());
             return Either.right(recommendedLoan.amount());
-        } catch (final Exception ex) {
-            LOGGER.debug("Failed investing {} CZK into loan #{}. Perhaps already full, or CAPTCHA in place.",
-                         recommendedLoan.amount(), i.getId(), ex);
-            return Either.left(ex);
+        } else {
+            LOGGER.debug("Failed investing {} CZK into loan #{}, reason: {}.",
+                         recommendedLoan.amount(), i.getLoanId(), r.getFailureType());
+            return Either.left(r.getFailureType().get()); // get() while !isSuccess() guaranteed by Result contract
         }
     }
 
-    public abstract Either<Exception, BigDecimal> invest(final RecommendedLoan r);
+    public abstract Either<InvestmentFailureType, BigDecimal> invest(final RecommendedLoan r);
 }

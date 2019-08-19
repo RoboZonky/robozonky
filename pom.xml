@@ -741,6 +741,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>
+          <rerunFailingTestsCount>1</rerunFailingTestsCount> <!-- Flaky tests are worked around. -->
           <useModulePath>false</useModulePath> <!-- Modularity in tests brings pain and no obvious benefits. -->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <workingDirectory>${basedir}/target</workingDirectory>
@@ -750,6 +751,7 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>
+          <rerunFailingTestsCount>1</rerunFailingTestsCount> <!-- Flaky tests are worked around. -->
           <useModulePath>false</useModulePath> <!-- Modularity in tests brings pain and no obvious benefits. -->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <workingDirectory>${basedir}/target</workingDirectory>

@@ -31,9 +31,12 @@ import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 
+import static com.github.robozonky.strategy.natural.Audit.LOGGER;
+
 class NaturalLanguageReservationStrategy implements ReservationStrategy {
 
     private static final Comparator<ReservationDescriptor> COMPARATOR = new ReservationComparator();
+
     private final ParsedStrategy strategy;
 
     public NaturalLanguageReservationStrategy(final ParsedStrategy p) {
@@ -58,9 +61,9 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
                 Util.sortByRating(strategy.getApplicableReservations(available, portfolio), d -> d.item().getRating());
         // and now return recommendations in the order in which investment should be attempted
         return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
-                .peek(rating -> Decisions.report(logger -> logger.trace("Processing rating {}.", rating)))
+                .peek(rating -> LOGGER.trace("Processing rating {}.", rating))
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
-                .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
+                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final BigDecimal amount = BigDecimal.valueOf(d.item().getMyReservation().getReservedAmount());
                     return d.recommend(amount)

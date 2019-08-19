@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
  * via methods {@link #fire(SessionEvent)} or {@link #fire(LazyEvent)} and can not be rolled back.
  * <p>
  * Instances of this interface should never get to users outside of the application, otherwise they would be able to
- * fire events. All user-facing code should see just the plain {@link Tenant}.
+ * fire events, among other things. All user-facing code should see just the plain {@link Tenant}.
  */
 public interface PowerTenant extends Tenant {
 
@@ -62,6 +62,10 @@ public interface PowerTenant extends Tenant {
             }
         }
     }
+
+    void setKnownBalanceUpperBound(long knownBalanceUpperBound);
+
+    long getKnownBalanceUpperBound();
 
     /**
      * See {@link SessionEvents#fire(SessionEvent)} for the semantics of this method.
