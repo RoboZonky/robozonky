@@ -99,7 +99,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     private boolean unsuccessfulInvestment(final RecommendedLoan recommendation,
                                            final InvestmentFailureType failureType) {
         if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
-            tenant.setKnownBalanceUpperBound(recommendation.amount().intValue() - 1);
+            tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
         }
         tenant.fire(investmentSkipped(recommendation));
         return false;
