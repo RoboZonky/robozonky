@@ -63,13 +63,18 @@ public class ApiProvider implements AutoCloseable {
      * be reused as much as possible.
      */
     private final Lazy<ResteasyClient> client;
+    private final RequestCounter counter = new RequestCounterImpl();
 
     public ApiProvider() {
         this.client = Lazy.of(ProxyFactory::newResteasyClient);
     }
 
+    private static <T> Api<T> obtainNormal(final T proxy, final RequestCounter counter) {
+        return new Api<>(proxy, counter);
+    }
+
     static <T> Api<T> obtainNormal(final T proxy) {
-        return new Api<>(proxy);
+        return obtainNormal(proxy, null);
     }
 
     /**
@@ -82,18 +87,18 @@ public class ApiProvider implements AutoCloseable {
      */
     <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
                                                                              final Supplier<ZonkyApiToken> token) {
-        return new PaginatedApi<>(api, ZONKY_URL, token, client.get());
+        return new PaginatedApi<>(api, ZONKY_URL, token, client.get(), counter);
     }
 
     <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token) {
         final T proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api, ZONKY_URL);
-        return obtainNormal(proxy);
+        return obtainNormal(proxy, counter);
     }
 
     private OAuth oauth() {
         final ZonkyOAuthApi proxy = ProxyFactory.newProxy(client.get(), new AuthenticationFilter(), ZonkyOAuthApi.class,
                                                           ZONKY_URL);
-        return new OAuth(obtainNormal(proxy));
+        return new OAuth(obtainNormal(proxy, counter));
     }
 
     /**
@@ -112,7 +117,7 @@ public class ApiProvider implements AutoCloseable {
      */
     public Collection<RawLoan> marketplace() {
         final EntityCollectionApi<RawLoan> proxy = ProxyFactory.newProxy(client.get(), LoanApi.class, ZONKY_URL);
-        final Api<? extends EntityCollectionApi<RawLoan>> api = obtainNormal(proxy);
+        final Api<? extends EntityCollectionApi<RawLoan>> api = obtainNormal(proxy, counter);
         return api.call(EntityCollectionApi::items);
     }
 
@@ -210,6 +215,10 @@ public class ApiProvider implements AutoCloseable {
      */
     PaginatedApi<RawDevelopment, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(CollectionsApi.class, token);
+    }
+
+    public RequestCounter getRequestCounter() {
+        return counter;
     }
 
     @Override

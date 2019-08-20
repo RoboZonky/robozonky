@@ -33,13 +33,20 @@ class PaginatedApi<S, T> {
     private final String url;
     private final ResteasyClient client;
     private final Supplier<ZonkyApiToken> tokenSupplier;
+    private final RequestCounter counter;
 
     PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
                  final ResteasyClient client) {
+        this(api, url, token, client, null);
+    }
+
+    public PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
+                 final ResteasyClient client, final RequestCounter counter) {
         this.api = api;
         this.url = url;
         this.client = client;
         this.tokenSupplier = token;
+        this.counter = counter;
     }
 
     /**
@@ -63,7 +70,7 @@ class PaginatedApi<S, T> {
 
     <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter) {
         final T proxy = ProxyFactory.newProxy(client, filter, api, url);
-        return Api.call(function, proxy);
+        return Api.call(function, proxy, counter);
     }
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
