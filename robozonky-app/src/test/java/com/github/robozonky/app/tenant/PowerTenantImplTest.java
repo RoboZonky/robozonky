@@ -26,7 +26,6 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -51,20 +50,6 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
 
     @Test
-    void closesWhenNoTokens() {
-        final OAuth a = mock(OAuth.class);
-        final Zonky z = mock(Zonky.class);
-        final ApiProvider api = mockApiProvider(a, z);
-        try (final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build()) {
-            assertThat(tenant.isAvailable()).isTrue();
-        } catch (final Exception e) {
-            fail(e);
-        }
-        verifyZeroInteractions(a);
-        verifyZeroInteractions(z);
-    }
-
-    @Test
     void closesWithTokens() {
         final OAuth a = mock(OAuth.class);
         when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
@@ -73,7 +58,6 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         try (final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build()) {
             final Statistics s = tenant.call(Zonky::getStatistics);
             assertThat(s).isSameAs(Statistics.empty());
-            assertThat(tenant.isAvailable()).isTrue();
         } catch (final Exception e) {
             fail(e);
         }
@@ -93,16 +77,6 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);
         assertThat(t.getReservationStrategy()).containsInstanceOf(ReservationStrategy.class);
-    }
-
-    @Test
-    void availabilityOfToken() {
-        final ZonkyApiTokenSupplier s = mock(ZonkyApiTokenSupplier.class);
-        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, new ApiProvider(), () -> null,
-                                                      scope -> s);
-        assertThat(t.isAvailable(OAuthScope.SCOPE_APP_WEB)).isTrue();
-        when(s.isClosed()).thenReturn(true);
-        assertThat(t.isAvailable(OAuthScope.SCOPE_APP_WEB)).isFalse();
     }
 
     @Test

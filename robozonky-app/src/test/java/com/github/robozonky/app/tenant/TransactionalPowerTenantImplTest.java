@@ -24,7 +24,6 @@ import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -54,12 +53,6 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
     private final TransactionalPowerTenant transactional = transactional(tenant);
-
-    @Test
-    void delegatesAvailability() {
-        final boolean available = tenant.isAvailable(OAuthScope.SCOPE_APP_WEB);
-        assertThat(transactional.isAvailable(OAuthScope.SCOPE_APP_WEB)).isEqualTo(available);
-    }
 
     @Test
     void delegatesRestrictions() {

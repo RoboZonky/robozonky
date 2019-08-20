@@ -40,6 +40,7 @@ import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
+import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import io.vavr.Lazy;
@@ -63,6 +64,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
     private final Lazy<Cache<Investment>> investmentCaches = Lazy.of(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
+    private final Availability availability;
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis,
                     final Supplier<StrategyProvider> strategyProvider,
@@ -81,6 +83,7 @@ class PowerTenantImpl implements PowerTenant {
                 .reloadAfter(Duration.ofHours(1))
                 .build();
         this.balance = new StatefulBoundedBalance(this);
+        this.availability = new AvailabilityImpl(getTokenSupplier(OAuthScope.SCOPE_APP_WEB));
     }
 
     @Override
@@ -108,9 +111,8 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public boolean isAvailable(final OAuthScope scope) {
-        // we have already logged out prior to daemon shutdown
-        return !getTokenSupplier(scope).isClosed();
+    public Availability getAvailability() {
+        return availability;
     }
 
     @Override

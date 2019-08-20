@@ -29,31 +29,6 @@ import static org.mockito.Mockito.*;
 class SkippableTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    void skips() {
-        final Runnable r = mock(Runnable.class);
-        final PowerTenant t = mockTenant();
-        when(t.isAvailable(any())).thenReturn(false);
-        final Consumer<Throwable> c = mock(Consumer.class);
-        final Skippable s = new Skippable(r, t);
-        s.run();
-        verify(r, never()).run();
-        verify(c, never()).accept(any());
-        assertThat(this.getEventsRequested()).isEmpty();
-    }
-
-    @Test
-    void doesNotSkip() {
-        final Runnable r = mock(Runnable.class);
-        final PowerTenant t = mockTenant();
-        final Consumer<Throwable> c = mock(Consumer.class);
-        final Skippable s = new Skippable(r, t);
-        s.run();
-        verify(r).run();
-        verify(c, never()).accept(any());
-        assertThat(this.getEventsRequested()).isEmpty();
-    }
-
-    @Test
     void fails() {
         final Runnable r = mock(Runnable.class);
         doThrow(IllegalStateException.class).when(r).run();

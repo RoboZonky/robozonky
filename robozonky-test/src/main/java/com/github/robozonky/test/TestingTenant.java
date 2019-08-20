@@ -31,8 +31,11 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
+import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
+
+import static org.mockito.Mockito.*;
 
 public class TestingTenant implements Tenant {
 
@@ -52,8 +55,8 @@ public class TestingTenant implements Tenant {
     }
 
     @Override
-    public boolean isAvailable(final OAuthScope scope) {
-        return true;
+    public Availability getAvailability() {
+        return mock(Availability.class);
     }
 
     @Override

@@ -17,8 +17,13 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.function.Consumer;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ResponseProcessingException;
 
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.tenant.Availability;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,19 +56,43 @@ final class Skippable implements Runnable {
         });
     }
 
+    private static Exception identifyKnownRootCause(final Throwable ex) {
+        if (ex instanceof ClientErrorException || ex instanceof ServerErrorException
+                || ex instanceof ResponseProcessingException) {
+            return (Exception) ex;
+        }
+        final Throwable cause = ex.getCause();
+        if (cause == null) { // no known exception, no deeper cause
+            return null;
+        } else { // no known exception, recurse into cause
+            return identifyKnownRootCause(cause);
+        }
+    }
+
     @Override
     public void run() {
-        if (!tenant.isAvailable()) {
-            LOGGER.debug("Not running {} on account of Zonky token not being available.", this);
+        final Availability availability = tenant.getAvailability();
+        if (!availability.nextAvailabilityCheck().isBefore(DateUtil.now())) {
+            LOGGER.debug("Not running {} on account of the robot being temporarily suspended.", this);
             return;
         }
         LOGGER.trace("Running {}.", this);
         try {
             toRun.run();
-            LOGGER.trace("Finished {}.", this);
+            availability.registerAvailability();
+            LOGGER.trace("Successfully finished {}.", this);
         } catch (final Exception ex) {
-            LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
-            tenant.fire(roboZonkyDaemonFailed(ex));
+            final Exception cause = identifyKnownRootCause(ex);
+            if (cause instanceof ServerErrorException) {
+                availability.registerServerError((ServerErrorException) cause);
+            } else if (cause instanceof ClientErrorException) {
+                availability.registerClientError((ClientErrorException) cause);
+            } else if (cause instanceof ResponseProcessingException) {
+                availability.registerApiIssue((ResponseProcessingException) cause);
+            } else {
+                LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
+                tenant.fire(roboZonkyDaemonFailed(ex));
+            }
         } catch (final Error er) {
             shutdownCall.accept(er);
             throw er; // rethrow the error

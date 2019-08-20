@@ -79,22 +79,7 @@ public interface Tenant extends AutoCloseable {
         call(StreamUtil.toFunction(operation), scope);
     }
 
-    /**
-     * Check that the tenant can be operated on, using the default scope.
-     * @return False in cases such as when the user's authentication credentials are being refreshed and therefore
-     * the present authentication may already be invalid, without the new one being available yet.
-     */
-    default boolean isAvailable() {
-        return isAvailable(OAuthScope.SCOPE_APP_WEB);
-    }
-
-    /**
-     * Check that the tenant can be operated on.
-     * @param scope The scope of access with the Zonky server.
-     * @return False in cases such as when the user's authentication credentials are being refreshed and therefore
-     * the present authentication may already be invalid, without the new one being available yet.
-     */
-    boolean isAvailable(OAuthScope scope);
+    Availability getAvailability();
 
     /**
      * Provides all relevant data representing user portfolio, such as blocked amounts and wallet balance. This may be

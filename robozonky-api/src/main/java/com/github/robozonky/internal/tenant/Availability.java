@@ -16,27 +16,23 @@
 
 package com.github.robozonky.internal.tenant;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.time.Instant;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ResponseProcessingException;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.remote.Zonky;
-import org.junit.jupiter.api.Test;
+public interface Availability {
 
-import static org.mockito.Mockito.*;
+    Instant nextAvailabilityCheck();
 
-class TenantTest {
+    boolean isPaused();
 
-    @Test
-    void defaultMethods() {
-        final Tenant t = spy(Tenant.class);
-        when(t.getSessionInfo()).thenReturn(new SessionInfo("someone@somewhere.cz"));
-        final Function<Zonky, String> f = z -> "";
-        t.call(f);
-        verify(t).call(eq(f));
-        final Consumer<Zonky> c = z -> {};
-        t.run(c);
-        verify(t).run(eq(c), any());
-    }
+    void registerAvailability();
+
+    void registerApiIssue(final ResponseProcessingException ex);
+
+    void registerServerError(final ServerErrorException ex);
+
+    void registerClientError(final ClientErrorException ex);
 
 }
