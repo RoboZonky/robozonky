@@ -72,7 +72,7 @@ class PowerTenantImpl implements PowerTenant {
         this.strategyProvider = Lazy.of(strategyProvider);
         this.apis = apis;
         this.requestWarningCheck = apis.getRequestCounter()
-                .map(r -> (Runnable) new TooManyRequestWarningSystem(r))
+                .map(r -> (Runnable) new QuotaMonitor(r))
                 .orElse(() -> {
                     // do nothing
                 });

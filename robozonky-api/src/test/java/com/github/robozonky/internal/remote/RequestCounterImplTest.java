@@ -18,40 +18,33 @@ package com.github.robozonky.internal.remote;
 
 import java.time.Duration;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RequestCounterImplTest {
 
     @Test
-    void markSingle() {
+    void marking() {
         final RequestCounter counter = new RequestCounterImpl();
-        Assertions.assertThat(counter.count()).isEqualTo(0);
-        Assertions.assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
-        Assertions.assertThat(counter.mark()).isEqualTo(0);
-        Assertions.assertThat(counter.mark()).isEqualTo(1);
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(counter.count()).isEqualTo(0);
+        assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
+        assertThat(counter.mark()).isEqualTo(0);
+        assertThat(counter.mark()).isEqualTo(1);
+        assertSoftly(softly -> {
             softly.assertThat(counter.current()).isEqualTo(1);
             softly.assertThat(counter.count()).isEqualTo(2);
             softly.assertThat(counter.count(Duration.ofMinutes(1))).isEqualTo(2);
             softly.assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
         });
         counter.keepOnly(Duration.ZERO); // clear everything
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(counter.mark()).isEqualTo(2); // id still continues where it started
             softly.assertThat(counter.count()).isEqualTo(1);
         });
-    }
-
-    @Test
-    void markMultiple() {
-        final RequestCounter counter = new RequestCounterImpl();
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(counter.mark(10)).isEqualTo(9);
-            softly.assertThat(counter.count()).isEqualTo(10);
-            softly.assertThat(counter.count(Duration.ofSeconds(10))).isEqualTo(10);
-        });
+        counter.cut(1);
+        assertThat(counter.count()).isEqualTo(0);
     }
 
 }

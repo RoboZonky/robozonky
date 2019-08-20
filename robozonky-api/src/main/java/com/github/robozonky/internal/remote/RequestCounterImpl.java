@@ -59,6 +59,15 @@ final class RequestCounterImpl implements RequestCounter {
     }
 
     @Override
+    public void cut(final int count) {
+        final SortedMap<Instant, Long> actualRequests = requests.get();
+        actualRequests.keySet().stream()
+                .limit(count)
+                .forEach(actualRequests::remove);
+        LOGGER.trace("Removed {} request(s), new total is {}.", count, count());
+    }
+
+    @Override
     public void keepOnly(final Duration interval) {
         LOGGER.trace("Resetting within the last interval: {}.", interval);
         final Instant threshold = DateUtil.now().minus(interval);

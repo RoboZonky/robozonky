@@ -17,24 +17,18 @@
 package com.github.robozonky.internal.remote;
 
 import java.time.Duration;
-import java.util.stream.LongStream;
 
 public interface RequestCounter {
 
     long mark();
-
-    default long mark(final int requestCount) {
-        return LongStream.rangeClosed(0, requestCount - 1)
-                .map(r -> mark())
-                .max()
-                .orElse(0);
-    }
 
     long current();
 
     int count();
 
     int count(Duration interval);
+
+    void cut(int count);
 
     void keepOnly(Duration interval);
 
