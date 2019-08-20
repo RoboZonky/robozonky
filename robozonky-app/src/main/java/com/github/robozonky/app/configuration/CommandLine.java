@@ -19,7 +19,6 @@ package com.github.robozonky.app.configuration;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -57,9 +56,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
     @picocli.CommandLine.Option(names = {"-g", "--guarded"},
             description = "Path to secure file that contains username, password etc.", required = true)
     private File keystore = null;
-    @picocli.CommandLine.Option(names = {"-ws", "--wait-secondary"},
-            description = "Number of seconds between consecutive checks of secondary marketplace.")
-    private int secondaryMarketplaceCheckDelay = 1;
 
     public CommandLine(final Supplier<Lifecycle> lifecycle) {
         this.lifecycle = lifecycle;
@@ -81,10 +77,6 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
         pico.execute(main.getArgs());
         final Optional<InvestmentMode> result = pico.getExecutionResult();
         return Objects.isNull(result) ? Optional.empty() : result;
-    }
-
-    Duration getSecondaryMarketplaceCheckDelay() {
-        return Duration.ofSeconds(secondaryMarketplaceCheckDelay);
     }
 
     boolean isDryRunEnabled() {
