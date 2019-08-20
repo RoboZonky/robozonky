@@ -47,9 +47,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-/**
- * Provides instances of APIs for the rest of RoboZonky to use.
- */
 public class ApiProvider implements AutoCloseable {
 
     public static final String ZONKY_URL = "https://api.zonky.cz";
@@ -84,6 +81,21 @@ public class ApiProvider implements AutoCloseable {
      */
     <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
                                                                              final Supplier<ZonkyApiToken> token) {
+        return obtainPaginated(api, token, counter);
+    }
+
+    /**
+     * Instantiate an API as a RESTEasy client proxy.
+     * @param <S> API return type.
+     * @param <T> API type.
+     * @param api RESTEasy endpoint.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
+     * @param counter Will only be request-counted if this is not null.
+     * @return RESTEasy client proxy for the API, ready to be called.
+     */
+    <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
+                                                                             final Supplier<ZonkyApiToken> token,
+                                                                             final RequestCounter counter) {
         return new PaginatedApi<>(api, ZONKY_URL, token, client.get(), counter);
     }
 
@@ -148,7 +160,8 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      */
     PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
-        return this.obtainPaginated(ParticipationApi.class, token);
+        // if we ever use the API for retrieving anything but the whole marketplace, request counting must be enabled
+        return this.obtainPaginated(ParticipationApi.class, token, null);
     }
 
     /**

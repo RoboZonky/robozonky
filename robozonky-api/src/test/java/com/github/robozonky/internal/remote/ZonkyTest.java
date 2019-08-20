@@ -94,7 +94,7 @@ class ZonkyTest {
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
                                                                             final Class<T> blueprint,
                                                                             final PaginatedApi<S, T> api) {
-        when(apiProvider.obtainPaginated(eq(blueprint), any())).thenReturn(api);
+        when(apiProvider.obtainPaginated(eq(blueprint), any(), any())).thenReturn(api);
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,

@@ -56,7 +56,7 @@ class Api<T> {
                 final long id = counter.mark();
                 LOGGER.trace(() -> assembleLogMessage(id, counter));
             } else {
-                LOGGER.trace("... done.");
+                LOGGER.trace("... done. (Not counting towards the API quota.)");
             }
         }
     }
