@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 /**
- * This package deals with the business of network and Zonky availability, as well as the handover of control between
- * the main thread and the daemon threads. It is imperative that the internal APIs remain internal, as this is very
- * sensitive, multi-threaded orchestration code.
+ * This package deals with the handover of control between the main thread and the daemon threads. It is imperative that
+ * the internal APIs remain internal, as this is very sensitive, multi-threaded orchestration code.
  */
 package com.github.robozonky.app.runtime;

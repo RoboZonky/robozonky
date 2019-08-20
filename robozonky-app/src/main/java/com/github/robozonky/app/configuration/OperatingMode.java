@@ -40,8 +40,7 @@ final class OperatingMode {
         this.lifecycle = lifecycle;
     }
 
-    private static PowerTenant getTenant(final CommandLine cli, final Supplier<Lifecycle> lifecycle,
-                                         final SecretProvider secrets) {
+    private static PowerTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
         final TenantBuilder b = new TenantBuilder();
         if (cli.isDryRunEnabled()) {
             LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
@@ -49,7 +48,6 @@ final class OperatingMode {
         }
         return b.withSecrets(secrets)
                 .withStrategy(cli.getStrategyLocation())
-                .withAvailabilityFrom(lifecycle)
                 .named(cli.getName())
                 .build();
     }
@@ -66,10 +64,9 @@ final class OperatingMode {
     }
 
     public InvestmentMode configure(final CommandLine cli, final SecretProvider secrets) {
-        final PowerTenant tenant = getTenant(cli, lifecycle, secrets);
+        final PowerTenant tenant = getTenant(cli, secrets);
         configureNotifications(cli, tenant);
         // and now initialize the chosen mode of operation
-        return new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant
-        );
+        return new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant);
     }
 }

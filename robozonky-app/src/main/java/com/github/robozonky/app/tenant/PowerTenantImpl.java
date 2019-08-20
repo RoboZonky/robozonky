@@ -21,7 +21,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -57,7 +56,6 @@ class PowerTenantImpl implements PowerTenant {
     private final ApiProvider apis;
     private final Runnable quotaMonitor;
     private final Function<OAuthScope, ZonkyApiTokenSupplier> supplier;
-    private final BooleanSupplier availability;
     private final Map<OAuthScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(OAuthScope.class);
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
@@ -66,7 +64,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Lazy<Cache<Investment>> investmentCaches = Lazy.of(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
 
-    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final BooleanSupplier zonkyAvailability,
+    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis,
                     final Supplier<StrategyProvider> strategyProvider,
                     final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = Lazy.of(strategyProvider);
@@ -77,7 +75,6 @@ class PowerTenantImpl implements PowerTenant {
                     // do nothing
                 });
         this.sessionInfo = sessionInfo;
-        this.availability = zonkyAvailability;
         this.supplier = tokenSupplier;
         this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
@@ -112,8 +109,8 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public boolean isAvailable(final OAuthScope scope) {
-        // either Zonky is not available, or we have already logged out prior to daemon shutdown
-        return availability.getAsBoolean() && !getTokenSupplier(scope).isClosed();
+        // we have already logged out prior to daemon shutdown
+        return !getTokenSupplier(scope).isClosed();
     }
 
     @Override

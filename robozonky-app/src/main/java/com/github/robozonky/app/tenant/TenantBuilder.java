@@ -18,13 +18,11 @@ package com.github.robozonky.app.tenant;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.enums.OAuthScope;
-import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
 
@@ -33,7 +31,6 @@ public final class TenantBuilder {
     private String name = null;
     private boolean dryRun = false;
     private SecretProvider secrets = null;
-    private Supplier<Lifecycle> lifecycle = null;
     private Supplier<StrategyProvider> strategyProvider = StrategyProvider::empty;
     private ApiProvider api;
 
@@ -54,11 +51,6 @@ public final class TenantBuilder {
 
     public TenantBuilder withStrategy(final String strategyLocation) {
         this.strategyProvider = () -> TenantBuilder.supplyStrategyProvider(strategyLocation);
-        return this;
-    }
-
-    public TenantBuilder withAvailabilityFrom(final Supplier<Lifecycle> lifecycle) {
-        this.lifecycle = lifecycle;
         return this;
     }
 
@@ -85,8 +77,7 @@ public final class TenantBuilder {
         final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier =
                 scope -> new ZonkyApiTokenSupplier(scope, apis, secrets);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
-        final BooleanSupplier zonkyAvailability = lifecycle == null ? () -> true : () -> lifecycle.get().isOnline();
-        return new PowerTenantImpl(sessionInfo, apis, zonkyAvailability, strategyProvider, tokenSupplier);
+        return new PowerTenantImpl(sessionInfo, apis, strategyProvider, tokenSupplier);
     }
 }
 

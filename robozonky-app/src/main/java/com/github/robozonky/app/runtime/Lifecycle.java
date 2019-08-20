@@ -16,9 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.time.OffsetDateTime;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,8 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
-import com.github.robozonky.internal.management.Management;
-import com.github.robozonky.internal.management.ManagementBean;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +37,6 @@ public class Lifecycle {
     private static final Logger LOGGER = LogManager.getLogger(Lifecycle.class);
     private static final Set<Thread> HOOKS = new HashSet<>(0);
     private final CountDownLatch circuitBreaker;
-    private final MainControl livenessCheck;
     private final Lazy<DaemonShutdownHook> shutdownHook;
     private final AtomicBoolean failed = new AtomicBoolean(false);
 
@@ -57,21 +52,9 @@ public class Lifecycle {
     }
 
     Lifecycle(final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
-        this(new MainControl(), circuitBreaker, hooks);
-    }
-
-    Lifecycle(final MainControl mc) {
-        this(mc, null, new ShutdownHook());
-    }
-
-    private Lifecycle(final MainControl mc, final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
         this.circuitBreaker = circuitBreaker;
-        this.livenessCheck = mc;
         final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
         this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
-        final ManagementBean<AboutMBean> managementBean = new ManagementBean<>(AboutMBean.class, () -> new About(this));
-        Management.register(managementBean);
-        LivenessCheck.setup(livenessCheck);
         hooks.register(shutdownEnabler);
     }
 
@@ -81,40 +64,6 @@ public class Lifecycle {
     public static void clearShutdownHooks() {
         HOOKS.forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
         HOOKS.clear();
-    }
-
-    /**
-     * Will block until RoboZonky is back online.
-     * @return True if now online, false if interrupted.
-     */
-    static boolean waitUntilOnline(final MainControl livenessCheck) {
-        try {
-            livenessCheck.waitUntilTriggered();
-            return true;
-        } catch (final InterruptedException ex) {
-            LOGGER.error("Cannot reach Zonky.", ex);
-            return false;
-        }
-    }
-
-    Optional<String> getZonkyApiVersion() {
-        return livenessCheck.getApiVersion();
-    }
-
-    OffsetDateTime getZonkyApiLastUpdate() {
-        return livenessCheck.getTimestamp();
-    }
-
-    public boolean isOnline() {
-        return getZonkyApiVersion().isPresent();
-    }
-
-    /**
-     * Will block until RoboZonky is back online.
-     * @return True if now online, false if interrupted.
-     */
-    public boolean waitUntilOnline() {
-        return waitUntilOnline(livenessCheck);
     }
 
     /**
