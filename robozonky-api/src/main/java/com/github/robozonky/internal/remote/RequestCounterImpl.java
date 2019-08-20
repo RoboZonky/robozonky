@@ -24,8 +24,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.internal.test.DateUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class RequestCounterImpl implements RequestCounter {
+
+    private static final Logger LOGGER = LogManager.getLogger(RequestCounterImpl.class);
 
     private final AtomicLong counter = new AtomicLong();
     private final AtomicReference<SortedMap<Instant, Long>> requests = new AtomicReference<>(new ConcurrentSkipListMap<>());
@@ -51,6 +55,7 @@ final class RequestCounterImpl implements RequestCounter {
 
     @Override
     public void keepOnly(final Duration interval) {
+        LOGGER.trace("Resetting within the last interval: {}.", interval);
         final Instant threshold = DateUtil.now().minus(interval);
         requests.set(requests.get().tailMap(threshold));
     }

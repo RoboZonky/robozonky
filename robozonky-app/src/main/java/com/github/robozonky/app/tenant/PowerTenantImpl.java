@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -51,8 +52,10 @@ class PowerTenantImpl implements PowerTenant {
     private static final Logger LOGGER = LogManager.getLogger(PowerTenantImpl.class);
     private static final Restrictions FULLY_RESTRICTED = new Restrictions();
 
+    private final Random random = new Random();
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
+    private final Runnable requestWarningCheck;
     private final Function<OAuthScope, ZonkyApiTokenSupplier> supplier;
     private final BooleanSupplier availability;
     private final Map<OAuthScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(OAuthScope.class);
@@ -68,6 +71,11 @@ class PowerTenantImpl implements PowerTenant {
                     final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = Lazy.of(strategyProvider);
         this.apis = apis;
+        this.requestWarningCheck = apis.getRequestCounter()
+                .map(r -> (Runnable) new TooManyRequestWarningSystem(r))
+                .orElse(() -> {
+                    // do nothing
+                });
         this.sessionInfo = sessionInfo;
         this.availability = zonkyAvailability;
         this.supplier = tokenSupplier;
@@ -92,7 +100,14 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
-        return apis.call(operation, getTokenSupplier(scope));
+        try {
+            return apis.call(operation, getTokenSupplier(scope));
+        } finally {
+            final int randomBetweenZeroAndHundred = random.nextInt(100);
+            if (randomBetweenZeroAndHundred == 0) { // check request situation in 1 % of cases
+                requestWarningCheck.run();
+            }
+        }
     }
 
     @Override
@@ -155,13 +170,13 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public void setKnownBalanceUpperBound(final long knownBalanceUpperBound) {
-        balance.set(knownBalanceUpperBound);
+    public long getKnownBalanceUpperBound() {
+        return balance.get();
     }
 
     @Override
-    public long getKnownBalanceUpperBound() {
-        return balance.get();
+    public void setKnownBalanceUpperBound(final long knownBalanceUpperBound) {
+        balance.set(knownBalanceUpperBound);
     }
 
     @Override

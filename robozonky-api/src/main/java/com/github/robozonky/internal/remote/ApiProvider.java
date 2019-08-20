@@ -18,6 +18,7 @@ package com.github.robozonky.internal.remote;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -217,8 +218,8 @@ public class ApiProvider implements AutoCloseable {
         return this.obtainPaginated(CollectionsApi.class, token);
     }
 
-    public RequestCounter getRequestCounter() {
-        return counter;
+    public Optional<RequestCounter> getRequestCounter() {
+        return Optional.ofNullable(counter);
     }
 
     @Override
