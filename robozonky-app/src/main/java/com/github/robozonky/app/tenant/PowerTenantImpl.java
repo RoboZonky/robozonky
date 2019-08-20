@@ -55,7 +55,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Random random = new Random();
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
-    private final Runnable requestWarningCheck;
+    private final Runnable quotaMonitor;
     private final Function<OAuthScope, ZonkyApiTokenSupplier> supplier;
     private final BooleanSupplier availability;
     private final Map<OAuthScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(OAuthScope.class);
@@ -71,7 +71,7 @@ class PowerTenantImpl implements PowerTenant {
                     final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = Lazy.of(strategyProvider);
         this.apis = apis;
-        this.requestWarningCheck = apis.getRequestCounter()
+        this.quotaMonitor = apis.getRequestCounter()
                 .map(r -> (Runnable) new QuotaMonitor(r))
                 .orElse(() -> {
                     // do nothing
@@ -105,7 +105,7 @@ class PowerTenantImpl implements PowerTenant {
         } finally {
             final int randomBetweenZeroAndHundred = random.nextInt(100);
             if (randomBetweenZeroAndHundred == 0) { // check request situation in 1 % of cases
-                requestWarningCheck.run();
+                quotaMonitor.run();
             }
         }
     }

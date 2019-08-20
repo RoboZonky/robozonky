@@ -16,34 +16,17 @@
 
 package com.github.robozonky.app.events;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.events.impl.EventFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class GlobalEventsTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    void lazyFireReturnsFuture() {
-        final Loan l = Loan.custom().build();
-        final Investment i = Investment.fresh(l, 200).build();
-        final Runnable result = SessionEvents.forSession(SESSION)
-                .fire(EventFactory.loanRepaidLazy(() -> EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class))));
-        result.run(); // make sure it does not throw
-        assertThat(getEventsRequested()).hasSize(1);
-    }
-
-    @Test
     void fireReturnsFuture() {
-        final Loan l = Loan.custom().build();
-        final Investment i = Investment.fresh(l, 200).build();
-        final Runnable result = SessionEvents.forSession(SESSION)
-                .fire(EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class)));
+        final Runnable result = GlobalEvents.get().fire(EventFactory.roboZonkyEnding());
         result.run(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }

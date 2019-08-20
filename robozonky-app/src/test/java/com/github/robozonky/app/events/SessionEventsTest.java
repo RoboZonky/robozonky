@@ -26,6 +26,7 @@ import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
@@ -39,6 +40,26 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky, false);
     private final PowerTenant tenantDry = mockTenant(zonky, true);
+
+    @Test
+    void lazyFireReturnsFuture() {
+        final Loan l = Loan.custom().build();
+        final Investment i = Investment.fresh(l, 200).build();
+        final Runnable result = SessionEvents.forSession(SESSION)
+                .fire(EventFactory.loanRepaidLazy(() -> EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class))));
+        result.run(); // make sure it does not throw
+        assertThat(getEventsRequested()).hasSize(1);
+    }
+
+    @Test
+    void fireReturnsFuture() {
+        final Loan l = Loan.custom().build();
+        final Investment i = Investment.fresh(l, 200).build();
+        final Runnable result = SessionEvents.forSession(SESSION)
+                .fire(EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class)));
+        result.run(); // make sure it does not throw
+        assertThat(getEventsRequested()).hasSize(1);
+    }
 
     @Test
     void identifiesEventTypeWhenClass() {

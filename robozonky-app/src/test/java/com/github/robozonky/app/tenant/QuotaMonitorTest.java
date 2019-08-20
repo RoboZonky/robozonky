@@ -16,12 +16,20 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.RequestCounter;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-class QuotaMonitorTest {
+import static org.assertj.core.api.Assertions.*;
+
+class QuotaMonitorTest extends AbstractRoboZonkyTest {
 
     private final ApiProvider api = new ApiProvider();
     private final RequestCounter counter = api.getRequestCounter().orElseThrow();
@@ -134,5 +142,13 @@ class QuotaMonitorTest {
             softly.assertThat(monitor.threshold90PercentReached()).isTrue();
             softly.assertThat(monitor.threshold99PercentReached()).isFalse();
         });
+    }
+
+    @Test
+    void preventMemoryLeaks() {
+        add(10);
+        setClock(Clock.fixed(Instant.now().plus(Duration.ofDays(1)), Defaults.ZONE_ID));
+        add(1);
+        assertThat(counter.count()).isEqualTo(1);
     }
 }
