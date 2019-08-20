@@ -16,8 +16,12 @@
 
 package com.github.robozonky.test;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ResponseProcessingException;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -42,6 +46,7 @@ public class TestingTenant implements Tenant {
     private final Zonky zonky;
     private final SessionInfo sessionInfo;
     private final RemotePortfolio portfolio;
+    private final Availability availability = spy(new MyAvailability());
 
     public TestingTenant(final SessionInfo sessionInfo, final Zonky zonky) {
         this.sessionInfo = sessionInfo;
@@ -56,7 +61,7 @@ public class TestingTenant implements Tenant {
 
     @Override
     public Availability getAvailability() {
-        return mock(Availability.class);
+        return availability;
     }
 
     @Override
@@ -112,5 +117,38 @@ public class TestingTenant implements Tenant {
     @Override
     public void close() {
         // no need to do anything here
+    }
+
+    private static class MyAvailability implements Availability {
+
+        @Override
+        public Instant nextAvailabilityCheck() {
+            return Instant.now();
+        }
+
+        @Override
+        public boolean isPaused() {
+            return false;
+        }
+
+        @Override
+        public void registerAvailability() {
+
+        }
+
+        @Override
+        public void registerApiIssue(final ResponseProcessingException ex) {
+
+        }
+
+        @Override
+        public void registerServerError(final ServerErrorException ex) {
+
+        }
+
+        @Override
+        public void registerClientError(final ClientErrorException ex) {
+
+        }
     }
 }

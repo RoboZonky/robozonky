@@ -64,7 +64,8 @@ class PowerTenantImpl implements PowerTenant {
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
     private final Lazy<Cache<Investment>> investmentCaches = Lazy.of(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
-    private final Availability availability;
+    private final Lazy<Availability> availability =
+            Lazy.of(() -> new AvailabilityImpl(getTokenSupplier(OAuthScope.SCOPE_APP_WEB)));
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis,
                     final Supplier<StrategyProvider> strategyProvider,
@@ -83,7 +84,6 @@ class PowerTenantImpl implements PowerTenant {
                 .reloadAfter(Duration.ofHours(1))
                 .build();
         this.balance = new StatefulBoundedBalance(this);
-        this.availability = new AvailabilityImpl(getTokenSupplier(OAuthScope.SCOPE_APP_WEB));
     }
 
     @Override
@@ -112,7 +112,7 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Availability getAvailability() {
-        return availability;
+        return availability.get();
     }
 
     @Override
