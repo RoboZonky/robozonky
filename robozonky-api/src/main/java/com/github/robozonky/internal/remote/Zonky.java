@@ -70,6 +70,19 @@ import org.apache.logging.log4j.Logger;
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
  * user. Consider {@link #logout()} when done.
+ * <p>
+ * Zonky implements API quotas on their endpoints. Reaching the quota will result in receiving "HTTP 429 Too Many
+ * Requests". The following operations have their own quotas:
+ *
+ * <ul>
+ *   <li>{@link #getLastPublishedLoanInfo()} allows for 3000 requests, with one request cleared every second. Therefore
+ *   we do not request-count this API, as we will only ever request this value once every second.</li>
+ *   <li>{@link #getAvailableParticipations(Select)} ()} is in the same situation.</li>
+ *   <li>Everything else is on the same quote and therefore is request-counted.</li>
+ * </ul>
+ * <p>
+ * Request counting does not actually limit anything. It just gives us an idea through logs how close or how far we are
+ * from reaching the quota.
  */
 public class Zonky {
 
@@ -127,7 +140,6 @@ public class Zonky {
     }
 
     /**
-     *
      * @param investment
      * @return Success or one of known investment failures.
      * @throws Exception Non-investment related failures, such as expired authentication.
@@ -246,7 +258,7 @@ public class Zonky {
     }
 
     public LastPublishedLoan getLastPublishedLoanInfo() {
-        return loanApi.execute(LoanApi::lastPublished);
+        return loanApi.execute(LoanApi::lastPublished, false);
     }
 
     /**

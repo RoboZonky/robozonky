@@ -16,6 +16,7 @@
 
 package com.github.robozonky.internal.remote;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -25,24 +26,43 @@ import org.apache.logging.log4j.Logger;
 class Api<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(Api.class);
+    private static final Duration ONE_MINUTE = Duration.ofMinutes(1);
+    private static final Duration FIVE_MINUTES = Duration.ofMinutes(5);
 
     private final T proxy;
+    private final RequestCounter counter;
 
-    public Api(final T proxy) {
-        this.proxy = proxy;
+    Api(final T proxy) {
+        this(proxy, null);
     }
 
-    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy) {
+    public Api(final T proxy, final RequestCounter counter) {
+        this.proxy = proxy;
+        this.counter = counter;
+    }
+
+    private static String assembleLogMessage(final long id, final RequestCounter counter) {
+        final int count1 = counter.count(ONE_MINUTE);
+        final int count5 = counter.count(FIVE_MINUTES);
+        return "... done. (Request #" + id + ", " + count1 + " in last 60 sec., " + count5 + " in last 5 min.)";
+    }
+
+    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter) {
         LOGGER.trace("Executing...");
         try {
             return function.apply(proxy);
         } finally {
-            LOGGER.trace("... done.");
+            if (counter != null) {
+                final long id = counter.mark();
+                LOGGER.trace(() -> assembleLogMessage(id, counter));
+            } else {
+                LOGGER.trace("... done. (Not counting towards the API quota.)");
+            }
         }
     }
 
     <S> S call(final Function<T, S> function) {
-        return call(function, proxy);
+        return call(function, proxy, counter);
     }
 
     void run(final Consumer<T> consumer) {

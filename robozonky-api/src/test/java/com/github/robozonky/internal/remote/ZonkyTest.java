@@ -94,7 +94,7 @@ class ZonkyTest {
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
                                                                             final Class<T> blueprint,
                                                                             final PaginatedApi<S, T> api) {
-        when(apiProvider.obtainPaginated(eq(blueprint), any())).thenReturn(api);
+        when(apiProvider.obtainPaginated(eq(blueprint), any(), any())).thenReturn(api);
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
@@ -104,7 +104,7 @@ class ZonkyTest {
 
     private static ApiProvider mockApiProvider() {
         final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
-        final Api<ControlApi> ca = ApiProvider.obtainNormal(mock(ControlApi.class));
+        final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(mock(ControlApi.class), null);
         doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
         final Api<ExportApi> ea = mockApi(mock(ExportApi.class));
         when(apiProvider.exports(any())).thenReturn(ea);

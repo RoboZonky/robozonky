@@ -18,6 +18,7 @@ package com.github.robozonky.internal.remote;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -46,9 +47,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-/**
- * Provides instances of APIs for the rest of RoboZonky to use.
- */
 public class ApiProvider implements AutoCloseable {
 
     public static final String ZONKY_URL = "https://api.zonky.cz";
@@ -63,13 +61,14 @@ public class ApiProvider implements AutoCloseable {
      * be reused as much as possible.
      */
     private final Lazy<ResteasyClient> client;
+    private final RequestCounter counter = new RequestCounterImpl();
 
     public ApiProvider() {
         this.client = Lazy.of(ProxyFactory::newResteasyClient);
     }
 
-    static <T> Api<T> obtainNormal(final T proxy) {
-        return new Api<>(proxy);
+    static <T> Api<T> actuallyObtainNormal(final T proxy, final RequestCounter counter) {
+        return new Api<>(proxy, counter);
     }
 
     /**
@@ -82,18 +81,33 @@ public class ApiProvider implements AutoCloseable {
      */
     <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
                                                                              final Supplier<ZonkyApiToken> token) {
-        return new PaginatedApi<>(api, ZONKY_URL, token, client.get());
+        return obtainPaginated(api, token, counter);
+    }
+
+    /**
+     * Instantiate an API as a RESTEasy client proxy.
+     * @param <S> API return type.
+     * @param <T> API type.
+     * @param api RESTEasy endpoint.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
+     * @param counter Will only be request-counted if this is not null.
+     * @return RESTEasy client proxy for the API, ready to be called.
+     */
+    <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
+                                                                             final Supplier<ZonkyApiToken> token,
+                                                                             final RequestCounter counter) {
+        return new PaginatedApi<>(api, ZONKY_URL, token, client.get(), counter);
     }
 
     <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token) {
         final T proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api, ZONKY_URL);
-        return obtainNormal(proxy);
+        return actuallyObtainNormal(proxy, counter);
     }
 
     private OAuth oauth() {
         final ZonkyOAuthApi proxy = ProxyFactory.newProxy(client.get(), new AuthenticationFilter(), ZonkyOAuthApi.class,
                                                           ZONKY_URL);
-        return new OAuth(obtainNormal(proxy));
+        return new OAuth(actuallyObtainNormal(proxy, counter));
     }
 
     /**
@@ -112,7 +126,7 @@ public class ApiProvider implements AutoCloseable {
      */
     public Collection<RawLoan> marketplace() {
         final EntityCollectionApi<RawLoan> proxy = ProxyFactory.newProxy(client.get(), LoanApi.class, ZONKY_URL);
-        final Api<? extends EntityCollectionApi<RawLoan>> api = obtainNormal(proxy);
+        final Api<? extends EntityCollectionApi<RawLoan>> api = actuallyObtainNormal(proxy, counter);
         return api.call(EntityCollectionApi::items);
     }
 
@@ -146,7 +160,8 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      */
     PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
-        return this.obtainPaginated(ParticipationApi.class, token);
+        // if we ever use the API for retrieving anything but the whole marketplace, request counting must be enabled
+        return this.obtainPaginated(ParticipationApi.class, token, null);
     }
 
     /**
@@ -210,6 +225,10 @@ public class ApiProvider implements AutoCloseable {
      */
     PaginatedApi<RawDevelopment, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(CollectionsApi.class, token);
+    }
+
+    public Optional<RequestCounter> getRequestCounter() {
+        return Optional.ofNullable(counter);
     }
 
     @Override

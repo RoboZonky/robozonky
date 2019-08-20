@@ -69,7 +69,7 @@ final class OperatingMode {
         final PowerTenant tenant = getTenant(cli, lifecycle, secrets);
         configureNotifications(cli, tenant);
         // and now initialize the chosen mode of operation
-        return new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant,
-                                        cli.getSecondaryMarketplaceCheckDelay());
+        return new DaemonInvestmentMode(t -> lifecycle.get().resumeToFail(t), tenant
+        );
     }
 }

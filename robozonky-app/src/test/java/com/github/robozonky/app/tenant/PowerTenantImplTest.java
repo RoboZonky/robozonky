@@ -88,7 +88,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
         when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
         when(s.getForReservations()).thenReturn(Optional.of(mock(ReservationStrategy.class)));
-        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, null, () -> s, null);
+        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, new ApiProvider(), null, () -> s, null);
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);
@@ -98,7 +98,8 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void availabilityOfToken() {
         final ZonkyApiTokenSupplier s = mock(ZonkyApiTokenSupplier.class);
-        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, () -> true, () -> null, scope -> s);
+        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, new ApiProvider(), () -> true, () -> null,
+                                                      scope -> s);
         assertThat(t.isAvailable(OAuthScope.SCOPE_APP_WEB)).isTrue();
         when(s.isClosed()).thenReturn(true);
         assertThat(t.isAvailable(OAuthScope.SCOPE_APP_WEB)).isFalse();
@@ -107,7 +108,8 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void availabilityOfZonky() {
         final ZonkyApiTokenSupplier s = mock(ZonkyApiTokenSupplier.class);
-        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, null, () -> false, () -> null, scope -> s);
+        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, new ApiProvider(), () -> false, () -> null,
+                                                      scope -> s);
         assertThat(t.isAvailable(OAuthScope.SCOPE_APP_WEB)).isFalse();
         when(s.isClosed()).thenReturn(true); // token availability makes no difference
         assertThat(t.isAvailable(OAuthScope.SCOPE_APP_WEB)).isFalse();

@@ -35,19 +35,19 @@ class PaginatedApiImplTest<S, T> {
         final Select sel = mock(Select.class);
         final RoboZonkyFilter filter = new RoboZonkyFilter();
         final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, null));
-        doReturn(null).when(p).execute(eq(f), eq(filter));
+        doReturn(null).when(p).execute(eq(f), eq(filter), anyBoolean());
         p.execute(f, sel, filter);
         verify(sel).accept(filter);
-        verify(p).execute(eq(f), any(RoboZonkyFilter.class));
+        verify(p).execute(eq(f), any(RoboZonkyFilter.class), eq(true));
     }
 
     @Test
     void checkSimple() {
         final Function<T, S> f = o -> null;
         final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, null));
-        doReturn(null).when(p).execute(eq(f), any());
+        doReturn(null).when(p).execute(eq(f), any(), anyBoolean());
         p.execute(f);
-        verify(p).execute(eq(f), isNotNull());
+        verify(p).execute(eq(f), isNotNull(), eq(true));
     }
 
     @Test

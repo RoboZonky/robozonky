@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -35,15 +34,13 @@ import static org.mockito.Mockito.*;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
-    private static final Duration ONE_SECOND = Duration.ofSeconds(1);
-
     private final Lifecycle lifecycle = new Lifecycle();
 
     @Test
     void get() throws Exception {
         final PowerTenant a = mockTenant(harmlessZonky(), true);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a, ONE_SECOND))) {
+        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
             doNothing().when(d).submit(any(), any(), any(), any(), any(), any());
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block

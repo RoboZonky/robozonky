@@ -38,28 +38,25 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LogManager.getLogger(DaemonInvestmentMode.class);
     private final PowerTenant tenant;
-    private final Duration secondaryMarketplaceCheckPeriod;
     private final Consumer<Throwable> shutdownCall;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant,
-                                final Duration secondaryMarketplaceCheckPeriod) {
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant) {
         this.shutdownCall = shutdownCall;
         this.tenant = tenant;
-        this.secondaryMarketplaceCheckPeriod = secondaryMarketplaceCheckPeriod;
     }
 
-    DaemonInvestmentMode(final PowerTenant tenant,
-                         final Duration secondaryMarketplaceCheckPeriod) {
+    DaemonInvestmentMode(final PowerTenant tenant) {
         this(t -> {
-        }, tenant, secondaryMarketplaceCheckPeriod);
+        }, tenant);
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
-        submit(executor, StrategyExecutor.forInvesting(tenant)::get, InvestingSession.class,
-               Duration.ofSeconds(1));
-        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, PurchasingSession.class,
-               secondaryMarketplaceCheckPeriod, Duration.ofMillis(250));
+        // never check marketplaces more than once per second, or else Zonky quotas will come knocking
+        final Duration oneSecond = Duration.ofSeconds(1);
+        submit(executor, StrategyExecutor.forInvesting(tenant)::get, InvestingSession.class, oneSecond);
+        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, PurchasingSession.class, oneSecond,
+               Duration.ofMillis(250)); // delay so that primary and secondary don't happen at the same time
     }
 
     private void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter) {

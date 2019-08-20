@@ -33,13 +33,20 @@ class PaginatedApi<S, T> {
     private final String url;
     private final ResteasyClient client;
     private final Supplier<ZonkyApiToken> tokenSupplier;
+    private final RequestCounter counter;
 
     PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
                  final ResteasyClient client) {
+        this(api, url, token, client, null);
+    }
+
+    public PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
+                        final ResteasyClient client, final RequestCounter counter) {
         this.api = api;
         this.url = url;
         this.client = client;
         this.tokenSupplier = token;
+        this.counter = counter;
     }
 
     /**
@@ -53,17 +60,26 @@ class PaginatedApi<S, T> {
     }
 
     public <Q> Q execute(final Function<T, Q> function) {
-        return this.execute(function, new Select(), newFilter());
+        return this.execute(function, true);
+    }
+
+    public <Q> Q execute(final Function<T, Q> function, final boolean trackRequests) {
+        return this.execute(function, new Select(), newFilter(), trackRequests);
     }
 
     <Q> Q execute(final Function<T, Q> function, final Select select, final RoboZonkyFilter filter) {
-        select.accept(filter);
-        return execute(function, filter);
+        return execute(function, select, filter, true);
     }
 
-    <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter) {
+    <Q> Q execute(final Function<T, Q> function, final Select select, final RoboZonkyFilter filter,
+                  final boolean trackRequests) {
+        select.accept(filter);
+        return execute(function, filter, trackRequests);
+    }
+
+    <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter, final boolean trackRequests) {
         final T proxy = ProxyFactory.newProxy(client, filter, api, url);
-        return Api.call(function, proxy);
+        return Api.call(function, proxy, trackRequests ? counter : null);
     }
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,

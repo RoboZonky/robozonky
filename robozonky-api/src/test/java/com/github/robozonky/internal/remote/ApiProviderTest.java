@@ -53,6 +53,7 @@ class ApiProviderTest {
             assertThat(result).isNotNull();
         }
         verify(p).close();
+        assertThat(p.getRequestCounter()).isNotEmpty();
         assertThat(p.isClosed()).isTrue();
     }
 

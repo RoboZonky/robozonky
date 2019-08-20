@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.events;
+package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.events.impl.EventFactory;
-import org.junit.jupiter.api.Test;
+import java.time.Duration;
 
-import static org.assertj.core.api.Assertions.*;
+public interface RequestCounter {
 
-class GlobalEventsTest extends AbstractZonkyLeveragingTest {
+    long mark();
 
-    @Test
-    void fireReturnsFuture() {
-        final Runnable result = GlobalEvents.get().fire(EventFactory.roboZonkyEnding());
-        result.run(); // make sure it does not throw
-        assertThat(getEventsRequested()).hasSize(1);
-    }
+    long current();
+
+    int count();
+
+    int count(Duration interval);
+
+    void cut(int count);
+
+    void keepOnly(Duration interval);
+
 }
