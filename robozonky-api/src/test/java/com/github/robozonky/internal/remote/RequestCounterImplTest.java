@@ -31,7 +31,7 @@ class RequestCounterImplTest {
         assertThat(counter.count()).isEqualTo(0);
         assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
         assertThat(counter.mark()).isEqualTo(0);
-        Thread.sleep(0, 1); // so that the two marks don't fall in the same nano
+        Thread.sleep(1); // so that the two marks don't fall in the same nano
         assertThat(counter.mark()).isEqualTo(1);
         assertSoftly(softly -> {
             softly.assertThat(counter.current()).isEqualTo(1);
