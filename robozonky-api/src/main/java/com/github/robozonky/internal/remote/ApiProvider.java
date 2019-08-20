@@ -70,12 +70,8 @@ public class ApiProvider implements AutoCloseable {
         this.client = Lazy.of(ProxyFactory::newResteasyClient);
     }
 
-    private static <T> Api<T> obtainNormal(final T proxy, final RequestCounter counter) {
+    static <T> Api<T> actuallyObtainNormal(final T proxy, final RequestCounter counter) {
         return new Api<>(proxy, counter);
-    }
-
-    static <T> Api<T> obtainNormal(final T proxy) {
-        return obtainNormal(proxy, null);
     }
 
     /**
@@ -93,13 +89,13 @@ public class ApiProvider implements AutoCloseable {
 
     <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token) {
         final T proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api, ZONKY_URL);
-        return obtainNormal(proxy, counter);
+        return actuallyObtainNormal(proxy, counter);
     }
 
     private OAuth oauth() {
         final ZonkyOAuthApi proxy = ProxyFactory.newProxy(client.get(), new AuthenticationFilter(), ZonkyOAuthApi.class,
                                                           ZONKY_URL);
-        return new OAuth(obtainNormal(proxy, counter));
+        return new OAuth(actuallyObtainNormal(proxy, counter));
     }
 
     /**
@@ -118,7 +114,7 @@ public class ApiProvider implements AutoCloseable {
      */
     public Collection<RawLoan> marketplace() {
         final EntityCollectionApi<RawLoan> proxy = ProxyFactory.newProxy(client.get(), LoanApi.class, ZONKY_URL);
-        final Api<? extends EntityCollectionApi<RawLoan>> api = obtainNormal(proxy, counter);
+        final Api<? extends EntityCollectionApi<RawLoan>> api = actuallyObtainNormal(proxy, counter);
         return api.call(EntityCollectionApi::items);
     }
 

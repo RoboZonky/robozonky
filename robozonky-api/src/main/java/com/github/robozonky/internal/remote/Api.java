@@ -27,6 +27,7 @@ class Api<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(Api.class);
     private static final Duration ONE_MINUTE = Duration.ofMinutes(1);
+    private static final Duration FIVE_MINUTES = Duration.ofMinutes(5);
 
     private final T proxy;
     private final RequestCounter counter;
@@ -41,8 +42,9 @@ class Api<T> {
     }
 
     private static String assembleLogMessage(final long id, final RequestCounter counter) {
-        final int count = counter.countLast(ONE_MINUTE);
-        return "... done (request #" + id + ", " + count + " requests in last 60 seconds).";
+        final int count1 = counter.count(ONE_MINUTE);
+        final int count5 = counter.count(FIVE_MINUTES);
+        return "... done. (Request #" + id + ", " + count1 + " in last 60 sec., " + count5 + " in last 5 min.)";
     }
 
     static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter) {

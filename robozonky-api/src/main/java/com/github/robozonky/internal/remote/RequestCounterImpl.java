@@ -48,7 +48,12 @@ final class RequestCounterImpl implements RequestCounter {
     }
 
     @Override
-    public int countLast(final Duration interval) {
+    public int count() {
+        return requests.get().size();
+    }
+
+    @Override
+    public int count(final Duration interval) {
         final Instant threshold = DateUtil.now().minus(interval);
         return requests.get().tailMap(threshold).size();
     }

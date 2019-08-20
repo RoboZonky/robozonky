@@ -104,7 +104,7 @@ class ZonkyTest {
 
     private static ApiProvider mockApiProvider() {
         final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
-        final Api<ControlApi> ca = ApiProvider.obtainNormal(mock(ControlApi.class));
+        final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(mock(ControlApi.class), null);
         doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
         final Api<ExportApi> ea = mockApi(mock(ExportApi.class));
         when(apiProvider.exports(any())).thenReturn(ea);

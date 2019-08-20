@@ -32,24 +32,28 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ApiTest {
 
+    private final RequestCounter counter = new RequestCounterImpl();
+
     @Mock
     private Consumer<LoanApi> procedure;
 
     @Test
     void executeFunction() {
         final LoanApi mock = mock(LoanApi.class);
-        final Api<LoanApi> api = new Api<>(mock);
+        final Api<LoanApi> api = new Api<>(mock, counter);
         final String expected = UUID.randomUUID().toString();
         final Function<LoanApi, String> function = (a) -> expected;
         final String result = api.call(function);
         assertThat(result).isSameAs(expected);
+        assertThat(counter.count()).isEqualTo(1);
     }
 
     @Test
     void executeProcedure() {
         final LoanApi mock = mock(LoanApi.class);
-        final Api<LoanApi> api = new Api<>(mock);
+        final Api<LoanApi> api = new Api<>(mock, counter);
         api.run(procedure);
         verify(procedure, times(1)).accept(eq(mock));
+        assertThat(counter.count()).isEqualTo(1);
     }
 }

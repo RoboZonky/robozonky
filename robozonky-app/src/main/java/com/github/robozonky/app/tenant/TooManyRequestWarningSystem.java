@@ -62,7 +62,7 @@ final class TooManyRequestWarningSystem implements Runnable {
 
     @Override
     public void run() {
-        final int requestsInLast600Seconds = counter.countLast(TEN_MINUTES);
+        final int requestsInLast600Seconds = counter.count(TEN_MINUTES);
         boolean informedOfReturnToNormal = false;
         for (int i = 0; i < THRESHOLDS_IN_PERCENT.length; i++) {
             final int thresholdInPercent = THRESHOLDS_IN_PERCENT[i];
