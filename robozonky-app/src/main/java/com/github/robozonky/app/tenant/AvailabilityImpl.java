@@ -42,11 +42,11 @@ final class AvailabilityImpl implements Availability {
 
     @Override
     public Instant nextAvailabilityCheck() {
-        if (!isPaused()) { // no waiting for anything
-            return DateUtil.now();
-        } else if (zonkyApiTokenSupplier.isClosed()) {
-            LOGGER.debug("Zonky OAuth2 token already closed.");
+        if (zonkyApiTokenSupplier.isClosed()) {
+            LOGGER.debug("Zonky OAuth2 token already closed, can not perform any more operations.");
             return Instant.MAX;
+        } else if (!isPaused()) { // no waiting for anything
+            return DateUtil.now();
         }
         final Tuple2<Instant, Long> paused = pause.get();
         final long retries = paused._2;
@@ -71,9 +71,9 @@ final class AvailabilityImpl implements Availability {
     private void register(final Exception ex) {
         if (isPaused()) {
             LOGGER.debug("Pause continues.", ex);
-            pause.set(Tuple.of(DateUtil.now(), 0L));
-        } else {
             pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
+        } else {
+            pause.set(Tuple.of(DateUtil.now(), 0L));
             LOGGER.debug("Fault identified, pause forced.", ex);
             // will go to console, no stack trace
             LOGGER.warn("Forcing a pause due to a potentially irrecoverable fault.");
