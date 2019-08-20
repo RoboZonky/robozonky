@@ -64,17 +64,17 @@ final class AvailabilityImpl implements Availability {
         if (!isPaused()) {
             return;
         }
-        LOGGER.info("Resuming after a forced pause.");
         pause.set(null);
+        LOGGER.info("Resumed after a forced pause.");
     }
 
     private void register(final Exception ex) {
         if (isPaused()) {
-            LOGGER.debug("Pause continues.", ex);
-            pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
+            final Tuple2<Instant, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
+            LOGGER.debug("Forced pause in effect since {}, {} retries.", paused._1, paused._2, ex);
         } else {
             pause.set(Tuple.of(DateUtil.now(), 0L));
-            LOGGER.debug("Fault identified, pause forced.", ex);
+            LOGGER.debug("Fault identified, forcing pause.", ex);
             // will go to console, no stack trace
             LOGGER.warn("Forcing a pause due to a potentially irrecoverable fault.");
         }
