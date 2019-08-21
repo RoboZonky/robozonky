@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.runtime;
+package com.github.robozonky.internal.tenant;
 
-import com.github.robozonky.internal.management.BaseMBean;
+import java.time.Instant;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ResponseProcessingException;
 
-public interface AboutMBean extends BaseMBean {
+public interface Availability {
 
-    void stopDaemon();
+    Instant nextAvailabilityCheck();
 
-    String getZonkyApiVersion();
+    boolean isAvailable();
 
-    String getVersion();
+    void registerAvailability();
+
+    void registerApiIssue(final ResponseProcessingException ex);
+
+    void registerServerError(final ServerErrorException ex);
+
+    void registerClientError(final ClientErrorException ex);
+
 }

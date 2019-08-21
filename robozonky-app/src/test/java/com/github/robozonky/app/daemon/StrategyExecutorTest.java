@@ -248,7 +248,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY));
-        final Investor builder = Investor.build(tenant);
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor();
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec = new StrategyExecutor<>(tenant, d);
         assertThat(exec.get()).isEmpty();
@@ -268,7 +267,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_INVESTMENT_STRATEGY));
-        final Investor builder = Investor.build(tenant);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec = new StrategyExecutor<>(tenant, d);
@@ -288,7 +286,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final PowerTenant tenant = mockTenant(z);
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY));
-        final Investor builder = Investor.build(tenant);
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> exec = new StrategyExecutor<>(tenant, d);
         final Collection<Investment> result = exec.get();

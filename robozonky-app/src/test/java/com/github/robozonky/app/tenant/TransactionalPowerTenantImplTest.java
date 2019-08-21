@@ -24,7 +24,6 @@ import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -36,6 +35,7 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
+import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.TransactionalTenant;
 import org.junit.jupiter.api.Test;
@@ -57,8 +57,8 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void delegatesAvailability() {
-        final boolean available = tenant.isAvailable(OAuthScope.SCOPE_APP_WEB);
-        assertThat(transactional.isAvailable(OAuthScope.SCOPE_APP_WEB)).isEqualTo(available);
+        final Availability result = tenant.getAvailability();
+        assertThat(transactional.getAvailability()).isSameAs(result);
     }
 
     @Test

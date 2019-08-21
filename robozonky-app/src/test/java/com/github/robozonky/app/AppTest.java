@@ -72,13 +72,11 @@ class AppTest extends AbstractEventLeveragingTest {
     void triggersEvents() {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
-        doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
         try {
             assertThat(main.execute(new MyInvestmentMode())).isEqualTo(ReturnCode.OK);
         } finally { // clean up, shutting down executors etc.
             main.exit(ReturnCode.OK);
         }
-        verify(main).ensureLiveness();
         verify(main).actuallyExit(ReturnCode.OK.getCode());
         final List<Event> events = getEventsRequested();
         assertThat(events).hasSize(3);
@@ -93,7 +91,6 @@ class AppTest extends AbstractEventLeveragingTest {
     void unregistersBeans() {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
-        doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
         final int countBefore = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
         main.execute(new MyInvestmentMode());
         final int countAfter = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
@@ -107,7 +104,6 @@ class AppTest extends AbstractEventLeveragingTest {
     void failsCorrectly() {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
-        doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
         try {
             final ReturnCode result = main.execute(new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
@@ -126,7 +122,6 @@ class AppTest extends AbstractEventLeveragingTest {
     void rentierNotSupported() {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
-        doNothing().when(main).ensureLiveness(); // avoid going out to actual live Zonky server
         try {
             final ReturnCode result = main.execute(new RentierMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);

@@ -30,12 +30,14 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class StateCleanerTest {
 
@@ -64,8 +66,8 @@ class StateCleanerTest {
         }
 
         @Override
-        public boolean isAvailable(final OAuthScope scope) {
-            return false;
+        public Availability getAvailability() {
+            return mock(Availability.class);
         }
 
         @Override

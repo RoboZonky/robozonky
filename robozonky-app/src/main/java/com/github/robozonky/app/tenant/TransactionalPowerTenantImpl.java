@@ -34,6 +34,7 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import org.apache.logging.log4j.LogManager;
@@ -101,8 +102,8 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
-    public boolean isAvailable(final OAuthScope scope) {
-        return parent.isAvailable(scope);
+    public Availability getAvailability() {
+        return parent.getAvailability();
     }
 
     @Override

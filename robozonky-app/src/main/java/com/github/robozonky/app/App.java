@@ -84,7 +84,6 @@ public class App implements Runnable {
 
     private ReturnCode executeSafe(final InvestmentMode m) {
         Events.global().fire(EventFactory.roboZonkyStarting());
-        ensureLiveness();
         final InvestmentType type = m.getInvestmentType();
         if (type != null && type != InvestmentType.N && type != InvestmentType.INVESTOR) {
             throw new IllegalStateException("Zonky Rentier customers can not use RoboZonky.");
@@ -107,12 +106,6 @@ public class App implements Runnable {
 
     public Lifecycle getLifecycle() {
         return lifecycle.get();
-    }
-
-    void ensureLiveness() {
-        if (!getLifecycle().waitUntilOnline()) {
-            exit(ReturnCode.ERROR_DOWN);
-        }
     }
 
     public String[] getArgs() {
