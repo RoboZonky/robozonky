@@ -16,11 +16,20 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.function.Consumer;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ResponseProcessingException;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TenantBuilder;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -49,6 +58,63 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final Skippable s = new Skippable(r, t, c);
         assertThatThrownBy(s::run).isInstanceOf(OutOfMemoryError.class);
         verify(c, only()).accept(any());
+    }
+
+    @Test
+    void unavailable() {
+        final Instant now = Instant.now();
+        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        final Runnable r = mock(Runnable.class);
+        doThrow(ClientErrorException.class).when(r).run();
+        final PowerTenant t = new TenantBuilder()
+                .withSecrets(SecretProvider.inMemory("someone@somewhere.cz"))
+                .build();
+        final Consumer<Throwable> c = mock(Consumer.class);
+        final Skippable s = new Skippable(r, t, c);
+        logger.debug("First run.");
+        s.run();
+        verify(r, times(1)).run();
+        assertThat(t.getAvailability().isAvailable()).isFalse();
+        // move one second, make sure it checks again
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(1)), Defaults.ZONE_ID));
+        logger.debug("Second run.");
+        doThrow(ServerErrorException.class).when(r).run();
+        s.run();
+        verify(r, times(2)).run();
+        assertThat(t.getAvailability().isAvailable()).isFalse();
+        // but it failed again, exponential backoff in effect
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(2)), Defaults.ZONE_ID));
+        logger.debug("Third run.");
+        doThrow(ResponseProcessingException.class).when(r).run();
+        s.run();
+        verify(r, times(3)).run();
+        assertThat(t.getAvailability().isAvailable()).isFalse();
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(3)), Defaults.ZONE_ID));
+        logger.debug("Fourth run.");
+        doNothing().when(r).run();
+        s.run();
+        verify(r, times(3)).run(); // not run as we're in the exponential backoff
+        assertThat(t.getAvailability().isAvailable()).isFalse();
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(4)), Defaults.ZONE_ID));
+        logger.debug("Fourth run.");
+        s.run();
+        verify(r, times(4)).run(); // it was run now
+        assertThat(t.getAvailability().isAvailable()).isTrue();
+    }
+
+    @Test
+    void identifiesRootCauseWhenThereIsOne() {
+        final Exception ex = new IllegalStateException(
+                new IllegalArgumentException(
+                        mock(ClientErrorException.class)
+                ));
+        assertThat(Skippable.identifyKnownRootCause(ex)).isInstanceOf(ClientErrorException.class);
+    }
+
+    @Test
+    void doesNotRecurseInfinitely() {
+        final Exception ex = new IllegalStateException(new IllegalArgumentException());
+        assertThat(Skippable.identifyKnownRootCause(ex)).isNull();
     }
 
 }

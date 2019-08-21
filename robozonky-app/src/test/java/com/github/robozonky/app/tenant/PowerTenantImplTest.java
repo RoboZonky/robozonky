@@ -91,6 +91,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+            assertThat(tenant.getAvailability()).isNotNull();
             assertThat(tenant.getLoan(1)).isSameAs(l);
             assertThat(tenant.getInvestment(1)).isSameAs(i);
             assertThat(tenant.getPortfolio()).isNotNull();

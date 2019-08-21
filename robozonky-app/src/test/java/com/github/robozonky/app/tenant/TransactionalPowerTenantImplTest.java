@@ -35,6 +35,7 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
+import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.TransactionalTenant;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,12 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
     private final TransactionalPowerTenant transactional = transactional(tenant);
+
+    @Test
+    void delegatesAvailability() {
+        final Availability result = tenant.getAvailability();
+        assertThat(transactional.getAvailability()).isSameAs(result);
+    }
 
     @Test
     void delegatesRestrictions() {

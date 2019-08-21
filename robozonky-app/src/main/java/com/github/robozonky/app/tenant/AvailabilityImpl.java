@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 final class AvailabilityImpl implements Availability {
 
     private static final Logger LOGGER = LogManager.getLogger(AvailabilityImpl.class);
+
     private final ZonkyApiTokenSupplier zonkyApiTokenSupplier;
     private final AtomicReference<Tuple2<Instant, Long>> pause = new AtomicReference<>();
 
@@ -45,7 +46,7 @@ final class AvailabilityImpl implements Availability {
         if (zonkyApiTokenSupplier.isClosed()) {
             LOGGER.debug("Zonky OAuth2 token already closed, can not perform any more operations.");
             return Instant.MAX;
-        } else if (!isPaused()) { // no waiting for anything
+        } else if (isAvailable()) { // no waiting for anything
             return DateUtil.now();
         }
         final Tuple2<Instant, Long> paused = pause.get();
@@ -55,13 +56,13 @@ final class AvailabilityImpl implements Availability {
     }
 
     @Override
-    public boolean isPaused() {
-        return pause.get() != null;
+    public boolean isAvailable() {
+        return !zonkyApiTokenSupplier.isClosed()  && pause.get() == null;
     }
 
     @Override
     public void registerAvailability() {
-        if (!isPaused()) {
+        if (isAvailable()) {
             return;
         }
         pause.set(null);
@@ -69,14 +70,14 @@ final class AvailabilityImpl implements Availability {
     }
 
     private void register(final Exception ex) {
-        if (isPaused()) {
-            final Tuple2<Instant, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
-            LOGGER.debug("Forced pause in effect since {}, {} retries.", paused._1, paused._2, ex);
-        } else {
+        if (isAvailable()) {
             pause.set(Tuple.of(DateUtil.now(), 0L));
             LOGGER.debug("Fault identified, forcing pause.", ex);
             // will go to console, no stack trace
             LOGGER.warn("Forcing a pause due to a potentially irrecoverable fault.");
+        } else {
+            final Tuple2<Instant, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
+            LOGGER.debug("Forced pause in effect since {}, {} retries.", paused._1, paused._2, ex);
         }
     }
 

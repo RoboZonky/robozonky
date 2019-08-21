@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Instant;
 import java.util.function.Consumer;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
@@ -56,7 +57,7 @@ final class Skippable implements Runnable {
         });
     }
 
-    private static Exception identifyKnownRootCause(final Throwable ex) {
+    static Exception identifyKnownRootCause(final Throwable ex) {
         if (ex instanceof ClientErrorException || ex instanceof ServerErrorException
                 || ex instanceof ResponseProcessingException) {
             return (Exception) ex;
@@ -72,7 +73,9 @@ final class Skippable implements Runnable {
     @Override
     public void run() {
         final Availability availability = tenant.getAvailability();
-        if (!availability.nextAvailabilityCheck().isBefore(DateUtil.now())) {
+        final Instant nextCheck = availability.nextAvailabilityCheck();
+        LOGGER.trace("Next availability check: {}.", nextCheck);
+        if (nextCheck.isAfter(DateUtil.now())) {
             LOGGER.debug("Not running {} on account of the robot being temporarily suspended.", this);
             return;
         }

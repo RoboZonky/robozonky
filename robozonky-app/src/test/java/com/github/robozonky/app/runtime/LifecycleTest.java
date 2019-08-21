@@ -28,9 +28,6 @@ import static org.mockito.Mockito.*;
 
 class LifecycleTest extends AbstractEventLeveragingTest {
 
-    /**
-     * This will unfortunately call the Zonky API, making the test flaky during Zonky downtimes.
-     */
     @Test
     void create() {
         final ShutdownHook hooks = spy(ShutdownHook.class);

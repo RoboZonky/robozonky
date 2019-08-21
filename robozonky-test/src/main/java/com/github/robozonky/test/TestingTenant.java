@@ -127,7 +127,7 @@ public class TestingTenant implements Tenant {
         }
 
         @Override
-        public boolean isPaused() {
+        public boolean isAvailable() {
             return false;
         }
 

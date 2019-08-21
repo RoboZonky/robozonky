@@ -25,7 +25,7 @@ public interface Availability {
 
     Instant nextAvailabilityCheck();
 
-    boolean isPaused();
+    boolean isAvailable();
 
     void registerAvailability();
 
