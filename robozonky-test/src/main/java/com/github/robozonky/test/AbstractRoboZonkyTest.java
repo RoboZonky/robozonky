@@ -41,8 +41,6 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.stubbing.Answer;
@@ -58,7 +56,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     protected static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
                                                                  false),
             SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
-    protected Logger logger = LogManager.getLogger(this.getClass());
 
     protected static Zonky harmlessZonky() {
         final Zonky zonky = mock(Zonky.class);
