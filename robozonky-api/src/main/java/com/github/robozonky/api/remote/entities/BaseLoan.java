@@ -28,6 +28,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.Defaults;
 
 public abstract class BaseLoan extends BaseEntity {
 
@@ -48,7 +49,7 @@ public abstract class BaseLoan extends BaseEntity {
     private double remainingInvestment;
     private double reservedAmount;
     private double zonkyPlusAmount;
-    private Currency currency;
+    private Currency currency = Defaults.CURRENCY;
     private String name;
     private String nickName;
     private String story;

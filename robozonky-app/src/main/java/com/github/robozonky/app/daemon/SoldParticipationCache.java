@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.tenant;
+package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 import java.util.Map;
@@ -22,24 +22,30 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class SoldParticipationCache {
+final class SoldParticipationCache {
 
     private static final Logger LOGGER = LogManager.getLogger(SoldParticipationCache.class);
     private static final Map<SessionInfo, SoldParticipationCache> INSTANCES = new WeakHashMap<>(0);
+    private static final String KEY = "offeredButNotYetSeenSold";
 
+    private final InstanceState<SoldParticipationCache> state;
     private final Set<Integer> listedSoldLocally = new CopyOnWriteArraySet<>();
     private final Reloadable<Set<Integer>> listedSoldRemotely;
 
     private SoldParticipationCache(final Tenant tenant) {
+        this.state = tenant.getState(SoldParticipationCache.class);
         this.listedSoldRemotely = Reloadable.with(() -> retrieveSoldParticipationIds(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
                 .build();
@@ -69,8 +75,30 @@ public final class SoldParticipationCache {
         INSTANCES.clear();
     }
 
+    public synchronized IntStream getOffered() {
+        return state.getValues(KEY)
+                .orElse(Stream.empty())
+                .mapToInt(Integer::parseInt);
+    }
+
+    private synchronized void setOffered(final IntStream values) {
+        state.update(m -> m.put(KEY, values.mapToObj(String::valueOf)));
+    }
+
+    public synchronized void unmarkAsOffered(final int loanId) {
+        setOffered(getOffered().filter(i -> i != loanId));
+    }
+
+    public void markAsOffered(final int loanId) {
+        final IntStream existingValue = getOffered();
+        final IntStream newValues = IntStream.concat(existingValue, IntStream.of(loanId))
+                .distinct();
+        setOffered(newValues);
+    }
+
     public void markAsSold(final int loanId) {
         listedSoldLocally.add(loanId);
+        unmarkAsOffered(loanId);
     }
 
     public boolean wasOnceSold(final int loanId) {

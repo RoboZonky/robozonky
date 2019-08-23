@@ -16,47 +16,30 @@
 
 package com.github.robozonky.app.summaries;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.function.Consumer;
+import java.math.BigDecimal;
+import java.util.Map;
 
-import com.github.robozonky.api.notifications.Summary;
-import com.github.robozonky.api.remote.entities.Transaction;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
-import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.vavr.Tuple2;
 
 final class Summarizer implements TenantPayload {
 
-    private static final Logger LOGGER = LogManager.getLogger(Summarizer.class);
+    private static ExtendedPortfolioOverview extend(final Tenant tenant) {
+        final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> amountsSellable =
+                Util.getAmountsSellable(tenant);
+        return ExtendedPortfolioOverviewImpl.extend(tenant.getPortfolio().getOverview(),
+                                                    Util.getAmountsAtRisk(tenant), amountsSellable._1(),
+                                                    amountsSellable._2());
+    }
 
     private static void run(final PowerTenant tenant) {
-        // assemble processors
-        final CashFlowProcessor cashFlow = new CashFlowProcessor();
-        final LeavingInvestmentProcessor leavingInvestmentProcessor = new LeavingInvestmentProcessor(tenant);
-        final ArrivingInvestmentProcessor newInvestmentProcessor = new ArrivingInvestmentProcessor(tenant);
-        final Collection<Consumer<Transaction>> processors =
-                Arrays.asList(cashFlow, leavingInvestmentProcessor, newInvestmentProcessor);
-        // prepare transactions and process them with all the processors
-        final LocalDate oneWeekAgo = DateUtil.localNow().toLocalDate().minusWeeks(1);
-        LOGGER.debug("Will process transactions with date of {} and closer.", oneWeekAgo);
-        final Select sinceLastTime = new Select().greaterThanOrEquals("transaction.transactionDate", oneWeekAgo);
-        tenant.call(z -> z.getTransactions(sinceLastTime))
-                .parallel() // there may be tens of thousands of them
-                .forEach(t -> processors.forEach(p -> p.accept(t)));
-        // now prepare the summary and trigger the event
-        final Summary summary = new SummaryBuilder(tenant)
-                .addCashFlows(cashFlow)
-                .addIncomingInvestments(newInvestmentProcessor)
-                .addOutgoingInvestments(leavingInvestmentProcessor)
-                .build();
-        tenant.fire(EventFactory.weeklySummary(summary));
+        final ExtendedPortfolioOverview portfolioOverview = extend(tenant);
+        tenant.fire(EventFactory.weeklySummary(portfolioOverview));
     }
 
     @Override

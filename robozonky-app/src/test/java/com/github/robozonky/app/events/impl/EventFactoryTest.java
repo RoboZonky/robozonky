@@ -35,7 +35,6 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
@@ -52,7 +51,6 @@ import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -61,6 +59,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -252,17 +251,6 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void loanRepaid() {
-        final LoanRepaidEvent e = EventFactory.loanRepaid(Investment.custom().build(), Loan.custom().build(),
-                                                          mockPortfolioOverview());
-        assertSoftly(softly -> {
-            softly.assertThat(e.getLoan()).isNotNull();
-            softly.assertThat(e.getInvestment()).isNotNull();
-            softly.assertThat(e.getPortfolioOverview()).isNotNull();
-        });
-    }
-
-    @Test
     void purchaseRecommended() {
         final PurchaseRecommendedEvent e = EventFactory.purchaseRecommended(recommendedParticipation());
         assertSoftly(softly -> {
@@ -408,9 +396,9 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void weeklySummary() {
-        final WeeklySummaryEvent e = EventFactory.weeklySummary(mock(Summary.class));
+        final WeeklySummaryEvent e = EventFactory.weeklySummary(mock(ExtendedPortfolioOverview.class));
         assertSoftly(softly -> {
-            softly.assertThat(e.getSummary()).isNotNull();
+            softly.assertThat(e.getPortfolioOverview()).isNotNull();
             softly.assertThat(e.getConceivedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
         });
     }

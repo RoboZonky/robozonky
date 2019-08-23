@@ -80,7 +80,6 @@ final class Util {
         p.setProperty("email.investmentSold.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.saleOffered.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.reservationAccepted.enabled", isInvestmentEmailEnabled);
-        p.setProperty("email.loanRepaid.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.loanLost.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.loanDefaulted.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.roboZonkyCrashed.enabled", "true");

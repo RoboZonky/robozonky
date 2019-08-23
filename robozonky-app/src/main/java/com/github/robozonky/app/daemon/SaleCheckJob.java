@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.transactions;
+package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.internal.jobs.TenantPayload;
 
-final class TransactionProcessingJob implements TenantJob {
+final class SaleCheckJob implements TenantJob {
 
     @Override
     public TenantPayload payload() {
-        return new IncomeProcessor();
+        return new SaleCheck();
     }
 
     @Override

@@ -9,3 +9,5 @@ Participace s následujícími parametry byla úspěšně prodána:
 <#include "additional-loan-info.ftl">
 
 <#include "additional-portfolio-info.ftl">
+
+Tato notifikace může mít za skutečným prodejem značné zpoždění.

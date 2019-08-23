@@ -23,6 +23,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.internal.Defaults;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
@@ -32,7 +33,7 @@ abstract class BaseInvestment extends BaseEntity {
 
     private long id;
     private int loanId;
-    private Currency currency;
+    private Currency currency = Defaults.CURRENCY;
     private BigDecimal amount;
     private BigDecimal additionalAmount;
     private BigDecimal firstAmount;

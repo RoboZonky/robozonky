@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.tenant;
+package com.github.robozonky.app.daemon;
 
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
@@ -57,7 +59,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void retrieves() {
+    void retrievesSold() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final Investment i1 = Investment.custom().setLoanId(2).build();
@@ -68,5 +70,24 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         instance.markAsSold(1);
         assertThat(instance.wasOnceSold(2)).isTrue();
         assertThat(instance.wasOnceSold(1)).isTrue();
+    }
+
+    @Test
+    void retrievesOffered() {
+        final Zonky zonky = harmlessZonky();
+        final Tenant tenant = mockTenant(zonky);
+        final Investment i1 = Investment.custom().setLoanId(1).build();
+        when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
+        final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
+        assertThat(instance.getOffered()).isEmpty();
+        instance.markAsOffered(1);
+        instance.markAsOffered(2);
+        assertThat(instance.getOffered()).containsOnly(1, 2);
+        instance.markAsSold(1);
+        assertSoftly(softly -> {
+            softly.assertThat(instance.getOffered()).containsOnly(2);
+            softly.assertThat(instance.wasOnceSold(1)).isTrue();
+            softly.assertThat(instance.wasOnceSold(2)).isFalse();
+        });
     }
 }

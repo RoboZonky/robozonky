@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.summaries;
+package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.notifications.LoanAndInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import java.util.Collection;
+import java.util.Collections;
 
-final class LoanAndInvestmentImpl implements LoanAndInvestment {
+import com.github.robozonky.internal.jobs.JobService;
+import com.github.robozonky.internal.jobs.SimpleJob;
+import com.github.robozonky.internal.jobs.TenantJob;
 
-    private final Investment investment;
-    private final Loan loan;
+public final class SaleCheckJobService implements JobService {
 
-    public LoanAndInvestmentImpl(final Investment i, final Loan l) {
-        this.investment = i;
-        this.loan = l;
+    private static final SaleCheckJob INSTANCE = new SaleCheckJob();
+
+    @Override
+    public Collection<SimpleJob> getSimpleJobs() {
+        return Collections.emptyList();
     }
 
     @Override
-    public Investment getInvestment() {
-        return investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
+    public Collection<TenantJob> getTenantJobs() {
+        return Collections.singleton(INSTANCE);
     }
 }

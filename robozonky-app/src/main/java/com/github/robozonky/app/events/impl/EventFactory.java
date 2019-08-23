@@ -37,7 +37,6 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
@@ -59,12 +58,12 @@ import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -166,11 +165,6 @@ public final class EventFactory {
         return new LoanRecommendedEventImpl(recommendation);
     }
 
-    public static LoanRepaidEvent loanRepaid(final Investment investment, final Loan loan,
-                                             final PortfolioOverview portfolioOverview) {
-        return new LoanRepaidEventImpl(investment, loan, portfolioOverview);
-    }
-
     public static PurchaseRecommendedEvent purchaseRecommended(final RecommendedParticipation recommendation) {
         return new PurchaseRecommendedEventImpl(recommendation);
     }
@@ -217,8 +211,8 @@ public final class EventFactory {
         return new RoboZonkyTestingEventImpl();
     }
 
-    public static WeeklySummaryEvent weeklySummary(final Summary summary) {
-        return new WeeklySummaryEventImpl(summary);
+    public static WeeklySummaryEvent weeklySummary(final ExtendedPortfolioOverview portfolioOverview) {
+        return new WeeklySummaryEventImpl(portfolioOverview);
     }
 
     public static RoboZonkyUpdateDetectedEvent roboZonkyUpdateDetected(final String version) {
@@ -325,10 +319,6 @@ public final class EventFactory {
         return async(LoanNoLongerDelinquentEvent.class, supplier);
     }
 
-    public static LazyEvent<LoanRepaidEvent> loanRepaidLazy(final Supplier<LoanRepaidEvent> supplier) {
-        return async(LoanRepaidEvent.class, supplier);
-    }
-
     public static LazyEvent<ExecutionCompletedEvent> executionCompletedLazy(
             final Supplier<ExecutionCompletedEvent> supplier) {
         return async(ExecutionCompletedEvent.class, supplier);
@@ -352,10 +342,6 @@ public final class EventFactory {
     public static LazyEvent<SellingCompletedEvent> sellingCompletedLazy(
             final Supplier<SellingCompletedEvent> supplier) {
         return async(SellingCompletedEvent.class, supplier);
-    }
-
-    public static LazyEvent<SellingStartedEvent> sellingStartedLazy(final Supplier<SellingStartedEvent> supplier) {
-        return async(SellingStartedEvent.class, supplier);
     }
 
     public static <T extends Event> LazyEvent<T> async(final Class<T> clz, final Supplier<T> eventSupplier) {

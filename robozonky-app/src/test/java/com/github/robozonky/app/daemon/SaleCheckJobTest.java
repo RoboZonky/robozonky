@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote;
+package com.github.robozonky.app.daemon;
 
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import java.time.Duration;
 
-import com.github.robozonky.api.remote.entities.Transaction;
-import com.github.robozonky.internal.ApiConstants;
-import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.jobs.TenantJob;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.Test;
 
-@Produces(Defaults.MEDIA_TYPE)
-@Consumes(Defaults.MEDIA_TYPE)
-public interface TransactionApi extends EntityCollectionApi<Transaction> {
+import static org.assertj.core.api.Assertions.*;
 
-    @GET
-    @Path(ApiConstants.ME + "/wallet/transactions")
-    List<Transaction> items();
+class SaleCheckJobTest extends AbstractRoboZonkyTest {
+
+    @Test
+    void getters() {
+        final TenantJob t = new SaleCheckJob();
+        assertThat(t.payload()).isNotNull()
+                .isInstanceOf(SaleCheck.class);
+        assertThat(t.repeatEvery()).isEqualTo(Duration.ofHours(1));
+    }
+
 }

@@ -55,6 +55,57 @@
         "code": "java.method.removed",
         "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAvailable()",
         "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.LoanRepaidEvent",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.Summary",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.strategies.ExtendedPortfolioOverview com.github.robozonky.api.notifications.WeeklySummaryEvent::getPortfolioOverview()",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.notifications.Summary com.github.robozonky.api.notifications.WeeklySummaryEvent::getSummary()",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.TransactionApi",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.Transaction",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder com.github.robozonky.api.remote.entities.sanitized.Investment::sanitize(com.github.robozonky.api.remote.entities.RawInvestment, java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.LocalDate>)",
+        "new": "method com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder com.github.robozonky.api.remote.entities.sanitized.Investment::sanitize(com.github.robozonky.api.remote.entities.RawInvestment)",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.remote.entities.sanitized.Investment::sanitized(com.github.robozonky.api.remote.entities.RawInvestment, java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.LocalDate>)",
+        "new": "method com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.remote.entities.sanitized.Investment::sanitized(com.github.robozonky.api.remote.entities.RawInvestment)",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.TransactionOrientation",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },{
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.LoanAndInvestment",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
       }
     ]
   }
