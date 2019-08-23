@@ -36,7 +36,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.sellingStartedLazy;
 
 /**
  * Implements selling of {@link RawInvestment}s on the secondary marketplace.
@@ -50,7 +49,7 @@ final class Selling implements TenantPayload {
     }
 
     private static Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
-                                                    final SessionState<Investment> sold) {
+                                                    final SoldParticipationCache sold) {
         tenant.fire(EventFactory.saleRequested(r));
         final Investment i = r.descriptor().item();
         final boolean isRealRun = !tenant.getSessionInfo().isDryRun();
@@ -59,7 +58,7 @@ final class Selling implements TenantPayload {
             tenant.run(z -> z.sell(i));
             LOGGER.info("Offered to sell investment in loan #{}.", i.getLoanId());
         }
-        sold.put(i); // make sure dry run never tries to sell this again in this instance
+        sold.markAsOffered(i.getLoanId());
         tenant.fire(EventFactory.saleOffered(i, r.descriptor().related()));
         return Optional.of(i);
     }
@@ -68,23 +67,21 @@ final class Selling implements TenantPayload {
         final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
-        final Set<Investment> marketplace = tenant.call(zonky -> zonky.getInvestments(sellable))
+        final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
+        final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .parallel()
-                .collect(Collectors.toSet());
-        final SessionState<Investment> sold = new SessionState<>(tenant, marketplace, Investment::getLoanId,
-                                                                 "soldInvestments");
-        final Set<InvestmentDescriptor> eligible = marketplace.stream()
-                .filter(i -> !sold.contains(i)) // to make dry run function properly
+                .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
+                .filter(i -> !sold.wasOnceSold(i.getLoanId()))
                 .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
-        tenant.fire(sellingStartedLazy(() -> EventFactory.sellingStarted(eligible, overview)));
+        tenant.fire(EventFactory.sellingStarted(eligible, overview));
         final Stream<RecommendedInvestment> recommended = strategy.recommend(eligible, overview)
                 .peek(r -> tenant.fire(EventFactory.saleRecommended(r)));
         final Stream<RecommendedInvestment> throttled = new SellingThrottle().apply(recommended, overview);
         final Collection<Investment> investmentsSold = throttled
                 .map(r -> processSale(tenant, r, sold))
-                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
+                .flatMap(Optional::stream)
                 .collect(Collectors.toSet());
         tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(investmentsSold,
                                                                              tenant.getPortfolio().getOverview())));

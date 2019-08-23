@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.app.tenant.SoldParticipationCache;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;

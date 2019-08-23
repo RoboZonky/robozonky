@@ -50,6 +50,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     private static Investment mockInvestment(final Loan loan) {
         return Investment.fresh(loan, 200)
+                .setLoanId(loan.getId())
                 .setRating(Rating.AAAAA)
                 .setOriginalTerm(1000)
                 .setRemainingPrincipal(BigDecimal.valueOf(100))
@@ -103,12 +104,10 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     }
 
     private void saleMade(final boolean isDryRun) {
-        final Loan loan = Loan.custom()
-                .setId(1)
-                .build();
+        final Loan loan = Loan.custom().build();
         final Investment i = mockInvestment(loan);
         final Zonky zonky = harmlessZonky();
-        when(zonky.getLoan(eq(1))).thenReturn(loan);
+        when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
         final PowerTenant tenant = mockTenant(zonky, isDryRun);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));

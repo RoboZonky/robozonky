@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.events;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.UUID;
@@ -32,6 +33,7 @@ import com.github.robozonky.internal.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.Mockito.*;
 
 class SessionEventsTest extends AbstractEventLeveragingTest {
@@ -96,7 +98,8 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         events.addListener(e);
         events.injectEventListener(l);
-        events.fire(s);
+        final Runnable r = events.fire(s);
+        assertTimeoutPreemptively(Duration.ofSeconds(5), r::run);
         assertThat(getEventsRequested()).isNotEmpty();
         assertThat(getEventsReady()).isNotEmpty();
         assertThat(getEventsFired()).isNotEmpty();
@@ -112,7 +115,8 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         doThrow(IllegalStateException.class).when(l).handle(any(), any());
         events.injectEventListener(l);
-        events.fire(s);
+        final Runnable r = events.fire(s);
+        assertTimeoutPreemptively(Duration.ofSeconds(5), r::run);
         assertThat(this.getEventsFailed()).isNotEmpty();
     }
 

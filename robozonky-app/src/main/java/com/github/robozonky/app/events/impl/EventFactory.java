@@ -344,10 +344,6 @@ public final class EventFactory {
         return async(SellingCompletedEvent.class, supplier);
     }
 
-    public static LazyEvent<SellingStartedEvent> sellingStartedLazy(final Supplier<SellingStartedEvent> supplier) {
-        return async(SellingStartedEvent.class, supplier);
-    }
-
     public static <T extends Event> LazyEvent<T> async(final Class<T> clz, final Supplier<T> eventSupplier) {
         return new LazyEventImpl<>(clz, eventSupplier);
     }
