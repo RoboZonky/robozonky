@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
@@ -40,6 +41,7 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
+import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -119,6 +121,10 @@ class ZonkyTest {
         return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
     }
 
+    private static Zonky mockZonky(final ApiProvider apiProvider) {
+        return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
+    }
+
     @Test
     void loan() {
         final PaginatedApi<RawLoan, LoanApi> la = mockApi();
@@ -132,6 +138,30 @@ class ZonkyTest {
         when(p.marketplace(any())).thenReturn(la);
         final Zonky z = new Zonky(p, () -> mock(ZonkyApiToken.class));
         assertThat(z.getLoan(loanId).getId()).isEqualTo(loanId);
+    }
+
+    @Test
+    void investmentById() {
+        // prepare data
+        final Loan l1 = Loan.custom()
+                .setCurrency(Defaults.CURRENCY)
+                .build();
+        final Loan l2 = Loan.custom()
+                .setCurrency(null)
+                .build();
+        final Investment i1 = Investment.fresh(l1, 200).build();
+        final Investment i2 = Investment.fresh(l2, 200).build();
+        final RawInvestment ri1 = new RawInvestment(i1);
+        final RawInvestment ri2 = new RawInvestment(i2);
+        // prepare api
+        final PaginatedApi<RawInvestment, PortfolioApi> api = mockApi(List.of(ri2, ri1));
+        final ApiProvider provider = mockApiProvider();
+        when(provider.obtainPaginated(eq(PortfolioApi.class), any(), any())).thenReturn(api);
+        final Zonky z = mockZonky(provider);
+        // start test
+        assertThat(z.getInvestmentByLoanId(i1.getLoanId()))
+                .hasValueSatisfying(i -> assertThat(i.getLoanId()).isEqualTo(i1.getLoanId()));
+
     }
 
     @Test
@@ -237,7 +267,7 @@ class ZonkyTest {
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
         final MyReservation mr = mock(MyReservation.class);
-        when(mr.getId()).thenReturn(111l);
+        when(mr.getId()).thenReturn(111L);
         final Reservation r = Reservation.custom().setMyReservation(mr).build();
         z.accept(r);
         verify(control).accept(argThat(rs -> {

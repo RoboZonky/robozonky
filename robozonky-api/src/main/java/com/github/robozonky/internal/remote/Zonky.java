@@ -19,6 +19,7 @@ package com.github.robozonky.internal.remote;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -125,10 +126,7 @@ public class Zonky {
 
     private static <T> Stream<T> excludeNonCZK(final Stream<T> data,
                                                final Function<T, Currency> extractor) {
-        return data.filter(i -> {
-            final Currency extracted = extractor.apply(i);
-            return extracted == null || extracted.equals(Defaults.CURRENCY);
-        });
+        return data.filter(i -> Objects.equals(extractor.apply(i), Defaults.CURRENCY));
     }
 
     /**
@@ -202,7 +200,7 @@ public class Zonky {
      */
     public Stream<Investment> getInvestments(final Select select) {
         return excludeNonCZK(getStream(portfolioApi, PortfolioApi::items, select), RawInvestment::getCurrency)
-                .map(raw -> Investment.sanitized(raw));
+                .map(Investment::sanitized);
     }
 
     public Stream<Investment> getDelinquentInvestments() {

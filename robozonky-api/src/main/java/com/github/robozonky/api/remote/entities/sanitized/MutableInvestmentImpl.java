@@ -123,6 +123,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
             this.id = i.getId();
             this.investmentDate.set(i.getTimeCreated());
         });
+        this.currency = loan.getCurrency();
         this.loanId = loan.getId();
         this.currentTerm = loan.getTermInMonths();
         this.originalTerm = loan.getTermInMonths();
