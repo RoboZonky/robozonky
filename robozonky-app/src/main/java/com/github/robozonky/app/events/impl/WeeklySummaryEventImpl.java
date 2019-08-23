@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package com.github.robozonky.app.events.impl;
 
-import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 
 final class WeeklySummaryEventImpl extends AbstractEventImpl implements WeeklySummaryEvent {
 
-    private final Summary summary;
+    private final ExtendedPortfolioOverview portfolioOverview;
 
-    public WeeklySummaryEventImpl(final Summary summary) {
-        this.summary = summary;
+    public WeeklySummaryEventImpl(final ExtendedPortfolioOverview extendedPortfolioOverview) {
+        this.portfolioOverview = extendedPortfolioOverview;
     }
 
     @Override
-    public Summary getSummary() {
-        return summary;
+    public ExtendedPortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 }

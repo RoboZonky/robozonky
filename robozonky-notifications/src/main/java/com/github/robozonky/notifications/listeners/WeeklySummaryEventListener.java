@@ -17,11 +17,9 @@
 package com.github.robozonky.notifications.listeners;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import com.github.robozonky.api.notifications.LoanAndInvestment;
-import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
@@ -33,13 +31,9 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
         super(listener, handler);
     }
 
-    private static Map<String, Object> describe(final LoanAndInvestment investment) {
-        return Util.getLoanData(investment.getInvestment(), investment.getLoan());
-    }
-
     @Override
     String getSubject(final WeeklySummaryEvent event) {
-        return "Týdenní souhrn aktivity na Vašem Zonky účtu";
+        return "Týdenní přehled informací o Vašem Zonky portfoliu";
     }
 
     @Override
@@ -49,23 +43,9 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
 
     @Override
     protected Map<String, Object> getData(final WeeklySummaryEvent event) {
-        final Summary summary = event.getSummary();
+        final ExtendedPortfolioOverview summary = event.getPortfolioOverview();
         return Map.ofEntries(
-                entry("inTotal", summary.getCashInTotal()),
-                entry("inFromDeposits", summary.getCashInFromDeposits()),
-                entry("outTotal", summary.getCashOutTotal()),
-                entry("total", summary.getCashInTotal() - summary.getCashOutTotal()),
-                entry("totalDepositsAndWithdrawals",
-                      summary.getCashInFromDeposits() - summary.getCashOutFromWithdrawals()),
-                entry("outFromFees", summary.getCashOutFromFees()),
-                entry("outFromWithdrawals", summary.getCashOutFromWithdrawals()),
-                entry("portfolio", Util.summarizePortfolioStructure(summary.getPortfolioOverview())),
-                entry("incomingInvestments", summary.getArrivingInvestments()
-                        .map(WeeklySummaryEventListener::describe)
-                        .collect(Collectors.toList())),
-                entry("outgoingInvestments", summary.getLeavingInvestments()
-                        .map(WeeklySummaryEventListener::describe)
-                        .collect(Collectors.toList()))
+                entry("portfolio", Util.summarizePortfolioStructure(summary))
         );
     }
 }

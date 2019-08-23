@@ -39,7 +39,6 @@ import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.notifications.LoanAndInvestment;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
@@ -57,7 +56,6 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.Summary;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -804,58 +802,13 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     private static class MyWeeklySummaryEvent implements WeeklySummaryEvent {
 
         @Override
-        public Summary getSummary() {
-            return new Summary() {
-                @Override
-                public int getCashInTotal() {
-                    return 0;
-                }
-
-                @Override
-                public int getCashInFromDeposits() {
-                    return 0;
-                }
-
-                @Override
-                public int getCashOutTotal() {
-                    return 0;
-                }
-
-                @Override
-                public int getCashOutFromFees() {
-                    return 0;
-                }
-
-                @Override
-                public int getCashOutFromWithdrawals() {
-                    return 0;
-                }
-
-                @Override
-                public ExtendedPortfolioOverview getPortfolioOverview() {
-                    return MAX_PORTFOLIO;
-                }
-
-                @Override
-                public Stream<LoanAndInvestment> getLeavingInvestments() {
-                    return Stream.empty();
-                }
-
-                @Override
-                public Stream<LoanAndInvestment> getArrivingInvestments() {
-                    return Stream.empty();
-                }
-
-                @Override
-                public OffsetDateTime getCreatedOn() {
-                    return OffsetDateTime.now();
-                }
-            };
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
         }
 
         @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
+        public ExtendedPortfolioOverview getPortfolioOverview() {
+            return mockPortfolioOverview();
         }
     }
 }

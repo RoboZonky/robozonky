@@ -55,6 +55,25 @@
         "code": "java.method.removed",
         "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkAvailable()",
         "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },{
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.LoanRepaidEvent",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.Summary",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.strategies.ExtendedPortfolioOverview com.github.robozonky.api.notifications.WeeklySummaryEvent::getPortfolioOverview()",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.notifications.Summary com.github.robozonky.api.notifications.WeeklySummaryEvent::getSummary()",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
       }
     ]
   }
