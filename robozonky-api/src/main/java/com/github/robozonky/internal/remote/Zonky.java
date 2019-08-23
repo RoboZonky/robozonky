@@ -16,8 +16,6 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
@@ -59,10 +57,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.Resolution;
-import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
-import com.github.robozonky.internal.test.DateUtil;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -209,31 +205,8 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Investment> getInvestments(final Select select) {
-        final Function<Investment, LocalDate> investmentDateSupplier = i -> {
-            /*
-             * Zonky makes it very difficult to figure out when any particular investment was made. this code attempts
-             * to figure it out.
-             *
-             * we find the first payment from past transactions. if there's no first payment, we use the expected date
-             * or days past due.
-             *
-             * we subtract a month from that value to find out the approximate date when this loan was created.
-             */
-            final Supplier<LocalDate> expectedPayment = () -> i.getNextPaymentDate()
-                    .map(OffsetDateTime::toLocalDate)
-                    .orElse(DateUtil.localNow().toLocalDate()).minusDays(i.getDaysPastDue());
-            final LocalDate lastPayment = getTransactions(i)
-                    .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
-                    .map(Transaction::getTransactionDate)
-                    .sorted()
-                    .findFirst()
-                    .orElseGet(expectedPayment);
-            final LocalDate d = lastPayment.minusMonths(1);
-            LOGGER.debug("Date for investment #{} (loan #{}) was determined to be {}.", i.getId(), i.getLoanId(), d);
-            return d;
-        };
         return excludeNonCZK(getStream(portfolioApi, PortfolioApi::items, select), RawInvestment::getCurrency)
-                .map(raw -> Investment.sanitized(raw, investmentDateSupplier));
+                .map(raw -> Investment.sanitized(raw));
     }
 
     public Stream<Investment> getDelinquentInvestments() {
@@ -278,16 +251,6 @@ public class Zonky {
      */
     public Stream<Transaction> getTransactions(final Select select) {
         return excludeNonCZK(getStream(transactions, TransactionApi::items, select), Transaction::getCurrency);
-    }
-
-    /**
-     * Retrieve transactions from the wallet via {@link TransactionApi}.
-     * @param investment Investment to filter the selection by.
-     * @return All items from the remote API, lazy-loaded, filtered for the specific investment.
-     */
-    public Stream<Transaction> getTransactions(final Investment investment) {
-        final Select select = new Select().equals("investment.id", investment.getId());
-        return getTransactions(select);
     }
 
     /**

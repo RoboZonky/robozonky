@@ -19,7 +19,6 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import java.util.function.Function;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -34,7 +33,7 @@ import com.github.robozonky.internal.test.DateUtil;
 /**
  * It is not recommended to use this class directly as Zonky will return various null references for fields at various
  * points in the investment lifecycle. Please use {@link Investment} as a null-safe alternative. Instances may be
- * created with static methods such as {@link Investment#sanitized(RawInvestment, Function)} )}.
+ * created with static methods such as {@link Investment#sanitized(RawInvestment)} )}.
  */
 public class RawInvestment extends BaseInvestment {
 
@@ -199,6 +198,10 @@ public class RawInvestment extends BaseInvestment {
         return paymentStatus;
     }
 
+    /**
+     *
+     * @return This appears to always be null.
+     */
     @XmlElement
     public OffsetDateTime getInvestmentDate() {
         return investmentDate;

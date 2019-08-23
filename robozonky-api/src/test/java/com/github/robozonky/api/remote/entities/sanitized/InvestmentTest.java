@@ -17,7 +17,6 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.function.Function;
@@ -49,7 +48,7 @@ class InvestmentTest {
     @Test
     @DisplayName("Sanitization works.")
     void sanitizing() {
-        assertThat(Investment.sanitized(mocked, (i) -> LocalDate.now())).isNotNull();
+        assertThat(Investment.sanitized(mocked)).isNotNull();
     }
 
     @Test

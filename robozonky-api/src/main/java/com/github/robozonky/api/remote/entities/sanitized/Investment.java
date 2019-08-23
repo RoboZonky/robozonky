@@ -17,12 +17,10 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Optional;
-import java.util.function.Function;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
@@ -41,15 +39,12 @@ import com.github.robozonky.internal.test.DateUtil;
 public interface Investment {
 
     /**
-     * Create {@link Investment} based on {@link RawInvestment}, figuring out the investment date in case
-     * {@link RawInvestment#getInvestmentDate()} is null.
+     * Create {@link Investment} based on {@link RawInvestment}.
      * @param investment Investment to sanitize.
-     * @param investmentDateSupplier Date to assign in case the original is null.
      * @return Sanitized investment.
      */
-    static Investment sanitized(final RawInvestment investment,
-                                final Function<Investment, LocalDate> investmentDateSupplier) {
-        return sanitize(investment, investmentDateSupplier).build();
+    static Investment sanitized(final RawInvestment investment) {
+        return sanitize(investment).build();
     }
 
     static InvestmentBuilder custom() {
@@ -60,12 +55,10 @@ public interface Investment {
      * Create modifiable {@link Investment} based on {@link RawInvestment}, figuring out the investment date in case
      * {@link RawInvestment#getInvestmentDate()} is null.
      * @param investment Investment to sanitize.
-     * @param investmentDateSupplier Date to assign in case the original is null.
      * @return Sanitized modifiable investment.
      */
-    static InvestmentBuilder sanitize(final RawInvestment investment,
-                                      final Function<Investment, LocalDate> investmentDateSupplier) {
-        return new MutableInvestmentImpl(investment, investmentDateSupplier);
+    static InvestmentBuilder sanitize(final RawInvestment investment) {
+        return new MutableInvestmentImpl(investment);
     }
 
     static InvestmentBuilder fresh(final MarketplaceLoan loan, final int investedAmount) {

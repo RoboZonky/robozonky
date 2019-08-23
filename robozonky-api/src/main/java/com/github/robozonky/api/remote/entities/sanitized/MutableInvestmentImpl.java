@@ -17,7 +17,6 @@
 package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,8 +24,6 @@ import java.util.Collections;
 import java.util.Currency;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
@@ -34,7 +31,6 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.test.RandomUtil;
 import com.github.robozonky.internal.util.ToStringBuilder;
@@ -48,22 +44,34 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private final AtomicReference<OffsetDateTime> investmentDate = new AtomicReference<>();
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
     private long id;
-    private int loanId, currentTerm, originalTerm, remainingMonths;
+    private int loanId;
+    private int currentTerm;
+    private int originalTerm;
+    private int remainingMonths;
     private Integer daysPastDue;
     private OffsetDateTime nextPaymentDate;
     private OffsetDateTime smpFeeExpirationDate;
-    private boolean canBeOffered, isOnSmp, isInsuranceActive, areInstalmentsPostponed;
+    private boolean canBeOffered;
+    private boolean isOnSmp;
+    private boolean isInsuranceActive;
+    private boolean areInstalmentsPostponed;
     private Boolean isInWithdrawal;
     private Ratio interestRate;
     private Ratio revenueRate;
-    private BigDecimal originalPrincipal, paidPrincipal, duePrincipal, paidInterest, dueInterest, expectedInterest,
-            paidPenalty, remainingPrincipal, smpFee, smpSoldFor;
+    private BigDecimal originalPrincipal;
+    private BigDecimal paidPrincipal;
+    private BigDecimal duePrincipal;
+    private BigDecimal paidInterest;
+    private BigDecimal dueInterest;
+    private BigDecimal expectedInterest;
+    private BigDecimal paidPenalty;
+    private BigDecimal remainingPrincipal;
+    private BigDecimal smpFee;
+    private BigDecimal smpSoldFor;
     private Rating rating;
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
-    // default value for investment date, in case it is null
-    private Supplier<LocalDate> investmentDateSupplier = () -> DateUtil.localNow().toLocalDate();
     private Currency currency;
 
     MutableInvestmentImpl() {
@@ -74,10 +82,9 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
      * Create a new instance, basing it on the original {@link RawInvestment}, which will lazy-load investment date
      * if necessary.
      * @param investment The original.
-     * @param investmentDateSupplier Will use this to lazy-load if the original is null.
+     *
      */
-    MutableInvestmentImpl(final RawInvestment investment,
-                          final Function<Investment, LocalDate> investmentDateSupplier) {
+    MutableInvestmentImpl(final RawInvestment investment) {
         LOGGER.trace("Sanitizing investment #{} for loan #{}.", investment.getId(), investment.getLoanId());
         this.currency = investment.getCurrency();
         this.loanId = investment.getLoanId();
@@ -109,7 +116,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInsuranceActive = investment.isInsuranceActive();
         this.areInstalmentsPostponed = investment.isInstalmentPostponement();
         setInsuranceHistory(investment.getInsuranceHistory());
-        this.investmentDateSupplier = () -> investmentDateSupplier.apply(this);
     }
 
     MutableInvestmentImpl(final MarketplaceLoan loan, final BigDecimal originalPrincipal) {
@@ -363,7 +369,10 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     public OffsetDateTime getInvestmentDate() {
         return investmentDate.updateAndGet(old -> {
             if (old == null) {
-                return investmentDateSupplier.get().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
+                final int monthsElapsed = getOriginalTerm() - getRemainingMonths();
+                final OffsetDateTime d = DateUtil.offsetNow().minusMonths(monthsElapsed);
+                LOGGER.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
+                return d;
             }
             return old;
         });
