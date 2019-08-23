@@ -37,7 +37,6 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
@@ -164,11 +163,6 @@ public final class EventFactory {
 
     public static LoanRecommendedEvent loanRecommended(final RecommendedLoan recommendation) {
         return new LoanRecommendedEventImpl(recommendation);
-    }
-
-    public static LoanRepaidEvent loanRepaid(final Investment investment, final Loan loan,
-                                             final PortfolioOverview portfolioOverview) {
-        return new LoanRepaidEventImpl(investment, loan, portfolioOverview);
     }
 
     public static PurchaseRecommendedEvent purchaseRecommended(final RecommendedParticipation recommendation) {
@@ -323,10 +317,6 @@ public final class EventFactory {
     public static LazyEvent<LoanNoLongerDelinquentEvent> loanNoLongerDelinquentLazy(
             final Supplier<LoanNoLongerDelinquentEvent> supplier) {
         return async(LoanNoLongerDelinquentEvent.class, supplier);
-    }
-
-    public static LazyEvent<LoanRepaidEvent> loanRepaidLazy(final Supplier<LoanRepaidEvent> supplier) {
-        return async(LoanRepaidEvent.class, supplier);
     }
 
     public static LazyEvent<ExecutionCompletedEvent> executionCompletedLazy(

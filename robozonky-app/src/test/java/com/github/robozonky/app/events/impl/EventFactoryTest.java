@@ -35,7 +35,6 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
@@ -248,17 +247,6 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getRecommendation()).isNotNull();
-        });
-    }
-
-    @Test
-    void loanRepaid() {
-        final LoanRepaidEvent e = EventFactory.loanRepaid(Investment.custom().build(), Loan.custom().build(),
-                                                          mockPortfolioOverview());
-        assertSoftly(softly -> {
-            softly.assertThat(e.getLoan()).isNotNull();
-            softly.assertThat(e.getInvestment()).isNotNull();
-            softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }
 

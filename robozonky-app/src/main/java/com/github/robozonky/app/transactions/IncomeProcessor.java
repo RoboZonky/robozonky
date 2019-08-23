@@ -43,14 +43,12 @@ final class IncomeProcessor implements TenantPayload {
 
     private static long processNewTransactions(final PowerTenant tenant, final Stream<Transaction> transactions,
                                                final long lastSeenTransactionId) {
-        final Consumer<Transaction> loansRepaid = new LoanRepaidProcessor(tenant);
         final Consumer<Transaction> participationsSold = new ParticipationSoldProcessor(tenant);
         return transactions.parallel() // retrieve remote pages in parallel
                 .filter(t -> t.getId() > lastSeenTransactionId)
                 .collect(Collectors.toMap(Transaction::getLoanId, t -> t, IncomeProcessor.DEDUPLICATOR)) // de-duplicate
                 .values()
                 .parallelStream() // possibly thousands of transactions, process them in parallel
-                .peek(loansRepaid)
                 .peek(participationsSold)
                 .mapToLong(Transaction::getId)
                 .max()

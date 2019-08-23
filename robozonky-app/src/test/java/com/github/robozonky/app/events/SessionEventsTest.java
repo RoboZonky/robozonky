@@ -26,7 +26,6 @@ import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
@@ -46,7 +45,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final Loan l = Loan.custom().build();
         final Investment i = Investment.fresh(l, 200).build();
         final Runnable result = SessionEvents.forSession(SESSION)
-                .fire(EventFactory.loanRepaidLazy(() -> EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class))));
+                .fire(EventFactory.loanNoLongerDelinquentLazy(() -> EventFactory.loanNoLongerDelinquent(i, l)));
         result.run(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }
@@ -56,7 +55,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final Loan l = Loan.custom().build();
         final Investment i = Investment.fresh(l, 200).build();
         final Runnable result = SessionEvents.forSession(SESSION)
-                .fire(EventFactory.loanRepaid(i, l, mock(PortfolioOverview.class)));
+                .fire(EventFactory.loanNoLongerDelinquent(i, l));
         result.run(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }

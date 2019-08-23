@@ -48,7 +48,6 @@ import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -237,7 +236,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.LOAN_DELINQUENT_30_PLUS, new MyLoanDelinquent30Plus(loan, i)),
                 forListener(SupportedListener.LOAN_DELINQUENT_60_PLUS, new MyLoanDelinquent60Plus(loan, i)),
                 forListener(SupportedListener.LOAN_DELINQUENT_90_PLUS, new MyLoanDelinquent90Plus(loan, i)),
-                forListener(SupportedListener.LOAN_REPAID, new MyLoanRepaidEvent(loan, i)),
                 forListener(SupportedListener.WEEKLY_SUMMARY, new MyWeeklySummaryEvent()),
                 forListener(SupportedListener.DAEMON_FAILED, new MyRoboZonkyDaemonFailedEvent()),
                 forListener(SupportedListener.CRASHED, new MyRoboZonkyCrashedEvent()),
@@ -774,37 +772,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public int getThresholdInDays() {
             return 0;
-        }
-    }
-
-    private static class MyLoanRepaidEvent implements LoanRepaidEvent {
-
-        private final Loan loan;
-        private final Investment i;
-
-        public MyLoanRepaidEvent(final Loan loan, final Investment i) {
-            this.loan = loan;
-            this.i = i;
-        }
-
-        @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
-        }
-
-        @Override
-        public Loan getLoan() {
-            return loan;
-        }
-
-        @Override
-        public Investment getInvestment() {
-            return i;
-        }
-
-        @Override
-        public PortfolioOverview getPortfolioOverview() {
-            return MAX_PORTFOLIO;
         }
     }
 

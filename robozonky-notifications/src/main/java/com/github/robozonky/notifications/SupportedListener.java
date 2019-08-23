@@ -30,7 +30,6 @@ import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -49,7 +48,6 @@ import com.github.robozonky.notifications.listeners.LoanDefaultedEventListener;
 import com.github.robozonky.notifications.listeners.LoanDelinquentEventListener;
 import com.github.robozonky.notifications.listeners.LoanLostEventListener;
 import com.github.robozonky.notifications.listeners.LoanNoLongerDelinquentEventListener;
-import com.github.robozonky.notifications.listeners.LoanRepaidEventListener;
 import com.github.robozonky.notifications.listeners.ReservationAcceptedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyCrashedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyDaemonFailedEventListener;
@@ -217,17 +215,6 @@ public enum SupportedListener {
         @Override
         public Class<? extends Event> getEventType() {
             return LoanLostEvent.class;
-        }
-    },
-    LOAN_REPAID {
-        @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new LoanRepaidEventListener(this, targetHandler);
-        }
-
-        @Override
-        public Class<? extends Event> getEventType() {
-            return LoanRepaidEvent.class;
         }
     },
     WEEKLY_SUMMARY {
