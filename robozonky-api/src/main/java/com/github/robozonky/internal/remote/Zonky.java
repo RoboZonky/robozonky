@@ -32,7 +32,6 @@ import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.ReservationApi;
-import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
@@ -48,7 +47,6 @@ import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
@@ -91,7 +89,6 @@ public class Zonky {
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<RawInvestment, PortfolioApi> portfolioApi;
     private final PaginatedApi<BlockedAmount, WalletApi> walletApi;
-    private final PaginatedApi<Transaction, TransactionApi> transactions;
     private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
 
     Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
@@ -102,7 +99,6 @@ public class Zonky {
         this.participationApi = api.secondaryMarketplace(tokenSupplier);
         this.portfolioApi = api.portfolio(tokenSupplier);
         this.walletApi = api.wallet(tokenSupplier);
-        this.transactions = api.transactions(tokenSupplier);
         this.collectionsApi = api.collections(tokenSupplier);
     }
 
@@ -242,15 +238,6 @@ public class Zonky {
     public Stream<MarketplaceLoan> getAvailableLoans(final Select select) {
         return excludeNonCZK(getStream(loanApi, LoanApi::items, select), RawLoan::getCurrency)
                 .map(MarketplaceLoan::sanitized);
-    }
-
-    /**
-     * Retrieve transactions from the wallet via {@link TransactionApi}.
-     * @param select Rules to filter the selection by.
-     * @return All items from the remote API, lazy-loaded, filtered.
-     */
-    public Stream<Transaction> getTransactions(final Select select) {
-        return excludeNonCZK(getStream(transactions, TransactionApi::items, select), Transaction::getCurrency);
     }
 
     /**

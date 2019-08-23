@@ -17,12 +17,9 @@
 package com.github.robozonky.internal.remote;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.CollectionsApi;
@@ -31,25 +28,19 @@ import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
-import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
-import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Reservation;
-import com.github.robozonky.api.remote.enums.TransactionCategory;
-import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -103,26 +94,17 @@ class ZonkyTest {
     }
 
     private static ApiProvider mockApiProvider() {
-        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final ApiProvider apiProvider = spy(new ApiProvider());
         final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(mock(ControlApi.class), null);
         doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
         final Api<ExportApi> ea = mockApi(mock(ExportApi.class));
         when(apiProvider.exports(any())).thenReturn(ea);
         mockPaginated(apiProvider, WalletApi.class);
         mockPaginated(apiProvider, LoanApi.class);
-        mockPaginated(apiProvider, TransactionApi.class);
         mockPaginated(apiProvider, PortfolioApi.class);
         mockPaginated(apiProvider, ParticipationApi.class);
         mockPaginated(apiProvider, CollectionsApi.class);
         return apiProvider;
-    }
-
-    private static Zonky mockZonky(final PaginatedApi<RawInvestment, PortfolioApi> pa,
-                                   final PaginatedApi<Transaction, TransactionApi> ta) {
-        final ApiProvider apiProvider = mockApiProvider();
-        mockPaginated(apiProvider, PortfolioApi.class, pa);
-        mockPaginated(apiProvider, TransactionApi.class, ta);
-        return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
     }
 
     private static Zonky mockZonky(final Api<ControlApi> ca, final PaginatedApi<RawLoan, LoanApi> la) {
@@ -146,7 +128,7 @@ class ZonkyTest {
         when(loan.getAmount()).thenReturn(200.0);
         when(loan.getRemainingInvestment()).thenReturn(200.0);
         when(la.execute(any())).thenReturn(loan);
-        final ApiProvider p = Mockito.spy(new ApiProvider());
+        final ApiProvider p = spy(new ApiProvider());
         when(p.marketplace(any())).thenReturn(la);
         final Zonky z = new Zonky(p, () -> mock(ZonkyApiToken.class));
         assertThat(z.getLoan(loanId).getId()).isEqualTo(loanId);
@@ -162,7 +144,6 @@ class ZonkyTest {
             softly.assertThat(z.getInvestment(1)).isEmpty();
             softly.assertThat(z.getDelinquentInvestments()).isEmpty();
             softly.assertThat(z.getAvailableParticipations(Select.unrestricted())).isEmpty();
-            softly.assertThat(z.getTransactions(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getDevelopments(1)).isEmpty();
         });
     }
@@ -237,31 +218,6 @@ class ZonkyTest {
                 .build();
         z.sell(p);
         verify(control).offer(any());
-    }
-
-    @Test
-    void correctlyGuessesInvestmentDateFromTransactionHistory() {
-        final Loan loan = Loan.custom()
-                .setId(1)
-                .build();
-        final Investment i = Investment.fresh(loan, 200)
-                .build();
-        final RawInvestment r = spy(new RawInvestment(i));
-        when(r.getInvestmentDate()).thenReturn(null); // enforce so that the date-guessing code has a chance to trigger
-        final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi(Collections.singletonList(r));
-        final Transaction irrelevant1 =
-                new Transaction(i, BigDecimal.ZERO, TransactionCategory.SMP_BUY, TransactionOrientation.OUT);
-        final Transaction irrelevant2 =
-                new Transaction(i, BigDecimal.ZERO, TransactionCategory.SMP_SELL, TransactionOrientation.IN);
-        final Transaction relevant =
-                new Transaction(i, BigDecimal.ZERO, TransactionCategory.PAYMENT, TransactionOrientation.IN);
-        final PaginatedApi<Transaction, TransactionApi> ta = mockApi(Arrays.asList(irrelevant1, relevant, irrelevant2));
-        final Zonky z = mockZonky(pa, ta);
-        final Optional<Investment> result = z.getInvestmentByLoanId(loan.getId());
-        assertThat(result).isPresent();
-        final Investment actual = result.get();
-        final LocalDate investmentDate = actual.getInvestmentDate().toLocalDate();
-        assertThat(investmentDate).isEqualTo(relevant.getTransactionDate().minusMonths(1));
     }
 
     @Test
