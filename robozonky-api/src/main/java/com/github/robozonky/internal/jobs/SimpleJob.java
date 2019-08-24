@@ -16,6 +16,14 @@
 
 package com.github.robozonky.internal.jobs;
 
+import com.github.robozonky.internal.tenant.Availability;
+import com.github.robozonky.internal.tenant.Tenant;
+
+/**
+ * Unlike {@link TenantJob}, this {@link Job} does not require a {@link Tenant}. Therefore, operations within this job
+ * are not subject to {@link Availability} and will not report to the user in case they fail. It is therefore ideal for
+ * inward-facing operations of the robot.
+ */
 public interface SimpleJob extends Job {
 
     /**

@@ -42,14 +42,15 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final ExecutorService e = Executors.newFixedThreadPool(1);
         try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
-            doNothing().when(d).submit(any(), any(), any(), any(), any(), any());
+            doNothing().when(d).submitWithTenant(any(), any(), any(), any(), any(), any());
+            doNothing().when(d).submitTenantless(any(), any(), any(), any(), any(), any());
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             // call all the jobs and daemons we know about
-            verify(d, times(2)).submit(any(), any(SimplePayload.class), any(), any(), any(), any());
-            verify(d, times(12)).submit(any(), any(), any(), any(), any(), any());
+            verify(d, times(2)).submitTenantless(any(), any(SimplePayload.class), any(), any(), any(), any());
+            verify(d, times(10)).submitWithTenant(any(), any(), any(), any(), any(), any());
         } finally {
             e.shutdownNow();
         }

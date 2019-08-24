@@ -54,37 +54,47 @@ public class DaemonInvestmentMode implements InvestmentMode {
         LOGGER.debug("Scheduling daemon threads.");
         // never check marketplaces more than once per second, or else Zonky quotas will come knocking
         final Duration oneSecond = Duration.ofSeconds(1);
-        submit(executor, StrategyExecutor.forInvesting(tenant)::get, InvestingSession.class, oneSecond);
-        submit(executor, StrategyExecutor.forPurchasing(tenant)::get, PurchasingSession.class, oneSecond,
-               Duration.ofMillis(250)); // delay so that primary and secondary don't happen at the same time
+        submitWithTenant(executor, StrategyExecutor.forInvesting(tenant)::get, InvestingSession.class, oneSecond);
+        submitWithTenant(executor, StrategyExecutor.forPurchasing(tenant)::get, PurchasingSession.class, oneSecond,
+                         Duration.ofMillis(250)); // delay so that primary and secondary don't happen at the same time
     }
 
-    private void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter) {
-        submit(executor, r, type, repeatAfter, Duration.ZERO);
+    private void submitWithTenant(final Scheduler executor, final Runnable r, final Class<?> type,
+                                  final Duration repeatAfter) {
+        submitWithTenant(executor, r, type, repeatAfter, Duration.ZERO);
     }
 
-    private void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
-                        final Duration initialDelay) {
-        submit(executor, r, type, repeatAfter, initialDelay, Duration.ZERO);
+    private void submitWithTenant(final Scheduler executor, final Runnable r, final Class<?> type,
+                                  final Duration repeatAfter,
+                                  final Duration initialDelay) {
+        submitWithTenant(executor, r, type, repeatAfter, initialDelay, Duration.ZERO);
     }
 
-    void submit(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
-                final Duration initialDelay, final Duration timeout) {
+    void submitWithTenant(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
+                          final Duration initialDelay, final Duration timeout) {
         LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
                      executor, repeatAfter, initialDelay, timeout);
-        executor.submit(new Skippable(r, type, tenant, shutdownCall), repeatAfter, initialDelay, timeout);
+        final Runnable payload = new Skippable(r, type, tenant, shutdownCall);
+        executor.submit(payload, repeatAfter, initialDelay, timeout);
+    }
+
+    void submitTenantless(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
+                          final Duration initialDelay, final Duration timeout) {
+        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
+                     executor, repeatAfter, initialDelay, timeout);
+        final Runnable payload = new SimpleSkippable(r, type, shutdownCall);
+        executor.submit(payload, repeatAfter, initialDelay, timeout);
     }
 
     private void scheduleJobs() {
-        // TODO implement payload timeouts (https://github.com/RoboZonky/robozonky/issues/307)
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submit(Tasks.INSTANCE.scheduler(), j.payload(), j.getClass(), j.repeatEvery(), j.startIn(),
-                                     j.killIn()));
+                .forEach(j -> submitTenantless(Tasks.INSTANCE.scheduler(), j.payload(), j.getClass(), j.repeatEvery(),
+                                               j.startIn(), j.killIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
-                .forEach(j -> submit(Tasks.INSTANCE.scheduler(), () -> j.payload().accept(tenant), j.getClass(),
-                                     j.repeatEvery(), j.startIn(), j.killIn()));
+                .forEach(j -> submitWithTenant(Tasks.INSTANCE.scheduler(), () -> j.payload().accept(tenant),
+                                               j.getClass(), j.repeatEvery(), j.startIn(), j.killIn()));
         LOGGER.debug("Job scheduling over.");
     }
 
