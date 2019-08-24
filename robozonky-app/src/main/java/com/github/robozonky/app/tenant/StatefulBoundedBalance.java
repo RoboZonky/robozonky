@@ -66,10 +66,7 @@ final class StatefulBoundedBalance {
 
     public synchronized void set(final long value) {
         final long newValue = Math.max(1, value); // if < 1, the multiplication in get() does not increase balance
-        final long oldValue = currentValue.getAndSet(newValue);
-        if (oldValue == newValue) { // don't update the timestamp, so that the auto-increases in get() work properly
-            return;
-        }
+        currentValue.set(newValue);
         lastModificationDate.set(DateUtil.now());
         state.update(m -> m.put(VALUE_KEY, Long.toString(newValue)));
     }
@@ -97,7 +94,6 @@ final class StatefulBoundedBalance {
         final long elapsedCycles = nanosBetween / nanosPeriod;
         if (elapsedCycles > 12) {
             LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
-            currentValue.set(Long.MAX_VALUE);
             return Long.MAX_VALUE;
         }
         final long newBalance = balance * (long) Math.pow(2, elapsedCycles);
