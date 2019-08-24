@@ -94,8 +94,13 @@ final class StatefulBoundedBalance {
             LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
             return Long.MAX_VALUE;
         }
-        final long newBalance = balance * (long)Math.pow(2, elapsedCycles);
-        LOGGER.trace("Changing balance upper bound from {} to {} CZK.", balance, newBalance);
-        return newBalance;
+        final long newBalance = balance * (long) Math.pow(2, elapsedCycles);
+        if (newBalance < balance) { // long overflow
+            LOGGER.trace("Balance upper bound reached the theoretical limit.");
+            return Long.MAX_VALUE;
+        } else {
+            LOGGER.trace("Changing balance upper bound from {} to {} CZK.", balance, newBalance);
+            return newBalance;
+        }
     }
 }
