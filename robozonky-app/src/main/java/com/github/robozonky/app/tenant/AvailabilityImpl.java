@@ -79,7 +79,7 @@ final class AvailabilityImpl implements Availability {
              * unfortunately, this will also keep the robot paused in situations where the error was something else,
              * but thankfully the robot never goes much longer than a few seconds without making a metered call.
              */
-            LOGGER.info("Not resuming as there were no metered requests since.");
+            LOGGER.debug("Not resuming as there were no metered requests since.");
             return false;
         } else {
             pause.set(null);
