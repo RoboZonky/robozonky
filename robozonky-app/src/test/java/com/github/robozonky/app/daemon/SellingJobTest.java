@@ -31,6 +31,7 @@ class SellingJobTest extends AbstractRoboZonkyTest {
         final TenantJob t = new SellingJob();
         assertThat(t.payload()).isNotNull()
                 .isInstanceOf(Selling.class);
+        assertThat(t.killIn()).isEqualTo(Duration.ofMinutes(10));
         assertThat(t.repeatEvery()).isEqualTo(Duration.ofHours(2));
     }
 

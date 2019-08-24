@@ -67,7 +67,7 @@ final class Skippable implements Runnable {
         LOGGER.trace("Running {}.", this);
         try {
             toRun.run();
-            final boolean becameAvailable = availability.registerAvailability();
+            final boolean becameAvailable = availability.registerSuccess();
             if (becameAvailable) {
                 tenant.fire(roboZonkyDaemonResumed());
             }

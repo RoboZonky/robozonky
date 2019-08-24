@@ -86,6 +86,9 @@ final class PurchasingSession extends
         }
         final BigDecimal amount = participation.getRemainingPrincipal();
         switch (result.getFailureType().get()) {
+            case TOO_MANY_REQUESTS:
+                // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
+                throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.");
             case INSUFFICIENT_BALANCE:
                 logger.debug("Failed purchasing a participation worth {} CZK. We don't have enough account balance.",
                              amount);

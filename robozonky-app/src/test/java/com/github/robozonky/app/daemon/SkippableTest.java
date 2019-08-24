@@ -29,6 +29,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
@@ -67,6 +68,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final Runnable r = mock(Runnable.class);
         doThrow(ClientErrorException.class).when(r).run();
         final PowerTenant t = new TenantBuilder()
+                .withApi(new ApiProvider(null))
                 .withSecrets(SecretProvider.inMemory("someone@somewhere.cz"))
                 .build();
         final Consumer<Throwable> c = mock(Consumer.class);

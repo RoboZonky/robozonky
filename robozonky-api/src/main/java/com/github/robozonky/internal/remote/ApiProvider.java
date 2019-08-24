@@ -59,10 +59,15 @@ public class ApiProvider implements AutoCloseable {
      * be reused as much as possible.
      */
     private final Lazy<ResteasyClient> client;
-    private final RequestCounter counter = new RequestCounterImpl();
+    private final RequestCounter counter;
 
     public ApiProvider() {
+        this(new RequestCounterImpl());
+    }
+
+    public ApiProvider(final RequestCounter requestCounter) {
         this.client = Lazy.of(ProxyFactory::newResteasyClient);
+        this.counter= requestCounter;
     }
 
     static <T> Api<T> actuallyObtainNormal(final T proxy, final RequestCounter counter) {

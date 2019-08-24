@@ -99,7 +99,10 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
 
     private boolean unsuccessfulInvestment(final RecommendedLoan recommendation,
                                            final InvestmentFailureType failureType) {
-        if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
+        if (failureType == InvestmentFailureType.TOO_MANY_REQUESTS) {
+            // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
+            throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.");
+        } else if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
             tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
         }
         tenant.fire(investmentSkipped(recommendation));

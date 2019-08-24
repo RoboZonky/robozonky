@@ -118,4 +118,37 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(199);
     }
 
+    @Test
+    void failureDueToTooManyRequests() {
+        final Loan l = Loan.custom()
+                .setId(1)
+                .setAmount(200)
+                .setRating(Rating.D)
+                .setNonReservedRemainingInvestment(200)
+                .setMyInvestment(mockMyInvestment())
+                .build();
+        final Participation p = mock(Participation.class);
+        when(p.getLoanId()).thenReturn(l.getId());
+        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        final PurchaseStrategy s = mock(PurchaseStrategy.class);
+        when(s.recommend(any(), any(), any())).thenAnswer(i -> {
+            final Collection<ParticipationDescriptor> participations = i.getArgument(0);
+            return participations.stream()
+                    .map(ParticipationDescriptor::recommend)
+                    .flatMap(Optional::stream);
+        });
+        final Zonky z = harmlessZonky();
+        when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final Response response = new ResponseBuilderImpl()
+                .status(400)
+                .entity(PurchaseFailureType.TOO_MANY_REQUESTS.getReason().get())
+                .build();
+        final ClientErrorException thrown = new BadRequestException(response);
+        when(z.purchase(any())).thenReturn(PurchaseResult.failure(thrown));
+        final PowerTenant auth = mockTenant(z, false);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
+        assertThatThrownBy(() -> PurchasingSession.purchase(auth, Collections.singleton(pd), s))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
 }

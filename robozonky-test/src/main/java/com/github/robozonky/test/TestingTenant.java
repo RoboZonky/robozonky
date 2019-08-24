@@ -129,7 +129,7 @@ public class TestingTenant implements Tenant {
         }
 
         @Override
-        public boolean registerAvailability() {
+        public boolean registerSuccess() {
             return true;
         }
 

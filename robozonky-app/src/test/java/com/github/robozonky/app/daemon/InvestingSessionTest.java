@@ -108,6 +108,21 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void failedDueToTooManyRequests() {
+        final Zonky z = harmlessZonky();
+        final PowerTenant auth = mockTenant(z, false);
+        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
+        final Response response = new ResponseBuilderImpl()
+                .status(400)
+                .entity(InvestmentFailureType.TOO_MANY_REQUESTS.getReason().get())
+                .build();
+        final ClientErrorException thrown = new BadRequestException(response);
+        when(z.invest(any())).thenReturn(InvestmentResult.failure(thrown));
+        final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
+        assertThatThrownBy(() -> t.accept(r)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void failedDueToLowBalance() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);

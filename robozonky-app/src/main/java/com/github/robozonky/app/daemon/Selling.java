@@ -44,10 +44,6 @@ final class Selling implements TenantPayload {
 
     private static final Logger LOGGER = Audit.selling();
 
-    private static InvestmentDescriptor getDescriptor(final Investment i, final Tenant tenant) {
-        return new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId()));
-    }
-
     private static Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
                                                     final SoldParticipationCache sold) {
         tenant.fire(EventFactory.saleRequested(r));
@@ -72,7 +68,7 @@ final class Selling implements TenantPayload {
                 .parallel()
                 .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
                 .filter(i -> !sold.wasOnceSold(i.getLoanId()))
-                .map(i -> getDescriptor(i, tenant))
+                .map(i -> new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId())))
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
         tenant.fire(EventFactory.sellingStarted(eligible, overview));

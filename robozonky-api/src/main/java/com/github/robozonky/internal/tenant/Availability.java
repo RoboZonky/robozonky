@@ -21,7 +21,6 @@ import java.time.Instant;
 public interface Availability {
 
     /**
-     *
      * @return The next time when the app should check for availability. In the meantime, no operations should
      * be attempted.
      */
@@ -34,16 +33,15 @@ public interface Availability {
     boolean isAvailable();
 
     /**
-     * Mark the app as available again.
+     * Report that the app's operation has finished successfully.
      * @return True if {@link #isAvailable()} changed its value as a result of this call.
      */
-    boolean registerAvailability();
+    boolean registerSuccess();
 
     /**
-     * Mark the app as unavailable.
+     * Report an error during the app's operation.
      * @param ex The exception that caused the unavailability.
      * @return True if {@link #isAvailable()} changed its value as a result of this call.
      */
     boolean registerException(final Exception ex);
-
 }

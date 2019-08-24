@@ -28,6 +28,7 @@ import javax.ws.rs.NotFoundException;
  */
 public enum PurchaseFailureType implements Predicate<ClientErrorException> {
 
+    TOO_MANY_REQUESTS("TOO_MANY_REQUESTS"),
     INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE"),
     ALREADY_HAVE_INVESTMENT("ALREADY_HAVE_INVESTMENT"),
     UNKNOWN(NotFoundException.class);

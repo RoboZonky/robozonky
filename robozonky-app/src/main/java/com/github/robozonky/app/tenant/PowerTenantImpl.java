@@ -37,6 +37,7 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
@@ -64,8 +65,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
     private final Lazy<Cache<Investment>> investmentCaches = Lazy.of(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
-    private final Lazy<Availability> availability =
-            Lazy.of(() -> new AvailabilityImpl(getTokenSupplier(OAuthScope.SCOPE_APP_WEB)));
+    private final Lazy<Availability> availability;
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis,
                     final Supplier<StrategyProvider> strategyProvider,
@@ -84,6 +84,11 @@ class PowerTenantImpl implements PowerTenant {
                 .reloadAfter(Duration.ofHours(1))
                 .build();
         this.balance = new StatefulBoundedBalance(this);
+        this.availability = Lazy.of(() -> {
+            final RequestCounter counter = apis.getRequestCounter().orElse(null);
+            return new AvailabilityImpl(getTokenSupplier(OAuthScope.SCOPE_APP_WEB), counter);
+        });
+
     }
 
     @Override

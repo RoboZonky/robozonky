@@ -28,6 +28,7 @@ import javax.ws.rs.NotFoundException;
  */
 public enum InvestmentFailureType implements Predicate<ClientErrorException> {
 
+    TOO_MANY_REQUESTS("TOO_MANY_REQUESTS"),
     CAPTCHA_REQUIRED("CAPTCHA_REQUIRED"),
     INSUFFICIENT_BALANCE("insufficientBalance"),
     CANCELLED("cancelled"),
