@@ -75,7 +75,7 @@ final class Skippable implements Runnable {
             if (becameAvailable) {
                 final OffsetDateTime now = DateUtil.offsetNow();
                 final OffsetDateTime since = unavailableSince.getAndSet(null);
-                LOGGER.trace("Resetting unavailability since date from {}.", since);
+                LOGGER.trace("Resetting unavailability since date from {} on {}.", since, this);
                 tenant.fire(roboZonkyDaemonResumed(since, now));
             }
             LOGGER.trace("Successfully finished {}.", this);
@@ -83,7 +83,7 @@ final class Skippable implements Runnable {
             final boolean becameUnavailable = availability.registerException(ex);
             if (becameUnavailable) {
                 final OffsetDateTime now = DateUtil.offsetNow();
-                LOGGER.trace("Setting unavailability since date to {}.", now);
+                LOGGER.trace("Setting unavailability since date to {} on {}.", now, this);
                 unavailableSince.set(now);
                 tenant.fire(roboZonkyDaemonSuspended(ex));
             }
