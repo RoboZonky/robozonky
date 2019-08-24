@@ -43,7 +43,7 @@ import org.apache.logging.log4j.Logger;
  */
 final class StatefulBoundedBalance {
 
-    private static final Duration BALANCE_INCREASE_INTERVAL_STEP = Duration.ofHours(1);
+    private static final Duration BALANCE_INCREASE_INTERVAL_STEP = Duration.ofMinutes(10);
     private static final String VALUE_KEY = "lastKnownUpperBound";
     private static final Logger LOGGER = LogManager.getLogger(StatefulBoundedBalance.class);
 
@@ -90,11 +90,11 @@ final class StatefulBoundedBalance {
         final long nanosPeriod = BALANCE_INCREASE_INTERVAL_STEP.toNanos();
         final long nanosBetween = timeBetweenLastBalanceCheckAndNow.toNanos();
         final long elapsedCycles = nanosBetween / nanosPeriod;
-        if (elapsedCycles > 4) {
+        if (elapsedCycles > 12) {
             LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
             return Long.MAX_VALUE;
         }
-        final long newBalance = balance * 2 * elapsedCycles;
+        final long newBalance = balance * (long)Math.pow(2, elapsedCycles);
         LOGGER.trace("Changing balance upper bound from {} to {} CZK.", balance, newBalance);
         return newBalance;
     }

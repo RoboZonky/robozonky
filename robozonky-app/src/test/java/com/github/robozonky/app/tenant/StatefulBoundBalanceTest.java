@@ -44,7 +44,7 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
         newNow = newNow.plus(Duration.ofHours(2));
         setClock(Clock.fixed(newNow, Defaults.ZONE_ID));
         assertThat(balance.get())
-                .isEqualTo(1000 * 2 * 2)
+                .isEqualTo(4_096_000)
                 .isLessThan(Long.MAX_VALUE);
         // resets as too much time passes
         newNow = newNow.plus(Duration.ofDays(1));
