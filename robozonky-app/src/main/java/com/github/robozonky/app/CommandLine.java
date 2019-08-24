@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-import com.github.robozonky.app.App;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.app.daemon.Daemon;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TenantBuilder;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.util.UrlUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,10 +40,9 @@ import org.apache.logging.log4j.Logger;
  * Converts command line into application configuration using {@link picocli.CommandLine}.
  */
 @picocli.CommandLine.Command(name = "robozonky(.sh|.bat)")
-public class CommandLine implements Callable<Optional<InvestmentMode>> {
+class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMode>>> {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLine.class);
-    private final Supplier<Lifecycle> lifecycle;
     @picocli.CommandLine.Option(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")
     String strategyLocation = "";
@@ -57,8 +63,7 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
             description = "Path to secure file that contains username, password etc.", required = true)
     private File keystore = null;
 
-    public CommandLine(final Supplier<Lifecycle> lifecycle) {
-        this.lifecycle = lifecycle;
+    public CommandLine() {
         // for backwards compatibility with RoboZonky 4.x, which used JCommander
         System.setProperty("picocli.trimQuotes", "true");
         System.setProperty("picocli.useSimplifiedAtFiles", "true");
@@ -70,13 +75,36 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
      * @param main The code that called this code.
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
-    public static Optional<InvestmentMode> parse(final App main) {
+    public static Optional<Function<Lifecycle, InvestmentMode>> parse(final App main) {
         // parse the arguments
-        final CommandLine cli = new CommandLine(main::getLifecycle);
+        final CommandLine cli = new CommandLine();
         final picocli.CommandLine pico = new picocli.CommandLine(cli);
         pico.execute(main.getArgs());
-        final Optional<InvestmentMode> result = pico.getExecutionResult();
+        final Optional<Function<Lifecycle, InvestmentMode>> result = pico.getExecutionResult();
         return Objects.isNull(result) ? Optional.empty() : result;
+    }
+
+    private static PowerTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
+        final TenantBuilder b = new TenantBuilder();
+        if (cli.isDryRunEnabled()) {
+            LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
+            b.dryRun();
+        }
+        return b.withSecrets(secrets)
+                .withStrategy(cli.getStrategyLocation())
+                .named(cli.getName())
+                .build();
+    }
+
+    private static void configureNotifications(final CommandLine cli, final PowerTenant tenant) {
+        // unregister if registered
+        final SessionInfo session = tenant.getSessionInfo();
+        ListenerServiceLoader.unregisterConfiguration(session);
+        // register if needed
+        cli.getNotificationConfigLocation().ifPresent(cfg -> ListenerServiceLoader.registerConfiguration(session, cfg));
+        // create event handler for this session, otherwise session-less notifications will not be sent
+        final SessionEvents e = Events.forSession(tenant);
+        LOGGER.debug("Notification subsystem initialized: {}.", e);
     }
 
     boolean isDryRunEnabled() {
@@ -92,17 +120,7 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
             LOGGER.info("Notifications are not set up.");
             return Optional.empty();
         }
-        try {
-            final URL url = new URL(notificationConfigLocation);
-            return Optional.of(url);
-        } catch (final MalformedURLException ex) {
-            final File f = new File(notificationConfigLocation);
-            try {
-                return Optional.of(f.getAbsoluteFile().toURI().toURL());
-            } catch (final MalformedURLException ex2) {
-                throw new IllegalStateException("Incorrect format for notification configuration location.", ex2);
-            }
-        }
+        return Optional.of(UrlUtil.toURL(notificationConfigLocation));
     }
 
     char[] getPassword() {
@@ -117,10 +135,16 @@ public class CommandLine implements Callable<Optional<InvestmentMode>> {
         return name;
     }
 
+    private InvestmentMode configure(final SecretProvider secrets, final Lifecycle lifecycle) {
+        final PowerTenant tenant = getTenant(this, secrets);
+        configureNotifications(this, tenant);
+        // and now initialize the chosen mode of operation
+        return new Daemon(tenant, lifecycle);
+    }
+
     @Override
-    public Optional<InvestmentMode> call() {
-        final OperatingMode mode = new OperatingMode(lifecycle);
+    public Optional<Function<Lifecycle, InvestmentMode>> call() {
         return SecretProviderFactory.getSecretProvider(this)
-                .map(secrets -> mode.configure(this, secrets));
+                .map(s -> l -> configure(s, l));
     }
 }

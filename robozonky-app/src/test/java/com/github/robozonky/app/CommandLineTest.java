@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,11 +24,10 @@ import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.app.App;
-import com.github.robozonky.app.ReturnCode;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
@@ -84,21 +83,22 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final App main = new App("-n", name, "-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i",
                                  "somewhere.txt",
                                  "-s", "somewhere");
-        final Optional<InvestmentMode> cfg = CommandLine.parse(main);
+        final Optional<Function<Lifecycle, InvestmentMode>> cfg = CommandLine.parse(main);
         assertThat(cfg).isPresent();
+        cfg.get().apply(null);
         assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }
 
     @Test
     void validDaemonCliNoKeystore() {
         final App main = mockedApp("-g", "a", "-p", "p", "-i", "somewhere.txt", "-s", "somewhere");
-        final Optional<InvestmentMode> cfg = CommandLine.parse(main);
+        final Optional<Function<Lifecycle, InvestmentMode>> cfg = CommandLine.parse(main);
         assertThat(cfg).isEmpty();
     }
 
     @Test
     void quotedAtFile() throws IOException {
-        final CommandLine cli = new CommandLine(mock(Supplier.class));
+        final CommandLine cli = new CommandLine();
         picocli.CommandLine.call(cli, "@" + getPath(getClass().getResourceAsStream("quoted.cli")));
         assertThat(cli.getKeystore()).contains(new File("C:\\Program Files\\RoboZonky\\robozonky.keystore"));
         assertThat(cli.getName()).isEqualTo("Testing Name");
@@ -106,7 +106,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
 
     @Test
     void unquotedAtFile() throws IOException {
-        final CommandLine cli = new CommandLine(mock(Supplier.class));
+        final CommandLine cli = new CommandLine();
         picocli.CommandLine.call(cli, "@" + getPath(getClass().getResourceAsStream("unquoted.cli")));
         assertThat(cli.getKeystore()).contains(new File("C:\\Program Files\\RoboZonky\\robozonky.keystore"));
         assertThat(cli.getName()).isEqualTo("Testing Name");
@@ -128,7 +128,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
 
     @Test
     void getters() {
-        final CommandLine cli = new CommandLine(mock(Supplier.class));
+        final CommandLine cli = new CommandLine();
         assertThat(cli.getKeystore()).isEmpty();
         assertThat(cli.getStrategyLocation()).isEmpty();
         assertThat(cli.getNotificationConfigLocation()).isEmpty();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app;
 
 import java.util.Arrays;
 import java.util.Optional;

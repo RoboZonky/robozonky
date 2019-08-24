@@ -19,17 +19,13 @@ package com.github.robozonky.app;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Function;
 
-import com.github.robozonky.api.remote.enums.InvestmentType;
-import com.github.robozonky.app.configuration.CommandLine;
-import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.management.Management;
-import io.vavr.Lazy;
-import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +37,6 @@ public class App implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(App.class);
 
     private final ShutdownHook shutdownHooks = new ShutdownHook();
-    private final Lazy<Lifecycle> lifecycle = Lazy.of(() -> new Lifecycle(shutdownHooks));
     private final String[] args;
 
     public App(final String... args) {
@@ -71,21 +66,18 @@ public class App implements Runnable {
         actuallyExit(result.getCode());
     }
 
-    ReturnCode execute(final InvestmentMode mode) {
-        return Try.withResources(() -> mode)
-                .of(this::executeSafe)
-                .getOrElseGet(t -> {
-                    LOGGER.error("Caught unexpected exception, terminating daemon.", t);
-                    return ReturnCode.ERROR_UNEXPECTED;
-                });
+    ReturnCode execute(final Function<Lifecycle, InvestmentMode> mode) {
+        try {
+            return this.executeSafe(mode);
+        } catch (final Throwable t) {
+            LOGGER.error("Caught unexpected exception, terminating daemon.", t);
+            return ReturnCode.ERROR_UNEXPECTED;
+        }
     }
 
-    private ReturnCode executeSafe(final InvestmentMode m) {
+    private ReturnCode executeSafe(final Function<Lifecycle, InvestmentMode> modeProvider) {
+        final InvestmentMode m = modeProvider.apply(new Lifecycle(shutdownHooks));
         Events.global().fire(EventFactory.roboZonkyStarting());
-        final InvestmentType type = m.getInvestmentType();
-        if (type != null && type != InvestmentType.N && type != InvestmentType.INVESTOR) {
-            throw new IllegalStateException("Zonky Rentier customers can not use RoboZonky.");
-        }
         // will close event-firing thread == must be triggered last == must be registered first
         shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
         // will trigger events, therefore needs to come before the above
@@ -93,17 +85,13 @@ public class App implements Runnable {
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         // trigger all shutdown hooks in reverse order, before the token is closed after exiting this method
         try {
-            final ReturnCode code = m.apply(getLifecycle());
+            final ReturnCode code = m.get();
             shutdownHooks.execute(code);
             return code;
         } catch (final Throwable ex) {
             shutdownHooks.execute(ReturnCode.ERROR_UNEXPECTED); // make sure all is closed even in a failing situation
             throw new IllegalStateException("Error executing daemon.", ex);
         }
-    }
-
-    public Lifecycle getLifecycle() {
-        return lifecycle.get();
     }
 
     public String[] getArgs() {
@@ -117,7 +105,9 @@ public class App implements Runnable {
                      System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
                      System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
                      Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
-        final ReturnCode code = CommandLine.parse(this).map(this::execute).orElse(ReturnCode.ERROR_SETUP);
+        final ReturnCode code = CommandLine.parse(this)
+                .map(this::execute)
+                .orElse(ReturnCode.ERROR_SETUP);
         exit(code); // call the core code
     }
 }

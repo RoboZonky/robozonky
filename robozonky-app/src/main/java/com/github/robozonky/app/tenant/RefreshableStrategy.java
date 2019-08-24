@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,23 +30,11 @@ class RefreshableStrategy extends Refreshable<String> {
     private final URL url;
 
     protected RefreshableStrategy(final String target) {
-        this(convertToUrl(target));
+        this(UrlUtil.toURL(target));
     }
 
     private RefreshableStrategy(final URL target) {
         this.url = target;
-    }
-
-    protected static URL convertToUrl(final String maybeUrl) {
-        try {
-            return new URL(maybeUrl);
-        } catch (final MalformedURLException e) {
-            try {
-                return new File(maybeUrl).toURI().toURL();
-            } catch (final NullPointerException | MalformedURLException e1) {
-                throw new IllegalStateException("Cannot load strategy " + maybeUrl, e1);
-            }
-        }
     }
 
     @Override

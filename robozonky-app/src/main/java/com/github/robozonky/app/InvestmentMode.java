@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.enums.InvestmentType;
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.runtime.Lifecycle;
 
-public interface InvestmentMode extends Function<Lifecycle, ReturnCode>,
-                                        AutoCloseable {
+public interface InvestmentMode extends AutoCloseable,
+                                        Supplier<ReturnCode> {
 
     SessionInfo getSessionInfo();
-
-    InvestmentType getInvestmentType();
 
 }

@@ -25,10 +25,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
-import com.github.robozonky.api.remote.enums.InvestmentType;
-import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.management.AbstractBaseMBean;
 import com.github.robozonky.internal.management.BaseMBean;
 import com.github.robozonky.internal.management.Management;
@@ -73,7 +70,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         try {
-            assertThat(main.execute(new MyInvestmentMode())).isEqualTo(ReturnCode.OK);
+            assertThat(main.execute(l -> new MyInvestmentMode())).isEqualTo(ReturnCode.OK);
         } finally { // clean up, shutting down executors etc.
             main.exit(ReturnCode.OK);
         }
@@ -92,7 +89,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         final int countBefore = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
-        main.execute(new MyInvestmentMode());
+        main.execute(l -> new MyInvestmentMode());
         final int countAfter = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
         assertThat(countAfter).isEqualTo(countBefore);
     }
@@ -105,7 +102,7 @@ class AppTest extends AbstractEventLeveragingTest {
         final App main = spy(new App());
         doNothing().when(main).actuallyExit(anyInt());
         try {
-            final ReturnCode result = main.execute(new MyFailingInvestmentMode());
+            final ReturnCode result = main.execute(l -> new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } finally { // clean up, shutting down executors etc.
             final List<Event> events = getEventsRequested();
@@ -118,22 +115,6 @@ class AppTest extends AbstractEventLeveragingTest {
         }
     }
 
-    @Test
-    void rentierNotSupported() {
-        final App main = spy(new App());
-        doNothing().when(main).actuallyExit(anyInt());
-        try {
-            final ReturnCode result = main.execute(new RentierMode());
-            assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
-        } finally { // clean up, shutting down executors etc.
-            final List<Event> events = getEventsRequested();
-            assertThat(events).hasSize(1);
-            assertSoftly(softly -> {
-                softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
-            });
-        }
-    }
-
     private static class MyInvestmentMode implements InvestmentMode {
 
         @Override
@@ -142,12 +123,7 @@ class AppTest extends AbstractEventLeveragingTest {
         }
 
         @Override
-        public InvestmentType getInvestmentType() {
-            return InvestmentType.INVESTOR;
-        }
-
-        @Override
-        public ReturnCode apply(final Lifecycle lifecycle) {
+        public ReturnCode get() {
             final ManagementBean<BaseMBean> mb = new ManagementBean<>(BaseMBean.class, Base::new);
             Management.register(mb);
             return ReturnCode.OK;
@@ -175,12 +151,7 @@ class AppTest extends AbstractEventLeveragingTest {
         }
 
         @Override
-        public InvestmentType getInvestmentType() {
-            return InvestmentType.INVESTOR;
-        }
-
-        @Override
-        public ReturnCode apply(final Lifecycle lifecycle) {
+        public ReturnCode get() {
             throw new IllegalStateException("Testing failure");
         }
 
@@ -189,30 +160,6 @@ class AppTest extends AbstractEventLeveragingTest {
 
         }
     }
-
-    private static class RentierMode implements InvestmentMode {
-
-        @Override
-        public SessionInfo getSessionInfo() {
-            return SESSION;
-        }
-
-        @Override
-        public InvestmentType getInvestmentType() {
-            return InvestmentType.RENTIER;
-        }
-
-        @Override
-        public ReturnCode apply(final Lifecycle lifecycle) {
-            throw new IllegalStateException("Testing failure");
-        }
-
-        @Override
-        public void close() {
-
-        }
-    }
-
 }
 
 

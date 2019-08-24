@@ -16,8 +16,10 @@
 
 package com.github.robozonky.internal.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -27,6 +29,19 @@ public final class UrlUtil {
 
     private UrlUtil() {
         // no instances
+    }
+
+    public static URL toURL(final String string) {
+        try {
+            return new URL(string);
+        } catch (final MalformedURLException ex) {
+            final File f = new File(string);
+            try {
+                return f.getAbsoluteFile().toURI().toURL();
+            } catch (final MalformedURLException ex2) {
+                throw new IllegalArgumentException("Incorrect location configuration.", ex2);
+            }
+        }
     }
 
     public static InputStream open(final URL url) throws IOException {

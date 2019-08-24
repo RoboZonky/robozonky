@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
+class DaemonTest extends AbstractZonkyLeveragingTest {
 
     private final Lifecycle lifecycle = new Lifecycle();
 
@@ -40,11 +40,11 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
     void get() throws Exception {
         final PowerTenant a = mockTenant(harmlessZonky(), true);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try (final DaemonInvestmentMode d = spy(new DaemonInvestmentMode(a))) {
+        try (final Daemon d = spy(new Daemon(a, lifecycle))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
             doNothing().when(d).submitWithTenant(any(), any(), any(), any(), any(), any());
             doNothing().when(d).submitTenantless(any(), any(), any(), any(), any(), any());
-            final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
+            final Future<ReturnCode> f = e.submit(d::get); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish

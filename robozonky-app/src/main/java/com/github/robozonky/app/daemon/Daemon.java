@@ -17,37 +17,35 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.enums.InvestmentType;
+import com.github.robozonky.app.InvestmentMode;
 import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.async.Scheduler;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.extensions.JobServiceLoader;
-import com.github.robozonky.internal.remote.Zonky;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DaemonInvestmentMode implements InvestmentMode {
+public class Daemon implements InvestmentMode {
 
-    private static final Logger LOGGER = LogManager.getLogger(DaemonInvestmentMode.class);
+    private static final Logger LOGGER = LogManager.getLogger(Daemon.class);
+    private final AtomicReference<Lifecycle> shutdownEnabler = new AtomicReference<>();
     private final PowerTenant tenant;
-    private final Consumer<Throwable> shutdownCall;
+    private final Lifecycle lifecycle;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final PowerTenant tenant) {
-        this.shutdownCall = shutdownCall;
-        this.tenant = tenant;
+    Daemon(final PowerTenant tenant) {
+        this(tenant, null);
     }
 
-    DaemonInvestmentMode(final PowerTenant tenant) {
-        this(t -> {
-        }, tenant);
+    public Daemon(final PowerTenant tenant, final Lifecycle lifecycle) {
+        this.tenant = tenant;
+        this.lifecycle = lifecycle;
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
@@ -74,7 +72,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
                           final Duration initialDelay, final Duration timeout) {
         LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
                      executor, repeatAfter, initialDelay, timeout);
-        final Runnable payload = new Skippable(r, type, tenant, shutdownCall);
+        final Runnable payload = new Skippable(r, type, tenant, this::triggerShutdownDueToFailure);
         executor.submit(payload, repeatAfter, initialDelay, timeout);
     }
 
@@ -82,8 +80,12 @@ public class DaemonInvestmentMode implements InvestmentMode {
                           final Duration initialDelay, final Duration timeout) {
         LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
                      executor, repeatAfter, initialDelay, timeout);
-        final Runnable payload = new SimpleSkippable(r, type, shutdownCall);
+        final Runnable payload = new SimpleSkippable(r, type, this::triggerShutdownDueToFailure);
         executor.submit(payload, repeatAfter, initialDelay, timeout);
+    }
+
+    private void triggerShutdownDueToFailure(final Throwable throwable) {
+        shutdownEnabler.get().resumeToFail(throwable);
     }
 
     private void scheduleJobs() {
@@ -104,12 +106,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     @Override
-    public InvestmentType getInvestmentType() {
-        return tenant.call(Zonky::getWallet).getInvestmentType();
-    }
-
-    @Override
-    public ReturnCode apply(final Lifecycle lifecycle) {
+    public ReturnCode get() {
         return Try.of(() -> {
             // schedule the tasks
             scheduleJobs();
