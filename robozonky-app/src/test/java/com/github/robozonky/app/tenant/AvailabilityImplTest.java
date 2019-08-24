@@ -32,6 +32,7 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
+import static com.github.robozonky.app.tenant.AvailabilityImpl.MANDATORY_DELAY_IN_SECONDS;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -69,17 +70,20 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
         a.registerException(new ResponseProcessingException(r, UUID.randomUUID().toString()));
         assertSoftly(softly -> {
             softly.assertThat(a.isAvailable()).isFalse();
-            softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now.plus(Duration.ofSeconds(1)));
+            softly.assertThat(a.nextAvailabilityCheck())
+                    .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 1)));
         });
         a.registerException(new ClientErrorException(429));
         assertSoftly(softly -> {
             softly.assertThat(a.isAvailable()).isFalse();
-            softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now.plus(Duration.ofSeconds(2)));
+            softly.assertThat(a.nextAvailabilityCheck())
+                    .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 2)));
         });
         a.registerException(new ServerErrorException(503));
         assertSoftly(softly -> {
             softly.assertThat(a.isAvailable()).isFalse();
-            softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now.plus(Duration.ofSeconds(4)));
+            softly.assertThat(a.nextAvailabilityCheck())
+                    .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 4)));
         });
         a.registerSuccess();
         assertSoftly(softly -> {
@@ -100,7 +104,8 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
         a.registerException(new ResponseProcessingException(r, UUID.randomUUID().toString()));
         assertSoftly(softly -> {
             softly.assertThat(a.isAvailable()).isFalse();
-            softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now.plus(Duration.ofSeconds(1)));
+            softly.assertThat(a.nextAvailabilityCheck())
+                    .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 1)));
         });
         // request count not increased == no API operation performed == no availability change
         final boolean available = a.registerSuccess();
@@ -116,5 +121,4 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(a.isAvailable()).isTrue();
         });
     }
-
 }

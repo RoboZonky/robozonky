@@ -78,26 +78,27 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         verify(r, times(1)).run();
         assertThat(t.getAvailability().isAvailable()).isFalse();
         // move one second, make sure it checks again
-        setClock(Clock.fixed(now.plus(Duration.ofSeconds(1)), Defaults.ZONE_ID));
+        final int mandatoryDelay = 5;
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(mandatoryDelay + 1)), Defaults.ZONE_ID));
         logger.debug("Second run.");
         doThrow(ServerErrorException.class).when(r).run();
         s.run();
         verify(r, times(2)).run();
         assertThat(t.getAvailability().isAvailable()).isFalse();
         // but it failed again, exponential backoff in effect
-        setClock(Clock.fixed(now.plus(Duration.ofSeconds(2)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(mandatoryDelay + 2)), Defaults.ZONE_ID));
         logger.debug("Third run.");
         doThrow(ResponseProcessingException.class).when(r).run();
         s.run();
         verify(r, times(3)).run();
         assertThat(t.getAvailability().isAvailable()).isFalse();
-        setClock(Clock.fixed(now.plus(Duration.ofSeconds(3)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(mandatoryDelay + 3)), Defaults.ZONE_ID));
         logger.debug("Fourth run.");
         doNothing().when(r).run();
         s.run();
         verify(r, times(3)).run(); // not run as we're in the exponential backoff
         assertThat(t.getAvailability().isAvailable()).isFalse();
-        setClock(Clock.fixed(now.plus(Duration.ofSeconds(4)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(mandatoryDelay + 4)), Defaults.ZONE_ID));
         logger.debug("Fourth run.");
         s.run();
         verify(r, times(4)).run(); // it was run now

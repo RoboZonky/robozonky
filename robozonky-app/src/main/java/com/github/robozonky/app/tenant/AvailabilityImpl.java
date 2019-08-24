@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 final class AvailabilityImpl implements Availability {
 
     private static final Logger LOGGER = LogManager.getLogger(AvailabilityImpl.class);
+    static final int MANDATORY_DELAY_IN_SECONDS = 5;
 
     private final ZonkyApiTokenSupplier zonkyApiTokenSupplier;
     private final AtomicReference<Tuple3<Instant, Long, Long>> pause = new AtomicReference<>();
@@ -51,7 +52,8 @@ final class AvailabilityImpl implements Availability {
         }
         final Tuple3<Instant, Long, Long> paused = pause.get();
         final long retries = paused._2;
-        final long secondsFromPauseToNextCheck = (long) Math.pow(2, retries);
+        // add 5 seconds of initial delay to give time to recover from HTTP 429 or whatever other problem there was
+        final long secondsFromPauseToNextCheck = MANDATORY_DELAY_IN_SECONDS + (long) Math.pow(2, retries);
         return paused._1.plus(Duration.ofSeconds(secondsFromPauseToNextCheck));
     }
 
