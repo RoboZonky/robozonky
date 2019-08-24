@@ -102,10 +102,16 @@
         "code": "java.class.removed",
         "old": "enum com.github.robozonky.api.remote.enums.TransactionOrientation",
         "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
-      },{
+      },
+      {
         "code": "java.class.removed",
         "old": "interface com.github.robozonky.api.notifications.LoanAndInvestment",
         "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent",
+        "justification": "Replaced with RoboZonkyDaemonSuspendedEvent."
       }
     ]
   }

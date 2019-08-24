@@ -49,7 +49,8 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -235,7 +236,8 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.LOAN_DELINQUENT_60_PLUS, new MyLoanDelinquent60Plus(loan, i)),
                 forListener(SupportedListener.LOAN_DELINQUENT_90_PLUS, new MyLoanDelinquent90Plus(loan, i)),
                 forListener(SupportedListener.WEEKLY_SUMMARY, new MyWeeklySummaryEvent()),
-                forListener(SupportedListener.DAEMON_FAILED, new MyRoboZonkyDaemonFailedEvent()),
+                forListener(SupportedListener.DAEMON_SUSPENDED, new MyRoboZonkyDaemonSuspendedEvent()),
+                forListener(SupportedListener.DAEMON_RESUMED, new MyRoboZonkyDaemonResumedEvent()),
                 forListener(SupportedListener.CRASHED, new MyRoboZonkyCrashedEvent()),
                 forListener(SupportedListener.INITIALIZED, (RoboZonkyInitializedEvent) OffsetDateTime::now),
                 forListener(SupportedListener.ENDING, (RoboZonkyEndingEvent) OffsetDateTime::now),
@@ -304,7 +306,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         }
     }
 
-    private static class MyRoboZonkyDaemonFailedEvent implements RoboZonkyDaemonFailedEvent {
+    private static class MyRoboZonkyDaemonSuspendedEvent implements RoboZonkyDaemonSuspendedEvent {
 
         @Override
         public OffsetDateTime getCreatedOn() {
@@ -315,6 +317,15 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         public Throwable getCause() {
             return new RuntimeException();
         }
+    }
+
+    private static class MyRoboZonkyDaemonResumedEvent implements RoboZonkyDaemonResumedEvent {
+
+        @Override
+        public OffsetDateTime getCreatedOn() {
+            return OffsetDateTime.now();
+        }
+
     }
 
     private static class MyRoboZonkyCrashedEvent implements RoboZonkyCrashedEvent {

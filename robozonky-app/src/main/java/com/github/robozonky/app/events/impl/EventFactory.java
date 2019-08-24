@@ -46,7 +46,8 @@ import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -187,8 +188,12 @@ public final class EventFactory {
         return new RoboZonkyCrashedEventImpl(cause);
     }
 
-    public static RoboZonkyDaemonFailedEvent roboZonkyDaemonFailed(final Exception cause) {
-        return new RoboZonkyDaemonFailedEventImpl(cause);
+    public static RoboZonkyDaemonSuspendedEvent roboZonkyDaemonSuspended(final Exception cause) {
+        return new RoboZonkyDaemonSuspendedEventImpl(cause);
+    }
+
+    public static RoboZonkyDaemonResumedEvent roboZonkyDaemonResumed() {
+        return new RoboZonkyDaemonResumedEventImpl();
     }
 
     public static RoboZonkyEndingEvent roboZonkyEnding() {

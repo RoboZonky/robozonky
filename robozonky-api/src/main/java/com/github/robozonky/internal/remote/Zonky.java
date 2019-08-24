@@ -140,6 +140,7 @@ public class Zonky {
             controlApi.run(api -> api.invest(new RawInvestment(investment)));
             return InvestmentResult.success();
         } catch (final ClientErrorException ex) {
+            LOGGER.debug("Caught API exception during investment.", ex);
             return InvestmentResult.failure(ex);
         }
     }
@@ -155,6 +156,7 @@ public class Zonky {
             controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
             return PurchaseResult.success();
         } catch (final ClientErrorException ex) {
+            LOGGER.debug("Caught API exception during purchasing.", ex);
             return PurchaseResult.failure(ex);
         }
     }

@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
-import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
+import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.robozonky.notifications.listeners.RoboZonkyInitializedEventListener;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 class NotificationEventListenerSupplierTest {
 
     private static ConfigStorage mockProperties() throws IOException {
-        final InputStream is = RoboZonkyTestingEventListener.class
+        final InputStream is = RoboZonkyInitializedEventListener.class
                 .getResourceAsStream("notifications-enabled-spamless.cfg");
         return mockProperties(is);
     }
@@ -41,12 +41,12 @@ class NotificationEventListenerSupplierTest {
 
     @Test
     void lifecycle() throws IOException {
-        final NotificationEventListenerSupplier<RoboZonkyDaemonFailedEvent> s =
-                new NotificationEventListenerSupplier<>(RoboZonkyDaemonFailedEvent.class);
+        final NotificationEventListenerSupplier<RoboZonkyInitializedEvent> s =
+                new NotificationEventListenerSupplier<>(RoboZonkyInitializedEvent.class);
         assertThat(s.apply(Target.EMAIL)).isEmpty();
         // the listener is enabled here
         final ConfigStorage p =
-                mockProperties(RoboZonkyTestingEventListener.class.getResourceAsStream("notifications-enabled.cfg"));
+                mockProperties(RoboZonkyInitializedEventListener.class.getResourceAsStream("notifications-enabled.cfg"));
         s.valueSet(p);
         assertThat(s.apply(Target.EMAIL)).isPresent();
         // disabled here

@@ -17,22 +17,33 @@
 package com.github.robozonky.internal.tenant;
 
 import java.time.Instant;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.client.ResponseProcessingException;
 
 public interface Availability {
 
+    /**
+     *
+     * @return The next time when the app should check for availability. In the meantime, no operations should
+     * be attempted.
+     */
     Instant nextAvailabilityCheck();
 
+    /**
+     * Whether or not the app is available.
+     * @return False if the app is considered in downtime.
+     */
     boolean isAvailable();
 
-    void registerAvailability();
+    /**
+     * Mark the app as available again.
+     * @return True if {@link #isAvailable()} changed its value as a result of this call.
+     */
+    boolean registerAvailability();
 
-    void registerApiIssue(final ResponseProcessingException ex);
-
-    void registerServerError(final ServerErrorException ex);
-
-    void registerClientError(final ClientErrorException ex);
+    /**
+     * Mark the app as unavailable.
+     * @param ex The exception that caused the unavailability.
+     * @return True if {@link #isAvailable()} changed its value as a result of this call.
+     */
+    boolean registerException(final Exception ex);
 
 }

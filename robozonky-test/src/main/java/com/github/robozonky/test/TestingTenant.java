@@ -19,9 +19,6 @@ package com.github.robozonky.test;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Function;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.client.ResponseProcessingException;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -132,23 +129,14 @@ public class TestingTenant implements Tenant {
         }
 
         @Override
-        public void registerAvailability() {
-
+        public boolean registerAvailability() {
+            return true;
         }
 
         @Override
-        public void registerApiIssue(final ResponseProcessingException ex) {
-
+        public boolean registerException(final Exception ex) {
+            return true;
         }
 
-        @Override
-        public void registerServerError(final ServerErrorException ex) {
-
-        }
-
-        @Override
-        public void registerClientError(final ClientErrorException ex) {
-
-        }
     }
 }

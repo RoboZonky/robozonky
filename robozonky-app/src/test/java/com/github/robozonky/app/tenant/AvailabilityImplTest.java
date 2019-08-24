@@ -63,17 +63,17 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
         final Instant now = Instant.now();
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
         final Response r = new ResponseBuilderImpl().build();
-        a.registerApiIssue(new ResponseProcessingException(r, UUID.randomUUID().toString()));
+        a.registerException(new ResponseProcessingException(r, UUID.randomUUID().toString()));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(a.isAvailable()).isFalse();
             softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now.plus(Duration.ofSeconds(1)));
         });
-        a.registerClientError(new ClientErrorException(429));
+        a.registerException(new ClientErrorException(429));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(a.isAvailable()).isFalse();
             softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now.plus(Duration.ofSeconds(2)));
         });
-        a.registerServerError(new ServerErrorException(503));
+        a.registerException(new ServerErrorException(503));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(a.isAvailable()).isFalse();
             softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now.plus(Duration.ofSeconds(4)));

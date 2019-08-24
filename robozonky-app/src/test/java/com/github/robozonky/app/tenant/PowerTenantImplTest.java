@@ -19,7 +19,7 @@ package com.github.robozonky.app.tenant;
 import java.util.Collections;
 import java.util.Optional;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -38,7 +38,7 @@ import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static org.assertj.core.api.Assertions.*;
@@ -117,11 +117,11 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
-            tenant.fire(roboZonkyDaemonFailed(new IllegalStateException()));
+            tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)
-                .first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+                .first().isInstanceOf(RoboZonkyDaemonSuspendedEvent.class);
     }
 
     @Test

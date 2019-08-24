@@ -93,6 +93,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - confirmedAmount);
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
+        logger.info("Invested {} CZK into loan #{}.", confirmedAmount, l.getId());
         return true;
     }
 
@@ -102,6 +103,8 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
         }
         tenant.fire(investmentSkipped(recommendation));
+        logger.debug("Failed investing {} CZK into loan #{}, reason: {}.",
+                     recommendation.amount(), recommendation.descriptor().item().getId(), failureType);
         return false;
     }
 
@@ -117,7 +120,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         final int loanId = loan.item().getId();
         tenant.fire(investmentRequested(recommendation));
         final Either<InvestmentFailureType, BigDecimal> response = investor.invest(recommendation);
-        logger.debug("Response for loan {}: {}.", loanId, response);
         return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
                              amount -> successfulInvestment(recommendation, amount));
     }

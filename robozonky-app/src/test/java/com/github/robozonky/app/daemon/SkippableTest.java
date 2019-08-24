@@ -24,7 +24,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.ResponseProcessingException;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TenantBuilder;
@@ -46,7 +46,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         s.run();
         assertThat(this.getEventsRequested()).hasSize(1)
                 .first()
-                .isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+                .isInstanceOf(RoboZonkyDaemonSuspendedEvent.class);
     }
 
     @Test
@@ -100,21 +100,6 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         s.run();
         verify(r, times(4)).run(); // it was run now
         assertThat(t.getAvailability().isAvailable()).isTrue();
-    }
-
-    @Test
-    void identifiesRootCauseWhenThereIsOne() {
-        final Exception ex = new IllegalStateException(
-                new IllegalArgumentException(
-                        mock(ClientErrorException.class)
-                ));
-        assertThat(Skippable.identifyKnownRootCause(ex)).isInstanceOf(ClientErrorException.class);
-    }
-
-    @Test
-    void doesNotRecurseInfinitely() {
-        final Exception ex = new IllegalStateException(new IllegalArgumentException());
-        assertThat(Skippable.identifyKnownRootCause(ex)).isNull();
     }
 
 }

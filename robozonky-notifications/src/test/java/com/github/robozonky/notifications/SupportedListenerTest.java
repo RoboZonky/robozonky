@@ -29,7 +29,7 @@ class SupportedListenerTest {
         final SupportedListener[] overriding = new SupportedListener[] {
                 SupportedListener.UPDATE_DETECTED, SupportedListener.CRASHED,
                 SupportedListener.EXPERIMENTAL_UPDATE_DETECTED, SupportedListener.ENDING, SupportedListener.INITIALIZED,
-                SupportedListener.WEEKLY_SUMMARY
+                SupportedListener.WEEKLY_SUMMARY, SupportedListener.DAEMON_RESUMED, SupportedListener.DAEMON_SUSPENDED
         };
         Arrays.stream(SupportedListener.values()).forEach(s -> {
             final boolean shouldOverride = Arrays.asList(overriding).contains(s);

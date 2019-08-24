@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
 
-final class RoboZonkyDaemonFailedEventImpl extends AbstractEventImpl implements RoboZonkyDaemonFailedEvent {
+final class RoboZonkyDaemonResumedEventImpl extends AbstractEventImpl implements RoboZonkyDaemonResumedEvent {
 
-    private final Throwable cause;
-
-    public RoboZonkyDaemonFailedEventImpl(final Throwable cause) {
-        this.cause = cause;
-    }
-
-    @Override
-    public Throwable getCause() {
-        return cause;
-    }
 }

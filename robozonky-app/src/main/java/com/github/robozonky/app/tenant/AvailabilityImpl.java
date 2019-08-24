@@ -19,9 +19,6 @@ package com.github.robozonky.app.tenant;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.client.ResponseProcessingException;
 
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
@@ -61,38 +58,28 @@ final class AvailabilityImpl implements Availability {
     }
 
     @Override
-    public void registerAvailability() {
+    public boolean registerAvailability() {
         if (isAvailable()) {
-            return;
+            return false;
         }
         pause.set(null);
         LOGGER.info("Resumed after a forced pause.");
+        return true;
     }
 
-    private void register(final Exception ex) {
+    @Override
+    public boolean registerException(final Exception ex) {
         if (isAvailable()) {
             pause.set(Tuple.of(DateUtil.now(), 0L));
             LOGGER.debug("Fault identified, forcing pause.", ex);
             // will go to console, no stack trace
             LOGGER.warn("Forcing a pause due to a potentially irrecoverable fault.");
+            return true;
         } else {
             final Tuple2<Instant, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
             LOGGER.debug("Forced pause in effect since {}, {} retries.", paused._1, paused._2, ex);
+            return false;
         }
     }
 
-    @Override
-    public void registerApiIssue(final ResponseProcessingException ex) {
-        register(ex);
-    }
-
-    @Override
-    public void registerServerError(final ServerErrorException ex) {
-        register(ex);
-    }
-
-    @Override
-    public void registerClientError(final ClientErrorException ex) {
-        register(ex);
-    }
 }

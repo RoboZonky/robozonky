@@ -44,7 +44,7 @@ import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
@@ -331,7 +331,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void robozonkyDaemonFailed() {
-        final RoboZonkyDaemonFailedEvent e = EventFactory.roboZonkyDaemonFailed(new IllegalArgumentException());
+        final RoboZonkyDaemonSuspendedEvent e = EventFactory.roboZonkyDaemonSuspended(new IllegalArgumentException());
         assertThat(e.getCause()).isNotNull();
     }
 

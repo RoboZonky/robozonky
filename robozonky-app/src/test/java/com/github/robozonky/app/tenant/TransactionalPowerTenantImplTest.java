@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -40,7 +40,7 @@ import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.TransactionalTenant;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonFailed;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static com.github.robozonky.app.tenant.PowerTenant.transactional;
@@ -126,13 +126,13 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
                                                                       .withApi(api)
                                                                       .withSecrets(SECRETS)
                                                                       .build())) {
-            final Runnable f = t.fire(roboZonkyDaemonFailed(new IllegalStateException()));
+            final Runnable f = t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
             t.commit();
             f.run();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)
-                .first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+                .first().isInstanceOf(RoboZonkyDaemonSuspendedEvent.class);
     }
 
     @Test
@@ -160,7 +160,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
         try (final TransactionalPowerTenant t = transactional(tenant)) {
             try {
-                t.fire(roboZonkyDaemonFailed(new IllegalStateException()));
+                t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
                 assertThatThrownBy(t::close).isInstanceOf(IllegalStateException.class);
             } finally {
                 t.commit(); // clean up after itself, else some locks may be left hanging

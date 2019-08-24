@@ -64,11 +64,8 @@ abstract class Investor {
         final Investment i = convertToInvestment(recommendedLoan);
         final InvestmentResult r = auth.call(zonky -> zonky.invest(i));
         if (r.isSuccess()) {
-            LOGGER.info("Invested {} CZK into loan #{}.", recommendedLoan.amount(), i.getLoanId());
             return Either.right(recommendedLoan.amount());
         } else {
-            LOGGER.debug("Failed investing {} CZK into loan #{}, reason: {}.",
-                         recommendedLoan.amount(), i.getLoanId(), r.getFailureType());
             return Either.left(r.getFailureType().get()); // get() while !isSuccess() guaranteed by Result contract
         }
     }

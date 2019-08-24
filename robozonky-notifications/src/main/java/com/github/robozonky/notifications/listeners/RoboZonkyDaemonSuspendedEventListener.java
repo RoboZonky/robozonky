@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,40 +19,28 @@ package com.github.robozonky.notifications.listeners;
 import java.util.Collections;
 import java.util.Map;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
-public class RoboZonkyDaemonFailedEventListener extends AbstractListener<RoboZonkyDaemonFailedEvent> {
+public class RoboZonkyDaemonSuspendedEventListener extends AbstractListener<RoboZonkyDaemonSuspendedEvent> {
 
-    public RoboZonkyDaemonFailedEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
+    public RoboZonkyDaemonSuspendedEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
     }
 
     @Override
-    String getSubject(final RoboZonkyDaemonFailedEvent event) {
+    String getSubject(final RoboZonkyDaemonSuspendedEvent event) {
         return "Uvnitř RoboZonky došlo k chybě!";
     }
 
     @Override
     String getTemplateFileName() {
-        return "daemon-failed.ftl";
-    }
-
-    /**
-     * Won't bother users with network connection errors, since in those cases the e-mail probably won't be sent anyway.
-     * @param event
-     * @param sessionInfo
-     * @return
-     */
-    @Override
-    boolean shouldNotify(final RoboZonkyDaemonFailedEvent event, final SessionInfo sessionInfo) {
-        return super.shouldNotify(event, sessionInfo) && !Util.isNetworkProblem(event.getCause());
+        return "daemon-suspended.ftl";
     }
 
     @Override
-    protected Map<String, Object> getData(final RoboZonkyDaemonFailedEvent event) {
+    protected Map<String, Object> getData(final RoboZonkyDaemonSuspendedEvent event) {
         return Collections.singletonMap("cause", Util.stackTraceToString(event.getCause()));
     }
 }

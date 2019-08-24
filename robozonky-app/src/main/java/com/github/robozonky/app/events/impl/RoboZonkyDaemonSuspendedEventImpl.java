@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.app.events.impl;
 
-/**
- * Fired after the daemon encountered an exception, but continues to run.
- */
-public interface RoboZonkyDaemonFailedEvent extends GlobalEvent, SessionEvent {
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 
-    Throwable getCause();
+final class RoboZonkyDaemonSuspendedEventImpl extends AbstractEventImpl implements RoboZonkyDaemonSuspendedEvent {
+
+    private final Throwable cause;
+
+    public RoboZonkyDaemonSuspendedEventImpl(final Throwable cause) {
+        this.cause = cause;
+    }
+
+    @Override
+    public Throwable getCause() {
+        return cause;
+    }
 }

@@ -32,7 +32,8 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -50,7 +51,8 @@ import com.github.robozonky.notifications.listeners.LoanLostEventListener;
 import com.github.robozonky.notifications.listeners.LoanNoLongerDelinquentEventListener;
 import com.github.robozonky.notifications.listeners.ReservationAcceptedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyCrashedEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyDaemonFailedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyDaemonResumedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyDaemonSuspendedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyEndingEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyExperimentalUpdateDetectedEventListener;
 import com.github.robozonky.notifications.listeners.RoboZonkyInitializedEventListener;
@@ -249,15 +251,36 @@ public enum SupportedListener {
             return new RoboZonkyCrashedEventListener(this, targetHandler);
         }
     },
-    DAEMON_FAILED {
+    DAEMON_SUSPENDED {
+        @Override
+        public boolean overrideGlobalGag() {
+            return true;
+        }
+
         @Override
         public Class<? extends Event> getEventType() {
-            return RoboZonkyDaemonFailedEvent.class;
+            return RoboZonkyDaemonSuspendedEvent.class;
         }
 
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new RoboZonkyDaemonFailedEventListener(this, targetHandler);
+            return new RoboZonkyDaemonSuspendedEventListener(this, targetHandler);
+        }
+    },
+    DAEMON_RESUMED {
+        @Override
+        public boolean overrideGlobalGag() {
+            return true;
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RoboZonkyDaemonResumedEvent.class;
+        }
+
+        @Override
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new RoboZonkyDaemonResumedEventListener(this, targetHandler);
         }
     },
     INITIALIZED {
