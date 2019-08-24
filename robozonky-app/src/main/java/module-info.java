@@ -35,6 +35,6 @@ module com.github.robozonky.app {
             com.github.robozonky.app.summaries.SummarizerJobService,
             com.github.robozonky.app.daemon.SaleCheckJobService;
 
-    opens com.github.robozonky.app.configuration to info.picocli;
+    opens com.github.robozonky.app to info.picocli;
     opens com.github.robozonky.app.events.impl to org.apache.commons.lang3;
 }

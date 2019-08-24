@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
  * Converts command line into application configuration using {@link picocli.CommandLine}.
  */
 @picocli.CommandLine.Command(name = "robozonky(.sh|.bat)")
-class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMode>>> {
+public class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMode>>> {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLine.class);
     @picocli.CommandLine.Option(names = {"-s", "--strategy"}, required = true,
