@@ -58,7 +58,7 @@ public interface PowerTenant extends Tenant {
             try {
                 transactional.close();
             } catch (final Exception ex) {
-                LogManager.getLogger(PowerTenant.class).debug("Failed committing transaction.", ex);
+                LogManager.getLogger(PowerTenant.class).debug("Failed closing transaction.", ex);
             }
         }
     }

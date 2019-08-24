@@ -18,11 +18,13 @@ package com.github.robozonky.app.tenant;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -108,6 +110,13 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
         final Loan result = tenant.getLoan(1);
         assertThat(transactional.getLoan(1)).isEqualTo(result);
+    }
+
+    @Test
+    void delegatesInvestment() {
+        when(zonky.getInvestmentByLoanId(anyInt())).thenReturn(Optional.of(Investment.custom().build()));
+        final Investment result = tenant.getInvestment(1);
+        assertThat(transactional.getInvestment(1)).isEqualTo(result);
     }
 
     @Test
@@ -201,6 +210,21 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         assertThat(s.getKeys()).isEmpty(); // nothing was stored
         copy.commit();
         assertThat(s.getKeys()).containsOnly(key); // now it was persisted
+    }
+
+    @Test
+    void abort() {
+        assertThatThrownBy(() -> tenant.inTransaction(t -> {
+            final String key = "a";
+            final InstanceState<TransactionalPowerTenantImplTest> s =
+                    t.getState(TransactionalPowerTenantImplTest.class);
+            t.fire(mock(RoboZonkyDaemonSuspendedEvent.class));
+            s.update(m -> m.put(key, UUID.randomUUID().toString()));
+            throw new IllegalStateException("Should abort transaction.");
+        })).isInstanceOf(IllegalStateException.class);
+        // nothing is performed
+        assertThat(tenant.getState(TransactionalPowerTenantImplTest.class).getKeys()).isEmpty();
+        assertThat(getEventsRequested()).isEmpty();
     }
 }
 
