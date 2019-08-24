@@ -17,6 +17,7 @@
 package com.github.robozonky.app.events.impl;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.function.Supplier;
 
@@ -192,8 +193,8 @@ public final class EventFactory {
         return new RoboZonkyDaemonSuspendedEventImpl(cause);
     }
 
-    public static RoboZonkyDaemonResumedEvent roboZonkyDaemonResumed() {
-        return new RoboZonkyDaemonResumedEventImpl();
+    public static RoboZonkyDaemonResumedEvent roboZonkyDaemonResumed(final OffsetDateTime since, final OffsetDateTime until) {
+        return new RoboZonkyDaemonResumedEventImpl(since, until);
     }
 
     public static RoboZonkyEndingEvent roboZonkyEnding() {

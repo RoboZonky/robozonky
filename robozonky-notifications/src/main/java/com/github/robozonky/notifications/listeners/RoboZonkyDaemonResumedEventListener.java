@@ -16,6 +16,10 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
@@ -36,4 +40,16 @@ public class RoboZonkyDaemonResumedEventListener extends AbstractListener<RoboZo
         return "daemon-resumed.ftl";
     }
 
+    @Override
+    protected Map<String, Object> getData(final RoboZonkyDaemonResumedEvent event) {
+        final Map<String, Object> result = new HashMap<>(super.getData(event));
+        result.put("since", event.getUnavailableSince());
+        result.put("until", event.getUnavailableUntil());
+        final Duration duration = Duration.between(event.getUnavailableSince(), event.getUnavailableUntil()).abs();
+        result.put("days", duration.toDays());
+        result.put("hours", duration.toHoursPart());
+        result.put("minutes", duration.toMinutesPart());
+        result.put("seconds", duration.toSecondsPart());
+        return result;
+    }
 }

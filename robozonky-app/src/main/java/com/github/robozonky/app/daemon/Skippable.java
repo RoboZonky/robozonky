@@ -17,9 +17,12 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +39,7 @@ final class Skippable implements Runnable {
     private final Class<?> type;
     private final Runnable toRun;
     private final Consumer<Throwable> shutdownCall;
+    private final AtomicReference<Instant> unavailableSince = new AtomicReference<>();
 
     Skippable(final Runnable toRun, final Class<?> type, final PowerTenant tenant,
               final Consumer<Throwable> shutdownCall) {
@@ -69,12 +73,17 @@ final class Skippable implements Runnable {
             toRun.run();
             final boolean becameAvailable = availability.registerSuccess();
             if (becameAvailable) {
-                tenant.fire(roboZonkyDaemonResumed());
+                final OffsetDateTime now = DateUtil.offsetNow();
+                final OffsetDateTime since = unavailableSince.getAndSet(null)
+                        .atZone(Defaults.ZONE_ID)
+                        .toOffsetDateTime();
+                tenant.fire(roboZonkyDaemonResumed(since, now));
             }
             LOGGER.trace("Successfully finished {}.", this);
         } catch (final Exception ex) {
             final boolean becameUnavailable = availability.registerException(ex);
             if (becameUnavailable) {
+                unavailableSince.set(DateUtil.now());
                 tenant.fire(roboZonkyDaemonSuspended(ex));
             }
         } catch (final Error er) {

@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -326,6 +327,17 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
             return OffsetDateTime.now();
         }
 
+        @Override
+        public OffsetDateTime getUnavailableSince() {
+            return OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+        }
+
+        @Override
+        public OffsetDateTime getUnavailableUntil() {
+            return getUnavailableSince()
+                    .plusDays(1)
+                    .minusSeconds(1);
+        }
     }
 
     private static class MyRoboZonkyCrashedEvent implements RoboZonkyCrashedEvent {

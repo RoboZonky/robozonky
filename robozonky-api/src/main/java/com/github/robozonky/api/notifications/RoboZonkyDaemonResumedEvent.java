@@ -16,9 +16,15 @@
 
 package com.github.robozonky.api.notifications;
 
+import java.time.OffsetDateTime;
+
 /**
  * Fired after daemon recovered following up on {@link RoboZonkyDaemonSuspendedEvent}.
  */
 public interface RoboZonkyDaemonResumedEvent extends GlobalEvent, SessionEvent {
+
+    OffsetDateTime getUnavailableSince();
+
+    OffsetDateTime getUnavailableUntil();
 
 }
