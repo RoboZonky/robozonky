@@ -74,6 +74,11 @@ final class StatefulBoundedBalance {
         state.update(m -> m.put(VALUE_KEY, Long.toString(newValue)));
     }
 
+    private Duration getTimeBetweenLastBalanceCheckAndNow() {
+        final Instant lastModified = lastModificationDate.get();
+        return Duration.between(DateUtil.now(), lastModified).abs();
+    }
+
     public synchronized long get() {
         final long balance = currentValue.get();
         if (balance == Long.MAX_VALUE) { // no need to do any other magic
@@ -81,7 +86,7 @@ final class StatefulBoundedBalance {
             return balance;
         }
         final Instant lastModified = lastModificationDate.get();
-        final Duration timeBetweenLastBalanceCheckAndNow = Duration.between(DateUtil.now(), lastModified).abs();
+        final Duration timeBetweenLastBalanceCheckAndNow = getTimeBetweenLastBalanceCheckAndNow();
         if (timeBetweenLastBalanceCheckAndNow.compareTo(BALANCE_INCREASE_INTERVAL_STEP) < 0) {
             LOGGER.trace("Balance of {} CZK is still fresh ({}).", balance, lastModified);
             return balance;
@@ -92,6 +97,7 @@ final class StatefulBoundedBalance {
         final long elapsedCycles = nanosBetween / nanosPeriod;
         if (elapsedCycles > 12) {
             LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
+            currentValue.set(Long.MAX_VALUE);
             return Long.MAX_VALUE;
         }
         final long newBalance = balance * (long) Math.pow(2, elapsedCycles);

@@ -60,4 +60,14 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
         assertThat(balance2.get()).isEqualTo(1000); // old state is read in the new instance, simulating robot restart
     }
 
+    @Test
+    void preventsEndlessLoop() {
+        final StatefulBoundedBalance balance = new StatefulBoundedBalance(tenant);
+        balance.set(199);
+        setClock(Clock.fixed(Instant.now().plus(Duration.ofDays(1)), Defaults.ZONE_ID));
+        assertThat(balance.get()).isEqualTo(Long.MAX_VALUE); // balance is too old, so it is reset to maximum
+        balance.set(199); // set it to a different value
+        assertThat(balance.get()).isEqualTo(199); // make sure the different value is stored and returned
+    }
+
 }
