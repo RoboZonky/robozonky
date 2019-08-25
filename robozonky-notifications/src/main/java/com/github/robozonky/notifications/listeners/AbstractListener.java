@@ -18,7 +18,6 @@ package com.github.robozonky.notifications.listeners;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -122,8 +121,8 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
                 entry("userAgent", Defaults.ROBOZONKY_USER_AGENT),
                 entry("isDryRun", sessionInfo.isDryRun())
         ));
-        result.put("conception", Date.from(event.getConceivedOn().toInstant()));
-        result.put("creation", Date.from(event.getCreatedOn().toInstant()));
+        result.put("conception", Util.toDate(event.getConceivedOn()));
+        result.put("creation", Util.toDate(event.getCreatedOn()));
         return Collections.unmodifiableMap(result);
     }
 

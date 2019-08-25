@@ -61,15 +61,15 @@ final class Util {
         // no instances
     }
 
-    private static Date toDate(final LocalDate localDate) {
+    public static Date toDate(final LocalDate localDate) {
         return toDate(localDate.atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime());
     }
 
-    private static Date toDate(final OffsetDateTime offsetDateTime) {
+    public static Date toDate(final OffsetDateTime offsetDateTime) {
         return Date.from(offsetDateTime.toInstant());
     }
 
-    private static Date toDate(final ZonedDateTime zonedDateTime) {
+    public static Date toDate(final ZonedDateTime zonedDateTime) {
         return Date.from(zonedDateTime.toInstant());
     }
 
@@ -175,7 +175,7 @@ final class Util {
                 })
                 .orElseGet(() -> minus(totalPaid, originalPrincipal));
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
-        loanData.put("investedOn", Util.toDate(i.getInvestmentDate()));
+        loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal());
         loanData.put("amountHeld", originalPrincipal);
@@ -194,20 +194,20 @@ final class Util {
                                                         final Collection<Development> collections,
                                                         final LocalDate date) {
         final Map<String, Object> result = new HashMap<>(getLoanData(i, loan));
-        result.put("since", Util.toDate(date));
+        result.put("since", toDate(date));
         result.put("collections", collections.stream()
                 .sorted(Comparator.comparing(Development::getDateFrom).reversed())
                 .limit(5)
                 .map(action -> {
                     final String code = action.getType().getCode();
                     final String note = action.getPublicNote().orElse("Bez dalšího vysvětlení.");
-                    final Date dateFrom = Util.toDate(action.getDateFrom());
+                    final Date dateFrom = toDate(action.getDateFrom());
                     return action.getDateTo()
                             .map(dateTo -> Map.ofEntries(
                                     entry("code", code),
                                     entry("note", note),
                                     entry("startDate", dateFrom),
-                                    entry("endDate", dateTo)))
+                                    entry("endDate", toDate(dateTo))))
                             .orElseGet(() -> Map.ofEntries(
                                     entry("code", code),
                                     entry("note", note),

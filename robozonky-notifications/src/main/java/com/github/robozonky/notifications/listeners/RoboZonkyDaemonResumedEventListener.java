@@ -32,7 +32,7 @@ public class RoboZonkyDaemonResumedEventListener extends AbstractListener<RoboZo
 
     @Override
     String getSubject(final RoboZonkyDaemonResumedEvent event) {
-        return "RoboZonky se zotavil.";
+        return "RoboZonky se zotavil";
     }
 
     @Override
@@ -43,8 +43,8 @@ public class RoboZonkyDaemonResumedEventListener extends AbstractListener<RoboZo
     @Override
     protected Map<String, Object> getData(final RoboZonkyDaemonResumedEvent event) {
         final Map<String, Object> result = new HashMap<>(super.getData(event));
-        result.put("since", event.getUnavailableSince());
-        result.put("until", event.getUnavailableUntil());
+        result.put("since", Util.toDate(event.getUnavailableSince()));
+        result.put("until", Util.toDate(event.getUnavailableUntil()));
         final Duration duration = Duration.between(event.getUnavailableSince(), event.getUnavailableUntil()).abs();
         result.put("days", duration.toDays());
         result.put("hours", duration.toHoursPart());
