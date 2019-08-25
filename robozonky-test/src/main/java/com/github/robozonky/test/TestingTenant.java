@@ -129,8 +129,8 @@ public class TestingTenant implements Tenant {
         }
 
         @Override
-        public boolean registerSuccess() {
-            return true;
+        public Optional<Instant> registerSuccess() {
+            return Optional.empty();
         }
 
         @Override

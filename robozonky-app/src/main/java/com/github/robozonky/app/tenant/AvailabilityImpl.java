@@ -18,28 +18,25 @@ package com.github.robozonky.app.tenant;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.Tuple;
-import io.vavr.Tuple3;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 final class AvailabilityImpl implements Availability {
 
-    private static final Logger LOGGER = LogManager.getLogger(AvailabilityImpl.class);
     static final int MANDATORY_DELAY_IN_SECONDS = 5;
-
+    private static final Logger LOGGER = LogManager.getLogger(AvailabilityImpl.class);
     private final ZonkyApiTokenSupplier zonkyApiTokenSupplier;
-    private final AtomicReference<Tuple3<Instant, Long, Long>> pause = new AtomicReference<>();
-    private final RequestCounter counter;
+    private final AtomicReference<Tuple2<Instant, Long>> pause = new AtomicReference<>();
 
-    public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier, final RequestCounter counter) {
+    public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier) {
         this.zonkyApiTokenSupplier = zonkyTokenSupplier;
-        this.counter = counter;
     }
 
     @Override
@@ -50,7 +47,7 @@ final class AvailabilityImpl implements Availability {
         } else if (isAvailable()) { // no waiting for anything
             return DateUtil.now();
         }
-        final Tuple3<Instant, Long, Long> paused = pause.get();
+        final Tuple2<Instant, Long> paused = pause.get();
         final long retries = paused._2;
         // add 5 seconds of initial delay to give time to recover from HTTP 429 or whatever other problem there was
         final long secondsFromPauseToNextCheck = MANDATORY_DELAY_IN_SECONDS + (long) Math.pow(2, retries);
@@ -63,47 +60,25 @@ final class AvailabilityImpl implements Availability {
     }
 
     @Override
-    public boolean registerSuccess() {
+    public Optional<Instant> registerSuccess() {
         if (isAvailable()) {
-            return false;
+            return Optional.empty();
         }
-        final Tuple3<Instant, Long, Long> paused = pause.get();
-        final long countWhenPaused = paused._3;
-        if (countWhenPaused < 0) { // there is no request counter, which is some weird test-only situation
-            pause.set(null);
-            LOGGER.warn("No request counter. This should not be happening.");
-            return true;
-        }
-        final long currentCount = getRequestCount();
-        if (countWhenPaused == currentCount) {
-            /*
-             * this is not a guarantee of the exception being gone, in case it was a HTTP 429 Too Many Requests.
-             * unfortunately, this will also keep the robot paused in situations where the error was something else,
-             * but thankfully the robot never goes much longer than a few seconds without making a metered call.
-             */
-            LOGGER.debug("Not resuming as there were no metered requests since.");
-            return false;
-        } else {
-            pause.set(null);
-            LOGGER.info("Resumed after a forced pause.");
-            return true;
-        }
-    }
-
-    private long getRequestCount() {
-        return counter == null ? -1 : counter.count();
+        final Tuple2<Instant, Long> paused = pause.getAndSet(null);
+        LOGGER.info("Resumed after a forced pause.");
+        return Optional.of(paused._1);
     }
 
     @Override
     public boolean registerException(final Exception ex) {
         if (isAvailable()) {
-            pause.set(Tuple.of(DateUtil.now(), 0L, getRequestCount()));
+            pause.set(Tuple.of(DateUtil.now(), 0L));
             LOGGER.debug("Fault identified, forcing pause.", ex);
             // will go to console, no stack trace
             LOGGER.warn("Forcing a pause due to a potentially irrecoverable fault.");
             return true;
         } else {
-            final Tuple3<Instant, Long, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1, f._3));
+            final Tuple2<Instant, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
             LOGGER.debug("Forced pause in effect since {}, {} retries.", paused._1, paused._2, ex);
             return false;
         }

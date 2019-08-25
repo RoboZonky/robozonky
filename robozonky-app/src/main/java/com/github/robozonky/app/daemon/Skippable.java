@@ -18,10 +18,11 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +39,6 @@ final class Skippable implements Runnable {
     private final Class<?> type;
     private final Runnable toRun;
     private final Consumer<Throwable> shutdownCall;
-    private final AtomicReference<OffsetDateTime> unavailableSince = new AtomicReference<>();
 
     Skippable(final Runnable toRun, final Class<?> type, final PowerTenant tenant,
               final Consumer<Throwable> shutdownCall) {
@@ -64,32 +64,31 @@ final class Skippable implements Runnable {
         final Instant nextCheck = availability.nextAvailabilityCheck();
         LOGGER.trace("Next availability check: {}.", nextCheck);
         if (nextCheck.isAfter(DateUtil.now())) {
-            LOGGER.debug("Not running {} on account of the robot being temporarily suspended since {}.",
-                         this, unavailableSince.get());
+            LOGGER.debug("Not running {} on account of the robot being temporarily suspended.", this);
             return;
         }
         LOGGER.trace("Running {}.", this);
         try {
+            final OffsetDateTime now = DateUtil.offsetNow();
             toRun.run();
-            final boolean becameAvailable = availability.registerSuccess();
-            if (becameAvailable) {
-                final OffsetDateTime now = DateUtil.offsetNow();
-                final OffsetDateTime since = unavailableSince.getAndSet(null);
-                LOGGER.trace("Resetting unavailability since date from {} on {}.", since, this);
+            final Optional<Instant> becameAvailable = availability.registerSuccess();
+            becameAvailable.ifPresent(unavailableSince -> {
+                final OffsetDateTime since = unavailableSince.atZone(Defaults.ZONE_ID).toOffsetDateTime();
+                LOGGER.debug("Unavailability over, lasted since {}.", since);
                 tenant.fire(roboZonkyDaemonResumed(since, now));
-            }
+            });
             LOGGER.trace("Successfully finished {}.", this);
         } catch (final Exception ex) {
             final boolean becameUnavailable = availability.registerException(ex);
             if (becameUnavailable) {
-                final OffsetDateTime now = DateUtil.offsetNow();
-                LOGGER.trace("Setting unavailability since date to {} on {}.", now, this);
-                unavailableSince.set(now);
+                LOGGER.debug("Unavailability starting.");
                 tenant.fire(roboZonkyDaemonSuspended(ex));
             }
         } catch (final Error er) {
             shutdownCall.accept(er);
             throw er; // rethrow the error
+        } finally {
+            LOGGER.trace("Finished {}.", this);
         }
     }
 

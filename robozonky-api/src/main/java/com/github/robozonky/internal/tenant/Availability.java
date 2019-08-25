@@ -17,6 +17,7 @@
 package com.github.robozonky.internal.tenant;
 
 import java.time.Instant;
+import java.util.Optional;
 
 public interface Availability {
 
@@ -34,9 +35,10 @@ public interface Availability {
 
     /**
      * Report that the app's operation has finished successfully.
-     * @return True if {@link #isAvailable()} changed its value as a result of this call.
+     * @return Empty if {@link #isAvailable()} is true. Otherwise {@link #isAvailable()} becomes true and we return
+     * an {@link Instant} of when the unavailability originally started.
      */
-    boolean registerSuccess();
+    Optional<Instant> registerSuccess();
 
     /**
      * Report an error during the app's operation.

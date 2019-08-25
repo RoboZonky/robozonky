@@ -71,8 +71,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
                 .withApi(new ApiProvider(null))
                 .withSecrets(SecretProvider.inMemory("someone@somewhere.cz"))
                 .build();
-        final Consumer<Throwable> c = mock(Consumer.class);
-        final Skippable s = new Skippable(r, t, c);
+        final Skippable s = new Skippable(r, t);
         logger.debug("First run.");
         s.run();
         verify(r, times(1)).run();

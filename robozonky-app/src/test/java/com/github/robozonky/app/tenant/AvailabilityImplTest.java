@@ -19,6 +19,7 @@ package com.github.robozonky.app.tenant;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
@@ -26,7 +27,6 @@ import javax.ws.rs.client.ResponseProcessingException;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
@@ -42,7 +42,7 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void noAvailabilityOnClosedToken() {
-        final Availability a = new AvailabilityImpl(s, null);
+        final Availability a = new AvailabilityImpl(s);
         when(s.isClosed()).thenReturn(true);
         assertSoftly(softly -> {
             softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(Instant.MAX);
@@ -52,7 +52,7 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void nextAvailabilityWhileNotPaused() {
-        final Availability a = new AvailabilityImpl(s, null);
+        final Availability a = new AvailabilityImpl(s);
         final Instant now = Instant.now();
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
         assertSoftly(softly -> {
@@ -63,62 +63,37 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void scalingUnavailability() {
-        final Availability a = new AvailabilityImpl(s, null);
+        final Availability a = new AvailabilityImpl(s);
         final Instant now = Instant.now();
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
         final Response r = new ResponseBuilderImpl().build();
-        a.registerException(new ResponseProcessingException(r, UUID.randomUUID().toString()));
+        final boolean reg = a.registerException(new ResponseProcessingException(r, UUID.randomUUID().toString()));
         assertSoftly(softly -> {
+            softly.assertThat(reg).isTrue();
             softly.assertThat(a.isAvailable()).isFalse();
             softly.assertThat(a.nextAvailabilityCheck())
                     .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 1)));
         });
-        a.registerException(new ClientErrorException(429));
+        final boolean reg2 = a.registerException(new ClientErrorException(429));
         assertSoftly(softly -> {
+            softly.assertThat(reg2).isFalse();
             softly.assertThat(a.isAvailable()).isFalse();
             softly.assertThat(a.nextAvailabilityCheck())
                     .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 2)));
         });
-        a.registerException(new ServerErrorException(503));
+        final boolean reg3 = a.registerException(new ServerErrorException(503));
         assertSoftly(softly -> {
+            softly.assertThat(reg3).isFalse();
             softly.assertThat(a.isAvailable()).isFalse();
             softly.assertThat(a.nextAvailabilityCheck())
                     .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 4)));
         });
-        a.registerSuccess();
+        final Optional<Instant> success = a.registerSuccess();
         assertSoftly(softly -> {
+            softly.assertThat(success).isPresent();
             softly.assertThat(a.isAvailable()).isTrue();
             softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now);
         });
     }
 
-    @Test
-    void requestCounterAvailabilty() {
-        final RequestCounter requestCounter = mock(RequestCounter.class);
-        final Availability a = new AvailabilityImpl(s, requestCounter);
-        final Instant now = Instant.now();
-        setClock(Clock.fixed(now, Defaults.ZONE_ID));
-        // failure is registered, availability is gone
-        when(requestCounter.count()).thenReturn(1);
-        final Response r = new ResponseBuilderImpl().build();
-        a.registerException(new ResponseProcessingException(r, UUID.randomUUID().toString()));
-        assertSoftly(softly -> {
-            softly.assertThat(a.isAvailable()).isFalse();
-            softly.assertThat(a.nextAvailabilityCheck())
-                    .isEqualTo(now.plus(Duration.ofSeconds(MANDATORY_DELAY_IN_SECONDS + 1)));
-        });
-        // request count not increased == no API operation performed == no availability change
-        final boolean available = a.registerSuccess();
-        assertSoftly(softly -> {
-            softly.assertThat(available).isFalse();
-            softly.assertThat(a.isAvailable()).isFalse();
-        });
-        // request count increased == availability change
-        when(requestCounter.count()).thenReturn(2);
-        final boolean available2 = a.registerSuccess();
-        assertSoftly(softly -> {
-            softly.assertThat(available2).isTrue();
-            softly.assertThat(a.isAvailable()).isTrue();
-        });
-    }
 }
