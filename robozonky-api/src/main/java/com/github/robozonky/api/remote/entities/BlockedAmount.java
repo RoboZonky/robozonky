@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.test.RandomUtil;
 
+@Deprecated(forRemoval = true)
 public class BlockedAmount extends BaseEntity {
 
     private BigDecimal amount;

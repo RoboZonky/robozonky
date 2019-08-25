@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.InvestmentType;
 
+@Deprecated(forRemoval = true)
 public class Wallet extends BaseEntity {
 
     private int id;

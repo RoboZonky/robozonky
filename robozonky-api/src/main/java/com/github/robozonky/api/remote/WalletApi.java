@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 
+@Deprecated(forRemoval = true)
 @Path(ApiConstants.ME + "/wallet")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)

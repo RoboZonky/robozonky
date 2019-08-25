@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.enums;
 /**
  * It is important to add new values at the end, as other pieces of code may depend on the existing order.
  */
+@Deprecated(forRemoval = true)
 public enum TransactionCategory {
 
     INVESTMENT_FEE,

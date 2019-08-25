@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.util.Currency;
 import javax.xml.bind.annotation.XmlElement;
 
+@Deprecated(forRemoval = true)
 public class BankAccount extends BaseEntity {
 
     private long id;
