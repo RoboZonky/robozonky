@@ -32,7 +32,6 @@ import com.github.robozonky.internal.remote.PurchaseResult;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
-import static com.github.robozonky.app.events.impl.EventFactory.purchaseRequested;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
@@ -110,7 +109,6 @@ final class PurchasingSession extends
                          tenant.getKnownBalanceUpperBound());
             return false;
         }
-        tenant.fire(purchaseRequested(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan l = recommendation.descriptor().related();
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);

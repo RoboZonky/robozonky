@@ -32,7 +32,6 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -86,13 +85,12 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         // check that one investment was made
         assertThat(i).hasSize(1);
         final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(5);
+        assertThat(newEvents).hasSize(4);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0)).isInstanceOf(ExecutionStartedEvent.class);
             softly.assertThat(newEvents.get(1)).isInstanceOf(LoanRecommendedEvent.class);
-            softly.assertThat(newEvents.get(2)).isInstanceOf(InvestmentRequestedEvent.class);
-            softly.assertThat(newEvents.get(3)).isInstanceOf(InvestmentMadeEvent.class);
-            softly.assertThat(newEvents.get(4)).isInstanceOf(ExecutionCompletedEvent.class);
+            softly.assertThat(newEvents.get(2)).isInstanceOf(InvestmentMadeEvent.class);
+            softly.assertThat(newEvents.get(3)).isInstanceOf(ExecutionCompletedEvent.class);
         });
     }
 
@@ -155,10 +153,9 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(investments.get(0).getOriginalPrincipal().intValue()).isEqualTo(amountToInvest);
         // validate event sequence
         final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(2);
-        assertSoftly(softly -> {
-            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentMadeEvent.class);
-        });
+        assertThat(newEvents)
+                .hasSize(1)
+                .first()
+                .isInstanceOf(InvestmentMadeEvent.class);
     }
 }

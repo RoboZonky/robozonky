@@ -36,8 +36,6 @@ import static com.github.robozonky.app.events.impl.EventFactory.executionStarted
 import static com.github.robozonky.app.events.impl.EventFactory.executionStartedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentRequested;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentSkipped;
 import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
 /**
@@ -105,7 +103,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         } else if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
             tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
         }
-        tenant.fire(investmentSkipped(recommendation));
         logger.debug("Failed investing {} CZK into loan #{}, reason: {}.",
                      recommendation.amount(), recommendation.descriptor().item().getId(), failureType);
         return false;
@@ -119,9 +116,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             return false;
         }
         logger.debug("Will attempt to invest in {}.", recommendation);
-        final LoanDescriptor loan = recommendation.descriptor();
-        final int loanId = loan.item().getId();
-        tenant.fire(investmentRequested(recommendation));
         final Either<InvestmentFailureType, BigDecimal> response = investor.invest(recommendation);
         return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
                              amount -> successfulInvestment(recommendation, amount));

@@ -38,7 +38,6 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
@@ -227,7 +226,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.RESERVATION_ACCEPTED, new MyReservationAcceptedEvent(loan, i)),
                 forListener(SupportedListener.INVESTMENT_MADE, new MyInvestmentMadeEvent(loan, i)),
                 forListener(SupportedListener.INVESTMENT_SOLD, new MyInvestmentSoldEvent(loan, i)),
-                forListener(SupportedListener.INVESTMENT_SKIPPED, new MyInvestmentSkippedEvent(recommendation, loan)),
                 forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, new MyLoanNoLongerDelinquentEvent(loan, i)),
                 forListener(SupportedListener.LOAN_DEFAULTED, new MyLoanDefaultedEvent(loan, i)),
                 forListener(SupportedListener.LOAN_LOST, new MyLoanLostEvent(loan, i)),
@@ -407,32 +405,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         @Override
         public Investment getInvestment() {
             return i;
-        }
-    }
-
-    private static class MyInvestmentSkippedEvent implements InvestmentSkippedEvent {
-
-        private final RecommendedLoan recommendation;
-        private final Loan loan;
-
-        public MyInvestmentSkippedEvent(final RecommendedLoan recommendation, final Loan loan) {
-            this.recommendation = recommendation;
-            this.loan = loan;
-        }
-
-        @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
-        }
-
-        @Override
-        public BigDecimal getRecommendation() {
-            return recommendation.amount();
-        }
-
-        @Override
-        public Loan getLoan() {
-            return loan;
         }
     }
 

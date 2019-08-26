@@ -28,9 +28,9 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -104,7 +104,7 @@ class UtilTest {
 
     @Test
     void identifyMarketplaceLoanBased() {
-        final MarketplaceLoanBased l = new InvestmentSkippedEvent() {
+        final MarketplaceLoanBased l = new LoanRecommendedEvent() {
             @Override
             public MarketplaceLoan getLoan() {
                 return MarketplaceLoan.custom().setRating(Rating.C).setInterestRate(Ratio.ONE).build();

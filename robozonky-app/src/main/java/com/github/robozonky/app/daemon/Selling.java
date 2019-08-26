@@ -46,7 +46,6 @@ final class Selling implements TenantPayload {
 
     private static Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
                                                     final SoldParticipationCache sold) {
-        tenant.fire(EventFactory.saleRequested(r));
         final Investment i = r.descriptor().item();
         final boolean isRealRun = !tenant.getSessionInfo().isDryRun();
         LOGGER.debug("Will send sell request for loan #{}: {}.", i.getLoanId(), isRealRun);

@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
-import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -114,13 +113,12 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Selling s = new Selling();
         s.accept(tenant);
         final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(5);
+        assertThat(e).hasSize(4);
         assertSoftly(softly -> {
             softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
             softly.assertThat(e.get(1)).isInstanceOf(SaleRecommendedEvent.class);
-            softly.assertThat(e.get(2)).isInstanceOf(SaleRequestedEvent.class);
-            softly.assertThat(e.get(3)).isInstanceOf(SaleOfferedEvent.class);
-            softly.assertThat(e.get(4)).isInstanceOf(SellingCompletedEvent.class);
+            softly.assertThat(e.get(2)).isInstanceOf(SaleOfferedEvent.class);
+            softly.assertThat(e.get(3)).isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
         verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));

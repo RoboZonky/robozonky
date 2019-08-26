@@ -26,8 +26,6 @@ import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
-import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
@@ -39,7 +37,6 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
@@ -57,7 +54,6 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
-import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
@@ -105,14 +101,6 @@ public final class EventFactory {
     public static InvestmentPurchasedEvent investmentPurchased(final Investment investment, final Loan loan,
                                                                final PortfolioOverview portfolioOverview) {
         return new InvestmentPurchasedEventImpl(investment, loan, portfolioOverview);
-    }
-
-    public static InvestmentRequestedEvent investmentRequested(final RecommendedLoan recommendation) {
-        return new InvestmentRequestedEventImpl(recommendation);
-    }
-
-    public static InvestmentSkippedEvent investmentSkipped(final RecommendedLoan recommendation) {
-        return new InvestmentSkippedEventImpl(recommendation);
     }
 
     public static InvestmentSoldEvent investmentSold(final Investment investment, final Loan loan,
@@ -171,10 +159,6 @@ public final class EventFactory {
         return new PurchaseRecommendedEventImpl(recommendation);
     }
 
-    public static PurchaseRequestedEvent purchaseRequested(final RecommendedParticipation recommendation) {
-        return new PurchaseRequestedEventImpl(recommendation);
-    }
-
     public static PurchasingCompletedEvent purchasingCompleted(final Collection<Investment> investment,
                                                                final PortfolioOverview portfolio) {
         return new PurchasingCompletedEventImpl(investment, portfolio);
@@ -231,10 +215,6 @@ public final class EventFactory {
 
     public static SaleRecommendedEvent saleRecommended(final RecommendedInvestment recommendation) {
         return new SaleRecommendedEventImpl(recommendation);
-    }
-
-    public static SaleRequestedEvent saleRequested(final RecommendedInvestment recommendation) {
-        return new SaleRequestedEventImpl(recommendation);
     }
 
     public static SellingCompletedEvent sellingCompleted(final Collection<Investment> investments,

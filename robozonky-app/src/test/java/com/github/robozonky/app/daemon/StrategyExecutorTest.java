@@ -33,7 +33,6 @@ import javax.ws.rs.ClientErrorException;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -147,12 +146,11 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(exec.get()).isNotEmpty();
         verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
         final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(5);
+        assertThat(e).hasSize(4);
         assertSoftly(softly -> {
             softly.assertThat(e).first().isInstanceOf(PurchasingStartedEvent.class);
             softly.assertThat(e.get(1)).isInstanceOf(PurchaseRecommendedEvent.class);
-            softly.assertThat(e.get(2)).isInstanceOf(PurchaseRequestedEvent.class);
-            softly.assertThat(e.get(3)).isInstanceOf(InvestmentPurchasedEvent.class);
+            softly.assertThat(e.get(2)).isInstanceOf(InvestmentPurchasedEvent.class);
             softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
         });
         // doing a dry run; the same participation is now ignored

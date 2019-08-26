@@ -20,7 +20,6 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
@@ -43,7 +42,6 @@ import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.notifications.listeners.InvestmentMadeEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentPurchasedEventListener;
-import com.github.robozonky.notifications.listeners.InvestmentSkippedEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentSoldEventListener;
 import com.github.robozonky.notifications.listeners.LoanDefaultedEventListener;
 import com.github.robozonky.notifications.listeners.LoanDelinquentEventListener;
@@ -85,17 +83,6 @@ public enum SupportedListener {
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new InvestmentSoldEventListener(this, targetHandler);
-        }
-    },
-    INVESTMENT_SKIPPED {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return InvestmentSkippedEvent.class;
-        }
-
-        @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new InvestmentSkippedEventListener(this, targetHandler);
         }
     },
     INVESTMENT_PURCHASED {
