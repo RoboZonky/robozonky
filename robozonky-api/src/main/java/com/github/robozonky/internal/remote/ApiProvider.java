@@ -195,15 +195,6 @@ public class ApiProvider implements AutoCloseable {
     }
 
     /**
-     * Retrieve user-specific Zonky API which requires authentication and allows to download various XLS exports.
-     * @param token Supplier of a valid Zonky API token, always representing the active user.
-     * @return New API instance.
-     */
-    Api<ExportApi> exports(final Supplier<ZonkyApiToken> token) {
-        return obtainNormal(ExportApi.class, token);
-    }
-
-    /**
      * Retrieve user-specific Zonky API which requires authentication and allows to retrieve reservations
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.

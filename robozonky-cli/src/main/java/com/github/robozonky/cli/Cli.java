@@ -23,7 +23,6 @@ import picocli.CommandLine;
 @CommandLine.Command(name = "java -jar robozonky-cli.jar",
         subcommands = {
                 CommandLine.HelpCommand.class,
-                GoogleCredentialsFeature.class,
                 MasterPasswordFeature.class,
                 NotificationTestingFeature.class,
                 StrategyValidationFeature.class,

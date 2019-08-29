@@ -35,32 +35,11 @@
     <!-- these are normally runtime dependencies, but we need them present in order to validate their settings -->
     <dependency>
       <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-integration-stonky</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-notifications</artifactId>
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-strategy-natural</artifactId>
-    </dependency>
-    <!-- google dependencies -->
-    <dependency>
-      <groupId>com.google.http-client</groupId>
-      <artifactId>google-http-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.oauth-client</groupId>
-      <artifactId>google-oauth-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-sheets</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-drive</artifactId>
     </dependency>
     <!-- all logging dependencies -->
     <dependency>

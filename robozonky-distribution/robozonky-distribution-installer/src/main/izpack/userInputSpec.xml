@@ -49,12 +49,6 @@
     <field type="check" variable="isJmxEnabled" summaryKey="Vzdálená správa povolena:">
       <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
     </field>
-    <field type="check" variable="showStonkyPanel" summaryKey="Integrace se Stonky povolena:">
-      <spec txt="Integrovat se Stonky. Vyžaduje Google účet. (Zastaralé, bude odstraněno.)" set="false"/>
-    </field>
-    <field type="check" variable="showStonkyPanel" summaryKey="Integrace se Stonky povolena:">
-      <spec txt="Integrovat se Stonky ('Statistics for Zonky'). Vyžaduje Google účet." set="false"/>
-    </field>
 
     <field type="space" />
     <field type="space" />
@@ -226,55 +220,5 @@
 
     <field type="staticText" align="left" bold="true" txt="Strategii si můžete vytvořit na následující webové adrese:" />
     <field type="staticText" align="left" bold="true" txt="https://robozonky.github.io/konfigurace-strategie/" />
-  </panel>
-
-  <panel id="stonkyEnablement" summaryKey="Integrace se Stonky">
-    <field type="staticText" align="left"
-           txt="Stonky je tabulka v Google Sheets, která zobrazuje nejrůznější užitečné statistiky o vašem portfoliu." />
-    <field type="space" />
-
-    <field type="staticText" align="left"
-           txt="Do této tabulky je nejprve potřeba importovat výpis peněženky a investic z Vašeho Google účtu. Následně můžete ručně spustit analýzu, která tato data zpracuje a vykreslí statistiky." />
-    <field type="space" />
-
-    <field type="staticText" align="left"
-           txt="Aby za vás RoboZonky mohl většinu těchto úkolů udělat, potřebuje k tomu přístup k vašemu Google Drive účtu. Pokud se jej rozhodnete povolit, RoboZonky bude ve Vašem Google Drive pravidelně vytvářet a upravovat složky a tabulky." />
-    <field type="space" />
-
-    <field type="staticText" align="left"
-           txt="Za tímto účelem se Vám během této instalace může otevřít okno prohlížeče, kde budete vyzvání k přidání oprávnění. Pokud se tak nestane, navštivte prosím adresu, kterou místo toho instalátor vypíše do terminálu." />
-    <field type="space" />
-
-    <field type="staticText" align="left"
-           txt="Nejste-li si jisti, zda dokážete oprávnění přidat, následující pole nezaškrtávejte. Instalátor jinak pravděpodobně skončí chybou nebo se zasekne." />
-    <field type="space" />
-
-    <field type="check" variable="isStonkyEnabled" summaryKey="Integrace se Stonky povolena:">
-      <spec txt="Chci povolit Stonky integraci, dám RoboZonky přístup ke svému Google Drive účtu." set="false"/>
-    </field>
-    <field type="space" />
-
-    <field type="staticText" align="left"
-           txt="Google bude s RoboZonky komunikovat přes HTTP na následující adrese. Doporučujeme ponechat výchozí hodnoty." />
-    <field type="space" />
-
-    <field type="staticText" align="left"
-           txt="Přesvědčte se, že nastavení vaší sítě případně firewallu umožní přístup nyní i kdykoli v budoucnu po vypršení platnosti původního Google oprávnění." />
-    <field type="space" />
-
-    <field type="text" variable="callbackHost" summaryKey="Hostitel:" readonlyCondition="readOnlyGoogleCallbackFields">
-      <spec txt="Hostitel:" size="30" set="localhost" />
-      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
-                 txt="Hostitel je povinná položka." />
-    </field>
-    <field type="space" />
-
-    <field type="text" variable="callbackPort" summaryKey="Port:" readonlyCondition="readOnlyGoogleCallbackFields">
-      <spec txt="Port ('0' vybere náhodný):" size="30" set="0" />
-      <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator" txt="Port musí být číslo." />
-    </field>
-    <field type="space" />
-
-    <field type="staticText" align="left" txt="Více o Stonky se dozvíte zde: https://www.facebook.com/groups/204405453512737/." />
   </panel>
 </izpack:userinput>

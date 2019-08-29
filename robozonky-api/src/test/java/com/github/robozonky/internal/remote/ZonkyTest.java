@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
@@ -72,12 +71,6 @@ class ZonkyTest {
         return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
     }
 
-    private static Zonky mockZonkyExports(final Api<ExportApi> ea) {
-        final ApiProvider apiProvider = mockApiProvider();
-        when(apiProvider.exports(any())).thenReturn(ea);
-        return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
-    }
-
     private static Zonky mockZonkyWallet(final PaginatedApi<BlockedAmount, WalletApi> wa) {
         final ApiProvider apiProvider = mockApiProvider();
         when(apiProvider.obtainPaginated(eq(WalletApi.class), any())).thenReturn(wa);
@@ -99,8 +92,6 @@ class ZonkyTest {
         final ApiProvider apiProvider = spy(new ApiProvider());
         final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(mock(ControlApi.class), null);
         doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
-        final Api<ExportApi> ea = mockApi(mock(ExportApi.class));
-        when(apiProvider.exports(any())).thenReturn(ea);
         mockPaginated(apiProvider, WalletApi.class);
         mockPaginated(apiProvider, LoanApi.class);
         mockPaginated(apiProvider, PortfolioApi.class);
@@ -176,23 +167,6 @@ class ZonkyTest {
             softly.assertThat(z.getAvailableParticipations(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getDevelopments(1)).isEmpty();
         });
-    }
-
-    @Test
-    void exports() {
-        final ExportApi api = mock(ExportApi.class);
-        when(api.downloadInvestmentsExport()).thenReturn(mock(Response.class));
-        when(api.downloadWalletExport()).thenReturn(mock(Response.class));
-        final Api<ExportApi> ea = mockApi(api);
-        final Zonky z = mockZonkyExports(ea);
-        assertSoftly(softly -> {
-            softly.assertThat(z.downloadInvestmentsExport()).isNotNull();
-            softly.assertThat(z.downloadWalletExport()).isNotNull();
-        });
-        z.requestInvestmentsExport();
-        verify(api).requestInvestmentsExport();
-        z.requestWalletExport();
-        verify(api).requestWalletExport();
     }
 
     @Test

@@ -82,10 +82,6 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         when(data.getVariable(Variables.SMTP_TO.getKey())).thenReturn("recipie  nt@server.cz");
         when(data.getVariable(Variables.SMTP_USERNAME.getKey())).thenReturn("sender@server.cz");
         when(data.getVariable(Variables.SMTP_PASSWORD.getKey())).thenReturn(UUID.randomUUID().toString());
-        // otherwise browser window will open to authenticate with Google
-        when(data.getVariable(Variables.IS_STONKY_ENABLED.getKey())).thenReturn("false");
-        when(data.getVariable(Variables.GOOGLE_CALLBACK_HOST.getKey())).thenReturn("localhost");
-        when(data.getVariable(Variables.GOOGLE_CALLBACK_PORT.getKey())).thenReturn("0");
         return data;
     }
 
@@ -283,7 +279,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
         verify(progress, times(1)).startAction(anyString(), anyInt());
-        verify(progress, times(8))
+        verify(progress, times(7))
                 .nextStep(anyString(), anyInt(), eq(1));
         verify(progress, times(1)).stopAction();
     }
@@ -312,7 +308,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
         verify(progress, times(1)).startAction(anyString(), anyInt());
-        verify(progress, times(8))
+        verify(progress, times(7))
                 .nextStep(anyString(), anyInt(), eq(1));
         verify(progress, times(1)).stopAction();
     }

@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.core.Response;
 
 import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
@@ -84,7 +83,6 @@ public class Zonky {
     private static final Logger LOGGER = LogManager.getLogger(Zonky.class);
 
     private final Api<ControlApi> controlApi;
-    private final Api<ExportApi> exports;
     private final Api<ReservationApi> reservationApi;
     private final PaginatedApi<RawLoan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
@@ -94,7 +92,6 @@ public class Zonky {
 
     Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
         this.controlApi = api.control(tokenSupplier);
-        this.exports = api.exports(tokenSupplier);
         this.loanApi = api.marketplace(tokenSupplier);
         this.reservationApi = api.reservations(tokenSupplier);
         this.participationApi = api.secondaryMarketplace(tokenSupplier);
@@ -264,22 +261,6 @@ public class Zonky {
 
     public void setReservationPreferences(final ReservationPreferences preferences) {
         controlApi.run(c -> c.setReservationPreferences(preferences));
-    }
-
-    public void requestWalletExport() {
-        exports.run(ExportApi::requestWalletExport);
-    }
-
-    public void requestInvestmentsExport() {
-        exports.run(ExportApi::requestInvestmentsExport);
-    }
-
-    public Response downloadWalletExport() {
-        return exports.call(ExportApi::downloadWalletExport);
-    }
-
-    public Response downloadInvestmentsExport() {
-        return exports.call(ExportApi::downloadInvestmentsExport);
     }
 
     public Restrictions getRestrictions() {
