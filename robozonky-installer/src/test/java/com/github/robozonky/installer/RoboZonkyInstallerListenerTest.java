@@ -279,7 +279,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
         verify(progress, times(1)).startAction(anyString(), anyInt());
-        verify(progress, times(8))
+        verify(progress, times(7))
                 .nextStep(anyString(), anyInt(), eq(1));
         verify(progress, times(1)).stopAction();
     }
@@ -308,7 +308,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
         verify(progress, times(1)).startAction(anyString(), anyInt());
-        verify(progress, times(8))
+        verify(progress, times(7))
                 .nextStep(anyString(), anyInt(), eq(1));
         verify(progress, times(1)).stopAction();
     }
