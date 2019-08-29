@@ -53,17 +53,9 @@
   </resources>
 
   <conditions>
-    <condition type="variable" id="enableStonkyPanel">
-      <name>showStonkyPanel</name>
-      <value>true</value>
-    </condition>
     <condition type="variable" id="enableSmtpAuthenticationFields">
       <name>isSmtpAuthenticationEnabled</name>
       <value>true</value>
-    </condition>
-    <condition type="variable" id="readOnlyGoogleCallbackFields">
-      <name>isStonkyEnabled</name>
-      <value>false</value>
     </condition>
     <condition type="variable" id="enableJmxPanel">
       <name>isJmxEnabled</name>
@@ -173,7 +165,6 @@
       <validator classname="com.github.robozonky.installer.EmailSettingsValidator"/>
     </panel>
     <!-- Settings for various integrations -->
-    <panel classname="UserInputPanel" id="stonkyEnablement" condition="enableStonkyPanel" />
     <panel classname="UserInputPanel" id="jmxUserInput" condition="enableJmxPanel" />
     <panel classname="SummaryPanel"/>
     <panel classname="InstallPanel"/>

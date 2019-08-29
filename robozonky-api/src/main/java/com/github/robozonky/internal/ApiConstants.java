@@ -20,8 +20,6 @@ public final class ApiConstants {
 
     public static final String ME = "/users/me";
     public static final String INVESTOR_ME = "/investors/me";
-    public static final String WALLET_EXPORT = ApiConstants.ME + "/wallet/transactions/export";
-    public static final String INVESTMENTS_EXPORT = ApiConstants.ME + "/investments/export";
 
     private ApiConstants() {
         // no instances
