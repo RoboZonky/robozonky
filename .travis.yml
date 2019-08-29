@@ -16,7 +16,6 @@ env:
     # then plugin modules
     - MODULE=robozonky-notifications
     - MODULE=robozonky-strategy-natural
-    - MODULE=robozonky-integration-stonky
 os:
   - linux
 jdk: # OpenJDK releases (non-EA) belong here, minimum of Java 11 is required

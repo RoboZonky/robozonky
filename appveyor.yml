@@ -10,7 +10,6 @@ environment:
       - MODULE: robozonky-installer
       # then plugin modules
       - MODULE: robozonky-strategy-natural
-      - MODULE: robozonky-integration-stonky
 matrix:
   fast_finish: true
 branches:
