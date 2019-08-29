@@ -29,7 +29,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.github.robozonky.cli.Feature;
-import com.github.robozonky.cli.GoogleCredentialsFeature;
 import com.github.robozonky.cli.SetupFailedException;
 import com.github.robozonky.cli.ZonkyPasswordFeature;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
@@ -43,10 +42,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_HOST;
-import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_CALLBACK_PORT;
-import static com.github.robozonky.integrations.stonky.Properties.GOOGLE_LOCAL_FOLDER;
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
@@ -219,8 +214,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     private static CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
-                                                      final CommandLinePart stonky, final CommandLinePart jmxConfig,
-                                                      final CommandLinePart core, final CommandLinePart logging) {
+                                                      final CommandLinePart jmxConfig, final CommandLinePart core,
+                                                      final CommandLinePart logging) {
         try {
             final File cliConfigFile = assembleCliFile(core, strategy, emailConfig);
             // have the CLI file loaded during RoboZonky startup
@@ -230,7 +225,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                     .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
-            Util.processCommandLine(commandLine, settings, strategy, stonky, jmxConfig, core, logging);
+            Util.processCommandLine(commandLine, settings, strategy, jmxConfig, core, logging);
             // write settings to a file
             Util.writeOutProperties(settings, SETTINGS_FILE);
             return commandLine;
@@ -257,35 +252,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    private static CommandLinePart prepareStonky() {
-        try {
-            final String host = Variables.GOOGLE_CALLBACK_HOST.getValue(DATA);
-            final String port = Variables.GOOGLE_CALLBACK_PORT.getValue(DATA);
-            final CommandLinePart cli = new CommandLinePart();
-            if (Boolean.valueOf(Variables.IS_STONKY_ENABLED.getValue(DATA))) {
-                cli.setProperty(GOOGLE_CALLBACK_HOST.getKey(), host);
-                cli.setProperty(GOOGLE_CALLBACK_PORT.getKey(), port);
-                // reuse the same code for this as we do in CLI
-                LOGGER.debug("Preparing Google credentials.");
-                final String username = Variables.ZONKY_USERNAME.getValue(DATA);
-                final GoogleCredentialsFeature google = new GoogleCredentialsFeature(username, host, Integer.parseInt(port));
-                google.runGoogleCredentialCheck();
-                LOGGER.debug("Credential check over.");
-                // copy credentials to the correct directory
-                final File source = GOOGLE_LOCAL_FOLDER.getValue()
-                        .map(File::new)
-                        .filter(File::isDirectory)
-                        .orElseThrow(() -> new IllegalStateException("Google credentials folder is not proper."));
-                final File target = new File(INSTALL_PATH, source.getName());
-                LOGGER.debug("Will copy {} to {}.", source, target);
-                FileUtils.moveDirectory(source, target);
-            }
-            return cli;
-        } catch (final Exception ex) {
-            throw new IllegalStateException("Failed configuring Google account.", ex);
-        }
-    }
-
     RoboZonkyInstallerListener.OS getOperatingSystem() {
         return operatingSystem;
     }
@@ -308,22 +274,20 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
         try {
-            progressListener.startAction("Konfigurace RoboZonky", 8);
+            progressListener.startAction("Konfigurace RoboZonky", 7);
             progressListener.nextStep("Příprava strategie.", 1, 1);
             final CommandLinePart strategyConfig = prepareStrategy();
             progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
             final CommandLinePart emailConfig = prepareEmailConfiguration();
-            progressListener.nextStep("Příprava Google účtu.", 3, 1);
-            final CommandLinePart stonky = prepareStonky();
-            progressListener.nextStep("Příprava nastavení JMX.", 4, 1);
+            progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
             final CommandLinePart jmx = prepareJmx();
-            progressListener.nextStep("Příprava nastavení Zonky.", 5, 1);
+            progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
             final CommandLinePart core = prepareCore();
-            progressListener.nextStep("Příprava nastavení logování.", 6, 1);
+            progressListener.nextStep("Příprava nastavení logování.", 5, 1);
             final CommandLinePart logging = prepareLogging();
-            progressListener.nextStep("Generování parametrů příkazové řádky.", 7, 1);
-            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, stonky, jmx, core, logging);
-            progressListener.nextStep("Generování spustitelného souboru.", 8, 1);
+            progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
+            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, core, logging);
+            progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
             prepareRunScript(result);
             progressListener.stopAction();
         } catch (final Exception ex) {

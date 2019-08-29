@@ -23,7 +23,6 @@
   <modules>
     <module>robozonky-api</module>
     <module>robozonky-app</module>
-    <module>robozonky-integration-stonky</module>
     <module>robozonky-notifications</module>
     <module>robozonky-extensions</module>
     <module>robozonky-strategy-natural</module>
@@ -91,11 +90,6 @@
       <dependency>
         <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-strategy-natural</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-integration-stonky</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -343,59 +337,6 @@
         <artifactId>commons-io</artifactId>
         <version>2.6</version>
       </dependency>
-      <!-- Google. -->
-      <dependency>
-        <groupId>com.google.api-client</groupId>
-        <artifactId>google-api-client</artifactId>
-        <version>${version.com.google.apis}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.http-client</groupId>
-        <artifactId>google-http-client-jackson2</artifactId>
-        <version>${version.com.google.apis}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.oauth-client</groupId>
-        <artifactId>google-oauth-client</artifactId>
-        <version>${version.com.google.apis}</version>
-        <exclusions>
-          <exclusion> <!-- comes from javax.annotations already -->
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.google.oauth-client</groupId>
-        <artifactId>google-oauth-client-java6</artifactId>
-        <version>${version.com.google.apis}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.oauth-client</groupId>
-        <artifactId>google-oauth-client-jetty</artifactId>
-        <version>${version.com.google.apis}</version>
-      </dependency>
-      <dependency> <!-- added explicitly here, as we use it for testing -->
-        <groupId>com.google.http-client</groupId>
-        <artifactId>google-http-client</artifactId>
-        <version>${version.com.google.apis}</version>
-        <exclusions>
-          <exclusion> <!-- comes from javax.annotations already -->
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.google.apis</groupId>
-        <artifactId>google-api-services-sheets</artifactId>
-        <version>v4-rev581-${version.com.google.apis}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.apis</groupId>
-        <artifactId>google-api-services-drive</artifactId>
-        <version>v3-rev173-${version.com.google.apis}</version>
-      </dependency>
       <!-- Testing. -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>
@@ -575,17 +516,6 @@
         <groupId>jakarta.enterprise</groupId>
         <artifactId>jakarta.enterprise.cdi-api</artifactId>
         <version>2.0.1</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>27.1-jre</version>
-        <exclusions>
-          <exclusion> <!-- comes from javax.annotations already -->
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.logging</groupId>
