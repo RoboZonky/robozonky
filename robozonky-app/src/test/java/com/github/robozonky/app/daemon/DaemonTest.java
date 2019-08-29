@@ -50,7 +50,7 @@ class DaemonTest extends AbstractZonkyLeveragingTest {
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             // call all the jobs and daemons we know about
             verify(d, times(2)).submitTenantless(any(), any(SimplePayload.class), any(), any(), any(), any());
-            verify(d, times(10)).submitWithTenant(any(), any(), any(), any(), any(), any());
+            verify(d, times(9)).submitWithTenant(any(), any(), any(), any(), any(), any());
         } finally {
             e.shutdownNow();
         }
