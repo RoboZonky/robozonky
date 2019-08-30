@@ -520,7 +520,8 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>27.1-jre</version>
+        <version>28.1-jre</version>
+        <scope>test</scope> <!-- otherwise mock-server makes it compile-scope -->
         <exclusions>
           <exclusion> <!-- comes from javax.annotations already -->
             <groupId>com.google.code.findbugs</groupId>
