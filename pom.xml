@@ -55,7 +55,7 @@
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
     <version.org.mockito>3.0.4</version.org.mockito>
-    <version.org.mock-server>5.5.4</version.org.mock-server>
+    <version.org.mock-server>5.6.1</version.org.mock-server>
     <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>
     <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
     <version.com.sun.mail>1.6.2</version.com.sun.mail>
