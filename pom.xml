@@ -379,6 +379,12 @@
         <groupId>org.assertj</groupId>
         <artifactId>assertj-vavr</artifactId>
         <version>0.0.1</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>
