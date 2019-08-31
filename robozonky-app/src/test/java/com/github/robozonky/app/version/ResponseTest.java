@@ -16,27 +16,18 @@
 
 package com.github.robozonky.app.version;
 
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class VersionIdentifierTest extends AbstractRoboZonkyTest {
+class ResponseTest {
 
     @Test
-    void stable() {
-        final String version = "1.2.3";
-        final VersionIdentifier v = new VersionIdentifier(version);
-        assertThat(v.getLatestStable()).isEqualTo(version);
-        assertThat(v.getLatestUnstable()).isEmpty();
+    void equality() {
+        final Response r = Response.noMoreRecentVersion();
+        assertThat(r).isNotEqualTo(null);
+        assertThat(r).isEqualTo(r);
+        assertThat(r).isEqualTo(Response.noMoreRecentVersion());
     }
 
-    @Test
-    void unstable() {
-        final String version = "1.2.3";
-        final String version2 = "1.3.0-beta-1";
-        final VersionIdentifier v = new VersionIdentifier(version, version2);
-        assertThat(v.getLatestStable()).isEqualTo(version);
-        assertThat(v.getLatestUnstable()).isPresent().contains(version2);
-    }
 }

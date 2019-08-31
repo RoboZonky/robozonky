@@ -62,10 +62,6 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.vavr</groupId>
       <artifactId>vavr</artifactId>
     </dependency>

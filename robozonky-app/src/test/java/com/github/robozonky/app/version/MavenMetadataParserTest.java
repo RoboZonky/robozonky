@@ -1,0 +1,170 @@
+/*
+ * Copyright 2019 The RoboZonky Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.robozonky.app.version;
+
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.UUID;
+
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import io.vavr.control.Either;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
+import org.mockserver.socket.PortFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import static org.assertj.vavr.api.VavrAssertions.assertThat;
+import static org.mockito.Mockito.*;
+
+class MavenMetadataParserTest extends AbstractRoboZonkyTest {
+
+    private static ClientAndServer server;
+    private static String serverUrl;
+
+    @BeforeAll
+    static void startServer() {
+        server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
+        serverUrl = "http://127.0.0.1:" + server.getLocalPort();
+    }
+
+    @AfterAll
+    static void stopServer() {
+        server.stop();
+    }
+
+    @AfterEach
+    void resetServer() {
+        server.reset();
+    }
+
+    @Test
+    void checkNullVersion() {
+        final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
+        final Either<Throwable, Response> result = parser.apply(null);
+        assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+    }
+
+    @Test
+    void checkEmptyVersion() {
+        final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
+        final Either<Throwable, Response> result = parser.apply("");
+        assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+    }
+
+    @Test
+    void checkNonExistentUrl() {
+        server.when(HttpRequest.request()).respond(HttpResponse.notFoundResponse());
+        final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                     "robozonky-nonexistent");
+        final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
+        assertThat(result).containsLeftInstanceOf(FileNotFoundException.class);
+    }
+
+    @Test
+    void parseSingleNodeList() {
+        final String version = "1.2.3";
+        final Node n = mock(Node.class);
+        when(n.getTextContent()).thenReturn(version);
+        final NodeList l = mock(NodeList.class);
+        when(l.getLength()).thenReturn(1);
+        when(l.item(eq(0))).thenReturn(n);
+        final List<String> actual = MarvenMetadataParser.extractItems(l);
+        Assertions.assertThat(actual).containsExactly(version);
+    }
+
+    @Test
+    void parseLongerNodeList() {
+        final String version = "1.2.3", version2 = "1.2.4-SNAPSHOT";
+        final Node n1 = mock(Node.class);
+        when(n1.getTextContent()).thenReturn(version);
+        final Node n2 = mock(Node.class);
+        when(n2.getTextContent()).thenReturn(version2);
+        final NodeList l = mock(NodeList.class);
+        when(l.getLength()).thenReturn(2);
+        when(l.item(eq(0))).thenReturn(n1);
+        when(l.item(eq(1))).thenReturn(n2);
+        final List<String> actual = MarvenMetadataParser.extractItems(l);
+        Assertions.assertThat(actual).containsExactly(version, version2);
+    }
+
+    @Nested
+    class validMavenMetadata {
+
+        @BeforeEach
+        void setupMetadata() {
+            server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
+                    .respond(HttpResponse.response().withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                                                                      "<metadata>\n" +
+                                                                      "  <groupId>com.github.robozonky</groupId>\n" +
+                                                                      "  <artifactId>robozonky</artifactId>\n" +
+                                                                      "  <versioning>\n" +
+                                                                      "    <latest>4.0.2-cr-2</latest>\n" +
+                                                                      "    <release>4.0.1</release>\n" +
+                                                                      "    <versions>\n" +
+                                                                      "      <version>4.0.0-cr-1</version>\n" +
+                                                                      "      <version>4.0.0</version>\n" +
+                                                                      "      <version>4.0.1</version>\n" +
+                                                                      "      <version>4.0.2-cr-1</version>\n" +
+                                                                      "    </versions>\n" +
+                                                                      "    <lastUpdated>20171015201449</lastUpdated" +
+                                                                      ">\n" +
+                                                                      "  </versioning>\n" +
+                                                                      "</metadata>"));
+        }
+
+        @Test
+        void checkUnknownVersion() {
+            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                         "robozonky");
+            final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
+            assertThat(result).containsLeftInstanceOf(IllegalStateException.class);
+        }
+
+        @Test
+        void checkLatestVersionBothOutdated() {
+            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                         "robozonky");
+            final Either<Throwable, Response> result = parser.apply("4.0.0");
+            assertThat(result).containsOnRight(Response.moreRecent("4.0.1", "4.0.2-cr-1"));
+        }
+
+        @Test
+        void checkLatestVersionExperimentalMoreRecent() {
+            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                         "robozonky");
+            final Either<Throwable, Response> result = parser.apply("4.0.1");
+            assertThat(result).containsOnRight(Response.moreRecentExperimental("4.0.2-cr-1"));
+        }
+
+        @Test
+        void checkLatestVersionNoneMoreRecent() {
+            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                         "robozonky");
+            final Either<Throwable, Response> result = parser.apply("4.0.2-cr-1");
+            assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+        }
+    }
+}

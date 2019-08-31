@@ -21,9 +21,9 @@ import java.time.Duration;
 import com.github.robozonky.internal.jobs.SimpleJob;
 import com.github.robozonky.internal.jobs.SimplePayload;
 
-public class VersionDetectionJob implements SimpleJob {
+final class VersionDetectionJob implements SimpleJob {
 
-    private final SimplePayload payload = new UpdateMonitor();
+    private final SimplePayload payload = new VersionDetection();
 
     @Override
     public Duration startIn() {

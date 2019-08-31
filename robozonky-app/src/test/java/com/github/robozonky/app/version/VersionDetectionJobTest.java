@@ -32,7 +32,7 @@ class VersionDetectionJobTest extends AbstractRoboZonkyTest {
         assertSoftly(softly -> {
             softly.assertThat(job.startIn()).isEqualTo(Duration.ZERO);
             softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofDays(1));
-            softly.assertThat(job.payload()).isInstanceOf(UpdateMonitor.class);
+            softly.assertThat(job.payload()).isInstanceOf(VersionDetection.class);
         });
     }
 

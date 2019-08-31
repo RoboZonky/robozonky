@@ -22,7 +22,6 @@ module com.github.robozonky.app {
     requires com.fasterxml.jackson.databind;
     requires info.picocli;
     requires io.vavr;
-    requires maven.artifact;
     requires org.apache.commons.lang3;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
