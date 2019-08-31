@@ -314,6 +314,18 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void robozonkyExperimentalUpdateDetected() {
+        var e = EventFactory.roboZonkyExperimentalUpdateDetected("5.0.0-cr-1");
+        assertThat(e.getNewVersion()).isEqualTo("5.0.0-cr-1");
+    }
+
+    @Test
+    void robozonkyUpdateDetected() {
+        var e = EventFactory.roboZonkyUpdateDetected("5.0.0");
+        assertThat(e.getNewVersion()).isEqualTo("5.0.0");
+    }
+
+    @Test
     void robozonkyCrashed() {
         final RoboZonkyCrashedEvent e = EventFactory.roboZonkyCrashed(new OutOfMemoryError());
         assertThat(e.getCause()).isNotNull();
