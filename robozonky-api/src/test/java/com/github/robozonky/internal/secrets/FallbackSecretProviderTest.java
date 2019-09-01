@@ -16,6 +16,9 @@
 
 package com.github.robozonky.internal.secrets;
 
+import java.util.UUID;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -34,4 +37,17 @@ class FallbackSecretProviderTest {
         assertThat(p.getPassword()).isEqualTo(FallbackSecretProviderTest.PWD.toCharArray());
         assertThat(p.isPersistent()).isFalse();
     }
+
+    @Test
+    void setToken() {
+        final SecretProvider p = SecretProvider.inMemory(FallbackSecretProviderTest.USR,
+                                                         FallbackSecretProviderTest.PWD.toCharArray());
+        // make sure original values were set
+        assertThat(p.getToken()).isEmpty();
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        assertThat(p.setToken(token)).isTrue();
+        assertThat(p.getToken()).contains(token);
+    }
+
 }
+
