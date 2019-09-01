@@ -25,6 +25,7 @@ module com.github.robozonky.app {
     requires org.apache.commons.lang3;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
+    requires resteasy.core;
 
     provides JobService with com.github.robozonky.app.events.EventFiringJobService,
             com.github.robozonky.app.version.VersionDetectionJobService,

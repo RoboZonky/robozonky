@@ -16,6 +16,9 @@
 
 package com.github.robozonky.internal.secrets;
 
+import java.util.Optional;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,8 +28,10 @@ import org.apache.logging.log4j.Logger;
 final class KeyStoreSecretProvider implements SecretProvider {
 
     private static final Logger LOGGER = LogManager.getLogger(KeyStoreSecretProvider.class);
+
     private static final String ALIAS_PASSWORD = "pwd";
     private static final String ALIAS_USERNAME = "usr";
+    private static final String ALIAS_TOKEN = "tkn";
     private final KeyStoreHandler ksh;
 
     public KeyStoreSecretProvider(final KeyStoreHandler ksh) {
@@ -73,6 +78,35 @@ final class KeyStoreSecretProvider implements SecretProvider {
     public String getUsername() {
         return new String(this.ksh.get(ALIAS_USERNAME)
                                   .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore.")));
+    }
+
+    @Override
+    public Optional<ZonkyApiToken> getToken() {
+        try {
+            final ZonkyApiToken result = this.ksh.get(ALIAS_TOKEN)
+                    .map(String::new)
+                    .map(ZonkyApiToken::unmarshal)
+                    .orElse(null);
+            return Optional.ofNullable(result);
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed reading Zonky API token from the keystore.", ex);
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public boolean setToken(ZonkyApiToken apiToken) {
+        if (apiToken == null) {
+            this.ksh.delete(ALIAS_TOKEN);
+            this.ksh.save();
+            return true;
+        }
+        try {
+            return this.set(ALIAS_TOKEN, ZonkyApiToken.marshal(apiToken).toCharArray());
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed storing Zonky API token to the keystore.", ex);
+            return false;
+        }
     }
 
     public boolean setPassword(final char[] password) {

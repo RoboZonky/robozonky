@@ -52,7 +52,7 @@ public class App implements Runnable {
      * Exists so that tests can mock the {@link System#exit(int)} away.
      * @param code
      */
-    public void actuallyExit(final int code) {
+    void actuallyExit(final int code) {
         System.exit(code);
     }
 
@@ -61,7 +61,7 @@ public class App implements Runnable {
      * so may result in unpredictable behavior of this instance of RoboZonky or future ones.
      * @param result Will be passed to {@link System#exit(int)}.
      */
-    public void exit(final ReturnCode result) {
+    void exit(final ReturnCode result) {
         LOGGER.trace("Exit requested with return code {}.", result);
         actuallyExit(result.getCode());
     }
@@ -70,6 +70,7 @@ public class App implements Runnable {
         try {
             return this.executeSafe(mode);
         } catch (final Throwable t) {
+            shutdownHooks.execute(ReturnCode.ERROR_UNEXPECTED); // make sure all is closed even in a failing situation
             LOGGER.error("Caught unexpected exception, terminating daemon.", t);
             return ReturnCode.ERROR_UNEXPECTED;
         }
@@ -84,17 +85,12 @@ public class App implements Runnable {
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         // trigger all shutdown hooks in reverse order, before the token is closed after exiting this method
-        try {
-            final ReturnCode code = m.get();
-            shutdownHooks.execute(code);
-            return code;
-        } catch (final Throwable ex) {
-            shutdownHooks.execute(ReturnCode.ERROR_UNEXPECTED); // make sure all is closed even in a failing situation
-            throw new IllegalStateException("Error executing daemon.", ex);
-        }
+        final ReturnCode code = m.get();
+        shutdownHooks.execute(code);
+        return code;
     }
 
-    public String[] getArgs() {
+    String[] getArgs() {
         return args.clone();
     }
 

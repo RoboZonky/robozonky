@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.OAuthScope;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.*;
 
 class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
 
-    private static final SecretProvider SECRETS = SecretProvider.inMemory("someone", "password".toCharArray());
+    private final SecretProvider SECRETS = SecretProvider.inMemory("someone", "password".toCharArray());
 
     private static ZonkyApiToken getTokenExpiringIn(final Duration duration) {
         return new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
@@ -126,7 +127,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(oAuth).login(any(), any(), any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
-        assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
     }
 
     @Test
@@ -141,9 +142,9 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         assertThat(token).isNotNull();
         skipAheadBy(Duration.ofSeconds(4 * 60 + 55)); // get over the refresh period, but not over expiration
         doThrow(IllegalStateException.class).when(oAuth).refresh(any());
-        assertThat(t.get())
-                .isNotNull()
-                .isNotSameAs(token);
+        assertThatThrownBy(t::get)
+                .isInstanceOf(NotAuthorizedException.class)
+                .hasCauseInstanceOf(IllegalStateException.class);
         verify(oAuth).refresh(any()); // make sure refresh was rejected before login was called
     }
 
@@ -160,7 +161,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         t.close();
         verify(oAuth, never()).login(any(), any(), any());
         verify(zonky, never()).logout();
-        assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
     }
 
     @Test
@@ -177,9 +178,9 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         verify(oAuth).login(any(), any(), any());
         assertThat(t.isClosed()).isFalse();
         t.close();
-        verify(zonky, only()).logout();
+        verify(zonky, never()).logout();
         assertThat(t.isClosed()).isTrue();
-        assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
     }
 
     @Test

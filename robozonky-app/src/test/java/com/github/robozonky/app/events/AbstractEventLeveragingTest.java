@@ -113,7 +113,7 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
     @AfterEach
     public void unregisterAllShutdownHooks() { // so that PITest can shut down all child processes
-        Lifecycle.clearShutdownHooks();
+        Lifecycle.getShutdownHooks().forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
         Thread.setDefaultUncaughtExceptionHandler(null);
     }
 

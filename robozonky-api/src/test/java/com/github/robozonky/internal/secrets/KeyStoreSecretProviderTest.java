@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Optional;
+import java.util.UUID;
 
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,7 +44,7 @@ class KeyStoreSecretProviderTest {
         try {
             final File f = File.createTempFile("robozonky-", ".keystore");
             f.delete();
-            return KeyStoreHandler.create(f, KeyStoreSecretProviderTest.PWD.toCharArray());
+            return KeyStoreHandler.create(f, PWD.toCharArray());
         } catch (final IOException | KeyStoreException e) {
             fail("Something went wrong.", e);
             return null;
@@ -50,29 +52,28 @@ class KeyStoreSecretProviderTest {
     }
 
     private static KeyStoreSecretProvider newProvider(final String username, final String password) {
-        final KeyStoreHandler ksh = KeyStoreSecretProviderTest.getKeyStoreHandler();
+        final KeyStoreHandler ksh = getKeyStoreHandler();
         return (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh, username, password.toCharArray());
     }
 
     @Test
     void usernameNotSet() {
-        assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getUsername())
+        assertThatThrownBy(() -> newMockProvider().getUsername())
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void passwordNotSet() {
-        assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getPassword())
+        assertThatThrownBy(() -> newMockProvider().getPassword())
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void setUsernameAndPassword() {
-        final KeyStoreSecretProvider p =
-                KeyStoreSecretProviderTest.newProvider(KeyStoreSecretProviderTest.USR, KeyStoreSecretProviderTest.PWD);
+        final KeyStoreSecretProvider p = newProvider(USR, PWD);
         // make sure original values were set
-        assertThat(p.getUsername()).isEqualTo(KeyStoreSecretProviderTest.USR);
-        assertThat(p.getPassword()).isEqualTo(KeyStoreSecretProviderTest.PWD.toCharArray());
+        assertThat(p.getUsername()).isEqualTo(USR);
+        assertThat(p.getPassword()).isEqualTo(PWD.toCharArray());
         // make sure updating them works
         final String usr = "something";
         assertThat(p.setUsername(usr)).isTrue();
@@ -81,6 +82,18 @@ class KeyStoreSecretProviderTest {
         assertThat(p.setPassword(pwd.toCharArray())).isTrue();
         assertThat(p.getPassword()).isEqualTo(pwd.toCharArray());
         assertThat(p.isPersistent()).isTrue();
+    }
+
+    @Test
+    void setToken() {
+        final SecretProvider p = newProvider(USR, PWD);
+        // make sure original values were set
+        assertThat(p.getToken()).isEmpty();
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        assertThat(p.setToken(token)).isTrue();
+        assertThat(p.getToken()).contains(token);
+        assertThat(p.setToken(null)).isTrue();
+        assertThat(p.getToken()).isEmpty();
     }
 
     @Test

@@ -17,6 +17,9 @@
 package com.github.robozonky.internal.secrets;
 
 import java.security.KeyStore;
+import java.util.Optional;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 /**
  * Implementations provide various ways of storing sensitive information, such as passwords or access tokens.
@@ -70,6 +73,17 @@ public interface SecretProvider {
      * @return The username.
      */
     String getUsername();
+
+    /**
+     * @return Present if previously stored with {@link #setToken(ZonkyApiToken)}.
+     */
+    Optional<ZonkyApiToken> getToken();
+
+    /**
+     * @param apiToken If null, subsequent {@link #getToken()} calls will return empty {@link Optional}.
+     * @return True if stored.
+     */
+    boolean setToken(ZonkyApiToken apiToken);
 
     /**
      * Whether or not this provider will store all data in such a way that it survives JVM restart.

@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.function.Consumer;
+import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
@@ -78,15 +79,15 @@ final class Skippable implements Runnable {
                 tenant.fire(roboZonkyDaemonResumed(since, now));
             });
             LOGGER.trace("Successfully finished {}.", this);
+        } catch (final NotAuthorizedException | Error ex) { // authorization problems treated as unrecoverable
+            shutdownCall.accept(ex);
+            throw ex; // rethrow the error
         } catch (final Exception ex) {
             final boolean becameUnavailable = availability.registerException(ex);
             if (becameUnavailable) {
                 LOGGER.debug("Unavailability starting.");
                 tenant.fire(roboZonkyDaemonSuspended(ex));
             }
-        } catch (final Error er) {
-            shutdownCall.accept(er);
-            throw er; // rethrow the error
         } finally {
             LOGGER.trace("Finished {}.", this);
         }

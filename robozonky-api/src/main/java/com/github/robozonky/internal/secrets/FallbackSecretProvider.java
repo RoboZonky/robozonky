@@ -17,6 +17,9 @@
 package com.github.robozonky.internal.secrets;
 
 import java.util.Arrays;
+import java.util.Optional;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 /**
  * Plain-text in-memory ephemeral secret storage. Should only ever be used for testing purposes.
@@ -25,6 +28,7 @@ final class FallbackSecretProvider implements SecretProvider {
 
     private final String username;
     private final char[] password;
+    private ZonkyApiToken token;
 
     public FallbackSecretProvider(final String username, final char... password) {
         this.username = username;
@@ -39,6 +43,17 @@ final class FallbackSecretProvider implements SecretProvider {
     @Override
     public String getUsername() {
         return this.username;
+    }
+
+    @Override
+    public synchronized Optional<ZonkyApiToken> getToken() {
+        return Optional.ofNullable(token);
+    }
+
+    @Override
+    public synchronized boolean setToken(ZonkyApiToken apiToken) {
+        this.token = apiToken;
+        return true;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,18 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -43,9 +49,7 @@ import com.github.robozonky.internal.test.DateUtil;
 public class ZonkyApiToken extends BaseEntity {
 
     public static final String REFRESH_TOKEN_STRING = "refresh_token";
-
     private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
-
     @XmlTransient
     private final long id = ID_GENERATOR.getAndIncrement();
     @XmlElement(name = "access_token")
@@ -73,7 +77,8 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn) {
-        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, OAuthScope.SCOPE_APP_WEB);
+        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING,
+             OAuthScope.SCOPE_APP_WEB);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
@@ -94,6 +99,28 @@ public class ZonkyApiToken extends BaseEntity {
         this.type = type;
         this.scope = scope.length == 0 ? OAuthScopes.of() : OAuthScopes.of(scope);
         this.obtainedOn = obtainedOn;
+    }
+
+    public static ZonkyApiToken unmarshal(final String token) {
+        try {
+            final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
+            final Unmarshaller u = ctx.createUnmarshaller();
+            return (ZonkyApiToken) u.unmarshal(new StringReader(token));
+        } catch (final JAXBException ex) {
+            throw new IllegalStateException("Failed unmarshalling Zonky API token.", ex);
+        }
+    }
+
+    public static String marshal(final ZonkyApiToken token) {
+        try {
+            final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
+            final Marshaller m = ctx.createMarshaller();
+            final StringWriter w = new StringWriter();
+            m.marshal(token, w);
+            return w.toString();
+        } catch (final JAXBException ex) {
+            throw new IllegalStateException("Failed marshalling Zonky API token.", ex);
+        }
     }
 
     public long getId() {

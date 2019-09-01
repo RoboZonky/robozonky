@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,5 +78,22 @@ public class OAuthScopes {
     @Override
     public String toString() {
         return scopes.stream().map(OAuthScope::name).collect(Collectors.joining(SEPARATOR));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final OAuthScopes that = (OAuthScopes) o;
+        return scopes.equals(that.scopes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(scopes);
     }
 }
