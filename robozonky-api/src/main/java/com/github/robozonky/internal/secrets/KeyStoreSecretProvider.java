@@ -96,6 +96,10 @@ final class KeyStoreSecretProvider implements SecretProvider {
 
     @Override
     public boolean setToken(ZonkyApiToken apiToken) {
+        if (apiToken == null) {
+            this.ksh.delete(ALIAS_TOKEN);
+            return true;
+        }
         try {
             return this.set(ALIAS_TOKEN, ZonkyApiToken.marshal(apiToken).toCharArray());
         } catch (final Exception ex) {

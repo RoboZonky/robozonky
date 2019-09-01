@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.UUID;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -32,10 +34,13 @@ import static org.mockito.Mockito.*;
 
 class TenantBuilderTest extends AbstractZonkyLeveragingTest {
 
+    private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
+                                                                 UUID.randomUUID().toString(), 299);
+
     @Test
     void apiProvided() {
         final OAuth o = mock(OAuth.class);
-        when(o.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
+        when(o.login(any(), any(), any())).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final ApiProvider a = mockApiProvider(o, z);
         final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());

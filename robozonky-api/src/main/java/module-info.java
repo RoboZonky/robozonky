@@ -59,7 +59,9 @@ module com.github.robozonky.api {
      * Extensions are managed by app and cli modules. Notifications are added as there is a slightly hackish
      * implementation of config sharing that wouldn't otherwise be possible.
      */
-    exports com.github.robozonky.internal.extensions to com.github.robozonky.app, com.github.robozonky.cli,
+    exports com.github.robozonky.internal.extensions to
+            com.github.robozonky.app,
+            com.github.robozonky.cli,
             com.github.robozonky.notifications;
 
     uses JobService;
@@ -68,8 +70,14 @@ module com.github.robozonky.api {
 
     provides JobService with StateCleanerJobService;
 
-    opens com.github.robozonky.api.remote.enums to com.fasterxml.jackson.databind, org.apache.commons.lang3;
-    opens com.github.robozonky.api.remote.entities to com.fasterxml.jackson.databind, org.apache.commons.lang3;
-    opens com.github.robozonky.api.remote.entities.sanitized to org.apache.commons.lang3;
+    opens com.github.robozonky.api.remote.entities to
+            java.xml.bind,
+            com.fasterxml.jackson.databind,
+            org.apache.commons.lang3;
+    opens com.github.robozonky.api.remote.enums to
+            com.fasterxml.jackson.databind,
+            org.apache.commons.lang3;
+    opens com.github.robozonky.api.remote.entities.sanitized to
+            org.apache.commons.lang3;
 
 }

@@ -18,6 +18,7 @@ package com.github.robozonky.app.tenant;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
@@ -48,11 +49,13 @@ import static org.mockito.Mockito.*;
 class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
+    private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
+                                                                 UUID.randomUUID().toString(), 299);
 
     @Test
     void closesWithTokens() {
         final OAuth a = mock(OAuth.class);
-        when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
+        when(a.login(any(), any(), any())).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build()) {
@@ -62,7 +65,6 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
             fail(e);
         }
         verify(a).login(any(), any(), any());
-        verify(z).logout();
     }
 
     @Test
@@ -82,7 +84,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void getters() throws Exception {
         final OAuth a = mock(OAuth.class);
-        when(a.login(any(), any(), any())).thenReturn(mock(ZonkyApiToken.class));
+        when(a.login(any(), any(), any())).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final Loan l = Loan.custom().setId(1).build();
         final Investment i = Investment.fresh(l, 200).build();

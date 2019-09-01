@@ -92,6 +92,8 @@ class KeyStoreSecretProviderTest {
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
         assertThat(p.setToken(token)).isTrue();
         assertThat(p.getToken()).contains(token);
+        assertThat(p.setToken(null)).isTrue();
+        assertThat(p.getToken()).isEmpty();
     }
 
     @Test
