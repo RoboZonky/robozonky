@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.app.daemon.Daemon;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
@@ -85,7 +86,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
                                  "-s", "somewhere");
         final Optional<Function<Lifecycle, InvestmentMode>> cfg = CommandLine.parse(main);
         assertThat(cfg).isPresent();
-        cfg.get().apply(null);
+        assertThat(cfg.get().apply(null)).isInstanceOf(Daemon.class);
         assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }
 

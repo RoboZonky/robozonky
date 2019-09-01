@@ -16,10 +16,12 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.Events;
@@ -35,7 +37,7 @@ import org.apache.logging.log4j.Logger;
 public class Lifecycle {
 
     private static final Logger LOGGER = LogManager.getLogger(Lifecycle.class);
-    private static final Set<Thread> HOOKS = new HashSet<>(0);
+    private static final AtomicReference<Set<Thread>> HOOKS = new AtomicReference<>(initShutdownHooks());
     private final CountDownLatch circuitBreaker;
     private final Lazy<DaemonShutdownHook> shutdownHook;
     private final AtomicBoolean failed = new AtomicBoolean(false);
@@ -58,12 +60,15 @@ public class Lifecycle {
         hooks.register(shutdownEnabler);
     }
 
+    private static Set<Thread> initShutdownHooks() {
+        return new HashSet<>(0);
+    }
+
     /**
      * For testing purposes. PITest mutations would start these and not kill them, leading to stuck processes.
      */
-    public static void clearShutdownHooks() {
-        HOOKS.forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
-        HOOKS.clear();
+    public static Collection<Thread> getShutdownHooks() {
+        return HOOKS.getAndSet(initShutdownHooks());
     }
 
     /**
@@ -73,7 +78,7 @@ public class Lifecycle {
         Thread.setDefaultUncaughtExceptionHandler((e, err) -> resumeToFail(err));
         final Thread t = shutdownHook.get();
         Runtime.getRuntime().addShutdownHook(t);
-        HOOKS.add(t);
+        HOOKS.get().add(t);
         LOGGER.debug("Pausing main thread.");
         try {
             circuitBreaker.await();
@@ -104,5 +109,4 @@ public class Lifecycle {
         LOGGER.debug("Asking application to die through {}.", this);
         circuitBreaker.countDown();
     }
-
 }
