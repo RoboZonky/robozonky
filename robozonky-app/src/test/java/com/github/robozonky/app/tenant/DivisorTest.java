@@ -25,12 +25,12 @@ class DivisorTest extends AbstractRoboZonkyTest {
 
     @Test
     void calculate() {
-        Divisor d = new Divisor(2);
+        Divisor d = new Divisor(1);
         assertThat(d.getSharePerMille()).isEqualTo(0);
         d.add(1);
-        assertThat(d.getSharePerMille()).isEqualTo(500);
+        assertThat(d.getSharePerMille()).isEqualTo(1000);
         d.add(10);
-        assertThat(d.getSharePerMille()).isEqualTo(5500);
+        assertThat(d.getSharePerMille()).isEqualTo(11000);
     }
 
     @Test

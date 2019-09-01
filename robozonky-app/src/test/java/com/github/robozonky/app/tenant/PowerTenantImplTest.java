@@ -58,13 +58,16 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(a.login(any(), any(), any())).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        try (final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build()) {
+        final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build();
+        try (tenant) {
             final Statistics s = tenant.call(Zonky::getStatistics);
             assertThat(s).isSameAs(Statistics.empty());
         } catch (final Exception e) {
             fail(e);
         }
         verify(a).login(any(), any(), any());
+        assertThatThrownBy(() -> tenant.getLoan(1)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> tenant.getInvestment(1)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -119,7 +122,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
-            tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
+            tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException())).run();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)

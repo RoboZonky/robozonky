@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -81,6 +82,7 @@ final class Cache<T> implements AutoCloseable {
         }
     };
 
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final Tenant tenant;
     private final Backend<T> backend;
     private final Map<Integer, Tuple2<T, Instant>> storage = new ConcurrentHashMap<>(20);
@@ -140,6 +142,9 @@ final class Cache<T> implements AutoCloseable {
     }
 
     public T get(final int id) {
+        if (isClosed.get()) {
+            throw new IllegalStateException("Already closed.");
+        }
         return getFromCache(id).orElseGet(() -> {
             final T item = backend.getItem(id, tenant)
                     .getOrElseThrow(e -> new IllegalStateException("Can not read " + identify(id) + " from Zonky.", e));
@@ -160,6 +165,7 @@ final class Cache<T> implements AutoCloseable {
     @Override
     public void close() {
         evictionTask.cancel(true);
+        isClosed.set(true);
     }
 
     private interface Backend<I> {
