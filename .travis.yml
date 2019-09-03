@@ -25,10 +25,10 @@ stages: # order the stages we'll use during this build
   - test
   - quicktest
   - sonar
-matrix:
-  allow_failures:
-    - jdk: openjdk-13
-    - jdk: openjdk-ea
+allow_failures:
+  - jdk: openjdk-13
+  - jdk: openjdk-ea
+jobs:
   include:
     - stage: precache # independent stage for Maven to build and download all dependencies
       env: # empty
@@ -50,10 +50,21 @@ matrix:
         - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io
     - stage: quicktest # test early adopters JDK as well, but relax requirements
       env: #empty
-      jdk:
-        - openjdk12
-        - openjdk13
-        - openjdk-ea
+      jdk: openjdk12
+      install: # do nothing
+        - mvn clean
+      script:
+        - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+    - stage: quicktest # test early adopters JDK as well, but relax requirements
+      env: #empty
+      jdk: openjdk13
+      install: # do nothing
+        - mvn clean
+      script:
+        - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+    - stage: quicktest # test early adopters JDK as well, but relax requirements
+      env: #empty
+      jdk: openjdk-ea
       install: # do nothing
         - mvn clean
       script:
