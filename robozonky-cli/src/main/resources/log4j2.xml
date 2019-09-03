@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<Configuration status="WARN">
+<Configuration status="WARN" monitorInterval="30">
 
   <Properties> <!-- These are the common pattern layouts to be used later in the file. -->
     <Property name="consoleAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level %msg%n</Property>
@@ -43,7 +43,16 @@
       <Policies>
         <TimeBasedTriggeringPolicy />
       </Policies>
-      <DefaultRolloverStrategy max="100" />
+      <DefaultRolloverStrategy max="100">
+        <!--
+        * delete only files older than 7days
+        -->
+        <Delete basePath="." maxDepth="1">
+          <IfFileName glob="robozonky*log*">
+            <IfLastModified age="7d" />
+          </IfFileName>
+        </Delete>
+      </DefaultRolloverStrategy>
     </RollingFile>
   </Appenders>
   <Loggers>
