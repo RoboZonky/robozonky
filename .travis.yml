@@ -23,8 +23,8 @@ jdk: # OpenJDK releases (non-EA) belong here, minimum of Java 11 is required
 stages: # order the stages we'll use during this build
   - precache # for Maven to build and download all dependencies
   - test # full long test on main JDK; runs PITest, takes very long
+  - sonar # for sonarcloud.io code analysis
   - quicktest # matrix stage for testing on a variety of JDKs; these are quick tests - PITest is not run
-  - sonar # for sonarcloud.i code analysis
 allow_failures: # allow failures on non-production JDKs
   - jdk: openjdk-13
   - jdk: openjdk-ea
