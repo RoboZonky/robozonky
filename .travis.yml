@@ -21,14 +21,16 @@ os:
 jdk: # OpenJDK releases (non-EA) belong here, minimum of Java 11 is required
   - openjdk11
   - openjdk12
+  - openjdk13
+  - openjdk-ea
 stages: # order the stages we'll use during this build
   - precache
   - test
   - sonar
-  - preview
 matrix:
   allow_failures:
-  - stage: preview
+  - jdk: openjdk13
+  - jdk: openjdk-ea
   include:
   - stage: precache # independent stage for Maven to build and download all dependencies
     env: # empty
@@ -47,15 +49,6 @@ matrix:
       - mvn clean
     script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
       - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io
-  - stage: preview # test early adopters JDK as well, but relax requirements
-    env: #empty
-    jdk:
-      - openjdk13
-      - openjdk-ea
-    install: # do nothing
-      - mvn clean
-    script:
-      - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip
 cache:
   directories:
   - $HOME/.m2
