@@ -20,45 +20,58 @@ os:
   - linux
 jdk: # OpenJDK releases (non-EA) belong here, minimum of Java 11 is required
   - openjdk11
-  - openjdk12
 stages: # order the stages we'll use during this build
-  - precache
-  - test
-  - sonar
-  - preview
-matrix:
+  - precache # for Maven to build and download all dependencies
+  - test # full long test on main JDK; runs PITest, takes very long
+  - sonar # for sonarcloud.io code analysis
+  - quicktest # matrix stage for testing on a variety of JDKs; these are quick tests - PITest is not run
+jobs:
   allow_failures:
-  - jdk: openjdk-ea
-  - stage: preview
+    - stage: quicktest
   include:
-  - stage: precache # independent stage for Maven to build and download all dependencies
-    env: # empty
-    install:
-    - mvn --batch-mode clean install -DskipTests -Dgpg.skip
-    script:
-      - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
-  - stage: sonar # independent build stage for Sonar code analysis
-    env: # empty
-    addons:
-      sonarcloud:
-        organization: "robozonky"
-        token:
-          secure: $SONAR_TOKEN
-    install: # do nothing
-      - mvn clean
-    script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
-      - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
-  - stage: preview # test early adopters JDK as well, but relax requirements
-    env: #empty
-    jdk: openjdk-ea
-    install: # do nothing
-      - mvn clean
-    script:
-      - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip
+    - stage: precache
+      env: # empty otherwise the matrix MODULE property will get here
+      install:
+        - mvn --batch-mode clean install -DskipTests -Dgpg.skip
+      script:
+        - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
+    - stage: sonar
+      env: # empty otherwise the matrix MODULE property will get here
+      addons:
+        sonarcloud:
+          organization: "robozonky"
+          token:
+            secure: $SONAR_TOKEN
+      install: # do nothing
+        - mvn clean
+      script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
+        - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io
+    - stage: quicktest # test early adopters JDK as well, but relax requirements
+      env: # empty otherwise the matrix MODULE property will get here
+      jdk: openjdk12
+      install: # do nothing
+        - mvn clean
+      script: # build and test, skipping PITest
+        - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+    - stage: quicktest # test early adopters JDK as well, but relax requirements
+      env: # empty otherwise the matrix MODULE property will get here
+      jdk: openjdk13
+      install: # do nothing
+        - mvn clean
+      script: # build and test, skipping PITest
+        - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+    - stage: quicktest # test early adopters JDK as well, but relax requirements
+      env: # empty otherwise the matrix MODULE property will get here
+      jdk: openjdk-ea
+      install: # do nothing
+        - mvn clean
+      script: # build and test, skipping PITest
+        - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2
 install: # freshly build all required modules
   - mvn --batch-mode -pl $MODULE -am clean install -DskipTests -Denforcer.skip -Dgpg.skip
 script: # by default, run all tests incl. PITest, skipping all assemblies
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+
