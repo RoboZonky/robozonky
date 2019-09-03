@@ -28,7 +28,6 @@ stages: # order the stages we'll use during this build
   - preview
 matrix:
   allow_failures:
-  - jdk: openjdk-ea
   - stage: preview
   include:
   - stage: precache # independent stage for Maven to build and download all dependencies
@@ -47,10 +46,12 @@ matrix:
     install: # do nothing
       - mvn clean
     script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
-      - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
+      - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io
   - stage: preview # test early adopters JDK as well, but relax requirements
     env: #empty
-    jdk: openjdk-ea
+    jdk:
+      - openjdk13
+      - openjdk-ea
     install: # do nothing
       - mvn clean
     script:
