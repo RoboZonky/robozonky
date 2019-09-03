@@ -21,23 +21,21 @@ os:
 jdk: # OpenJDK releases (non-EA) belong here, minimum of Java 11 is required
   - openjdk11
 stages: # order the stages we'll use during this build
-  - precache
-  - test
-  - quicktest
-  - sonar
-allow_failures:
+  - precache # for Maven to build and download all dependencies
+  - test # full long test on main JDK; runs PITest, takes very long
+  - quicktest # matrix stage for testing on a variety of JDKs; these are quick tests - PITest is not run
+  - sonar # for sonarcloud.i code analysis
+allow_failures: # allow failures on non-production JDKs
   - jdk: openjdk-13
   - jdk: openjdk-ea
 jobs:
   include:
-    - stage: precache # independent stage for Maven to build and download all dependencies
-      env: # empty
+    - stage: precache
       install:
         - mvn --batch-mode clean install -DskipTests -Dgpg.skip
       script:
         - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
-    - stage: sonar # independent build stage for Sonar code analysis
-      env: # empty
+    - stage: sonar
       addons:
         sonarcloud:
           organization: "robozonky"
@@ -46,29 +44,26 @@ jobs:
       install: # do nothing
         - mvn clean
       script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
-        - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
         - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io
     - stage: quicktest # test early adopters JDK as well, but relax requirements
-      env: #empty
       jdk: openjdk12
       install: # do nothing
         - mvn clean
-      script:
-        - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+      script: # build and test, skipping PITest
+        - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
     - stage: quicktest # test early adopters JDK as well, but relax requirements
-      env: #empty
       jdk: openjdk13
       install: # do nothing
         - mvn clean
-      script:
-        - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+      script: # build and test, skipping PITest
+        - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
     - stage: quicktest # test early adopters JDK as well, but relax requirements
       env: #empty
       jdk: openjdk-ea
       install: # do nothing
         - mvn clean
-      script:
-        - mvn --batch-mode test -Dassembly.skipAssembly  -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+      script: # build and test, skipping PITest
+        - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
 cache:
   directories:
     - $HOME/.m2
