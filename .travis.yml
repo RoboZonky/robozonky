@@ -31,11 +31,13 @@ allow_failures: # allow failures on non-production JDKs
 jobs:
   include:
     - stage: precache
+      env: # empty otherwise the matrix MODULE property will get here
       install:
         - mvn --batch-mode clean install -DskipTests -Dgpg.skip
       script:
         - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
     - stage: sonar
+      env: # empty otherwise the matrix MODULE property will get here
       addons:
         sonarcloud:
           organization: "robozonky"
@@ -46,19 +48,21 @@ jobs:
       script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
         - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io
     - stage: quicktest # test early adopters JDK as well, but relax requirements
+      env: # empty otherwise the matrix MODULE property will get here
       jdk: openjdk12
       install: # do nothing
         - mvn clean
       script: # build and test, skipping PITest
         - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
     - stage: quicktest # test early adopters JDK as well, but relax requirements
+      env: # empty otherwise the matrix MODULE property will get here
       jdk: openjdk13
       install: # do nothing
         - mvn clean
       script: # build and test, skipping PITest
         - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
     - stage: quicktest # test early adopters JDK as well, but relax requirements
-      env: #empty
+      env: # empty otherwise the matrix MODULE property will get here
       jdk: openjdk-ea
       install: # do nothing
         - mvn clean
