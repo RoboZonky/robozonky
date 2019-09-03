@@ -25,6 +25,8 @@ stages: # order the stages we'll use during this build
   - test # full long test on main JDK; runs PITest, takes very long
   - sonar # for sonarcloud.io code analysis
   - quicktest # matrix stage for testing on a variety of JDKs; these are quick tests - PITest is not run
+allow_failures:
+  - stage: quicktest
 jobs:
   include:
     - stage: precache
