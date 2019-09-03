@@ -43,7 +43,16 @@
       <Policies>
         <TimeBasedTriggeringPolicy />
       </Policies>
-      <DefaultRolloverStrategy max="100" />
+      <DefaultRolloverStrategy max="100">
+        <!--
+        * delete only files older than 7days
+        -->
+        <Delete basePath="." maxDepth="1">
+          <IfFileName glob="robozonky*log*">
+            <IfLastModified age="7d" />
+          </IfFileName>
+        </Delete>
+      </DefaultRolloverStrategy>
     </RollingFile>
   </Appenders>
   <Loggers>
