@@ -25,8 +25,10 @@ import java.util.UUID;
 import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class SelectTest {
 
@@ -118,6 +120,28 @@ class SelectTest {
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
         verify(filter).setQueryParam(eq(fieldName + "__gteornull"), eq(String.valueOf(value)));
+    }
+
+    @Test
+    void gteornullDate() {
+        final String fieldName = "field";
+        final LocalDate value = LocalDate.of(1, 2, 3);
+        final Select select = new Select().greaterThanOrNull(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__gteornull"), eq("0001-02-03"));
+    }
+
+    @Test
+    void gteornullDateTime() {
+        final String fieldName = "field";
+        final LocalDate date = LocalDate.of(2000, 01, 02);
+        final LocalTime time = LocalTime.of(4, 5, 6);
+        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final Select select = new Select().greaterThanOrNull(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__gteornull"), eq("2000-01-02T04:05:06+01:00"));
     }
 
     @Test
@@ -236,6 +260,28 @@ class SelectTest {
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
         verify(filter).setQueryParam(eq(fieldName + "__lteornull"), eq(String.valueOf(value)));
+    }
+
+    @Test
+    void lteornullDate() {
+        final String fieldName = "field";
+        final LocalDate value = LocalDate.of(1, 2, 3);
+        final Select select = new Select().lessThanOrNull(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__lteornull"), eq("0001-02-03"));
+    }
+
+    @Test
+    void lteornullDateTime() {
+        final String fieldName = "field";
+        final LocalDate date = LocalDate.of(2000, 01, 02);
+        final LocalTime time = LocalTime.of(4, 5, 6);
+        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final Select select = new Select().lessThanOrNull(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__lteornull"), eq("2000-01-02T04:05:06+01:00"));
     }
 
     @Test

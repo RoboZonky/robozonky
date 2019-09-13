@@ -26,7 +26,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.internal.remote.InvestmentFailureType.INSUFFICIENT_BALANCE;
 import static com.github.robozonky.internal.remote.InvestmentFailureType.UNKNOWN;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class InvestmentResultTest {
 
@@ -36,8 +37,18 @@ class InvestmentResultTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.isSuccess()).isTrue();
             softly.assertThat(result.getFailureType()).isEmpty();
-            softly.assertThat(result).isEqualTo(result);
             softly.assertThat(result).isSameAs(InvestmentResult.success());
+        });
+    }
+
+    @Test
+    void equality() {
+        final InvestmentResult result = InvestmentResult.success();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result).isEqualTo(result);
+            softly.assertThat(result).isNotEqualTo(null);
+            softly.assertThat(result).isNotEqualTo(InvestmentResult.failure(mock(ClientErrorException.class)));
+            softly.assertThat(result).isNotEqualTo(PurchaseResult.success());
         });
     }
 
