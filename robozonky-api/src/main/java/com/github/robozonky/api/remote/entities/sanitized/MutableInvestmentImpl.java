@@ -51,6 +51,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private Integer daysPastDue;
     private OffsetDateTime nextPaymentDate;
     private OffsetDateTime smpFeeExpirationDate;
+    private OffsetDateTime activeFrom;
     private boolean canBeOffered;
     private boolean isOnSmp;
     private boolean isInsuranceActive;
@@ -95,6 +96,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.daysPastDue = investment.getLegalDpd();
         this.investmentDate.set(investment.getInvestmentDate());
         this.nextPaymentDate = investment.getNextPaymentDate();
+        this.activeFrom = investment.getActiveFrom();
         this.canBeOffered = investment.isCanBeOffered();
         this.isOnSmp = investment.isOnSmp();
         this.originalPrincipal = investment.getPurchasePrice();
@@ -300,6 +302,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
+    public InvestmentBuilder setActiveFrom(OffsetDateTime activeFrom) {
+        this.activeFrom = activeFrom;
+        return this;
+    }
+
+    @Override
     public InvestmentBuilder setStatus(final InvestmentStatus investmentStatus) {
         this.status = investmentStatus;
         return this;
@@ -476,6 +484,11 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
         return Optional.ofNullable(smpFeeExpirationDate);
+    }
+
+    @Override
+    public Optional<OffsetDateTime> getActiveFrom() {
+        return Optional.ofNullable(activeFrom);
     }
 
     @Override

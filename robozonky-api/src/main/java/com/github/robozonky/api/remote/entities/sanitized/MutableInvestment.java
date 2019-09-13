@@ -29,6 +29,8 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 public interface MutableInvestment<T extends MutableInvestment<T>> extends Investment {
 
+    T setActiveFrom(OffsetDateTime activeFrom);
+
     T setCurrency(Currency currency);
 
     T setLoanId(int loanId);

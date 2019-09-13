@@ -77,6 +77,8 @@ public interface Investment {
                 .build();
     }
 
+    Optional<OffsetDateTime> getActiveFrom();
+
     Currency getCurrency();
 
     int getLoanId();
