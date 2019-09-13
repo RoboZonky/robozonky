@@ -84,6 +84,8 @@ public interface MutableBaseLoan<T extends MutableBaseLoan<T>> extends BaseLoan 
 
     T setInsuranceActive(final boolean isInsuranceActive);
 
+    T setInsuredInFuture(final boolean isInsuredInFuture);
+
     T setInsuranceHistory(final Collection<InsurancePolicyPeriod> insuranceHistory);
 
     T setUserId(final int userId);

@@ -20,9 +20,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Currency;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -36,6 +38,9 @@ public class Participation extends BaseEntity {
     private MainIncomeType incomeType;
     private Ratio interestRate;
     private BigDecimal remainingPrincipal;
+    private BigDecimal discount;
+    private BigDecimal price;
+    private LoanHealthInfo loanHealthInfo;
     private String loanName;
     private Purpose purpose;
     private Rating rating;
@@ -146,5 +151,20 @@ public class Participation extends BaseEntity {
     @XmlElement
     public Object getLoanInvestments() { // FIXME figure out what this means
         return loanInvestments;
+    }
+
+    @XmlElement
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    @XmlElement
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    @XmlElement
+    public LoanHealthInfo getLoanHealthInfo() {
+        return loanHealthInfo;
     }
 }

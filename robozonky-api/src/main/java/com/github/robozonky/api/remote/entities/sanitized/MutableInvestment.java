@@ -24,12 +24,17 @@ import java.util.Currency;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
 public interface MutableInvestment<T extends MutableInvestment<T>> extends Investment {
 
     T setActiveFrom(OffsetDateTime activeFrom);
+
+    T setSmpPrice(BigDecimal smpPrice);
+
+    T setLoanHealthInfo(LoanHealthInfo loanHealthInfo);
 
     T setCurrency(Currency currency);
 

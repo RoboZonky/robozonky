@@ -29,6 +29,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
@@ -68,10 +69,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private BigDecimal paidPenalty;
     private BigDecimal remainingPrincipal;
     private BigDecimal smpFee;
+    private BigDecimal smpPrice;
     private BigDecimal smpSoldFor;
     private Rating rating;
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
+    private LoanHealthInfo loanHealthInfo;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
     private Currency currency;
 
@@ -110,8 +113,10 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.paidPenalty = investment.getPaidPenalty();
         this.remainingPrincipal = investment.getRemainingPrincipal();
         this.smpFee = investment.getSmpFee();
+        this.smpPrice = investment.getSmpPrice();
         this.smpSoldFor = investment.getSmpSoldFor();
         this.rating = investment.getRating();
+        this.loanHealthInfo = investment.getLoanHealthInfo();
         this.isInWithdrawal = investment.isInWithdrawal();
         this.status = investment.getStatus();
         this.paymentStatus = investment.getPaymentStatus();
@@ -308,6 +313,18 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
+    public InvestmentBuilder setSmpPrice(BigDecimal smpPrice) {
+        this.smpPrice = smpPrice;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setLoanHealthInfo(LoanHealthInfo loanHealthInfo) {
+        this.loanHealthInfo = loanHealthInfo;
+        return this;
+    }
+
+    @Override
     public InvestmentBuilder setStatus(final InvestmentStatus investmentStatus) {
         this.status = investmentStatus;
         return this;
@@ -489,6 +506,16 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public Optional<OffsetDateTime> getActiveFrom() {
         return Optional.ofNullable(activeFrom);
+    }
+
+    @Override
+    public Optional<BigDecimal> getSmpPrice() {
+        return Optional.ofNullable(smpPrice);
+    }
+
+    @Override
+    public Optional<LoanHealthInfo> getLoanHealthInfo() {
+        return Optional.ofNullable(loanHealthInfo);
     }
 
     @Override

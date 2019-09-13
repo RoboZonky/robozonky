@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
 import com.github.robozonky.api.remote.enums.InvestmentType;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
@@ -39,6 +40,7 @@ import com.github.robozonky.internal.test.DateUtil;
 public class RawInvestment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
+    private LoanHealthInfo loanHealthInfo;
     private boolean smpRelated;
     private boolean onSmp;
     private boolean canBeOffered;
@@ -55,9 +57,20 @@ public class RawInvestment extends BaseInvestment {
     private OffsetDateTime activeFrom;
     private OffsetDateTime activeTo;
     private OffsetDateTime smpFeeExpirationDate;
-    private BigDecimal paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
-            duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
-            smpFee, paidPenalty = BigDecimal.ZERO;
+    private BigDecimal paid;
+    private BigDecimal toPay;
+    private BigDecimal amountDue;
+    private BigDecimal paidInterest = BigDecimal.ZERO;
+    private BigDecimal dueInterest;
+    private BigDecimal paidPrincipal;
+    private BigDecimal duePrincipal;
+    private BigDecimal expectedInterest;
+    private BigDecimal purchasePrice;
+    private BigDecimal remainingPrincipal;
+    private BigDecimal smpSoldFor;
+    private BigDecimal smpFee;
+    private BigDecimal smpPrice;
+    private BigDecimal paidPenalty = BigDecimal.ZERO;
     private Ratio interestRate;
     private Ratio revenueRate;
     private Rating rating;
@@ -98,9 +111,11 @@ public class RawInvestment extends BaseInvestment {
         this.remainingPrincipal = investment.getRemainingPrincipal();
         this.smpSoldFor = investment.getSmpSoldFor().orElse(null);
         this.smpFee = investment.getSmpFee().orElse(null);
+        this.smpPrice = investment.getSmpPrice().orElse(remainingPrincipal);
         this.smpFeeExpirationDate = investment.getSmpFeeExpirationDate().orElse(null);
         this.paidPenalty = investment.getPaidPenalty();
         this.rating = investment.getRating();
+        this.loanHealthInfo = investment.getLoanHealthInfo().orElse(LoanHealthInfo.HEALTHY);
         this.hasCollectionHistory = false;
         this.insuranceStatus =
                 investment.isInsuranceActive() ? InsuranceStatus.CURRENTLY_INSURED : InsuranceStatus.NOT_INSURED;
@@ -112,6 +127,15 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public Rating getRating() {
         return rating;
+    }
+
+    /**
+     *
+     * @return Null when no longer relevant, such as when sold.
+     */
+    @XmlElement
+    public LoanHealthInfo getLoanHealthInfo() {
+        return loanHealthInfo;
     }
 
     @XmlElement
@@ -306,6 +330,15 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public BigDecimal getSmpFee() {
         return smpFee;
+    }
+
+    /**
+     *
+     * @return Null when cannot be sold, that is when sold already.
+     */
+    @XmlElement
+    public BigDecimal getSmpPrice() {
+        return smpPrice;
     }
 
     @XmlElement

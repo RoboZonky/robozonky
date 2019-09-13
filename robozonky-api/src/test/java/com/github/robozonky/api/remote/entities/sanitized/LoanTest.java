@@ -39,9 +39,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class LoanTest {
@@ -229,6 +229,11 @@ class LoanTest {
         @Test
         void insuranceActive() {
             bool(b, b::setInsuranceActive, b::isInsuranceActive);
+        }
+
+        @Test
+        void insuredInFuture() {
+            bool(b, b::setInsuredInFuture, b::isInsuredInFuture);
         }
 
         @Test

@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Currency;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -37,6 +38,7 @@ public abstract class BaseLoan extends BaseEntity {
     private boolean published;
     private boolean questionsAllowed;
     private boolean insuranceActive;
+    private boolean insuredInFuture;
     private boolean additionallyInsured;
     private boolean multicash;
     private int id;
@@ -225,6 +227,15 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    /**
+     * @return True if the loan will become insured at some later point in time. False when {@link #isInsuranceActive()}
+     * is true.
+     */
+    @XmlElement
+    public boolean isInsuredInFuture() {
+        return insuredInFuture;
     }
 
     /**

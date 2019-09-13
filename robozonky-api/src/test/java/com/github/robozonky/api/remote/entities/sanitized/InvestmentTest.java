@@ -26,6 +26,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.DisplayName;
@@ -198,8 +199,18 @@ class InvestmentTest {
         }
 
         @Test
+        void loanHealthInfo() {
+            optional(b, b::setLoanHealthInfo, b::getLoanHealthInfo, LoanHealthInfo.HEALTHY);
+        }
+
+        @Test
         void smpFee() {
             optional(b, b::setSmpFee, b::getSmpFee, BigDecimal.ONE);
+        }
+
+        @Test
+        void smpPrice() {
+            optional(b, b::setSmpPrice, b::getSmpPrice, BigDecimal.ONE);
         }
 
         @Test

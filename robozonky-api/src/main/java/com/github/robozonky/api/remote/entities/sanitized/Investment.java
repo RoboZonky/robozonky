@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
@@ -78,6 +79,10 @@ public interface Investment {
     }
 
     Optional<OffsetDateTime> getActiveFrom();
+
+    Optional<BigDecimal> getSmpPrice();
+
+    Optional<LoanHealthInfo> getLoanHealthInfo();
 
     Currency getCurrency();
 

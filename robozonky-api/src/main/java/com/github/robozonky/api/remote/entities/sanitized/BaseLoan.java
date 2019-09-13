@@ -100,6 +100,8 @@ public interface BaseLoan {
 
     boolean isInsuranceActive();
 
+    boolean isInsuredInFuture();
+
     Collection<InsurancePolicyPeriod> getInsuranceHistory();
 
     int getUserId();

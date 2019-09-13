@@ -112,7 +112,8 @@
         "code": "java.class.removed",
         "old": "interface com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent",
         "justification": "Replaced with RoboZonkyDaemonSuspendedEvent."
-      },{
+      },
+      {
         "code": "java.class.removed",
         "old": "interface com.github.robozonky.api.notifications.InvestmentRequestedEvent",
         "justification": "Removed on account of no longer being necessary or helpful."
@@ -131,7 +132,8 @@
         "code": "java.class.removed",
         "old": "interface com.github.robozonky.api.notifications.SaleRequestedEvent",
         "justification": "Removed on account of no longer being necessary or helpful."
-      },{
+      },
+      {
         "code": "java.class.removed",
         "old": "interface com.github.robozonky.api.remote.WalletApi",
         "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
@@ -187,6 +189,36 @@
         "code": "java.class.removed",
         "old": "enum com.github.robozonky.api.remote.enums.TransactionCategory",
         "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method boolean com.github.robozonky.api.remote.entities.sanitized.BaseLoan::isInsuredInFuture()",
+        "justification": "New Zonky API attributes."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Optional<com.github.robozonky.api.remote.enums.LoanHealthInfo> com.github.robozonky.api.remote.entities.sanitized.Investment::getLoanHealthInfo()",
+        "justification": "New Zonky API attributes."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Optional<java.math.BigDecimal> com.github.robozonky.api.remote.entities.sanitized.Investment::getSmpPrice()",
+        "justification": "New Zonky API attributes."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>>::setInsuredInFuture(boolean)",
+        "justification": "New Zonky API attributes."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setLoanHealthInfo(com.github.robozonky.api.remote.enums.LoanHealthInfo)",
+        "justification": "New Zonky API attributes."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setSmpPrice(java.math.BigDecimal)",
+        "justification": "New Zonky API attributes."
       }
     ]
   }

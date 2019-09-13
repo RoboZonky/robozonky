@@ -39,7 +39,12 @@ import io.vavr.Lazy;
 abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements MutableBaseLoan<T> {
 
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
-    private boolean topped, covered, published, questionsAllowed, insuranceActive;
+    private boolean topped;
+    private boolean covered;
+    private boolean published;
+    private boolean questionsAllowed;
+    private boolean insuranceActive;
+    private boolean insuredInFuture;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount;
     private int remainingInvestment;
     private int nonReservedRemainingInvestment;
@@ -74,6 +79,7 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
         this.revenueRate = original.getRevenueRate();
         this.annuity = original.getAnnuityWithInsurance();
         this.insuranceActive = original.isInsuranceActive();
+        this.insuredInFuture = original.isInsuredInFuture();
         this.published = original.isPublished();
         this.questionsAllowed = original.isQuestionsAllowed();
         this.topped = original.isTopped();
@@ -328,6 +334,11 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     }
 
     @Override
+    public boolean isInsuredInFuture() {
+        return insuredInFuture;
+    }
+
+    @Override
     public int getUserId() {
         return userId;
     }
@@ -365,6 +376,12 @@ abstract class AbstractBaseLoanImpl<T extends MutableBaseLoan<T>> implements Mut
     @Override
     public T setInsuranceActive(final boolean isInsuranceActive) {
         this.insuranceActive = isInsuranceActive;
+        return (T) this;
+    }
+
+    @Override
+    public T setInsuredInFuture(final boolean isInsuredInFuture) {
+        this.insuredInFuture = isInsuredInFuture;
         return (T) this;
     }
 
