@@ -45,7 +45,6 @@ final class RemoteData {
         LOGGER.debug("Loading the latest Zonky portfolio information.");
         final Statistics statistics = tenant.call(Zonky::getStatistics);
         final Map<Rating, BigDecimal> blocked = Util.getAmountsBlocked(tenant);
-        System.out.println(blocked);
         LOGGER.debug("Finished.");
         return new RemoteData(statistics, blocked);
     }

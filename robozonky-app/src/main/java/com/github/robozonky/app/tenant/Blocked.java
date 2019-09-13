@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -36,20 +35,9 @@ final class Blocked {
         this(id, amount, rating, false);
     }
 
-    Blocked(final BlockedAmount amount, final Rating rating) {
-        this(amount, rating, false);
-    }
-
     public Blocked(final int id, final BigDecimal amount, final Rating rating, final boolean persistent) {
         this.id = id;
         this.amount = amount.abs();
-        this.rating = rating;
-        this.persistent = persistent;
-    }
-
-    Blocked(final BlockedAmount amount, final Rating rating, final boolean persistent) {
-        this.id = amount.getLoanId();
-        this.amount = amount.getAmount().abs();
         this.rating = rating;
         this.persistent = persistent;
     }

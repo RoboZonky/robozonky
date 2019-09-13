@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
 import javax.ws.rs.ClientErrorException;
 
 import com.github.robozonky.api.remote.CollectionsApi;
@@ -32,8 +33,6 @@ import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.ReservationApi;
-import com.github.robozonky.api.remote.WalletApi;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
@@ -47,7 +46,6 @@ import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -87,7 +85,6 @@ public class Zonky {
     private final PaginatedApi<RawLoan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<RawInvestment, PortfolioApi> portfolioApi;
-    private final PaginatedApi<BlockedAmount, WalletApi> walletApi;
     private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
 
     Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
@@ -96,7 +93,6 @@ public class Zonky {
         this.reservationApi = api.reservations(tokenSupplier);
         this.participationApi = api.secondaryMarketplace(tokenSupplier);
         this.portfolioApi = api.portfolio(tokenSupplier);
-        this.walletApi = api.wallet(tokenSupplier);
         this.collectionsApi = api.collections(tokenSupplier);
     }
 
@@ -169,10 +165,6 @@ public class Zonky {
         controlApi.run(c -> c.accept(rs));
     }
 
-    public Wallet getWallet() {
-        return walletApi.execute(WalletApi::wallet);
-    }
-
     /**
      * Retrieve reservations that the user has to either accept or reject.
      * @return All items from the remote API, lazy-loaded.
@@ -182,14 +174,6 @@ public class Zonky {
                              RawReservation::getCurrency)
                 .filter(r -> r.getCurrency().equals(Defaults.CURRENCY))
                 .map(Reservation::sanitized);
-    }
-
-    /**
-     * Retrieve blocked amounts from user's wallet via {@link WalletApi}.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<BlockedAmount> getBlockedAmounts() {
-        return excludeNonCZK(getStream(walletApi, WalletApi::items), BlockedAmount::getCurrency);
     }
 
     /**
