@@ -31,9 +31,7 @@ import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.ReservationApi;
-import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
@@ -165,15 +163,6 @@ public class ApiProvider implements AutoCloseable {
     PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
         // if we ever use the API for retrieving anything but the whole marketplace, request counting must be enabled
         return this.obtainPaginated(ParticipationApi.class, token, null);
-    }
-
-    /**
-     * Retrieve user-specific Zonky wallet API which requires authentication.
-     * @param token Supplier of a valid Zonky API token, always representing the active user.
-     * @return New API instance.
-     */
-    PaginatedApi<BlockedAmount, WalletApi> wallet(final Supplier<ZonkyApiToken> token) {
-        return this.obtainPaginated(WalletApi.class, token);
     }
 
     /**

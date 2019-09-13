@@ -35,9 +35,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InvestmentTest {
@@ -209,6 +210,11 @@ class InvestmentTest {
         @Test
         void smpFeeExpirationDate() {
             optional(b, b::setSmpFeeExpirationDate, b::getSmpFeeExpirationDate, OffsetDateTime.now());
+        }
+
+        @Test
+        void activeFrom() {
+            optional(b, b::setActiveFrom, b::getActiveFrom, OffsetDateTime.now());
         }
 
         @Test

@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -51,6 +52,7 @@ public class RawInvestment extends BaseInvestment {
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
     private OffsetDateTime investmentDate = DateUtil.offsetNow();
     private OffsetDateTime nextPaymentDate = investmentDate.plusMonths(1);
+    private OffsetDateTime activeFrom;
     private OffsetDateTime activeTo;
     private OffsetDateTime smpFeeExpirationDate;
     private BigDecimal paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
@@ -84,6 +86,7 @@ public class RawInvestment extends BaseInvestment {
         this.currentTerm = investment.getCurrentTerm();
         this.investmentDate = investment.getInvestmentDate();
         this.nextPaymentDate = investment.getNextPaymentDate().orElse(null);
+        this.activeFrom = investment.getActiveFrom().orElse(null);
         this.interestRate = investment.getInterestRate();
         this.revenueRate = investment.getRevenueRate().orElse(null);
         this.paidInterest = investment.getPaidInterest();
@@ -215,6 +218,16 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public OffsetDateTime getNextPaymentDate() {
         return nextPaymentDate;
+    }
+
+    /**
+     *
+     * @return If bought on SMP, then the timestamp of purchase. If invested from primary marketplace, then timestamp of
+     * settlement (= null when not yet settled).
+     */
+    @XmlElement
+    public OffsetDateTime getActiveFrom() {
+        return activeFrom;
     }
 
     @XmlElement

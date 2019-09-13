@@ -27,15 +27,12 @@ import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
-import com.github.robozonky.api.remote.WalletApi;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -43,9 +40,18 @@ import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ZonkyTest {
 
@@ -71,12 +77,6 @@ class ZonkyTest {
         return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
     }
 
-    private static Zonky mockZonkyWallet(final PaginatedApi<BlockedAmount, WalletApi> wa) {
-        final ApiProvider apiProvider = mockApiProvider();
-        when(apiProvider.obtainPaginated(eq(WalletApi.class), any())).thenReturn(wa);
-        return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
-    }
-
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
                                                                             final Class<T> blueprint,
                                                                             final PaginatedApi<S, T> api) {
@@ -92,7 +92,6 @@ class ZonkyTest {
         final ApiProvider apiProvider = spy(new ApiProvider());
         final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(mock(ControlApi.class), null);
         doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
-        mockPaginated(apiProvider, WalletApi.class);
         mockPaginated(apiProvider, LoanApi.class);
         mockPaginated(apiProvider, PortfolioApi.class);
         mockPaginated(apiProvider, ParticipationApi.class);
@@ -160,7 +159,6 @@ class ZonkyTest {
         final Zonky z = mockZonky();
         assertSoftly(softly -> {
             softly.assertThat(z.getAvailableLoans(Select.unrestricted())).isEmpty();
-            softly.assertThat(z.getBlockedAmounts()).isEmpty();
             softly.assertThat(z.getInvestments(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getInvestment(1)).isEmpty();
             softly.assertThat(z.getDelinquentInvestments()).isEmpty();
@@ -187,15 +185,6 @@ class ZonkyTest {
         z.logout();
         verify(control, times(1)).invest(any());
         verify(control, times(1)).logout();
-    }
-
-    @Test
-    void wallet() {
-        final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
-        when(wa.execute(any())).thenReturn(mock(Wallet.class));
-        final Zonky z = mockZonkyWallet(wa);
-        final Wallet w = z.getWallet();
-        assertThat(w).isNotNull();
     }
 
     @Test

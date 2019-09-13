@@ -22,7 +22,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class BlockedTest extends AbstractRoboZonkyTest {
@@ -34,17 +34,6 @@ class BlockedTest extends AbstractRoboZonkyTest {
             softly.assertThat(b.getAmount()).isEqualTo(BigDecimal.TEN);
             softly.assertThat(b.getRating()).isEqualTo(Rating.D);
             softly.assertThat(b.getId()).isEqualTo(1);
-        });
-    }
-
-    @Test
-    void fromBlockedAmount() {
-        final com.github.robozonky.api.remote.entities.BlockedAmount a = new com.github.robozonky.api.remote.entities.BlockedAmount(1, BigDecimal.ONE);
-        final Blocked b = new Blocked(a, Rating.D);
-        assertSoftly(softly -> {
-            softly.assertThat(b.getAmount()).isEqualTo(a.getAmount());
-            softly.assertThat(b.getRating()).isEqualTo(Rating.D);
-            softly.assertThat(b.getId()).isEqualTo(a.getLoanId());
         });
     }
 

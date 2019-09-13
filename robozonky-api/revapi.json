@@ -131,6 +131,62 @@
         "code": "java.class.removed",
         "old": "interface com.github.robozonky.api.notifications.SaleRequestedEvent",
         "justification": "Removed on account of no longer being necessary or helpful."
+      },{
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.WalletApi",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.BankAccount",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.BlockedAmount",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.Wallet",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Optional<java.time.OffsetDateTime> com.github.robozonky.api.remote.entities.sanitized.Investment::getActiveFrom()",
+        "justification": "New method to allow to replace blocked amounts."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setActiveFrom(java.time.OffsetDateTime)",
+        "justification": "New method to allow to replace blocked amounts."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.InvestmentType.INVESTOR",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.InvestmentType.N",
+        "new": "field com.github.robozonky.api.remote.enums.InvestmentType.N",
+        "justification": "Other constants were removed."
+      },
+      {
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.InvestmentType.P",
+        "new": "field com.github.robozonky.api.remote.enums.InvestmentType.P",
+        "justification": "Other constants were removed."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.InvestmentType.RENTIER",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.TransactionCategory",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
       }
     ]
   }

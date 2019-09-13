@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
@@ -62,7 +63,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Reloadable<Restrictions> restrictions;
     private final Lazy<StrategyProvider> strategyProvider;
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
-    private final Lazy<Cache<Investment>> investmentCaches = Lazy.of(() -> Cache.forInvestment(this));
+    private final Lazy<Cache<Investment>> investmentCache = Lazy.of(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
     private final Lazy<Availability> availability =
             Lazy.of(() -> new AvailabilityImpl(getTokenSupplier(OAuthScope.SCOPE_APP_WEB)));
@@ -152,7 +153,7 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Investment getInvestment(final int loanId) {
-        return investmentCaches.get().get(loanId);
+        return investmentCache.get().get(loanId);
     }
 
     @Override
@@ -163,9 +164,7 @@ class PowerTenantImpl implements PowerTenant {
     @Override
     public void close() {
         tokens.forEach((k, v) -> v.close()); // cancel existing tokens
-        // clean up the cache
-        loanCache.get().close();
-        investmentCaches.get().close();
+        Stream.of(loanCache, investmentCache).forEach(cache -> cache.get().close()); // clean up the caches
     }
 
     @Override
