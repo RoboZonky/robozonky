@@ -189,6 +189,16 @@ public class Select implements Consumer<RoboZonkyFilter> {
         return this;
     }
 
+    public Select greaterThanOrNull(final String field, final LocalDate value) {
+        addLocalDate(field, "gteornull", value);
+        return this;
+    }
+
+    public Select greaterThanOrNull(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "gteornull", value);
+        return this;
+    }
+
     public Select greaterThanOrNull(final String field, final long value) {
         addLong(field, "gteornull", value);
         return this;
@@ -223,6 +233,17 @@ public class Select implements Consumer<RoboZonkyFilter> {
         addOffsetDateTime(field, "lte", value);
         return this;
     }
+
+    public Select lessThanOrNull(final String field, final LocalDate value) {
+        addLocalDate(field, "lteornull", value);
+        return this;
+    }
+
+    public Select lessThanOrNull(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "lteornull", value);
+        return this;
+    }
+
 
     public Select lessThanOrNull(final String field, final long value) {
         addLong(field, "lteornull", value);

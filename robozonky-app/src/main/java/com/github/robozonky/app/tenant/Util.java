@@ -17,21 +17,17 @@
 package com.github.robozonky.app.tenant;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collector;
-import java.util.stream.Stream;
-import javax.ws.rs.NotFoundException;
 
-import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.BigDecimalCalculator;
-import io.vavr.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,42 +45,12 @@ final class Util {
         // no instances
     }
 
-    static Map<Rating, BigDecimal> getAmountsBlocked(final Tenant tenant, final Statistics stats) {
-        final long portfolioSize = stats.getCurrentOverview().getPrincipalLeft();
-        final Divisor divisor = new Divisor(portfolioSize);
-        return tenant.call(Zonky::getBlockedAmounts)
-                .parallel()
-                .peek(ba -> LOGGER.debug("Found: {}.", ba))
-                .filter(ba -> ba.getLoanId() > 0)
-                .flatMap(ba -> getLoan(tenant, ba, divisor)
-                        .map(loan -> Stream.of(Tuple.of(ba, loan)))
-                        .orElse(Stream.empty()))
-                .collect(groupingBy(t -> t._2.getRating(),
-                                    () -> new EnumMap<>(Rating.class),
-                                    mapping(t -> t._1.getAmount(), BIGDECIMAL_REDUCING_COLLECTOR)));
-    }
-
-    static Optional<Loan> getLoan(final Tenant tenant, final BlockedAmount ba, final Divisor divisor) {
-        final int loanId = ba.getLoanId();
-        try {
-            return Optional.of(tenant.getLoan(loanId));
-        } catch (final NotFoundException ex) {
-            /*
-             * Zonky has an intermittent caching problem and a failure here would prevent the robot from
-             * ever finishing the portfolio update. As a result, the robot would not be able to do
-             * anything. Comparatively, being wrong by 0,5 % is not so bad.
-             */
-            LOGGER.warn("Zonky API mistakenly reports loan #{} as non-existent. " +
-                                "Consider reporting this to Zonky so that they can fix their cache.", loanId, ex);
-            final BigDecimal amount = ba.getAmount();
-            divisor.add(amount.longValue());
-            final long shareThatIsWrongPerMille = divisor.getSharePerMille();
-            LOGGER.debug("Share per mille: {}.", shareThatIsWrongPerMille);
-            if (shareThatIsWrongPerMille >= 5) {
-                throw new IllegalStateException("RoboZonky portfolio structure is too far off.", ex);
-            } else { // let this slide as the portfolio is only a little bit off
-                return Optional.empty();
-            }
-        }
+    static Map<Rating, BigDecimal> getAmountsBlocked(final Tenant tenant) {
+        final Select select = new Select()
+                .lessThanOrNull("activeFrom", Instant.EPOCH.atZone(Defaults.ZONE_ID).toOffsetDateTime());
+        return tenant.call(zonky -> zonky.getInvestments(select))
+                .peek(investment -> LOGGER.debug("Found: {}.", investment))
+                .collect(groupingBy(Investment::getRating, () -> new EnumMap<>(Rating.class),
+                        mapping(Investment::getOriginalPrincipal, BIGDECIMAL_REDUCING_COLLECTOR)));
     }
 }
