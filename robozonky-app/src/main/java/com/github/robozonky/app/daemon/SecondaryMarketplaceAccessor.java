@@ -23,6 +23,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -85,6 +86,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
+                .filter(p -> p.getLoanHealthInfo() == LoanHealthInfo.HEALTHY) // TODO enable discounted (=overdue)
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {

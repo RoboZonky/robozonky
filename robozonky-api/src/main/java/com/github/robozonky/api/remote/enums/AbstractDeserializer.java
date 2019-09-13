@@ -30,27 +30,36 @@ abstract class AbstractDeserializer<T extends Enum<T>> extends JsonDeserializer<
     protected final Logger LOGGER = LogManager.getLogger(getClass());
     private final Function<String, T> parser;
     private final T defaultValue;
+    private final boolean nullAllowed;
 
     protected AbstractDeserializer(final Function<String, T> parser, final T defaultValue) {
+        this(parser, defaultValue, false);
+    }
+
+    protected AbstractDeserializer(final Function<String, T> parser, final T defaultValue, final boolean nullAllowed) {
         this.parser = parser;
         this.defaultValue = defaultValue;
+        this.nullAllowed = nullAllowed;
     }
 
     @Override
     public T deserialize(final JsonParser jsonParser,
-                         final DeserializationContext ctx) throws IOException {
+            final DeserializationContext ctx) throws IOException {
         final String id = jsonParser.getText();
         try {
             return parser.apply(id);
         } catch (final Exception ex) {
             LOGGER.warn("Received unknown value from Zonky: '{}'. This may be a problem, but we continue.",
-                        id);
+                    id);
             return defaultValue;
         }
     }
 
     @Override
     public T getNullValue(final DeserializationContext ctx) {
+        if (nullAllowed) {
+            return null;
+        }
         LOGGER.warn("Unexpectedly received null value from Zonky. This may be a problem, but we continue.");
         return defaultValue;
     }

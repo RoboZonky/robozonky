@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -64,7 +65,8 @@ final class Selling implements TenantPayload {
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
-                .parallel()
+                // TODO enable selling of discounted investments
+                .filter(i -> i.getLoanHealthInfo().orElse(LoanHealthInfo.HEALTHY) == LoanHealthInfo.HEALTHY)
                 .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
                 .filter(i -> !sold.wasOnceSold(i.getLoanId()))
                 .map(i -> new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId())))
