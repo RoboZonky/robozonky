@@ -54,7 +54,7 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     private DelayedFiring getDelayedFiring() {
-        return delayedFiring.get().getOrElseThrow(() -> new IllegalStateException("Can not happen."));
+        return delayedFiring.get().get();
     }
 
     @Override

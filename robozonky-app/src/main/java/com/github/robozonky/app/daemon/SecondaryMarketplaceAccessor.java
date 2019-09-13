@@ -23,7 +23,6 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -69,10 +68,6 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
         return false;
     }
 
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant tenant) {
-        return new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId()));
-    }
-
     /**
      * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
      * marketplace changed since the last time this method was called.
@@ -90,7 +85,6 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
-                .parallel()
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {
@@ -100,7 +94,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                         return true;
                     }
                 })
-                .map(p -> toDescriptor(p, tenant));
+                .map(p -> new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId())));
     }
 
     @Override

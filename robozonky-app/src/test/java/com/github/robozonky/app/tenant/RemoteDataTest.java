@@ -16,12 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.OffsetDateTime;
+
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class RemoteDataTest extends AbstractZonkyLeveragingTest {
 
@@ -30,8 +31,11 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final RemoteData data = RemoteData.load(tenant);
-        assertThat(data.getStatistics()).isNotNull();
-        assertThat(data.getBlocked()).isEmpty();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(data.getStatistics()).isNotNull();
+            softly.assertThat(data.getBlocked()).isEmpty();
+            softly.assertThat(data.getRetrievedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
+        });
     }
 
 }
