@@ -16,15 +16,10 @@
 
 package com.github.robozonky.internal.state;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.function.Function;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -36,8 +31,12 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class StateCleanerTest {
 
@@ -61,7 +60,7 @@ class StateCleanerTest {
     private static final class MyTenant implements Tenant {
 
         @Override
-        public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
+        public <T> T call(final Function<Zonky, T> operation) {
             return null;
         }
 

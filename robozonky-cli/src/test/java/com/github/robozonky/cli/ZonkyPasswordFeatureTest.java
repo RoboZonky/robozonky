@@ -16,13 +16,6 @@
 
 package com.github.robozonky.cli;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.KeyStoreException;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
@@ -31,7 +24,14 @@ import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.io.File;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -61,12 +61,12 @@ class ZonkyPasswordFeatureTest {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private ApiProvider mockApi(final String username, final char... password) {
+    private ApiProvider mockApi(final char... password) {
         final ApiProvider api = spy(new ApiProvider());
         final ZonkyApiToken token = mock(ZonkyApiToken.class);
         when(token.getAccessToken()).thenReturn(new char[0]);
         final OAuth oauth = mock(OAuth.class);
-        when(oauth.login(eq(username), eq(password))).thenReturn(token);
+        when(oauth.login(eq(password))).thenReturn(token);
         doAnswer(i -> {
             final Function f = i.getArgument(0);
             return f.apply(oauth);
@@ -86,7 +86,7 @@ class ZonkyPasswordFeatureTest {
         final ZonkyApiToken token = mock(ZonkyApiToken.class);
         when(token.getAccessToken()).thenReturn(new char[0]);
         final OAuth oauth = mock(OAuth.class);
-        when(oauth.login(any(), any())).thenReturn(token);
+        when(oauth.login(any())).thenReturn(token);
         doAnswer(i -> {
             final Function f = i.getArgument(0);
             return f.apply(oauth);
@@ -107,7 +107,7 @@ class ZonkyPasswordFeatureTest {
         final File f = newTempFile();
         final String username = "someone@somewhere.cz";
         final String pwd = UUID.randomUUID().toString();
-        final ApiProvider api = mockApi(username, pwd.toCharArray());
+        final ApiProvider api = mockApi(pwd.toCharArray());
         final Feature feature = new ZonkyPasswordFeature(api, f, KEYSTORE_PASSWORD.toCharArray(), username,
                                                          pwd.toCharArray());
         feature.setup();
@@ -133,7 +133,7 @@ class ZonkyPasswordFeatureTest {
         final File f = newTempFile();
         final String username = "someone@somewhere.cz";
         final String pwd = UUID.randomUUID().toString();
-        final ApiProvider api = mockApi(username, pwd.toCharArray());
+        final ApiProvider api = mockApi(pwd.toCharArray());
         final Feature feature = new ZonkyPasswordFeature(api, f, KEYSTORE_PASSWORD.toCharArray(), username,
                                                          pwd.toCharArray());
         assertThatThrownBy(feature::test).isInstanceOf(TestFailedException.class); // no keystore exists

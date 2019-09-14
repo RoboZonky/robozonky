@@ -16,14 +16,9 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.Base64;
-
-import com.github.robozonky.internal.Defaults;
-
 class AuthenticationFilter extends RoboZonkyFilter {
 
-    public AuthenticationFilter() {
-        final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes(Defaults.CHARSET));
-        this.setRequestHeader("Authorization", "Basic " + authCode);
+    public AuthenticationFilter() { // encoded secret
+        this.setRequestHeader("Authorization", "Basic cm9ib3pvbmt5OjludEN6Y2lta0dBYXIzc2d6bXRlUVFNa3FxOHVkRg==");
     }
 }

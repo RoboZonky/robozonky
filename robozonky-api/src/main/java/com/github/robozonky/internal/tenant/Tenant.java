@@ -16,15 +16,10 @@
 
 package com.github.robozonky.internal.tenant;
 
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -33,6 +28,10 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.util.StreamUtil;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 /**
  * Base tenant functionality. All changes made via these methods will be immediately persisted, unless the instance
  * also implements the {@link TransactionalTenant} interface.
@@ -40,43 +39,21 @@ import com.github.robozonky.internal.util.StreamUtil;
 public interface Tenant extends AutoCloseable {
 
     /**
-     * Execute an operation using on the Zonky server, using the default scope.
-     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
-     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
-     * @param <T> Return type of the operation.
-     * @return Whatever the operation returned.
-     */
-    default <T> T call(final Function<Zonky, T> operation) {
-        return call(operation, OAuthScope.SCOPE_APP_WEB);
-    }
-
-    /**
      * Execute an operation using on the Zonky server.
      * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
      * nothing else, since the underlying code will block the thread for the entire duration of that operation.
-     * @param scope The scope of access to request with the Zonky server.
      * @param <T> Return type of the operation.
      * @return Whatever the operation returned.
      */
-    <T> T call(Function<Zonky, T> operation, OAuthScope scope);
+    <T> T call(final Function<Zonky, T> operation);
 
     /**
-     * Execute an operation using on the Zonky server, using the default scope.
+     * Execute an operation using on the Zonky server.
      * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
      * nothing else, since the underlying code will block the thread for the entire duration of that operation.
      */
     default void run(final Consumer<Zonky> operation) {
-        run(operation, OAuthScope.SCOPE_APP_WEB);
-    }
-
-    /**
-     * Execute an operation using on the Zonky server.
-     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
-     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
-     * @param scope The scope of access to request with the Zonky server.
-     */
-    default void run(final Consumer<Zonky> operation, final OAuthScope scope) {
-        call(StreamUtil.toFunction(operation), scope);
+        call(StreamUtil.toFunction(operation));
     }
 
     Availability getAvailability();

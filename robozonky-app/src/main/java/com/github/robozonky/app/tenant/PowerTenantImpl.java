@@ -16,15 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Duration;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -48,6 +39,15 @@ import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.Duration;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 class PowerTenantImpl implements PowerTenant {
 
     private static final Logger LOGGER = LogManager.getLogger(PowerTenantImpl.class);
@@ -57,20 +57,19 @@ class PowerTenantImpl implements PowerTenant {
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
     private final Runnable quotaMonitor;
-    private final Function<OAuthScope, ZonkyApiTokenSupplier> supplier;
     private final Map<OAuthScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(OAuthScope.class);
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
+    private final Lazy<ZonkyApiTokenSupplier> token;
     private final Lazy<StrategyProvider> strategyProvider;
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
     private final Lazy<Cache<Investment>> investmentCache = Lazy.of(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
-    private final Lazy<Availability> availability =
-            Lazy.of(() -> new AvailabilityImpl(getTokenSupplier(OAuthScope.SCOPE_APP_WEB)));
+    private final Lazy<Availability> availability;
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis,
                     final Supplier<StrategyProvider> strategyProvider,
-                    final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier) {
+                    final Supplier<ZonkyApiTokenSupplier> tokenSupplier) {
         this.strategyProvider = Lazy.of(strategyProvider);
         this.apis = apis;
         this.quotaMonitor = apis.getRequestCounter()
@@ -79,7 +78,8 @@ class PowerTenantImpl implements PowerTenant {
                     // do nothing
                 });
         this.sessionInfo = sessionInfo;
-        this.supplier = tokenSupplier;
+        this.token = Lazy.of(tokenSupplier);
+        this.availability = Lazy.of(() -> new AvailabilityImpl(token.get()));
         this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
                 .reloadAfter(Duration.ofHours(1))
@@ -95,14 +95,10 @@ class PowerTenantImpl implements PowerTenant {
         });
     }
 
-    private ZonkyApiTokenSupplier getTokenSupplier(final OAuthScope scope) {
-        return tokens.computeIfAbsent(scope, supplier);
-    }
-
     @Override
-    public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
+    public <T> T call(final Function<Zonky, T> operation) {
         try {
-            return apis.call(operation, getTokenSupplier(scope));
+            return apis.call(operation, token.get());
         } finally {
             final int randomBetweenZeroAndHundred = random.nextInt(100);
             if (randomBetweenZeroAndHundred == 0) { // check request situation in 1 % of cases

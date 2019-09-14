@@ -16,13 +16,13 @@
 
 package com.github.robozonky.cli;
 
-import java.io.File;
-import java.util.Optional;
-
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
-import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import picocli.CommandLine;
+
+import java.io.File;
 
 @CommandLine.Command(name = "zonky-credentials", description = ZonkyPasswordFeature.DESCRIPTION)
 public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
@@ -33,7 +33,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
             description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
     @CommandLine.Option(names = {"-p", "--password"},
-            description = "Password to use to authenticate with Zonky servers.", required = true, interactive = true,
+            description = "Authorization code obtained from Zonky.", required = true, interactive = true,
             arity = "0..1")
     private char[] password = null;
 
@@ -55,19 +55,11 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
         this.api = new ApiProvider();
     }
 
-    public static void attemptLogin(final ApiProvider api, final String username,
-                                    final char... password) throws TestFailedException {
-        final Optional<Exception> thrown = api.oauth(oauth -> {
-            try {
-                api.run(Zonky::logout, () -> oauth.login(username, password));
-                return Optional.empty();
-            } catch (final Exception ex) {
-                return Optional.of(ex);
-            }
-        });
-        if (thrown.isPresent()) {
-            throw new TestFailedException(thrown.get());
-        }
+    public static void attemptLoginAndStore(final KeyStoreHandler keyStoreHandler, final ApiProvider api,
+                                            final String username, final char... password) {
+        final ZonkyApiToken token = api.oauth(oauth -> oauth.login(password));
+        final SecretProvider secretProvider = SecretProvider.keyStoreBased(keyStoreHandler, username, password);
+        secretProvider.setToken(token);
     }
 
     @Override
@@ -77,14 +69,25 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
 
     @Override
     public void setup() throws SetupFailedException {
-        super.setup();
-        SecretProvider.keyStoreBased(this.getStorage(), username, password);
+        try {
+            super.setup();
+            attemptLoginAndStore(getStorage(), api, username, password);
+        } catch (final Exception ex) {
+            throw new SetupFailedException(ex);
+        }
     }
 
     @Override
     public void test() throws TestFailedException {
-        super.test();
-        final SecretProvider s = SecretProvider.keyStoreBased(this.getStorage());
-        attemptLogin(api, s.getUsername(), s.getPassword());
+        try {
+            super.test();
+            final SecretProvider s = SecretProvider.keyStoreBased(this.getStorage());
+            final ZonkyApiToken newToken = s.getToken()
+                    .map(token -> api.oauth(oAuth -> oAuth.refresh(token)))
+                    .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
+            s.setToken(newToken);
+        } catch (final Exception ex) {
+            throw new TestFailedException(ex);
+        }
     }
 }

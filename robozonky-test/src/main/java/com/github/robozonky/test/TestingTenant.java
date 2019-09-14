@@ -16,15 +16,10 @@
 
 package com.github.robozonky.test;
 
-import java.time.Instant;
-import java.util.Optional;
-import java.util.function.Function;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -36,7 +31,11 @@ import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 
-import static org.mockito.Mockito.*;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static org.mockito.Mockito.spy;
 
 public class TestingTenant implements Tenant {
 
@@ -52,7 +51,7 @@ public class TestingTenant implements Tenant {
     }
 
     @Override
-    public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
+    public <T> T call(final Function<Zonky, T> operation) {
         return operation.apply(zonky);
     }
 

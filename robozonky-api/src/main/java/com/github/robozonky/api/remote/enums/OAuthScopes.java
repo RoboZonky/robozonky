@@ -16,13 +16,7 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OAuthScopes {
@@ -54,25 +48,6 @@ public class OAuthScopes {
 
     public Set<OAuthScope> getOAuthScopes() {
         return scopes;
-    }
-
-    /**
-     * Primary scope is the scope that is actually useful for the application. When {@link OAuthScope#SCOPE_APP_WEB} is
-     * requested, Zonky may return scopes such as "SCOPE_APP_WEB SCOPE_APP_OAUTH" and out of the two, we only care about
-     * the one that was requested.
-     * @return
-     */
-    public Optional<OAuthScope> getPrimaryScope() {
-        if (scopes.contains(OAuthScope.SCOPE_APP_WEB)) {
-            return Optional.of(OAuthScope.SCOPE_APP_WEB);
-        } else if (scopes.contains(OAuthScope.SCOPE_FILE_DOWNLOAD)) {
-            return Optional.of(OAuthScope.SCOPE_FILE_DOWNLOAD);
-        } else if (scopes.size() == 1) {
-            final OAuthScope s = scopes.toArray(new OAuthScope[0])[0];
-            return Optional.of(s);
-        } else {
-            return Optional.empty();
-        }
     }
 
     @Override

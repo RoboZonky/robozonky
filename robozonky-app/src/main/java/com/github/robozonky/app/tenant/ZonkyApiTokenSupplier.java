@@ -16,21 +16,19 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.secrets.SecretProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
+
+import javax.ws.rs.NotAuthorizedException;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
-import javax.ws.rs.NotAuthorizedException;
-
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.remote.enums.OAuthScope;
-import com.github.robozonky.internal.async.Reloadable;
-import com.github.robozonky.internal.remote.ApiProvider;
-import com.github.robozonky.internal.secrets.SecretProvider;
-import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 
 /**
  * Will keep permanent user authentication running in the background.
@@ -39,37 +37,23 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                                        Closeable {
 
     private static final Logger LOGGER = LogManager.getLogger(ZonkyApiTokenSupplier.class);
-    private static final Duration ONE_HOUR = Duration.ofHours(1);
 
-    private final OAuthScope scope;
     private final SecretProvider secrets;
     private final ApiProvider apis;
     private final Reloadable<ZonkyApiToken> token;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
-    ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets) {
-        this(OAuthScope.SCOPE_APP_WEB, apis, secrets);
-    }
-
-    public ZonkyApiTokenSupplier(final OAuthScope scope, final ApiProvider apis, final SecretProvider secrets) {
-        this.scope = scope;
+    public ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets) {
         this.apis = apis;
         this.secrets = secrets;
-        this.token = Reloadable.with(this::refreshOrLogin)
+        this.token = Reloadable.with(this::refreshOrFail)
                 .reloadAfter(ZonkyApiTokenSupplier::reloadAfter)
                 .finishWith(secrets::setToken)
                 .build();
     }
 
-    static Duration reloadAfter(final ZonkyApiToken token) {
-        var expiresOn = token.getExpiresOn();
-        var now = DateUtil.offsetNow();
-        var untilExpiration = Duration.between(expiresOn, now).abs();
-        if (untilExpiration.compareTo(ONE_HOUR) > 0) {
-            return ONE_HOUR;
-        } else {
-            return untilExpiration.dividedBy(10);
-        }
+    private static Duration reloadAfter(final ZonkyApiToken token) {
+        return Duration.ofSeconds(token.getExpiresIn() / 2);
     }
 
     private static NotAuthorizedException createException(final String message) {
@@ -80,31 +64,29 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     private static NotAuthorizedException createException(final Throwable throwable) {
-        var response = new ResponseBuilderImpl()
-                .status(401)
-                .build();
-        return new NotAuthorizedException(response, throwable);
+        if (throwable instanceof NotAuthorizedException) {
+            var response = new ResponseBuilderImpl()
+                    .status(401, "Unrecoverable authentication failure.")
+                    .build();
+            return new NotAuthorizedException(response, throwable);
+        } else { // we have a problem, but that problem is not HTTP 401
+            throw new IllegalStateException("Recoverable authentication failure.", throwable);
+        }
     }
 
-    private ZonkyApiToken refreshOrLogin() {
+    private ZonkyApiToken refreshOrFail() {
         return secrets.getToken()
-                .map(this::refreshOrLogin)
-                .orElseGet(() -> apis.oauth(oauth -> {
-                               final String username = secrets.getUsername();
-                               LOGGER.info("Authenticating as '{}', requesting scope '{}'.", username, scope);
-                               return oauth.login(scope, username, secrets.getPassword());
-                           })
-                );
+                .map(this::refreshOrFail)
+                .orElseThrow(() -> createException("No token found."));
     }
 
-    private ZonkyApiToken refreshOrLogin(final ZonkyApiToken token) {
+    private ZonkyApiToken refreshOrFail(final ZonkyApiToken token) {
         if (token.isExpired()) {
-            LOGGER.debug("Found expired token #{}.", token.getId());
             secrets.setToken(null);
-            return refreshOrLogin();
+            throw createException("Token expired.");
         }
         LOGGER.debug("Current token #{} expiring on {}.", token.getId(), token.getExpiresOn());
-        LOGGER.info("Refreshing access token for '{}', scope '{}'.", secrets.getUsername(), scope);
+        LOGGER.info("Refreshing access token for '{}'.", secrets.getUsername());
         return apis.oauth(oauth -> oauth.refresh(token));
     }
 

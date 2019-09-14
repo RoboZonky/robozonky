@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.UUID;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -28,7 +26,10 @@ import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -40,7 +41,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
     @Test
     void apiProvided() {
         final OAuth o = mock(OAuth.class);
-        when(o.login(any(), any(), any())).thenReturn(TOKEN);
+        when(o.login(any())).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final ApiProvider a = mockApiProvider(o, z);
         final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
@@ -49,7 +50,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
                 .withSecrets(s)
                 .build();
         assertThat(t.getRestrictions()).isNotNull();
-        verify(o).login(any(), eq(s.getUsername()), eq(s.getPassword()));
+        verify(o).login(eq(s.getPassword()));
         verify(z).getRestrictions();
     }
 

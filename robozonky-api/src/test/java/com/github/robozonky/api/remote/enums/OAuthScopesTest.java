@@ -16,68 +16,38 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.util.UUID;
-
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OAuthScopesTest {
 
     @Test
     void empty() {
         final OAuthScopes result = OAuthScopes.valueOf("");
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.getPrimaryScope()).isEmpty();
-            softly.assertThat(result.getOAuthScopes()).isEmpty();
-        });
+        assertThat(result.getOAuthScopes()).isEmpty();
     }
 
     @Test
     void emptyNotTrimmed() {
         final OAuthScopes result = OAuthScopes.valueOf(" ");
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.getPrimaryScope()).isEmpty();
-            softly.assertThat(result.getOAuthScopes()).isEmpty();
-        });
+        assertThat(result.getOAuthScopes()).isEmpty();
     }
 
     @Test
     void oneValue() {
-        final OAuthScopes result = OAuthScopes.valueOf("SCOPE_APP_WEB");
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.getPrimaryScope()).contains(OAuthScope.SCOPE_APP_WEB);
-            softly.assertThat(result.getOAuthScopes()).containsOnly(OAuthScope.SCOPE_APP_WEB);
-        });
+        final OAuthScopes result = OAuthScopes.valueOf("SCOPE_APP_BASIC_INFO");
+        assertThat(result.getOAuthScopes()).containsOnly(OAuthScope.SCOPE_APP_BASIC_INFO);
     }
 
     @Test
     void twoValues() {
-        final OAuthScopes result = OAuthScopes.valueOf("SCOPE_APP_OAUTH SCOPE_APP_WEB");
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.getPrimaryScope()).contains(OAuthScope.SCOPE_APP_WEB);
-            softly.assertThat(result.getOAuthScopes()).containsOnly(OAuthScope.SCOPE_APP_WEB,
-                                                                    OAuthScope.SCOPE_APP_OAUTH);
-        });
-    }
-
-    @Test
-    void preference() {
-        final OAuthScopes result = OAuthScopes.valueOf("SCOPE_APP_OAUTH SCOPE_APP_WEB SCOPE_FILE_DOWNLOAD");
-        assertThat(result.getPrimaryScope()).contains(OAuthScope.SCOPE_APP_WEB);
-    }
-
-    @Test
-    void preference2() {
-        final OAuthScopes result = OAuthScopes.valueOf("SCOPE_APP_OAUTH SCOPE_FILE_DOWNLOAD");
-        assertThat(result.getPrimaryScope()).contains(OAuthScope.SCOPE_FILE_DOWNLOAD);
-    }
-
-    @Test
-    void preference3() {
-        final OAuthScopes result = OAuthScopes.valueOf("SCOPE_APP_OAUTH");
-        assertThat(result.getPrimaryScope()).contains(OAuthScope.SCOPE_APP_OAUTH);
+        final OAuthScopes result = OAuthScopes.valueOf("SCOPE_APP_BASIC_INFO SCOPE_INVESTMENT_READ");
+        assertThat(result.getOAuthScopes()).containsOnly(OAuthScope.SCOPE_APP_BASIC_INFO,
+                OAuthScope.SCOPE_INVESTMENT_READ);
     }
 
     @Test
@@ -93,17 +63,11 @@ class OAuthScopesTest {
     }
 
     @Test
-    void ofSome() {
-        final OAuthScopes result = OAuthScopes.of(OAuthScope.SCOPE_APP_WEB, OAuthScope.SCOPE_APP_OAUTH);
-        assertThat(result.getOAuthScopes()).containsExactly(OAuthScope.SCOPE_APP_OAUTH, OAuthScope.SCOPE_APP_WEB);
-    }
-
-    @Test
     void equals() {
-        final OAuthScopes result = OAuthScopes.of(OAuthScope.SCOPE_APP_WEB, OAuthScope.SCOPE_APP_OAUTH);
+        final OAuthScopes result = OAuthScopes.of(OAuthScope.SCOPE_APP_BASIC_INFO, OAuthScope.SCOPE_INVESTMENT_READ);
         assertThat(result).isNotEqualTo(null);
         assertThat(result).isEqualTo(result);
-        final OAuthScopes result2 = OAuthScopes.of(OAuthScope.SCOPE_APP_WEB, OAuthScope.SCOPE_APP_OAUTH);
+        final OAuthScopes result2 = OAuthScopes.of(OAuthScope.SCOPE_APP_BASIC_INFO, OAuthScope.SCOPE_INVESTMENT_READ);
         assertThat(result).isEqualTo(result2);
     }
 }

@@ -16,17 +16,11 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Function;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -39,6 +33,11 @@ import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 
 class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
@@ -97,8 +96,8 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
-    public <T> T call(final Function<Zonky, T> operation, final OAuthScope scope) {
-        return parent.call(operation, scope);
+    public <T> T call(final Function<Zonky, T> operation) {
+        return parent.call(operation);
     }
 
     @Override

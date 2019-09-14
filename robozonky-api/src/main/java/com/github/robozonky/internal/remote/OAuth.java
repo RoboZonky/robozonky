@@ -18,7 +18,8 @@ package com.github.robozonky.internal.remote;
 
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.remote.enums.OAuthScope;
+
+import static com.github.robozonky.api.remote.entities.ZonkyApiToken.REFRESH_TOKEN_STRING;
 
 public class OAuth {
 
@@ -28,17 +29,15 @@ public class OAuth {
         this.api = api;
     }
 
-    public ZonkyApiToken login(final String username, final char[] password) {
-        return login(OAuthScope.SCOPE_APP_WEB, username, password);
+    private static String toString(final char... code) {
+        return String.valueOf(code);
     }
 
-    public ZonkyApiToken login(final OAuthScope scope, final String username, final char[] password) {
-        return api.call(a -> a.login(username, String.valueOf(password), "password", scope));
+    public ZonkyApiToken login(final char[] code) {
+        return api.call(a -> a.login(toString(code), "https://app.zonky.cz/api/oauth/code", "authorization_code"));
     }
 
     public ZonkyApiToken refresh(final ZonkyApiToken token) {
-        final OAuthScope scope = token.getScope().getPrimaryScope().orElse(OAuthScope.SCOPE_APP_WEB);
-        return api.call(a -> a.refresh(String.valueOf(token.getRefreshToken()), ZonkyApiToken.REFRESH_TOKEN_STRING,
-                                       scope));
+        return api.call(a -> a.refresh(toString(token.getRefreshToken()), REFRESH_TOKEN_STRING));
     }
 }

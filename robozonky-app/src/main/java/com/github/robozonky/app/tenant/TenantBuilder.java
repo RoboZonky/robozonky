@@ -16,15 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 public final class TenantBuilder {
 
@@ -74,8 +72,7 @@ public final class TenantBuilder {
             throw new IllegalStateException("Secret provider must be provided.");
         }
         final ApiProvider apis = api == null ? new ApiProvider() : api;
-        final Function<OAuthScope, ZonkyApiTokenSupplier> tokenSupplier =
-                scope -> new ZonkyApiTokenSupplier(scope, apis, secrets);
+        final Supplier<ZonkyApiTokenSupplier> tokenSupplier = () -> new ZonkyApiTokenSupplier(apis, secrets);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
         return new PowerTenantImpl(sessionInfo, apis, strategyProvider, tokenSupplier);
     }

@@ -16,10 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
-
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -39,10 +35,13 @@ import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
-import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
-import static org.assertj.core.api.Assertions.*;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
+
+import static com.github.robozonky.app.events.impl.EventFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
@@ -55,7 +54,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void closesWithTokens() {
         final OAuth a = mock(OAuth.class);
-        when(a.login(any(), any(), any())).thenReturn(TOKEN);
+        when(a.login(any())).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build();
@@ -65,7 +64,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         } catch (final Exception e) {
             fail(e);
         }
-        verify(a).login(any(), any(), any());
+        verify(a).login(any());
         assertThatThrownBy(() -> tenant.getLoan(1)).isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> tenant.getInvestment(1)).isInstanceOf(IllegalStateException.class);
     }
@@ -87,7 +86,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void getters() throws Exception {
         final OAuth a = mock(OAuth.class);
-        when(a.login(any(), any(), any())).thenReturn(TOKEN);
+        when(a.login(any())).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final Loan l = Loan.custom().setId(1).build();
         final Investment i = Investment.fresh(l, 200).build();
