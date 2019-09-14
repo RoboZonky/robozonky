@@ -23,6 +23,7 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
 import java.io.File;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class ZonkySettingsValidator extends AbstractValidator {
@@ -49,9 +50,12 @@ public class ZonkySettingsValidator extends AbstractValidator {
         final String username = Variables.ZONKY_USERNAME.getValue(installData);
         final String password = Variables.ZONKY_PASSWORD.getValue(installData);
         try {
-            final File f = File.createTempFile("some", "keystore");
-            final KeyStoreHandler k = KeyStoreHandler.create(f, "password".toCharArray());
+            final File f = File.createTempFile("robozonky", "keystore");
+            final char[] p = UUID.randomUUID().toString().toCharArray();
+            f.delete(); // or else the next step fails
+            final KeyStoreHandler k = KeyStoreHandler.create(f, p);
             ZonkyPasswordFeature.attemptLoginAndStore(k, apiSupplier.get(), username, password.toCharArray());
+            RoboZonkyInstallerListener.setKeystoreInformation(f, p);
             return DataValidator.Status.OK;
         } catch (final Exception t) {
             logger.warn("Failed obtaining Zonky API token.", t);
