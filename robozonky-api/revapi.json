@@ -219,6 +219,75 @@
         "code": "java.method.addedToInterface",
         "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setSmpPrice(java.math.BigDecimal)",
         "justification": "New Zonky API attributes."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(===java.lang.String===, java.lang.String, java.lang.String, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(===java.lang.String===, java.lang.String, java.lang.String)",
+        "annotationType": "javax.ws.rs.FormParam",
+        "attribute": "value",
+        "oldValue": "\"username\"",
+        "newValue": "\"code\"",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, ===java.lang.String===, java.lang.String, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, ===java.lang.String===, java.lang.String)",
+        "annotation": "@javax.ws.rs.DefaultValue(\"https:\/\/app.zonky.cz\/api\/oauth\/code\")",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, ===java.lang.String===, java.lang.String, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, ===java.lang.String===, java.lang.String)",
+        "annotationType": "javax.ws.rs.FormParam",
+        "attribute": "value",
+        "oldValue": "\"password\"",
+        "newValue": "\"redirect_uri\"",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, ===java.lang.String===, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "new": "parameter com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, ===java.lang.String===)",
+        "annotationType": "javax.ws.rs.DefaultValue",
+        "attribute": "value",
+        "oldValue": "\"password\"",
+        "newValue": "\"authorization_code\"",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "new": "method com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String)",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "new": "method com.github.robozonky.api.remote.entities.ZonkyApiToken com.github.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String)",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.OAuthScope.SCOPE_APP_OAUTH",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.OAuthScope.SCOPE_APP_WEB",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.OAuthScope.SCOPE_FILE_DOWNLOAD",
+        "justification": "Refactored Zonky authentication API due to PSD2."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.Optional<com.github.robozonky.api.remote.enums.OAuthScope> com.github.robozonky.api.remote.enums.OAuthScopes::getPrimaryScope()",
+        "justification": "Refactored Zonky authentication API due to PSD2."
       }
     ]
   }
