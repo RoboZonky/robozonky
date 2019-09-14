@@ -16,8 +16,25 @@
 
 package com.github.robozonky.test;
 
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
+import com.github.robozonky.internal.async.Tasks;
+import com.github.robozonky.internal.remote.*;
+import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.state.TenantState;
+import com.github.robozonky.internal.tenant.RemotePortfolio;
+import com.github.robozonky.internal.tenant.Tenant;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.mockito.stubbing.Answer;
+
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,31 +43,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.internal.async.Tasks;
-import com.github.robozonky.internal.remote.ApiProvider;
-import com.github.robozonky.internal.remote.InvestmentResult;
-import com.github.robozonky.internal.remote.OAuth;
-import com.github.robozonky.internal.remote.PurchaseResult;
-import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.state.TenantState;
-import com.github.robozonky.internal.tenant.RemotePortfolio;
-import com.github.robozonky.internal.tenant.Tenant;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.mockito.stubbing.Answer;
-
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * This is a suggested parent class for all RoboZonky tests using this module. It will make sure to clear shared state
@@ -61,6 +54,19 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     protected static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
                                                                  false),
             SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
+
+    private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(), 299);
+
+    protected static SecretProvider mockSecretProvider(final ZonkyApiToken token) {
+        final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
+        s.setToken(token);
+        return s;
+    }
+
+    protected static SecretProvider mockSecretProvider() {
+        return mockSecretProvider(TOKEN);
+    }
 
     protected static Zonky harmlessZonky() {
         final Zonky zonky = mock(Zonky.class);

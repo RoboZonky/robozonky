@@ -16,19 +16,20 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -50,6 +51,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     void readsMarketplace() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
+        when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final Tenant tenant = mockTenant(zonky);
@@ -67,6 +69,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     void hasUpdatesWhenCurrentAndPreviousEmpty() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
+        when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final Tenant tenant = mockTenant(zonky);

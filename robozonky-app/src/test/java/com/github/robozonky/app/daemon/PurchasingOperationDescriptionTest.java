@@ -16,17 +16,18 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
@@ -46,6 +47,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     void freshAccessorEveryTimeButTheyShareState() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
+        when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
         final Zonky z = harmlessZonky();
         when(z.getAvailableParticipations(any())).thenAnswer(i -> Stream.of(p));
         final Tenant t = mockTenant(z);

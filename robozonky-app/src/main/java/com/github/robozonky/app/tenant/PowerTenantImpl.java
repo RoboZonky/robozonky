@@ -21,7 +21,6 @@ import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -38,8 +37,6 @@ import com.github.robozonky.internal.tenant.RemotePortfolio;
 import io.vavr.Lazy;
 
 import java.time.Duration;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
@@ -52,7 +49,6 @@ class PowerTenantImpl implements PowerTenant {
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
     private final Runnable quotaMonitor;
-    private final Map<OAuthScope, ZonkyApiTokenSupplier> tokens = new EnumMap<>(OAuthScope.class);
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final Lazy<ZonkyApiTokenSupplier> token;
@@ -152,7 +148,7 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public void close() {
-        tokens.forEach((k, v) -> v.close()); // cancel existing tokens
+        token.get().close();
         Stream.of(loanCache, investmentCache).forEach(cache -> cache.get().close()); // clean up the caches
     }
 
