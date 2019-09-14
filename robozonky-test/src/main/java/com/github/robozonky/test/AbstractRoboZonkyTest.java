@@ -51,15 +51,14 @@ import static org.mockito.Mockito.*;
  */
 public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest {
 
-    protected static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
-                                                                 false),
-            SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
-
+    private static final String USERNAME = "someone@robozonky.cz";
+    protected static final SessionInfo SESSION = new SessionInfo(USERNAME, "Testing", false);
+    protected static final SessionInfo SESSION_DRY = new SessionInfo(USERNAME, "Testing", true);
     private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
             UUID.randomUUID().toString(), 299);
 
     protected static SecretProvider mockSecretProvider(final ZonkyApiToken token) {
-        final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
+        final SecretProvider s = SecretProvider.inMemory(USERNAME, "pwd".toCharArray());
         s.setToken(token);
         return s;
     }
