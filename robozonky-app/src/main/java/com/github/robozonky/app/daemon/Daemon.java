@@ -16,10 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.InvestmentMode;
 import com.github.robozonky.app.ReturnCode;
@@ -32,16 +28,14 @@ import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.Duration;
+import java.util.function.Function;
+
 public class Daemon implements InvestmentMode {
 
     private static final Logger LOGGER = LogManager.getLogger(Daemon.class);
-    private final AtomicReference<Lifecycle> shutdownEnabler = new AtomicReference<>();
     private final PowerTenant tenant;
     private final Lifecycle lifecycle;
-
-    Daemon(final PowerTenant tenant) {
-        this(tenant, null);
-    }
 
     public Daemon(final PowerTenant tenant, final Lifecycle lifecycle) {
         this.tenant = tenant;
@@ -85,7 +79,7 @@ public class Daemon implements InvestmentMode {
     }
 
     private void triggerShutdownDueToFailure(final Throwable throwable) {
-        shutdownEnabler.get().resumeToFail(throwable);
+        lifecycle.resumeToFail(throwable);
     }
 
     private void scheduleJobs() {
