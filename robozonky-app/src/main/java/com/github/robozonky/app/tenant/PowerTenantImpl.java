@@ -36,8 +36,6 @@ import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import io.vavr.Lazy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
 import java.util.EnumMap;
@@ -49,9 +47,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 class PowerTenantImpl implements PowerTenant {
-
-    private static final Logger LOGGER = LogManager.getLogger(PowerTenantImpl.class);
-    private static final Restrictions FULLY_RESTRICTED = new Restrictions();
 
     private final Random random = new Random();
     private final SessionInfo sessionInfo;
@@ -89,10 +84,8 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Restrictions getRestrictions() {
-        return restrictions.get().getOrElseGet(ex -> {
-            LOGGER.info("Failed retrieving Zonky restrictions, disabling all operations.", ex);
-            return FULLY_RESTRICTED;
-        });
+        return restrictions.get()
+                .getOrElseThrow(t -> new IllegalStateException("Failed retrieving Restrictions from Zonky.", t));
     }
 
     @Override
