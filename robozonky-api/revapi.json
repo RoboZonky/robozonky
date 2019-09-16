@@ -301,6 +301,25 @@
         "new": "method java.util.Optional<java.time.OffsetDateTime> com.github.robozonky.api.remote.entities.Restrictions::getWithdrawalDate()",
         "annotation": "@javax.xml.bind.annotation.XmlElement",
         "justification": "The information is optional."
+      },{
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.ExpectedPayment",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.Instalment",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.Instalment> com.github.robozonky.api.remote.entities.Statistics::getCashFlow()",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.ExpectedPayment> com.github.robozonky.api.remote.entities.Statistics::getExpectedPayments()",
+        "justification": "Removed as we no longer have access to account information due to the PSD2 regulation."
       }
     ]
   }
