@@ -16,13 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -31,6 +24,13 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.Logger;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
 
@@ -55,11 +55,19 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     }
 
     private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
-        if (marketplace.hasUpdates()) {
+        if (!tenant.getAvailability().isAvailable()) {
+            /*
+             * If we are in a forced pause due to some remote server error, we need to make sure we've tried as many
+             * remote operations before resuming from such forced pause. In such cases, we will force a marketplace
+             * check, which would likely uncover any persistent JSON parsing issues etc.
+             */
+            logger.debug("Forcing marketplace check to see if we can resume from forced pause.");
+            return false;
+        } else if (marketplace.hasUpdates()) {
             logger.debug("Waking up due to a change in marketplace.");
             return false;
         } else if (needsToForceMarketplaceCheck()) {
-            logger.debug("Forcing a periodic live marketplace check.");
+            logger.debug("Forcing a periodic marketplace check.");
             return false;
         } else {
             logger.debug("Asleep as there was no change since last checked.");

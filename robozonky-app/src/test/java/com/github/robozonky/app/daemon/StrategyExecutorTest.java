@@ -16,25 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ClientErrorException;
-
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
-import com.github.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -52,7 +34,18 @@ import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -322,6 +315,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
                 .build();
         when(zonky.getAvailableLoans(any())).thenAnswer(i -> Stream.of(loan));
         final PowerTenant tenant = mockTenant(zonky);
+        when(tenant.getAvailability().isAvailable()).thenReturn(true);
         when(tenant.getInvestmentStrategy())
                 .thenReturn(Optional.of((available, portfolio, restrictions) -> Stream.empty()));
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = new InvestingOperationDescriptor();
