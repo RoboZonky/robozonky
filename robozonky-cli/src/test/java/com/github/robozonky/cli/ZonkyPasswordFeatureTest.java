@@ -20,19 +20,15 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.secrets.KeyStoreHandler;
-import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.KeyStoreException;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class ZonkyPasswordFeatureTest {
@@ -45,23 +41,8 @@ class ZonkyPasswordFeatureTest {
         return f;
     }
 
-    @Test
-    void createNew() throws IOException, SetupFailedException, KeyStoreException {
-        final File f = newTempFile();
-        final String username = "someone@somewhere.cz";
-        final String pwd = UUID.randomUUID().toString();
-        final Feature feature = new ZonkyPasswordFeature(f, KEYSTORE_PASSWORD.toCharArray(), username,
-                                                         pwd.toCharArray());
-        feature.setup();
-        final SecretProvider s = SecretProvider.keyStoreBased(KeyStoreHandler.open(f, KEYSTORE_PASSWORD.toCharArray()));
-        assertSoftly(softly -> {
-            softly.assertThat(s.getUsername()).isEqualTo(username);
-            softly.assertThat(s.getPassword()).isEqualTo(pwd.toCharArray());
-        });
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private ApiProvider mockApi(final char... password) {
+    private static ApiProvider mockApi(final char... password) {
         final ApiProvider api = spy(new ApiProvider());
         final ZonkyApiToken token = mock(ZonkyApiToken.class);
         when(token.getAccessToken()).thenReturn(new char[0]);
@@ -81,7 +62,7 @@ class ZonkyPasswordFeatureTest {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private ApiProvider mockFailingApi() {
+    private static ApiProvider mockFailingApi() {
         final ApiProvider api = spy(new ApiProvider());
         final ZonkyApiToken token = mock(ZonkyApiToken.class);
         when(token.getAccessToken()).thenReturn(new char[0]);
@@ -99,21 +80,6 @@ class ZonkyPasswordFeatureTest {
         }).when(api).run(any(Consumer.class), any());
         doThrow(IllegalStateException.class).when(z).logout(); // last call will fail
         return api;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void testWorks() throws IOException, TestFailedException, SetupFailedException {
-        final File f = newTempFile();
-        final String username = "someone@somewhere.cz";
-        final String pwd = UUID.randomUUID().toString();
-        final ApiProvider api = mockApi(pwd.toCharArray());
-        final Feature feature = new ZonkyPasswordFeature(api, f, KEYSTORE_PASSWORD.toCharArray(), username,
-                                                         pwd.toCharArray());
-        feature.setup();
-        feature.test();
-        verify(api).oauth(any());
-        verify(api).run(any(Consumer.class), any());
     }
 
     @Test

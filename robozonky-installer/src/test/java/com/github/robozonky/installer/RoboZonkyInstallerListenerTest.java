@@ -23,6 +23,7 @@ import com.izforge.izpack.api.event.InstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -46,6 +47,12 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     private static final String ZONKY_USERNAME = "user@zonky.cz";
 
     private final InstallData data = RoboZonkyInstallerListenerTest.mockData();
+
+    @BeforeAll
+    static void initialize() {
+        final File f = newFile(false);
+        RoboZonkyInstallerListener.setKeystoreInformation(f, UUID.randomUUID().toString().toCharArray());
+    }
 
     private static File newFile(final boolean withContent) {
         try {

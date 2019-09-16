@@ -78,7 +78,6 @@ class ZonkySettingsValidatorTest {
         final ZonkySettingsValidator validator = new ZonkySettingsValidator();
         assertSoftly(softly -> {
             softly.assertThat(validator.getDefaultAnswer()).isFalse();
-            softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
             softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
             softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
         });
@@ -99,21 +98,6 @@ class ZonkySettingsValidatorTest {
         // test
         assertThat(result).isEqualTo(DataValidator.Status.OK);
         verify(oauth).login(eq(ZonkySettingsValidatorTest.PASSWORD.toCharArray()));
-        verify(zonky).logout();
-    }
-
-    @Test
-    void warning() {
-        // mock data
-        final OAuth oauth = mock(OAuth.class);
-        when(oauth.login(any())).thenThrow(new IllegalStateException());
-        final ApiProvider provider = mockApiProvider(oauth);
-        final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
-        // execute SUT
-        final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
-        final DataValidator.Status result = validator.validateData(d);
-        // test
-        assertThat(result).isEqualTo(DataValidator.Status.WARNING);
     }
 
     @Test
