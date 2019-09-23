@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,32 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
+import java.math.BigDecimal;
 
-public class OverallPortfolio extends BaseEntity {
+public class InvestmentSummary extends BaseEntity {
 
-    private BigDecimal unpaid, paid, due;
+    static final InvestmentSummary EMPTY = new InvestmentSummary(BigDecimal.ZERO, 0);
 
-    OverallPortfolio() {
-        // for JAXB
+    private BigDecimal amount;
+    private int count;
+
+    InvestmentSummary() {
+        // fox JAXB
     }
 
-    public OverallPortfolio(final long paid, final long unpaid, final long due) {
-        this.unpaid = BigDecimal.valueOf(unpaid);
-        this.paid = BigDecimal.valueOf(paid);
-        this.due = BigDecimal.valueOf(due);
-    }
-
-    @XmlElement
-    public BigDecimal getUnpaid() {
-        return unpaid;
-    }
-
-    @XmlElement
-    public BigDecimal getPaid() {
-        return paid;
+    public InvestmentSummary(final BigDecimal amount, final int count) {
+        this.amount = amount;
+        this.count = count;
     }
 
     @XmlElement
-    public BigDecimal getDue() {
-        return due;
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    @XmlElement
+    public int getCount() {
+        return count;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class RiskPortfolio extends OverallPortfolio {
+import javax.xml.bind.annotation.XmlElement;
+import java.math.BigDecimal;
 
+public class RiskPortfolio extends BaseEntity {
+
+    private BigDecimal unpaid;
+    private BigDecimal paid;
+    private BigDecimal due;
     private BigDecimal totalAmount;
     private Rating rating;
 
@@ -31,9 +34,26 @@ public class RiskPortfolio extends OverallPortfolio {
     }
 
     public RiskPortfolio(final Rating rating, final long paid, final long unpaid, final long due) {
-        super(paid, unpaid, due);
+        this.paid = BigDecimal.valueOf(paid);
+        this.unpaid = BigDecimal.valueOf(unpaid);
+        this.due = BigDecimal.valueOf(due);
         this.rating = rating;
         this.totalAmount = BigDecimal.valueOf(paid + unpaid + due);
+    }
+
+    @XmlElement
+    public BigDecimal getUnpaid() {
+        return unpaid;
+    }
+
+    @XmlElement
+    public BigDecimal getPaid() {
+        return paid;
+    }
+
+    @XmlElement
+    public BigDecimal getDue() {
+        return due;
     }
 
     @XmlElement

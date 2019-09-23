@@ -16,12 +16,6 @@
 
 package com.github.robozonky.app.summaries;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.CurrentOverview;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -33,7 +27,12 @@ import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class UtilTest extends AbstractZonkyLeveragingTest {
@@ -49,7 +48,6 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final Statistics stats = mock(Statistics.class);
         final RiskPortfolio r = new RiskPortfolio(i.getRating(), 0, 0, i.getRemainingPrincipal().longValue());
         when(stats.getRiskPortfolio()).thenReturn(Collections.singletonList(r));
-        when(stats.getCurrentOverview()).thenReturn(mock(CurrentOverview.class));
         final Zonky zonky = harmlessZonky();
         when(zonky.getStatistics()).thenReturn(stats);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i));

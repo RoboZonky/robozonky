@@ -16,16 +16,16 @@
 
 package com.github.robozonky.api.remote;
 
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import java.util.List;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
@@ -36,7 +36,7 @@ public interface PortfolioApi extends EntityCollectionApi<RawInvestment> {
     @Override
     List<RawInvestment> items();
 
-    @Path("/statistics/me/overview")
+    @Path("/statistics/me/public-overview")
     @GET
     Statistics item();
 

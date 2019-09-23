@@ -34,7 +34,6 @@ public class Statistics extends BaseEntity {
     private Ratio profitability;
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
-    private OverallPortfolio overallPortfolio;
     private SuperInvestorOverview superInvestorOverview;
     private List<RiskPortfolio> riskPortfolio;
     private OffsetDateTime timestamp;
@@ -53,7 +52,6 @@ public class Statistics extends BaseEntity {
         s.riskPortfolio = Collections.emptyList();
         s.currentOverview = new CurrentOverview();
         s.overallOverview = new OverallOverview();
-        s.overallPortfolio = new OverallPortfolio(0, 0, 0);
         s.superInvestorOverview = SuperInvestorOverview.empty();
         s.timestamp = DateUtil.offsetNow();
         return s;
@@ -79,11 +77,6 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public OverallOverview getOverallOverview() {
         return overallOverview;
-    }
-
-    @XmlElement
-    public OverallPortfolio getOverallPortfolio() {
-        return overallPortfolio;
     }
 
     @XmlElement
