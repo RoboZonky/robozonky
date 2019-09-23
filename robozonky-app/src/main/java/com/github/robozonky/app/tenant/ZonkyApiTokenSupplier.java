@@ -63,14 +63,11 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         return new NotAuthorizedException(response);
     }
 
-    private static NotAuthorizedException createException(final Throwable throwable) {
+    private static RuntimeException createException(final Throwable throwable) {
         if (throwable instanceof NotAuthorizedException) {
-            var response = new ResponseBuilderImpl()
-                    .status(401, "Unrecoverable authentication failure.")
-                    .build();
-            return new NotAuthorizedException(response, throwable);
+            return (RuntimeException)throwable;
         } else { // we have a problem, but that problem is not HTTP 401
-            throw new IllegalStateException("Recoverable authentication failure.", throwable);
+            return new IllegalStateException("Recoverable authentication failure.", throwable);
         }
     }
 
