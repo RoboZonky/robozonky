@@ -62,6 +62,7 @@
      -->
     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
     <pit.skip>${skipTests}</pit.skip>
+    <pit.threshold>90</pit.threshold>
   </properties>
 
   <dependencies> <!-- Libraries required for logging. Enforce this on project-level, otherwise it'd too tedious. -->
@@ -579,8 +580,8 @@
         <configuration>
           <skip>${pit.skip}</skip>
           <timestampedReports>false</timestampedReports>
-          <coverageThreshold>90</coverageThreshold>
-          <mutationThreshold>90</mutationThreshold>
+          <coverageThreshold>${pit.threshold}</coverageThreshold>
+          <mutationThreshold>${pit.threshold}</mutationThreshold>
           <targetClasses>
             <param>com.github.robozonky.*</param>
           </targetClasses>
