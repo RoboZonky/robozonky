@@ -16,18 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.function.Consumer;
-import javax.ws.rs.NotAuthorizedException;
-
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonResumed;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
@@ -79,14 +78,17 @@ final class Skippable implements Runnable {
                 tenant.fire(roboZonkyDaemonResumed(since, now));
             });
             LOGGER.trace("Successfully finished {}.", this);
-        } catch (final NotAuthorizedException | Error ex) { // authorization problems treated as unrecoverable
-            shutdownCall.accept(ex);
-            throw ex; // rethrow the error
-        } catch (final Exception ex) {
-            final boolean becameUnavailable = availability.registerException(ex);
-            if (becameUnavailable) {
-                LOGGER.debug("Unavailability starting.");
-                tenant.fire(roboZonkyDaemonSuspended(ex));
+        } catch (final Throwable t) {
+            if (SimpleSkippable.isRecoverable(t)) {
+                final Exception ex = (Exception)t; // errors are never recoverable
+                final boolean becameUnavailable = availability.registerException(ex);
+                if (becameUnavailable) {
+                    LOGGER.debug("Unavailability starting.");
+                    tenant.fire(roboZonkyDaemonSuspended(ex));
+                }
+            } else {
+                shutdownCall.accept(t);
+                throw t;
             }
         } finally {
             LOGGER.trace("Finished {}.", this);

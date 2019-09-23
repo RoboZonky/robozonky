@@ -16,13 +16,6 @@
 
 package com.github.robozonky.installer;
 
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Response;
-
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
@@ -31,7 +24,14 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.core.Response;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -78,7 +78,6 @@ class ZonkySettingsValidatorTest {
         final ZonkySettingsValidator validator = new ZonkySettingsValidator();
         assertSoftly(softly -> {
             softly.assertThat(validator.getDefaultAnswer()).isFalse();
-            softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
             softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
             softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
         });
@@ -89,7 +88,7 @@ class ZonkySettingsValidatorTest {
         // mock data
         final ZonkyApiToken token = mock(ZonkyApiToken.class);
         final OAuth oauth = mock(OAuth.class);
-        when(oauth.login(any(), any())).thenReturn(token);
+        when(oauth.login(any())).thenReturn(token);
         final Zonky zonky = mock(Zonky.class);
         final ApiProvider provider = mockApiProvider(oauth, token, zonky);
         // execute SUT
@@ -98,33 +97,14 @@ class ZonkySettingsValidatorTest {
         final DataValidator.Status result = validator.validateData(d);
         // test
         assertThat(result).isEqualTo(DataValidator.Status.OK);
-        verify(oauth)
-                .login(eq(ZonkySettingsValidatorTest.USERNAME),
-                       eq(ZonkySettingsValidatorTest.PASSWORD.toCharArray()));
-        verify(zonky).logout();
-    }
-
-    @Test
-    void warning() {
-        // mock data
-        final OAuth oauth = mock(OAuth.class);
-        when(oauth.login(any(), any())).thenThrow(
-                new IllegalStateException());
-        final ApiProvider provider = mockApiProvider(oauth);
-        final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
-        // execute SUT
-        final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
-        final DataValidator.Status result = validator.validateData(d);
-        // test
-        assertThat(result).isEqualTo(DataValidator.Status.WARNING);
+        verify(oauth).login(eq(ZonkySettingsValidatorTest.PASSWORD.toCharArray()));
     }
 
     @Test
     void error() {
         // mock data
         final OAuth oauth = mock(OAuth.class);
-        when(oauth.login(any(), any()))
-                .thenThrow(new ServerErrorException(Response.Status.INTERNAL_SERVER_ERROR));
+        when(oauth.login(any())).thenThrow(new ServerErrorException(Response.Status.INTERNAL_SERVER_ERROR));
         final ApiProvider provider = mockApiProvider(oauth);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT

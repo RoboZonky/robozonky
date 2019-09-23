@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,13 @@ import java.util.stream.Stream;
 
 public enum OAuthScope {
 
-    SCOPE_APP_OAUTH,
-    SCOPE_APP_WEB,
-    SCOPE_FILE_DOWNLOAD;
+    SCOPE_APP_BASIC_INFO,
+    SCOPE_INVESTMENT_READ,
+    SCOPE_INVESTMENT_WRITE,
+    SCOPE_RESERVATIONS_READ,
+    SCOPE_RESERVATIONS_WRITE,
+    SCOPE_NOTIFICATIONS_READ,
+    SCOPE_NOTIFICATIONS_WRITE;
 
     public static OAuthScope findByCode(final String code) {
         return Stream.of(OAuthScope.values())

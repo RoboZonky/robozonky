@@ -16,10 +16,11 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.function.Consumer;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.NotAuthorizedException;
+import java.util.function.Consumer;
 
 final class SimpleSkippable implements Runnable {
 
@@ -45,17 +46,29 @@ final class SimpleSkippable implements Runnable {
         });
     }
 
+    static boolean isRecoverable(Throwable throwable) {
+        if (throwable == null) {
+            return true;
+        } else if (throwable instanceof Error || throwable instanceof NotAuthorizedException) {
+            return false;
+        } else {
+            return isRecoverable(throwable.getCause());
+        }
+    }
+
     @Override
     public void run() {
         LOGGER.trace("Running {}.", this);
         try {
             toRun.run();
             LOGGER.trace("Successfully finished {}.", this);
-        } catch (final Exception ex) {
-            LOGGER.debug("Failed executing {}.", this, ex);
-        } catch (final Error er) {
-            shutdownCall.accept(er);
-            throw er; // rethrow the error
+        } catch (final Throwable t) {
+            if (isRecoverable(t)) {
+                LOGGER.debug("Failed executing {}.", this, t);
+            } else {
+                shutdownCall.accept(t);
+                throw t; // rethrow the error
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,24 @@
 
 package com.github.robozonky.api.remote;
 
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.remote.enums.OAuthScope;
 
 @Path("/oauth/token")
 public interface ZonkyOAuthApi {
 
     @POST
     ZonkyApiToken login(
-            @FormParam("username") String username,
-            @FormParam("password") String password,
-            @FormParam("grant_type") @DefaultValue("password") String grantType,
-            @FormParam("scope") OAuthScope scope);
+            @FormParam("code") String password,
+            @FormParam("redirect_uri") @DefaultValue("https://app.zonky.cz/api/oauth/code") String redirectUri,
+            @FormParam("grant_type") @DefaultValue("authorization_code") String grantType);
 
     @POST
     ZonkyApiToken refresh(
             @FormParam("refresh_token") String refreshToken,
-            @FormParam("grant_type") @DefaultValue("refresh_token") String grantType,
-            @FormParam("scope") OAuthScope scope);
+            @FormParam("grant_type") @DefaultValue("refresh_token") String grantType);
 }

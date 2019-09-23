@@ -29,12 +29,15 @@
     </field>
     <field type="password" variable="zonkyPassword">
       <spec>
-        <pwd txt="Uživatelské heslo:" size="20" set=""/>
+        <pwd txt="Autorizační kód:" size="20" set=""/>
       </spec>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
-                 txt="Heslo je povinná položka." />
+                 txt="Kód je povinná položka." />
     </field>
-
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" txt="POZOR! Autorizační kód není Vaše heslo. Více informací najdete na této adrese:"/>
+    <field type="staticText" align="left" bold="true" txt="https://github.com/RoboZonky/robozonky/wiki/2FA-a-RoboZonky"/>
     <field type="space" />
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:"/>

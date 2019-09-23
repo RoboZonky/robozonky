@@ -16,21 +16,6 @@
 
 package com.github.robozonky.installer;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import com.github.robozonky.cli.Feature;
-import com.github.robozonky.cli.SetupFailedException;
-import com.github.robozonky.cli.ZonkyPasswordFeature;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
 import com.github.robozonky.internal.Settings;
@@ -43,13 +28,32 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.stream.Stream;
+
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
-    static final char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
     private static final Logger LOGGER = LogManager.getLogger(RoboZonkyInstallerListener.class);
-    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
-            CLI_CONFIG_FILE, LOG4J2_CONFIG_FILE;
+    private static File DIST_PATH;
+    private static File SETTINGS_FILE;
+    private static File LOG4J2_CONFIG_FILE;
+    private static File KEYSTORE_SOURCE;
+    private static File KEYSTORE_TARGET;
+    private static char[] KEYSTORE_SECRET;
     private static InstallData DATA;
+    static File INSTALL_PATH;
+    static File JMX_PROPERTIES_FILE;
+    static File EMAIL_CONFIG_FILE;
+    static File CLI_CONFIG_FILE;
+
     private RoboZonkyInstallerListener.OS operatingSystem = RoboZonkyInstallerListener.OS.OTHER;
 
     public RoboZonkyInstallerListener() {
@@ -68,6 +72,11 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         operatingSystem = os;
     }
 
+    static void setKeystoreInformation(final File keystore, final char... keystorePassword) {
+        KEYSTORE_SOURCE = keystore;
+        KEYSTORE_SECRET = keystorePassword;
+    }
+
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
      * accept {@link InstallData}, Picocontainer would have thrown some weird exception.
@@ -81,7 +90,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         RoboZonkyInstallerListener.DATA = data;
         INSTALL_PATH = new File(Variables.INSTALL_PATH.getValue(DATA));
         DIST_PATH = new File(INSTALL_PATH, "Dist/");
-        KEYSTORE_FILE = new File(INSTALL_PATH, "robozonky.keystore");
+        KEYSTORE_TARGET = new File(INSTALL_PATH, "robozonky.keystore");
         JMX_PROPERTIES_FILE = new File(INSTALL_PATH, "management.properties");
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
         SETTINGS_FILE = new File(INSTALL_PATH, "robozonky.properties");
@@ -93,7 +102,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         RoboZonkyInstallerListener.DATA = null;
         INSTALL_PATH = null;
         DIST_PATH = null;
-        KEYSTORE_FILE = null;
+        KEYSTORE_TARGET = null;
         JMX_PROPERTIES_FILE = null;
         EMAIL_CONFIG_FILE = null;
         SETTINGS_FILE = null;
@@ -101,19 +110,15 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         LOG4J2_CONFIG_FILE = null;
     }
 
-    private static void primeKeyStore(final char... keystorePassword) throws SetupFailedException, IOException {
-        final String username = Variables.ZONKY_USERNAME.getValue(DATA);
-        final char[] password = Variables.ZONKY_PASSWORD.getValue(DATA).toCharArray();
-        Files.deleteIfExists(KEYSTORE_FILE.toPath()); // re-install into the same directory otherwise fails
-        final Feature f = new ZonkyPasswordFeature(KEYSTORE_FILE, keystorePassword, username, password);
-        f.setup();
+    private static void primeKeyStore() throws IOException {
+        Files.deleteIfExists(KEYSTORE_TARGET.toPath()); // re-install into the same directory otherwise fails
+        Files.copy(KEYSTORE_SOURCE.toPath(), KEYSTORE_TARGET.toPath());
     }
 
-    private static CommandLinePart prepareCore(
-            final char... keystorePassword) throws SetupFailedException, IOException {
+    static CommandLinePart prepareCore() throws IOException {
         final CommandLinePart cli = new CommandLinePart()
-                .setOption("-p", String.valueOf(keystorePassword));
-        cli.setOption("-g", KEYSTORE_FILE.getAbsolutePath());
+                .setOption("-g", KEYSTORE_TARGET.getAbsolutePath())
+                .setOption("-p", String.valueOf(KEYSTORE_SECRET));
         if (Boolean.valueOf(Variables.IS_DRY_RUN.getValue(DATA))) {
             cli.setOption("-d");
             cli.setJvmArgument("Xmx128m"); // more memory for the JFR recording
@@ -121,7 +126,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         } else {
             cli.setJvmArgument("Xmx64m");
         }
-        primeKeyStore(keystorePassword);
+        primeKeyStore();
         return cli;
     }
 
@@ -207,10 +212,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         // configure JMX to read the props file
         return clp.setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath())
                 .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
-    }
-
-    static CommandLinePart prepareCore() throws SetupFailedException, IOException {
-        return prepareCore(KEYSTORE_PASSWORD);
     }
 
     private static CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,

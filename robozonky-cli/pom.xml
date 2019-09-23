@@ -27,6 +27,10 @@
 
   <name>RoboZonky: Command-line configuration and validation utility</name>
 
+  <properties>
+    <pit.threshold>80</pit.threshold> <!-- This is a command-line utility, therefore near impossible to test fully. -->
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>

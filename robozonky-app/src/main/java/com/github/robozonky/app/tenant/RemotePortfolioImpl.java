@@ -16,16 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -34,6 +24,15 @@ import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
 
@@ -58,7 +57,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .build();
     }
 
-    private static BigDecimal sumOutstanding(final OverallPortfolio portfolio) {
+    private static BigDecimal sumOutstanding(final RiskPortfolio portfolio) {
         return plus(portfolio.getDue(), portfolio.getUnpaid());
     }
 

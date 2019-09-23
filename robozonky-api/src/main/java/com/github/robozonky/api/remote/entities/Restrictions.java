@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,18 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.OffsetDateTime;
+import com.github.robozonky.internal.Defaults;
+
 import javax.xml.bind.annotation.XmlElement;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 
 public class Restrictions extends BaseEntity {
 
-    private OffsetDateTime requestDate, withdrawalDate;
+    private OffsetDateTime requestDate = Instant.EPOCH.atZone(Defaults.ZONE_ID).toOffsetDateTime();
+    @XmlElement
+    private OffsetDateTime withdrawalDate = null;
     private boolean cannotInvest, cannotAccessSmp;
     private int minimumInvestmentAmount = 200, maximumInvestmentAmount = 5_000, investmentStep = 200;
 
@@ -47,9 +53,8 @@ public class Restrictions extends BaseEntity {
      * Date of investor's contract termination. Will be later than {@link #getRequestDate()}.
      * @return
      */
-    @XmlElement
-    public OffsetDateTime getWithdrawalDate() {
-        return withdrawalDate;
+    public Optional<OffsetDateTime> getWithdrawalDate() {
+        return Optional.ofNullable(withdrawalDate);
     }
 
     @XmlElement

@@ -16,14 +16,6 @@
 
 package com.github.robozonky.installer;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.UUID;
-
-import com.github.robozonky.cli.SetupFailedException;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.izforge.izpack.api.data.InstallData;
@@ -31,12 +23,20 @@ import com.izforge.izpack.api.event.InstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import static org.assertj.core.api.Assertions.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -47,6 +47,12 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     private static final String ZONKY_USERNAME = "user@zonky.cz";
 
     private final InstallData data = RoboZonkyInstallerListenerTest.mockData();
+
+    @BeforeAll
+    static void initialize() {
+        final File f = newFile(false);
+        RoboZonkyInstallerListener.setKeystoreInformation(f, UUID.randomUUID().toString().toCharArray());
+    }
 
     private static File newFile(final boolean withContent) {
         try {
@@ -189,7 +195,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void coreWithoutTweaks() throws SetupFailedException, IOException {
+    void coreWithoutTweaks() throws IOException {
         // prepare
         RoboZonkyInstallerListener.setInstallData(data);
         // execute SUT
@@ -201,12 +207,12 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
                     .doesNotContainKey("-r")
                     .doesNotContainKey("-x");
             softly.assertThat(clp.getOptions().get("-p"))
-                    .containsOnly(String.valueOf(RoboZonkyInstallerListener.KEYSTORE_PASSWORD));
+                    .isNotNull();
         });
     }
 
     @Test
-    void coreWithTweaks() throws SetupFailedException, IOException {
+    void coreWithTweaks() throws IOException {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
         when(localData.getVariable(Variables.IS_DRY_RUN.getKey())).thenReturn("true");
@@ -216,8 +222,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         // test
         assertSoftly(softly -> {
             softly.assertThat(clp.getOptions()).containsKey("-d");
-            softly.assertThat(clp.getOptions().get("-p"))
-                    .containsOnly(String.valueOf(RoboZonkyInstallerListener.KEYSTORE_PASSWORD));
+            softly.assertThat(clp.getOptions().get("-p")).isNotNull();
         });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,19 @@
 package com.github.robozonky.api.remote.entities;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.util.Optional;
 
 public class CurrentOverview extends BaseOverview {
 
-    private long principalLeft, principalLeftToPay, principalLeftDue, interestPlanned, interestLeft, interestLeftToPay,
-            interestLeftDue;
+    private long principalLeft;
+    private long principalLeftToPay;
+    private long principalLeftDue;
+    private long interestPlanned;
+    private long interestLeft;
+    private long interestLeftToPay;
+    private long interestLeftDue;
+    @XmlElement
+    private CurrentPortfolio currentInvestments;
 
     CurrentOverview() {
         // for JAXB
@@ -61,4 +69,9 @@ public class CurrentOverview extends BaseOverview {
     public long getInterestLeftDue() {
         return interestLeftDue;
     }
+
+    public Optional<CurrentPortfolio> getCurrentInvestments() {
+        return Optional.ofNullable(currentInvestments);
+    }
+
 }

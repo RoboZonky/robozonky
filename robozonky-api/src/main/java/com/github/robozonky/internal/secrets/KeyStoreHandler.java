@@ -16,25 +16,20 @@
 
 package com.github.robozonky.internal.secrets;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import io.vavr.control.Try;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
-import io.vavr.control.Try;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Simple abstraction for dealing with the overly complicated {@link KeyStore} API. Always call {@link #save()} to
@@ -107,6 +102,7 @@ public class KeyStoreHandler {
         // store the newly created key store
         final SecretKeyFactory skf = getSecretKeyFactory();
         final KeyStoreHandler ksh = new KeyStoreHandler(ks, password, keyStoreFile, skf);
+        LOGGER.debug("Creating keystore {}.", keyStoreFile);
         ksh.save();
         return ksh;
     }
@@ -130,6 +126,7 @@ public class KeyStoreHandler {
         // get user password and file input stream
         return Try.withResources(() -> new FileInputStream(keyStoreFile))
                 .of(fis -> {
+                    LOGGER.debug("Opening keystore {}.", keyStoreFile);
                     ks.load(fis, password);
                     return new KeyStoreHandler(ks, password, keyStoreFile, getSecretKeyFactory(),
                                                false);

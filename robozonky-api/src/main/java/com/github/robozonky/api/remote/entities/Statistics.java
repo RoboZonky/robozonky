@@ -16,15 +16,15 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Lazy;
+
+import javax.xml.bind.annotation.XmlElement;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import javax.xml.bind.annotation.XmlElement;
-
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Lazy;
 
 public class Statistics extends BaseEntity {
 
@@ -34,11 +34,8 @@ public class Statistics extends BaseEntity {
     private Ratio profitability;
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
-    private OverallPortfolio overallPortfolio;
     private SuperInvestorOverview superInvestorOverview;
     private List<RiskPortfolio> riskPortfolio;
-    private List<Instalment> cashFlow;
-    private List<ExpectedPayment> expectedPayments;
     private OffsetDateTime timestamp;
 
     private Statistics() {
@@ -52,12 +49,9 @@ public class Statistics extends BaseEntity {
     public static Statistics emptyAndFresh() {
         final Statistics s = new Statistics();
         s.profitability = Ratio.ZERO;
-        s.cashFlow = Collections.emptyList();
         s.riskPortfolio = Collections.emptyList();
-        s.expectedPayments = Collections.emptyList();
         s.currentOverview = new CurrentOverview();
         s.overallOverview = new OverallOverview();
-        s.overallPortfolio = new OverallPortfolio(0, 0, 0);
         s.superInvestorOverview = SuperInvestorOverview.empty();
         s.timestamp = DateUtil.offsetNow();
         return s;
@@ -86,11 +80,6 @@ public class Statistics extends BaseEntity {
     }
 
     @XmlElement
-    public OverallPortfolio getOverallPortfolio() {
-        return overallPortfolio;
-    }
-
-    @XmlElement
     public List<RiskPortfolio> getRiskPortfolio() { // "riskPortfolio" is null for new Zonky users
         return unmodifiableOrEmpty(riskPortfolio);
     }
@@ -98,16 +87,6 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public SuperInvestorOverview getSuperInvestorOverview() {
         return superInvestorOverview;
-    }
-
-    @XmlElement
-    public List<Instalment> getCashFlow() {
-        return unmodifiableOrEmpty(cashFlow);
-    }
-
-    @XmlElement
-    public List<ExpectedPayment> getExpectedPayments() {
-        return unmodifiableOrEmpty(expectedPayments);
     }
 
     /**

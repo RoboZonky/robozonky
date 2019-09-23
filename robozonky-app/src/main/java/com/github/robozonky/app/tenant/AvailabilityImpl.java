@@ -16,17 +16,17 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class AvailabilityImpl implements Availability {
 
@@ -75,7 +75,7 @@ final class AvailabilityImpl implements Availability {
             pause.set(Tuple.of(DateUtil.now(), 0L));
             LOGGER.debug("Fault identified, forcing pause.", ex);
             // will go to console, no stack trace
-            LOGGER.warn("Forcing a pause due to a potentially irrecoverable fault.");
+            LOGGER.warn("Forcing a pause due to a remote failure.");
             return true;
         } else {
             final Tuple2<Instant, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
