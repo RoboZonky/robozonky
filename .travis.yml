@@ -48,14 +48,14 @@ jobs:
         - mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io
     - stage: quicktest # test early adopters JDK as well, but relax requirements
       env: # empty otherwise the matrix MODULE property will get here
-      jdk: openjdk12
+      jdk: openjdk13
       install: # do nothing
         - mvn clean
       script: # build and test, skipping PITest
         - mvn --batch-mode test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
     - stage: quicktest # test early adopters JDK as well, but relax requirements
       env: # empty otherwise the matrix MODULE property will get here
-      jdk: openjdk13
+      jdk: openjdk14
       install: # do nothing
         - mvn clean
       script: # build and test, skipping PITest
