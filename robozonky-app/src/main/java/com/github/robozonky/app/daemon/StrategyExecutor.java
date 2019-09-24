@@ -55,19 +55,11 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
     }
 
     private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
-        if (!tenant.getAvailability().isAvailable()) {
-            /*
-             * If we are in a forced pause due to some remote server error, we need to make sure we've tried as many
-             * remote operations before resuming from such forced pause. In such cases, we will force a marketplace
-             * check, which would likely uncover any persistent JSON parsing issues etc.
-             */
-            logger.debug("Forcing marketplace check to see if we can resume from forced pause.");
+        if (needsToForceMarketplaceCheck()) {
+            logger.debug("Forcing a marketplace check.");
             return false;
         } else if (marketplace.hasUpdates()) {
             logger.debug("Waking up due to a change in marketplace.");
-            return false;
-        } else if (needsToForceMarketplaceCheck()) {
-            logger.debug("Forcing a periodic marketplace check.");
             return false;
         } else {
             logger.debug("Asleep as there was no change since last checked.");
@@ -75,8 +67,19 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         }
     }
 
+    /**
+     * Marketplace check needs to be forced in the following situations:
+     *
+     * <ul>
+     *     <li>If we are in a forced pause due to some previous remote server error, we need to make sure we've tried
+     *     as many remote operations before resuming from such forced pause. Forcing a marketplace chech will maximize
+     *     the chances of uncovering any persistent JSON parsing issues etc.</li>
+     *     <li>If it's been a while since the full marketplace was last checked.</li>
+     * </ul>
+     * @return True if the check is to be forced.
+     */
     private boolean needsToForceMarketplaceCheck() {
-        return lastSuccessfulMarketplaceCheck.get()
+        return !tenant.getAvailability().isAvailable() || lastSuccessfulMarketplaceCheck.get()
                 .plus(FORCED_MARKETPLACE_CHECK_PERIOD)
                 .isBefore(DateUtil.now());
     }
@@ -87,7 +90,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
             return Collections.emptyList();
         }
         final Collection<T> marketplace = marketplaceAccessor.getMarketplace();
-        if (marketplace.isEmpty()) {
+        if (!needsToForceMarketplaceCheck() && marketplace.isEmpty()) {
             logger.debug("Marketplace is empty.");
             return Collections.emptyList();
         }
@@ -106,7 +109,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
         }
         final long currentBalance = tenant.getKnownBalanceUpperBound();
         final long minimum = operationDescriptor.getMinimumBalance(tenant);
-        if (currentBalance < minimum) {
+        if (!needsToForceMarketplaceCheck() && currentBalance < minimum) {
             logger.debug("Asleep due to balance estimated below minimum. ({} < {})", currentBalance, minimum);
             return Collections.emptyList();
         }
