@@ -142,31 +142,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.revapi</groupId>
-        <artifactId>revapi-maven-plugin</artifactId>
-        <version>0.11.0</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.revapi</groupId>
-            <artifactId>revapi-java</artifactId>
-            <version>0.19.0</version>
-          </dependency>
-        </dependencies>
-        <configuration> <!-- A.B.C or A.B.C-cr-D are considered stable versions -->
-          <versionFormat>[1-9]+\.[0-9]+\.[0-9]+(\-cr\-[0-9]+)?</versionFormat>
-          <analysisConfigurationFiles>
-            <file>${project.basedir}/revapi.json</file>
-          </analysisConfigurationFiles>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
         <configuration>
@@ -181,4 +156,43 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>revapi</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.revapi</groupId>
+            <artifactId>revapi-maven-plugin</artifactId>
+            <version>0.11.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.revapi</groupId>
+                <artifactId>revapi-java</artifactId>
+                <version>0.19.0</version>
+              </dependency>
+            </dependencies>
+            <configuration> <!-- A.B.C or A.B.C-cr-D are considered stable versions -->
+              <versionFormat>[1-9]+\.[0-9]+\.[0-9]+(\-cr\-[0-9]+)?</versionFormat>
+              <analysisConfigurationFiles>
+                <file>${project.basedir}/revapi.json</file>
+              </analysisConfigurationFiles>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
