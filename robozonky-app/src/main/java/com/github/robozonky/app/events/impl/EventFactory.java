@@ -17,9 +17,9 @@
 package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.strategies.*;
 import com.github.robozonky.internal.tenant.LazyEvent;
 

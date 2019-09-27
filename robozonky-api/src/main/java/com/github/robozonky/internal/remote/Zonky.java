@@ -18,7 +18,6 @@ package com.github.robozonky.internal.remote;
 
 import com.github.robozonky.api.remote.*;
 import com.github.robozonky.api.remote.entities.*;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
@@ -58,7 +57,7 @@ public class Zonky {
     private final PaginatedApi<Loan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<Investment, PortfolioApi> portfolioApi;
-    private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
+    private final PaginatedApi<Development, CollectionsApi> collectionsApi;
 
     Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
         this.controlApi = api.control(tokenSupplier);
@@ -197,7 +196,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Development> getDevelopments(final int loanId) {
-        return getStream(collectionsApi, a -> a.items(loanId)).map(Development::sanitized);
+        return getStream(collectionsApi, a -> a.items(loanId));
     }
 
     /**

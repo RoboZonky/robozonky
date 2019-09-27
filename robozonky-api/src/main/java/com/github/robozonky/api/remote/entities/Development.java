@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.enums.DevelopmentType;
+
+import javax.xml.bind.annotation.XmlElement;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 
 /**
  * Represents a notification of collections department operating on delinquent loans. Obvious name for this class would
@@ -27,22 +29,25 @@ import com.github.robozonky.api.remote.enums.DevelopmentType;
  * Another obvious name would be InvestorEvent, which is how Zonky calls this in their API. Unfortunately, this would
  * clash with {@link Event} too much.
  */
-public class RawDevelopment extends BaseEntity {
+public class Development extends BaseEntity {
 
     private DevelopmentType businessCode;
+    @XmlElement
     private String publicNote;
     private Object metadata;
     private int loanId;
-    private DateDescriptor dateFrom, dateTo;
+    @XmlElement
+    private DateDescriptor dateFrom;
+    @XmlElement
+    private DateDescriptor dateTo;
 
     @XmlElement
     public DevelopmentType getBusinessCode() {
         return businessCode;
     }
 
-    @XmlElement
-    public String getPublicNote() {
-        return publicNote;
+    public Optional<String> getPublicNote() {
+        return Optional.ofNullable(publicNote);
     }
 
     @XmlElement
@@ -56,13 +61,11 @@ public class RawDevelopment extends BaseEntity {
         return metadata;
     }
 
-    @XmlElement
-    public DateDescriptor getDateFrom() {
-        return dateFrom;
+    public OffsetDateTime getDateFrom() {
+        return DateDescriptor.toOffsetDateTime(dateFrom);
     }
 
-    @XmlElement
-    public DateDescriptor getDateTo() {
-        return dateTo;
+    public Optional<OffsetDateTime> getDateTo() {
+        return Optional.ofNullable(dateTo).map(DateDescriptor::toOffsetDateTime);
     }
 }

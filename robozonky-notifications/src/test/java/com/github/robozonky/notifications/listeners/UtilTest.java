@@ -21,10 +21,11 @@ import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
+import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.enums.*;
+import com.github.robozonky.test.mock.MockDevelopmentBuilder;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
@@ -60,9 +61,9 @@ class UtilTest {
 
     @Test
     void missingToDateInCollectionHistory() throws MalformedURLException { // https://github.com/RoboZonky/robozonky/issues/278
-        final Development d = Development.custom()
+        final Development d = new MockDevelopmentBuilder()
                 .setDateFrom(OffsetDateTime.now())
-                .setType(DevelopmentType.OTHER)
+                .setDevelopmentType(DevelopmentType.OTHER)
                 .build();
         final Loan l = new MockLoanBuilder()
                 .setRating(Rating.D)

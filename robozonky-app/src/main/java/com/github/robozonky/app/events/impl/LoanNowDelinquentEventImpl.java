@@ -17,9 +17,9 @@
 package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 
 import java.time.LocalDate;
 import java.util.Collection;

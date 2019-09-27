@@ -18,7 +18,6 @@ package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.api.remote.entities.*;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.*;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;

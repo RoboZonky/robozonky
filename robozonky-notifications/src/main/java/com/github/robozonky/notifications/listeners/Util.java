@@ -18,9 +18,9 @@ package com.github.robozonky.notifications.listeners;
 
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
+import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -193,7 +193,7 @@ final class Util {
                 .sorted(Comparator.comparing(Development::getDateFrom).reversed())
                 .limit(5)
                 .map(action -> {
-                    final String code = action.getType().getCode();
+                    final String code = action.getBusinessCode().getCode();
                     final String note = action.getPublicNote().orElse("Bez dalšího vysvětlení.");
                     final Date dateFrom = toDate(action.getDateFrom());
                     return action.getDateTo()

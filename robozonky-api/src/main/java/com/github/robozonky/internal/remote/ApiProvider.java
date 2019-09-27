@@ -186,7 +186,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    PaginatedApi<RawDevelopment, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<Development, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(CollectionsApi.class, token);
     }
 
