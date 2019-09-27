@@ -18,9 +18,9 @@ package com.github.robozonky.notifications.listeners;
 
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -160,7 +160,7 @@ final class Util {
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
         final BigDecimal totalPaid = getTotalPaid(i);
-        final BigDecimal originalPrincipal = i.getOriginalPrincipal();
+        final BigDecimal originalPrincipal = i.getAmount();
         final BigDecimal balance = i.getSmpSoldFor()
                 .map(soldFor -> {
                     final BigDecimal partial = minus(totalPaid, originalPrincipal);
@@ -180,7 +180,7 @@ final class Util {
         loanData.put("penaltiesPaid", i.getPaidPenalty());
         loanData.put("monthsElapsed", getMonthsElapsed(i));
         loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
-        loanData.put("postponed", i.areInstalmentsPostponed());
+        loanData.put("postponed", i.isInstalmentPostponement());
         return loanData;
     }
 

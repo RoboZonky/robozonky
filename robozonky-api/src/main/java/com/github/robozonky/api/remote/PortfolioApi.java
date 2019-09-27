@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.remote;
 
-import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
@@ -29,12 +29,12 @@ import java.util.List;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface PortfolioApi extends EntityCollectionApi<RawInvestment> {
+public interface PortfolioApi extends EntityCollectionApi<Investment> {
 
     @Path(ApiConstants.ME + "/investments")
     @GET
     @Override
-    List<RawInvestment> items();
+    List<Investment> items();
 
     @Path("/statistics/me/public-overview")
     @GET

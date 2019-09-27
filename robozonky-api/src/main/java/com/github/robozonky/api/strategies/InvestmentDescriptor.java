@@ -16,8 +16,8 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import io.vavr.Lazy;
 
 import java.math.BigDecimal;

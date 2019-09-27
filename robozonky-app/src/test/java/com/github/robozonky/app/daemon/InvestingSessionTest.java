@@ -16,24 +16,8 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.stream.Stream;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServiceUnavailableException;
-import javax.ws.rs.core.Response;
-
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -45,7 +29,16 @@ import com.github.robozonky.internal.remote.Zonky;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServiceUnavailableException;
+import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -150,7 +143,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         });
         final List<Investment> investments = t.getResult();
         assertThat(investments).hasSize(1);
-        assertThat(investments.get(0).getOriginalPrincipal().intValue()).isEqualTo(amountToInvest);
+        assertThat(investments.get(0).getAmount().intValue()).isEqualTo(amountToInvest);
         // validate event sequence
         final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents)

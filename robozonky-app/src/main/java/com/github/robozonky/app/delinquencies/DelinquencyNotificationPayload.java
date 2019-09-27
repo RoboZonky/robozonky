@@ -16,8 +16,8 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
@@ -92,7 +92,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             LOGGER.debug("Investment #{} may not be promoted anymore.", investmentId);
             return;
         }
-        final int daysPastDue = currentDelinquent.getDaysPastDue();
+        final int daysPastDue = currentDelinquent.getLegalDpd();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
                 .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
@@ -128,7 +128,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
         return investments.parallelStream()
-                .filter(i -> i.getDaysPastDue() > 0)
+                .filter(i -> i.getLegalDpd() > 0)
                 .filter(i -> !isDefaulted(i));
     }
 
@@ -153,7 +153,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
             getNonDefaulted(delinquents).forEach(d -> {
                 for (final Category cat : Category.values()) {
-                    if (cat.getThresholdInDays() > d.getDaysPastDue() || cat.getThresholdInDays() < 0) {
+                    if (cat.getThresholdInDays() > d.getLegalDpd() || cat.getThresholdInDays() < 0) {
                         continue;
                     }
                     registry.addCategory(d, cat);

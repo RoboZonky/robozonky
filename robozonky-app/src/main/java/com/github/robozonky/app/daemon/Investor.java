@@ -16,15 +16,16 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.control.Either;
 import org.apache.logging.log4j.Logger;
+
+import java.math.BigDecimal;
 
 abstract class Investor {
 
@@ -35,8 +36,7 @@ abstract class Investor {
     }
 
     static Investment convertToInvestment(final RecommendedLoan r) {
-        final int amount = r.amount().intValue();
-        return Investment.fresh(r.descriptor().item(), amount);
+        return new Investment(r.descriptor().item(), r.amount(), Defaults.CURRENCY);
     }
 
     public static Investor build(final Tenant auth) {

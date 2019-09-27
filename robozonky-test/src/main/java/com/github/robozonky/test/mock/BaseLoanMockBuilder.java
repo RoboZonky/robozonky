@@ -26,13 +26,10 @@ import com.github.robozonky.api.remote.enums.Region;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 import static org.mockito.Mockito.when;
 
 abstract class BaseLoanMockBuilder<T extends BaseLoan, S extends BaseLoanMockBuilder<T, S>> extends BaseMockBuilder<T, S> {
-
-    protected static final Random RANDOM = new Random();
 
     protected BaseLoanMockBuilder(Class<T> clz) {
         super(clz);

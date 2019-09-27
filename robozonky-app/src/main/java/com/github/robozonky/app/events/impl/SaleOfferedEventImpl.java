@@ -17,8 +17,8 @@
 package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 
 final class SaleOfferedEventImpl extends AbstractEventImpl implements SaleOfferedEvent {
 

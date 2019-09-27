@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +45,7 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final OffsetDateTime d = OffsetDateTime.now();
         when(mi.getTimeCreated()).thenReturn(d);
         final Loan loan = MockLoanBuilder.fresh();
-        final Investment investment = Investment.fresh(loan, 200).build();
+        final Investment investment = MockInvestmentBuilder.fresh(loan, 200).build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
@@ -59,7 +60,7 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final Loan loan = MockLoanBuilder.fresh();
-        final Investment investment = Investment.fresh(loan, 200).build();
+        final Investment investment = MockInvestmentBuilder.fresh(loan, 200).build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
         when(z.getInvestmentByLoanId(eq(loanId))).thenReturn(Optional.of(investment));

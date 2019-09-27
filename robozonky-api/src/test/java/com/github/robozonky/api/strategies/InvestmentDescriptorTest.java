@@ -16,9 +16,8 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -28,15 +27,16 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class InvestmentDescriptorTest {
 
     private static final Loan LOAN = mock(Loan.class);
 
     private static Investment mockInvestment(final BigDecimal amount) {
-        final InvestmentBuilder i = Investment.custom();
-        i.setRemainingPrincipal(amount);
-        return i.build();
+        final Investment i = mock(Investment.class);
+        when(i.getRemainingPrincipal()).thenReturn(amount);
+        return i;
     }
 
     @Test

@@ -17,8 +17,8 @@
 package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class InvestmentMadeEventImpl extends AbstractEventImpl implements InvestmentMadeEvent {

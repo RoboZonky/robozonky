@@ -18,10 +18,10 @@ package com.github.robozonky.app.tenant;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -32,6 +32,7 @@ import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -89,7 +90,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(a.refresh(eq(token))).thenReturn(token);
         final Zonky z = harmlessZonky();
         final Loan l = MockLoanBuilder.fresh();
-        final Investment i = Investment.fresh(l, 200).build();
+        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         when(z.getInvestmentByLoanId(eq(l.getId()))).thenReturn(Optional.of(i));
         doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions

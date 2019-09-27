@@ -16,10 +16,10 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -105,7 +105,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
                     final Collection<ReservationDescriptor> reservations = i.getArgument(0);
                     return reservations.stream()
                             .map(r -> r.recommend(BigDecimal.valueOf(200)))
-                            .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+                            .flatMap(Optional::stream);
                 });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);

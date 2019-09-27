@@ -21,10 +21,11 @@ import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.*;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +73,7 @@ class UtilTest {
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setName(UUID.randomUUID().toString())
                 .build();
-        final Investment i = Investment.fresh(l, 200).build();
+        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         Util.getDelinquentData(i, l, Collections.singleton(d), LocalDate.now());
     }
 

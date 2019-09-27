@@ -17,9 +17,9 @@
 package com.github.robozonky.app.delinquencies;
 
 import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.LazyEvent;
@@ -104,7 +104,7 @@ enum Category {
 
     private static SessionEvent supplyEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getDaysPastDue());
+        final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getLegalDpd());
         final int loanId = investment.getLoanId();
         final Collection<Development> developments = getDevelopments(tenant, loanId, since);
         final Loan loan = tenant.getLoan(loanId);

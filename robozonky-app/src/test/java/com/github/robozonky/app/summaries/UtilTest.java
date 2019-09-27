@@ -16,14 +16,15 @@
 
 package com.github.robozonky.app.summaries;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +40,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void atRisk() {
-        final Investment i = Investment.custom()
+        final Investment i = MockInvestmentBuilder.fresh()
                 .setRating(Rating.D)
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setPaidInterest(BigDecimal.ZERO)
@@ -59,12 +60,12 @@ class UtilTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void sellable() {
-        final Investment i = Investment.custom()
+        final Investment i = MockInvestmentBuilder.fresh()
                 .setRating(Rating.D)
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setSmpFee(BigDecimal.ONE)
                 .build();
-        final Investment i2 = Investment.custom()
+        final Investment i2 = MockInvestmentBuilder.fresh()
                 .setRating(Rating.A)
                 .setRemainingPrincipal(BigDecimal.ONE)
                 .setSmpFee(BigDecimal.ZERO)

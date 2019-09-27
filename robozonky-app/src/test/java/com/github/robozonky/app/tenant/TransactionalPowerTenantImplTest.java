@@ -19,9 +19,9 @@ package com.github.robozonky.app.tenant;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -36,6 +36,7 @@ import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.TransactionalTenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -116,7 +117,8 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void delegatesInvestment() {
-        when(zonky.getInvestmentByLoanId(anyInt())).thenReturn(Optional.of(Investment.custom().build()));
+        final Investment fresh = MockInvestmentBuilder.fresh().build();
+        when(zonky.getInvestmentByLoanId(anyInt())).thenReturn(Optional.of(fresh));
         final Investment result = tenant.getInvestment(1);
         assertThat(transactional.getInvestment(1)).isEqualTo(result);
     }

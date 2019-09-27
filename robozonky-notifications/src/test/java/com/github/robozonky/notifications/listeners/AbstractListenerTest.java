@@ -19,9 +19,9 @@ package com.github.robozonky.notifications.listeners;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -35,6 +35,7 @@ import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.notifications.*;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import freemarker.template.TemplateException;
 import org.junit.jupiter.api.*;
@@ -179,7 +180,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .build();
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final RecommendedLoan recommendation = loanDescriptor.recommend(1200).get();
-        final Investment i = Investment.fresh(loan, 1000)
+        final Investment i = MockInvestmentBuilder.fresh(loan, 1000)
                 .setExpectedInterest(BigDecimal.TEN)
                 .setPaidPenalty(BigDecimal.ZERO)
                 .setInvestmentDate(OffsetDateTime.now())

@@ -17,7 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -68,7 +68,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalTermInMonths() {
-        return investment.getOriginalTerm();
+        return investment.getLoanTermInMonth();
     }
 
     @Override

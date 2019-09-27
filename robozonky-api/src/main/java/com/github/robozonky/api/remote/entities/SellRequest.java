@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
+import java.math.BigDecimal;
 
 public class SellRequest extends BaseEntity {
 
     private long investmentId;
     private BigDecimal feeAmount, remainingPrincipal;
 
-    public SellRequest(final RawInvestment investment) {
+    public SellRequest(final Investment investment) {
         this.investmentId = investment.getId();
         this.remainingPrincipal = investment.getRemainingPrincipal();
-        this.feeAmount = investment.getSmpFee();
+        this.feeAmount = investment.getSmpFee().orElseThrow();
     }
 
     @XmlElement

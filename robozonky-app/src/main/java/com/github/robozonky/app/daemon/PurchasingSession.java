@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.PurchaseResult;
 
 import java.math.BigDecimal;
@@ -106,7 +107,7 @@ final class PurchasingSession extends
         final Participation participation = recommendation.descriptor().item();
         final Loan l = recommendation.descriptor().related();
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);
-        final Investment i = Investment.fresh(participation, l, recommendation.amount());
+        final Investment i = new Investment(l, recommendation.amount(), Defaults.CURRENCY);
         discard(recommendation.descriptor());
         if (succeeded) {
             result.add(i);

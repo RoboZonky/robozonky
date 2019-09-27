@@ -16,14 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
+
+import javax.xml.bind.annotation.XmlElement;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Currency;
-import javax.xml.bind.annotation.XmlElement;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.internal.Defaults;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
@@ -38,19 +38,18 @@ abstract class BaseInvestment extends BaseEntity {
     private BigDecimal additionalAmount;
     private BigDecimal firstAmount;
     private InvestmentStatus status;
-    private OffsetDateTime timeCreated = OffsetDateTime.MIN;
+    private OffsetDateTime timeCreated = DateUtil.offsetNow();
 
     BaseInvestment() {
         // for JAXB
     }
 
-    BaseInvestment(final Investment investment) {
-        this.id = investment.getId();
-        this.currency = investment.getCurrency();
-        this.loanId = investment.getLoanId();
-        this.amount = investment.getOriginalPrincipal();
+    BaseInvestment(final Loan loan, final BigDecimal amount, final Currency currency) {
+        this.currency = currency;
+        this.loanId = loan.getId();
+        this.amount = amount;
         this.additionalAmount = BigDecimal.ZERO;
-        this.firstAmount = BigDecimal.ZERO;
+        this.firstAmount = amount;
         this.status = InvestmentStatus.ACTIVE;
     }
 

@@ -17,14 +17,15 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
@@ -45,14 +46,14 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     private static final SellStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty();
 
     private static Investment mockInvestment(final Loan loan) {
-        return Investment.fresh(loan, 200)
+        return MockInvestmentBuilder.fresh(loan, 200)
                 .setLoanId(loan.getId())
                 .setRating(Rating.AAAAA)
-                .setOriginalTerm(1000)
+                .setLoanTermInMonth(1000)
                 .setRemainingPrincipal(BigDecimal.valueOf(100))
                 .setStatus(InvestmentStatus.ACTIVE)
                 .setOnSmp(false)
-                .setOfferable(true)
+                .setIsCanBeOffered(true)
                 .setInWithdrawal(false)
                 .build();
     }

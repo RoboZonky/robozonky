@@ -17,7 +17,7 @@
 package com.github.robozonky.notifications.listeners;
 
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
@@ -30,7 +30,7 @@ public class ReservationAcceptedEventListener extends AbstractListener<Reservati
     @Override
     String getSubject(final ReservationAcceptedEvent event) {
         final Investment i = event.getInvestment();
-        return "Rezervace potvrzena - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
+        return "Rezervace potvrzena - " + i.getAmount().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override

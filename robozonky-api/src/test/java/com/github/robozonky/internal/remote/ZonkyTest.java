@@ -18,7 +18,6 @@ package com.github.robozonky.internal.remote;
 
 import com.github.robozonky.api.remote.*;
 import com.github.robozonky.api.remote.entities.*;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -35,6 +35,14 @@ class ZonkyTest {
 
     private static <T, S> PaginatedApi<T, S> mockApi() {
         return mockApi(Collections.emptyList());
+    }
+
+    private static final Investment mockInvestment(final Loan loan, final int amount) {
+        final Investment i = mock(Investment.class);
+        doReturn(loan.getId()).when(i).getLoanId();
+        doReturn(loan.getCurrency()).when(i).getCurrency();
+        when(i.getAmount()).thenReturn(BigDecimal.valueOf(amount));
+        return i;
     }
 
     @SuppressWarnings("unchecked")
@@ -116,12 +124,10 @@ class ZonkyTest {
         when(l1.getCurrency()).thenReturn(Defaults.CURRENCY);
         final Loan l2 = mock(Loan.class);
         when(l2.getId()).thenReturn(2);
-        final Investment i1 = Investment.fresh(l1, 200).build();
-        final Investment i2 = Investment.fresh(l2, 200).build();
-        final RawInvestment ri1 = new RawInvestment(i1);
-        final RawInvestment ri2 = new RawInvestment(i2);
+        final Investment i1 = mockInvestment(l1, 200);
+        final Investment i2 = mockInvestment(l2, 200);
         // prepare api
-        final PaginatedApi<RawInvestment, PortfolioApi> api = mockApi(List.of(ri2, ri1));
+        final PaginatedApi<Investment, PortfolioApi> api = mockApi(List.of(i2, i1));
         final ApiProvider provider = mockApiProvider();
         when(provider.obtainPaginated(eq(PortfolioApi.class), any(), any())).thenReturn(api);
         final Zonky z = mockZonky(provider);
@@ -157,7 +163,7 @@ class ZonkyTest {
         when(la.execute(any())).thenReturn(loan);
         final Zonky z = mockZonky(ca, la);
         final Loan l = z.getLoan(loanId);
-        final Investment i = Investment.fresh(l, 200);
+        final Investment i = mockInvestment(l, 200);
         z.invest(i);
         z.logout();
         verify(control, times(1)).invest(any());
@@ -181,11 +187,10 @@ class ZonkyTest {
         final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
-        final Investment p = Investment.custom()
-                .setRemainingPrincipal(BigDecimal.TEN)
-                .setSmpFee(BigDecimal.ONE)
-                .setId(1)
-                .build();
+        final Investment p = mock(Investment.class);
+        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        when(p.getSmpFee()).thenReturn(Optional.of(BigDecimal.ONE));
+        when(p.getId()).thenReturn(1L);
         z.sell(p);
         verify(control).offer(any());
     }

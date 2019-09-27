@@ -18,12 +18,13 @@ package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +35,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 class SaleCheckTest extends AbstractZonkyLeveragingTest {
@@ -52,15 +53,15 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
     @Nested
     class SomethingIsOffered {
 
-        private final Investment soldEarlier = Investment.fresh(MockLoanBuilder.fresh(), 200)
+        private final Investment soldEarlier = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
                 .setOnSmp(false)
                 .setStatus(InvestmentStatus.ACTIVE)
                 .build();
-        private final Investment soldNow = Investment.fresh(MockLoanBuilder.fresh(), 200)
+        private final Investment soldNow = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
                 .setOnSmp(false)
                 .setStatus(InvestmentStatus.SOLD)
                 .build();
-        private final Investment onSmp = Investment.fresh(MockLoanBuilder.fresh(), 200)
+        private final Investment onSmp = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
                 .setStatus(InvestmentStatus.ACTIVE)
                 .setOnSmp(true)
                 .build();

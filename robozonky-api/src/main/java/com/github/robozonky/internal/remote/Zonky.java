@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote;
 import com.github.robozonky.api.remote.*;
 import com.github.robozonky.api.remote.entities.*;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
@@ -58,7 +57,7 @@ public class Zonky {
     private final Api<ReservationApi> reservationApi;
     private final PaginatedApi<Loan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
-    private final PaginatedApi<RawInvestment, PortfolioApi> portfolioApi;
+    private final PaginatedApi<Investment, PortfolioApi> portfolioApi;
     private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
 
     Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
@@ -104,7 +103,7 @@ public class Zonky {
     public InvestmentResult invest(final Investment investment) {
         LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
         try {
-            controlApi.run(api -> api.invest(new RawInvestment(investment)));
+            controlApi.run(api -> api.invest(investment));
             return InvestmentResult.success();
         } catch (final ClientErrorException ex) {
             LOGGER.debug("Caught API exception during investment.", ex);
@@ -130,7 +129,7 @@ public class Zonky {
 
     public void sell(final Investment investment) {
         LOGGER.debug("Offering to sell investment in loan #{}.", investment.getLoanId());
-        controlApi.run(api -> api.offer(new SellRequest(new RawInvestment(investment))));
+        controlApi.run(api -> api.offer(new SellRequest(investment)));
     }
 
     public void accept(final Reservation reservation) {
@@ -155,8 +154,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Investment> getInvestments(final Select select) {
-        return excludeNonCZK(getStream(portfolioApi, PortfolioApi::items, select), RawInvestment::getCurrency)
-                .map(Investment::sanitized);
+        return excludeNonCZK(getStream(portfolioApi, PortfolioApi::items, select), Investment::getCurrency);
     }
 
     public Stream<Investment> getDelinquentInvestments() {

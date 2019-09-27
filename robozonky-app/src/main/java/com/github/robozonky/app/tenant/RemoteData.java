@@ -16,15 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.stream.Collector;
-
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
@@ -35,9 +28,14 @@ import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.reducing;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.stream.Collector;
+
+import static java.util.stream.Collectors.*;
 
 final class RemoteData {
 
@@ -68,7 +66,7 @@ final class RemoteData {
         return tenant.call(zonky -> zonky.getInvestments(select))
                 .peek(investment -> LOGGER.debug("Found: {}.", investment))
                 .collect(groupingBy(Investment::getRating, () -> new EnumMap<>(Rating.class),
-                        mapping(Investment::getOriginalPrincipal, BIGDECIMAL_REDUCING_COLLECTOR)));
+                        mapping(Investment::getAmount, BIGDECIMAL_REDUCING_COLLECTOR)));
     }
 
     public OffsetDateTime getRetrievedOn() {

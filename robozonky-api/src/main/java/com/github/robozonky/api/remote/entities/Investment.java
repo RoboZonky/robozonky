@@ -17,23 +17,23 @@
 package com.github.robozonky.api.remote.entities;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.*;
 import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.Optional;
 
-/**
- * It is not recommended to use this class directly as Zonky will return various null references for fields at various
- * points in the investment lifecycle. Please use {@link Investment} as a null-safe alternative. Instances may be
- * created with static methods such as {@link Investment#sanitized(RawInvestment)} )}.
- */
-public class RawInvestment extends BaseInvestment {
+public class Investment extends BaseInvestment {
 
+    @XmlElement
     private PaymentStatus paymentStatus;
+    @XmlElement
     private LoanHealthInfo loanHealthInfo;
     private boolean smpRelated;
     private boolean onSmp;
@@ -43,13 +43,29 @@ public class RawInvestment extends BaseInvestment {
     private boolean insuranceActive;
     private boolean additionallyInsured;
     private boolean instalmentPostponement;
-    private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
-    private String loanName, nickname, firstName, surname;
+    private int legalDpd;
+    private int loanTermInMonth = 84;
+    private int currentTerm = 0;
+    private int remainingMonths = loanTermInMonth - currentTerm;
+    private String loanName;
+    private String nickname;
+    private String firstName;
+    private String surname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
+    @XmlElement
     private OffsetDateTime investmentDate = DateUtil.offsetNow();
+    private Lazy<OffsetDateTime> actualInvestmentDate = Lazy.of(() -> {
+        final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
+        final OffsetDateTime d = DateUtil.offsetNow().minusMonths(monthsElapsed);
+        logger.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
+        return d;
+    });
+    @XmlElement
     private OffsetDateTime nextPaymentDate = investmentDate.plusMonths(1);
+    @XmlElement
     private OffsetDateTime activeFrom;
     private OffsetDateTime activeTo;
+    @XmlElement
     private OffsetDateTime smpFeeExpirationDate;
     private BigDecimal paid;
     private BigDecimal toPay;
@@ -61,61 +77,29 @@ public class RawInvestment extends BaseInvestment {
     private BigDecimal expectedInterest;
     private BigDecimal purchasePrice;
     private BigDecimal remainingPrincipal;
+    @XmlElement
     private BigDecimal smpSoldFor;
+    @XmlElement
     private BigDecimal smpFee;
+    @XmlElement
     private BigDecimal smpPrice;
     private BigDecimal paidPenalty = BigDecimal.ZERO;
     private Ratio interestRate;
+    @XmlElement
     private Ratio revenueRate;
     private Rating rating;
     private InvestmentType investmentType;
+    @XmlElement
     private Collection<InsurancePolicyPeriod> insuranceHistory;
 
-    RawInvestment() {
+    Investment() {
         // for JAXB
     }
 
-    public RawInvestment(final Investment investment, final Loan loan) {
-        this(investment);
-        this.loanName = loan.getName();
-        this.nickname = loan.getNickName();
-    }
-
-    public RawInvestment(final Investment investment) {
-        super(investment);
-        this.paymentStatus = investment.getPaymentStatus().orElse(null);
-        this.onSmp = investment.isOnSmp();
-        this.canBeOffered = investment.canBeOffered();
-        this.inWithdrawal = investment.isInWithdrawal().orElse(false);
-        this.legalDpd = investment.getDaysPastDue();
-        this.loanTermInMonth = investment.getOriginalTerm();
-        this.remainingMonths = investment.getRemainingMonths();
-        this.currentTerm = investment.getCurrentTerm();
-        this.investmentDate = investment.getInvestmentDate();
-        this.nextPaymentDate = investment.getNextPaymentDate().orElse(null);
-        this.activeFrom = investment.getActiveFrom().orElse(null);
-        this.interestRate = investment.getInterestRate();
-        this.revenueRate = investment.getRevenueRate().orElse(null);
-        this.paidInterest = investment.getPaidInterest();
-        this.dueInterest = investment.getDueInterest();
-        this.paidPrincipal = investment.getPaidPrincipal();
-        this.duePrincipal = investment.getDuePrincipal();
-        this.expectedInterest = investment.getExpectedInterest();
-        this.purchasePrice = investment.getOriginalPrincipal();
-        this.remainingPrincipal = investment.getRemainingPrincipal();
-        this.smpSoldFor = investment.getSmpSoldFor().orElse(null);
-        this.smpFee = investment.getSmpFee().orElse(null);
-        this.smpPrice = investment.getSmpPrice().orElse(remainingPrincipal);
-        this.smpFeeExpirationDate = investment.getSmpFeeExpirationDate().orElse(null);
-        this.paidPenalty = investment.getPaidPenalty();
-        this.rating = investment.getRating();
-        this.loanHealthInfo = investment.getLoanHealthInfo().orElse(LoanHealthInfo.HEALTHY);
-        this.hasCollectionHistory = false;
-        this.insuranceStatus =
-                investment.isInsuranceActive() ? InsuranceStatus.CURRENTLY_INSURED : InsuranceStatus.NOT_INSURED;
-        this.insuranceActive = investment.isInsuranceActive();
-        this.instalmentPostponement = investment.areInstalmentsPostponed();
-        this.insuranceHistory = investment.getInsuranceHistory();
+    public Investment(final Loan loan, final BigDecimal amount, final Currency currency) {
+        super(loan, amount, currency);
+        this.rating = loan.getRating();
+        this.remainingPrincipal = amount;
     }
 
     @XmlElement
@@ -125,11 +109,11 @@ public class RawInvestment extends BaseInvestment {
 
     /**
      *
-     * @return Null when no longer relevant, such as when sold.
+     * @return Empty when no longer relevant, such as when sold.
      */
     @XmlElement
-    public LoanHealthInfo getLoanHealthInfo() {
-        return loanHealthInfo;
+    public Optional<LoanHealthInfo> getLoanHealthInfo() {
+        return Optional.ofNullable(loanHealthInfo);
     }
 
     @XmlElement
@@ -214,38 +198,35 @@ public class RawInvestment extends BaseInvestment {
         return surname;
     }
 
-    @XmlElement
-    public PaymentStatus getPaymentStatus() {
-        return paymentStatus;
+    public Optional<PaymentStatus> getPaymentStatus() {
+        return Optional.ofNullable(paymentStatus);
     }
 
     /**
      *
-     * @return This appears to always be null.
+     * @return This appears to always be null, so we guess from other fields.
      */
-    @XmlElement
     public OffsetDateTime getInvestmentDate() {
-        return investmentDate;
+        return actualInvestmentDate.get();
     }
 
     /**
      * In case of a presently delinquent loan, this always shows the date of the least recent instalment that is
      * delinquent.
-     * @return Null for loans where no payments are expected anymore.
+     * @return Empty for loans where no payments are expected anymore.
      */
-    @XmlElement
-    public OffsetDateTime getNextPaymentDate() {
-        return nextPaymentDate;
+    public Optional<OffsetDateTime> getNextPaymentDate() {
+        return Optional.ofNullable(nextPaymentDate);
     }
 
     /**
      *
      * @return If bought on SMP, then the timestamp of purchase. If invested from primary marketplace, then timestamp of
-     * settlement (= null when not yet settled).
+     * settlement (= empty when not yet settled).
      */
     @XmlElement
-    public OffsetDateTime getActiveFrom() {
-        return activeFrom;
+    public Optional<OffsetDateTime> getActiveFrom() {
+        return Optional.ofNullable(activeFrom);
     }
 
     @XmlElement
@@ -253,9 +234,8 @@ public class RawInvestment extends BaseInvestment {
         return activeTo;
     }
 
-    @XmlElement
-    public OffsetDateTime getSmpFeeExpirationDate() {
-        return smpFeeExpirationDate;
+    public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
+        return Optional.ofNullable(smpFeeExpirationDate);
     }
 
     @XmlElement
@@ -312,8 +292,8 @@ public class RawInvestment extends BaseInvestment {
     }
 
     @XmlElement
-    public BigDecimal getSmpSoldFor() {
-        return smpSoldFor;
+    public Optional<BigDecimal> getSmpSoldFor() {
+        return Optional.ofNullable(smpSoldFor);
     }
 
     @XmlElement
@@ -322,17 +302,16 @@ public class RawInvestment extends BaseInvestment {
     }
 
     @XmlElement
-    public BigDecimal getSmpFee() {
-        return smpFee;
+    public Optional<BigDecimal> getSmpFee() {
+        return Optional.ofNullable(smpFee);
     }
 
     /**
      *
-     * @return Null when cannot be sold, that is when sold already.
+     * @return Empty when cannot be sold, that is when sold already.
      */
-    @XmlElement
-    public BigDecimal getSmpPrice() {
-        return smpPrice;
+    public Optional<BigDecimal> getSmpPrice() {
+        return Optional.ofNullable(smpPrice);
     }
 
     @XmlElement
@@ -363,9 +342,8 @@ public class RawInvestment extends BaseInvestment {
         return instalmentPostponement;
     }
 
-    @XmlElement
     public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
-        return insuranceHistory;
+        return insuranceHistory == null ? Collections.emptySet() : Collections.unmodifiableCollection(insuranceHistory);
     }
 
     @XmlElement
@@ -373,9 +351,8 @@ public class RawInvestment extends BaseInvestment {
         return hasCollectionHistory;
     }
 
-    @XmlElement
-    public Ratio getRevenueRate() {
-        return revenueRate;
+    public Optional<Ratio> getRevenueRate() {
+        return Optional.ofNullable(revenueRate);
     }
 
     @XmlElement

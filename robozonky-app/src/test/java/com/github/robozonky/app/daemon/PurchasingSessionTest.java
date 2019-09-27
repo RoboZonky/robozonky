@@ -16,9 +16,9 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -39,7 +39,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -72,7 +71,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
             final Collection<ParticipationDescriptor> participations = i.getArgument(0);
             return participations.stream()
                     .map(ParticipationDescriptor::recommend)
-                    .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+                    .flatMap(Optional::stream);
         });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);

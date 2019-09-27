@@ -17,12 +17,13 @@
 package com.github.robozonky.app.delinquencies;
 
 import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky();
     private final Loan loan = MockLoanBuilder.fresh();
-    private final Investment investment = Investment.fresh(loan, 200).build();
+    private final Investment investment = MockInvestmentBuilder.fresh(loan, 200).build();
 
     @Test
     void thresholds() {

@@ -20,11 +20,12 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +47,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @Test
     void lazyFireReturnsFuture() {
         final Loan l = MockLoanBuilder.fresh();
-        final Investment i = Investment.fresh(l, 200).build();
+        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         final Runnable result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanNoLongerDelinquentLazy(() -> EventFactory.loanNoLongerDelinquent(i, l)));
         result.run(); // make sure it does not throw
@@ -56,7 +57,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @Test
     void fireReturnsFuture() {
         final Loan l = MockLoanBuilder.fresh();
-        final Investment i = Investment.fresh(l, 200).build();
+        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         final Runnable result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanNoLongerDelinquent(i, l));
         result.run(); // make sure it does not throw
@@ -65,7 +66,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
 
     @Test
     void identifiesEventTypeWhenClass() {
-        final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(Investment.custom().build(),
+        final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(MockInvestmentBuilder.fresh().build(),
                 MockLoanBuilder.fresh(), LocalDate.now(), Collections.emptyList());
         assertThat(SessionEvents.getImplementingEvent(e.getClass()))
                 .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);

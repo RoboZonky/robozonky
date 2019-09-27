@@ -16,12 +16,13 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +53,7 @@ class NaturalLanguageSellStrategyTest {
     }
 
     private static Investment mockInvestment(final BigDecimal fee) {
-        return Investment.custom()
+        return MockInvestmentBuilder.fresh()
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setSmpFee(fee)
                 .build();

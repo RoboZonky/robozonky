@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import io.vavr.control.Either;
 
@@ -77,15 +78,14 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     }
 
     private boolean successfulInvestment(final RecommendedLoan recommendation, final BigDecimal amount) {
-        final int confirmedAmount = amount.intValue();
         final Loan l = recommendation.descriptor().item();
-        final Investment i = Investment.fresh(l, confirmedAmount);
+        final Investment i = new Investment(l, amount, Defaults.CURRENCY);
         result.add(i);
-        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
-        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - confirmedAmount);
+        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), amount);
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - amount.intValue());
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
-        logger.info("Invested {} CZK into loan #{}.", confirmedAmount, l.getId());
+        logger.info("Invested {} CZK into loan #{}.", amount, l.getId());
         return true;
     }
 

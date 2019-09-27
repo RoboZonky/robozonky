@@ -16,20 +16,22 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.when;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -62,7 +64,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void retrievesSold() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        final Investment i1 = Investment.custom().setLoanId(2).build();
+        final Investment i1 = MockInvestmentBuilder.fresh().setLoanId(2).build();
         when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.wasOnceSold(2)).isTrue();
@@ -76,7 +78,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void retrievesOffered() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        final Investment i1 = Investment.custom().setLoanId(1).build();
+        final Investment i1 = MockInvestmentBuilder.fresh().setLoanId(1).build();
         when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.getOffered()).isEmpty();

@@ -18,8 +18,11 @@ package com.github.robozonky.test.mock;
 
 import org.mockito.Mockito;
 
+import java.util.Random;
+
 abstract class BaseMockBuilder<T, S extends BaseMockBuilder<T, S>> {
 
+    protected static final Random RANDOM = new Random();
     protected final T mock;
 
     protected BaseMockBuilder(Class<T> clz) {

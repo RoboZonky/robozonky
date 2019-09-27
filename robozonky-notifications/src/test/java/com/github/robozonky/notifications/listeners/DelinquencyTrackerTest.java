@@ -22,9 +22,9 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -33,6 +33,7 @@ import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setName("")
             .setUrl(getSomeUrl())
             .build();
-    private static final Investment INVESTMENT = Investment.fresh(LOAN, 200)
+    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 200)
             .setInvestmentDate(OffsetDateTime.now())
             .setExpectedInterest(BigDecimal.TEN)
             .build();
@@ -76,7 +77,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setName("")
             .setUrl(getSomeUrl())
             .build();
-    private static final Investment INVESTMENT2 = Investment.fresh(LOAN2, 200)
+    private static final Investment INVESTMENT2 = MockInvestmentBuilder.fresh(LOAN2, 200)
             .setInvestmentDate(OffsetDateTime.now())
             .build();
     private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");

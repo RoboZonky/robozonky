@@ -17,9 +17,9 @@
 package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -27,6 +27,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -82,7 +83,7 @@ class ParsedStrategyTest {
         final Loan l = ParsedStrategyTest.mockLoan(1000);
         final LoanDescriptor ld = new LoanDescriptor(l);
         final ParticipationDescriptor pd = ParsedStrategyTest.mockParticipationDescriptor(l);
-        final Investment i = Investment.fresh(l, 200);
+        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> l);
         assertSoftly(softly -> {
             softly.assertThat(strategy.getApplicableLoans(Collections.singleton(ld), FOLIO)).isEmpty();
@@ -110,9 +111,9 @@ class ParsedStrategyTest {
         final LoanDescriptor ldUnder = new LoanDescriptor(loanUnder);
         final ParticipationDescriptor pdOver = ParsedStrategyTest.mockParticipationDescriptor(loanOver);
         final ParticipationDescriptor pdUnder = ParsedStrategyTest.mockParticipationDescriptor(loanUnder);
-        final Investment iUnder = Investment.fresh(loanUnder, 200);
+        final Investment iUnder = MockInvestmentBuilder.fresh(loanUnder, 200).build();
         final InvestmentDescriptor idUnder = new InvestmentDescriptor(iUnder, () -> loanUnder);
-        final Investment iOver = Investment.fresh(loanOver, 200);
+        final Investment iOver = MockInvestmentBuilder.fresh(loanOver, 200).build();
         final InvestmentDescriptor idOver = new InvestmentDescriptor(iOver, () -> loanOver);
         assertSoftly(softly -> {
             softly.assertThat(strategy.getApplicableLoans(Arrays.asList(ldOver, ldUnder), FOLIO)).containsOnly(ldUnder);

@@ -17,8 +17,8 @@
 package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.LoanLostEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 
 final class LoanLostEventImpl extends AbstractEventImpl implements LoanLostEvent {
 

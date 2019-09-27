@@ -17,13 +17,14 @@
 package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
@@ -42,12 +43,13 @@ class WrapperTest {
     void fromInvestment() {
         final Loan loan = new MockLoanBuilder()
                 .setAmount(100_000)
+                .setRevenueRate(Ratio.ONE)
                 .setRevenueRate(Ratio.ZERO)
                 .setInterestRate(Ratio.ONE)
                 .setAnnuity(BigDecimal.ONE)
                 .build();
         final int invested = 200;
-        final Investment investment = Investment.fresh(loan, invested)
+        final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
                 .setSmpFee(BigDecimal.ONE)
                 .build();
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan), FOLIO);
@@ -72,7 +74,7 @@ class WrapperTest {
                 .setRating(Rating.A)
                 .build();
         final int invested = 200;
-        final Investment investment = Investment.fresh(loan, invested)
+        final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
                 .setSmpFee(BigDecimal.ONE)
                 .build();
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan), FOLIO);

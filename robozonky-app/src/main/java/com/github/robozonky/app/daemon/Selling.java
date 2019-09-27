@@ -16,14 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.RawInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -36,10 +29,16 @@ import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 
 /**
- * Implements selling of {@link RawInvestment}s on the secondary marketplace.
+ * Implements selling of {@link Investment}s on the secondary marketplace.
  */
 final class Selling implements TenantPayload {
 

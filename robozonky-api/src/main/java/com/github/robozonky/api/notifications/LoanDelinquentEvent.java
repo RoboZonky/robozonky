@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.Investment;
 
 /**
- * Fired immediately after an {@link RawInvestment} is identified as delinquent.
+ * Fired immediately after an {@link Investment} is identified as delinquent.
  */
 public interface LoanDelinquentEvent extends DelinquencyBased {
 
