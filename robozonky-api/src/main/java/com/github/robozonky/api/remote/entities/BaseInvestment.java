@@ -16,9 +16,11 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.math.BigDecimal;
@@ -34,9 +36,15 @@ abstract class BaseInvestment extends BaseEntity {
     private long id;
     private int loanId;
     private Currency currency = Defaults.CURRENCY;
-    private BigDecimal amount;
-    private BigDecimal additionalAmount;
-    private BigDecimal firstAmount;
+    @XmlElement
+    private String amount;
+    @XmlElement
+    private String additionalAmount;
+    @XmlElement
+    private String firstAmount;
+    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
+    private final Lazy<Money> moneyAdditionalAmount = Lazy.of(() -> Money.from(additionalAmount, currency));
+    private final Lazy<Money> moneyFirstAmount = Lazy.of(() -> Money.from(firstAmount, currency));
     private InvestmentStatus status;
     private OffsetDateTime timeCreated = DateUtil.offsetNow();
 
@@ -44,12 +52,12 @@ abstract class BaseInvestment extends BaseEntity {
         // for JAXB
     }
 
-    BaseInvestment(final Loan loan, final BigDecimal amount, final Currency currency) {
-        this.currency = currency;
+    BaseInvestment(final Loan loan, final Money amount) {
+        this.currency = amount.getCurrency();
         this.loanId = loan.getId();
-        this.amount = amount;
-        this.additionalAmount = BigDecimal.ZERO;
-        this.firstAmount = amount;
+        this.amount = amount.getValue().toPlainString();
+        this.additionalAmount = BigDecimal.ZERO.toPlainString();
+        this.firstAmount = amount.getValue().toPlainString();
         this.status = InvestmentStatus.ACTIVE;
     }
 
@@ -68,19 +76,16 @@ abstract class BaseInvestment extends BaseEntity {
         return loanId;
     }
 
-    @XmlElement
-    public BigDecimal getAmount() {
-        return amount;
+    public Money getAmount() {
+        return moneyAmount.get();
     }
 
-    @XmlElement
-    public BigDecimal getAdditionalAmount() {
-        return additionalAmount;
+    public Money getAdditionalAmount() {
+        return moneyAdditionalAmount.get();
     }
 
-    @XmlElement
-    public BigDecimal getFirstAmount() {
-        return firstAmount;
+    public Money getFirstAmount() {
+        return moneyFirstAmount.get();
     }
 
     @XmlElement

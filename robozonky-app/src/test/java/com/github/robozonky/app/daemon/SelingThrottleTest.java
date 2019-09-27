@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
@@ -26,6 +27,7 @@ import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,11 +52,11 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
                 .setRemainingPrincipal(BigDecimal.ONE)
                 .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getCzkInvested(eq(rating))).thenReturn(BigDecimal.TEN);
+        when(portfolioOverview.getInvested(eq(rating))).thenReturn(Money.from(10));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
                 .map(i -> new InvestmentDescriptor(i, () -> null))
-                .map(d -> d.recommend(d.item().getRemainingPrincipal()))
-                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+                .map(d -> d.recommend(d.item().getRemainingPrincipal().orElseThrow()))
+                .flatMap(Optional::stream);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);
         assertThat(throttled)
@@ -78,11 +80,11 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
                 .setRemainingPrincipal(BigDecimal.ONE)
                 .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.valueOf(2200));
+        when(portfolioOverview.getInvested()).thenReturn(Money.from(2200));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
                 .map(i -> new InvestmentDescriptor(i, () -> null))
-                .map(d -> d.recommend(d.item().getRemainingPrincipal()))
-                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+                .map(d -> d.recommend(d.item().getRemainingPrincipal().orElseThrow()))
+                .flatMap(Optional::stream);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);
         assertThat(throttled)

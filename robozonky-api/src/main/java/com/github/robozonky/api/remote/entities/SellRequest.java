@@ -22,12 +22,13 @@ import java.math.BigDecimal;
 public class SellRequest extends BaseEntity {
 
     private long investmentId;
-    private BigDecimal feeAmount, remainingPrincipal;
+    private BigDecimal feeAmount;
+    private BigDecimal remainingPrincipal;
 
     public SellRequest(final Investment investment) {
         this.investmentId = investment.getId();
-        this.remainingPrincipal = investment.getRemainingPrincipal();
-        this.feeAmount = investment.getSmpFee().orElseThrow();
+        this.remainingPrincipal = investment.getRemainingPrincipal().orElseThrow().getValue();
+        this.feeAmount = investment.getSmpFee().orElseThrow().getValue();
     }
 
     @XmlElement

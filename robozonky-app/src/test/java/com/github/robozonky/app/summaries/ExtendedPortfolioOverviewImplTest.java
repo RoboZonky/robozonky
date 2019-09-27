@@ -16,9 +16,7 @@
 
 package com.github.robozonky.app.summaries;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
@@ -26,8 +24,11 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
 
 class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
@@ -39,14 +40,14 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
                                                                                       Collections.emptyMap(),
                                                                                       Collections.emptyMap());
         assertSoftly(softly -> {
-            softly.assertThat(tested.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
-            softly.assertThat(tested.getCzkInvested(Rating.A)).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(tested.getInvested()).isEqualTo(Money.ZERO);
+            softly.assertThat(tested.getInvested(Rating.A)).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getShareOnInvestment(Rating.A)).isEqualTo(Ratio.ZERO);
-            softly.assertThat(tested.getCzkMinimalMonthlyProfit()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(tested.getMinimalMonthlyProfit()).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getMinimalAnnualProfitability()).isEqualTo(Ratio.ZERO);
-            softly.assertThat(tested.getCzkOptimalMonthlyProfit()).isEqualTo(BigDecimal.TEN);
+            softly.assertThat(tested.getOptimalMonthlyProfit()).isEqualTo(Money.from(10));
             softly.assertThat(tested.getOptimalAnnualProfitability()).isEqualTo(Ratio.ONE);
-            softly.assertThat(tested.getCzkMonthlyProfit()).isEqualTo(BigDecimal.ONE);
+            softly.assertThat(tested.getMonthlyProfit()).isEqualTo(Money.from(1));
             softly.assertThat(tested.getAnnualProfitability()).isEqualTo(Ratio.fromPercentage("5"));
         });
     }
@@ -54,17 +55,17 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void risk() {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getCzkInvested(eq(Rating.A))).thenReturn(BigDecimal.TEN);
-        when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.TEN);
+        when(portfolioOverview.getInvested(eq(Rating.A))).thenReturn(Money.from(10));
+        when(portfolioOverview.getInvested()).thenReturn(Money.from(10));
         final ExtendedPortfolioOverview tested =
                 ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
-                                                     Collections.singletonMap(Rating.A, BigDecimal.ONE),
+                                                     Collections.singletonMap(Rating.A, Money.from(1)),
                                                      Collections.emptyMap(),
                                                      Collections.emptyMap());
         assertSoftly(softly -> {
-            softly.assertThat(tested.getCzkAtRisk()).isEqualTo(BigDecimal.ONE);
-            softly.assertThat(tested.getCzkAtRisk(Rating.A)).isEqualTo(BigDecimal.ONE);
-            softly.assertThat(tested.getCzkAtRisk(Rating.B)).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(tested.getAtRisk()).isEqualTo(Money.from(1));
+            softly.assertThat(tested.getAtRisk(Rating.A)).isEqualTo(Money.from(1));
+            softly.assertThat(tested.getAtRisk(Rating.B)).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getShareAtRisk()).isEqualTo(Ratio.fromPercentage(10));
             softly.assertThat(tested.getAtRiskShareOnInvestment(Rating.A)).isEqualTo(Ratio.fromPercentage(10));
             softly.assertThat(tested.getAtRiskShareOnInvestment(Rating.B)).isEqualTo(Ratio.ZERO);
@@ -74,17 +75,17 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void sellable() {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getCzkInvested(eq(Rating.A))).thenReturn(BigDecimal.TEN);
-        when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.TEN);
+        when(portfolioOverview.getInvested(eq(Rating.A))).thenReturn(Money.from(10));
+        when(portfolioOverview.getInvested()).thenReturn(Money.from(10));
         final ExtendedPortfolioOverview tested =
                 ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
                                                      Collections.emptyMap(),
-                                                     Collections.singletonMap(Rating.A, BigDecimal.ONE),
+                                                     Collections.singletonMap(Rating.A, Money.from(1)),
                                                      Collections.emptyMap());
         assertSoftly(softly -> {
-            softly.assertThat(tested.getCzkSellable()).isEqualTo(BigDecimal.ONE);
-            softly.assertThat(tested.getCzkSellable(Rating.A)).isEqualTo(BigDecimal.ONE);
-            softly.assertThat(tested.getCzkSellable(Rating.B)).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(tested.getSellable()).isEqualTo(Money.from(1));
+            softly.assertThat(tested.getSellable(Rating.A)).isEqualTo(Money.from(1));
+            softly.assertThat(tested.getSellable(Rating.B)).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getShareSellable()).isEqualTo(Ratio.fromPercentage(10));
             softly.assertThat(tested.getShareSellable(Rating.A)).isEqualTo(Ratio.fromPercentage(10));
             softly.assertThat(tested.getShareSellable(Rating.B)).isEqualTo(Ratio.ZERO);
@@ -94,17 +95,17 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void sellableFeeless() {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getCzkInvested(eq(Rating.A))).thenReturn(BigDecimal.TEN);
-        when(portfolioOverview.getCzkInvested()).thenReturn(BigDecimal.TEN);
+        when(portfolioOverview.getInvested(eq(Rating.A))).thenReturn(Money.from(10));
+        when(portfolioOverview.getInvested()).thenReturn(Money.from(10));
         final ExtendedPortfolioOverview tested =
                 ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
                                                      Collections.emptyMap(),
                                                      Collections.emptyMap(),
-                                                     Collections.singletonMap(Rating.A, BigDecimal.ONE));
+                                                     Collections.singletonMap(Rating.A, Money.from(1)));
         assertSoftly(softly -> {
-            softly.assertThat(tested.getCzkSellableFeeless()).isEqualTo(BigDecimal.ONE);
-            softly.assertThat(tested.getCzkSellableFeeless(Rating.A)).isEqualTo(BigDecimal.ONE);
-            softly.assertThat(tested.getCzkSellableFeeless(Rating.B)).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(tested.getSellableFeeless()).isEqualTo(Money.from(1));
+            softly.assertThat(tested.getSellableFeeless(Rating.A)).isEqualTo(Money.from(1));
+            softly.assertThat(tested.getSellableFeeless(Rating.B)).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getShareSellableFeeless()).isEqualTo(Ratio.fromPercentage(10));
             softly.assertThat(tested.getShareSellableFeeless(Rating.A)).isEqualTo(Ratio.fromPercentage(10));
             softly.assertThat(tested.getShareSellableFeeless(Rating.B)).isEqualTo(Ratio.ZERO);

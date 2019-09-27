@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.api.remote.entities.*;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -41,27 +42,29 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static RecommendedLoan recommendedLoan() {
         final Loan loan = new MockLoanBuilder().setNonReservedRemainingInvestment(2000).build();
-        return new LoanDescriptor(loan).recommend(200).orElse(null);
+        return new LoanDescriptor(loan).recommend(Money.from(200)).orElse(null);
     }
 
     private static RecommendedParticipation recommendedParticipation() {
         final Participation p = mock(Participation.class);
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
-        return new ParticipationDescriptor(p, () -> MockLoanBuilder.fresh()).recommend().orElse(null);
+        when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
+        return new ParticipationDescriptor(p, MockLoanBuilder::fresh).recommend().orElse(null);
     }
 
     private static RecommendedInvestment recommendedInvestment() {
         return new InvestmentDescriptor(MockInvestmentBuilder.fresh().setRemainingPrincipal(BigDecimal.TEN).build(),
-                                        () -> MockLoanBuilder.fresh()).recommend().orElse(null);
+                MockLoanBuilder::fresh).recommend().orElse(null);
     }
 
     private static RecommendedReservation recommendedReservation() {
+        final MyReservation mr = mock(MyReservation.class);
+        when(mr.getReservedAmount()).thenReturn(Money.from(200));
         final Reservation r = new MockReservationBuilder()
-                .setMyReservation(mock(MyReservation.class))
+                .setMyReservation(mr)
                 .build();
         final Loan l = MockLoanBuilder.fresh();
         return new ReservationDescriptor(r, () -> l)
-                .recommend(BigDecimal.valueOf(r.getMyReservation().getReservedAmount()))
+                .recommend(r.getMyReservation().getReservedAmount())
                 .orElse(null);
     }
 

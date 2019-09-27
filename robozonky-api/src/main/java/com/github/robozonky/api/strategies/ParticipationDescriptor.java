@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import io.vavr.Lazy;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -57,7 +57,7 @@ public final class ParticipationDescriptor
     }
 
     @Override
-    public Optional<RecommendedParticipation> recommend(final BigDecimal amount) {
+    public Optional<RecommendedParticipation> recommend(final Money amount) {
         if (participation.isWillExceedLoanInvestmentLimit() ||
                 !Objects.equals(amount, participation.getRemainingPrincipal())) {
             return Optional.empty();

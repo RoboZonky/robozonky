@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class InvestmentDescriptorTest {
 
     private static Investment mockInvestment(final BigDecimal amount) {
         final Investment i = mock(Investment.class);
-        when(i.getRemainingPrincipal()).thenReturn(amount);
+        when(i.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(amount)));
         return i;
     }
 
@@ -48,7 +49,7 @@ class InvestmentDescriptorTest {
         final Optional<RecommendedInvestment> r = id.recommend();
         assertThat(r).isPresent();
         assertSoftly(softly -> {
-            softly.assertThat(r.get().amount()).isEqualTo(remainingPrincipal);
+            softly.assertThat(r.get().amount()).isEqualTo(Money.from(remainingPrincipal));
             softly.assertThat(r.get().descriptor()).isEqualTo(id);
             softly.assertThat(r.get().descriptor().related()).isSameAs(LOAN);
         });
@@ -59,7 +60,7 @@ class InvestmentDescriptorTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
-        final Optional<RecommendedInvestment> r = id.recommend(remainingPrincipal.subtract(BigDecimal.ONE));
+        final Optional<RecommendedInvestment> r = id.recommend(Money.from(remainingPrincipal.subtract(BigDecimal.ONE)));
         assertThat(r).isEmpty();
     }
 

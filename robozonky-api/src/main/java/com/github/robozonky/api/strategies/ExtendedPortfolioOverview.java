@@ -16,8 +16,7 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 
@@ -29,9 +28,9 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
 
     /**
      * Sum total of all remaining principal where loans are currently overdue.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkAtRisk();
+    Money getAtRisk();
 
     /**
      * How much is at risk out of the entire portfolio, in relative terms.
@@ -42,12 +41,12 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
     /**
      * Sum total of all remaining principal where loans in a given rating are currently overdue.
      * @param r Rating in question.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkAtRisk(final Rating r);
+    Money getAtRisk(final Rating r);
 
     /**
-     * Retrieve the amounts due in a given rating, divided by {@link #getCzkInvested()}.
+     * Retrieve the amounts due in a given rating, divided by {@link #getInvested()}.
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
@@ -55,9 +54,9 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
 
     /**
      * Sum total of all remaining principal which can be sold right now.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkSellable();
+    Money getSellable();
 
     /**
      * How much can be sold of the entire portfolio, in relative terms.
@@ -68,12 +67,12 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
     /**
      * Sum total of all remaining principal which can be sold right now in a given rating.
      * @param r Rating in question.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkSellable(final Rating r);
+    Money getSellable(final Rating r);
 
     /**
-     * Retrieve the sellable in a given rating, divided by {@link #getCzkInvested(Rating)}.
+     * Retrieve the sellable in a given rating, divided by {@link #getInvested(Rating)}.
      * @param r Rating in question.
      * @return Share of sellable on overall investments in a given rating.
      */
@@ -81,9 +80,9 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
 
     /**
      * Sum total of all remaining principal which can be sold right now, without sale fees.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkSellableFeeless();
+    Money getSellableFeeless();
 
     /**
      * How much can be sold of the entire portfolio without fees, in relative terms.
@@ -94,12 +93,12 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
     /**
      * Sum total of all remaining principal which can be sold right now without fees in a given rating.
      * @param r Rating in question.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkSellableFeeless(final Rating r);
+    Money getSellableFeeless(final Rating r);
 
     /**
-     * Retrieve the sellable without fees in a given rating, divided by {@link #getCzkInvested(Rating)}.
+     * Retrieve the sellable without fees in a given rating, divided by {@link #getInvested(Rating)}.
      * @param r Rating in question.
      * @return Share of sellable on overall investments in a given rating.
      */

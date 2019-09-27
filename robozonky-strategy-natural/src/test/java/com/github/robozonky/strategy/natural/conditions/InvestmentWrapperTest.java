@@ -62,8 +62,8 @@ class InvestmentWrapperTest {
             softly.assertThat(w.getRating()).isEqualTo(INVESTMENT.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(LOAN.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) LOAN.getAmount());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(INVESTMENT.getRemainingPrincipal());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo(LOAN.getAmount().getValue().intValue());
+            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(INVESTMENT.getRemainingPrincipal().get().getValue());
             softly.assertThat(w.getOriginal()).isSameAs(original);
             softly.assertThat(w.getStory()).isEqualTo(LOAN.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(INVESTMENT.getLoanTermInMonth());

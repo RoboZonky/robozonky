@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
@@ -31,11 +32,9 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -44,7 +43,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
 
     private static Reservation mockReservation() {
         final MyReservation mr = mock(MyReservation.class);
-        when(mr.getReservedAmount()).thenReturn(200);
+        when(mr.getReservedAmount()).thenReturn(Money.from(200));
         return new MockReservationBuilder()
                 .setMyReservation(mr)
                 .build();
@@ -73,8 +72,8 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
                 .thenAnswer(i -> {
                     final Collection<ReservationDescriptor> reservations = i.getArgument(0);
                     return reservations.stream()
-                            .map(r -> r.recommend(BigDecimal.valueOf(200)))
-                            .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+                            .map(r -> r.recommend(Money.from(200)))
+                            .flatMap(Optional::stream);
                 });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
@@ -104,7 +103,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
                 .thenAnswer(i -> {
                     final Collection<ReservationDescriptor> reservations = i.getArgument(0);
                     return reservations.stream()
-                            .map(r -> r.recommend(BigDecimal.valueOf(200)))
+                            .map(r -> r.recommend(Money.from(200)))
                             .flatMap(Optional::stream);
                 });
         final Zonky z = harmlessZonky();
@@ -135,7 +134,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
                 .thenAnswer(i -> {
                     final Collection<ReservationDescriptor> reservations = i.getArgument(0);
                     return reservations.stream()
-                            .map(r -> r.recommend(BigDecimal.valueOf(200)))
+                            .map(r -> r.recommend(Money.from(200)))
                             .flatMap(Optional::stream);
                 });
         final Zonky z = harmlessZonky();

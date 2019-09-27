@@ -16,18 +16,17 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.Recommended;
 
-import java.math.BigDecimal;
-
-abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, X>,
-        S extends Descriptor<T, S, X>, X> extends AbstractEventImpl {
+abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X>
+        extends AbstractEventImpl {
 
     private final X participation;
     private final Loan loan;
-    private final BigDecimal recommendation;
+    private final Money recommendation;
 
     protected AbstractRecommendationBasedEventImpl(final T recommendation) {
         this.participation = recommendation.descriptor().item();
@@ -43,7 +42,7 @@ abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, 
         return participation;
     }
 
-    public BigDecimal getRecommendation() {
+    public Money getRecommendation() {
         return recommendation;
     }
 }

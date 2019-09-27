@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import io.vavr.Lazy;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -54,8 +54,8 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
         return related.get();
     }
 
-    private BigDecimal getRemainingPrincipal() {
-        return investment.getRemainingPrincipal();
+    private Money getRemainingPrincipal() {
+        return investment.getRemainingPrincipal().orElseThrow();
     }
 
     public Optional<RecommendedInvestment> recommend() {
@@ -63,7 +63,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
     }
 
     @Override
-    public Optional<RecommendedInvestment> recommend(final BigDecimal amount) {
+    public Optional<RecommendedInvestment> recommend(final Money amount) {
         if (Objects.equals(amount, getRemainingPrincipal())) {
             return Optional.of(new RecommendedInvestment(this, amount));
         } else {

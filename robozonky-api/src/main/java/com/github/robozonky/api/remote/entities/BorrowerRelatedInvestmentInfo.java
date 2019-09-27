@@ -16,28 +16,40 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
+
 import javax.xml.bind.annotation.XmlElement;
-import java.math.BigDecimal;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
 public class BorrowerRelatedInvestmentInfo extends BaseEntity {
 
-    @XmlElement
-    private BigDecimal totalPrincipalToLoan = BigDecimal.ZERO;
-    @XmlElement
-    private BigDecimal remainingPrincipalToLoan = BigDecimal.ZERO;;
-    @XmlElement
-    private BigDecimal totalPrincipalToBorrower = BigDecimal.ZERO;;
-    @XmlElement
-    private BigDecimal remainingPrincipalToBorrower = BigDecimal.ZERO;;
-    private BigDecimal totalSoldAmountToLoan = BigDecimal.ZERO;;
     private int activeCountToLoan;
     private int soldCountToLoan;
 
     @XmlElement
     private Collection<String> otherBorrowerNicknames = Collections.emptyList();
+
+    // string representation of money
+
+    @XmlElement
+    private String totalPrincipalToLoan;
+    private final Lazy<Money> moneyTotalPrincipalToLoan = Lazy.of(() -> Money.from(totalPrincipalToLoan));
+    @XmlElement
+    private String remainingPrincipalToLoan;
+    private final Lazy<Money> moneyRemainingPrincipalToLoan = Lazy.of(() -> Money.from(remainingPrincipalToLoan));
+    @XmlElement
+    private String totalPrincipalToBorrower;
+    private final Lazy<Money> moneyTotalPrincipalToBorrower = Lazy.of(() -> Money.from(totalPrincipalToBorrower));
+    @XmlElement
+    private String remainingPrincipalToBorrower;
+    private final Lazy<Money> moneyRemainingPrincipalToBorrower = Lazy.of(() -> Money.from(remainingPrincipalToBorrower));
+    @XmlElement
+    private String totalSoldAmountToLoan;;
+    private final Lazy<Money> moneyTotalSoldAmountToLoan = Lazy.of(() -> Money.from(totalSoldAmountToLoan));
 
     BorrowerRelatedInvestmentInfo() {
         // for JAXB
@@ -50,33 +62,6 @@ public class BorrowerRelatedInvestmentInfo extends BaseEntity {
         return otherBorrowerNicknames == null ? Collections.emptySet() : otherBorrowerNicknames;
     }
 
-    public Optional<BigDecimal> getTotalPrincipalToLoan() {
-        return Optional.ofNullable(totalPrincipalToLoan);
-    }
-
-    public Optional<BigDecimal> getRemainingPrincipalToLoan() {
-        return Optional.ofNullable(remainingPrincipalToLoan);
-    }
-
-    /**
-     * @return Empty if no other loans to the borrower.
-     */
-    public Optional<BigDecimal> getTotalPrincipalToBorrower() {
-        return Optional.ofNullable(totalPrincipalToBorrower);
-    }
-
-    /**
-     * @return Empty if no other loans to the borrower.
-     */
-    public Optional<BigDecimal> getRemainingPrincipalToBorrower() {
-        return Optional.ofNullable(remainingPrincipalToBorrower);
-    }
-
-    @XmlElement
-    public BigDecimal getTotalSoldAmountToLoan() {
-        return totalSoldAmountToLoan;
-    }
-
     @XmlElement
     public int getActiveCountToLoan() {
         return activeCountToLoan;
@@ -86,4 +71,38 @@ public class BorrowerRelatedInvestmentInfo extends BaseEntity {
     public int getSoldCountToLoan() {
         return soldCountToLoan;
     }
+
+    // money-based fields are all transient
+
+    @XmlTransient
+    public Optional<Money> getTotalPrincipalToLoan() {
+        return Optional.ofNullable(moneyTotalPrincipalToLoan.getOrElse((Money) null));
+    }
+
+    @XmlTransient
+    public Optional<Money> getRemainingPrincipalToLoan() {
+        return Optional.ofNullable(moneyRemainingPrincipalToLoan.getOrElse((Money) null));
+    }
+
+    /**
+     * @return Empty if no other loans to the borrower.
+     */
+    @XmlTransient
+    public Optional<Money> getTotalPrincipalToBorrower() {
+        return Optional.ofNullable(moneyTotalPrincipalToBorrower.getOrElse((Money) null));
+    }
+
+    /**
+     * @return Empty if no other loans to the borrower.
+     */
+    @XmlTransient
+    public Optional<Money> getRemainingPrincipalToBorrower() {
+        return Optional.ofNullable(moneyRemainingPrincipalToBorrower.getOrElse((Money) null));
+    }
+
+    @XmlTransient
+    public Money getTotalSoldAmountToLoan() {
+        return moneyTotalSoldAmountToLoan.get();
+    }
+
 }

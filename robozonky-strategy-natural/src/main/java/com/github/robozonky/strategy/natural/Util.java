@@ -16,26 +16,18 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 final class Util {
 
@@ -76,9 +68,9 @@ final class Util {
     }
 
     static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
-        final long invested = portfolio.getCzkInvested().longValue();
-        final long investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
-        if (invested >= investmentCeiling) {
+        final Money invested = portfolio.getInvested();
+        final Money investmentCeiling = strategy.getMaximumInvestmentSize();
+        if (invested.compareTo(investmentCeiling) >= 0) {
             LOGGER.debug("Not recommending any loans due to reaching the ceiling.");
             return false;
         }

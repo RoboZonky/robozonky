@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Reservation;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,17 +45,17 @@ class RecommendedReservationTest {
     void constructor() {
         final ReservationDescriptor ld = mockDescriptor();
         final int amount = 200;
-        final RecommendedReservation r = new RecommendedReservation(ld, amount);
+        final RecommendedReservation r = new RecommendedReservation(ld, Money.from(amount));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.descriptor()).isSameAs(ld);
-            softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(amount));
+            softly.assertThat(r.amount()).isEqualTo(Money.from(amount));
         });
     }
 
     @Test
     void constructorNoLoanDescriptor() {
         final int amount = 200;
-        assertThatThrownBy(() -> new RecommendedReservation(null, amount))
+        assertThatThrownBy(() -> new RecommendedReservation(null, Money.from(amount)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -63,17 +63,17 @@ class RecommendedReservationTest {
     void equalsSame() {
         final ReservationDescriptor ld = mockDescriptor();
         final int amount = 200;
-        final RecommendedReservation r1 = new RecommendedReservation(ld, amount);
+        final RecommendedReservation r1 = new RecommendedReservation(ld, Money.from(amount));
         assertThat(r1).isEqualTo(r1);
-        final RecommendedReservation r2 = new RecommendedReservation(ld, amount);
+        final RecommendedReservation r2 = new RecommendedReservation(ld, Money.from(amount));
         assertThat(r1).isEqualTo(r2);
     }
 
     @Test
     void notEqualsDifferentLoanDescriptor() {
         final int amount = 200;
-        final RecommendedReservation r1 = new RecommendedReservation(mockDescriptor(), amount);
-        final RecommendedReservation r2 = new RecommendedReservation(mockDescriptor(), amount);
+        final RecommendedReservation r1 = new RecommendedReservation(mockDescriptor(), Money.from(amount));
+        final RecommendedReservation r2 = new RecommendedReservation(mockDescriptor(), Money.from(amount));
         assertThat(r1).isNotEqualTo(r2);
     }
 
@@ -81,14 +81,14 @@ class RecommendedReservationTest {
     void notEqualsDifferentAmount() {
         final ReservationDescriptor ld = mockDescriptor();
         final int amount = 200;
-        final RecommendedReservation r1 = new RecommendedReservation(ld, amount);
-        final RecommendedReservation r2 = new RecommendedReservation(ld, amount + 1);
+        final RecommendedReservation r1 = new RecommendedReservation(ld, Money.from(amount));
+        final RecommendedReservation r2 = new RecommendedReservation(ld, Money.from(amount + 1));
         assertThat(r1).isNotEqualTo(r2);
     }
 
     @Test
     void notEqualsDifferentJavaType() {
-        final RecommendedReservation r1 = new RecommendedReservation(mockDescriptor(), 200);
+        final RecommendedReservation r1 = new RecommendedReservation(mockDescriptor(), Money.from(200));
         assertThat(r1).isNotEqualTo(r1.toString());
     }
 }

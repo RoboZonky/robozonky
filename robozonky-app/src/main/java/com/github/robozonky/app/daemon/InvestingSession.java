@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -23,11 +24,9 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import io.vavr.control.Either;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -77,12 +76,12 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         } while (invested);
     }
 
-    private boolean successfulInvestment(final RecommendedLoan recommendation, final BigDecimal amount) {
+    private boolean successfulInvestment(final RecommendedLoan recommendation, final Money amount) {
         final Loan l = recommendation.descriptor().item();
-        final Investment i = new Investment(l, amount, Defaults.CURRENCY);
+        final Investment i = new Investment(l, amount);
         result.add(i);
         tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), amount);
-        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - amount.intValue());
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(amount));
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
         logger.info("Invested {} CZK into loan #{}.", amount, l.getId());
@@ -95,7 +94,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
             throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.");
         } else if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
-            tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
+            tenant.setKnownBalanceUpperBound(recommendation.amount().subtract(1));
         }
         logger.debug("Failed investing {} CZK into loan #{}, reason: {}.",
                      recommendation.amount(), recommendation.descriptor().item().getId(), failureType);
@@ -110,7 +109,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             return false;
         }
         logger.debug("Will attempt to invest in {}.", recommendation);
-        final Either<InvestmentFailureType, BigDecimal> response = investor.invest(recommendation);
+        final Either<InvestmentFailureType, Money> response = investor.invest(recommendation);
         return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
                              amount -> successfulInvestment(recommendation, amount));
     }

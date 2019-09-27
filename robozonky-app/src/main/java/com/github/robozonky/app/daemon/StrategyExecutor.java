@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -107,9 +108,9 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
             logger.debug("Access to marketplace disabled by Zonky.");
             return Collections.emptyList();
         }
-        final long currentBalance = tenant.getKnownBalanceUpperBound();
-        final long minimum = operationDescriptor.getMinimumBalance(tenant);
-        if (!needsToForceMarketplaceCheck() && currentBalance < minimum) {
+        final Money currentBalance = tenant.getKnownBalanceUpperBound();
+        final Money minimum = operationDescriptor.getMinimumBalance(tenant);
+        if (!needsToForceMarketplaceCheck() && currentBalance.compareTo(minimum) < 0) {
             logger.debug("Asleep due to balance estimated below minimum. ({} < {})", currentBalance, minimum);
             return Collections.emptyList();
         }

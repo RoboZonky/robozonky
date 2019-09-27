@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class ParticipationDescriptorTest {
 
     private static Participation mockParticipation(final BigDecimal amount) {
         final Participation p = mock(Participation.class);
-        when(p.getRemainingPrincipal()).thenReturn(amount);
+        when(p.getRemainingPrincipal()).thenReturn(Money.from(amount));
         return p;
     }
 
@@ -56,7 +57,7 @@ class ParticipationDescriptorTest {
     void recommendWrong() {
         final Participation p = mockParticipation(BigDecimal.TEN);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
-        final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal().subtract(BigDecimal.ONE));
+        final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal().subtract(Money.from(1)));
         assertThat(r).isEmpty();
     }
 

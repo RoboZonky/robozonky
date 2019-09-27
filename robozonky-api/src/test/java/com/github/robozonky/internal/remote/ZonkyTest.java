@@ -16,12 +16,12 @@
 
 package com.github.robozonky.internal.remote;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.*;
 import com.github.robozonky.api.remote.entities.*;
 import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +41,7 @@ class ZonkyTest {
         final Investment i = mock(Investment.class);
         doReturn(loan.getId()).when(i).getLoanId();
         doReturn(loan.getCurrency()).when(i).getCurrency();
-        when(i.getAmount()).thenReturn(BigDecimal.valueOf(amount));
+        when(i.getAmount()).thenReturn(Money.from(amount));
         return i;
     }
 
@@ -107,8 +107,8 @@ class ZonkyTest {
         final int loanId = 1;
         final Loan loan = mock(Loan.class);
         when(loan.getId()).thenReturn(loanId);
-        when(loan.getAmount()).thenReturn(200.0);
-        when(loan.getRemainingInvestment()).thenReturn(200.0);
+        when(loan.getAmount()).thenReturn(Money.from(200.0));
+        when(loan.getRemainingInvestment()).thenReturn(Money.from(200.0));
         when(la.execute(any())).thenReturn(loan);
         final ApiProvider p = spy(new ApiProvider());
         when(p.marketplace(any())).thenReturn(la);
@@ -158,8 +158,8 @@ class ZonkyTest {
         final int loanId = 1;
         final Loan loan = mock(Loan.class);
         when(loan.getId()).thenReturn(loanId);
-        when(loan.getAmount()).thenReturn(200.0);
-        when(loan.getRemainingInvestment()).thenReturn(200.0);
+        when(loan.getAmount()).thenReturn(Money.from(200.0));
+        when(loan.getRemainingInvestment()).thenReturn(Money.from(200.0));
         when(la.execute(any())).thenReturn(loan);
         final Zonky z = mockZonky(ca, la);
         final Loan l = z.getLoan(loanId);
@@ -176,7 +176,7 @@ class ZonkyTest {
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
         final Participation p = mock(Participation.class);
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
         when(p.getId()).thenReturn(1L);
         z.purchase(p);
         verify(control).purchase(eq(p.getId()), any());
@@ -188,8 +188,8 @@ class ZonkyTest {
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
         final Investment p = mock(Investment.class);
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
-        when(p.getSmpFee()).thenReturn(Optional.of(BigDecimal.ONE));
+        when(p.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(10)));
+        when(p.getSmpFee()).thenReturn(Optional.of(Money.from(1)));
         when(p.getId()).thenReturn(1L);
         z.sell(p);
         verify(control).offer(any());

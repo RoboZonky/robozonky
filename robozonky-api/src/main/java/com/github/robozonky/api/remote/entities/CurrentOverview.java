@@ -16,18 +16,36 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
+
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.Optional;
 
 public class CurrentOverview extends BaseOverview {
 
+    @XmlElement
     private long principalLeft;
+    private final Lazy<Money> moneyPrincipalLeft = Lazy.of(() -> Money.from(principalLeft));
+    @XmlElement
     private long principalLeftToPay;
+    private final Lazy<Money> moneyPrincipalLeftToPay = Lazy.of(() -> Money.from(principalLeftToPay));
+    @XmlElement
     private long principalLeftDue;
+    private final Lazy<Money> moneyPrincipalLeftDue = Lazy.of(() -> Money.from(principalLeftDue));
+    @XmlElement
     private long interestPlanned;
+    private final Lazy<Money> moneyInterestPlanned = Lazy.of(() -> Money.from(interestPlanned));
+    @XmlElement
     private long interestLeft;
+    private final Lazy<Money> moneyInterestLeft = Lazy.of(() -> Money.from(interestLeft));
+    @XmlElement
     private long interestLeftToPay;
+    private final Lazy<Money> moneyInterestLeftToPay = Lazy.of(() -> Money.from(interestLeftToPay));
+    @XmlElement
     private long interestLeftDue;
+    private final Lazy<Money> moneyInterestLeftDue = Lazy.of(() -> Money.from(interestLeftDue));
     @XmlElement
     private CurrentPortfolio currentInvestments;
 
@@ -35,41 +53,42 @@ public class CurrentOverview extends BaseOverview {
         // for JAXB
     }
 
-    @XmlElement
-    public long getPrincipalLeft() {
-        return principalLeft;
+    @XmlTransient
+    public Money getPrincipalLeft() {
+        return moneyPrincipalLeft.get();
     }
 
-    @XmlElement
-    public long getPrincipalLeftToPay() {
-        return principalLeftToPay;
+    @XmlTransient
+    public Money getPrincipalLeftToPay() {
+        return moneyPrincipalLeftToPay.get();
     }
 
-    @XmlElement
-    public long getPrincipalLeftDue() {
-        return principalLeftDue;
+    @XmlTransient
+    public Money getPrincipalLeftDue() {
+        return moneyPrincipalLeftDue.get();
     }
 
-    @XmlElement
-    public long getInterestPlanned() {
-        return interestPlanned;
+    @XmlTransient
+    public Money getInterestPlanned() {
+        return moneyInterestPlanned.get();
     }
 
-    @XmlElement
-    public long getInterestLeft() {
-        return interestLeft;
+    @XmlTransient
+    public Money getInterestLeft() {
+        return moneyInterestLeft.get();
     }
 
-    @XmlElement
-    public long getInterestLeftToPay() {
-        return interestLeftToPay;
+    @XmlTransient
+    public Money getInterestLeftToPay() {
+        return moneyInterestLeftToPay.get();
     }
 
-    @XmlElement
-    public long getInterestLeftDue() {
-        return interestLeftDue;
+    @XmlTransient
+    public Money getInterestLeftDue() {
+        return moneyInterestLeftDue.get();
     }
 
+    @XmlTransient
     public Optional<CurrentPortfolio> getCurrentInvestments() {
         return Optional.ofNullable(currentInvestments);
     }

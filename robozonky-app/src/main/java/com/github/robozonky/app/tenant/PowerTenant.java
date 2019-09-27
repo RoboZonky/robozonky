@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.function.Consumer;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
+
+import java.util.function.Consumer;
 
 /**
  * This is a {@link Tenant} extension which allows to easily fire {@link SessionEvent}s. Events are fired when requested
@@ -63,9 +64,9 @@ public interface PowerTenant extends Tenant {
         }
     }
 
-    void setKnownBalanceUpperBound(long knownBalanceUpperBound);
+    void setKnownBalanceUpperBound(Money knownBalanceUpperBound);
 
-    long getKnownBalanceUpperBound();
+    Money getKnownBalanceUpperBound();
 
     /**
      * See {@link SessionEvents#fire(SessionEvent)} for the semantics of this method.

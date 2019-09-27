@@ -16,10 +16,11 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Optional;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
 
 interface OperationDescriptor<T, S> {
 
@@ -33,7 +34,7 @@ interface OperationDescriptor<T, S> {
 
     Operation<T, S> getOperation();
 
-    long getMinimumBalance(final Tenant tenant);
+    Money getMinimumBalance(final Tenant tenant);
 
     Logger getLogger();
 

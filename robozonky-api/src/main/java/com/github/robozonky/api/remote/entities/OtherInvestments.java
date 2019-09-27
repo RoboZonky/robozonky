@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,19 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
 import java.util.Collections;
-import javax.xml.bind.annotation.XmlElement;
 
 public class OtherInvestments extends BaseEntity {
 
-    private BigDecimal amount;
+    @XmlElement
+    private String amount;
+    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount));
     private Collection<String> otherBorrowerNicknames = Collections.emptyList();
 
     @XmlElement
@@ -31,8 +36,8 @@ public class OtherInvestments extends BaseEntity {
         return otherBorrowerNicknames;
     }
 
-    @XmlElement
-    public BigDecimal getAmount() {
-        return amount;
+    @XmlTransient
+    public Money getAmount() {
+        return moneyAmount.get();
     }
 }

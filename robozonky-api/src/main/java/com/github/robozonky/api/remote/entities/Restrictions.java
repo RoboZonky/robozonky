@@ -16,9 +16,12 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.internal.Defaults;
+import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -28,8 +31,17 @@ public class Restrictions extends BaseEntity {
     private OffsetDateTime requestDate = Instant.EPOCH.atZone(Defaults.ZONE_ID).toOffsetDateTime();
     @XmlElement
     private OffsetDateTime withdrawalDate = null;
-    private boolean cannotInvest, cannotAccessSmp;
-    private int minimumInvestmentAmount = 200, maximumInvestmentAmount = 5_000, investmentStep = 200;
+    private boolean cannotInvest;
+    private boolean cannotAccessSmp;
+    @XmlElement
+    private int minimumInvestmentAmount = 200;
+    private final Lazy<Money> moneyMinimumInvestmentAmount = Lazy.of(() -> Money.from(minimumInvestmentAmount));
+    @XmlElement
+    private int maximumInvestmentAmount = 5_000;
+    private final Lazy<Money> moneyMaximumInvestmentAmount = Lazy.of(() -> Money.from(maximumInvestmentAmount));
+    @XmlElement
+    private int investmentStep = 200;
+    private final Lazy<Money> moneyInvestmentStep = Lazy.of(() -> Money.from(investmentStep));
 
     public Restrictions(final boolean permissive) {
         this.cannotAccessSmp = !permissive;
@@ -67,22 +79,22 @@ public class Restrictions extends BaseEntity {
         return cannotAccessSmp;
     }
 
-    @XmlElement
-    public int getMinimumInvestmentAmount() {
-        return minimumInvestmentAmount;
+    @XmlTransient
+    public Money getMinimumInvestmentAmount() {
+        return moneyMinimumInvestmentAmount.get();
     }
 
-    @XmlElement
-    public int getInvestmentStep() {
-        return investmentStep;
+    @XmlTransient
+    public Money getInvestmentStep() {
+        return moneyInvestmentStep.get();
     }
 
     /**
      * Biggest amount that a user is allowed to invest into a single loan.
      * @return
      */
-    @XmlElement
-    public int getMaximumInvestmentAmount() {
-        return maximumInvestmentAmount;
+    @XmlTransient
+    public Money getMaximumInvestmentAmount() {
+        return moneyMaximumInvestmentAmount.get();
     }
 }

@@ -32,7 +32,7 @@ public class InvestmentSoldEventListener extends AbstractListener<InvestmentSold
     @Override
     String getSubject(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
-        final BigDecimal remaining = i.getRemainingPrincipal();
+        final BigDecimal remaining = i.getRemainingPrincipal().get().getValue();
         return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 

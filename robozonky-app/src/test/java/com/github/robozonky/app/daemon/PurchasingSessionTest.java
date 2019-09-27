@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -35,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -65,7 +65,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Participation p = mock(Participation.class);
         doReturn(l.getId()).when(p).getLoanId();
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenAnswer(i -> {
             final Collection<ParticipationDescriptor> participations = i.getArgument(0);
@@ -96,7 +96,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Participation p = mock(Participation.class);
         doReturn(l.getId()).when(p).getLoanId();
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenAnswer(i -> {
             final Collection<ParticipationDescriptor> participations = i.getArgument(0);
@@ -116,7 +116,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
         assertThat(i).isEmpty();
-        assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(199);
+        assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(Money.from(199));
     }
 
     @Test
@@ -129,7 +129,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Participation p = mock(Participation.class);
         doReturn(l.getId()).when(p).getLoanId();
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenAnswer(i -> {
             final Collection<ParticipationDescriptor> participations = i.getArgument(0);

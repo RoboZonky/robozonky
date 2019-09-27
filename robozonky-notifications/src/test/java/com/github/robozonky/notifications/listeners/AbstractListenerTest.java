@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.*;
@@ -179,7 +180,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 .setUrl(new URL("http://www.robozonky.cz"))
                 .build();
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
-        final RecommendedLoan recommendation = loanDescriptor.recommend(1200).get();
+        final RecommendedLoan recommendation = loanDescriptor.recommend(Money.from(1200)).get();
         final Investment i = MockInvestmentBuilder.fresh(loan, 1000)
                 .setExpectedInterest(BigDecimal.TEN)
                 .setPaidPenalty(BigDecimal.ZERO)

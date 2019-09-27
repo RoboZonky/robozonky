@@ -16,6 +16,7 @@
 
 package com.github.robozonky.test.mock;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -60,7 +61,7 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     }
 
     public MockInvestmentBuilder setAmount(final BigDecimal amount) {
-        when(mock.getAmount()).thenReturn(amount);
+        when(mock.getAmount()).thenReturn(Money.from(amount));
         return this;
     }
 
@@ -90,7 +91,7 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     }
 
     public MockInvestmentBuilder setSmpFee(final BigDecimal bigDecimal) {
-        when(mock.getSmpFee()).thenReturn(Optional.ofNullable(bigDecimal));
+        when(mock.getSmpFee()).thenReturn(Optional.ofNullable(Money.from(bigDecimal)));
         return this;
     }
 
@@ -111,17 +112,17 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     }
 
     public MockInvestmentBuilder setRemainingPrincipal(final BigDecimal remainingPrincipal) {
-        when(mock.getRemainingPrincipal()).thenReturn(remainingPrincipal);
+        when(mock.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(remainingPrincipal)));
         return this;
     }
 
     public MockInvestmentBuilder setExpectedInterest(final BigDecimal expectedInterest) {
-        when(mock.getExpectedInterest()).thenReturn(expectedInterest);
+        when(mock.getExpectedInterest()).thenReturn(Money.from(expectedInterest));
         return this;
     }
 
     public MockInvestmentBuilder setPaidInterest(final BigDecimal paidInterest) {
-        when(mock.getPaidInterest()).thenReturn(paidInterest);
+        when(mock.getPaidInterest()).thenReturn(Money.from(paidInterest));
         return this;
     }
 
@@ -146,12 +147,12 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     }
 
     public MockInvestmentBuilder setPaidPenalty(final BigDecimal paidPenalty) {
-        when(mock.getPaidPenalty()).thenReturn(paidPenalty);
+        when(mock.getPaidPenalty()).thenReturn(Money.from(paidPenalty));
         return this;
     }
 
     public MockInvestmentBuilder setPaidPrincipal(final BigDecimal paidPrincipal) {
-        when(mock.getPaidPrincipal()).thenReturn(paidPrincipal);
+        when(mock.getPaidPrincipal()).thenReturn(Money.from(paidPrincipal));
         return this;
     }
 

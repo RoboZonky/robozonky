@@ -16,6 +16,7 @@
 
 package com.github.robozonky.test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -32,7 +33,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.stubbing.Answer;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
@@ -77,10 +77,10 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     public static RemotePortfolio mockPortfolio() {
-        final AtomicReference<BigDecimal> change = new AtomicReference<>(BigDecimal.ZERO);
+        final AtomicReference<Money> change = new AtomicReference<>(Money.ZERO);
         final RemotePortfolio p = mock(RemotePortfolio.class);
         doAnswer(i -> {
-            final BigDecimal amount = i.getArgument(2);
+            final Money amount = i.getArgument(2);
             change.updateAndGet(old -> old.add(amount));
             return null;
         }).when(p).simulateCharge(anyInt(), any(), any());
@@ -128,14 +128,14 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     protected static ExtendedPortfolioOverview mockPortfolioOverview() {
         final ExtendedPortfolioOverview po = mock(ExtendedPortfolioOverview.class);
-        when(po.getCzkInvested()).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkInvested(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkAtRisk()).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkAtRisk(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkSellable()).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkSellable(any())).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkSellableFeeless()).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkSellableFeeless(any())).thenReturn(BigDecimal.ZERO);
+        when(po.getInvested()).thenReturn(Money.ZERO);
+        when(po.getInvested(any())).thenReturn(Money.ZERO);
+        when(po.getAtRisk()).thenReturn(Money.ZERO);
+        when(po.getAtRisk(any())).thenReturn(Money.ZERO);
+        when(po.getSellable()).thenReturn(Money.ZERO);
+        when(po.getSellable(any())).thenReturn(Money.ZERO);
+        when(po.getSellableFeeless()).thenReturn(Money.ZERO);
+        when(po.getSellableFeeless(any())).thenReturn(Money.ZERO);
         when(po.getShareAtRisk()).thenReturn(Ratio.ZERO);
         when(po.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(po.getAtRiskShareOnInvestment(any())).thenReturn(Ratio.ZERO);
@@ -143,9 +143,9 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(po.getShareSellable(any())).thenReturn(Ratio.ZERO);
         when(po.getShareSellableFeeless()).thenReturn(Ratio.ZERO);
         when(po.getShareSellableFeeless(any())).thenReturn(Ratio.ZERO);
-        when(po.getCzkMinimalMonthlyProfit()).thenReturn(BigDecimal.ZERO);
-        when(po.getCzkMonthlyProfit()).thenReturn(BigDecimal.ONE);
-        when(po.getCzkOptimalMonthlyProfit()).thenReturn(BigDecimal.TEN);
+        when(po.getMinimalMonthlyProfit()).thenReturn(Money.from(0));
+        when(po.getMonthlyProfit()).thenReturn(Money.from(1));
+        when(po.getOptimalMonthlyProfit()).thenReturn(Money.from(10));
         when(po.getMinimalAnnualProfitability()).thenReturn(Ratio.ZERO);
         when(po.getAnnualProfitability()).thenReturn(Ratio.fromPercentage(5));
         when(po.getOptimalAnnualProfitability()).thenReturn(Ratio.ONE);

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -57,12 +58,12 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
-    public void setKnownBalanceUpperBound(final long knownBalanceUpperBound) {
+    public void setKnownBalanceUpperBound(final Money knownBalanceUpperBound) {
         parent.setKnownBalanceUpperBound(knownBalanceUpperBound);
     }
 
     @Override
-    public long getKnownBalanceUpperBound() {
+    public Money getKnownBalanceUpperBound() {
         return parent.getKnownBalanceUpperBound();
     }
 

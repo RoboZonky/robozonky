@@ -59,7 +59,7 @@ final class Cache<T> implements AutoCloseable {
 
         @Override
         public boolean shouldCache(final Loan item) {
-            return item.getRemainingInvestment() == 0;
+            return item.getRemainingInvestment().isZero();
         }
     };
 

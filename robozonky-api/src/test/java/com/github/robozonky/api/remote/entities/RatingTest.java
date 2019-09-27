@@ -16,16 +16,17 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class RatingTest {
 
@@ -37,7 +38,7 @@ class RatingTest {
 
     @Test
     void maxFeeDiscount() {
-        final Ratio revenue = Rating.D.getMaximalRevenueRate(Long.MAX_VALUE);
+        final Ratio revenue = Rating.D.getMaximalRevenueRate(Money.from(Long.MAX_VALUE));
         assertThat(revenue.doubleValue()).isEqualTo(0.1599, Offset.offset(0.0001));
     }
 

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -37,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -57,7 +57,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
             (a, p, r) -> a.stream().map(d -> d.recommend().get());
     private static final InvestmentStrategy NONE_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Stream.empty();
     private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY =
-            (a, p, r) -> a.stream().map(d -> d.recommend(200).get());
+            (a, p, r) -> a.stream().map(d -> d.recommend(Money.from(200)).get());
 
     private static PurchasingOperationDescriptor mockPurchasingOperationDescriptor(
             final ParticipationDescriptor... pd) {
@@ -99,7 +99,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Loan loan = new MockLoanBuilder().setAmount(200).build();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         final Participation mock = mock(Participation.class);
-        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
         final PowerTenant tenant = mockTenant(zonky);
         when(tenant.getPurchaseStrategy()).thenReturn(Optional.of(NONE_ACCEPTING_PURCHASE_STRATEGY));
@@ -130,7 +130,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Participation mock = mock(Participation.class);
         when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loanId);
-        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
         when(mock.getRating()).thenReturn(rating);
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
         final PowerTenant tenant = mockTenant(zonky);
@@ -168,7 +168,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Participation mock = mock(Participation.class);
         when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loanId);
-        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
         when(mock.getRating()).thenReturn(rating);
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
         final PowerTenant tenant = mockTenant(zonky, false);
@@ -195,7 +195,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Participation mock = mock(Participation.class);
         when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loanId);
-        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
         when(mock.getRating()).thenReturn(rating);
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
         final PowerTenant tenant = mockTenant(zonky, false);

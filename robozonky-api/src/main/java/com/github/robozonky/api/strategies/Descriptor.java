@@ -16,9 +16,9 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface Descriptor<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
@@ -27,5 +27,5 @@ public interface Descriptor<T extends Recommended<T, S, X>, S extends Descriptor
 
     Loan related();
 
-    Optional<T> recommend(final BigDecimal amount);
+    Optional<T> recommend(final Money amount);
 }

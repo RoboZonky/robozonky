@@ -16,22 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 import org.apache.logging.log4j.Logger;
+
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The goal of this class is to only sell investments in small amounts, so that the entire {@link PortfolioOverview} is
@@ -54,25 +49,25 @@ final class SellingThrottle
     private static final Ratio MAX_SELLOFF_SHARE_PER_RATING = Ratio.fromPercentage(0.5);
 
     private static Stream<RecommendedInvestment> determineSelloffByRating(final Set<RecommendedInvestment> eligible,
-                                                                          final long maxSelloffSizeInCzk) {
+                                                                          final Money maxSelloffSize) {
         if (eligible.isEmpty()) {
             LOGGER.debug("No investments eligible.");
             return Stream.empty();
         }
-        long czkIncluded = 0;
+        Money czkIncluded = Money.ZERO;
         final List<RecommendedInvestment> byAmountIncreasing = eligible.stream()
-                .sorted(Comparator.comparing(d -> d.descriptor().item().getRemainingPrincipal()))
+                .sorted(Comparator.comparing(d -> d.descriptor().item().getRemainingPrincipal().orElseThrow()))
                 .collect(Collectors.toList());
         LOGGER.trace("Eligible investments: {}.", byAmountIncreasing);
         final Set<RecommendedInvestment> included = new HashSet<>();
         // find all the investments that can be sold without reaching over the limit, start with the smallest first
         for (final RecommendedInvestment evaluating : byAmountIncreasing) {
-            final long value = evaluating.descriptor().item().getRemainingPrincipal().longValue();
-            final long ifIncluded = czkIncluded + value;
-            if (ifIncluded > maxSelloffSizeInCzk) {
+            final Money value = evaluating.descriptor().item().getRemainingPrincipal().orElseThrow();
+            final Money ifIncluded = czkIncluded.add(value);
+            if (ifIncluded.compareTo(maxSelloffSize) > 0) {
                 continue;
             }
-            czkIncluded += value;
+            czkIncluded = czkIncluded.add(value);
             included.add(evaluating);
         }
         /*
@@ -89,10 +84,9 @@ final class SellingThrottle
         }
     }
 
-    private static long getMaxSelloffValue(final PortfolioOverview portfolioOverview) {
-        final BigDecimal invested = portfolioOverview.getCzkInvested();
-        final BigDecimal sellable = BigDecimalCalculator.times(invested, MAX_SELLOFF_SHARE_PER_RATING);
-        return sellable.longValue();
+    private static Money getMaxSelloffValue(final PortfolioOverview portfolioOverview) {
+        final Money invested = portfolioOverview.getInvested();
+        return MAX_SELLOFF_SHARE_PER_RATING.apply(invested);
     }
 
     @Override
@@ -100,7 +94,7 @@ final class SellingThrottle
                                                final PortfolioOverview portfolioOverview) {
         final Map<Rating, Set<RecommendedInvestment>> eligible = investmentDescriptors
                 .collect(Collectors.groupingBy(t -> t.descriptor().item().getRating(), Collectors.toSet()));
-        final long maxSeloffValue = getMaxSelloffValue(portfolioOverview);
+        final Money maxSeloffValue = getMaxSelloffValue(portfolioOverview);
         return eligible.entrySet().stream()
                 .flatMap(e -> {
                     final Rating r = e.getKey();

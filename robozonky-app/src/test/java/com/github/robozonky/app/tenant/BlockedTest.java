@@ -16,8 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.math.BigDecimal;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
@@ -29,9 +28,9 @@ class BlockedTest extends AbstractRoboZonkyTest {
 
     @Test
     void fromBigDecimal() {
-        final Blocked b = new Blocked(1, BigDecimal.TEN, Rating.D);
+        final Blocked b = new Blocked(1, Money.from(10), Rating.D);
         assertSoftly(softly -> {
-            softly.assertThat(b.getAmount()).isEqualTo(BigDecimal.TEN);
+            softly.assertThat(b.getAmount()).isEqualTo(Money.from(10));
             softly.assertThat(b.getRating()).isEqualTo(Rating.D);
             softly.assertThat(b.getId()).isEqualTo(1);
         });
@@ -39,13 +38,13 @@ class BlockedTest extends AbstractRoboZonkyTest {
 
     @Test
     void equals() {
-        final Blocked b = new Blocked(2, BigDecimal.TEN, Rating.D);
+        final Blocked b = new Blocked(2, Money.from(10), Rating.D);
         assertThat(b).isEqualTo(b);
         assertThat(b).isNotEqualTo(null);
         assertThat(b).isNotEqualTo("");
-        final Blocked sameB = new Blocked(2, BigDecimal.TEN, Rating.D);
+        final Blocked sameB = new Blocked(2, Money.from(10), Rating.D);
         assertThat(sameB).isEqualTo(b);
-        final Blocked differentB = new Blocked(2, BigDecimal.ONE, Rating.D);
+        final Blocked differentB = new Blocked(2, Money.from(1), Rating.D);
         assertThat(differentB).isNotEqualTo(b);
     }
 }

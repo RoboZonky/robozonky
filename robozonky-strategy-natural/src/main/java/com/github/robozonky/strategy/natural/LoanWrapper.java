@@ -88,12 +88,12 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     @Override
     public int getOriginalAmount() {
-        return (int) loan.getAmount();
+        return loan.getAmount().getValue().intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return loan.getAnnuity().intValue();
+        return loan.getAnnuity().getValue().intValue();
     }
 
     @Override

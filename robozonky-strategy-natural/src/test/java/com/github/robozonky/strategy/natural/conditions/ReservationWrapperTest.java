@@ -59,7 +59,7 @@ class ReservationWrapperTest {
             softly.assertThat(w.getRating()).isEqualTo(l.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(l.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(l.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) l.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo(l.getAmount().getValue().intValue());
             softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
             softly.assertThat(w.getOriginal()).isSameAs(original);
             softly.assertThat(w.getStory()).isEqualTo(l.getStory());

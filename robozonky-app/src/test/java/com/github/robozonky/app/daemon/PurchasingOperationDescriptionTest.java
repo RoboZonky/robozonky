@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealthInfo;
@@ -41,7 +42,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final Loan l = MockLoanBuilder.fresh();
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         assertThat(d.identify(pd)).isEqualTo(1);
-        assertThat(d.getMinimumBalance(null)).isEqualTo(1);
+        assertThat(d.getMinimumBalance(null)).isEqualTo(Money.from(1));
     }
 
     @Test

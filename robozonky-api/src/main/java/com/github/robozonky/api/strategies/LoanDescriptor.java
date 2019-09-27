@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -87,18 +87,14 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
         return loan;
     }
 
-    public Optional<RecommendedLoan> recommend(final int toInvest) {
-        final int remaining = (int)loan.getNonReservedRemainingInvestment();
-        if (toInvest <= remaining) {
+    @Override
+    public Optional<RecommendedLoan> recommend(final Money toInvest) {
+        final Money remaining = loan.getNonReservedRemainingInvestment();
+        if (toInvest.compareTo(remaining) <= 0) {
             return Optional.of(new RecommendedLoan(this, toInvest));
         } else {
             LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", toInvest, remaining, loan.getId());
             return Optional.empty();
         }
-    }
-
-    @Override
-    public Optional<RecommendedLoan> recommend(final BigDecimal toInvest) {
-        return recommend(toInvest.intValue());
     }
 }

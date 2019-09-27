@@ -16,9 +16,7 @@
 
 package com.github.robozonky.app.summaries;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.app.events.impl.EventFactory;
@@ -27,14 +25,14 @@ import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.Tuple2;
 
+import java.util.Map;
+
 final class Summarizer implements TenantPayload {
 
     private static ExtendedPortfolioOverview extend(final Tenant tenant) {
-        final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> amountsSellable =
-                Util.getAmountsSellable(tenant);
+        final Tuple2<Map<Rating, Money>, Map<Rating, Money>> amountsSellable = Util.getAmountsSellable(tenant);
         return ExtendedPortfolioOverviewImpl.extend(tenant.getPortfolio().getOverview(),
-                                                    Util.getAmountsAtRisk(tenant), amountsSellable._1(),
-                                                    amountsSellable._2());
+                Util.getAmountsAtRisk(tenant), amountsSellable._1(), amountsSellable._2());
     }
 
     private static void run(final PowerTenant tenant) {

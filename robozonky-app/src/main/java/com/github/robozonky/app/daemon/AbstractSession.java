@@ -59,7 +59,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
     }
 
     protected boolean isBalanceAcceptable(final T item) {
-        return item.amount().intValue() <= tenant.getKnownBalanceUpperBound();
+        return item.amount().compareTo(tenant.getKnownBalanceUpperBound()) <= 0;
     }
 
     /**

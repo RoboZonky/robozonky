@@ -88,12 +88,12 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     @Override
     public int getOriginalAmount() {
-        return (int) reservation.getAmount();
+        return reservation.getAmount().getValue().intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return reservation.getAnnuity().intValue();
+        return reservation.getAnnuity().getValue().intValue();
     }
 
     @Override

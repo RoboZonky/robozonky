@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
+import java.math.BigDecimal;
 
 public class PurchaseRequest extends BaseEntity {
 
     private BigDecimal amount;
 
     public PurchaseRequest(final Participation participation) {
-        this.amount = participation.getRemainingPrincipal();
+        this.amount = participation.getRemainingPrincipal().getValue();
     }
 
     @XmlElement

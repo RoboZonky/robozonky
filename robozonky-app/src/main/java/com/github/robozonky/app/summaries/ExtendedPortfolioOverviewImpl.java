@@ -16,86 +16,81 @@
 
 package com.github.robozonky.app.summaries;
 
-import java.math.BigDecimal;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Map;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.isZero;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.sum;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.Map;
 
 final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
     private final PortfolioOverview parent;
-    private final BigDecimal czkAtRisk;
-    private final BigDecimal czkSellable;
-    private final BigDecimal czkSellableFeeless;
-    private final Map<Rating, BigDecimal> czkAtRiskPerRating;
-    private final Map<Rating, BigDecimal> czkSellablePerRating;
-    private final Map<Rating, BigDecimal> czkSellableFeelessPerRating;
+    private final Money atRisk;
+    private final Money sellable;
+    private final Money sellableFeeless;
+    private final Map<Rating, Money> atRiskPerRating;
+    private final Map<Rating, Money> sellablePerRating;
+    private final Map<Rating, Money> sellableFeelessPerRating;
 
     ExtendedPortfolioOverviewImpl(final PortfolioOverview parent,
-                                  final Map<Rating, BigDecimal> czkAtRiskPerRating,
-                                  final Map<Rating, BigDecimal> czkSellablePerRating,
-                                  final Map<Rating, BigDecimal> czkSellableFeelessPerRating) {
+                                  final Map<Rating, Money> atRiskPerRating,
+                                  final Map<Rating, Money> sellablePerRating,
+                                  final Map<Rating, Money> sellableFeelessPerRating) {
         this.parent = parent;
-        this.czkSellable = sum(czkSellablePerRating.values());
-        this.czkSellableFeeless = sum(czkSellableFeelessPerRating.values());
-        if (isZero(parent.getCzkInvested())) {
-            this.czkAtRiskPerRating = Collections.emptyMap();
-            this.czkSellablePerRating = Collections.emptyMap();
-            this.czkSellableFeelessPerRating = Collections.emptyMap();
-            this.czkAtRisk = BigDecimal.ZERO;
+        this.sellable = Money.sum(sellablePerRating.values());
+        this.sellableFeeless = Money.sum(sellableFeelessPerRating.values());
+        if (parent.getInvested().isZero()) {
+            this.atRiskPerRating = Collections.emptyMap();
+            this.sellablePerRating = Collections.emptyMap();
+            this.sellableFeelessPerRating = Collections.emptyMap();
+            this.atRisk = Money.ZERO;
         } else {
-            this.czkAtRisk = sum(czkAtRiskPerRating.values());
-            this.czkAtRiskPerRating = isZero(czkAtRisk) ? Collections.emptyMap() : czkAtRiskPerRating;
-            this.czkSellablePerRating = isZero(czkSellable) ? Collections.emptyMap() : czkSellablePerRating;
-            this.czkSellableFeelessPerRating =
-                    isZero(czkSellableFeeless) ? Collections.emptyMap() : czkSellableFeelessPerRating;
+            this.atRisk = Money.sum(atRiskPerRating.values());
+            this.atRiskPerRating = atRisk.isZero() ? Collections.emptyMap() : atRiskPerRating;
+            this.sellablePerRating = sellable.isZero() ? Collections.emptyMap() : sellablePerRating;
+            this.sellableFeelessPerRating = sellableFeeless.isZero() ? Collections.emptyMap() : sellableFeelessPerRating;
         }
     }
 
     public static ExtendedPortfolioOverview extend(final PortfolioOverview parent,
-                                                   final Map<Rating, BigDecimal> czkAtRiskPerRating,
-                                                   final Map<Rating, BigDecimal> czkSellablePerRating,
-                                                   final Map<Rating, BigDecimal> czkSellableFeelessPerRating) {
-        return new ExtendedPortfolioOverviewImpl(parent, czkAtRiskPerRating, czkSellablePerRating,
-                                                 czkSellableFeelessPerRating);
+                                                   final Map<Rating, Money> atRiskPerRating,
+                                                   final Map<Rating, Money> sellablePerRating,
+                                                   final Map<Rating, Money> sellableFeelessPerRating) {
+        return new ExtendedPortfolioOverviewImpl(parent, atRiskPerRating, sellablePerRating,
+                sellableFeelessPerRating);
     }
 
     @Override
-    public BigDecimal getCzkInvested() {
-        return parent.getCzkInvested();
+    public Money getInvested() {
+        return parent.getInvested();
     }
 
     @Override
-    public BigDecimal getCzkInvested(final Rating r) {
-        return parent.getCzkInvested(r);
+    public Money getInvested(final Rating r) {
+        return parent.getInvested(r);
     }
 
     @Override
-    public BigDecimal getCzkAtRisk() {
-        return this.czkAtRisk;
+    public Money getAtRisk() {
+        return this.atRisk;
     }
 
     @Override
     public Ratio getShareAtRisk() {
-        final BigDecimal czkInvested = getCzkInvested();
-        if (isZero(czkInvested)) { // protected against division by zero
+        final Money czkInvested = getInvested();
+        if (czkInvested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(czkAtRisk, czkInvested));
+        return Ratio.fromRaw(atRisk.divideBy(czkInvested).getValue());
     }
 
     @Override
-    public BigDecimal getCzkAtRisk(final Rating r) {
-        return this.czkAtRiskPerRating.getOrDefault(r, BigDecimal.ZERO);
+    public Money getAtRisk(final Rating r) {
+        return this.atRiskPerRating.getOrDefault(r, Money.ZERO);
     }
 
     @Override
@@ -105,67 +100,67 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
     @Override
     public Ratio getAtRiskShareOnInvestment(final Rating r) {
-        final BigDecimal investedPerRating = this.getCzkInvested(r);
-        if (isZero(investedPerRating)) { // protected against division by zero
+        final Money investedPerRating = this.getInvested(r);
+        if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(getCzkAtRisk(r), investedPerRating));
+        return Ratio.fromRaw(getAtRisk(r).divideBy(investedPerRating).getValue());
     }
 
     @Override
-    public BigDecimal getCzkSellable() {
-        return czkSellable;
+    public Money getSellable() {
+        return sellable;
     }
 
     @Override
     public Ratio getShareSellable() {
-        final BigDecimal czkInvested = getCzkInvested();
-        if (isZero(czkInvested)) { // protected against division by zero
+        final Money czkInvested = getInvested();
+        if (czkInvested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(czkSellable, czkInvested));
+        return Ratio.fromRaw(sellable.divideBy(czkInvested).getValue());
     }
 
     @Override
-    public BigDecimal getCzkSellable(final Rating r) {
-        return czkSellablePerRating.getOrDefault(r, BigDecimal.ZERO);
+    public Money getSellable(final Rating r) {
+        return sellablePerRating.getOrDefault(r, Money.ZERO);
     }
 
     @Override
     public Ratio getShareSellable(final Rating r) {
-        final BigDecimal investedPerRating = this.getCzkInvested(r);
-        if (isZero(investedPerRating)) { // protected against division by zero
+        final Money investedPerRating = this.getInvested(r);
+        if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(getCzkSellable(r), investedPerRating));
+        return Ratio.fromRaw(getSellable(r).divideBy(investedPerRating).getValue());
     }
 
     @Override
-    public BigDecimal getCzkSellableFeeless() {
-        return czkSellableFeeless;
+    public Money getSellableFeeless() {
+        return sellableFeeless;
     }
 
     @Override
     public Ratio getShareSellableFeeless() {
-        final BigDecimal czkInvested = getCzkInvested();
-        if (isZero(czkInvested)) { // protected against division by zero
+        final Money czkInvested = getInvested();
+        if (czkInvested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(czkSellableFeeless, czkInvested));
+        return Ratio.fromRaw(sellableFeeless.divideBy(czkInvested).getValue());
     }
 
     @Override
-    public BigDecimal getCzkSellableFeeless(final Rating r) {
-        return czkSellableFeelessPerRating.getOrDefault(r, BigDecimal.ZERO);
+    public Money getSellableFeeless(final Rating r) {
+        return sellableFeelessPerRating.getOrDefault(r, Money.ZERO);
     }
 
     @Override
     public Ratio getShareSellableFeeless(final Rating r) {
-        final BigDecimal investedPerRating = this.getCzkInvested(r);
-        if (isZero(investedPerRating)) { // protected against division by zero
+        final Money investedPerRating = this.getInvested(r);
+        if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(divide(getCzkSellableFeeless(r), investedPerRating));
+        return Ratio.fromRaw(getSellableFeeless(r).divideBy(investedPerRating).getValue());
     }
 
     @Override
@@ -184,18 +179,18 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public BigDecimal getCzkMonthlyProfit() {
-        return parent.getCzkMonthlyProfit();
+    public Money getMonthlyProfit() {
+        return parent.getMonthlyProfit();
     }
 
     @Override
-    public BigDecimal getCzkMinimalMonthlyProfit() {
-        return parent.getCzkMinimalMonthlyProfit();
+    public Money getMinimalMonthlyProfit() {
+        return parent.getMinimalMonthlyProfit();
     }
 
     @Override
-    public BigDecimal getCzkOptimalMonthlyProfit() {
-        return parent.getCzkOptimalMonthlyProfit();
+    public Money getOptimalMonthlyProfit() {
+        return parent.getOptimalMonthlyProfit();
     }
 
     @Override
@@ -206,12 +201,12 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     @Override
     public String toString() {
         return "ExtendedPortfolioOverviewImpl{" +
-                "czkAtRisk=" + czkAtRisk +
-                ", czkAtRiskPerRating=" + czkAtRiskPerRating +
-                ", czkSellable=" + czkSellable +
-                ", czkSellableFeeless=" + czkSellableFeeless +
-                ", czkSellableFeelessPerRating=" + czkSellableFeelessPerRating +
-                ", czkSellablePerRating=" + czkSellablePerRating +
+                "czkAtRisk=" + atRisk +
+                ", czkAtRiskPerRating=" + atRiskPerRating +
+                ", czkSellable=" + sellable +
+                ", czkSellableFeeless=" + sellableFeeless +
+                ", czkSellableFeelessPerRating=" + sellableFeelessPerRating +
+                ", czkSellablePerRating=" + sellablePerRating +
                 ", parent=" + parent +
                 '}';
     }

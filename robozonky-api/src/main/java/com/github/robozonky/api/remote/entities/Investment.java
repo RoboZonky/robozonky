@@ -16,17 +16,17 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.*;
 import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.math.BigDecimal;
+import javax.xml.bind.annotation.XmlTransient;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Currency;
 import java.util.Optional;
 
 public class Investment extends BaseInvestment {
@@ -67,23 +67,6 @@ public class Investment extends BaseInvestment {
     private OffsetDateTime activeTo;
     @XmlElement
     private OffsetDateTime smpFeeExpirationDate;
-    private BigDecimal paid;
-    private BigDecimal toPay;
-    private BigDecimal amountDue;
-    private BigDecimal paidInterest = BigDecimal.ZERO;
-    private BigDecimal dueInterest;
-    private BigDecimal paidPrincipal;
-    private BigDecimal duePrincipal;
-    private BigDecimal expectedInterest;
-    private BigDecimal purchasePrice;
-    private BigDecimal remainingPrincipal;
-    @XmlElement
-    private BigDecimal smpSoldFor;
-    @XmlElement
-    private BigDecimal smpFee;
-    @XmlElement
-    private BigDecimal smpPrice;
-    private BigDecimal paidPenalty = BigDecimal.ZERO;
     private Ratio interestRate;
     @XmlElement
     private Ratio revenueRate;
@@ -92,14 +75,59 @@ public class Investment extends BaseInvestment {
     @XmlElement
     private Collection<InsurancePolicyPeriod> insuranceHistory;
 
+    // string-based money
+
+    @XmlElement
+    private String paid;
+    private final Lazy<Money> moneyPaid = Lazy.of(() -> Money.from(paid));
+    @XmlElement
+    private String toPay;
+    private final Lazy<Money> moneyToPay = Lazy.of(() -> Money.from(toPay));
+    @XmlElement
+    private String amountDue;
+    private final Lazy<Money> moneyAmountDue = Lazy.of(() -> Money.from(amountDue));
+    @XmlElement
+    private String paidInterest;
+    private final Lazy<Money> moneyPaidInterest = Lazy.of(() -> Money.from(paidInterest));
+    @XmlElement
+    private String dueInterest;
+    private final Lazy<Money> moneyDueInterest = Lazy.of(() -> Money.from(dueInterest));
+    @XmlElement
+    private String paidPrincipal;
+    private final Lazy<Money> moneyPaidPrincipal = Lazy.of(() -> Money.from(paidPrincipal));
+    @XmlElement
+    private String duePrincipal;
+    private final Lazy<Money> moneyDuePrincipal = Lazy.of(() -> Money.from(duePrincipal));
+    @XmlElement
+    private String expectedInterest;
+    private final Lazy<Money> moneyExpectedInterest = Lazy.of(() -> Money.from(expectedInterest));
+    @XmlElement
+    private String purchasePrice;
+    private final Lazy<Money> moneyPurchasePrice = Lazy.of(() -> Money.from(purchasePrice));
+    @XmlElement
+    private String remainingPrincipal;
+    private final Lazy<Money> moneyRemainingPrincipal = Lazy.of(() -> Money.from(remainingPrincipal));
+    @XmlElement
+    private String smpPrice;
+    private final Lazy<Money> moneySmpPrice = Lazy.of(() -> Money.from(smpPrice));
+    @XmlElement
+    private String smpSoldFor;
+    private final Lazy<Money> moneySmpSoldFor = Lazy.of(() -> Money.from(smpSoldFor));
+    @XmlElement
+    private String smpFee;
+    private final Lazy<Money> moneySmpFee = Lazy.of(() -> Money.from(smpFee));
+    @XmlElement
+    private String paidPenalty;
+    private final Lazy<Money> moneyPaidPenalty = Lazy.of(() -> Money.from(paidPenalty));
+
     Investment() {
         // for JAXB
     }
 
-    public Investment(final Loan loan, final BigDecimal amount, final Currency currency) {
-        super(loan, amount, currency);
+    public Investment(final Loan loan, final Money amount) {
+        super(loan, amount);
         this.rating = loan.getRating();
-        this.remainingPrincipal = amount;
+        this.remainingPrincipal = amount.getValue().toPlainString();
     }
 
     @XmlElement
@@ -174,11 +202,6 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    public BigDecimal getPurchasePrice() {
-        return purchasePrice;
-    }
-
-    @XmlElement
     public String getLoanName() {
         return loanName;
     }
@@ -244,77 +267,6 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    public BigDecimal getPaid() {
-        return paid;
-    }
-
-    @XmlElement
-    public BigDecimal getToPay() {
-        return toPay;
-    }
-
-    @XmlElement
-    public BigDecimal getAmountDue() {
-        return amountDue;
-    }
-
-    @XmlElement
-    public BigDecimal getPaidInterest() {
-        return paidInterest;
-    }
-
-    @XmlElement
-    public BigDecimal getDueInterest() {
-        return dueInterest;
-    }
-
-    @XmlElement
-    public BigDecimal getPaidPrincipal() {
-        return paidPrincipal;
-    }
-
-    @XmlElement
-    public BigDecimal getDuePrincipal() {
-        return duePrincipal;
-    }
-
-    @XmlElement
-    public BigDecimal getExpectedInterest() {
-        return expectedInterest;
-    }
-
-    /**
-     * @return Null when the investment is already sold.
-     */
-    @XmlElement
-    public BigDecimal getRemainingPrincipal() {
-        return remainingPrincipal;
-    }
-
-    @XmlElement
-    public Optional<BigDecimal> getSmpSoldFor() {
-        return Optional.ofNullable(smpSoldFor);
-    }
-
-    @XmlElement
-    public BigDecimal getPaidPenalty() {
-        return paidPenalty;
-    }
-
-    @XmlElement
-    public Optional<BigDecimal> getSmpFee() {
-        return Optional.ofNullable(smpFee);
-    }
-
-    /**
-     *
-     * @return Empty when cannot be sold, that is when sold already.
-     */
-    public Optional<BigDecimal> getSmpPrice() {
-        return Optional.ofNullable(smpPrice);
-    }
-
-    @XmlElement
     public InsuranceStatus getInsuranceStatus() {
         return insuranceStatus;
     }
@@ -359,4 +311,84 @@ public class Investment extends BaseInvestment {
     public InvestmentType getInvestmentType() {
         return investmentType;
     }
+
+    // money types are all transient
+
+    @XmlTransient
+    public Money getPurchasePrice() {
+        return moneyPurchasePrice.get();
+    }
+
+    @XmlTransient
+    public Money getPaid() {
+        return moneyPaid.get();
+    }
+
+    @XmlTransient
+    public Money getToPay() {
+        return moneyToPay.get();
+    }
+
+    @XmlTransient
+    public Money getAmountDue() {
+        return moneyAmountDue.get();
+    }
+
+    @XmlTransient
+    public Money getPaidInterest() {
+        return moneyPaidInterest.get();
+    }
+
+    @XmlTransient
+    public Money getDueInterest() {
+        return moneyDueInterest.get();
+    }
+
+    @XmlTransient
+    public Money getPaidPrincipal() {
+        return moneyPaidPrincipal.get();
+    }
+
+    @XmlTransient
+    public Money getDuePrincipal() {
+        return moneyDuePrincipal.get();
+    }
+
+    @XmlTransient
+    public Money getExpectedInterest() {
+        return moneyExpectedInterest.get();
+    }
+
+    /**
+     * @return Empty when the investment is already sold.
+     */
+    @XmlTransient
+    public Optional<Money> getRemainingPrincipal() {
+        return Optional.ofNullable(moneyRemainingPrincipal.getOrElse((Money) null));
+    }
+
+    @XmlTransient
+    public Optional<Money> getSmpSoldFor() {
+        return Optional.ofNullable(moneySmpSoldFor.getOrElse((Money) null));
+    }
+
+    @XmlTransient
+    public Money getPaidPenalty() {
+        return moneyPaidPenalty.get();
+    }
+
+    @XmlTransient
+    public Optional<Money> getSmpFee() {
+        return Optional.ofNullable(moneySmpFee.getOrElse((Money) null));
+    }
+
+    /**
+     *
+     * @return Empty when cannot be sold, that is when sold already.
+     */
+    @XmlTransient
+    public Optional<Money> getSmpPrice() {
+        return Optional.ofNullable(moneySmpPrice.getOrElse((Money) null));
+    }
+
 }

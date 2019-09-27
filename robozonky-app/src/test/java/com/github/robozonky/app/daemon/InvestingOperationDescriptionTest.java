@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -37,7 +38,7 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final Loan l = MockLoanBuilder.fresh();
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(d.identify(ld)).isEqualTo(l.getId());
-        assertThat(d.getMinimumBalance(mockTenant())).isEqualTo(200);
+        assertThat(d.getMinimumBalance(mockTenant())).isEqualTo(Money.from(200));
     }
 
     @Test

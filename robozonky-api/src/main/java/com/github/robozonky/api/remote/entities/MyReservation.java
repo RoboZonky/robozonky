@@ -16,9 +16,13 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.time.OffsetDateTime;
 import java.util.Currency;
-import javax.xml.bind.annotation.XmlElement;
 
 public class MyReservation extends BaseEntity {
 
@@ -26,7 +30,10 @@ public class MyReservation extends BaseEntity {
     private Currency currency;
     private OffsetDateTime timeCreated;
     private OffsetDateTime deadline;
-    private int reservedAmount;
+
+    @XmlElement
+    private String reservedAmount;
+    private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount, currency));
 
     MyReservation() {
         // for JAXB
@@ -52,8 +59,8 @@ public class MyReservation extends BaseEntity {
         return deadline;
     }
 
-    @XmlElement
-    public int getReservedAmount() {
-        return reservedAmount;
+    @XmlTransient
+    public Money getReservedAmount() {
+        return moneyReservedAmount.get();
     }
 }

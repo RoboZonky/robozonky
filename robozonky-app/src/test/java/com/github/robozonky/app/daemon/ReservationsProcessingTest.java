@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.*;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -28,7 +29,6 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -49,9 +49,9 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
                                                         final PortfolioOverview portfolio,
                                                         final Restrictions restrictions) {
             return available.stream().map(r -> {
-                final BigDecimal amount = BigDecimal.valueOf(r.item().getMyReservation().getReservedAmount());
+                final Money amount = r.item().getMyReservation().getReservedAmount();
                 return r.recommend(amount);
-            }).flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+            }).flatMap(Optional::stream);
         }
     };
     private static final ReservationPreference SOME_PREFERENCE =
@@ -59,7 +59,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
     private static MyReservation mockMyReservation() {
         final MyReservation r = mock(MyReservation.class);
-        when(r.getReservedAmount()).thenReturn(200);
+        when(r.getReservedAmount()).thenReturn(Money.from(200));
         when(r.getId()).thenReturn((long) (Math.random() * 1000));
         return r;
     }

@@ -79,17 +79,17 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public int getOriginalAmount() {
-        return (int) getLoan().getAmount();
+        return getLoan().getAmount().getValue().intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return getLoan().getAnnuity().intValue();
+        return getLoan().getAnnuity().getValue().intValue();
     }
 
     @Override
     public BigDecimal getRemainingPrincipal() {
-        return participation.getRemainingPrincipal();
+        return participation.getRemainingPrincipal().getValue();
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
@@ -66,6 +67,7 @@ class UtilTest {
                 .setDevelopmentType(DevelopmentType.OTHER)
                 .build();
         final Loan l = new MockLoanBuilder()
+                .setAmount(100_000)
                 .setRating(Rating.D)
                 .setAnnuity(BigDecimal.TEN)
                 .setUrl(new URL("http://localhost"))
@@ -74,7 +76,9 @@ class UtilTest {
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setName(UUID.randomUUID().toString())
                 .build();
-        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
+        final Investment i = MockInvestmentBuilder.fresh(l, 200)
+                .setExpectedInterest(BigDecimal.ONE)
+                .build();
         Util.getDelinquentData(i, l, Collections.singleton(d), LocalDate.now());
     }
 
@@ -109,8 +113,8 @@ class UtilTest {
             }
 
             @Override
-            public BigDecimal getRecommendation() {
-                return BigDecimal.ZERO;
+            public Money getRecommendation() {
+                return Money.ZERO;
             }
 
             @Override

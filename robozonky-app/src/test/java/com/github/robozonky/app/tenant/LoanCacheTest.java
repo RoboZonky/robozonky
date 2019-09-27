@@ -44,6 +44,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         when(mi.getTimeCreated()).thenReturn(d);
         final Loan loan = new MockLoanBuilder()
                 .setMyInvestment(mi)
+                .setRemainingInvestment(1_000)
                 .build();
         final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
@@ -57,7 +58,9 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     void loadLoan() {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
-        final Loan loan = MockLoanBuilder.fresh();
+        final Loan loan = new MockLoanBuilder()
+                .setRemainingInvestment(0)
+                .build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(loan);

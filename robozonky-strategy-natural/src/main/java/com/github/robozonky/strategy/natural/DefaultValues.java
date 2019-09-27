@@ -16,18 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.time.Period;
-import java.util.Optional;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.internal.test.DateUtil;
+
+import java.time.Period;
+import java.util.Optional;
 
 class DefaultValues {
 
     private final DefaultPortfolio portfolio;
     private ReservationMode reservationMode = null;
     private SellingMode sellingMode = null;
-    private long targetPortfolioSize = Long.MAX_VALUE;
+    private Money targetPortfolioSize = Money.from(Long.MAX_VALUE);
     private InvestmentSize investmentSize = new InvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private ExitProperties exitProperties;
@@ -77,7 +78,7 @@ class DefaultValues {
         }
     }
 
-    public long getTargetPortfolioSize() {
+    public Money getTargetPortfolioSize() {
         return targetPortfolioSize;
     }
 
@@ -85,7 +86,7 @@ class DefaultValues {
         if (targetPortfolioSize <= 0) {
             throw new IllegalArgumentException("Target portfolio size must be a positive number.");
         }
-        this.targetPortfolioSize = targetPortfolioSize;
+        this.targetPortfolioSize = Money.from(targetPortfolioSize);
     }
 
     public DefaultInvestmentShare getInvestmentShare() {

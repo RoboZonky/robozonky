@@ -24,7 +24,6 @@ import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.Defaults;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -93,14 +92,14 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actuallyAccept(recommendation);
         discard(recommendation.descriptor()); // never show again
         if (!succeeded) {
-            tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
+            tenant.setKnownBalanceUpperBound(recommendation.amount().subtract(1));
             return false;
         }
         final Loan l = recommendation.descriptor().related();
-        final Investment i = new Investment(l, recommendation.amount(), Defaults.CURRENCY);
+        final Investment i = new Investment(l, recommendation.amount());
         result.add(i);
         tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getAmount());
-        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - recommendation.amount().longValue());
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
         tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(i, l, tenant.getPortfolio().getOverview())));
         return true;
     }

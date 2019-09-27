@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.Money;
+
 class InvestmentSize {
 
-    private final int minimumInvestmentInCzk, maximumInvestmentInCzk;
+    private final Money minimumInvestment;
+    private final Money maximumInvestment;
 
     public InvestmentSize() {
         this(20_000); // this is the theoretical maximum allowed by Zonky
@@ -29,23 +32,23 @@ class InvestmentSize {
     }
 
     public InvestmentSize(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
-        this.minimumInvestmentInCzk = Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk);
-        this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
+        this.minimumInvestment = Money.from(Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk));
+        this.maximumInvestment = Money.from(Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk));
     }
 
-    public int getMinimumInvestmentInCzk() {
-        return minimumInvestmentInCzk;
+    public Money getMinimumInvestment() {
+        return minimumInvestment;
     }
 
-    public int getMaximumInvestmentInCzk() {
-        return maximumInvestmentInCzk;
+    public Money getMaximumInvestment() {
+        return maximumInvestment;
     }
 
     @Override
     public String toString() {
         return "DefaultInvestmentSize{" +
-                "minimumInvestmentInCzk=" + minimumInvestmentInCzk +
-                ", maximumInvestmentInCzk=" + maximumInvestmentInCzk +
+                "minimumInvestment=" + minimumInvestment +
+                ", maximumInvestment=" + maximumInvestment +
                 '}';
     }
 }

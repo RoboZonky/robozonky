@@ -16,6 +16,12 @@
 
 package com.github.robozonky.api.remote.enums;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.Settings;
+import com.github.robozonky.internal.test.DateUtil;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -25,11 +31,6 @@ import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.Settings;
-import com.github.robozonky.internal.test.DateUtil;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
@@ -84,11 +85,14 @@ public enum Rating implements BaseEnum {
      * @return
      * @see "https://zonky.cz/zonky-vyhody/"
      */
-    private static Ratio feeDiscount(final long totalInvested) {
+    private static Ratio feeDiscount(final Money totalInvested) {
         /* For the institutional investor ("zonky"), total will cause int overflow. Cap the value be max integer value,
          * since the only place where it will be used in this method doesn't use more than the order of millions.
          */
-        final int totalCapped = (totalInvested > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) totalInvested + 1;
+        final long value = totalInvested.getValue().longValue();
+        final int totalCapped = (value > Integer.MAX_VALUE) ?
+                Integer.MAX_VALUE :
+                (int) value + 1;
         final SortedMap<Integer, Ratio> applicableDiscounts = FEE_DISCOUNTS.headMap(totalCapped);
         if (applicableDiscounts.isEmpty()) {
             return Ratio.ZERO;
@@ -108,7 +112,7 @@ public enum Rating implements BaseEnum {
         return dateForFees.isBefore(MIDNIGHT_2019_03_18);
     }
 
-    private static Ratio getDiscountedFee(final Ratio ratio, final long totalInvested) {
+    private static Ratio getDiscountedFee(final Ratio ratio, final Money totalInvested) {
         final BigDecimal baseFee = ratio.bigDecimalValue();
         final BigDecimal feeDiscount = feeDiscount(totalInvested).bigDecimalValue();
         return Ratio.fromRaw(minus(baseFee, times(baseFee, feeDiscount)));
@@ -119,18 +123,18 @@ public enum Rating implements BaseEnum {
     }
 
     public Ratio getFee(final Instant dateForFees) {
-        return getFee(dateForFees, 0);
+        return getFee(dateForFees, Money.ZERO);
     }
 
     public Ratio getFee() {
         return getFee(DateUtil.now());
     }
 
-    public Ratio getFee(final long totalInvested) {
+    public Ratio getFee(final Money totalInvested) {
         return getFee(DateUtil.now(), totalInvested);
     }
 
-    public Ratio getFee(final Instant dateForFees, final long totalInvested) {
+    public Ratio getFee(final Instant dateForFees, final Money totalInvested) {
         if (isInvalid(dateForFees)) {
             return Ratio.ZERO;
         } else if (dateForFees.isBefore(MIDNIGHT_2017_09_01)) {
@@ -146,7 +150,7 @@ public enum Rating implements BaseEnum {
         return isBeforeLatestFeeChange(dateForFees) && (this == Rating.AAE || this == Rating.AE);
     }
 
-    public Ratio getMinimalRevenueRate(final Instant dateForFees, final long totalInvested) {
+    public Ratio getMinimalRevenueRate(final Instant dateForFees, final Money totalInvested) {
         if (isInvalid(dateForFees)) {
             return Ratio.ZERO;
         }
@@ -161,14 +165,14 @@ public enum Rating implements BaseEnum {
     }
 
     public Ratio getMinimalRevenueRate(final Instant dateForFees) {
-        return getMinimalRevenueRate(dateForFees, 0);
+        return getMinimalRevenueRate(dateForFees, Money.ZERO);
     }
 
-    public Ratio getMinimalRevenueRate(final long totalInvested) {
+    public Ratio getMinimalRevenueRate(final Money totalInvested) {
         return getMinimalRevenueRate(DateUtil.now(), totalInvested);
     }
 
-    public Ratio getMaximalRevenueRate(final Instant dateForFees, final long totalInvested) {
+    public Ratio getMaximalRevenueRate(final Instant dateForFees, final Money totalInvested) {
         if (isInvalid(dateForFees)) {
             return Ratio.ZERO;
         }
@@ -182,12 +186,12 @@ public enum Rating implements BaseEnum {
         return getMaximalRevenueRate(DateUtil.now());
     }
 
-    public Ratio getMaximalRevenueRate(final long totalInvested) {
+    public Ratio getMaximalRevenueRate(final Money totalInvested) {
         return getMaximalRevenueRate(DateUtil.now(), totalInvested);
     }
 
     public Ratio getMaximalRevenueRate(final Instant dateForFees) {
-        return getMaximalRevenueRate(dateForFees, 0);
+        return getMaximalRevenueRate(dateForFees, Money.ZERO);
     }
 
     public Duration getCaptchaDelay() {

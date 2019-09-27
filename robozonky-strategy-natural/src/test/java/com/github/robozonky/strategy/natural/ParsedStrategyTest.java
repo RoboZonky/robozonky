@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -62,13 +63,13 @@ class ParsedStrategyTest {
         final DefaultPortfolio portfolio = DefaultPortfolio.PROGRESSIVE;
         final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk()).isEqualTo(Long.MAX_VALUE);
+            softly.assertThat(strategy.getMaximumInvestmentSize()).isEqualTo(Money.from(Long.MAX_VALUE));
             softly.assertThat(strategy.getMinimumShare(Rating.A))
                     .isEqualTo(portfolio.getDefaultShare(Rating.A));
             softly.assertThat(strategy.getMaximumShare(Rating.B))
                     .isEqualTo(portfolio.getDefaultShare(Rating.B));
-            softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.C)).isEqualTo(0);
-            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(20_000);
+            softly.assertThat(strategy.getMinimumInvestmentSize(Rating.C)).isEqualTo(Money.from(0));
+            softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D)).isEqualTo(Money.from(20_000));
         });
     }
 
@@ -160,8 +161,8 @@ class ParsedStrategyTest {
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(),
                                                            Collections.singletonMap(Rating.D, size));
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.D)).isEqualTo(600);
-            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(1000);
+            softly.assertThat(strategy.getMinimumInvestmentSize(Rating.D)).isEqualTo(Money.from(600));
+            softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D)).isEqualTo(Money.from(1_000));
         });
     }
 

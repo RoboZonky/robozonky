@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -57,6 +58,7 @@ class ParticipationWrapperTest {
     private static Participation mockParticipation(final Loan loan) {
         final Participation p = mock(Participation.class);
         when(p.getInterestRate()).thenReturn(Ratio.ONE);
+        doReturn(Money.ZERO).when(p).getRemainingPrincipal();
         doReturn(loan.getPurpose()).when(p).getPurpose();
         doReturn(loan.getRating()).when(p).getRating();
         doReturn(loan.getMainIncomeType()).when(p).getIncomeType();
@@ -74,8 +76,8 @@ class ParticipationWrapperTest {
             softly.assertThat(w.getRating()).isEqualTo(PARTICIPATION.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(LOAN.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo((int)LOAN.getAmount());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(PARTICIPATION.getRemainingPrincipal());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo(LOAN.getAmount().getValue().intValue());
+            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(PARTICIPATION.getRemainingPrincipal().getValue());
             softly.assertThat(w.getOriginal()).isSameAs(original);
             softly.assertThat(w.getStory()).isEqualTo(LOAN.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(PARTICIPATION.getOriginalInstalmentCount());

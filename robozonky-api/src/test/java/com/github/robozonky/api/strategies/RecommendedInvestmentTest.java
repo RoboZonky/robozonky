@@ -16,11 +16,13 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +36,7 @@ class RecommendedInvestmentTest {
 
     private static Investment mockInvestment(final BigDecimal remainingPrincipal) {
         final Investment i = mock(Investment.class);
-        when(i.getRemainingPrincipal()).thenReturn(remainingPrincipal);
+        when(i.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(remainingPrincipal)));
         return i;
     }
 
@@ -43,20 +45,20 @@ class RecommendedInvestmentTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor d = new InvestmentDescriptor(i, () -> LOAN);
-        final RecommendedInvestment r = new RecommendedInvestment(d, remainingPrincipal);
+        final RecommendedInvestment r = new RecommendedInvestment(d, Money.from(remainingPrincipal));
         assertSoftly(softly -> {
             softly.assertThat(r).isNotEqualTo(null);
             softly.assertThat(r).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(r).isEqualTo(r);
         });
-        final RecommendedInvestment r2 = new RecommendedInvestment(d, remainingPrincipal);
+        final RecommendedInvestment r2 = new RecommendedInvestment(d, Money.from(remainingPrincipal));
         assertSoftly(softly -> {
             softly.assertThat(r).isEqualTo(r2);
             softly.assertThat(r2).isEqualTo(r);
         });
         final RecommendedInvestment r3 =
                 new RecommendedInvestment(new InvestmentDescriptor(mockInvestment(remainingPrincipal), () -> LOAN),
-                                          remainingPrincipal);
+                        Money.from(remainingPrincipal));
         assertThat(r).isNotEqualTo(r3);
     }
 }

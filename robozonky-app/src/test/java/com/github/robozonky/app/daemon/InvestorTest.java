@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -36,7 +37,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -57,9 +57,9 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     void proper(final SessionInfo sessionType) {
         final Tenant t = mockTenant(zonky, sessionType.isDryRun());
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(200).orElse(null);
-        final Either<InvestmentFailureType, BigDecimal> result = i.invest(r);
-        assertThat(result).containsOnRight(BigDecimal.valueOf(200));
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
+        final Either<InvestmentFailureType, Money> result = i.invest(r);
+        assertThat(result).containsOnRight(Money.from(200));
     }
 
     @ParameterizedTest
@@ -73,10 +73,10 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
                 .build();
         when(zonky.invest(any())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(200).orElse(null);
-        final Either<InvestmentFailureType, BigDecimal> result = i.invest(r);
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
+        final Either<InvestmentFailureType, Money> result = i.invest(r);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
-            assertThat(result).containsOnRight(BigDecimal.valueOf(200));
+            assertThat(result).containsOnRight(Money.from(200));
         } else {
             assertThat(result).containsOnLeft(InvestmentFailureType.INSUFFICIENT_BALANCE);
         }
@@ -92,10 +92,10 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
                 .build();
         when(zonky.invest(any())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(200).orElse(null);
-        final Either<InvestmentFailureType, BigDecimal> result = i.invest(r);
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
+        final Either<InvestmentFailureType, Money> result = i.invest(r);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
-            assertThat(result).containsOnRight(BigDecimal.valueOf(200));
+            assertThat(result).containsOnRight(Money.from(200));
         } else {
             assertThat(result).containsOnLeft(InvestmentFailureType.UNKNOWN);
         }
@@ -108,9 +108,9 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         final Tenant t = mockTenant(zonky, isDryRun);
         doThrow(IllegalStateException.class).when(zonky).invest(any());
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(200).orElse(null);
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
-            assertThat(i.invest(r)).containsOnRight(BigDecimal.valueOf(200));
+            assertThat(i.invest(r)).containsOnRight(Money.from(200));
         } else {
             assertThatThrownBy(() -> i.invest(r)).isInstanceOf(IllegalStateException.class);
         }

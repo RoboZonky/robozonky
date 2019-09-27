@@ -16,6 +16,7 @@
 
 package com.github.robozonky.test.mock;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -37,12 +38,17 @@ abstract class BaseLoanMockBuilder<T extends BaseLoan, S extends BaseLoanMockBui
     }
 
     public S setAmount(final int amount) {
-        when(mock.getAmount()).thenReturn((double) amount);
+        when(mock.getAmount()).thenReturn(Money.from(amount));
+        return (S) this;
+    }
+
+    public S setRemainingInvestment(final int amount) {
+        when(mock.getRemainingInvestment()).thenReturn(Money.from(amount));
         return (S) this;
     }
 
     public S setNonReservedRemainingInvestment(final int amount) {
-        when(mock.getNonReservedRemainingInvestment()).thenReturn((double) amount);
+        when(mock.getNonReservedRemainingInvestment()).thenReturn(Money.from(amount));
         return (S) this;
     }
 
@@ -57,7 +63,7 @@ abstract class BaseLoanMockBuilder<T extends BaseLoan, S extends BaseLoanMockBui
     }
 
     public S setAnnuity(final BigDecimal annuity) {
-        when(mock.getAnnuity()).thenReturn(annuity);
+        when(mock.getAnnuity()).thenReturn(Money.from(annuity));
         return (S) this;
     }
 

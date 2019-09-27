@@ -16,22 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static com.github.robozonky.api.Ratio.fromPercentage;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -102,18 +99,18 @@ class UtilTest extends AbstractRoboZonkyTest {
     @Test
     void acceptable() {
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMaximumInvestmentSizeInCzk()).thenReturn(1000l);
+        when(s.getMaximumInvestmentSize()).thenReturn(Money.from(1_000));
         final PortfolioOverview p = mockPortfolioOverview();
-        when(p.getCzkInvested()).thenReturn(BigDecimal.valueOf(999));
+        when(p.getInvested()).thenReturn(Money.from(999));
         assertThat(Util.isAcceptable(s, p)).isTrue();
     }
 
     @Test
     void unacceptableDueToCeiling() {
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMaximumInvestmentSizeInCzk()).thenReturn(10_000l);
+        when(s.getMaximumInvestmentSize()).thenReturn(Money.from(10_000));
         final PortfolioOverview p = mockPortfolioOverview();
-        when(p.getCzkInvested()).thenReturn(BigDecimal.valueOf(10_000));
+        when(p.getInvested()).thenReturn(Money.from(10_000));
         assertThat(Util.isAcceptable(s, p)).isFalse();
     }
 

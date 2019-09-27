@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -78,22 +79,22 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalAmount() {
-        return (int) getLoan().getAmount();
+        return getLoan().getAmount().getValue().intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return getLoan().getAnnuity().intValue();
+        return getLoan().getAnnuity().getValue().intValue();
     }
 
     @Override
     public BigDecimal getRemainingPrincipal() {
-        return investment.getRemainingPrincipal();
+        return investment.getRemainingPrincipal().orElseThrow().getValue();
     }
 
     @Override
     public Optional<BigDecimal> saleFee() {
-        return investment.getSmpFee();
+        return investment.getSmpFee().map(Money::getValue);
     }
 
     @Override

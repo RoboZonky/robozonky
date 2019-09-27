@@ -16,11 +16,11 @@
 
 package com.github.robozonky.internal.tenant;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+
+import java.util.Map;
 
 public interface RemotePortfolio {
 
@@ -31,9 +31,9 @@ public interface RemotePortfolio {
      * @param rating
      * @param amount
      */
-    void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount);
+    void simulateCharge(final int loanId, final Rating rating, final Money amount);
 
-    Map<Rating, BigDecimal> getTotal();
+    Map<Rating, Money> getTotal();
 
     /**
      * Takes {@link #getTotal()} and summarizes it.

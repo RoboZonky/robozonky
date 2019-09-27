@@ -16,15 +16,15 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Objects;
-import java.util.Optional;
-
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
 
@@ -37,8 +37,7 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     }
 
     protected Ratio estimateRevenueRate(final OffsetDateTime dateForFees) {
-        return getRating().getMaximalRevenueRate(dateForFees.toInstant(),
-                                                 portfolioOverview.getCzkInvested().longValue());
+        return getRating().getMaximalRevenueRate(dateForFees.toInstant(), portfolioOverview.getInvested());
     }
 
     protected Ratio estimateRevenueRate() {

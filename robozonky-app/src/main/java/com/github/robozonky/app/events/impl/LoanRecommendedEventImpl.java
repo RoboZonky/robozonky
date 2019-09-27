@@ -16,16 +16,15 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
-import java.math.BigDecimal;
-
 final class LoanRecommendedEventImpl extends AbstractEventImpl implements LoanRecommendedEvent {
 
     private final Loan loan;
-    private final BigDecimal recommendation;
+    private final Money recommendation;
 
     public LoanRecommendedEventImpl(final RecommendedLoan recommendation) {
         this.loan = recommendation.descriptor().item();
@@ -36,7 +35,7 @@ final class LoanRecommendedEventImpl extends AbstractEventImpl implements LoanRe
      * @return The recommendation to be submitted to the investing algorithm.
      */
     @Override
-    public BigDecimal getRecommendation() {
+    public Money getRecommendation() {
         return recommendation;
     }
 

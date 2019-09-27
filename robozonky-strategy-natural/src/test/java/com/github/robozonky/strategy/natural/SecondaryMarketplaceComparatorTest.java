@@ -22,7 +22,6 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 
@@ -60,14 +59,14 @@ class SecondaryMarketplaceComparatorTest {
         final Participation p = mock(Participation.class);
         when(p.getRemainingInstalmentCount()).thenReturn(remainingInstalments);
         when(p.getDeadline()).thenReturn(deadline);
-        doReturn(BigDecimal.valueOf(loan.getAmount())).when(p).getRemainingPrincipal();
+        doReturn(loan.getAmount()).when(p).getRemainingPrincipal();
         return new ParticipationDescriptor(p, () -> loan);
     }
 
     @Test
     void sortByInsurance() {
         final Loan l1 = mockLoan(100000, true);
-        final Loan l2 = mockLoan((int) l1.getAmount(), !l1.isInsuranceActive());
+        final Loan l2 = mockLoan(l1.getAmount().getValue().intValue(), !l1.isInsuranceActive());
         final ParticipationDescriptor pd1 = mockParticipationDescriptor(l1), pd2 = mockParticipationDescriptor(l2);
         assertSoftly(softly -> {
             softly.assertThat(c.compare(pd1, pd2)).isEqualTo(-1);
@@ -79,7 +78,7 @@ class SecondaryMarketplaceComparatorTest {
     @Test
     void sortByTermIfInsured() {
         final Loan l1 = mockLoan(100_000);
-        final Loan l2 = mockLoan((int) l1.getAmount());
+        final Loan l2 = mockLoan(l1.getAmount().getValue().intValue());
         final ParticipationDescriptor pd1 = mockParticipationDescriptor(l1, 2),
                 pd2 = mockParticipationDescriptor(l2, 1);
         assertSoftly(softly -> {

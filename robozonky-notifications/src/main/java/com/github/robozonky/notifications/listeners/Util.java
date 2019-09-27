@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.entities.Development;
@@ -42,8 +43,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
 import static java.util.Map.entry;
 
 final class Util {
@@ -84,8 +83,8 @@ final class Util {
     public static Map<String, Object> getLoanData(final Loan loan) {
         return Map.ofEntries(
                 entry("loanId", loan.getId()),
-                entry("loanAmount", loan.getAmount()),
-                entry("loanAnnuity", loan.getAnnuity().intValue()),
+                entry("loanAmount", loan.getAmount().getValue()),
+                entry("loanAnnuity", loan.getAnnuity().getValue()),
                 entry("loanInterestRate", loan.getRating().getCode()),
                 entry("loanRating", loan.getRating()),
                 entry("loanTerm", loan.getTermInMonths()),
@@ -98,21 +97,26 @@ final class Util {
         );
     }
 
-    private static Map<String, Object> perRating(final Function<Rating, Number> provider) {
+    private static Map<String, Object> moneyPerRating(final Function<Rating, Money> provider) {
+        final Function<Rating, Number> converter = m -> provider.apply(m).getValue();
+        return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, converter));
+    }
+
+    private static Map<String, Object> numberPerRating(final Function<Rating, Number> provider) {
         return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, provider));
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
         return Map.ofEntries(
-                entry("absoluteShare", perRating(portfolioOverview::getCzkInvested)),
-                entry("relativeShare", perRating(portfolioOverview::getShareOnInvestment)),
-                entry("total", portfolioOverview.getCzkInvested()),
+                entry("absoluteShare", moneyPerRating(portfolioOverview::getInvested)),
+                entry("relativeShare", numberPerRating(portfolioOverview::getShareOnInvestment)),
+                entry("total", portfolioOverview.getInvested().getValue()),
                 entry("profitability", portfolioOverview.getAnnualProfitability()),
-                entry("monthlyProfit", portfolioOverview.getCzkMonthlyProfit()),
+                entry("monthlyProfit", portfolioOverview.getMonthlyProfit().getValue()),
                 entry("minimalProfitability", portfolioOverview.getMinimalAnnualProfitability()),
-                entry("minimalMonthlyProfit", portfolioOverview.getCzkMinimalMonthlyProfit()),
+                entry("minimalMonthlyProfit", portfolioOverview.getMinimalMonthlyProfit().getValue()),
                 entry("optimalProfitability", portfolioOverview.getOptimalAnnualProfitability()),
-                entry("optimalMonthlyProfit", portfolioOverview.getCzkOptimalMonthlyProfit()),
+                entry("optimalMonthlyProfit", portfolioOverview.getOptimalMonthlyProfit().getValue()),
                 entry("timestamp", toDate(portfolioOverview.getTimestamp()))
         );
     }
@@ -121,15 +125,15 @@ final class Util {
         final Map<String, Object> entries =
                 new LinkedHashMap<>(summarizePortfolioStructure((PortfolioOverview) portfolioOverview));
         entries.putAll(Map.ofEntries(
-                entry("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk)),
-                entry("relativeRisk", perRating(portfolioOverview::getAtRiskShareOnInvestment)),
-                entry("absoluteSellable", perRating(portfolioOverview::getCzkSellable)),
-                entry("relativeSellable", perRating(portfolioOverview::getShareSellable)),
-                entry("absoluteSellableFeeless", perRating(portfolioOverview::getCzkSellableFeeless)),
-                entry("relativeSellableFeeless", perRating(portfolioOverview::getShareSellableFeeless)),
-                entry("totalRisk", portfolioOverview.getCzkAtRisk()),
-                entry("totalSellable", portfolioOverview.getCzkSellable()),
-                entry("totalSellableFeeless", portfolioOverview.getCzkSellableFeeless()),
+                entry("absoluteRisk", moneyPerRating(portfolioOverview::getAtRisk)),
+                entry("relativeRisk", numberPerRating(portfolioOverview::getAtRiskShareOnInvestment)),
+                entry("absoluteSellable", moneyPerRating(portfolioOverview::getSellable)),
+                entry("relativeSellable", numberPerRating(portfolioOverview::getShareSellable)),
+                entry("absoluteSellableFeeless", moneyPerRating(portfolioOverview::getSellableFeeless)),
+                entry("relativeSellableFeeless", numberPerRating(portfolioOverview::getShareSellableFeeless)),
+                entry("totalRisk", portfolioOverview.getAtRisk().getValue()),
+                entry("totalSellable", portfolioOverview.getSellable().getValue()),
+                entry("totalSellableFeeless", portfolioOverview.getSellableFeeless().getValue()),
                 entry("totalShare", portfolioOverview.getShareAtRisk()),
                 entry("totalSellableShare", portfolioOverview.getShareSellable()),
                 entry("totalSellableFeelessShare", portfolioOverview.getShareSellableFeeless()),
@@ -148,7 +152,7 @@ final class Util {
         }
     }
 
-    private static BigDecimal getTotalPaid(final Investment i) {
+    private static Money getTotalPaid(final Investment i) {
         return i.getPaidInterest()
                 .add(i.getPaidPrincipal())
                 .add(i.getPaidPenalty());
@@ -159,25 +163,25 @@ final class Util {
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
-        final BigDecimal totalPaid = getTotalPaid(i);
-        final BigDecimal originalPrincipal = i.getAmount();
-        final BigDecimal balance = i.getSmpSoldFor()
+        final Money totalPaid = getTotalPaid(i);
+        final Money originalPrincipal = i.getAmount();
+        final Money balance = i.getSmpSoldFor()
                 .map(soldFor -> {
-                    final BigDecimal partial = minus(totalPaid, originalPrincipal);
-                    final BigDecimal saleFee = i.getSmpFee().orElse(BigDecimal.ZERO);
-                    return minus(plus(partial, soldFor), saleFee);
+                    final Money partial = totalPaid.subtract(originalPrincipal);
+                    final Money saleFee = i.getSmpFee().orElse(Money.ZERO);
+                    return partial.add(soldFor).subtract(saleFee);
                 })
-                .orElseGet(() -> minus(totalPaid, originalPrincipal));
+                .orElseGet(() -> totalPaid.subtract(originalPrincipal));
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
-        loanData.put("amountRemaining", i.getRemainingPrincipal());
-        loanData.put("amountHeld", originalPrincipal);
-        loanData.put("amountPaid", totalPaid);
-        loanData.put("balance", balance);
-        loanData.put("interestExpected", i.getExpectedInterest());
-        loanData.put("interestPaid", i.getPaidInterest());
-        loanData.put("penaltiesPaid", i.getPaidPenalty());
+        loanData.put("amountRemaining", i.getRemainingPrincipal().get().getValue());
+        loanData.put("amountHeld", originalPrincipal.getValue());
+        loanData.put("amountPaid", totalPaid.getValue());
+        loanData.put("balance", balance.getValue());
+        loanData.put("interestExpected", i.getExpectedInterest().getValue());
+        loanData.put("interestPaid", i.getPaidInterest().getValue());
+        loanData.put("penaltiesPaid", i.getPaidPenalty().getValue());
         loanData.put("monthsElapsed", getMonthsElapsed(i));
         loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
         loanData.put("postponed", i.isInstalmentPostponement());

@@ -16,8 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.math.BigDecimal;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
@@ -48,16 +47,19 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertThat(p.getTotal()).isEmpty();
-        assertThat(p.getOverview().getCzkInvested()).isEqualTo(BigDecimal.ZERO);
-        p.simulateCharge(1, Rating.D, BigDecimal.TEN);
-        assertThat(p.getTotal()).containsOnlyKeys(Rating.D)
-                .containsValues(BigDecimal.TEN);
-        p.simulateCharge(2, Rating.A, BigDecimal.ONE);
-        assertThat(p.getTotal()).containsOnlyKeys(Rating.A, Rating.D)
-                .containsValues(BigDecimal.ONE, BigDecimal.TEN);
-        p.simulateCharge(3, Rating.A, BigDecimal.ONE);
-        assertThat(p.getTotal()).containsOnlyKeys(Rating.A, Rating.D)
-                .containsValues(BigDecimal.valueOf(2), BigDecimal.TEN);
+        assertThat(p.getOverview().getInvested()).isEqualTo(Money.ZERO);
+        p.simulateCharge(1, Rating.D, Money.from(10));
+        assertThat(p.getTotal())
+                .containsOnlyKeys(Rating.D)
+                .containsValues(Money.from(10));
+        p.simulateCharge(2, Rating.A, Money.from(1));
+        assertThat(p.getTotal())
+                .containsOnlyKeys(Rating.A, Rating.D)
+                .containsValues(Money.from(1), Money.from(10));
+        p.simulateCharge(3, Rating.A, Money.from(1));
+        assertThat(p.getTotal())
+                .containsOnlyKeys(Rating.A, Rating.D)
+                .containsValues(Money.from(2), Money.from(10));
     }
 
 }

@@ -16,14 +16,15 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
 
@@ -55,7 +56,7 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public long getMinimumBalance(final Tenant tenant) {
+    public Money getMinimumBalance(final Tenant tenant) {
         return tenant.getRestrictions().getMinimumInvestmentAmount();
     }
 

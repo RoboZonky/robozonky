@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
@@ -125,9 +126,9 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void keepsBalance() {
-        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(Long.MAX_VALUE);
-        transactional.setKnownBalanceUpperBound(100);
-        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(100);
+        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(Money.from(Long.MAX_VALUE));
+        transactional.setKnownBalanceUpperBound(Money.from(100));
+        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(Money.from(100));
     }
 
     @Test

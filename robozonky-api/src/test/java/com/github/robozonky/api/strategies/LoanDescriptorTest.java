@@ -16,13 +16,13 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Settings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -41,8 +41,8 @@ class LoanDescriptorTest {
         final Loan loan = mock(Loan.class);
         when(loan.getId()).thenReturn(1);
         when(loan.getRating()).thenReturn(r);
-        when(loan.getAmount()).thenReturn(2_000.0);
-        when(loan.getNonReservedRemainingInvestment()).thenReturn(1000.0);
+        when(loan.getAmount()).thenReturn(Money.from(2_000));
+        when(loan.getNonReservedRemainingInvestment()).thenReturn(Money.from(1_000));
         when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         return loan;
     }
@@ -86,12 +86,12 @@ class LoanDescriptorTest {
     void recommendAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<RecommendedLoan> r = ld.recommend(200);
+        final Optional<RecommendedLoan> r = ld.recommend(Money.from(200));
         assertThat(r).isPresent();
         final RecommendedLoan recommendation = r.get();
         assertSoftly(softly -> {
             softly.assertThat(recommendation.descriptor()).isSameAs(ld);
-            softly.assertThat(recommendation.amount()).isEqualTo(BigDecimal.valueOf(200));
+            softly.assertThat(recommendation.amount()).isEqualTo(Money.from(200));
         });
     }
 
@@ -100,7 +100,7 @@ class LoanDescriptorTest {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<RecommendedLoan> r =
-                ld.recommend(BigDecimal.valueOf(mockedLoan.getNonReservedRemainingInvestment() + 1));
+                ld.recommend(mockedLoan.getNonReservedRemainingInvestment().add(Money.from(1)));
         assertThat(r).isEmpty();
     }
 }

@@ -34,9 +34,14 @@ public class Statistics extends BaseEntity {
     private Ratio profitability;
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
-    private SuperInvestorOverview superInvestorOverview;
     private List<RiskPortfolio> riskPortfolio;
     private OffsetDateTime timestamp;
+
+    /**
+     * Data structure intentionally not implemented. We do not need this information.
+     */
+    @XmlElement
+    private String superInvestorOverview = "";
 
     private Statistics() {
         // for JAXB
@@ -52,7 +57,6 @@ public class Statistics extends BaseEntity {
         s.riskPortfolio = Collections.emptyList();
         s.currentOverview = new CurrentOverview();
         s.overallOverview = new OverallOverview();
-        s.superInvestorOverview = SuperInvestorOverview.empty();
         s.timestamp = DateUtil.offsetNow();
         return s;
     }
@@ -82,11 +86,6 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public List<RiskPortfolio> getRiskPortfolio() { // "riskPortfolio" is null for new Zonky users
         return unmodifiableOrEmpty(riskPortfolio);
-    }
-
-    @XmlElement
-    public SuperInvestorOverview getSuperInvestorOverview() {
-        return superInvestorOverview;
     }
 
     /**

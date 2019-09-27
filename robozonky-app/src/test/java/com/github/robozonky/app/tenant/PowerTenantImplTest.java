@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -89,7 +90,9 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         when(a.refresh(eq(token))).thenReturn(token);
         final Zonky z = harmlessZonky();
-        final Loan l = MockLoanBuilder.fresh();
+        final Loan l = new MockLoanBuilder()
+                .setRemainingInvestment(1_000)
+                .build();
         final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         when(z.getInvestmentByLoanId(eq(l.getId()))).thenReturn(Optional.of(i));
@@ -108,9 +111,9 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void keepsBalance() throws Exception {
         try (final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS).build()) {
-            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Long.MAX_VALUE);
-            tenant.setKnownBalanceUpperBound(100);
-            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(100);
+            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(Long.MAX_VALUE));
+            tenant.setKnownBalanceUpperBound(Money.from(100));
+            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(100));
         }
     }
 

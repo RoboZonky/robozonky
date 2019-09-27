@@ -16,29 +16,29 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * On Zonky, we do not know the user's current account balance. However, in order for the robot to be able to function
  * effectively and not repeat useless Zonky calls etc., some information about balance is still required. This class
  * helps with that.
  * <p>
- * By default, the balance is {@link Long#MAX_VALUE}. Every time {@link #set(long)} is called, the balance is set to
- * this new value. Also, a timer is reset - unless {@link #set(long)} is called within reasonable time, the balance
+ * By default, the balance is {@link Long#MAX_VALUE}. Every time {@link #set(Money)} is called, the balance is set to
+ * this new value. Also, a timer is reset - unless {@link #set(Money)} is called within reasonable time, the balance
  * as returned by {@link #get()} will be gradually increasing to simulate the user's possible real-life balance changes.
  * <p>
- * The external code is expected to {@link #set(long)} whatever value it thinks may still be available. For example, if
- * we attempt to invest 600 and Zonky gives us an insufficient balance error, we should {@link #set(long)} 599 as that
+ * The external code is expected to {@link #set(Money)} whatever value it thinks may still be available. For example, if
+ * we attempt to invest 600 and Zonky gives us an insufficient balance error, we should {@link #set(Money)} 599 as that
  * is a value that can still be available.
  */
 final class StatefulBoundedBalance {
@@ -48,7 +48,7 @@ final class StatefulBoundedBalance {
     private static final Logger LOGGER = LogManager.getLogger(StatefulBoundedBalance.class);
 
     private final InstanceState<StatefulBoundedBalance> state;
-    private final AtomicLong currentValue = new AtomicLong();
+    private final AtomicReference<Money> currentValue = new AtomicReference<>();
     private final AtomicReference<Instant> lastModificationDate = new AtomicReference<>();
 
     public StatefulBoundedBalance(final Tenant tenant) {
@@ -59,16 +59,16 @@ final class StatefulBoundedBalance {
     private synchronized void reloadFromState() {
         final Instant lastModified = state.getLastUpdated().map(OffsetDateTime::toInstant).orElse(Instant.EPOCH);
         lastModificationDate.set(lastModified);
-        final long lastKnownValue = state.getValue(VALUE_KEY).map(Long::parseLong).orElse(Long.MAX_VALUE);
+        final Money lastKnownValue = state.getValue(VALUE_KEY).map(Money::from).orElse(Money.from(Long.MAX_VALUE));
         currentValue.set(lastKnownValue);
         LOGGER.trace("Loaded {} CZK from {}", lastKnownValue, lastModified);
     }
 
-    public synchronized void set(final long value) {
-        final long newValue = Math.max(1, value); // if < 1, the multiplication in get() does not increase balance
+    public synchronized void set(final Money value) {
+        final Money newValue = value.max(Money.from(1)); // if < 1, the multiplication in get() does not increase balance
         currentValue.set(newValue);
         lastModificationDate.set(DateUtil.now());
-        state.update(m -> m.put(VALUE_KEY, Long.toString(newValue)));
+        state.update(m -> m.put(VALUE_KEY, newValue.getValue().toPlainString()));
     }
 
     private Duration getTimeBetweenLastBalanceCheckAndNow() {
@@ -76,9 +76,9 @@ final class StatefulBoundedBalance {
         return Duration.between(DateUtil.now(), lastModified).abs();
     }
 
-    public synchronized long get() {
-        final long balance = currentValue.get();
-        if (balance == Long.MAX_VALUE) { // no need to do any other magic
+    public synchronized Money get() {
+        final Money balance = currentValue.get();
+        if (balance.getValue().longValue() == Long.MAX_VALUE) { // no need to do any other magic
             LOGGER.trace("Balance already at maximum.");
             return balance;
         }
@@ -94,12 +94,12 @@ final class StatefulBoundedBalance {
         final long elapsedCycles = nanosBetween / nanosPeriod;
         if (elapsedCycles > 12) {
             LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
-            return Long.MAX_VALUE;
+            return Money.from(Long.MAX_VALUE);
         }
-        final long newBalance = balance * (long) Math.pow(2, elapsedCycles);
-        if (newBalance < balance) { // long overflow
+        final Money newBalance = balance.multiplyBy((long) Math.pow(2, elapsedCycles));
+        if (newBalance.compareTo(balance) < 0) { // long overflow
             LOGGER.trace("Balance upper bound reached the theoretical limit.");
-            return Long.MAX_VALUE;
+            return Money.from(Long.MAX_VALUE);
         } else {
             LOGGER.trace("Changing balance upper bound from {} to {} CZK.", balance, newBalance);
             return newBalance;

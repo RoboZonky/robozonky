@@ -30,7 +30,7 @@ public class InvestmentMadeEventListener extends AbstractListener<InvestmentMade
     @Override
     String getSubject(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
-        return "Nová investice - " + i.getAmount().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
+        return "Nová investice - " + i.getAmount().getValue().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override

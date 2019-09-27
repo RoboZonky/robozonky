@@ -16,30 +16,32 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Currency;
-
-import javax.xml.bind.annotation.XmlElement;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
+import io.vavr.Lazy;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Currency;
 
 public class Participation extends BaseEntity {
 
     private OffsetDateTime deadline;
     private LocalDate nextPaymentDate;
-    private int loanId, originalInstalmentCount, remainingInstalmentCount, userId;
-    private long id, investmentId;
+    private int loanId;
+    private int originalInstalmentCount;
+    private int remainingInstalmentCount;
+    private int userId;
+    private long id;
+    private long investmentId;
     private MainIncomeType incomeType;
     private Ratio interestRate;
-    private BigDecimal remainingPrincipal;
-    private BigDecimal discount;
-    private BigDecimal price;
     private LoanHealthInfo loanHealthInfo;
     private String loanName;
     private Purpose purpose;
@@ -48,7 +50,17 @@ public class Participation extends BaseEntity {
     private boolean insuranceActive;
     private boolean additionallyInsured;
     private Object loanInvestments;
+
     private Currency currency;
+    @XmlElement
+    private String remainingPrincipal;
+    private final Lazy<Money> moneyRemainingPrincipal = Lazy.of(() -> Money.from(remainingPrincipal, currency));
+    @XmlElement
+    private String discount;
+    private final Lazy<Money> moneyDiscount = Lazy.of(() -> Money.from(discount, currency));
+    @XmlElement
+    private String price;
+    private final Lazy<Money> moneyPrice = Lazy.of(() -> Money.from(price, currency));
 
     @XmlElement
     public OffsetDateTime getDeadline() {
@@ -101,11 +113,6 @@ public class Participation extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getRemainingPrincipal() {
-        return remainingPrincipal;
-    }
-
-    @XmlElement
     public String getLoanName() {
         return loanName;
     }
@@ -118,11 +125,6 @@ public class Participation extends BaseEntity {
     @XmlElement
     public Rating getRating() {
         return rating;
-    }
-
-    @XmlElement
-    public Currency getCurrency() {
-        return currency;
     }
 
     @XmlElement
@@ -154,17 +156,28 @@ public class Participation extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    @XmlElement
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    @XmlElement
     public LoanHealthInfo getLoanHealthInfo() {
         return loanHealthInfo;
     }
+
+    @XmlElement
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    @XmlTransient
+    public Money getRemainingPrincipal() {
+        return moneyRemainingPrincipal.get();
+    }
+
+    @XmlTransient
+    public Money getDiscount() {
+        return moneyDiscount.get();
+    }
+
+    @XmlTransient
+    public Money getPrice() {
+        return moneyPrice.get();
+    }
+
 }

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -33,9 +34,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,7 +46,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
         return (l, p, r) -> l.stream()
                 .filter(i -> i.item().getId() == loanToRecommend)
-                .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
+                .flatMap(i -> i.recommend(Money.from(recommend)).stream());
     }
 
     @Test
@@ -91,7 +90,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void failedDueToUnknownError() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
-        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
+        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200)).get();
         final Exception thrown = new ServiceUnavailableException();
         doThrow(thrown).when(z).invest(any());
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
@@ -102,7 +101,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void failedDueToTooManyRequests() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
-        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
+        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200)).get();
         final Response response = new ResponseBuilderImpl()
                 .status(400)
                 .entity(InvestmentFailureType.TOO_MANY_REQUESTS.getReason().get())
@@ -117,7 +116,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void failedDueToLowBalance() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
-        final RecommendedLoan r = mockLoanDescriptor().recommend(200).get();
+        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200)).get();
         final Response response = new ResponseBuilderImpl()
                 .status(400)
                 .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason().get())
@@ -126,13 +125,13 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.invest(any())).thenReturn(InvestmentResult.failure(thrown));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
         assertThat(t.accept(r)).isFalse();
-        assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(199);
+        assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(Money.from(199));
     }
 
     @Test
     void successful() {
         final int amountToInvest = 200;
-        final RecommendedLoan r = mockLoanDescriptor().recommend(amountToInvest).get();
+        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(amountToInvest)).get();
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
@@ -143,7 +142,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         });
         final List<Investment> investments = t.getResult();
         assertThat(investments).hasSize(1);
-        assertThat(investments.get(0).getAmount().intValue()).isEqualTo(amountToInvest);
+        assertThat(investments.get(0).getAmount()).isEqualTo(Money.from(amountToInvest));
         // validate event sequence
         final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents)

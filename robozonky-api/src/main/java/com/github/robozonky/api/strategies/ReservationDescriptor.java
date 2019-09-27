@@ -16,12 +16,12 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Reservation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -53,12 +53,12 @@ public final class ReservationDescriptor
     }
 
     @Override
-    public Optional<RecommendedReservation> recommend(final BigDecimal amount) {
-        final int actual = reservation.getMyReservation().getReservedAmount();
-        if (amount.intValue() == actual) {
-            return Optional.of(new RecommendedReservation(this, amount.intValue()));
+    public Optional<RecommendedReservation> recommend(final Money amount) {
+        final Money actual = reservation.getMyReservation().getReservedAmount();
+        if (amount.equals(actual)) {
+            return Optional.of(new RecommendedReservation(this, amount));
         } else {
-            LOGGER.warn("Requested reservation of {} CZK while only worth {} CZK. ", amount, actual);
+            LOGGER.warn("Requested reservation of {} while it is worth {}. ", amount, actual);
             return Optional.empty();
         }
     }

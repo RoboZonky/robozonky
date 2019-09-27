@@ -16,19 +16,18 @@
 
 package com.github.robozonky.app.summaries;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
@@ -40,50 +39,49 @@ import static java.util.stream.Collectors.*;
 final class Util {
 
     private static final Logger LOGGER = LogManager.getLogger(Util.class);
-    private static final Collector<BigDecimal, ?, BigDecimal> BIGDECIMAL_REDUCING_COLLECTOR =
-            reducing(BigDecimal.ZERO, BigDecimalCalculator::plus);
+    private static final Collector<Money, ?, Money> REDUCING_COLLECTOR = reducing(Money.ZERO, Money::add);
 
     private Util() {
         // no instances
     }
 
-    static Map<Rating, BigDecimal> getAmountsAtRisk(final Tenant tenant) {
+    static Map<Rating, Money> getAmountsAtRisk(final Tenant tenant) {
         return tenant.call(Zonky::getDelinquentInvestments)
                 .parallel() // possibly many pages' worth of results; fetch in parallel
                 .collect(groupingBy(Investment::getRating,
                                     () -> new EnumMap<>(Rating.class),
                                     mapping(i -> {
-                                        final BigDecimal principalNotYetReturned = i.getRemainingPrincipal()
+                                        final Money principalNotYetReturned = i.getRemainingPrincipal().orElseThrow()
                                                 .subtract(i.getPaidInterest())
                                                 .subtract(i.getPaidPenalty())
-                                                .max(BigDecimal.ZERO);
+                                                .max(Money.ZERO);
                                         LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
                                                      principalNotYetReturned, i.getLoanId(), i.getId());
                                         return principalNotYetReturned;
-                                    }, BIGDECIMAL_REDUCING_COLLECTOR)));
+                                    }, REDUCING_COLLECTOR)));
     }
 
     /**
      * @param tenant
      * @return First is sellable with or without fee, second just without.
      */
-    static Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> getAmountsSellable(final Tenant tenant) {
+    static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
         final Select select = new Select()
                 .equals("status", "ACTIVE")
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY");
-        final Collection<Tuple3<Rating, BigDecimal, BigDecimal>> sellable = tenant.call(z -> z.getInvestments(select))
+        final Collection<Tuple3<Rating, Money, Money>> sellable = tenant.call(z -> z.getInvestments(select))
                 .parallel() // possibly many pages' worth of results; fetch in parallel
-                .map(i -> Tuple.of(i.getRating(), i.getRemainingPrincipal(), i.getSmpFee().orElse(BigDecimal.ZERO)))
+                .map(i -> Tuple.of(i.getRating(), i.getRemainingPrincipal().orElseThrow(), i.getSmpFee().orElse(Money.ZERO)))
                 .collect(Collectors.toList());
-        final Map<Rating, BigDecimal> justFeeless = sellable.stream()
-                .filter(t -> t._3.signum() == 0)
+        final Map<Rating, Money> justFeeless = sellable.stream()
+                .filter(t -> t._3.isZero())
                 .collect(groupingBy(t -> t._1,
                                     () -> new EnumMap<>(Rating.class),
-                                    mapping(t -> t._2, BIGDECIMAL_REDUCING_COLLECTOR)));
-        final Map<Rating, BigDecimal> all = sellable.stream()
+                                    mapping(t -> t._2, REDUCING_COLLECTOR)));
+        final Map<Rating, Money> all = sellable.stream()
                 .collect(groupingBy(t -> t._1,
                                     () -> new EnumMap<>(Rating.class),
-                                    mapping(t -> t._2, BIGDECIMAL_REDUCING_COLLECTOR)));
+                                    mapping(t -> t._2, REDUCING_COLLECTOR)));
         return Tuple.of(all, justFeeless);
     }
 
