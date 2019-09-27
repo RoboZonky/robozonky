@@ -16,24 +16,10 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.SessionEvent;
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.LazyEvent;
@@ -41,6 +27,14 @@ import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 

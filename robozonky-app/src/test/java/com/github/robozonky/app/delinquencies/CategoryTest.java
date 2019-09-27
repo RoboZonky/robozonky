@@ -16,35 +16,26 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.app.delinquencies.Category.CRITICAL;
-import static com.github.robozonky.app.delinquencies.Category.DEFAULTED;
-import static com.github.robozonky.app.delinquencies.Category.HOPELESS;
-import static com.github.robozonky.app.delinquencies.Category.MILD;
-import static com.github.robozonky.app.delinquencies.Category.NEW;
-import static com.github.robozonky.app.delinquencies.Category.SEVERE;
-import static org.assertj.core.api.Assertions.*;
+import static com.github.robozonky.app.delinquencies.Category.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class CategoryTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky();
-    private final Loan loan = Loan.custom().build();
+    private final Loan loan = MockLoanBuilder.fresh();
     private final Investment investment = Investment.fresh(loan, 200).build();
 
     @Test

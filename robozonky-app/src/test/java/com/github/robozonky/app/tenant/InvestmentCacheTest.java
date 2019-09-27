@@ -16,22 +16,24 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
+import org.junit.jupiter.api.Test;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.tenant.Tenant;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
@@ -41,7 +43,7 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
         final MyInvestment mi = mock(MyInvestment.class);
         final OffsetDateTime d = OffsetDateTime.now();
         when(mi.getTimeCreated()).thenReturn(d);
-        final Loan loan = Loan.custom().build();
+        final Loan loan = MockLoanBuilder.fresh();
         final Investment investment = Investment.fresh(loan, 200).build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
@@ -56,7 +58,7 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
     void loadLoan() {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
-        final Loan loan = Loan.custom().build();
+        final Loan loan = MockLoanBuilder.fresh();
         final Investment investment = Investment.fresh(loan, 200).build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
@@ -76,7 +78,7 @@ class InvestmentCacheTest extends AbstractZonkyLeveragingTest {
     void fail() {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
-        final Loan loan = Loan.custom().build();
+        final Loan loan = MockLoanBuilder.fresh();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
         when(z.getInvestmentByLoanId(eq(loanId))).thenReturn(Optional.empty());

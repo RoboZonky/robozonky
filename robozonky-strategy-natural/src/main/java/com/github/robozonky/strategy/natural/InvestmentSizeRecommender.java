@@ -16,12 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.enums.Rating;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.enums.Rating;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
@@ -44,8 +44,7 @@ class InvestmentSizeRecommender {
                 .intValue();
     }
 
-    private int[] getInvestmentBounds(final ParsedStrategy strategy, final MarketplaceLoan loan,
-                                      final Restrictions restrictions) {
+    private int[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan, final Restrictions restrictions) {
         final Rating rating = loan.getRating();
         final int absoluteMinimum = Math.max(strategy.getMinimumInvestmentSizeInCzk(rating),
                                              restrictions.getMinimumInvestmentAmount());
@@ -72,7 +71,7 @@ class InvestmentSizeRecommender {
         return new int[]{minimumInvestment, maximumInvestment};
     }
 
-    public Integer apply(final MarketplaceLoan loan, final Restrictions restrictions) {
+    public Integer apply(final Loan loan, final Restrictions restrictions) {
         final int id = loan.getId();
         final int[] recommended = getInvestmentBounds(strategy, loan, restrictions);
         final int minimumRecommendation = recommended[0];
@@ -80,7 +79,7 @@ class InvestmentSizeRecommender {
         LOGGER.debug("Recommended investment range for loan #{} is <{}; {}> CZK.", id, minimumRecommendation,
                      maximumRecommendation);
         // round to nearest lower increment
-        final int loanRemaining = loan.getNonReservedRemainingInvestment();
+        final int loanRemaining = (int) loan.getNonReservedRemainingInvestment();
         if (minimumRecommendation > loanRemaining) {
             LOGGER.debug("Not recommending loan #{} due to minimum over remaining.", id);
             return 0;

@@ -16,21 +16,22 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class EqualityConditionTest {
 
@@ -49,7 +50,7 @@ class EqualityConditionTest {
     }
 
     private static Wrapper<?> mockLoan(final Rating r) {
-        final Loan loan = Loan.custom().setRating(r).build();
+        final Loan loan = new MockLoanBuilder().setRating(r).build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }
 

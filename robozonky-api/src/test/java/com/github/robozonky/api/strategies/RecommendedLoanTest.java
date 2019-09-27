@@ -16,23 +16,19 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RecommendedLoanTest {
 
-    private static Loan mockLoan() {
-        return Loan.custom().setDatePublished(OffsetDateTime.now()).build();
-    }
-
     private static LoanDescriptor mockLoanDescriptor() {
-        final Loan loan = RecommendedLoanTest.mockLoan();
+        final Loan loan = LoanDescriptorTest.mockLoan();
         return new LoanDescriptor(loan);
     }
 

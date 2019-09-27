@@ -16,10 +16,8 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.UUID;
-
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
+import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -27,10 +25,13 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class ReservationWrapperTest {
 
@@ -38,7 +39,7 @@ class ReservationWrapperTest {
 
     @Test
     void values() {
-        final Reservation l = Reservation.custom()
+        final Reservation l = new MockReservationBuilder()
                 .setInsuranceActive(true)
                 .setAmount(100_000)
                 .setRating(Rating.D)
@@ -58,7 +59,7 @@ class ReservationWrapperTest {
             softly.assertThat(w.getRating()).isEqualTo(l.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(l.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(l.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(l.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) l.getAmount());
             softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
             softly.assertThat(w.getOriginal()).isSameAs(original);
             softly.assertThat(w.getStory()).isEqualTo(l.getStory());
@@ -70,7 +71,7 @@ class ReservationWrapperTest {
 
     @Test
     void equality() {
-        final Reservation l = Reservation.custom()
+        final Reservation l = new MockReservationBuilder()
                 .setInsuranceActive(true)
                 .setAmount(100_000)
                 .setRating(Rating.D)
@@ -89,7 +90,7 @@ class ReservationWrapperTest {
             softly.assertThat(w).isEqualTo(Wrapper.wrap(new ReservationDescriptor(l, () -> null), FOLIO));
             softly.assertThat(w)
                     .isNotEqualTo(
-                            Wrapper.wrap(new ReservationDescriptor(Reservation.custom().build(), () -> null), FOLIO));
+                            Wrapper.wrap(new ReservationDescriptor(MockReservationBuilder.fresh(), () -> null), FOLIO));
             softly.assertThat(w).isNotEqualTo(null);
         });
     }

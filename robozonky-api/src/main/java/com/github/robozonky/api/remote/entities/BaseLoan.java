@@ -16,13 +16,6 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Currency;
-
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -30,6 +23,15 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.Optional;
 
 public abstract class BaseLoan extends BaseEntity {
 
@@ -57,6 +59,7 @@ public abstract class BaseLoan extends BaseEntity {
     private String story;
     private Ratio interestRate;
     private Ratio investmentRate;
+    @XmlElement
     private Ratio revenueRate;
     private BigDecimal annuity;
     private BigDecimal premium;
@@ -70,6 +73,7 @@ public abstract class BaseLoan extends BaseEntity {
     private MainIncomeType mainIncomeType;
     private Region region;
     private Purpose purpose;
+    @XmlElement
     private Collection<InsurancePolicyPeriod> insuranceHistory;
 
     protected BaseLoan() {
@@ -149,6 +153,11 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public double getRemainingInvestment() {
         return remainingInvestment;
+    }
+
+    @XmlTransient
+    public double getNonReservedRemainingInvestment() {
+        return remainingInvestment - reservedAmount;
     }
 
     @XmlElement
@@ -247,9 +256,12 @@ public abstract class BaseLoan extends BaseEntity {
         return additionallyInsured;
     }
 
+    /**
+     * @return
+     */
     @XmlElement
     public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
-        return insuranceHistory;
+        return insuranceHistory == null ? Collections.emptySet() : insuranceHistory;
     }
 
     /**
@@ -265,9 +277,8 @@ public abstract class BaseLoan extends BaseEntity {
         return userId;
     }
 
-    @XmlElement
-    public Ratio getRevenueRate() {
-        return revenueRate;
+    public Optional<Ratio> getRevenueRate() {
+        return Optional.ofNullable(revenueRate);
     }
 
     @XmlElement

@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.test.mock;
 
-public interface ReservationBuilder extends BaseLoanBuilder<Reservation, ReservationBuilder>,
-                                            MutableReservation<ReservationBuilder> {
+import org.mockito.Mockito;
+
+abstract class BaseMockBuilder<T, S extends BaseMockBuilder<T, S>> {
+
+    protected final T mock;
+
+    protected BaseMockBuilder(Class<T> clz) {
+        mock = Mockito.mock(clz);
+    }
+
+    public final T build() {
+        return mock;
+    }
 
 }

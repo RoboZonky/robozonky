@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
@@ -37,7 +38,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
-        final Loan l = Loan.custom().build();
+        final Loan l = MockLoanBuilder.fresh();
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         assertThat(d.identify(pd)).isEqualTo(1);
         assertThat(d.getMinimumBalance(null)).isEqualTo(1);

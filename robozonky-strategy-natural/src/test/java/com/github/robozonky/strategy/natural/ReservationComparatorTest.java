@@ -16,15 +16,16 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.test.mock.MockReservationBuilder;
+import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
-
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.internal.Defaults;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -37,7 +38,7 @@ class ReservationComparatorTest {
     }
 
     private static Reservation mockReservation(final OffsetDateTime published, final boolean insured) {
-        return Reservation.custom()
+        return new MockReservationBuilder()
                 .setDatePublished(published)
                 .setInsuranceActive(insured)
                 .build();

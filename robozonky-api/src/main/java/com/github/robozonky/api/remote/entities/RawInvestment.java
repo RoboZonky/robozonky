@@ -16,21 +16,15 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.enums.*;
+import com.github.robozonky.internal.test.DateUtil;
+
+import javax.xml.bind.annotation.XmlElement;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
-
-import javax.xml.bind.annotation.XmlElement;
-
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.InsuranceStatus;
-import com.github.robozonky.api.remote.enums.InvestmentType;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * It is not recommended to use this class directly as Zonky will return various null references for fields at various

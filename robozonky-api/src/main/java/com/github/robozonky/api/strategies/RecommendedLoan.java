@@ -16,16 +16,15 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Loan;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-
 /**
- * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link RawLoan} for investing.
+ * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link Loan} for investing.
  */
-public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
+public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, Loan> {
 
     private final LoanDescriptor loanDescriptor;
     private final int recommendedInvestmentAmount;

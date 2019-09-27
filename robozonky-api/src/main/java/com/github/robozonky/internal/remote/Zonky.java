@@ -16,48 +16,22 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.Collections;
-import java.util.Currency;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import javax.ws.rs.ClientErrorException;
-
-import com.github.robozonky.api.remote.CollectionsApi;
-import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.ParticipationApi;
-import com.github.robozonky.api.remote.PortfolioApi;
-import com.github.robozonky.api.remote.ReservationApi;
-import com.github.robozonky.api.remote.entities.LastPublishedLoan;
-import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.PurchaseRequest;
-import com.github.robozonky.api.remote.entities.RawDevelopment;
-import com.github.robozonky.api.remote.entities.RawInvestment;
-import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.api.remote.entities.RawReservation;
-import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.ResolutionRequest;
-import com.github.robozonky.api.remote.entities.Resolutions;
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.SellRequest;
-import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.remote.*;
+import com.github.robozonky.api.remote.entities.*;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.ClientErrorException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
@@ -82,7 +56,7 @@ public class Zonky {
 
     private final Api<ControlApi> controlApi;
     private final Api<ReservationApi> reservationApi;
-    private final PaginatedApi<RawLoan, LoanApi> loanApi;
+    private final PaginatedApi<Loan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<RawInvestment, PortfolioApi> portfolioApi;
     private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
@@ -171,9 +145,8 @@ public class Zonky {
      */
     public Stream<Reservation> getPendingReservations() {
         return excludeNonCZK(reservationApi.call(ReservationApi::items).getReservations().stream(),
-                             RawReservation::getCurrency)
-                .filter(r -> r.getCurrency().equals(Defaults.CURRENCY))
-                .map(Reservation::sanitized);
+                             Reservation::getCurrency)
+                .filter(r -> r.getCurrency().equals(Defaults.CURRENCY));
     }
 
     /**
@@ -194,7 +167,7 @@ public class Zonky {
     }
 
     public Loan getLoan(final int id) {
-        return Loan.sanitized(loanApi.execute(api -> api.item(id)));
+        return loanApi.execute(api -> api.item(id));
     }
 
     public Optional<Investment> getInvestment(final long id) {
@@ -216,9 +189,8 @@ public class Zonky {
      * @param select Rules to filter the selection by.
      * @return All items from the remote API, lazy-loaded.
      */
-    public Stream<MarketplaceLoan> getAvailableLoans(final Select select) {
-        return excludeNonCZK(getStream(loanApi, LoanApi::items, select), RawLoan::getCurrency)
-                .map(MarketplaceLoan::sanitized);
+    public Stream<Loan> getAvailableLoans(final Select select) {
+        return excludeNonCZK(getStream(loanApi, LoanApi::items, select), Loan::getCurrency);
     }
 
     /**

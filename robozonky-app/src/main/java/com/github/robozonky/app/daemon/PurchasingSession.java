@@ -16,26 +16,20 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseResult;
 
-import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingStartedLazy;
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+
+import static com.github.robozonky.app.events.impl.EventFactory.*;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.

@@ -16,6 +16,17 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.MarketplaceLoanBased;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -25,28 +36,11 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.notifications.LoanBased;
-import com.github.robozonky.api.notifications.MarketplaceLoanBased;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.test.DateUtil;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
@@ -73,7 +67,7 @@ final class Util {
         return Date.from(zonedDateTime.toInstant());
     }
 
-    private static String identifyLoan(final MarketplaceLoan loan) {
+    private static String identifyLoan(final Loan loan) {
         final BigDecimal interestRate = loan.getInterestRate().asPercentage();
         // string formatting ensures proper locale-specific floating point separator
         return String.format("č. %d (%.2f %% p.a., %d m.)", loan.getId(), interestRate, loan.getTermInMonths());
@@ -87,7 +81,7 @@ final class Util {
         return identifyLoan(event.getLoan());
     }
 
-    public static Map<String, Object> getLoanData(final MarketplaceLoan loan) {
+    public static Map<String, Object> getLoanData(final Loan loan) {
         return Map.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()),
@@ -164,7 +158,7 @@ final class Util {
         return Period.between(i.getInvestmentDate().toLocalDate(), DateUtil.localNow().toLocalDate()).toTotalMonths();
     }
 
-    public static Map<String, Object> getLoanData(final Investment i, final MarketplaceLoan l) {
+    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
         final BigDecimal totalPaid = getTotalPaid(i);
         final BigDecimal originalPrincipal = i.getOriginalPrincipal();
         final BigDecimal balance = i.getSmpSoldFor()

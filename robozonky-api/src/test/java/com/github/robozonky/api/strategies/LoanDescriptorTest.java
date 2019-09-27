@@ -16,33 +16,35 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Optional;
-
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Settings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class LoanDescriptorTest {
 
-    private static Loan mockLoan() {
+    static Loan mockLoan() {
         return mockLoan(Rating.D);
     }
 
-    private static Loan mockLoan(final Rating r) {
-        return Loan.custom()
-                .setId(1)
-                .setRating(r)
-                .setAmount(2000)
-                .setNonReservedRemainingInvestment(1000)
-                .setDatePublished(OffsetDateTime.now())
-                .build();
+    static Loan mockLoan(final Rating r) {
+        final Loan loan = mock(Loan.class);
+        when(loan.getId()).thenReturn(1);
+        when(loan.getRating()).thenReturn(r);
+        when(loan.getAmount()).thenReturn(2_000.0);
+        when(loan.getNonReservedRemainingInvestment()).thenReturn(1000.0);
+        when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
+        return loan;
     }
 
     @Disabled("Looks like CAPTCHA is disabled for now. Let's wait and see if it comes back.")

@@ -16,6 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
+import com.github.robozonky.test.mock.MockLoanBuilder;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -24,27 +37,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.InvestmentStrategy;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
-import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class NaturalLanguageInvestmentStrategyTest {
 
     private static Loan mockLoan(final int amount) {
-        return Loan.custom()
-                .setId(1)
+        return new MockLoanBuilder()
                 .setAmount(amount)
                 .setDatePublished(OffsetDateTime.now())
                 .setNonReservedRemainingInvestment(amount)

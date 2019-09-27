@@ -16,17 +16,18 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.Optional;
-
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class InsuranceConditionTest {
 
@@ -34,7 +35,7 @@ class InsuranceConditionTest {
 
     @Test
     void basic() {
-        final Loan loan = Loan.custom()
+        final Loan loan = new MockLoanBuilder()
                 .setInsuranceActive(true)
                 .build();
         final Wrapper<?> wrap = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);

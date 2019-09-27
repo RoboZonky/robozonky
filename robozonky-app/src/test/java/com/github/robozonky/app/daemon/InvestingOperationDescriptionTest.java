@@ -17,22 +17,24 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void getters() {
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
-        final Loan l = Loan.custom().build();
+        final Loan l = MockLoanBuilder.fresh();
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(d.identify(ld)).isEqualTo(l.getId());
         assertThat(d.getMinimumBalance(mockTenant())).isEqualTo(200);

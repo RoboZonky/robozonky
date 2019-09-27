@@ -16,13 +16,8 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.stream.Stream;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response;
-
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -30,6 +25,7 @@ import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import io.vavr.control.Either;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -38,13 +34,18 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class InvestorTest extends AbstractZonkyLeveragingTest {
 
-    private static final Loan LOAN = Loan.custom()
+    private static final Loan LOAN = new MockLoanBuilder()
             .setNonReservedRemainingInvestment(100_000)
             .build();
     private static final LoanDescriptor DESCRIPTOR = new LoanDescriptor(LOAN);

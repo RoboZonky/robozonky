@@ -16,14 +16,15 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Collections;
-
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class InvestmentSizeRecommenderTest {
@@ -32,8 +33,7 @@ class InvestmentSizeRecommenderTest {
     private static final int MAXIMUM_INVESTMENT = 1000;
 
     private static Loan mockLoan(final int amount) {
-        return Loan.custom()
-                .setId(1)
+        return new MockLoanBuilder()
                 .setRating(Rating.A)
                 .setAmount(amount)
                 .setNonReservedRemainingInvestment(amount)

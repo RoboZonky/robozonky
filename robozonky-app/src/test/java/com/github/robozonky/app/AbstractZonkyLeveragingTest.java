@@ -16,18 +16,18 @@
 
 package com.github.robozonky.app;
 
-import java.time.OffsetDateTime;
-import java.util.Random;
-
 import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.Settings;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
-import static org.mockito.Mockito.*;
+import java.time.OffsetDateTime;
+import java.util.Random;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
@@ -45,20 +45,15 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
     }
 
     protected static LoanDescriptor mockLoanDescriptor() {
-        return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt());
-    }
-
-    protected static LoanDescriptor mockLoanDescriptor(final int loanId) {
-        return AbstractZonkyLeveragingTest.mockLoanDescriptor(loanId, true);
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(true);
     }
 
     protected static LoanDescriptor mockLoanDescriptorWithoutCaptcha() {
-        return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt(), false);
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(false);
     }
 
-    private static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
-        final LoanBuilder b = Loan.custom()
-                .setId(loanId)
+    private static LoanDescriptor mockLoanDescriptor(final boolean withCaptcha) {
+        final MockLoanBuilder b = new MockLoanBuilder()
                 .setNonReservedRemainingInvestment(Integer.MAX_VALUE)
                 .setDatePublished(OffsetDateTime.now());
         if (withCaptcha) {

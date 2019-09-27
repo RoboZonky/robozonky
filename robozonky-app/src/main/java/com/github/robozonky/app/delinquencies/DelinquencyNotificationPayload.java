@@ -16,16 +16,8 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
@@ -34,10 +26,15 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.github.robozonky.app.events.impl.EventFactory.loanLost;
-import static com.github.robozonky.app.events.impl.EventFactory.loanLostLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquent;
-import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquentLazy;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.github.robozonky.app.events.impl.EventFactory.*;
 
 /**
  * Updates delinquency information based on the information about loans that are either currently delinquent or no

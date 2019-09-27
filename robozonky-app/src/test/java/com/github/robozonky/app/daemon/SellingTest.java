@@ -16,28 +16,25 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SaleRecommendedEvent;
-import com.github.robozonky.api.notifications.SellingCompletedEvent;
-import com.github.robozonky.api.notifications.SellingStartedEvent;
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -84,9 +81,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noSaleDueToStrategyForbidding() {
-        final Loan loan = Loan.custom()
-                .setId(1)
-                .build();
+        final Loan loan = MockLoanBuilder.fresh();
         final Investment i = mockInvestment(loan);
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(1))).thenReturn(loan);
@@ -103,7 +98,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     }
 
     private void saleMade(final boolean isDryRun) {
-        final Loan loan = Loan.custom().build();
+        final Loan loan = MockLoanBuilder.fresh();
         final Investment i = mockInvestment(loan);
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);

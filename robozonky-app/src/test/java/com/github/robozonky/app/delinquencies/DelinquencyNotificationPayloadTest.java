@@ -16,26 +16,20 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanLostEvent;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -86,7 +80,8 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i10, i30, i60, i90, defaulted));
-        when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
+        final Loan fresh = MockLoanBuilder.fresh();
+        when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquencies will show up now
         assertThat(getEventsRequested())
                 .extracting(e -> (Object) e.getClass().getInterfaces()[0])
@@ -103,7 +98,8 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final Investment i2 = Investment.custom().setDaysPastDue(1).setPaymentStatus(PaymentStatus.OK).build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
-        when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
+        final Loan fresh = MockLoanBuilder.fresh();
+        when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
         assertThat(getEventsRequested()).hasSize(1)
                 .extracting(e -> (Object) e.getClass().getInterfaces()[0])
@@ -126,7 +122,8 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final Investment i2 = Investment.custom().setDaysPastDue(1).setPaymentStatus(PaymentStatus.WRITTEN_OFF).build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
-        when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
+        final Loan fresh = MockLoanBuilder.fresh();
+        when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
         assertThat(getEventsRequested()).hasSize(1)
                 .extracting(e -> (Object) e.getClass().getInterfaces()[0])
@@ -149,7 +146,8 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final Investment i2 = Investment.custom().setDaysPastDue(1).setPaymentStatus(PaymentStatus.PAID).build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
-        when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
+        final Loan fresh = MockLoanBuilder.fresh();
+        when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
         assertThat(getEventsRequested()).hasSize(1)
                 .extracting(e -> (Object) e.getClass().getInterfaces()[0])

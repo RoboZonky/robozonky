@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.remote.entities.MyReservation;
+import javax.xml.bind.annotation.XmlElement;
 
-public interface MutableReservation<T extends MutableReservation<T>> extends Reservation,
-                                                                             MutableBaseLoan<T> {
+public class Reservation extends BaseLoan {
 
-    T setMyReservation(final MyReservation myReservation);
+    private MyReservation myReservation;
+
+    protected Reservation() {
+        // for JAXB
+    }
+
+    @XmlElement
+    public MyReservation getMyReservation() {
+        return myReservation;
+    }
 }

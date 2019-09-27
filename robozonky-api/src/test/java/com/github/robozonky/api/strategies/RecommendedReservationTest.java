@@ -16,19 +16,24 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
+import com.github.robozonky.api.remote.entities.Reservation;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RecommendedReservationTest {
 
     private static Reservation mockReservation() {
-        return Reservation.custom().setDatePublished(OffsetDateTime.now()).build();
+        final Reservation reservation = mock(Reservation.class);
+        when(reservation.getDatePublished()).thenReturn(OffsetDateTime.now());
+        return reservation;
     }
 
     private static ReservationDescriptor mockDescriptor() {

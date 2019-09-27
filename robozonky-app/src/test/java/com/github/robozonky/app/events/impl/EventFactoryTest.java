@@ -16,85 +16,54 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.test.mock.MockLoanBuilder;
+import com.github.robozonky.test.mock.MockReservationBuilder;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanLostEvent;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
-import com.github.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
-import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
-import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SaleRecommendedEvent;
-import com.github.robozonky.api.notifications.SellingCompletedEvent;
-import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.api.remote.entities.MyReservation;
-import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
-import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.api.strategies.RecommendedReservation;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static RecommendedLoan recommendedLoan() {
-        final Loan loan = Loan.custom().setNonReservedRemainingInvestment(2000).build();
+        final Loan loan = new MockLoanBuilder().setNonReservedRemainingInvestment(2000).build();
         return new LoanDescriptor(loan).recommend(200).orElse(null);
     }
 
     private static RecommendedParticipation recommendedParticipation() {
         final Participation p = mock(Participation.class);
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
-        return new ParticipationDescriptor(p, () -> Loan.custom().build()).recommend().orElse(null);
+        return new ParticipationDescriptor(p, () -> MockLoanBuilder.fresh()).recommend().orElse(null);
     }
 
     private static RecommendedInvestment recommendedInvestment() {
         return new InvestmentDescriptor(Investment.custom().setRemainingPrincipal(BigDecimal.TEN).build(),
-                                        () -> Loan.custom().build()).recommend().orElse(null);
+                                        () -> MockLoanBuilder.fresh()).recommend().orElse(null);
     }
 
     private static RecommendedReservation recommendedReservation() {
-        final Reservation r = Reservation.custom()
+        final Reservation r = new MockReservationBuilder()
                 .setMyReservation(mock(MyReservation.class))
                 .build();
-        final Loan l = Loan.custom().build();
+        final Loan l = MockLoanBuilder.fresh();
         return new ReservationDescriptor(r, () -> l)
                 .recommend(BigDecimal.valueOf(r.getMyReservation().getReservedAmount()))
                 .orElse(null);
@@ -106,7 +75,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void thresholds() {
-        final Loan loan = Loan.custom().setRating(Rating.D).setAmount(100_000).build();
+        final Loan loan = new MockLoanBuilder().setRating(Rating.D).setAmount(100_000).build();
         final Investment investment = Investment.fresh(loan, BigDecimal.TEN).build();
         final LocalDate now = LocalDate.now();
         final Collection<Development> developments = Collections.emptyList();
@@ -143,8 +112,8 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentMade() {
-        final InvestmentMadeEvent e = EventFactory.investmentMade(Investment.custom().build(), Loan.custom().build(),
-                                                                  mockPortfolioOverview());
+        final InvestmentMadeEvent e = EventFactory.investmentMade(Investment.custom().build(),
+                MockLoanBuilder.fresh(), mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -155,7 +124,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentPurchased() {
         final InvestmentPurchasedEvent e = EventFactory.investmentPurchased(Investment.custom().build(),
-                                                                            Loan.custom().build(),
+                                                                            MockLoanBuilder.fresh(),
                                                                             mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
@@ -166,8 +135,8 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentSold() {
-        final InvestmentSoldEvent e = EventFactory.investmentSold(Investment.custom().build(), Loan.custom().build(),
-                                                                  mockPortfolioOverview());
+        final InvestmentSoldEvent e = EventFactory.investmentSold(Investment.custom().build(),
+                MockLoanBuilder.fresh(), mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -177,8 +146,8 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void loanDefaulted() {
-        final LoanDefaultedEvent e = EventFactory.loanDefaulted(Investment.custom().build(), Loan.custom().build(),
-                                                                LocalDate.now(), Collections.emptyList());
+        final LoanDefaultedEvent e = EventFactory.loanDefaulted(Investment.custom().build(),
+                MockLoanBuilder.fresh(), LocalDate.now(), Collections.emptyList());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -190,7 +159,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNoLongerDelinquent() {
         final LoanNoLongerDelinquentEvent e = EventFactory.loanNoLongerDelinquent(Investment.custom().build(),
-                                                                                  Loan.custom().build());
+                MockLoanBuilder.fresh());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -200,8 +169,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNowDelinquent() {
         final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(Investment.custom().build(),
-                                                                        Loan.custom().build(),
-                                                                        LocalDate.now(), Collections.emptyList());
+                MockLoanBuilder.fresh(), LocalDate.now(), Collections.emptyList());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -213,7 +181,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void loanLost() {
-        final LoanLostEvent e = EventFactory.loanLost(Investment.custom().build(), Loan.custom().build());
+        final LoanLostEvent e = EventFactory.loanLost(Investment.custom().build(), MockLoanBuilder.fresh());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -268,7 +236,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void reservationAccepted() {
-        final Loan l = Loan.custom().build();
+        final Loan l = MockLoanBuilder.fresh();
         final Investment i = Investment.fresh(l, 200).build();
         final ReservationAcceptedEvent e = EventFactory.reservationAccepted(i, l, mockPortfolioOverview());
         assertSoftly(softly -> {
@@ -339,7 +307,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void saleOffered() {
-        final SaleOfferedEvent e = EventFactory.saleOffered(Investment.custom().build(), Loan.custom().build());
+        final SaleOfferedEvent e = EventFactory.saleOffered(Investment.custom().build(), MockLoanBuilder.fresh());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,27 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import javax.xml.bind.annotation.XmlElement;
+import java.util.Optional;
 
 public class BorrowerRelatedInvestmentInfo extends BaseEntity {
 
-    private BigDecimal totalPrincipalToLoan, remainingPrincipalToLoan, totalPrincipalToBorrower,
-            remainingPrincipalToBorrower, totalSoldAmountToLoan;
-    private int activeCountToLoan, soldCountToLoan;
+    @XmlElement
+    private BigDecimal totalPrincipalToLoan = BigDecimal.ZERO;
+    @XmlElement
+    private BigDecimal remainingPrincipalToLoan = BigDecimal.ZERO;;
+    @XmlElement
+    private BigDecimal totalPrincipalToBorrower = BigDecimal.ZERO;;
+    @XmlElement
+    private BigDecimal remainingPrincipalToBorrower = BigDecimal.ZERO;;
+    private BigDecimal totalSoldAmountToLoan = BigDecimal.ZERO;;
+    private int activeCountToLoan;
+    private int soldCountToLoan;
 
+    @XmlElement
     private Collection<String> otherBorrowerNicknames = Collections.emptyList();
 
     BorrowerRelatedInvestmentInfo() {
@@ -36,35 +46,30 @@ public class BorrowerRelatedInvestmentInfo extends BaseEntity {
     /**
      * @return Will be null if no other nicknames.
      */
-    @XmlElement
     public Collection<String> getOtherBorrowerNicknames() {
-        return otherBorrowerNicknames;
+        return otherBorrowerNicknames == null ? Collections.emptySet() : otherBorrowerNicknames;
     }
 
-    @XmlElement
-    public BigDecimal getTotalPrincipalToLoan() {
-        return totalPrincipalToLoan;
+    public Optional<BigDecimal> getTotalPrincipalToLoan() {
+        return Optional.ofNullable(totalPrincipalToLoan);
     }
 
-    @XmlElement
-    public BigDecimal getRemainingPrincipalToLoan() {
-        return remainingPrincipalToLoan;
-    }
-
-    /**
-     * @return Will be null if no other loans to the borrower.
-     */
-    @XmlElement
-    public BigDecimal getTotalPrincipalToBorrower() {
-        return totalPrincipalToBorrower;
+    public Optional<BigDecimal> getRemainingPrincipalToLoan() {
+        return Optional.ofNullable(remainingPrincipalToLoan);
     }
 
     /**
-     * @return Will be null if no other loans to the borrower.
+     * @return Empty if no other loans to the borrower.
      */
-    @XmlElement
-    public BigDecimal getRemainingPrincipalToBorrower() {
-        return remainingPrincipalToBorrower;
+    public Optional<BigDecimal> getTotalPrincipalToBorrower() {
+        return Optional.ofNullable(totalPrincipalToBorrower);
+    }
+
+    /**
+     * @return Empty if no other loans to the borrower.
+     */
+    public Optional<BigDecimal> getRemainingPrincipalToBorrower() {
+        return Optional.ofNullable(remainingPrincipalToBorrower);
     }
 
     @XmlElement

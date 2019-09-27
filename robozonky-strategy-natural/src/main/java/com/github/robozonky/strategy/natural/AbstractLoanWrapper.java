@@ -16,23 +16,23 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.function.Supplier;
-
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
+import java.util.function.Supplier;
+
 abstract class AbstractLoanWrapper<T extends Descriptor<?, ?, ?>> extends AbstractWrapper<T> {
 
-    private final Supplier<MarketplaceLoan> loan;
+    private final Supplier<Loan> loan;
 
     protected AbstractLoanWrapper(final T original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
         this.loan = original::related;
     }
 
-    protected MarketplaceLoan getLoan() {
+    protected Loan getLoan() {
         return loan.get();
     }
 

@@ -16,6 +16,10 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Loan;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -23,21 +27,16 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
- * Carries metadata regarding a {@link RawLoan}.
+ * Carries metadata regarding a {@link Loan}.
  */
-public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
+public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDescriptor, Loan> {
 
     private static final Logger LOGGER = LogManager.getLogger(LoanDescriptor.class);
 
-    private final MarketplaceLoan loan;
+    private final Loan loan;
 
-    public LoanDescriptor(final MarketplaceLoan loan) {
+    public LoanDescriptor(final Loan loan) {
         this.loan = loan;
     }
 
@@ -79,17 +78,17 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
     }
 
     @Override
-    public MarketplaceLoan item() {
+    public Loan item() {
         return loan;
     }
 
     @Override
-    public MarketplaceLoan related() {
+    public Loan related() {
         return loan;
     }
 
     public Optional<RecommendedLoan> recommend(final int toInvest) {
-        final int remaining = loan.getNonReservedRemainingInvestment();
+        final int remaining = (int)loan.getNonReservedRemainingInvestment();
         if (toInvest <= remaining) {
             return Optional.of(new RecommendedLoan(this, toInvest));
         } else {

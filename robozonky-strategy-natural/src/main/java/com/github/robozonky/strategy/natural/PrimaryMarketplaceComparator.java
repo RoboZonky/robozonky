@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Comparator;
-
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+
+import java.util.Comparator;
 
 /**
  * Loan ordering such that it maximizes the chances the loan is still available on the marketplace when the investment
@@ -27,10 +27,10 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
  */
 class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
 
-    private static final Comparator<MarketplaceLoan>
-            MOST_RECENT_FIRST = Comparator.comparing(MarketplaceLoan::getDatePublished).reversed(),
-            BIGGEST_FIRST = Comparator.comparing(MarketplaceLoan::getNonReservedRemainingInvestment).reversed(),
-            INSURED_FIRST = Comparator.comparing(MarketplaceLoan::isInsuranceActive).reversed(),
+    private static final Comparator<Loan>
+            MOST_RECENT_FIRST = Comparator.comparing(Loan::getDatePublished).reversed(),
+            BIGGEST_FIRST = Comparator.comparing(Loan::getNonReservedRemainingInvestment).reversed(),
+            INSURED_FIRST = Comparator.comparing(Loan::isInsuranceActive).reversed(),
             FINAL = INSURED_FIRST.thenComparing(MOST_RECENT_FIRST).thenComparing(BIGGEST_FIRST);
 
     @Override

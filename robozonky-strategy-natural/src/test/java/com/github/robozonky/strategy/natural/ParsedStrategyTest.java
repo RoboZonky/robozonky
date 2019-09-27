@@ -16,15 +16,10 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -32,9 +27,15 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -43,8 +44,7 @@ class ParsedStrategyTest {
     private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     private static Loan mockLoan(final int amount) {
-        return Loan.custom()
-                .setId(1)
+        return new MockLoanBuilder()
                 .setRating(Rating.A)
                 .setAmount(amount)
                 .build();
@@ -102,8 +102,7 @@ class ParsedStrategyTest {
                                                                               Collections.emptySet()));
         // no loan or participation should be bought; every investment should be sold
         final Loan loanUnder = ParsedStrategyTest.mockLoan(1000);
-        final Loan loanOver = Loan.custom()
-                .setId(2)
+        final Loan loanOver = new MockLoanBuilder()
                 .setAmount(2000)
                 .setTermInMonths(84)
                 .build();

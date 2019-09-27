@@ -16,11 +16,9 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.UUID;
-
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -28,14 +26,17 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class InvestmentWrapperTest {
 
-    private static final Loan LOAN = Loan.custom()
+    private static final Loan LOAN = new MockLoanBuilder()
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)
@@ -60,7 +61,7 @@ class InvestmentWrapperTest {
             softly.assertThat(w.getRating()).isEqualTo(INVESTMENT.getRating());
             softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(LOAN.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(LOAN.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) LOAN.getAmount());
             softly.assertThat(w.getRemainingPrincipal()).isEqualTo(INVESTMENT.getRemainingPrincipal());
             softly.assertThat(w.getOriginal()).isSameAs(original);
             softly.assertThat(w.getStory()).isEqualTo(LOAN.getStory());

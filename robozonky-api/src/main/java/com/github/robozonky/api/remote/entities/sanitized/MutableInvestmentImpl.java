@@ -16,17 +16,9 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.LoanHealthInfo;
@@ -38,6 +30,11 @@ import com.github.robozonky.internal.util.ToStringBuilder;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class MutableInvestmentImpl implements InvestmentBuilder {
 
@@ -125,7 +122,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         setInsuranceHistory(investment.getInsuranceHistory());
     }
 
-    MutableInvestmentImpl(final MarketplaceLoan loan, final BigDecimal originalPrincipal) {
+    MutableInvestmentImpl(final Loan loan, final BigDecimal originalPrincipal) {
         loan.getMyInvestment().ifPresent(i -> {
             this.id = i.getId();
             this.investmentDate.set(i.getTimeCreated());
@@ -140,7 +137,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isOnSmp = false;
         this.originalPrincipal = originalPrincipal;
         this.interestRate = loan.getInterestRate();
-        this.revenueRate = loan.getRevenueRate().orElse(null);
+        this.revenueRate = loan.getRevenueRate().orElse(Ratio.ZERO);
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.ZERO;
         this.paidInterest = BigDecimal.ZERO;

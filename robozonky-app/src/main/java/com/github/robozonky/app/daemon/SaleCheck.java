@@ -16,16 +16,16 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Optional;
-
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentSold;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentSoldLazy;

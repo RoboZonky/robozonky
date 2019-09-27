@@ -16,14 +16,9 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Currency;
-import java.util.Optional;
-
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
@@ -31,6 +26,12 @@ import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Currency;
+import java.util.Optional;
 
 /**
  * This class is an adapted version of {@link RawInvestment}, with some computed fields added and others removed. Most
@@ -62,11 +63,11 @@ public interface Investment {
         return new MutableInvestmentImpl(investment);
     }
 
-    static InvestmentBuilder fresh(final MarketplaceLoan loan, final int investedAmount) {
+    static InvestmentBuilder fresh(final Loan loan, final int investedAmount) {
         return fresh(loan, BigDecimal.valueOf(investedAmount));
     }
 
-    static InvestmentBuilder fresh(final MarketplaceLoan loan, final BigDecimal investedAmount) {
+    static InvestmentBuilder fresh(final Loan loan, final BigDecimal investedAmount) {
         return new MutableInvestmentImpl(loan, investedAmount);
     }
 

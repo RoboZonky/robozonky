@@ -16,17 +16,18 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ParticipationDescriptorTest {
 
@@ -36,7 +37,7 @@ class ParticipationDescriptorTest {
         return p;
     }
 
-    private static final Loan LOAN = Loan.custom().build();
+    private static final Loan LOAN = LoanDescriptorTest.mockLoan();
 
     @Test
     void recommend() {

@@ -16,34 +16,35 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void eliminatesUselessLoans() {
-        final Loan alreadyInvested = Loan.custom()
+        final Loan alreadyInvested = new MockLoanBuilder()
                 .setRating(Rating.B)
                 .setNonReservedRemainingInvestment(1)
                 .setMyInvestment(mock(MyInvestment.class))
                 .build();
-        final Loan normal = Loan.custom()
+        final Loan normal = new MockLoanBuilder()
                 .setRating(Rating.A)
                 .setNonReservedRemainingInvestment(1)
                 .build();

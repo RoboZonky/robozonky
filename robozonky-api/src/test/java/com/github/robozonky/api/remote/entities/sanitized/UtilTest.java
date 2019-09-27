@@ -16,18 +16,20 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.Loan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class UtilTest {
 
     @Test
     void guessesUrl() {
         final int id = 1;
-        final RawLoan mocked = mock(RawLoan.class);
+        final Loan mocked = mock(Loan.class);
         when(mocked.getId()).thenReturn(id);
         assertThat(Util.getUrlSafe(mocked).toString()).isEqualTo(
                 "https://app.zonky.cz/#/marketplace/detail/" + id + "/");
@@ -35,14 +37,14 @@ class UtilTest {
 
     @Test
     void hasUrl() {
-        final RawLoan mocked = mock(RawLoan.class);
+        final Loan mocked = mock(Loan.class);
         when(mocked.getUrl()).thenReturn("http://something");
         assertThat(Util.getUrlSafe(mocked).toString()).isEqualTo(mocked.getUrl());
     }
 
     @Test
     void hasWrongUrl() {
-        final RawLoan mocked = mock(RawLoan.class);
+        final Loan mocked = mock(Loan.class);
         when(mocked.getUrl()).thenReturn("something");
         assertThatThrownBy(() -> Util.getUrlSafe(mocked)).isInstanceOf(IllegalStateException.class);
     }

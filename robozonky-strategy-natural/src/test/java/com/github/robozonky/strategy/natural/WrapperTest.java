@@ -16,23 +16,21 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.test.mock.MockLoanBuilder;
+import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -42,8 +40,7 @@ class WrapperTest {
 
     @Test
     void fromInvestment() {
-        final Loan loan = Loan.custom()
-                .setId(1)
+        final Loan loan = new MockLoanBuilder()
                 .setAmount(100_000)
                 .setRevenueRate(Ratio.ZERO)
                 .setInterestRate(Ratio.ONE)
@@ -58,7 +55,7 @@ class WrapperTest {
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
             softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) loan.getAmount());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
@@ -71,7 +68,7 @@ class WrapperTest {
 
     @Test
     void fromInvestmentWithoutRevenueRate() {
-        final Loan loan = Loan.custom()
+        final Loan loan = new MockLoanBuilder()
                 .setRating(Rating.A)
                 .build();
         final int invested = 200;
@@ -85,7 +82,7 @@ class WrapperTest {
 
     @Test
     void fromReservation() {
-        final Reservation reservation = Reservation.custom()
+        final Reservation reservation = new MockReservationBuilder()
                 .setAnnuity(BigDecimal.ONE)
                 .setRating(Rating.D)
                 .setRegion(Region.JIHOCESKY)
@@ -97,7 +94,7 @@ class WrapperTest {
             softly.assertThat(w.getStory()).isEqualTo(reservation.getStory());
             softly.assertThat(w.getRegion()).isEqualTo(reservation.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(reservation.getRating());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(reservation.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) reservation.getAmount());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(reservation.getAnnuity().intValue());
@@ -110,19 +107,18 @@ class WrapperTest {
 
     @Test
     void fromReservationWithoutRevenueRate() {
-        final Reservation reservation = Reservation.custom()
+        final Reservation reservation = new MockReservationBuilder()
                 .setRating(Rating.B)
                 .build();
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(new ReservationDescriptor(reservation, () -> null),
-                                                              FOLIO);
+                FOLIO);
         when(FOLIO.getCzkInvested()).thenReturn(BigDecimal.ZERO);
         assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("9.99"));
     }
 
     @Test
     void fromLoan() {
-        final Loan loan = Loan.custom()
-                .setId(1)
+        final Loan loan = new MockLoanBuilder()
                 .setAmount(100_000)
                 .setRevenueRate(Ratio.ZERO)
                 .setInterestRate(Ratio.ONE)
@@ -133,7 +129,7 @@ class WrapperTest {
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
             softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) loan.getAmount());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
@@ -146,7 +142,7 @@ class WrapperTest {
 
     @Test
     void fromLoanWithoutRevenueRate() {
-        final Loan loan = Loan.custom()
+        final Loan loan = new MockLoanBuilder()
                 .setRating(Rating.D)
                 .build();
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
@@ -156,8 +152,7 @@ class WrapperTest {
 
     @Test
     void fromParticipation() {
-        final Loan loan = Loan.custom()
-                .setId(1)
+        final Loan loan = new MockLoanBuilder()
                 .setAmount(100_000)
                 .setRevenueRate(Ratio.ZERO)
                 .setInterestRate(Ratio.ONE)
@@ -172,7 +167,7 @@ class WrapperTest {
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
             softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) loan.getAmount());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().intValue());
@@ -185,13 +180,12 @@ class WrapperTest {
 
     @Test
     void fromParticipationWithoutRevenueRate() {
-        final Loan loan = Loan.custom()
+        final Loan loan = new MockLoanBuilder()
                 .setRating(Rating.C)
                 .build();
         final int invested = 200;
         final Participation p = mock(Participation.class);
-        when(p.getRating()).thenReturn(loan.getRating());
-        when(p.getInterestRate()).thenReturn(Ratio.ONE);
+        doReturn(loan.getRating()).when(p).getRating();
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(invested));
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(new ParticipationDescriptor(p, () -> loan), FOLIO);
         when(FOLIO.getCzkInvested()).thenReturn(BigDecimal.ZERO);
@@ -200,8 +194,7 @@ class WrapperTest {
 
     @Test
     void equality() {
-        final Loan loan = Loan.custom()
-                .setId(1)
+        final Loan loan = new MockLoanBuilder()
                 .setAmount(2)
                 .build();
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);

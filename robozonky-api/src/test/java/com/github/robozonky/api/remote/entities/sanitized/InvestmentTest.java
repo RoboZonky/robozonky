@@ -16,13 +16,8 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
@@ -35,6 +30,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -65,30 +66,29 @@ class InvestmentTest {
         assertThat(i).isNotNull();
     }
 
+    private static final Loan LOAN = mock(Loan.class);
+
     @Test
     @DisplayName("Fresh from Loan works.")
     void freshFromLoan() {
-        final Loan l = Loan.custom().build();
-        final Investment i = Investment.fresh(l, 1000);
+        final Investment i = Investment.fresh(LOAN, 1000);
         assertThat(i.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(1000));
     }
 
     @Test
     @DisplayName("Fresh from MarketplaceLoan works.")
     void freshFromMarketplaceLoan() {
-        final MarketplaceLoan l = MarketplaceLoan.custom().build();
-        final Investment i = Investment.fresh(l, 1000);
+        final Investment i = Investment.fresh(LOAN, 1000);
         assertThat(i.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(1000));
     }
 
     @Test
     @DisplayName("Fresh from Participation works.")
     void freshFromParticipation() {
-        final Loan l = Loan.custom().build();
         final Participation p = mock(Participation.class);
         when(p.getInvestmentId()).thenReturn(1L);
         when(p.getRemainingInstalmentCount()).thenReturn(2);
-        final Investment i = Investment.fresh(p, l, BigDecimal.valueOf(1000));
+        final Investment i = Investment.fresh(p, LOAN, BigDecimal.valueOf(1000));
         assertSoftly(softly -> {
             softly.assertThat(i.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(1000));
             softly.assertThat(i.getId()).isEqualTo(p.getInvestmentId());

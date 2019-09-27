@@ -16,23 +16,19 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Collection;
-import java.util.Collections;
-
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 
-import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptationRecommended;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationAccepted;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckStarted;
+import java.util.Collection;
+import java.util.Collections;
+
+import static com.github.robozonky.app.events.impl.EventFactory.*;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
@@ -100,7 +96,7 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
             return false;
         }
         final int confirmedAmount = recommendation.amount().intValue();
-        final MarketplaceLoan l = recommendation.descriptor().related();
+        final Loan l = recommendation.descriptor().related();
         final Investment i = Investment.fresh(l, confirmedAmount);
         result.add(i);
         tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());

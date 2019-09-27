@@ -16,14 +16,13 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Reservation;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.RawReservation;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
-
 /**
- * Represents the decision of the {@link ReservationStrategy} to recommend a {@link RawReservation} for investing.
+ * Represents the decision of the {@link ReservationStrategy} to recommend a {@link Reservation} for investing.
  */
 public final class RecommendedReservation
         implements Recommended<RecommendedReservation, ReservationDescriptor, Reservation> {

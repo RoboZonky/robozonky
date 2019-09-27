@@ -16,19 +16,20 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.enums.Rating;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import com.github.robozonky.api.remote.entities.MyReservation;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
-import com.github.robozonky.api.remote.enums.Rating;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ReservationDescriptorTest {
 
@@ -39,19 +40,19 @@ class ReservationDescriptorTest {
     private static Reservation mockReservation(final Rating r) {
         final MyReservation mr = mock(MyReservation.class);
         when(mr.getReservedAmount()).thenReturn(1000);
-        return Reservation.custom()
-                .setId(1)
-                .setRating(r)
-                .setAmount(2000)
-                .setNonReservedRemainingInvestment(1000)
-                .setDatePublished(OffsetDateTime.now())
-                .setMyReservation(mr)
-                .build();
+        final Reservation rs = mock(Reservation.class);
+        when(rs.getId()).thenReturn(1);
+        when(rs.getRating()).thenReturn(r);
+        when(rs.getAmount()).thenReturn(2_000.0);
+        when(rs.getNonReservedRemainingInvestment()).thenReturn(1_000.0);
+        when(rs.getDatePublished()).thenReturn(OffsetDateTime.now());
+        when(rs.getMyReservation()).thenReturn(mr);
+        return rs;
     }
 
     @Test
     void constructor() {
-        final Loan l = Loan.custom().build();
+        final Loan l = mock(Loan.class);
         final Reservation mockedReservation = ReservationDescriptorTest.mockReservation(Rating.AAAAA);
         final ReservationDescriptor ld = new ReservationDescriptor(mockedReservation, () -> l);
         assertThat(ld.item()).isSameAs(mockedReservation);

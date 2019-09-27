@@ -16,51 +16,12 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.EventListenerSupplier;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanLostEvent;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.WeeklySummaryEvent;
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -71,22 +32,25 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
-import com.github.robozonky.notifications.AbstractTargetHandler;
-import com.github.robozonky.notifications.ConfigStorage;
-import com.github.robozonky.notifications.NotificationListenerService;
-import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.Target;
+import com.github.robozonky.notifications.*;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import freemarker.template.TemplateException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 
-import static org.assertj.core.api.Assertions.*;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.Mockito.*;
 
@@ -199,8 +163,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     @TestFactory
     Stream<DynamicNode> listeners() throws IOException {
         // prepare data
-        final Loan loan = Loan.custom()
-                .setId(66666)
+        final Loan loan = new MockLoanBuilder()
                 .setAmount(100_000)
                 .setAnnuity(BigDecimal.TEN)
                 .setInterestRate(Ratio.ONE)

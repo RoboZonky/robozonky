@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
+import com.github.robozonky.api.remote.entities.Loan;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.function.Function;
-
-import com.github.robozonky.api.remote.entities.RawLoan;
 
 final class Util {
 
@@ -44,11 +44,11 @@ final class Util {
     }
 
     /**
-     * Zonky's API documentation states that {@link RawLoan#getUrl()} is optional. Therefore the only safe use of that
+     * Zonky's API documentation states that {@link Loan#getUrl()} is optional. Therefore the only safe use of that
      * attribute is through this method.
      * @return URL to a loan on Zonky's website. Guessed if not present.
      */
-    static URL getUrlSafe(final RawLoan l) {
+    static URL getUrlSafe(final Loan l) {
         // in case investment has no loan, we guess loan URL
         final String providedUrl = l.getUrl();
         if (providedUrl == null) {

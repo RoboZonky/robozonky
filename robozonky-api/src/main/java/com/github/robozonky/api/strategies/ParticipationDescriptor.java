@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
+import io.vavr.Lazy;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import io.vavr.Lazy;
 
 public final class ParticipationDescriptor
         implements Descriptor<RecommendedParticipation, ParticipationDescriptor, Participation> {
