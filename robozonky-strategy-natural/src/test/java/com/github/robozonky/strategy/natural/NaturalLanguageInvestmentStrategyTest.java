@@ -71,7 +71,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
                                                            portfolio, new Restrictions());
         assertThat(result).isEmpty();
@@ -82,7 +82,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Loan l = mockLoan(1000);
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(l)),
@@ -95,7 +95,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Loan l = mockLoan(100_000);
         final Loan l2 = mockLoan(100);

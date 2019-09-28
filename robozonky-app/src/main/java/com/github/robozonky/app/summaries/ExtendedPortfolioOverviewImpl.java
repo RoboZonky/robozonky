@@ -47,7 +47,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
             this.atRiskPerRating = Collections.emptyMap();
             this.sellablePerRating = Collections.emptyMap();
             this.sellableFeelessPerRating = Collections.emptyMap();
-            this.atRisk = Money.ZERO;
+            this.atRisk = parent.getInvested().getZero();
         } else {
             this.atRisk = Money.sum(atRiskPerRating.values());
             this.atRiskPerRating = atRisk.isZero() ? Collections.emptyMap() : atRiskPerRating;
@@ -90,7 +90,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
     @Override
     public Money getAtRisk(final Rating r) {
-        return this.atRiskPerRating.getOrDefault(r, Money.ZERO);
+        return this.atRiskPerRating.getOrDefault(r, atRisk.getZero());
     }
 
     @Override
@@ -123,7 +123,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
     @Override
     public Money getSellable(final Rating r) {
-        return sellablePerRating.getOrDefault(r, Money.ZERO);
+        return sellablePerRating.getOrDefault(r, sellable.getZero());
     }
 
     @Override
@@ -151,7 +151,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
     @Override
     public Money getSellableFeeless(final Rating r) {
-        return sellableFeelessPerRating.getOrDefault(r, Money.ZERO);
+        return sellableFeelessPerRating.getOrDefault(r, sellable.getZero());
     }
 
     @Override

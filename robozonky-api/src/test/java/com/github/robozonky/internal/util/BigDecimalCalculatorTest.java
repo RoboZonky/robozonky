@@ -16,30 +16,13 @@
 
 package com.github.robozonky.internal.util;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BigDecimalCalculatorTest {
-
-    @Test
-    void sum() {
-        assertThat(BigDecimalCalculator.sum(Arrays.asList(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.TEN)))
-                .isEqualTo(BigDecimal.valueOf(11));
-    }
-
-    @Test
-    void isZero() {
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(BigDecimalCalculator.isZero(BigDecimal.ONE)).isFalse();
-            softly.assertThat(BigDecimalCalculator.isZero(BigDecimal.ZERO)).isTrue();
-            softly.assertThat(BigDecimalCalculator.isZero(BigDecimal.ONE.negate())).isFalse();        }
-        );
-    }
 
     @Test
     void multiplication() {

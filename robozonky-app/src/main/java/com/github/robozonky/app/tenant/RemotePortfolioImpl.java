@@ -103,13 +103,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
                                           Money::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach((r, amount) -> amounts.put(r, amounts.getOrDefault(r, Money.ZERO).add(amount)));
+        data.getBlocked().forEach((r, amount) -> amounts.put(r, amounts.getOrDefault(r, amount.getZero()).add(amount)));
         LOGGER.debug("Plus remote blocked: {}.", amounts);
         syntheticByLoanId.get().values().stream()
                 .filter(syntheticBlocked -> syntheticBlocked.isValidInStatistics(data))
                 .forEach(syntheticBlocked -> {
                     final Rating r = syntheticBlocked.getRating();
-                    amounts.put(r, amounts.getOrDefault(r, Money.ZERO).add(syntheticBlocked.getAmount()));
+                    final Money zero = syntheticBlocked.getAmount().getZero();
+                    amounts.put(r, amounts.getOrDefault(r, zero).add(syntheticBlocked.getAmount()));
                 });
         LOGGER.debug("Grand total incl. synthetics: {}.", amounts);
         return Collections.unmodifiableMap(amounts);

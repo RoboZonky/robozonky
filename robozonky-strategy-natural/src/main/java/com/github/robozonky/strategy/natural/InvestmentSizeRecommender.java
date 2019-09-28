@@ -45,7 +45,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money>
 
     private static Money getPercentage(final Money original, final int percentage) {
         if (percentage == 0) {
-            return Money.ZERO;
+            return original.getZero();
         }
         final BigDecimal result = divide(times(original.getValue(), percentage), HUNDRED);
         return Money.from(result);
@@ -87,15 +87,16 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money>
                      maximumRecommendation);
         // round to nearest lower increment
         final Money loanRemaining = loan.getNonReservedRemainingInvestment();
+        final Money zero = loanRemaining.getZero();
         if (minimumRecommendation.compareTo(loanRemaining) > 0) {
             LOGGER.debug("Not recommending loan #{} due to minimum over remaining.", id);
-            return Money.ZERO;
+            return zero;
         }
         final Money recommendedAmount = maximumRecommendation.min(loanRemaining);
         final Money r = roundToNearestIncrement(recommendedAmount, restrictions.getInvestmentStep());
         if (r.compareTo(minimumRecommendation) < 0) {
             LOGGER.debug("Not recommending loan #{} due to recommendation below minimum.", id);
-            return Money.ZERO;
+            return zero;
         } else {
             LOGGER.debug("Final recommendation for loan #{} is {}.", id, r);
             return r;

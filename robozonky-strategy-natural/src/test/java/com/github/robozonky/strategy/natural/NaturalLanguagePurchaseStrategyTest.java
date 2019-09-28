@@ -79,7 +79,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), w);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         assertThat(result).isEmpty();
@@ -90,7 +90,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation l = mockParticipation();
         doReturn(Rating.A).when(l).getRating();
@@ -106,7 +106,7 @@ class NaturalLanguagePurchaseStrategyTest {
                                                     new FilterSupplier(v, null, Collections.emptySet()));
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation participation = mockParticipation();
         doReturn(Money.from(100_000)).when(participation).getRemainingPrincipal(); // not recommended for balance

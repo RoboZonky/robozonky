@@ -51,10 +51,10 @@ final class Util {
                 .collect(groupingBy(Investment::getRating,
                                     () -> new EnumMap<>(Rating.class),
                                     mapping(i -> {
-                                        final Money principalNotYetReturned = i.getRemainingPrincipal().orElseThrow()
-                                                .subtract(i.getPaidInterest())
+                                        final Money remaining = i.getRemainingPrincipal().orElseThrow();
+                                        final Money principalNotYetReturned = remaining.subtract(i.getPaidInterest())
                                                 .subtract(i.getPaidPenalty())
-                                                .max(Money.ZERO);
+                                                .max(remaining.getZero());
                                         LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
                                                      principalNotYetReturned, i.getLoanId(), i.getId());
                                         return principalNotYetReturned;

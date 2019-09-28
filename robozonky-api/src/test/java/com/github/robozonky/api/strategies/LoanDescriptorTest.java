@@ -100,7 +100,7 @@ class LoanDescriptorTest {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<RecommendedLoan> r =
-                ld.recommend(mockedLoan.getNonReservedRemainingInvestment().add(Money.from(1)));
+                ld.recommend(mockedLoan.getNonReservedRemainingInvestment().add(1));
         assertThat(r).isEmpty();
     }
 }

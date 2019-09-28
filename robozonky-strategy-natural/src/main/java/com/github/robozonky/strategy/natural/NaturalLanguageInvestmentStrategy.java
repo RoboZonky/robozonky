@@ -60,7 +60,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final Money recommendedAmount = recommender.apply(d.item(), restrictions);
-                    if (recommendedAmount.compareTo(Money.ZERO) > 0) {
+                    if (recommendedAmount.compareTo(recommendedAmount.getZero()) > 0) {
                         return d.recommend(recommendedAmount).stream();
                     } else {
                         return Stream.empty();

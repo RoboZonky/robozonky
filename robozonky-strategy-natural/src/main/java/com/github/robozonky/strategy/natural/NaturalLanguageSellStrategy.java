@@ -37,8 +37,7 @@ class NaturalLanguageSellStrategy implements SellStrategy {
     }
 
     private static boolean isFree(final InvestmentDescriptor descriptor) {
-        final Money fee = descriptor.item().getSmpFee().orElse(Money.ZERO);
-        return fee.getValue().signum() == 0;
+        return descriptor.item().getSmpFee().map(Money::isZero).orElse(true);
     }
 
     @Override

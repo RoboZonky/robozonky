@@ -54,7 +54,7 @@ final class SellingThrottle
             LOGGER.debug("No investments eligible.");
             return Stream.empty();
         }
-        Money czkIncluded = Money.ZERO;
+        Money czkIncluded = maxSelloffSize.getZero();
         final List<RecommendedInvestment> byAmountIncreasing = eligible.stream()
                 .sorted(Comparator.comparing(d -> d.descriptor().item().getRemainingPrincipal().orElseThrow()))
                 .collect(Collectors.toList());

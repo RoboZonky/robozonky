@@ -57,7 +57,7 @@ class ParticipationDescriptorTest {
     void recommendWrong() {
         final Participation p = mockParticipation(BigDecimal.TEN);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
-        final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal().subtract(Money.from(1)));
+        final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal().subtract(1));
         assertThat(r).isEmpty();
     }
 

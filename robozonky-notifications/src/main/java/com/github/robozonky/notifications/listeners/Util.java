@@ -168,7 +168,7 @@ final class Util {
         final Money balance = i.getSmpSoldFor()
                 .map(soldFor -> {
                     final Money partial = totalPaid.subtract(originalPrincipal);
-                    final Money saleFee = i.getSmpFee().orElse(Money.ZERO);
+                    final Money saleFee = i.getSmpFee().orElse(soldFor.getZero());
                     return partial.add(soldFor).subtract(saleFee);
                 })
                 .orElseGet(() -> totalPaid.subtract(originalPrincipal));

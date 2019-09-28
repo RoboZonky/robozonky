@@ -91,8 +91,7 @@ class InvestmentSizeRecommenderTest {
         final Loan l = mockLoan(minimumInvestment.getValue().intValue() - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
         when(s.getMinimumInvestmentSize(eq(l.getRating()))).thenReturn(minimumInvestment);
-        when(s.getMaximumInvestmentSize(eq(l.getRating())))
-                .thenReturn(minimumInvestment.add(minimumInvestment));
+        when(s.getMaximumInvestmentSize(eq(l.getRating()))).thenReturn(minimumInvestment.add(minimumInvestment));
         when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
         assertThat(r.apply(l, new Restrictions())).isEqualTo(Money.ZERO);
@@ -106,7 +105,7 @@ class InvestmentSizeRecommenderTest {
         final ParsedStrategy s = mock(ParsedStrategy.class);
         // next line will cause the recommendation to be rounded to 800, which will be below the minimum investment
         when(s.getMinimumInvestmentSize(eq(l.getRating()))).thenReturn(
-                minimumInvestment.subtract(Money.from(1)));
+                minimumInvestment.subtract(1));
         when(s.getMaximumInvestmentSize(eq(l.getRating())))
                 .thenReturn(minimumInvestment);
         when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);

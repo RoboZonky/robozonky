@@ -75,7 +75,7 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         final Stream<RecommendedReservation> result =
                 s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
                             portfolio, new Restrictions());
@@ -87,7 +87,7 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Stream<RecommendedReservation> result =
                 s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
@@ -100,7 +100,7 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(Money.from(1)));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Reservation l = mockReservation(200);
         final ReservationDescriptor ld = new ReservationDescriptor(l, () -> null);

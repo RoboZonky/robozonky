@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.github.robozonky.api.Money.ZERO;
 import static com.github.robozonky.api.Money.from;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
@@ -62,7 +61,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
 
     @Override
     public Money getInvested(final Rating r) {
-        return this.investedPerRating.getOrDefault(r, ZERO);
+        return this.investedPerRating.getOrDefault(r, invested.getZero());
     }
 
     @Override
