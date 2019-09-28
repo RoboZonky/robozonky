@@ -16,35 +16,47 @@
 
 package com.github.robozonky.api;
 
-import com.github.robozonky.internal.util.BigDecimalCalculator;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.*;
+
 public final class Ratio extends Number implements Comparable<Ratio> {
 
-    public static final Ratio ZERO = Ratio.fromRaw(0);
-    public static final Ratio ONE = Ratio.fromRaw(1);
+    private static final BigDecimal HUNDRED = BigDecimal.TEN.pow(2);
+
+    public static final Ratio ZERO = new Ratio(BigDecimal.ZERO);
+    public static final Ratio ONE = new Ratio(BigDecimal.ONE);
     private final BigDecimal raw;
     private final BigDecimal percentage;
 
     private Ratio(final BigDecimal raw) {
-        this.raw = BigDecimalCalculator.toScale(raw);
-        this.percentage = BigDecimalCalculator.times(raw, BigDecimal.TEN.pow(2));
+        this.raw = raw;
+        this.percentage = times(raw, HUNDRED);
     }
 
     public static Ratio fromRaw(final Number rate) {
-        return new Ratio(new BigDecimal(rate.toString()));
+        return fromRaw(new BigDecimal(rate.toString()));
     }
 
     public static Ratio fromRaw(final String rate) {
-        return new Ratio(new BigDecimal(rate));
+        return fromRaw(new BigDecimal(rate));
+    }
+
+    public static Ratio fromRaw(final BigDecimal rate) {
+        final BigDecimal raw = toScale(rate);
+        if (raw.signum() == 0) {
+            return ZERO;
+        } else if (raw.compareTo(BigDecimal.ONE) == 0) {
+            return ONE;
+        }
+        return new Ratio(raw);
     }
 
     public static Ratio fromPercentage(final String rate) {
         final BigDecimal original = new BigDecimal(rate);
-        final BigDecimal raw = BigDecimalCalculator.divide(original, BigDecimal.TEN.pow(2));
-        return new Ratio(raw);
+        final BigDecimal raw = divide(original, HUNDRED);
+        return fromRaw(raw);
     }
 
     public static Ratio fromPercentage(final Number rate) {
@@ -85,7 +97,7 @@ public final class Ratio extends Number implements Comparable<Ratio> {
     }
 
     public Money apply(final Money money) {
-        return Money.from(BigDecimalCalculator.times(money.getValue(), raw));
+        return Money.from(times(money.getValue(), raw), money.getCurrency());
     }
 
     @Override
