@@ -23,6 +23,7 @@ import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Currency;
@@ -76,18 +77,6 @@ abstract class BaseInvestment extends BaseEntity {
         return loanId;
     }
 
-    public Money getAmount() {
-        return moneyAmount.get();
-    }
-
-    public Money getAdditionalAmount() {
-        return moneyAdditionalAmount.get();
-    }
-
-    public Money getFirstAmount() {
-        return moneyFirstAmount.get();
-    }
-
     @XmlElement
     public Currency getCurrency() {
         return currency;
@@ -97,4 +86,22 @@ abstract class BaseInvestment extends BaseEntity {
     public long getId() {
         return id;
     }
+
+    // money types are all transient
+
+    @XmlTransient
+    public Money getAmount() {
+        return moneyAmount.get();
+    }
+
+    @XmlTransient
+    public Money getAdditionalAmount() {
+        return moneyAdditionalAmount.get();
+    }
+
+    @XmlTransient
+    public Money getFirstAmount() {
+        return moneyFirstAmount.get();
+    }
+
 }

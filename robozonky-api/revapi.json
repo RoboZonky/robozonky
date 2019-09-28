@@ -1644,6 +1644,27 @@
         "oldSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.sanitized.Reservation>",
         "newSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.Reservation>",
         "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getAdditionalAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getAdditionalAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getFirstAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getFirstAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
       }
     ]
   }
