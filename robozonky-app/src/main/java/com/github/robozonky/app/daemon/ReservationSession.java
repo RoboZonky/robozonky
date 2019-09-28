@@ -84,7 +84,7 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
     @Override
     protected boolean accept(final RecommendedReservation recommendation) {
         if (!isBalanceAcceptable(recommendation)) {
-            logger.debug("Will not accept reservation {} due to balance ({} CZK) likely too low.", recommendation,
+            logger.debug("Will not accept reservation {} due to balance ({}) likely too low.", recommendation,
                          tenant.getKnownBalanceUpperBound());
             return false;
         }

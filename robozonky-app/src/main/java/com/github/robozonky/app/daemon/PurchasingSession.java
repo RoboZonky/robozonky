@@ -38,12 +38,12 @@ import static com.github.robozonky.app.events.impl.EventFactory.*;
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
  */
 final class PurchasingSession extends
-                              AbstractSession<RecommendedParticipation, ParticipationDescriptor, Participation> {
+        AbstractSession<RecommendedParticipation, ParticipationDescriptor, Participation> {
 
     PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final PowerTenant tenant) {
         super(marketplace, tenant,
-              new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations"),
-              Audit.purchasing());
+                new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations"),
+                Audit.purchasing());
     }
 
     public static Collection<Investment> purchase(final PowerTenant auth,
@@ -74,7 +74,7 @@ final class PurchasingSession extends
     private boolean actualPurchase(final Participation participation) {
         final PurchaseResult result = tenant.call(zonky -> zonky.purchase(participation));
         if (result.isSuccess()) {
-            logger.info("Purchased a participation worth {} CZK.", participation.getRemainingPrincipal());
+            logger.info("Purchased a participation worth {}.", participation.getRemainingPrincipal());
             return true;
         }
         final Money amount = participation.getRemainingPrincipal();
@@ -83,15 +83,14 @@ final class PurchasingSession extends
                 // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
                 throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.");
             case INSUFFICIENT_BALANCE:
-                logger.debug("Failed purchasing a participation worth {} CZK. We don't have enough account balance.",
-                             amount);
+                logger.debug("Failed purchasing a participation worth {}. We don't have enough account balance.", amount);
                 tenant.setKnownBalanceUpperBound(amount.subtract(1));
                 break;
             case ALREADY_HAVE_INVESTMENT:
-                logger.debug("Failed purchasing a participation worth {} CZK. Someone's beaten us to it.", amount);
+                logger.debug("Failed purchasing a participation worth {}. Someone's beaten us to it.", amount);
                 break;
             default:
-                logger.debug("Failed purchasing a participation worth {} CZK. Reason unknown.", amount);
+                logger.debug("Failed purchasing a participation worth {}. Reason unknown.", amount);
         }
         return false;
     }
@@ -99,8 +98,8 @@ final class PurchasingSession extends
     @Override
     protected boolean accept(final RecommendedParticipation recommendation) {
         if (!isBalanceAcceptable(recommendation)) {
-            logger.debug("Will not purchase {} due to balance ({} CZK) likely too low.", recommendation,
-                         tenant.getKnownBalanceUpperBound());
+            logger.debug("Will not purchase {} due to balance ({}) likely too low.", recommendation,
+                    tenant.getKnownBalanceUpperBound());
             return false;
         }
         final Participation participation = recommendation.descriptor().item();

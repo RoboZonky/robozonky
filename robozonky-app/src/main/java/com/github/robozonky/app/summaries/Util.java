@@ -55,7 +55,7 @@ final class Util {
                                         final Money principalNotYetReturned = remaining.subtract(i.getPaidInterest())
                                                 .subtract(i.getPaidPenalty())
                                                 .max(remaining.getZero());
-                                        LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
+                                        LOGGER.debug("Delinquent: {} in loan #{}, investment #{}.",
                                                      principalNotYetReturned, i.getLoanId(), i.getId());
                                         return principalNotYetReturned;
                                     }, REDUCING_COLLECTOR)));

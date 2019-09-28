@@ -61,7 +61,7 @@ final class StatefulBoundedBalance {
         lastModificationDate.set(lastModified);
         final Money lastKnownValue = state.getValue(VALUE_KEY).map(Money::from).orElse(Money.from(Long.MAX_VALUE));
         currentValue.set(lastKnownValue);
-        LOGGER.trace("Loaded {} CZK from {}", lastKnownValue, lastModified);
+        LOGGER.trace("Loaded {} from {}", lastKnownValue, lastModified);
     }
 
     public synchronized void set(final Money value) {
@@ -85,7 +85,7 @@ final class StatefulBoundedBalance {
         final Instant lastModified = lastModificationDate.get();
         final Duration timeBetweenLastBalanceCheckAndNow = getTimeBetweenLastBalanceCheckAndNow();
         if (timeBetweenLastBalanceCheckAndNow.compareTo(BALANCE_INCREASE_INTERVAL_STEP) < 0) {
-            LOGGER.trace("Balance of {} CZK is still fresh ({}).", balance, lastModified);
+            LOGGER.trace("Balance of {} is still fresh ({}).", balance, lastModified);
             return balance;
         }
         // try to increase the balance; double it for every BALANCE_INCREASE_INTERVAL_STEP
@@ -101,7 +101,7 @@ final class StatefulBoundedBalance {
             LOGGER.trace("Balance upper bound reached the theoretical limit.");
             return Money.from(Long.MAX_VALUE);
         } else {
-            LOGGER.trace("Changing balance upper bound from {} to {} CZK.", balance, newBalance);
+            LOGGER.trace("Changing balance upper bound from {} to {}.", balance, newBalance);
             return newBalance;
         }
     }

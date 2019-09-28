@@ -63,7 +63,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money>
         }
         final Money maximumRecommendation = maximumUserRecommendation.min(maximumInvestmentAmount);
         final int loanId = loan.getId();
-        LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId, minimumRecommendation,
+        LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}>.", loanId, minimumRecommendation,
                      maximumRecommendation);
         final Money minimumInvestmentByShare =
                 getPercentage(loan.getAmount(), strategy.getMinimumInvestmentShareInPercent());

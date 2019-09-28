@@ -79,7 +79,7 @@ final class SellingThrottle
             LOGGER.debug("Will sell one investment: {}.", descriptor);
             return Stream.of(descriptor);
         } else {
-            LOGGER.debug("Investments with total value of {} CZK to be sold: {}.", czkIncluded, byAmountIncreasing);
+            LOGGER.debug("Investments with total value of {} to be sold: {}.", czkIncluded, byAmountIncreasing);
             return included.stream();
         }
     }

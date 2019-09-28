@@ -65,7 +65,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     }
 
     private void invest(final InvestmentStrategy strategy) {
-        logger.debug("Starting the investing mechanism with balance upper bound of {} CZK.",
+        logger.debug("Starting the investing mechanism with balance upper bound of {}.",
                      tenant.getKnownBalanceUpperBound());
         boolean invested;
         do {
@@ -84,7 +84,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(amount));
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
-        logger.info("Invested {} CZK into loan #{}.", amount, l.getId());
+        logger.info("Invested {} into loan #{}.", amount, l.getId());
         return true;
     }
 
@@ -96,7 +96,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         } else if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
             tenant.setKnownBalanceUpperBound(recommendation.amount().subtract(1));
         }
-        logger.debug("Failed investing {} CZK into loan #{}, reason: {}.",
+        logger.debug("Failed investing {} into loan #{}, reason: {}.",
                      recommendation.amount(), recommendation.descriptor().item().getId(), failureType);
         return false;
     }
@@ -104,7 +104,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     @Override
     protected boolean accept(final RecommendedLoan recommendation) {
         if (!isBalanceAcceptable(recommendation)) {
-            logger.debug("Will not invest in {} due to balance ({} CZK) likely too low.", recommendation,
+            logger.debug("Will not invest in {} due to balance ({}) likely too low.", recommendation,
                          tenant.getKnownBalanceUpperBound());
             return false;
         }

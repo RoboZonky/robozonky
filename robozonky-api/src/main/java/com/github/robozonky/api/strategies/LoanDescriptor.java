@@ -93,7 +93,7 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
         if (toInvest.compareTo(remaining) <= 0) {
             return Optional.of(new RecommendedLoan(this, toInvest));
         } else {
-            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", toInvest, remaining, loan.getId());
+            LOGGER.warn("Can not recommend {} with {} remaining in loan #{}.", toInvest, remaining, loan.getId());
             return Optional.empty();
         }
     }
