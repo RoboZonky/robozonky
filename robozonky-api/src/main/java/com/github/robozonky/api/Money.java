@@ -19,6 +19,7 @@ package com.github.robozonky.api;
 import com.github.robozonky.internal.Defaults;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Map;
@@ -29,6 +30,10 @@ import java.util.stream.Stream;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.*;
 import static java.math.BigDecimal.valueOf;
 
+/**
+ * Represents a monetary amount of any size, in any currency. Rounds to 2 decimal points. Two instances equal if their
+ * {@link #getCurrency()} and {@link #getValue()} equal, or when {@link #isZero()} regardless of currency.
+ */
 public final class Money implements Comparable<Money> {
 
     private static final Map<Currency, Money> ZEROS = new ConcurrentHashMap<>(1);
@@ -40,8 +45,12 @@ public final class Money implements Comparable<Money> {
     private final Currency currency;
 
     private Money(final BigDecimal value, final Currency currency) {
-        this.value = value.stripTrailingZeros();
+        this.value = value;
         this.currency = currency;
+    }
+
+    private static BigDecimal trim(final BigDecimal number) {
+        return number.setScale(2, RoundingMode.HALF_UP);
     }
 
     public static Money sum(Collection<Money> money) {
@@ -49,7 +58,7 @@ public final class Money implements Comparable<Money> {
     }
 
     public static Money sum(Stream<Money> money) {
-        return money.reduce(Money.ZERO, Money::add);
+        return money.reduce(ZERO, Money::add);
     }
 
     public static Money from(final String number) {
@@ -59,7 +68,7 @@ public final class Money implements Comparable<Money> {
     public static Money from(final String number, final Currency currency) {
         Objects.requireNonNull(number);
         Objects.requireNonNull(currency);
-        return new Money(new BigDecimal(number), currency);
+        return from(new BigDecimal(number), currency);
     }
 
     public static Money from(final BigDecimal number) {
@@ -69,15 +78,11 @@ public final class Money implements Comparable<Money> {
     public static Money from(final BigDecimal number, final Currency currency) {
         Objects.requireNonNull(number);
         Objects.requireNonNull(currency);
-        return new Money(number, currency);
-    }
-
-    public static Money from(final int number) {
-        return from((long) number);
-    }
-
-    public static Money from(final int number, final Currency currency) {
-        return from((long) number, currency);
+        final BigDecimal trimmed = trim(number);
+        if (trimmed.signum() == 0) {
+            return getZero(currency);
+        }
+        return new Money(trimmed, currency);
     }
 
     public static Money from(final long number) {
@@ -86,15 +91,7 @@ public final class Money implements Comparable<Money> {
 
     public static Money from(final long number, final Currency currency) {
         Objects.requireNonNull(currency);
-        return new Money(valueOf(number), currency);
-    }
-
-    public static Money from(final float number) {
-        return from((double) number);
-    }
-
-    public static Money from(final float number, final Currency currency) {
-        return from((double) number, currency);
+        return from(valueOf(number), currency);
     }
 
     public static Money from(final double number) {
@@ -103,22 +100,11 @@ public final class Money implements Comparable<Money> {
 
     public static Money from(final double number, final Currency currency) {
         Objects.requireNonNull(currency);
-        return new Money(valueOf(number), currency);
+        return from(valueOf(number), currency);
     }
 
     public static Money getZero(final Currency currency) {
         return ZEROS.computeIfAbsent(currency, key -> new Money(BigDecimal.ZERO, key));
-    }
-
-    private static int compare(Money money, Money money2) {
-        if (money.isZero() && money2.isZero()) { // currency doesn't matter
-            return 0;
-        } else if (!Objects.equals(money.currency, money2.currency)) {
-            throw new IllegalStateException("Cannot compare different currencies: " + money + " and " + money2);
-        } else {
-            return money.value.compareTo(money2.value);
-        }
-
     }
 
     public BigDecimal getValue() {
@@ -129,84 +115,84 @@ public final class Money implements Comparable<Money> {
         return currency;
     }
 
-    public Money add(final int amount) {
-        return add(Money.from(amount, getCurrency()));
+    public Money add(final BigDecimal amount) {
+        return add(from(amount, currency));
     }
 
     public Money add(final long amount) {
-        return add(Money.from(amount, getCurrency()));
+        return add(from(amount, currency));
     }
 
     public Money add(final double amount) {
-        return add(Money.from(amount, getCurrency()));
+        return add(from(amount, currency));
     }
 
     public Money add(final Money money) {
-        return new Money(plus(value, money.value), currency);
+        return from(plus(value, money.value), currency);
     }
 
-    public Money subtract(final int amount) {
-        return subtract(Money.from(amount, getCurrency()));
+    public Money subtract(final BigDecimal amount) {
+        return subtract(from(amount, currency));
     }
 
     public Money subtract(final long amount) {
-        return subtract(Money.from(amount, getCurrency()));
+        return subtract(from(amount, currency));
     }
 
     public Money subtract(final double amount) {
-        return subtract(Money.from(amount, getCurrency()));
+        return subtract(from(amount, currency));
     }
 
     public Money subtract(final Money money) {
-        return new Money(minus(value, money.value), currency);
+        return from(minus(value, money.value), currency);
     }
 
-    public Money multiplyBy(final int amount) {
-        return multiplyBy(Money.from(amount, getCurrency()));
+    public Money multiplyBy(final BigDecimal amount) {
+        return multiplyBy(from(amount, currency));
     }
 
     public Money multiplyBy(final long amount) {
-        return multiplyBy(Money.from(amount, getCurrency()));
+        return multiplyBy(from(amount, currency));
     }
 
     public Money multiplyBy(final double amount) {
-        return multiplyBy(Money.from(amount, getCurrency()));
+        return multiplyBy(from(amount, currency));
     }
 
     public Money multiplyBy(final Money money) {
-        return new Money(times(value, money.value), currency);
+        return from(times(value, money.value), currency);
     }
 
-    public Money divideBy(final int amount) {
-        return divideBy(Money.from(amount, getCurrency()));
+    public Money divideBy(final BigDecimal amount) {
+        return divideBy(from(amount, currency));
     }
 
     public Money divideBy(final long amount) {
-        return divideBy(Money.from(amount, getCurrency()));
+        return divideBy(from(amount, currency));
     }
 
     public Money divideBy(final double amount) {
-        return divideBy(Money.from(amount, getCurrency()));
+        return divideBy(from(amount, currency));
     }
 
     public Money divideBy(final Money money) {
-        return new Money(divide(value, money.value), currency);
+        return from(divide(value, money.value), currency);
     }
 
     public Money min(final Money money) {
-        return this.compareTo(money) <= 0 ? this : money;
+        return compareTo(money) <= 0 ? this : money;
     }
 
     public Money max(final Money money) {
-        return this.compareTo(money) >= 0 ? this : money;
+        return compareTo(money) >= 0 ? this : money;
     }
 
     public boolean isZero() {
-        return getValue().signum() == 0;
+        return value.signum() == 0;
     }
 
     public Money getZero() {
-        return getZero(getCurrency());
+        return getZero(currency);
     }
 
     @Override
@@ -221,8 +207,11 @@ public final class Money implements Comparable<Money> {
             return false;
         }
         final Money money = (Money) o;
-        final int comparison = compare(this, money);
-        return comparison == 0;
+        if (isZero() && money.isZero()) { // currency doesn't matter
+            return true;
+        }
+        return Objects.equals(value, money.value) &&
+                Objects.equals(currency, money.currency);
     }
 
     @Override
@@ -230,8 +219,20 @@ public final class Money implements Comparable<Money> {
         return Objects.hash(value, currency);
     }
 
+    /**
+     * @param o
+     * @return
+     * @throws IllegalArgumentException When the two non-zero instances don't share {@link #getCurrency()}.
+     */
     @Override
     public int compareTo(Money o) {
-        return compare(this, o);
+        if (Objects.equals(this, o)) {
+            return 0;
+        } else if (!Objects.equals(currency, o.currency)) {
+            throw new IllegalArgumentException("Cannot compare different currencies: " + this + " and " + o);
+        } else {
+            return value.compareTo(o.value);
+        }
+
     }
 }

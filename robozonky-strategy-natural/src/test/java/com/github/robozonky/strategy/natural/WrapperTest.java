@@ -63,8 +63,9 @@ class WrapperTest {
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().getValue().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(invested).stripTrailingZeros());
-            softly.assertThat(w.saleFee()).contains(BigDecimal.ONE);
+            softly.assertThat(w.getRemainingPrincipal().stripTrailingZeros())
+                    .isEqualTo(BigDecimal.valueOf(invested).stripTrailingZeros());
+            softly.assertThat(w.saleFee()).contains(Money.from(1).getValue());
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -176,7 +177,8 @@ class WrapperTest {
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().getValue().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(loan.getTermInMonths());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(invested).stripTrailingZeros());
+            softly.assertThat(w.getRemainingPrincipal().stripTrailingZeros())
+                    .isEqualTo(BigDecimal.valueOf(invested).stripTrailingZeros());
             softly.assertThat(w.saleFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });

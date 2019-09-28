@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RatioTest {
@@ -68,6 +69,13 @@ class RatioTest {
             softly.assertThat(ratio).isNotEqualTo(ratio2);
             softly.assertThat(ratio).isEqualTo(ratio3);
         });
+    }
+
+    @Test
+    void apply() {
+        final Money money = Money.from(10);
+        final Ratio ratio = Ratio.fromPercentage("25");
+        assertThat(ratio.apply(money)).isEqualTo(Money.from("2.5"));
     }
 
 }

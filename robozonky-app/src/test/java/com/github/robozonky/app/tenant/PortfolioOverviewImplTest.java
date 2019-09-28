@@ -69,7 +69,7 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
                     .isCloseTo(4.87, within(0.01));
             softly.assertThat(po.getMonthlyProfit().getValue().intValue()).isCloseTo(733, within(1));
             softly.assertThat(po.getMinimalMonthlyProfit().getValue().intValue()).isCloseTo(682, within(1));
-            softly.assertThat(po.getOptimalMonthlyProfit().getValue().intValue()).isCloseTo(893, within(1));
+            softly.assertThat(po.getOptimalMonthlyProfit().getValue().intValue()).isCloseTo(891, within(1));
         });
     }
 

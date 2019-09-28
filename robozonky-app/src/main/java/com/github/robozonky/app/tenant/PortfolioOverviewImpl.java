@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.github.robozonky.api.Money.from;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
@@ -104,17 +103,17 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
 
     @Override
     public Money getMonthlyProfit() {
-        return getInvested().multiplyBy(from(profitability.bigDecimalValue())).divideBy(from(12));
+        return profitability.apply(getInvested()).divideBy(12);
     }
 
     @Override
     public Money getMinimalMonthlyProfit() {
-        return getInvested().multiplyBy(from(getMinimalAnnualProfitability().bigDecimalValue())).divideBy(from(12));
+        return getMinimalAnnualProfitability().apply(getInvested()).divideBy(12);
     }
 
     @Override
     public Money getOptimalMonthlyProfit() {
-        return getInvested().multiplyBy(from(getOptimalAnnualProfitability().bigDecimalValue())).divideBy(from(12));
+        return getOptimalAnnualProfitability().apply(getInvested()).divideBy(12);
     }
 
     @Override

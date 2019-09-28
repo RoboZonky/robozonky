@@ -41,7 +41,7 @@ public class Statistics extends BaseEntity {
      * Data structure intentionally not implemented. We do not need this information.
      */
     @XmlElement
-    private String superInvestorOverview = "";
+    private Object superInvestorOverview = "";
 
     private Statistics() {
         // for JAXB
