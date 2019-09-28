@@ -16,26 +16,25 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Loan;
+
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-
 /**
- * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link RawLoan} for investing.
+ * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link Loan} for investing.
  */
-public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
+public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, Loan> {
 
     private final LoanDescriptor loanDescriptor;
-    private final int recommendedInvestmentAmount;
+    private final Money recommendedInvestment;
 
-    RecommendedLoan(final LoanDescriptor loanDescriptor, final int amount) {
+    RecommendedLoan(final LoanDescriptor loanDescriptor, final Money amount) {
         if (loanDescriptor == null) {
             throw new IllegalArgumentException("Loan descriptor must not be null.");
         }
         this.loanDescriptor = loanDescriptor;
-        this.recommendedInvestmentAmount = amount;
+        this.recommendedInvestment = amount;
     }
 
     @Override
@@ -46,20 +45,20 @@ public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanD
             return false;
         }
         final RecommendedLoan that = (RecommendedLoan) o;
-        return recommendedInvestmentAmount == that.recommendedInvestmentAmount &&
+        return Objects.equals(recommendedInvestment, that.recommendedInvestment) &&
                 Objects.equals(loanDescriptor, that.loanDescriptor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(loanDescriptor, recommendedInvestmentAmount);
+        return Objects.hash(loanDescriptor, recommendedInvestment);
     }
 
     @Override
     public String toString() {
         return "Recommendation{" +
                 "loanDescriptor=" + loanDescriptor +
-                ", recommendedInvestmentAmount=" + recommendedInvestmentAmount +
+                ", recommendedInvestmentAmount=" + recommendedInvestment +
                 '}';
     }
 
@@ -69,7 +68,7 @@ public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanD
     }
 
     @Override
-    public BigDecimal amount() {
-        return BigDecimal.valueOf(recommendedInvestmentAmount);
+    public Money amount() {
+        return recommendedInvestment;
     }
 }

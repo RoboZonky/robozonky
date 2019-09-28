@@ -16,62 +16,17 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Development;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.internal.tenant.LazyEvent;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.function.Supplier;
-
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanLostEvent;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
-import com.github.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
-import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
-import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SaleRecommendedEvent;
-import com.github.robozonky.api.notifications.SellingCompletedEvent;
-import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
-import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.api.strategies.RecommendedReservation;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.internal.tenant.LazyEvent;
 
 /**
  * Events which require an instance of {@link PortfolioOverview} or {@link Loan} are prime candidates for lazy
@@ -93,7 +48,7 @@ public final class EventFactory {
         return new ExecutionStartedEventImpl(loans, portfolioOverview);
     }
 
-    public static InvestmentMadeEvent investmentMade(final Investment investment, final MarketplaceLoan loan,
+    public static InvestmentMadeEvent investmentMade(final Investment investment, final Loan loan,
                                                      final PortfolioOverview portfolioOverview) {
         return new InvestmentMadeEventImpl(investment, loan, portfolioOverview);
     }
@@ -244,7 +199,7 @@ public final class EventFactory {
     }
 
     public static ReservationAcceptedEvent reservationAccepted(final Investment investment,
-                                                               final MarketplaceLoan loan,
+                                                               final Loan loan,
                                                                final PortfolioOverview portfolioOverview) {
         return new ReservationAcceptedEventImpl(investment, loan, portfolioOverview);
     }

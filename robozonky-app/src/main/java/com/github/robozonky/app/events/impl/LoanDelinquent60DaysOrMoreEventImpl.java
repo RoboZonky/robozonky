@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
+import com.github.robozonky.api.remote.entities.Development;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+
 import java.time.LocalDate;
 import java.util.Collection;
-
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 final class LoanDelinquent60DaysOrMoreEventImpl extends AbstractLoanDelinquentEventImpl implements LoanDelinquent60DaysOrMoreEvent {
 

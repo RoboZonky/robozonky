@@ -16,24 +16,25 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RecommendedParticipationTest {
 
-    private static final Loan LOAN = Loan.custom().build();
+    private static final Loan LOAN = LoanDescriptorTest.mockLoan();
 
     private static Participation mockParticipation() {
         final Participation p = mock(Participation.class);
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
         return p;
     }
 

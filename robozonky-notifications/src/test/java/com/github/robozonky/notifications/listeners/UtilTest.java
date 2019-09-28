@@ -16,6 +16,21 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanRecommendedEvent;
+import com.github.robozonky.api.notifications.MarketplaceLoanBased;
+import com.github.robozonky.api.remote.entities.Development;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.*;
+import com.github.robozonky.test.mock.MockDevelopmentBuilder;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -27,23 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.notifications.LoanBased;
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.MarketplaceLoanBased;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.enums.DevelopmentType;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class UtilTest {
 
@@ -63,11 +62,12 @@ class UtilTest {
 
     @Test
     void missingToDateInCollectionHistory() throws MalformedURLException { // https://github.com/RoboZonky/robozonky/issues/278
-        final Development d = Development.custom()
+        final Development d = new MockDevelopmentBuilder()
                 .setDateFrom(OffsetDateTime.now())
-                .setType(DevelopmentType.OTHER)
+                .setDevelopmentType(DevelopmentType.OTHER)
                 .build();
-        final Loan l = Loan.custom()
+        final Loan l = new MockLoanBuilder()
+                .setAmount(100_000)
                 .setRating(Rating.D)
                 .setAnnuity(BigDecimal.TEN)
                 .setUrl(new URL("http://localhost"))
@@ -76,7 +76,9 @@ class UtilTest {
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setName(UUID.randomUUID().toString())
                 .build();
-        final Investment i = Investment.fresh(l, 200).build();
+        final Investment i = MockInvestmentBuilder.fresh(l, 200)
+                .setExpectedInterest(BigDecimal.ONE)
+                .build();
         Util.getDelinquentData(i, l, Collections.singleton(d), LocalDate.now());
     }
 
@@ -106,13 +108,13 @@ class UtilTest {
     void identifyMarketplaceLoanBased() {
         final MarketplaceLoanBased l = new LoanRecommendedEvent() {
             @Override
-            public MarketplaceLoan getLoan() {
-                return MarketplaceLoan.custom().setRating(Rating.C).setInterestRate(Ratio.ONE).build();
+            public Loan getLoan() {
+                return new MockLoanBuilder().setRating(Rating.C).setInterestRate(Ratio.ONE).build();
             }
 
             @Override
-            public BigDecimal getRecommendation() {
-                return BigDecimal.ZERO;
+            public Money getRecommendation() {
+                return Money.ZERO;
             }
 
             @Override
@@ -133,7 +135,7 @@ class UtilTest {
 
             @Override
             public Loan getLoan() {
-                return Loan.custom().setRating(Rating.D).setInterestRate(Ratio.ONE).build();
+                return new MockLoanBuilder().setRating(Rating.D).setInterestRate(Ratio.ONE).build();
             }
 
             @Override

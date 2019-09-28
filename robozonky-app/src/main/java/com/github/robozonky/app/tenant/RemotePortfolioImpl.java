@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -25,7 +26,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -33,8 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
 
 class RemotePortfolioImpl implements RemotePortfolio {
 
@@ -57,8 +55,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .build();
     }
 
-    private static BigDecimal sumOutstanding(final RiskPortfolio portfolio) {
-        return plus(portfolio.getDue(), portfolio.getUnpaid());
+    private static Money sumOutstanding(final RiskPortfolio portfolio) {
+        return portfolio.getDue().add(portfolio.getUnpaid());
     }
 
     private void refreshPortfolio(final RemoteData data) {
@@ -74,7 +72,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     @Override
-    public void simulateCharge(final int loanId, final Rating rating, final BigDecimal amount) {
+    public void simulateCharge(final int loanId, final Rating rating, final Money amount) {
         LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> {
             final Map<Integer, Blocked> result = new LinkedHashMap<>(old);
@@ -96,22 +94,23 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     @Override
-    public Map<Rating, BigDecimal> getTotal() {
+    public Map<Rating, Money> getTotal() {
         final RemoteData data = getRemotePortfolio(); // use the same data for the entirety of this method
         LOGGER.debug("Remote data used: {}.", data);
-        final Map<Rating, BigDecimal> amounts = data.getStatistics().getRiskPortfolio().stream()
+        final Map<Rating, Money> amounts = data.getStatistics().getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating,
                                           RemotePortfolioImpl::sumOutstanding,
-                                          BigDecimal::add, // should not be necessary
+                                          Money::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach((r, amount) -> amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(amount)));
+        data.getBlocked().forEach((r, amount) -> amounts.put(r, amounts.getOrDefault(r, amount.getZero()).add(amount)));
         LOGGER.debug("Plus remote blocked: {}.", amounts);
         syntheticByLoanId.get().values().stream()
                 .filter(syntheticBlocked -> syntheticBlocked.isValidInStatistics(data))
                 .forEach(syntheticBlocked -> {
                     final Rating r = syntheticBlocked.getRating();
-                    amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(syntheticBlocked.getAmount()));
+                    final Money zero = syntheticBlocked.getAmount().getZero();
+                    amounts.put(r, amounts.getOrDefault(r, zero).add(syntheticBlocked.getAmount()));
                 });
         LOGGER.debug("Grand total incl. synthetics: {}.", amounts);
         return Collections.unmodifiableMap(amounts);

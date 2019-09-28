@@ -16,12 +16,12 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+
 import java.util.Collection;
 import java.util.Collections;
-
-import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class ReservationCheckCompletedEventImpl extends AbstractEventImpl implements ReservationCheckCompletedEvent {
 

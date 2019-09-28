@@ -16,14 +16,16 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Lazy;
+
+import javax.xml.bind.annotation.XmlElement;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Currency;
-import javax.xml.bind.annotation.XmlElement;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.internal.Defaults;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
@@ -34,23 +36,28 @@ abstract class BaseInvestment extends BaseEntity {
     private long id;
     private int loanId;
     private Currency currency = Defaults.CURRENCY;
-    private BigDecimal amount;
-    private BigDecimal additionalAmount;
-    private BigDecimal firstAmount;
+    @XmlElement
+    private String amount;
+    @XmlElement
+    private String additionalAmount;
+    @XmlElement
+    private String firstAmount;
+    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
+    private final Lazy<Money> moneyAdditionalAmount = Lazy.of(() -> Money.from(additionalAmount, currency));
+    private final Lazy<Money> moneyFirstAmount = Lazy.of(() -> Money.from(firstAmount, currency));
     private InvestmentStatus status;
-    private OffsetDateTime timeCreated = OffsetDateTime.MIN;
+    private OffsetDateTime timeCreated = DateUtil.offsetNow();
 
     BaseInvestment() {
         // for JAXB
     }
 
-    BaseInvestment(final Investment investment) {
-        this.id = investment.getId();
-        this.currency = investment.getCurrency();
-        this.loanId = investment.getLoanId();
-        this.amount = investment.getOriginalPrincipal();
-        this.additionalAmount = BigDecimal.ZERO;
-        this.firstAmount = BigDecimal.ZERO;
+    BaseInvestment(final Loan loan, final Money amount) {
+        this.currency = amount.getCurrency();
+        this.loanId = loan.getId();
+        this.amount = amount.getValue().toPlainString();
+        this.additionalAmount = BigDecimal.ZERO.toPlainString();
+        this.firstAmount = amount.getValue().toPlainString();
         this.status = InvestmentStatus.ACTIVE;
     }
 
@@ -69,19 +76,16 @@ abstract class BaseInvestment extends BaseEntity {
         return loanId;
     }
 
-    @XmlElement
-    public BigDecimal getAmount() {
-        return amount;
+    public Money getAmount() {
+        return moneyAmount.get();
     }
 
-    @XmlElement
-    public BigDecimal getAdditionalAmount() {
-        return additionalAmount;
+    public Money getAdditionalAmount() {
+        return moneyAdditionalAmount.get();
     }
 
-    @XmlElement
-    public BigDecimal getFirstAmount() {
-        return firstAmount;
+    public Money getFirstAmount() {
+        return moneyFirstAmount.get();
     }
 
     @XmlElement

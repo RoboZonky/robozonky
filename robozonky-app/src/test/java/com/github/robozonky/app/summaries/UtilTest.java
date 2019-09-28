@@ -16,14 +16,16 @@
 
 package com.github.robozonky.app.summaries;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 
@@ -39,32 +41,32 @@ class UtilTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void atRisk() {
-        final Investment i = Investment.custom()
+        final Investment i = MockInvestmentBuilder.fresh()
                 .setRating(Rating.D)
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setPaidInterest(BigDecimal.ZERO)
                 .setPaidPenalty(BigDecimal.ZERO)
                 .build();
         final Statistics stats = mock(Statistics.class);
-        final RiskPortfolio r = new RiskPortfolio(i.getRating(), 0, 0, i.getRemainingPrincipal().longValue());
+        final RiskPortfolio r = new RiskPortfolio(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal().orElseThrow());
         when(stats.getRiskPortfolio()).thenReturn(Collections.singletonList(r));
         final Zonky zonky = harmlessZonky();
         when(zonky.getStatistics()).thenReturn(stats);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i));
         final Tenant tenant = mockTenant(zonky);
-        final Map<Rating, BigDecimal> result = Util.getAmountsAtRisk(tenant);
+        final Map<Rating, Money> result = Util.getAmountsAtRisk(tenant);
         assertThat(result).containsOnlyKeys(Rating.D);
-        assertThat(result.get(Rating.D).longValue()).isEqualTo(BigDecimal.TEN.longValue());
+        assertThat(result.get(Rating.D)).isEqualTo(Money.from(10));
     }
 
     @Test
     void sellable() {
-        final Investment i = Investment.custom()
+        final Investment i = MockInvestmentBuilder.fresh()
                 .setRating(Rating.D)
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setSmpFee(BigDecimal.ONE)
                 .build();
-        final Investment i2 = Investment.custom()
+        final Investment i2 = MockInvestmentBuilder.fresh()
                 .setRating(Rating.A)
                 .setRemainingPrincipal(BigDecimal.ONE)
                 .setSmpFee(BigDecimal.ZERO)
@@ -72,7 +74,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         when(zonky.getInvestments((Select)any())).thenReturn(Stream.of(i, i2));
         final Tenant tenant = mockTenant(zonky);
-        final Tuple2<Map<Rating, BigDecimal>, Map<Rating, BigDecimal>> result = Util.getAmountsSellable(tenant);
+        final Tuple2<Map<Rating, Money>, Map<Rating, Money>> result = Util.getAmountsSellable(tenant);
         assertThat(result._1).containsOnlyKeys(Rating.D, Rating.A);
         assertThat(result._2).containsOnlyKeys(Rating.A);
     }

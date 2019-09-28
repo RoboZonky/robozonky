@@ -38,7 +38,6 @@ module com.github.robozonky.api {
     exports com.github.robozonky.api.notifications;
     exports com.github.robozonky.api.remote;
     exports com.github.robozonky.api.remote.entities;
-    exports com.github.robozonky.api.remote.entities.sanitized;
     exports com.github.robozonky.api.remote.enums;
     exports com.github.robozonky.api.strategies;
     /*
@@ -76,8 +75,6 @@ module com.github.robozonky.api {
             org.apache.commons.lang3;
     opens com.github.robozonky.api.remote.enums to
             com.fasterxml.jackson.databind,
-            org.apache.commons.lang3;
-    opens com.github.robozonky.api.remote.entities.sanitized to
             org.apache.commons.lang3;
 
 }

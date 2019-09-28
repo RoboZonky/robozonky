@@ -16,9 +16,9 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.util.Collection;
+import com.github.robozonky.api.remote.entities.Investment;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import java.util.Collection;
 
 /**
  * Fired immediately after the investing algorithm is finished confirming recommendations

@@ -16,24 +16,10 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.remote.entities.Development;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.LazyEvent;
@@ -41,6 +27,14 @@ import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -110,7 +104,7 @@ enum Category {
 
     private static SessionEvent supplyEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getDaysPastDue());
+        final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getLegalDpd());
         final int loanId = investment.getLoanId();
         final Collection<Development> developments = getDevelopments(tenant, loanId, since);
         final Loan loan = tenant.getLoan(loanId);

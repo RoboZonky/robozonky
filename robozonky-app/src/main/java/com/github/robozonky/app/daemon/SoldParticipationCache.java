@@ -16,6 +16,15 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Tenant;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
@@ -24,15 +33,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.internal.async.Reloadable;
-import com.github.robozonky.internal.remote.Select;
-import com.github.robozonky.internal.state.InstanceState;
-import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class SoldParticipationCache {
 

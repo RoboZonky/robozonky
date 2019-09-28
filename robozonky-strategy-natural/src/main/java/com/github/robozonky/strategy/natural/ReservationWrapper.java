@@ -16,16 +16,16 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
+import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
+
+import java.math.BigDecimal;
 
 final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
@@ -88,12 +88,12 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     @Override
     public int getOriginalAmount() {
-        return reservation.getAmount();
+        return reservation.getAmount().getValue().intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return reservation.getAnnuity().intValue();
+        return reservation.getAnnuity().getValue().intValue();
     }
 
     @Override

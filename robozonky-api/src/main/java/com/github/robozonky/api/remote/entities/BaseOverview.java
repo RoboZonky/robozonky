@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,56 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
+
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 abstract class BaseOverview extends BaseEntity {
 
-    private long totalInvestment, principalPaid, interestPaid, investmentCount, penaltyPaid;
+    private long investmentCount;
+
+    // strings to be represented as money
 
     @XmlElement
-    public long getTotalInvestment() {
-        return totalInvestment;
-    }
-
+    private long totalInvestment;
+    private final Lazy<Money> moneyTotalInvestment = Lazy.of(() -> Money.from(totalInvestment));
     @XmlElement
-    public long getPrincipalPaid() {
-        return principalPaid;
-    }
-
+    private long principalPaid;
+    private final Lazy<Money> moneyPrincipalPaid = Lazy.of(() -> Money.from(principalPaid));
     @XmlElement
-    public long getInterestPaid() {
-        return interestPaid;
-    }
-
+    private long interestPaid;
+    private final Lazy<Money> moneyInterestPaid = Lazy.of(() -> Money.from(interestPaid));
     @XmlElement
-    public long getPenaltyPaid() {
-        return penaltyPaid;
-    }
+    private long penaltyPaid;
+    private final Lazy<Money> moneyPenaltyPaid = Lazy.of(() -> Money.from(penaltyPaid));
 
     @XmlElement
     public long getInvestmentCount() {
         return investmentCount;
     }
+
+    // money-based fields are all transient
+
+    @XmlTransient
+    public Money getTotalInvestment() {
+        return moneyTotalInvestment.get();
+    }
+
+    @XmlTransient
+    public Money getPrincipalPaid() {
+        return moneyPrincipalPaid.get();
+    }
+
+    @XmlTransient
+    public Money getInterestPaid() {
+        return moneyInterestPaid.get();
+    }
+
+    @XmlTransient
+    public Money getPenaltyPaid() {
+        return moneyPenaltyPaid.get();
+    }
+
 }

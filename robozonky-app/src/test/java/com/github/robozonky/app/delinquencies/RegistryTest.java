@@ -16,24 +16,26 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.util.Collections;
-import java.util.Optional;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Collections;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 class RegistryTest extends AbstractRoboZonkyTest {
 
     private final Zonky zonky = harmlessZonky();
     private final Tenant tenant = mockTenant(zonky);
-    private final Investment i = Investment.custom().build();
+    private final Investment i = MockInvestmentBuilder.fresh().build();
 
     @Test
     void persists() {
@@ -87,7 +89,7 @@ class RegistryTest extends AbstractRoboZonkyTest {
         r.addCategory(i, Category.DEFAULTED);
         r.persist();
         assertThat(r.complement(Collections.emptySet())).containsExactly(i);
-        assertThat(r.complement(Collections.singleton(Investment.custom().build()))).containsExactly(i);
+        assertThat(r.complement(Collections.singleton(MockInvestmentBuilder.fresh().build()))).containsExactly(i);
         assertThat(r.complement(Collections.singleton(i))).isEmpty();
     }
 }

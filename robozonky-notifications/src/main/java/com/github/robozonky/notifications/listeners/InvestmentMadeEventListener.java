@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package com.github.robozonky.notifications.listeners;
 
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
@@ -30,7 +30,7 @@ public class InvestmentMadeEventListener extends AbstractListener<InvestmentMade
     @Override
     String getSubject(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
-        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
+        return "Nová investice - " + i.getAmount().getValue().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override

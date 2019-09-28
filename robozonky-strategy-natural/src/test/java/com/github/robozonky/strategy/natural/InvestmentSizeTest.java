@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.Money;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -28,8 +29,8 @@ class InvestmentSizeTest {
     void regular() {
         final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MIN, InvestmentSizeTest.MAX);
         assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MIN);
-            softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
+            softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MIN));
+            softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
         });
     }
 
@@ -37,8 +38,8 @@ class InvestmentSizeTest {
     void switched() {
         final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX, InvestmentSizeTest.MIN);
         assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MIN);
-            softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
+            softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MIN));
+            softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
         });
     }
 
@@ -46,8 +47,8 @@ class InvestmentSizeTest {
     void omitted() {
         final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX);
         assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(0);
-            softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
+            softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.ZERO);
+            softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
         });
     }
 }

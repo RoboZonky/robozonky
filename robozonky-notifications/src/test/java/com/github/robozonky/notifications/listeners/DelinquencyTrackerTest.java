@@ -16,23 +16,15 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
-
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Development;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -41,16 +33,25 @@ import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
-    private static final Loan LOAN = Loan.custom()
-            .setId(1)
+    private static final Loan LOAN = new MockLoanBuilder()
             .setAmount(200)
             .setAnnuity(BigDecimal.TEN)
             .setRating(Rating.D)
@@ -61,12 +62,11 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setName("")
             .setUrl(getSomeUrl())
             .build();
-    private static final Investment INVESTMENT = Investment.fresh(LOAN, 200)
+    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 200)
             .setInvestmentDate(OffsetDateTime.now())
             .setExpectedInterest(BigDecimal.TEN)
             .build();
-    private static final Loan LOAN2 = Loan.custom()
-            .setId(2)
+    private static final Loan LOAN2 = new MockLoanBuilder()
             .setAmount(200)
             .setAnnuity(BigDecimal.TEN)
             .setRating(Rating.A)
@@ -77,7 +77,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setName("")
             .setUrl(getSomeUrl())
             .build();
-    private static final Investment INVESTMENT2 = Investment.fresh(LOAN2, 200)
+    private static final Investment INVESTMENT2 = MockInvestmentBuilder.fresh(LOAN2, 200)
             .setInvestmentDate(OffsetDateTime.now())
             .build();
     private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");

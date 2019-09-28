@@ -16,12 +16,9 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -30,13 +27,10 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import io.vavr.control.Either;
 
-import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.executionCompletedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.executionStarted;
-import static com.github.robozonky.app.events.impl.EventFactory.executionStartedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
+import java.util.Collection;
+import java.util.Collections;
+
+import static com.github.robozonky.app.events.impl.EventFactory.*;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
@@ -45,7 +39,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
  * Instances of this class are supposed to be short-lived, as the marketplace and Zonky account balance can change
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
  */
-final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
+final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescriptor, Loan> {
 
     private final Investor investor;
 
@@ -82,16 +76,15 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         } while (invested);
     }
 
-    private boolean successfulInvestment(final RecommendedLoan recommendation, final BigDecimal amount) {
-        final int confirmedAmount = amount.intValue();
-        final MarketplaceLoan l = recommendation.descriptor().item();
-        final Investment i = Investment.fresh(l, confirmedAmount);
+    private boolean successfulInvestment(final RecommendedLoan recommendation, final Money amount) {
+        final Loan l = recommendation.descriptor().item();
+        final Investment i = new Investment(l, amount);
         result.add(i);
-        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getOriginalPrincipal());
-        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - confirmedAmount);
+        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), amount);
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(amount));
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
-        logger.info("Invested {} CZK into loan #{}.", confirmedAmount, l.getId());
+        logger.info("Invested {} CZK into loan #{}.", amount, l.getId());
         return true;
     }
 
@@ -101,7 +94,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
             throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.");
         } else if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
-            tenant.setKnownBalanceUpperBound(recommendation.amount().longValue() - 1);
+            tenant.setKnownBalanceUpperBound(recommendation.amount().subtract(1));
         }
         logger.debug("Failed investing {} CZK into loan #{}, reason: {}.",
                      recommendation.amount(), recommendation.descriptor().item().getId(), failureType);
@@ -116,7 +109,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             return false;
         }
         logger.debug("Will attempt to invest in {}.", recommendation);
-        final Either<InvestmentFailureType, BigDecimal> response = investor.invest(recommendation);
+        final Either<InvestmentFailureType, Money> response = investor.invest(recommendation);
         return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
                              amount -> successfulInvestment(recommendation, amount));
     }

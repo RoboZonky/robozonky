@@ -16,15 +16,17 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.time.Clock;
-import java.time.Instant;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.time.Clock;
+import java.time.Instant;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
@@ -35,7 +37,7 @@ class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
         final DefaultValues sut = new DefaultValues(p);
         assertSoftly(softly -> {
             softly.assertThat(sut.getPortfolio()).isSameAs(p);
-            softly.assertThat(sut.getInvestmentSize().getMinimumInvestmentInCzk()).isEqualTo(0);
+            softly.assertThat(sut.getInvestmentSize().getMinimumInvestment()).isEqualTo(Money.ZERO);
         });
     }
 
@@ -43,9 +45,9 @@ class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
     void setTargetPortfolioSize() {
         final DefaultPortfolio p = DefaultPortfolio.PROGRESSIVE;
         final DefaultValues sut = new DefaultValues(p);
-        assertThat(sut.getTargetPortfolioSize()).isEqualTo(Long.MAX_VALUE);
+        assertThat(sut.getTargetPortfolioSize()).isEqualTo(Money.from(Long.MAX_VALUE));
         sut.setTargetPortfolioSize(400);
-        assertThat(sut.getTargetPortfolioSize()).isEqualTo(400);
+        assertThat(sut.getTargetPortfolioSize()).isEqualTo(Money.from(400));
     }
 
     @Test

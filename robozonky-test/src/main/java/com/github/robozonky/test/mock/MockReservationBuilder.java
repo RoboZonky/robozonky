@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.test.mock;
 
 import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.Reservation;
 
-public interface MutableReservation<T extends MutableReservation<T>> extends Reservation,
-                                                                             MutableBaseLoan<T> {
+import static org.mockito.Mockito.when;
 
-    T setMyReservation(final MyReservation myReservation);
+public class MockReservationBuilder extends BaseLoanMockBuilder<Reservation, MockReservationBuilder> {
+
+    public static Reservation fresh() {
+        return new MockReservationBuilder().build();
+    }
+
+    public MockReservationBuilder() {
+        super(Reservation.class);
+    }
+
+    public MockReservationBuilder setMyReservation(final MyReservation myReservation) {
+        when(mock.getMyReservation()).thenReturn(myReservation);
+        return this;
+    }
 }

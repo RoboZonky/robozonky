@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,48 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
+
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 public class OverallOverview extends BaseOverview {
 
-    private long feesAmount, netIncome, principalLost, feesDiscount;
+    @XmlElement
+    private String feesAmount;
+    private final Lazy<Money> moneyFeesAmount = Lazy.of(() -> Money.from(feesAmount));
+    @XmlElement
+    private String netIncome;
+    private final Lazy<Money> moneyNetIncome = Lazy.of(() -> Money.from(netIncome));
+    @XmlElement
+    private String principalLost;
+    private final Lazy<Money> moneyPrincipalLost = Lazy.of(() -> Money.from(principalLost));
+    @XmlElement
+    private String feesDiscount;
+    private final Lazy<Money> moneyFeesDiscount = Lazy.of(() -> Money.from(feesDiscount));
 
     OverallOverview() {
         // for JAXB
     }
 
-    @XmlElement
-    public long getFeesAmount() {
-        return feesAmount;
+    @XmlTransient
+    public Money getFeesAmount() {
+        return moneyFeesAmount.get();
     }
 
-    @XmlElement
-    public long getFeesDiscount() {
-        return feesDiscount;
+    @XmlTransient
+    public Money getFeesDiscount() {
+        return moneyFeesDiscount.get();
     }
 
-    @XmlElement
-    public long getNetIncome() {
-        return netIncome;
+    @XmlTransient
+    public Money getNetIncome() {
+        return moneyNetIncome.get();
     }
 
-    @XmlElement
-    public long getPrincipalLost() {
-        return principalLost;
+    @XmlTransient
+    public Money getPrincipalLost() {
+        return moneyPrincipalLost.get();
     }
 }

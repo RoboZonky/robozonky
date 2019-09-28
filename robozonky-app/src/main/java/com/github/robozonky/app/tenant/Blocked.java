@@ -16,28 +16,28 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Objects;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
+
+import java.time.OffsetDateTime;
+import java.util.Objects;
 
 final class Blocked {
 
     private final int id;
-    private final BigDecimal amount;
+    private final Money amount;
     private final Rating rating;
     private final boolean persistent;
     private final OffsetDateTime storedOn = DateUtil.offsetNow();
 
-    Blocked(final int id, final BigDecimal amount, final Rating rating) {
+    Blocked(final int id, final Money amount, final Rating rating) {
         this(id, amount, rating, false);
     }
 
-    public Blocked(final int id, final BigDecimal amount, final Rating rating, final boolean persistent) {
+    public Blocked(final int id, final Money amount, final Rating rating, final boolean persistent) {
         this.id = id;
-        this.amount = amount.abs();
+        this.amount = Money.from(amount.getValue().abs());
         this.rating = rating;
         this.persistent = persistent;
     }
@@ -46,7 +46,7 @@ final class Blocked {
         return id;
     }
 
-    public BigDecimal getAmount() {
+    public Money getAmount() {
         return amount;
     }
 

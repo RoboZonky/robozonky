@@ -16,26 +16,28 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class InvestmentDescriptorTest {
 
-    private static final Loan LOAN = Loan.custom().build();
+    private static final Loan LOAN = mock(Loan.class);
 
     private static Investment mockInvestment(final BigDecimal amount) {
-        final InvestmentBuilder i = Investment.custom();
-        i.setRemainingPrincipal(amount);
-        return i.build();
+        final Investment i = mock(Investment.class);
+        when(i.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(amount)));
+        return i;
     }
 
     @Test
@@ -47,7 +49,7 @@ class InvestmentDescriptorTest {
         final Optional<RecommendedInvestment> r = id.recommend();
         assertThat(r).isPresent();
         assertSoftly(softly -> {
-            softly.assertThat(r.get().amount()).isEqualTo(remainingPrincipal);
+            softly.assertThat(r.get().amount()).isEqualTo(Money.from(remainingPrincipal));
             softly.assertThat(r.get().descriptor()).isEqualTo(id);
             softly.assertThat(r.get().descriptor().related()).isSameAs(LOAN);
         });
@@ -58,7 +60,7 @@ class InvestmentDescriptorTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
-        final Optional<RecommendedInvestment> r = id.recommend(remainingPrincipal.subtract(BigDecimal.ONE));
+        final Optional<RecommendedInvestment> r = id.recommend(Money.from(remainingPrincipal.subtract(BigDecimal.ONE)));
         assertThat(r).isEmpty();
     }
 

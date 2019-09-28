@@ -16,26 +16,20 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseResult;
 
-import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
-import static com.github.robozonky.app.events.impl.EventFactory.purchasingStartedLazy;
+import java.util.Collection;
+import java.util.Collections;
+
+import static com.github.robozonky.app.events.impl.EventFactory.*;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.
@@ -83,7 +77,7 @@ final class PurchasingSession extends
             logger.info("Purchased a participation worth {} CZK.", participation.getRemainingPrincipal());
             return true;
         }
-        final BigDecimal amount = participation.getRemainingPrincipal();
+        final Money amount = participation.getRemainingPrincipal();
         switch (result.getFailureType().get()) {
             case TOO_MANY_REQUESTS:
                 // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
@@ -91,7 +85,7 @@ final class PurchasingSession extends
             case INSUFFICIENT_BALANCE:
                 logger.debug("Failed purchasing a participation worth {} CZK. We don't have enough account balance.",
                              amount);
-                tenant.setKnownBalanceUpperBound(amount.longValue() - 1);
+                tenant.setKnownBalanceUpperBound(amount.subtract(1));
                 break;
             case ALREADY_HAVE_INVESTMENT:
                 logger.debug("Failed purchasing a participation worth {} CZK. Someone's beaten us to it.", amount);
@@ -112,12 +106,12 @@ final class PurchasingSession extends
         final Participation participation = recommendation.descriptor().item();
         final Loan l = recommendation.descriptor().related();
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);
-        final Investment i = Investment.fresh(participation, l, recommendation.amount());
+        final Investment i = new Investment(l, recommendation.amount());
         discard(recommendation.descriptor());
         if (succeeded) {
             result.add(i);
-            tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal());
-            tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound() - recommendation.amount().longValue());
+            tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal().orElseThrow());
+            tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
             tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(i, l, tenant.getPortfolio().getOverview())));
         }
         return succeeded;

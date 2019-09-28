@@ -16,18 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
@@ -58,8 +59,8 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .flatMap(d -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = recommender.apply(d.item(), restrictions);
-                    if (recommendedAmount > 0) {
+                    final Money recommendedAmount = recommender.apply(d.item(), restrictions);
+                    if (recommendedAmount.compareTo(recommendedAmount.getZero()) > 0) {
                         return d.recommend(recommendedAmount).stream();
                     } else {
                         return Stream.empty();

@@ -16,12 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -32,6 +33,8 @@ import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -87,16 +90,18 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         when(a.refresh(eq(token))).thenReturn(token);
         final Zonky z = harmlessZonky();
-        final Loan l = Loan.custom().setId(1).build();
-        final Investment i = Investment.fresh(l, 200).build();
-        when(z.getLoan(eq(1))).thenReturn(l);
-        when(z.getInvestmentByLoanId(eq(1))).thenReturn(Optional.of(i));
+        final Loan l = new MockLoanBuilder()
+                .setRemainingInvestment(1_000)
+                .build();
+        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
+        when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        when(z.getInvestmentByLoanId(eq(l.getId()))).thenReturn(Optional.of(i));
         doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(s).build()) {
             assertThat(tenant.getAvailability()).isNotNull();
-            assertThat(tenant.getLoan(1)).isSameAs(l);
-            assertThat(tenant.getInvestment(1)).isSameAs(i);
+            assertThat(tenant.getLoan(l.getId())).isSameAs(l);
+            assertThat(tenant.getInvestment(l.getId())).isSameAs(i);
             assertThat(tenant.getPortfolio()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
             assertThatThrownBy(tenant::getRestrictions).isInstanceOf(IllegalStateException.class);
@@ -106,9 +111,9 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void keepsBalance() throws Exception {
         try (final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS).build()) {
-            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Long.MAX_VALUE);
-            tenant.setKnownBalanceUpperBound(100);
-            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(100);
+            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(Long.MAX_VALUE));
+            tenant.setKnownBalanceUpperBound(Money.from(100));
+            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(100));
         }
     }
 

@@ -145,13 +145,9 @@
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
         <configuration>
-          <targetClasses> <!-- this is a hack to be able to exclude entities, but include its sanitized subpackage -->
-            <param>com.github.robozonky.api.notifications.*</param>
-            <param>com.github.robozonky.api.remote.enums.*</param>
-            <param>com.github.robozonky.api.remote.entities.sanitized.*</param>
-            <param>com.github.robozonky.api.strategies.*</param>
-            <param>com.github.robozonky.internal.*</param>
-          </targetClasses>
+          <excludedClasses>
+            <param>com.github.robozonky.api.remote.entities.*</param> <!-- Mostly getters and setters. -->
+          </excludedClasses>
         </configuration>
       </plugin>
     </plugins>

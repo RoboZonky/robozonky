@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
-import java.time.ZonedDateTime;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
+
+import java.time.ZonedDateTime;
 
 /**
  * Class with some aggregate statistics about user's portfolio. Used primarily as the main input into
@@ -30,19 +30,19 @@ public interface PortfolioOverview {
 
     /**
      * Sum total of all amounts yet unpaid.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkInvested();
+    Money getInvested();
 
     /**
      * Amount yet unpaid in a given rating.
      * @param r Rating in question.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkInvested(final Rating r);
+    Money getInvested(final Rating r);
 
     /**
-     * Retrieve the amounts due in a given rating, divided by {@link #getCzkInvested()}.
+     * Retrieve the amounts due in a given rating, divided by {@link #getInvested()}.
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
@@ -56,35 +56,35 @@ public interface PortfolioOverview {
 
     /**
      * Retrieve minimal annual rate of return of the entire portfolio, assuming Zonky rist cost model holds.
-     * (See {@link Rating#getMinimalRevenueRate(long)}.)
+     * (See {@link Rating#getMinimalRevenueRate(Money)}.)
      * @return
      */
     Ratio getMinimalAnnualProfitability();
 
     /**
      * Retrieve maximal annual rate of return of the entire portfolio, assuming none of the loans are ever delinquent.
-     * (See {@link Rating#getMaximalRevenueRate(long)}.)
+     * (See {@link Rating#getMaximalRevenueRate(Money)}.)
      * @return
      */
     Ratio getOptimalAnnualProfitability();
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getAnnualProfitability()}.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkMonthlyProfit();
+    Money getMonthlyProfit();
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getMinimalAnnualProfitability()}.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkMinimalMonthlyProfit();
+    Money getMinimalMonthlyProfit();
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getOptimalAnnualProfitability()}.
-     * @return Amount in CZK.
+     * @return Amount.
      */
-    BigDecimal getCzkOptimalMonthlyProfit();
+    Money getOptimalMonthlyProfit();
 
     /**
      * @return When this instance was created.

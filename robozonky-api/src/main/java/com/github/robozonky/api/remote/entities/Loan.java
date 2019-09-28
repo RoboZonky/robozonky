@@ -16,14 +16,13 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import javax.xml.bind.annotation.XmlElement;
-
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+
+import javax.xml.bind.annotation.XmlElement;
+import java.util.Optional;
 
 /**
  * This class carries several enumeration-based fields. Some of the enums are extremely important to the core function
@@ -31,26 +30,22 @@ import com.github.robozonky.api.remote.enums.Region;
  * additional metadata. If the important enums change, we need RoboZonky to fail. However, in case of the others, we
  * provide non-failing deserializers which handle the missing values gracefully and provide a message warning users that
  * something needs an upgrade.
- * <p>
- * It is not recommended to use this class directly as Zonky will return various null references for fields at various
- * points in the investment lifecycle. Please use {@link Loan} and {@link MarketplaceLoan} as a null-safe alternative.
- * Instances may be created with static methods such as {@link Loan#sanitized(RawLoan)}.
  */
-public class RawLoan extends BaseLoan {
+public class Loan extends BaseLoan {
 
     private String url;
+    @XmlElement
     private MyInvestment myInvestment;
 
-    protected RawLoan() {
+    protected Loan() {
         // for JAXB
     }
 
     /**
-     * @return Null if the loan doesn't have an investment by the current user.
+     * @return Empty if the loan doesn't have an investment by the current user.
      */
-    @XmlElement
-    public MyInvestment getMyInvestment() {
-        return myInvestment;
+    public Optional<MyInvestment> getMyInvestment() {
+        return Optional.ofNullable(myInvestment);
     }
 
     @XmlElement

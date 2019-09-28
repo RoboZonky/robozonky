@@ -16,25 +16,28 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RecommendedInvestmentTest {
 
-    private static final Loan LOAN = Loan.custom().build();
+    private static final Loan LOAN = LoanDescriptorTest.mockLoan();
 
     private static Investment mockInvestment(final BigDecimal remainingPrincipal) {
-        final InvestmentBuilder i = Investment.custom();
-        i.setRemainingPrincipal(remainingPrincipal);
-        return i.build();
+        final Investment i = mock(Investment.class);
+        when(i.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(remainingPrincipal)));
+        return i;
     }
 
     @Test
@@ -42,20 +45,20 @@ class RecommendedInvestmentTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor d = new InvestmentDescriptor(i, () -> LOAN);
-        final RecommendedInvestment r = new RecommendedInvestment(d, remainingPrincipal);
+        final RecommendedInvestment r = new RecommendedInvestment(d, Money.from(remainingPrincipal));
         assertSoftly(softly -> {
             softly.assertThat(r).isNotEqualTo(null);
             softly.assertThat(r).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(r).isEqualTo(r);
         });
-        final RecommendedInvestment r2 = new RecommendedInvestment(d, remainingPrincipal);
+        final RecommendedInvestment r2 = new RecommendedInvestment(d, Money.from(remainingPrincipal));
         assertSoftly(softly -> {
             softly.assertThat(r).isEqualTo(r2);
             softly.assertThat(r2).isEqualTo(r);
         });
         final RecommendedInvestment r3 =
                 new RecommendedInvestment(new InvestmentDescriptor(mockInvestment(remainingPrincipal), () -> LOAN),
-                                          remainingPrincipal);
+                        Money.from(remainingPrincipal));
         assertThat(r).isNotEqualTo(r3);
     }
 }

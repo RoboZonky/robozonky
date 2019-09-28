@@ -16,9 +16,8 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.math.BigDecimal;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
@@ -35,15 +34,14 @@ abstract class Investor {
     }
 
     static Investment convertToInvestment(final RecommendedLoan r) {
-        final int amount = r.amount().intValue();
-        return Investment.fresh(r.descriptor().item(), amount);
+        return new Investment(r.descriptor().item(), r.amount());
     }
 
     public static Investor build(final Tenant auth) {
         if (auth.getSessionInfo().isDryRun()) {
             return new Investor() {
                 @Override
-                public Either<InvestmentFailureType, BigDecimal> invest(final RecommendedLoan r) {
+                public Either<InvestmentFailureType, Money> invest(final RecommendedLoan r) {
                     LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", r);
                     return Either.right(r.amount());
                 }
@@ -52,14 +50,14 @@ abstract class Investor {
             return new Investor() {
 
                 @Override
-                public Either<InvestmentFailureType, BigDecimal> invest(final RecommendedLoan r) {
+                public Either<InvestmentFailureType, Money> invest(final RecommendedLoan r) {
                     return Investor.invest(auth, r);
                 }
             };
         }
     }
 
-    private static Either<InvestmentFailureType, BigDecimal> invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
+    private static Either<InvestmentFailureType, Money> invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
         LOGGER.debug("Executing investment: {}.", recommendedLoan);
         final Investment i = convertToInvestment(recommendedLoan);
         final InvestmentResult r = auth.call(zonky -> zonky.invest(i));
@@ -70,5 +68,5 @@ abstract class Investor {
         }
     }
 
-    public abstract Either<InvestmentFailureType, BigDecimal> invest(final RecommendedLoan r);
+    public abstract Either<InvestmentFailureType, Money> invest(final RecommendedLoan r);
 }

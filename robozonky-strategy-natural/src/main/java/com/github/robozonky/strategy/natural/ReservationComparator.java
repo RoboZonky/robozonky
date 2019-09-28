@@ -16,10 +16,10 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Comparator;
-
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
+import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
+
+import java.util.Comparator;
 
 class ReservationComparator implements Comparator<ReservationDescriptor> {
 

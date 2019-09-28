@@ -16,24 +16,25 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Collections;
-import java.util.UUID;
-
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Collections;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Session state")
 class SessionStateTest extends AbstractZonkyLeveragingTest {
 
     private static final String INITIAL_ID = UUID.randomUUID().toString();
-    private static final Loan INITIAL_LOAN = Loan.custom().setId(1).build();
+    private static final Loan INITIAL_LOAN = MockLoanBuilder.fresh();
     private static final Tenant TENANT = mockTenant();
     private SessionState<Loan> state;
 

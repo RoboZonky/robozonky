@@ -16,22 +16,18 @@
 
 package com.github.robozonky.api.remote;
 
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-
-import com.github.robozonky.api.remote.entities.RawDevelopment;
+import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.internal.Defaults;
+
+import javax.ws.rs.*;
+import java.util.List;
 
 @Path("/collections")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface CollectionsApi extends EntityCollectionApi<RawDevelopment> {
+public interface CollectionsApi extends EntityCollectionApi<Development> {
 
     @GET
     @Path("loans/{loanId}/investor-events")
-    List<RawDevelopment> items(@PathParam("loanId") int loanId);
+    List<Development> items(@PathParam("loanId") int loanId);
 }

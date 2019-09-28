@@ -16,17 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
@@ -35,6 +26,15 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 final class Cache<T> implements AutoCloseable {
 
@@ -59,7 +59,7 @@ final class Cache<T> implements AutoCloseable {
 
         @Override
         public boolean shouldCache(final Loan item) {
-            return item.getRemainingInvestment() == 0;
+            return item.getRemainingInvestment().isZero();
         }
     };
 

@@ -16,21 +16,23 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.strategies.InvestmentDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.RecommendedInvestment;
+import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
-import com.github.robozonky.api.strategies.SellStrategy;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class NaturalLanguageSellStrategyTest {
@@ -40,8 +42,7 @@ class NaturalLanguageSellStrategyTest {
     }
 
     private InvestmentDescriptor mockDescriptor(final Investment investment) {
-        final Loan l = Loan.custom()
-                .setId(1)
+        final Loan l = new MockLoanBuilder()
                 .setAmount(100_000)
                 .build();
         return new InvestmentDescriptor(investment, () -> l);
@@ -52,7 +53,7 @@ class NaturalLanguageSellStrategyTest {
     }
 
     private static Investment mockInvestment(final BigDecimal fee) {
-        return Investment.custom()
+        return MockInvestmentBuilder.fresh()
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setSmpFee(fee)
                 .build();

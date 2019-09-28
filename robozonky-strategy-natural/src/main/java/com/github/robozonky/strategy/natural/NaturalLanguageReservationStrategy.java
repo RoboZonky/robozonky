@@ -16,20 +16,16 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.*;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedReservation;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.api.strategies.ReservationMode;
-import com.github.robozonky.api.strategies.ReservationStrategy;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
@@ -65,7 +61,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .flatMap(d -> { // recommend amount to invest per strategy
-                    final BigDecimal amount = BigDecimal.valueOf(d.item().getMyReservation().getReservedAmount());
+                    final Money amount = d.item().getMyReservation().getReservedAmount();
                     return d.recommend(amount)
                             .map(Stream::of)
                             .orElse(Stream.empty());

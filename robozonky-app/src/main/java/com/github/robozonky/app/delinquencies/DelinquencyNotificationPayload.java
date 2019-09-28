@@ -16,16 +16,8 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
@@ -34,10 +26,15 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.github.robozonky.app.events.impl.EventFactory.loanLost;
-import static com.github.robozonky.app.events.impl.EventFactory.loanLostLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquent;
-import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquentLazy;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.github.robozonky.app.events.impl.EventFactory.*;
 
 /**
  * Updates delinquency information based on the information about loans that are either currently delinquent or no
@@ -95,7 +92,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             LOGGER.debug("Investment #{} may not be promoted anymore.", investmentId);
             return;
         }
-        final int daysPastDue = currentDelinquent.getDaysPastDue();
+        final int daysPastDue = currentDelinquent.getLegalDpd();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
                 .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
@@ -131,7 +128,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
         return investments.parallelStream()
-                .filter(i -> i.getDaysPastDue() > 0)
+                .filter(i -> i.getLegalDpd() > 0)
                 .filter(i -> !isDefaulted(i));
     }
 
@@ -156,7 +153,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
             getNonDefaulted(delinquents).forEach(d -> {
                 for (final Category cat : Category.values()) {
-                    if (cat.getThresholdInDays() > d.getDaysPastDue() || cat.getThresholdInDays() < 0) {
+                    if (cat.getThresholdInDays() > d.getLegalDpd() || cat.getThresholdInDays() < 0) {
                         continue;
                     }
                     registry.addCategory(d, cat);

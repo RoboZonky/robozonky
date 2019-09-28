@@ -1,10 +1,27 @@
+/*
+ * Copyright 2019 The RoboZonky Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.robozonky.api.remote.enums;
 
-import java.time.Instant;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
 
 class RatingTest {
 
@@ -63,11 +80,11 @@ class RatingTest {
     void feesDecreasing() {
         SoftAssertions.assertSoftly(softly -> {
             for (final Rating r : Rating.values()) {
-                final Ratio fee0 = r.getFee(0);
-                final Ratio fee1 = r.getFee(150_000);
-                final Ratio fee2 = r.getFee(200_000);
-                final Ratio fee3 = r.getFee(500_000);
-                final Ratio fee4 = r.getFee(1_000_000);
+                final Ratio fee0 = r.getFee(Money.from(0));
+                final Ratio fee1 = r.getFee(Money.from(150_000));
+                final Ratio fee2 = r.getFee(Money.from(200_000));
+                final Ratio fee3 = r.getFee(Money.from(500_000));
+                final Ratio fee4 = r.getFee(Money.from(1_000_000));
                 softly.assertThat(fee1)
                         .as("Fee for " + r + " at 150 000")
                         .isLessThan(fee0);

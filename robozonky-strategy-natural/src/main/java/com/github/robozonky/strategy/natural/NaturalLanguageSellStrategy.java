@@ -16,20 +16,20 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.stream.Stream;
+
 class NaturalLanguageSellStrategy implements SellStrategy {
 
     private static final Comparator<RecommendedInvestment> COMPARATOR =
-            Comparator.comparing(r -> r.descriptor().item().getSmpFee().orElse(BigDecimal.ZERO));
+            Comparator.comparing(r -> r.descriptor().item().getSmpFee().orElse(Money.ZERO));
     private final ParsedStrategy strategy;
 
     public NaturalLanguageSellStrategy(final ParsedStrategy p) {
@@ -37,8 +37,7 @@ class NaturalLanguageSellStrategy implements SellStrategy {
     }
 
     private static boolean isFree(final InvestmentDescriptor descriptor) {
-        final BigDecimal fee = descriptor.item().getSmpFee().orElse(BigDecimal.ZERO);
-        return fee.signum() == 0;
+        return descriptor.item().getSmpFee().map(Money::isZero).orElse(true);
     }
 
     @Override

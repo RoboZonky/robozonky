@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy> {
 
@@ -55,8 +56,8 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
-    public long getMinimumBalance(final Tenant tenant) {
-        return 1;
+    public Money getMinimumBalance(final Tenant tenant) {
+        return Money.from(1);
     }
 
     @Override

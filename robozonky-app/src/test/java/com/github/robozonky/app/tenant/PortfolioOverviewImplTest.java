@@ -16,19 +16,20 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.math.BigDecimal;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
@@ -43,9 +44,9 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     void emptyPortfolio() {
         final PortfolioOverview po = new PortfolioOverviewImpl(Collections.emptyMap(), Ratio.ZERO);
         assertSoftly(softly -> {
-            softly.assertThat(po.getCzkInvested()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(po.getInvested()).isEqualTo(Money.ZERO);
             for (final Rating r : Rating.values()) {
-                softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(po.getInvested(r)).as(r + " invested").isEqualTo(Money.ZERO);
                 softly.assertThat(po.getShareOnInvestment(r))
                         .as(r + " as a share")
                         .isEqualTo(Ratio.ZERO);
@@ -55,9 +56,9 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void profitability() {
-        final Map<Rating, BigDecimal> investments = new EnumMap<>(Rating.class);
-        investments.put(Rating.AAAAA, BigDecimal.valueOf(200_000));
-        investments.put(Rating.D, BigDecimal.valueOf(20_000));
+        final Map<Rating, Money> investments = new EnumMap<>(Rating.class);
+        investments.put(Rating.AAAAA, Money.from(200_000));
+        investments.put(Rating.D, Money.from(20_000));
         final PortfolioOverview po = new PortfolioOverviewImpl(investments, Ratio.fromPercentage(4));
         assertSoftly(softly -> {
             // the values tested against have been calculated manually and are guaranteed correct
@@ -66,26 +67,26 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
                     .isCloseTo(3.72, within(0.01));
             softly.assertThat(po.getOptimalAnnualProfitability().asPercentage().doubleValue())
                     .isCloseTo(4.87, within(0.01));
-            softly.assertThat(po.getCzkMonthlyProfit().intValue()).isCloseTo(733, within(1));
-            softly.assertThat(po.getCzkMinimalMonthlyProfit().intValue()).isCloseTo(682, within(1));
-            softly.assertThat(po.getCzkOptimalMonthlyProfit().intValue()).isCloseTo(893, within(1));
+            softly.assertThat(po.getMonthlyProfit().getValue().intValue()).isCloseTo(733, within(1));
+            softly.assertThat(po.getMinimalMonthlyProfit().getValue().intValue()).isCloseTo(682, within(1));
+            softly.assertThat(po.getOptimalMonthlyProfit().getValue().intValue()).isCloseTo(891, within(1));
         });
     }
 
     @Test
     void emptyPortfolioWithAdjustmentsAndRisks() {
-        final BigDecimal adj = BigDecimal.TEN;
-        final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
+        final Money adj = Money.from(10);
+        final Map<Rating, Money> in = Collections.singletonMap(Rating.D, adj);
         final PortfolioOverview po = new PortfolioOverviewImpl(in, Ratio.ZERO);
         assertSoftly(softly -> {
-            softly.assertThat(po.getCzkInvested()).isEqualTo(adj);
+            softly.assertThat(po.getInvested()).isEqualTo(adj);
             for (final Rating r : Rating.values()) {
-                final BigDecimal expectedAbsolute = r == Rating.D ? adj : BigDecimal.ZERO;
-                final BigDecimal expectedRelative = r == Rating.D ? BigDecimal.ONE : BigDecimal.ZERO;
-                softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(expectedAbsolute);
+                final Money expectedAbsolute = r == Rating.D ? adj : Money.ZERO;
+                final Money expectedRelative = r == Rating.D ? Money.from(1) : Money.ZERO;
+                softly.assertThat(po.getInvested(r)).as(r + " invested").isEqualTo(expectedAbsolute);
                 softly.assertThat(po.getShareOnInvestment(r))
                         .as(r + " as a share")
-                        .isEqualTo(Ratio.fromRaw(expectedRelative));
+                        .isEqualTo(Ratio.fromRaw(expectedRelative.getValue()));
             }
         });
     }

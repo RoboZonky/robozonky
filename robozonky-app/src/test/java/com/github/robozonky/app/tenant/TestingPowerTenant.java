@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.Events;
@@ -32,12 +33,12 @@ public class TestingPowerTenant extends TestingTenant implements PowerTenant {
     }
 
     @Override
-    public long getKnownBalanceUpperBound() {
+    public Money getKnownBalanceUpperBound() {
         return balance.get();
     }
 
     @Override
-    public void setKnownBalanceUpperBound(final long knownBalanceUpperBound) {
+    public void setKnownBalanceUpperBound(final Money knownBalanceUpperBound) {
         balance.set(knownBalanceUpperBound);
     }
 

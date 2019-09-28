@@ -16,18 +16,12 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.internal.tenant.Tenant;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.internal.tenant.Tenant;
 
 final class Registry {
 

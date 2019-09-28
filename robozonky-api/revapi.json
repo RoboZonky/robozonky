@@ -11,6 +11,1640 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development> com.github.robozonky.api.notifications.DelinquencyBased::getCollectionActions()",
+        "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.Development> com.github.robozonky.api.notifications.DelinquencyBased::getCollectionActions()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Investment> com.github.robozonky.api.notifications.ExecutionCompletedEvent::getInvestments()",
+        "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.Investment> com.github.robozonky.api.notifications.ExecutionCompletedEvent::getInvestments()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.notifications.InvestmentBased::getInvestment()",
+        "new": "method com.github.robozonky.api.remote.entities.Investment com.github.robozonky.api.notifications.InvestmentBased::getInvestment()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Loan com.github.robozonky.api.notifications.LoanBased::getLoan()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.notifications.LoanBased::getLoan()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.notifications.MarketplaceInvestmentBased::getInvestment()",
+        "new": "method com.github.robozonky.api.remote.entities.Investment com.github.robozonky.api.notifications.MarketplaceInvestmentBased::getInvestment()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan com.github.robozonky.api.notifications.MarketplaceLoanBased::getLoan()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.notifications.MarketplaceLoanBased::getLoan()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Investment> com.github.robozonky.api.notifications.PurchasingCompletedEvent::getInvestments()",
+        "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.Investment> com.github.robozonky.api.notifications.PurchasingCompletedEvent::getInvestments()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.notifications.Recommending::getRecommendation()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.notifications.Recommending::getRecommendation()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Investment> com.github.robozonky.api.notifications.ReservationCheckCompletedEvent::getInvestments()",
+        "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.Investment> com.github.robozonky.api.notifications.ReservationCheckCompletedEvent::getInvestments()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Investment> com.github.robozonky.api.notifications.SellingCompletedEvent::getInvestments()",
+        "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.Investment> com.github.robozonky.api.notifications.SellingCompletedEvent::getInvestments()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.RawDevelopment> com.github.robozonky.api.remote.CollectionsApi::items(int)",
+        "new": "method java.util.List<com.github.robozonky.api.remote.entities.Development> com.github.robozonky.api.remote.CollectionsApi::items(int)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "interface com.github.robozonky.api.remote.CollectionsApi",
+        "new": "interface com.github.robozonky.api.remote.CollectionsApi",
+        "interface": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.RawDevelopment>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "interface com.github.robozonky.api.remote.CollectionsApi",
+        "new": "interface com.github.robozonky.api.remote.CollectionsApi",
+        "oldSuperType": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.RawDevelopment>",
+        "newSuperType": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.Development>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.remote.ControlApi::invest(===com.github.robozonky.api.remote.entities.RawInvestment===)",
+        "new": "parameter void com.github.robozonky.api.remote.ControlApi::invest(===com.github.robozonky.api.remote.entities.Investment===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.RawLoan com.github.robozonky.api.remote.LoanApi::item(int)",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.remote.LoanApi::item(int)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.RawLoan> com.github.robozonky.api.remote.LoanApi::items()",
+        "new": "method java.util.List<com.github.robozonky.api.remote.entities.Loan> com.github.robozonky.api.remote.LoanApi::items()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "interface com.github.robozonky.api.remote.LoanApi",
+        "new": "interface com.github.robozonky.api.remote.LoanApi",
+        "interface": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.RawLoan>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "interface com.github.robozonky.api.remote.LoanApi",
+        "new": "interface com.github.robozonky.api.remote.LoanApi",
+        "oldSuperType": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.RawLoan>",
+        "newSuperType": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.Loan>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.RawInvestment> com.github.robozonky.api.remote.PortfolioApi::items()",
+        "new": "method java.util.List<com.github.robozonky.api.remote.entities.Investment> com.github.robozonky.api.remote.PortfolioApi::items()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "interface com.github.robozonky.api.remote.PortfolioApi",
+        "new": "interface com.github.robozonky.api.remote.PortfolioApi",
+        "interface": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.RawInvestment>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "interface com.github.robozonky.api.remote.PortfolioApi",
+        "new": "interface com.github.robozonky.api.remote.PortfolioApi",
+        "oldSuperType": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.RawInvestment>",
+        "newSuperType": "com.github.robozonky.api.remote.EntityCollectionApi<com.github.robozonky.api.remote.entities.Investment>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getAnnuity()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAnnuity()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getAnnuity()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAnnuity()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getAnnuity()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAnnuity()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getAnnuityWithInsurance()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAnnuityWithInsurance()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getAnnuityWithInsurance()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAnnuityWithInsurance()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getAnnuityWithInsurance()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getAnnuityWithInsurance()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getPremium()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getPremium()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getPremium()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getPremium()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseLoan::getPremium()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getPremium()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getRemainingInvestment()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getRemainingInvestment()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getRemainingInvestment()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getRemainingInvestment()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getRemainingInvestment()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getRemainingInvestment()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getReservedAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getReservedAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getReservedAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getReservedAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getReservedAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getReservedAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Ratio> com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Ratio> com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Ratio> com.github.robozonky.api.remote.entities.BaseLoan::getRevenueRate()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getZonkyPlusAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getZonkyPlusAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getZonkyPlusAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getZonkyPlusAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method double com.github.robozonky.api.remote.entities.BaseLoan::getZonkyPlusAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseLoan::getZonkyPlusAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.util.Collection<java.lang.String> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getOtherBorrowerNicknames()",
+        "new": "method java.util.Collection<java.lang.String> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getOtherBorrowerNicknames()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToBorrower()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToBorrower()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToBorrower()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToBorrower()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToBorrower()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToBorrower()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToLoan()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToLoan()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToLoan()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToLoan()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToLoan()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getRemainingPrincipalToLoan()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToBorrower()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToBorrower()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToBorrower()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToBorrower()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToBorrower()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToBorrower()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToLoan()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToLoan()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToLoan()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToLoan()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToLoan()",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalPrincipalToLoan()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalSoldAmountToLoan()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalSoldAmountToLoan()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalSoldAmountToLoan()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalSoldAmountToLoan()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalSoldAmountToLoan()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo::getTotalSoldAmountToLoan()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.util.Optional<com.github.robozonky.api.remote.entities.CurrentPortfolio> com.github.robozonky.api.remote.entities.CurrentOverview::getCurrentInvestments()",
+        "new": "method java.util.Optional<com.github.robozonky.api.remote.entities.CurrentPortfolio> com.github.robozonky.api.remote.entities.CurrentOverview::getCurrentInvestments()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeft()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeft()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeft()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeft()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeft()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeft()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftDue()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftDue()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftDue()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftToPay()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftToPay()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftToPay()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftToPay()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftToPay()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestLeftToPay()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestPlanned()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestPlanned()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestPlanned()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestPlanned()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getInterestPlanned()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getInterestPlanned()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeft()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeft()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeft()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeft()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeft()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeft()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftDue()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftDue()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftDue()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftToPay()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftToPay()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftToPay()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftToPay()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftToPay()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.CurrentOverview::getPrincipalLeftToPay()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.CurrentOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.remote.entities.InvestmentSummary::<init>(===java.math.BigDecimal===, int)",
+        "new": "parameter void com.github.robozonky.api.remote.entities.InvestmentSummary::<init>(===com.github.robozonky.api.Money===, int)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.InvestmentSummary::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.InvestmentSummary::getAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.InvestmentSummary::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.InvestmentSummary::getAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.InvestmentSummary::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.InvestmentSummary::getAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.MonthlySuperInvestorOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getAdditionalAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getAdditionalAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getAdditionalAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getAdditionalAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getFirstAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getFirstAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.BaseInvestment::getFirstAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getFirstAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method int com.github.robozonky.api.remote.entities.MyReservation::getReservedAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.MyReservation::getReservedAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method int com.github.robozonky.api.remote.entities.MyReservation::getReservedAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.MyReservation::getReservedAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method int com.github.robozonky.api.remote.entities.MyReservation::getReservedAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.MyReservation::getReservedAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.OtherInvestments::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OtherInvestments::getAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.OtherInvestments::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OtherInvestments::getAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.OtherInvestments::getAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OtherInvestments::getAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getFeesAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getFeesAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getFeesAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getFeesAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getFeesAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getFeesAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getFeesDiscount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getFeesDiscount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getFeesDiscount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getFeesDiscount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getFeesDiscount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getFeesDiscount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getInterestPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getNetIncome()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getNetIncome()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getNetIncome()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getNetIncome()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getNetIncome()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getNetIncome()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPenaltyPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getPrincipalLost()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getPrincipalLost()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getPrincipalLost()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getPrincipalLost()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.OverallOverview::getPrincipalLost()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.OverallOverview::getPrincipalLost()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getPrincipalPaid() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method long com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseOverview::getTotalInvestment() @ com.github.robozonky.api.remote.entities.OverallOverview",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getPrice()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getPrice()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getPrice()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getPrice()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getPrice()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getPrice()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getRemainingPrincipal()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getRemainingPrincipal()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getRemainingPrincipal()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getRemainingPrincipal()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.Participation::getRemainingPrincipal()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getRemainingPrincipal()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.RawDevelopment",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.RawInvestment",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.RawLoan",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.RawReservation",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.RawReservation> com.github.robozonky.api.remote.entities.Reservations::getReservations()",
+        "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.Reservation> com.github.robozonky.api.remote.entities.Reservations::getReservations()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getInvestmentStep()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getInvestmentStep()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getInvestmentStep()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getInvestmentStep()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getInvestmentStep()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getInvestmentStep()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getMaximumInvestmentAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getMaximumInvestmentAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getMaximumInvestmentAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getMaximumInvestmentAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getMaximumInvestmentAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getMaximumInvestmentAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getMinimumInvestmentAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getMinimumInvestmentAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getMinimumInvestmentAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getMinimumInvestmentAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method int com.github.robozonky.api.remote.entities.Restrictions::getMinimumInvestmentAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Restrictions::getMinimumInvestmentAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.remote.entities.RiskPortfolio::<init>(com.github.robozonky.api.remote.enums.Rating, ===long===, long, long)",
+        "new": "parameter void com.github.robozonky.api.remote.entities.RiskPortfolio::<init>(com.github.robozonky.api.remote.enums.Rating, ===com.github.robozonky.api.Money===, com.github.robozonky.api.Money, com.github.robozonky.api.Money)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.remote.entities.RiskPortfolio::<init>(com.github.robozonky.api.remote.enums.Rating, long, ===long===, long)",
+        "new": "parameter void com.github.robozonky.api.remote.entities.RiskPortfolio::<init>(com.github.robozonky.api.remote.enums.Rating, com.github.robozonky.api.Money, ===com.github.robozonky.api.Money===, com.github.robozonky.api.Money)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.remote.entities.RiskPortfolio::<init>(com.github.robozonky.api.remote.enums.Rating, long, long, ===long===)",
+        "new": "parameter void com.github.robozonky.api.remote.entities.RiskPortfolio::<init>(com.github.robozonky.api.remote.enums.Rating, com.github.robozonky.api.Money, com.github.robozonky.api.Money, ===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getDue()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getDue()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getDue()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getDue()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getPaid()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getPaid()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getPaid()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getPaid()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getPaid()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getPaid()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getUnpaid()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getUnpaid()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getUnpaid()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getUnpaid()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getUnpaid()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.RiskPortfolio::getUnpaid()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.remote.entities.SellRequest::<init>(===com.github.robozonky.api.remote.entities.RawInvestment===)",
+        "new": "parameter void com.github.robozonky.api.remote.entities.SellRequest::<init>(===com.github.robozonky.api.remote.entities.Investment===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.entities.SuperInvestorOverview com.github.robozonky.api.remote.entities.Statistics::getSuperInvestorOverview()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.SuperInvestorOverview",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.BaseLoan",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.BaseLoanBuilder<T extends com.github.robozonky.api.remote.entities.sanitized.BaseLoan, S extends com.github.robozonky.api.remote.entities.sanitized.BaseLoanBuilder<T, S>>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.Development",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.DevelopmentBuilder",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.Investment",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.Loan",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.LoanBuilder",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoanBuilder",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableBaseLoan<T>>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T>>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MutableLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableLoan<T>>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T>>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.MutableReservation<T extends com.github.robozonky.api.remote.entities.sanitized.MutableReservation<T>>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.Reservation",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.entities.sanitized.ReservationBuilder",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(java.time.Instant, ===long===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(java.time.Instant, ===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(===long===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(java.time.Instant, ===long===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(java.time.Instant, ===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(===long===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(java.time.Instant, ===long===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(java.time.Instant, ===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===long===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.Optional<T> com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, S extends com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, X>::recommend(===java.math.BigDecimal===)",
+        "new": "parameter java.util.Optional<T> com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, S extends com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, X>::recommend(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, S extends com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, X>::related()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, S extends com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, X>::related()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getAtRisk()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getAtRisk(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getCzkAtRisk()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getCzkAtRisk(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getCzkSellable()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getCzkSellable(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getCzkSellableFeeless()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getCzkSellableFeeless(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getSellable()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getSellable(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getSellableFeeless()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.ExtendedPortfolioOverview::getSellableFeeless(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.InvestmentDescriptor::<init>(===com.github.robozonky.api.remote.entities.sanitized.Investment===, java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>)",
+        "new": "parameter void com.github.robozonky.api.strategies.InvestmentDescriptor::<init>(===com.github.robozonky.api.remote.entities.Investment===, java.util.function.Supplier<com.github.robozonky.api.remote.entities.Loan>)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.InvestmentDescriptor::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>===)",
+        "new": "parameter void com.github.robozonky.api.strategies.InvestmentDescriptor::<init>(com.github.robozonky.api.remote.entities.Investment, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.Loan>===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.strategies.InvestmentDescriptor::item()",
+        "new": "method com.github.robozonky.api.remote.entities.Investment com.github.robozonky.api.strategies.InvestmentDescriptor::item()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.InvestmentDescriptor::recommend(===java.math.BigDecimal===)",
+        "new": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.InvestmentDescriptor::recommend(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Loan com.github.robozonky.api.strategies.InvestmentDescriptor::related()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.strategies.InvestmentDescriptor::related()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class com.github.robozonky.api.strategies.InvestmentDescriptor",
+        "new": "class com.github.robozonky.api.strategies.InvestmentDescriptor",
+        "interface": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedInvestment, com.github.robozonky.api.strategies.InvestmentDescriptor, com.github.robozonky.api.remote.entities.sanitized.Investment>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "class com.github.robozonky.api.strategies.InvestmentDescriptor",
+        "new": "class com.github.robozonky.api.strategies.InvestmentDescriptor",
+        "oldSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedInvestment, com.github.robozonky.api.strategies.InvestmentDescriptor, com.github.robozonky.api.remote.entities.sanitized.Investment>",
+        "newSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedInvestment, com.github.robozonky.api.strategies.InvestmentDescriptor, com.github.robozonky.api.remote.entities.Investment>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.LoanDescriptor::<init>(===com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan===)",
+        "new": "parameter void com.github.robozonky.api.strategies.LoanDescriptor::<init>(===com.github.robozonky.api.remote.entities.Loan===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan com.github.robozonky.api.strategies.LoanDescriptor::item()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.strategies.LoanDescriptor::item()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.LoanDescriptor::recommend(===java.math.BigDecimal===)",
+        "new": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.LoanDescriptor::recommend(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.Optional<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.LoanDescriptor::recommend(int)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan com.github.robozonky.api.strategies.LoanDescriptor::related()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.strategies.LoanDescriptor::related()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class com.github.robozonky.api.strategies.LoanDescriptor",
+        "new": "class com.github.robozonky.api.strategies.LoanDescriptor",
+        "interface": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedLoan, com.github.robozonky.api.strategies.LoanDescriptor, com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "class com.github.robozonky.api.strategies.LoanDescriptor",
+        "new": "class com.github.robozonky.api.strategies.LoanDescriptor",
+        "oldSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedLoan, com.github.robozonky.api.strategies.LoanDescriptor, com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan>",
+        "newSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedLoan, com.github.robozonky.api.strategies.LoanDescriptor, com.github.robozonky.api.remote.entities.Loan>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.ParticipationDescriptor::<init>(com.github.robozonky.api.remote.entities.Participation, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>===)",
+        "new": "parameter void com.github.robozonky.api.strategies.ParticipationDescriptor::<init>(com.github.robozonky.api.remote.entities.Participation, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.Loan>===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.ParticipationDescriptor::recommend(===java.math.BigDecimal===)",
+        "new": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.ParticipationDescriptor::recommend(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Loan com.github.robozonky.api.strategies.ParticipationDescriptor::related()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.strategies.ParticipationDescriptor::related()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkInvested(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkMinimalMonthlyProfit()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkMonthlyProfit()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.PortfolioOverview::getCzkOptimalMonthlyProfit()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.PortfolioOverview::getInvested()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.PortfolioOverview::getInvested(com.github.robozonky.api.remote.enums.Rating)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.PortfolioOverview::getMinimalMonthlyProfit()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.PortfolioOverview::getMonthlyProfit()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.PortfolioOverview::getOptimalMonthlyProfit()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, S extends com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, X>::amount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, S extends com.github.robozonky.api.strategies.Descriptor<T extends com.github.robozonky.api.strategies.Recommended<T, S extends com.github.robozonky.api.strategies.Descriptor<T, S, X extends java.lang.Object>, X>, S, X>, X>::amount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.RecommendedInvestment::amount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.RecommendedInvestment::amount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class com.github.robozonky.api.strategies.RecommendedInvestment",
+        "new": "class com.github.robozonky.api.strategies.RecommendedInvestment",
+        "interface": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedInvestment, com.github.robozonky.api.strategies.InvestmentDescriptor, com.github.robozonky.api.remote.entities.sanitized.Investment>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "class com.github.robozonky.api.strategies.RecommendedInvestment",
+        "new": "class com.github.robozonky.api.strategies.RecommendedInvestment",
+        "oldSuperType": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedInvestment, com.github.robozonky.api.strategies.InvestmentDescriptor, com.github.robozonky.api.remote.entities.sanitized.Investment>",
+        "newSuperType": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedInvestment, com.github.robozonky.api.strategies.InvestmentDescriptor, com.github.robozonky.api.remote.entities.Investment>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.RecommendedLoan::amount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.RecommendedLoan::amount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class com.github.robozonky.api.strategies.RecommendedLoan",
+        "new": "class com.github.robozonky.api.strategies.RecommendedLoan",
+        "interface": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedLoan, com.github.robozonky.api.strategies.LoanDescriptor, com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "class com.github.robozonky.api.strategies.RecommendedLoan",
+        "new": "class com.github.robozonky.api.strategies.RecommendedLoan",
+        "oldSuperType": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedLoan, com.github.robozonky.api.strategies.LoanDescriptor, com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan>",
+        "newSuperType": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedLoan, com.github.robozonky.api.strategies.LoanDescriptor, com.github.robozonky.api.remote.entities.Loan>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.RecommendedParticipation::amount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.RecommendedParticipation::amount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.math.BigDecimal com.github.robozonky.api.strategies.RecommendedReservation::amount()",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.strategies.RecommendedReservation::amount()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class com.github.robozonky.api.strategies.RecommendedReservation",
+        "new": "class com.github.robozonky.api.strategies.RecommendedReservation",
+        "interface": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.sanitized.Reservation>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "class com.github.robozonky.api.strategies.RecommendedReservation",
+        "new": "class com.github.robozonky.api.strategies.RecommendedReservation",
+        "oldSuperType": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.sanitized.Reservation>",
+        "newSuperType": "com.github.robozonky.api.strategies.Recommended<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.Reservation>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.ReservationDescriptor::<init>(===com.github.robozonky.api.remote.entities.sanitized.Reservation===, java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>)",
+        "new": "parameter void com.github.robozonky.api.strategies.ReservationDescriptor::<init>(===com.github.robozonky.api.remote.entities.Reservation===, java.util.function.Supplier<com.github.robozonky.api.remote.entities.Loan>)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter void com.github.robozonky.api.strategies.ReservationDescriptor::<init>(com.github.robozonky.api.remote.entities.sanitized.Reservation, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.sanitized.Loan>===)",
+        "new": "parameter void com.github.robozonky.api.strategies.ReservationDescriptor::<init>(com.github.robozonky.api.remote.entities.Reservation, ===java.util.function.Supplier<com.github.robozonky.api.remote.entities.Loan>===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.Reservation com.github.robozonky.api.strategies.ReservationDescriptor::item()",
+        "new": "method com.github.robozonky.api.remote.entities.Reservation com.github.robozonky.api.strategies.ReservationDescriptor::item()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedReservation> com.github.robozonky.api.strategies.ReservationDescriptor::recommend(===java.math.BigDecimal===)",
+        "new": "parameter java.util.Optional<com.github.robozonky.api.strategies.RecommendedReservation> com.github.robozonky.api.strategies.ReservationDescriptor::recommend(===com.github.robozonky.api.Money===)",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan com.github.robozonky.api.strategies.ReservationDescriptor::related()",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.strategies.ReservationDescriptor::related()",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class com.github.robozonky.api.strategies.ReservationDescriptor",
+        "new": "class com.github.robozonky.api.strategies.ReservationDescriptor",
+        "interface": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.sanitized.Reservation>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "class com.github.robozonky.api.strategies.ReservationDescriptor",
+        "new": "class com.github.robozonky.api.strategies.ReservationDescriptor",
+        "oldSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.sanitized.Reservation>",
+        "newSuperType": "com.github.robozonky.api.strategies.Descriptor<com.github.robozonky.api.strategies.RecommendedReservation, com.github.robozonky.api.strategies.ReservationDescriptor, com.github.robozonky.api.remote.entities.Reservation>",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      }
     ]
   }
 }

@@ -16,20 +16,18 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Reservation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.RawReservation;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
- * Carries metadata regarding a {@link RawReservation}.
+ * Carries metadata regarding a {@link Reservation}.
  */
 public final class ReservationDescriptor
         implements Descriptor<RecommendedReservation, ReservationDescriptor, Reservation> {
@@ -50,17 +48,17 @@ public final class ReservationDescriptor
     }
 
     @Override
-    public MarketplaceLoan related() {
+    public Loan related() {
         return loanSupplier.get();
     }
 
     @Override
-    public Optional<RecommendedReservation> recommend(final BigDecimal amount) {
-        final int actual = reservation.getMyReservation().getReservedAmount();
-        if (amount.intValue() == actual) {
-            return Optional.of(new RecommendedReservation(this, amount.intValue()));
+    public Optional<RecommendedReservation> recommend(final Money amount) {
+        final Money actual = reservation.getMyReservation().getReservedAmount();
+        if (amount.equals(actual)) {
+            return Optional.of(new RecommendedReservation(this, amount));
         } else {
-            LOGGER.warn("Requested reservation of {} CZK while only worth {} CZK. ", amount, actual);
+            LOGGER.warn("Requested reservation of {} while it is worth {}. ", amount, actual);
             return Optional.empty();
         }
     }

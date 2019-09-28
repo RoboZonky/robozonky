@@ -17,17 +17,17 @@
 package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class ReservationAcceptedEventImpl extends AbstractEventImpl implements ReservationAcceptedEvent {
 
     private final Investment investment;
-    private final MarketplaceLoan loan;
+    private final Loan loan;
     private final PortfolioOverview portfolioOverview;
 
-    public ReservationAcceptedEventImpl(final Investment investment, final MarketplaceLoan loan,
+    public ReservationAcceptedEventImpl(final Investment investment, final Loan loan,
                                         final PortfolioOverview portfolioOverview) {
         this.investment = investment;
         this.loan = loan;
@@ -35,7 +35,7 @@ final class ReservationAcceptedEventImpl extends AbstractEventImpl implements Re
     }
 
     @Override
-    public MarketplaceLoan getLoan() {
+    public Loan getLoan() {
         return loan;
     }
 

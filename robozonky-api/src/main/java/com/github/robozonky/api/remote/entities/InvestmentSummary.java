@@ -16,28 +16,34 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
+
 import javax.xml.bind.annotation.XmlElement;
-import java.math.BigDecimal;
+import javax.xml.bind.annotation.XmlTransient;
 
 public class InvestmentSummary extends BaseEntity {
 
-    static final InvestmentSummary EMPTY = new InvestmentSummary(BigDecimal.ZERO, 0);
+    static final InvestmentSummary EMPTY = new InvestmentSummary(Money.ZERO, 0);
 
-    private BigDecimal amount;
+    @XmlElement
+    private String amount;
+    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount));
+
     private int count;
 
     InvestmentSummary() {
         // fox JAXB
     }
 
-    public InvestmentSummary(final BigDecimal amount, final int count) {
-        this.amount = amount;
+    public InvestmentSummary(final Money amount, final int count) {
+        this.amount = amount.getValue().toPlainString();
         this.count = count;
     }
 
-    @XmlElement
-    public BigDecimal getAmount() {
-        return amount;
+    @XmlTransient
+    public Money getAmount() {
+        return moneyAmount.get();
     }
 
     @XmlElement

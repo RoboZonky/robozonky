@@ -16,21 +16,17 @@
 
 package com.github.robozonky.api.remote;
 
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
-import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.Defaults;
+
+import javax.ws.rs.*;
+import java.util.List;
 
 @Path("/loans")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface LoanApi extends EntityCollectionApi<RawLoan> {
+public interface LoanApi extends EntityCollectionApi<Loan> {
 
     /**
      * @return Every single loan that ever was.
@@ -39,7 +35,7 @@ public interface LoanApi extends EntityCollectionApi<RawLoan> {
     @GET
     @Path("marketplace")
     @Override
-    List<RawLoan> items();
+    List<Loan> items();
 
     @GET
     @Path("last-published")
@@ -47,5 +43,5 @@ public interface LoanApi extends EntityCollectionApi<RawLoan> {
 
     @GET
     @Path("{loanId}")
-    RawLoan item(@PathParam("loanId") int id);
+    Loan item(@PathParam("loanId") int id);
 }

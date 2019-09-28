@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.api.remote.entities;
 
-public interface DevelopmentBuilder extends MutableDevelopment<DevelopmentBuilder>,
-                                            Builder<Development> {
+import javax.xml.bind.annotation.XmlElement;
 
+public class Reservation extends BaseLoan {
+
+    private MyReservation myReservation;
+
+    protected Reservation() {
+        // for JAXB
+    }
+
+    @XmlElement
+    public MyReservation getMyReservation() {
+        return myReservation;
+    }
 }

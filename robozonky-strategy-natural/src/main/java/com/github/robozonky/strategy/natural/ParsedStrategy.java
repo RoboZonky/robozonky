@@ -16,27 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.api.strategies.ReservationMode;
+import com.github.robozonky.api.strategies.*;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class ParsedStrategy {
 
@@ -110,7 +102,7 @@ class ParsedStrategy {
         return defaults.getInvestmentShare().getMaximumShareInPercent();
     }
 
-    public long getMaximumInvestmentSizeInCzk() {
+    public Money getMaximumInvestmentSize() {
         return defaults.getTargetPortfolioSize();
     }
 
@@ -142,12 +134,12 @@ class ParsedStrategy {
         return investmentSizes.getOrDefault(rating, defaults.getInvestmentSize());
     }
 
-    public int getMinimumInvestmentSizeInCzk(final Rating rating) {
-        return getInvestmentSize(rating).getMinimumInvestmentInCzk();
+    public Money getMinimumInvestmentSize(final Rating rating) {
+        return getInvestmentSize(rating).getMinimumInvestment();
     }
 
-    public int getMaximumInvestmentSizeInCzk(final Rating rating) {
-        return getInvestmentSize(rating).getMaximumInvestmentInCzk();
+    public Money getMaximumInvestmentSize(final Rating rating) {
+        return getInvestmentSize(rating).getMaximumInvestment();
     }
 
     private <T> Stream<T> getApplicable(final Stream<Wrapper<T>> wrappers) {

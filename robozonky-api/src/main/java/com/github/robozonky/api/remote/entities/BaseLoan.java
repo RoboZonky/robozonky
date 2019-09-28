@@ -16,13 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Currency;
-
-import javax.xml.bind.annotation.XmlElement;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -30,6 +24,15 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
+import io.vavr.Lazy;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.Optional;
 
 public abstract class BaseLoan extends BaseEntity {
 
@@ -47,20 +50,9 @@ public abstract class BaseLoan extends BaseEntity {
     private int questionsCount;
     private int userId;
     private int activeLoansCount;
-    private double amount;
-    private double remainingInvestment;
-    private double reservedAmount;
-    private double zonkyPlusAmount;
-    private Currency currency = Defaults.CURRENCY;
     private String name;
     private String nickName;
     private String story;
-    private Ratio interestRate;
-    private Ratio investmentRate;
-    private Ratio revenueRate;
-    private BigDecimal annuity;
-    private BigDecimal premium;
-    private BigDecimal annuityWithInsurance;
     private OffsetDateTime datePublished;
     private OffsetDateTime deadline;
     private Rating rating;
@@ -70,7 +62,41 @@ public abstract class BaseLoan extends BaseEntity {
     private MainIncomeType mainIncomeType;
     private Region region;
     private Purpose purpose;
+    @XmlElement
     private Collection<InsurancePolicyPeriod> insuranceHistory;
+
+    // various ratios
+
+    private Ratio interestRate;
+    private Ratio investmentRate;
+    @XmlElement
+    private Ratio revenueRate;
+
+    private Currency currency = Defaults.CURRENCY;
+
+    // strings to be represented as money
+
+    @XmlElement
+    private String amount;
+    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
+    @XmlElement
+    private String remainingInvestment;
+    private final Lazy<Money> moneyRemainingInvestment = Lazy.of(() -> Money.from(remainingInvestment, currency));
+    @XmlElement
+    private String reservedAmount;
+    private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount, currency));
+    @XmlElement
+    private String annuity;
+    private final Lazy<Money> moneyAnnuity = Lazy.of(() -> Money.from(annuity, currency));
+    @XmlElement
+    private String annuityWithInsurance;
+    private final Lazy<Money> moneyAnnuityWithInsurance = Lazy.of(() -> Money.from(annuityWithInsurance, currency));
+    @XmlElement
+    private String premium;
+    private final Lazy<Money> moneyPremium = Lazy.of(() -> Money.from(premium, currency));
+    @XmlElement
+    private String zonkyPlusAmount;
+    private final Lazy<Money> moneyZonkyPlusAmount = Lazy.of(() -> Money.from(zonkyPlusAmount, currency));
 
     protected BaseLoan() {
         // for JAXB
@@ -142,16 +168,6 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     @XmlElement
-    public double getAmount() {
-        return amount;
-    }
-
-    @XmlElement
-    public double getRemainingInvestment() {
-        return remainingInvestment;
-    }
-
-    @XmlElement
     public boolean isCovered() {
         return covered;
     }
@@ -210,16 +226,6 @@ public abstract class BaseLoan extends BaseEntity {
         return myOtherInvestments;
     }
 
-    @XmlElement
-    public double getReservedAmount() {
-        return reservedAmount;
-    }
-
-    @XmlElement
-    public double getZonkyPlusAmount() {
-        return zonkyPlusAmount;
-    }
-
     /**
      * @return True if the loan is insured at this very moment. Uninsured loans will have both this and
      * {@link #isAdditionallyInsured()} return false.
@@ -247,9 +253,12 @@ public abstract class BaseLoan extends BaseEntity {
         return additionallyInsured;
     }
 
+    /**
+     * @return
+     */
     @XmlElement
     public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
-        return insuranceHistory;
+        return insuranceHistory == null ? Collections.emptySet() : insuranceHistory;
     }
 
     /**
@@ -265,26 +274,53 @@ public abstract class BaseLoan extends BaseEntity {
         return userId;
     }
 
-    @XmlElement
-    public Ratio getRevenueRate() {
-        return revenueRate;
+    @XmlTransient
+    public Optional<Ratio> getRevenueRate() {
+        return Optional.ofNullable(revenueRate);
     }
 
-    @XmlElement
-    public BigDecimal getAnnuity() {
-        return annuity;
+    // money-based fields are all transient
+
+    @XmlTransient
+    public Money getAmount() {
+        return moneyAmount.get();
     }
 
-    @XmlElement
-    public BigDecimal getPremium() {
-        return premium;
+    @XmlTransient
+    public Money getRemainingInvestment() {
+        return moneyRemainingInvestment.get();
+    }
+
+    @XmlTransient
+    public Money getNonReservedRemainingInvestment() {
+        return moneyRemainingInvestment.get().subtract(moneyReservedAmount.get());
+    }
+
+    @XmlTransient
+    public Money getReservedAmount() {
+        return moneyReservedAmount.get();
+    }
+
+    @XmlTransient
+    public Money getZonkyPlusAmount() {
+        return moneyZonkyPlusAmount.get();
+    }
+
+    @XmlTransient
+    public Money getAnnuity() {
+        return moneyAnnuity.get();
+    }
+
+    @XmlTransient
+    public Money getPremium() {
+        return moneyPremium.get();
     }
 
     /**
      * @return {@link #getAnnuity()} + {@link #getPremium()}
      */
-    @XmlElement
-    public BigDecimal getAnnuityWithInsurance() {
-        return annuityWithInsurance;
+    @XmlTransient
+    public Money getAnnuityWithInsurance() {
+        return moneyAnnuityWithInsurance.get();
     }
 }

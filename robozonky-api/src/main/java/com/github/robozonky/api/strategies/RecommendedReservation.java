@@ -16,27 +16,26 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.math.BigDecimal;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Reservation;
+
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.RawReservation;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
-
 /**
- * Represents the decision of the {@link ReservationStrategy} to recommend a {@link RawReservation} for investing.
+ * Represents the decision of the {@link ReservationStrategy} to recommend a {@link Reservation} for investing.
  */
 public final class RecommendedReservation
         implements Recommended<RecommendedReservation, ReservationDescriptor, Reservation> {
 
     private final ReservationDescriptor reservationDescriptor;
-    private final int recommendedInvestmentAmount;
+    private final Money recommendedInvestment;
 
-    RecommendedReservation(final ReservationDescriptor reservationDescriptor, final int amount) {
+    RecommendedReservation(final ReservationDescriptor reservationDescriptor, final Money amount) {
         if (reservationDescriptor == null) {
             throw new IllegalArgumentException("Reservation descriptor must not be null.");
         }
         this.reservationDescriptor = reservationDescriptor;
-        this.recommendedInvestmentAmount = amount;
+        this.recommendedInvestment = amount;
     }
 
     @Override
@@ -45,8 +44,8 @@ public final class RecommendedReservation
     }
 
     @Override
-    public BigDecimal amount() {
-        return BigDecimal.valueOf(recommendedInvestmentAmount);
+    public Money amount() {
+        return recommendedInvestment;
     }
 
     @Override
@@ -58,19 +57,19 @@ public final class RecommendedReservation
             return false;
         }
         final RecommendedReservation that = (RecommendedReservation) o;
-        return recommendedInvestmentAmount == that.recommendedInvestmentAmount &&
+        return Objects.equals(recommendedInvestment, that.recommendedInvestment) &&
                 Objects.equals(reservationDescriptor, that.reservationDescriptor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reservationDescriptor, recommendedInvestmentAmount);
+        return Objects.hash(reservationDescriptor, recommendedInvestment);
     }
 
     @Override
     public String toString() {
         return "RecommendedReservation{" +
-                "recommendedInvestmentAmount=" + recommendedInvestmentAmount +
+                "recommendedInvestmentAmount=" + recommendedInvestment +
                 ", reservationDescriptor=" + reservationDescriptor +
                 '}';
     }

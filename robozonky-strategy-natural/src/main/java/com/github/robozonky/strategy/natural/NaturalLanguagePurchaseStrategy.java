@@ -16,12 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -29,6 +24,12 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
@@ -42,26 +43,26 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         this.strategy = p;
     }
 
-    private int[] getRecommendationBoundaries(final Participation participation) {
+    private Money[] getRecommendationBoundaries(final Participation participation) {
         final Rating rating = participation.getRating();
-        final int minimumInvestment = strategy.getMinimumInvestmentSizeInCzk(rating);
-        final int maximumInvestment = strategy.getMaximumInvestmentSizeInCzk(rating);
-        return new int[]{minimumInvestment, maximumInvestment};
+        final Money minimumInvestment = strategy.getMinimumInvestmentSize(rating);
+        final Money maximumInvestment = strategy.getMaximumInvestmentSize(rating);
+        return new Money[]{minimumInvestment, maximumInvestment};
     }
 
     boolean sizeMatchesStrategy(final Participation participation) {
         final int id = participation.getLoanId();
         final long participationId = participation.getId();
-        final int[] recommended = getRecommendationBoundaries(participation);
-        final int minimumRecommendation = recommended[0];
-        final int maximumRecommendation = recommended[1];
-        LOGGER.trace("Loan #{} (participation #{}) recommended range <{}; {}> CZK.", id, participationId,
+        final Money[] recommended = getRecommendationBoundaries(participation);
+        final Money minimumRecommendation = recommended[0];
+        final Money maximumRecommendation = recommended[1];
+        LOGGER.trace("Loan #{} (participation #{}) recommended range <{}; {}>.", id, participationId,
                      minimumRecommendation, maximumRecommendation);
         // round to nearest lower increment
-        final double price = participation.getRemainingPrincipal().doubleValue();
-        if (minimumRecommendation > price) {
+        final Money price = participation.getRemainingPrincipal();
+        if (minimumRecommendation.compareTo(price) > 0) {
             LOGGER.debug("Loan #{} (participation #{}) not recommended; below minimum.", id, participationId);
-        } else if (price > maximumRecommendation) {
+        } else if (price.compareTo(maximumRecommendation) > 0) {
             LOGGER.debug("Loan #{} (participation #{}) not recommended; over maximum.", id, participationId);
         } else {
             LOGGER.debug("Final recommendation: buy loan #{} (participation #{}).", id, participationId);
@@ -86,6 +87,6 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> sizeMatchesStrategy(d.item()))
-                .flatMap(d -> d.recommend().map(Stream::of).orElse(Stream.empty()));
+                .flatMap(d -> d.recommend().stream());
     }
 }

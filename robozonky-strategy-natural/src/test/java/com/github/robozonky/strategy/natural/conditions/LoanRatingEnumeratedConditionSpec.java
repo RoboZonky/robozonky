@@ -16,13 +16,14 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Rating> {
 
@@ -35,7 +36,7 @@ class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTe
 
     @Override
     public Wrapper<?> getMocked() {
-        final Loan loan = Loan.custom().setRating(this.getTriggerItem()).build();
+        final Loan loan = new MockLoanBuilder().setRating(this.getTriggerItem()).build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }
 

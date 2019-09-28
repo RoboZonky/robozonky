@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.test.mock;
 
-public interface InvestmentBuilder extends MutableInvestment<InvestmentBuilder>,
-                                           Builder<Investment> {
+import org.mockito.Mockito;
+
+import java.util.Random;
+
+abstract class BaseMockBuilder<T, S extends BaseMockBuilder<T, S>> {
+
+    protected static final Random RANDOM = new Random();
+    protected final T mock;
+
+    protected BaseMockBuilder(Class<T> clz) {
+        mock = Mockito.mock(clz);
+    }
+
+    public final T build() {
+        return mock;
+    }
 
 }

@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.strategies;
 
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.Restrictions;
+
 import java.util.Collection;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.Reservation;
 
 /**
  * Determines which {@link Reservation}s will be invested into out of those coming through the reservation system,

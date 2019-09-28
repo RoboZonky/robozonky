@@ -16,49 +16,59 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
+import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.math.BigDecimal;
+import javax.xml.bind.annotation.XmlTransient;
 
 public class RiskPortfolio extends BaseEntity {
 
-    private BigDecimal unpaid;
-    private BigDecimal paid;
-    private BigDecimal due;
-    private BigDecimal totalAmount;
+    @XmlElement
+    private String unpaid;
+    private final Lazy<Money> moneyUnpaid = Lazy.of(() -> Money.from(unpaid));
+    @XmlElement
+    private String paid;
+    private final Lazy<Money> moneyPaid = Lazy.of(() -> Money.from(paid));
+    @XmlElement
+    private String due;
+    private final Lazy<Money> moneyDue = Lazy.of(() -> Money.from(due));
+    @XmlElement
+    private String totalAmount;
+    private final Lazy<Money> moneyTotalAmount = Lazy.of(() -> Money.from(totalAmount));
     private Rating rating;
 
     RiskPortfolio() {
         // for JAXB
     }
 
-    public RiskPortfolio(final Rating rating, final long paid, final long unpaid, final long due) {
-        this.paid = BigDecimal.valueOf(paid);
-        this.unpaid = BigDecimal.valueOf(unpaid);
-        this.due = BigDecimal.valueOf(due);
+    public RiskPortfolio(final Rating rating, final Money paid, final Money unpaid, final Money due) {
+        this.paid = paid.getValue().toPlainString();
+        this.unpaid = unpaid.getValue().toPlainString();
+        this.due = due.getValue().toPlainString();
         this.rating = rating;
-        this.totalAmount = BigDecimal.valueOf(paid + unpaid + due);
+        this.totalAmount = paid.add(unpaid).add(due).getValue().toPlainString();
     }
 
-    @XmlElement
-    public BigDecimal getUnpaid() {
-        return unpaid;
+    @XmlTransient
+    public Money getUnpaid() {
+        return moneyUnpaid.get();
     }
 
-    @XmlElement
-    public BigDecimal getPaid() {
-        return paid;
+    @XmlTransient
+    public Money getPaid() {
+        return moneyPaid.get();
     }
 
-    @XmlElement
-    public BigDecimal getDue() {
-        return due;
+    @XmlTransient
+    public Money getDue() {
+        return moneyDue.get();
     }
 
-    @XmlElement
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
+    @XmlTransient
+    public Money getTotalAmount() {
+        return moneyTotalAmount.get();
     }
 
     @XmlElement

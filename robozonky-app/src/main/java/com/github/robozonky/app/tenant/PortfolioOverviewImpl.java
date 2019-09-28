@@ -16,6 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
+
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -23,56 +30,46 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
-
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.isZero;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.sum;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
 
     private final ZonedDateTime timestamp = DateUtil.zonedNow();
     private final Ratio profitability;
-    private final BigDecimal czkInvested;
-    private final Map<Rating, BigDecimal> czkInvestedPerRating;
+    private final Money invested;
+    private final Map<Rating, Money> investedPerRating;
 
     PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
-        this(impl.getTotal(),
-             impl.getRemotePortfolio().getStatistics().getProfitability().orElse(Ratio.ZERO));
+        this(impl.getTotal(), impl.getRemotePortfolio().getStatistics().getProfitability().orElse(Ratio.ZERO));
     }
 
-    PortfolioOverviewImpl(final Map<Rating, BigDecimal> czkInvestedPerRating, final Ratio profitability) {
+    PortfolioOverviewImpl(final Map<Rating, Money> investedPerRating, final Ratio profitability) {
         this.profitability = profitability;
-        this.czkInvested = sum(czkInvestedPerRating.values());
-        if (isZero(this.czkInvested)) {
-            this.czkInvestedPerRating = Collections.emptyMap();
+        this.invested = Money.sum(investedPerRating.values());
+        if (invested.isZero()) {
+            this.investedPerRating = Collections.emptyMap();
         } else {
-            this.czkInvestedPerRating = czkInvestedPerRating;
+            this.investedPerRating = investedPerRating;
         }
     }
 
     @Override
-    public BigDecimal getCzkInvested() {
-        return this.czkInvested;
+    public Money getInvested() {
+        return this.invested;
     }
 
     @Override
-    public BigDecimal getCzkInvested(final Rating r) {
-        return this.czkInvestedPerRating.getOrDefault(r, BigDecimal.ZERO);
+    public Money getInvested(final Rating r) {
+        return this.investedPerRating.getOrDefault(r, invested.getZero());
     }
 
     @Override
     public Ratio getShareOnInvestment(final Rating r) {
-        if (isZero(czkInvested)) { // protected against division by zero
+        if (invested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        final BigDecimal investedPerRating = this.getCzkInvested(r);
-        return Ratio.fromRaw(divide(investedPerRating, czkInvested));
+        final Money investedPerRating = this.getInvested(r);
+        return Ratio.fromRaw(investedPerRating.divideBy(invested).getValue());
     }
 
     @Override
@@ -96,27 +93,27 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
 
     @Override
     public Ratio getMinimalAnnualProfitability() {
-        return getProfitability(r -> r.getMinimalRevenueRate(getCzkInvested().longValue()));
+        return getProfitability(r -> r.getMinimalRevenueRate(getInvested()));
     }
 
     @Override
     public Ratio getOptimalAnnualProfitability() {
-        return getProfitability(r -> r.getMaximalRevenueRate(getCzkInvested().longValue()));
+        return getProfitability(r -> r.getMaximalRevenueRate(getInvested()));
     }
 
     @Override
-    public BigDecimal getCzkMonthlyProfit() {
-        return divide(times(profitability.bigDecimalValue(), getCzkInvested()), 12);
+    public Money getMonthlyProfit() {
+        return profitability.apply(getInvested()).divideBy(12);
     }
 
     @Override
-    public BigDecimal getCzkMinimalMonthlyProfit() {
-        return divide(times(getMinimalAnnualProfitability().bigDecimalValue(), getCzkInvested()), 12);
+    public Money getMinimalMonthlyProfit() {
+        return getMinimalAnnualProfitability().apply(getInvested()).divideBy(12);
     }
 
     @Override
-    public BigDecimal getCzkOptimalMonthlyProfit() {
-        return divide(times(getOptimalAnnualProfitability().bigDecimalValue(), getCzkInvested()), 12);
+    public Money getOptimalMonthlyProfit() {
+        return getOptimalAnnualProfitability().apply(getInvested()).divideBy(12);
     }
 
     @Override
@@ -127,8 +124,8 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     @Override
     public String toString() {
         return "PortfolioOverviewImpl{" +
-                "czkInvested=" + czkInvested +
-                ", czkInvestedPerRating=" + czkInvestedPerRating +
+                "czkInvested=" + invested +
+                ", czkInvestedPerRating=" + investedPerRating +
                 ", profitability=" + profitability +
                 ", timestamp=" + timestamp +
                 '}';

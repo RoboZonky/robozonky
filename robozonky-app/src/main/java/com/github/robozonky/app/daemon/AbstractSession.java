@@ -16,17 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.Recommended;
 import com.github.robozonky.app.tenant.PowerTenant;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
 
@@ -59,7 +59,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
     }
 
     protected boolean isBalanceAcceptable(final T item) {
-        return item.amount().intValue() <= tenant.getKnownBalanceUpperBound();
+        return item.amount().compareTo(tenant.getKnownBalanceUpperBound()) <= 0;
     }
 
     /**

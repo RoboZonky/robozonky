@@ -16,16 +16,17 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
 
@@ -68,7 +69,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalTermInMonths() {
-        return investment.getOriginalTerm();
+        return investment.getLoanTermInMonth();
     }
 
     @Override
@@ -78,22 +79,22 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalAmount() {
-        return getLoan().getAmount();
+        return getLoan().getAmount().getValue().intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return getLoan().getAnnuity().intValue();
+        return getLoan().getAnnuity().getValue().intValue();
     }
 
     @Override
     public BigDecimal getRemainingPrincipal() {
-        return investment.getRemainingPrincipal();
+        return investment.getRemainingPrincipal().orElseThrow().getValue();
     }
 
     @Override
     public Optional<BigDecimal> saleFee() {
-        return investment.getSmpFee();
+        return investment.getSmpFee().map(Money::getValue);
     }
 
     @Override
