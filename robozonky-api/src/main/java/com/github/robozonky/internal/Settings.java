@@ -16,6 +16,10 @@
 
 package com.github.robozonky.internal;
 
+import com.github.robozonky.api.remote.enums.Rating;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -25,10 +29,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import com.github.robozonky.api.remote.enums.Rating;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * These are RoboZonky settings read from a property file at system startup. The location of this file will be looked
@@ -208,7 +208,7 @@ public enum Settings {
     }
 
     public int getDefaultApiPageSize() {
-        return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 100);
+        return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 50);
     }
 
     public enum Key {

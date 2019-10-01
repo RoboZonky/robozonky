@@ -16,6 +16,10 @@
 
 package com.github.robozonky.internal;
 
+import com.github.robozonky.api.remote.enums.Rating;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,10 +29,6 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.remote.enums.Rating;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -59,7 +59,7 @@ class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(10));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(10));
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(50);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(443);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).isEmpty();
         });
