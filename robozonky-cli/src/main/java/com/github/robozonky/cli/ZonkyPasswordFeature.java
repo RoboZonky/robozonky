@@ -20,12 +20,16 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 
 import java.io.File;
 
 @CommandLine.Command(name = "zonky-credentials", description = ZonkyPasswordFeature.DESCRIPTION)
 public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
+
+    private static final Logger LOGGER = LogManager.getLogger(ZonkyPasswordFeature.class);
 
     static final String DESCRIPTION = "Set credentials to access Zonky servers.";
     private final ApiProvider api;
@@ -57,9 +61,11 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
 
     public static void attemptLoginAndStore(final KeyStoreHandler keyStoreHandler, final ApiProvider api,
                                             final String username, final char... password) {
+        LOGGER.debug("Logging into Zonky.");
         final ZonkyApiToken token = api.oauth(oauth -> oauth.login(password));
         final SecretProvider secretProvider = SecretProvider.keyStoreBased(keyStoreHandler, username, password);
         secretProvider.setToken(token);
+        LOGGER.debug("Token stored.");
     }
 
     @Override

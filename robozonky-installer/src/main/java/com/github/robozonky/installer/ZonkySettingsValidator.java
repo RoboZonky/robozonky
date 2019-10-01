@@ -23,6 +23,7 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -51,10 +52,13 @@ public class ZonkySettingsValidator extends AbstractValidator {
         final String password = Variables.ZONKY_PASSWORD.getValue(installData);
         try {
             final File f = File.createTempFile("robozonky", "keystore");
+            logger.debug("Created temporary keystore file {}.", f.getAbsolutePath());
             final char[] p = UUID.randomUUID().toString().toCharArray();
-            f.delete(); // or else the next step fails
+            Files.delete(f.toPath()); // or else the next step fails
             final KeyStoreHandler k = KeyStoreHandler.create(f, p);
+            logger.debug("Keystore created, attempting login.");
             ZonkyPasswordFeature.attemptLoginAndStore(k, apiSupplier.get(), username, password.toCharArray());
+            logger.debug("Over and out.");
             RoboZonkyInstallerListener.setKeystoreInformation(f, p);
             return DataValidator.Status.OK;
         } catch (final Exception t) {

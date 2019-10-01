@@ -16,16 +16,16 @@
 
 package com.github.robozonky.installer;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
+import com.github.robozonky.internal.Settings;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 abstract class AbstractValidator implements DataValidator {
 
@@ -33,19 +33,24 @@ abstract class AbstractValidator implements DataValidator {
 
     protected abstract DataValidator.Status validateDataPossiblyThrowingException(InstallData installData);
 
+    private static Duration getTimeout() {
+        Duration connection = Settings.INSTANCE.getConnectionTimeout();
+        Duration socket = Settings.INSTANCE.getSocketTimeout();
+        return connection.plus(socket).plusSeconds(10);
+    }
+
     @Override
     public DataValidator.Status validateData(final InstallData installData) {
-        final ExecutorService e = Executors.newCachedThreadPool();
         try {
-            logger.info("Starting validation.");
-            final Callable<DataValidator.Status> c = () -> this.validateDataPossiblyThrowingException(installData);
-            final Future<DataValidator.Status> f = e.submit(c);
-            return f.get(15, TimeUnit.SECONDS); // don't wait for result indefinitely
+            final long timeoutInSeconds = getTimeout().toSeconds();
+            logger.info("Starting background validation, will wait for up to {} seconds.", timeoutInSeconds);
+            final Supplier<Status> c = () -> this.validateDataPossiblyThrowingException(installData);
+            return CompletableFuture.supplyAsync(c)
+                    .get(timeoutInSeconds, TimeUnit.SECONDS);
         } catch (final Exception ex) { // the installer must never ever throw an exception (= neverending spinner)
             logger.error("Uncaught exception.", ex);
             return DataValidator.Status.ERROR;
         } finally {
-            e.shutdownNow();
             logger.info("Finished validation.");
         }
     }
