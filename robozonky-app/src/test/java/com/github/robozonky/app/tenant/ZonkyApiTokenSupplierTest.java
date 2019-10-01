@@ -87,7 +87,6 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
         t.close();
-        verify(zonky, never()).logout();
         assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
     }
 
@@ -100,6 +99,5 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
         t.close();
-        verify(zonky, never()).logout();
     }
 }

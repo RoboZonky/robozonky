@@ -78,7 +78,6 @@ class ZonkyPasswordFeatureTest {
             f.accept(z);
             return null;
         }).when(api).run(any(Consumer.class), any());
-        doThrow(IllegalStateException.class).when(z).logout(); // last call will fail
         return api;
     }
 

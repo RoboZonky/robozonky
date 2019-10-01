@@ -26,7 +26,6 @@ import javax.ws.rs.*;
 @Consumes(Defaults.MEDIA_TYPE)
 public interface ControlApi {
 
-
     @GET
     @Path(ApiConstants.ME + "/logout")
     void logout();

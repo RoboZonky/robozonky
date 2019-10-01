@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
- * user. Consider {@link #logout()} when done.
+ * user.
  * <p>
  * Zonky implements API quotas on their endpoints. Reaching the quota will result in receiving "HTTP 429 Too Many
  * Requests". The following operations have their own quotas:
@@ -224,7 +224,4 @@ public class Zonky {
         return portfolioApi.execute(PortfolioApi::item);
     }
 
-    public void logout() {
-        controlApi.run(ControlApi::logout);
-    }
 }

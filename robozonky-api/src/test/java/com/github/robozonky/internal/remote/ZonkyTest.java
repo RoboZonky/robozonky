@@ -165,9 +165,7 @@ class ZonkyTest {
         final Loan l = z.getLoan(loanId);
         final Investment i = mockInvestment(l, 200);
         z.invest(i);
-        z.logout();
         verify(control, times(1)).invest(any());
-        verify(control, times(1)).logout();
     }
 
     @Test
