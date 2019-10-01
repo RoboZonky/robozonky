@@ -18,10 +18,8 @@ package com.github.robozonky.api.remote.entities;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.*;
+import com.github.robozonky.internal.Defaults;
 import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -51,6 +49,7 @@ public class Participation extends BaseEntity {
     private boolean additionallyInsured;
     private Object loanInvestments;
 
+    private Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     private Currency currency;
     @XmlElement
     private String remainingPrincipal;
@@ -158,6 +157,11 @@ public class Participation extends BaseEntity {
     @XmlElement
     public LoanHealthInfo getLoanHealthInfo() {
         return loanHealthInfo;
+    }
+
+    @XmlElement
+    public Country getCountryOfOrigin() {
+        return countryOfOrigin;
     }
 
     @XmlElement

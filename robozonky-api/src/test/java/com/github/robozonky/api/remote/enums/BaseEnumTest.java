@@ -16,21 +16,22 @@
 
 package com.github.robozonky.api.remote.enums;
 
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class BaseEnumTest {
 
     private static <T extends BaseEnum> void bidirectionality(final T i, final Function<String, T> converter) {
-        final String code = i.getCode();
-        final BaseEnum type = converter.apply(code);
+        var code = i.getCode();
+        var type = converter.apply(code);
         assertThat(type).isSameAs(i);
     }
 
@@ -41,24 +42,22 @@ class BaseEnumTest {
 
     private static <T extends BaseEnum> Stream<DynamicTest> code(final Class<T> clz, final T[] instances,
                                                                  final Function<String, T> converter) {
-        final Stream<DynamicTest> t = Stream.of(instances)
-                .map(value -> dynamicTest("bidirectional " + value.getClass().getSimpleName() + '.' + value,
-                                          () -> bidirectionality(value, converter)));
-        final Stream<DynamicTest> t2 =
-                Stream.of(dynamicTest("wrong " + clz.getSimpleName(), () -> wrong(converter)));
-        return Stream.concat(t, t2);
+        var test1 = Stream.of(instances).map(value -> dynamicTest("bidirectional " + value.getClass().getSimpleName() + '.' + value,
+                () -> bidirectionality(value, converter)));
+        var test2 = Stream.of(dynamicTest("wrong " + clz.getSimpleName(), () -> wrong(converter)));
+        return Stream.concat(test1, test2);
     }
 
     @TestFactory
     Stream<DynamicTest> code() {
-        final Stream<DynamicTest> purpose = code(Purpose.class, Purpose.values(), Purpose::findByCode);
-        final Stream<DynamicTest> mainIncomeType = code(MainIncomeType.class, MainIncomeType.values(),
-                                                        MainIncomeType::findByCode);
-        final Stream<DynamicTest> rating = code(Rating.class, Rating.values(), Rating::findByCode);
-        final Stream<DynamicTest> region = code(Region.class, Region.values(), Region::findByCode);
-        final Stream<DynamicTest> developmentType = code(DevelopmentType.class, Stream.of(DevelopmentType.values())
+        var purpose = code(Purpose.class, Purpose.values(), Purpose::findByCode);
+        var mainIncomeType = code(MainIncomeType.class, MainIncomeType.values(), MainIncomeType::findByCode);
+        var rating = code(Rating.class, Rating.values(), Rating::findByCode);
+        var region = code(Region.class, Region.values(), Region::findByCode);
+        var country = code(Country.class, Country.values(), Country::findByCode);
+        var developmentType = code(DevelopmentType.class, Stream.of(DevelopmentType.values())
                 .filter(v -> v != DevelopmentType.PAYMENT_PAIRED) // multiple codes evaluate to one type
                 .toArray(DevelopmentType[]::new), DevelopmentType::findByCode);
-        return Stream.of(purpose, mainIncomeType, rating, region, developmentType).flatMap(s -> s);
+        return Stream.of(purpose, mainIncomeType, rating, region, country, developmentType).flatMap(s -> s);
     }
 }

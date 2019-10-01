@@ -16,6 +16,11 @@
 
 package com.github.robozonky.internal;
 
+import com.github.robozonky.api.remote.enums.Country;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.core.MediaType;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -23,10 +28,6 @@ import java.time.ZoneId;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Properties;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Carries application constants (such as version) and desired environmental settings (such as charset or locale).
@@ -36,6 +37,7 @@ public final class Defaults {
     private static final Logger LOGGER = LogManager.getLogger(Defaults.class);
 
     public static final Currency CURRENCY = Currency.getInstance("CZK");
+    public static final Country COUNTRY_OF_ORIGIN = Country.CZECHIA;
     public static final String MEDIA_TYPE = MediaType.APPLICATION_JSON + "; charset=UTF-8";
     public static final Locale LOCALE = Locale.forLanguageTag("cs-CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;

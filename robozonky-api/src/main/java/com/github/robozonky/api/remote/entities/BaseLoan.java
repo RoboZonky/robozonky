@@ -19,10 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.remote.enums.*;
 import com.github.robozonky.internal.Defaults;
 import io.vavr.Lazy;
 
@@ -72,6 +69,7 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     private Ratio revenueRate;
 
+    private Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     private Currency currency = Defaults.CURRENCY;
 
     // strings to be represented as money
@@ -100,6 +98,11 @@ public abstract class BaseLoan extends BaseEntity {
 
     protected BaseLoan() {
         // for JAXB
+    }
+
+    @XmlElement
+    public Country getCountryOfOrigin() {
+        return countryOfOrigin;
     }
 
     @XmlElement

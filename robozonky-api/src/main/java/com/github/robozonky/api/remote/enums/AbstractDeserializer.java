@@ -16,18 +16,18 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.io.IOException;
-import java.util.function.Function;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.util.function.Function;
+
 abstract class AbstractDeserializer<T extends Enum<T>> extends JsonDeserializer<T> {
 
-    protected final Logger LOGGER = LogManager.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
     private final Function<String, T> parser;
     private final T defaultValue;
     private final boolean nullAllowed;
@@ -43,14 +43,12 @@ abstract class AbstractDeserializer<T extends Enum<T>> extends JsonDeserializer<
     }
 
     @Override
-    public T deserialize(final JsonParser jsonParser,
-            final DeserializationContext ctx) throws IOException {
-        final String id = jsonParser.getText();
+    public T deserialize(final JsonParser jsonParser, final DeserializationContext ctx) throws IOException {
+        var id = jsonParser.getText();
         try {
             return parser.apply(id);
         } catch (final Exception ex) {
-            LOGGER.warn("Received unknown value from Zonky: '{}'. This may be a problem, but we continue.",
-                    id);
+            logger.warn("Received unknown value from Zonky: '{}'. This may be a problem, but we continue.", id);
             return defaultValue;
         }
     }
@@ -60,7 +58,7 @@ abstract class AbstractDeserializer<T extends Enum<T>> extends JsonDeserializer<
         if (nullAllowed) {
             return null;
         }
-        LOGGER.warn("Unexpectedly received null value from Zonky. This may be a problem, but we continue.");
+        logger.warn("Unexpectedly received null value from Zonky. This may be a problem, but we continue.");
         return defaultValue;
     }
 }
