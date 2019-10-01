@@ -11,18 +11,6 @@
       }
     },
     "ignore": [
-      {
-        "code": "java.field.enumConstantOrderChanged",
-        "old": "field com.github.robozonky.api.remote.enums.OAuthScope.SCOPE_NOTIFICATIONS_READ",
-        "new": "field com.github.robozonky.api.remote.enums.OAuthScope.SCOPE_NOTIFICATIONS_READ",
-        "justification": "Previously unknown Zonky API scope."
-      },
-      {
-        "code": "java.field.enumConstantOrderChanged",
-        "old": "field com.github.robozonky.api.remote.enums.OAuthScope.SCOPE_NOTIFICATIONS_WRITE",
-        "new": "field com.github.robozonky.api.remote.enums.OAuthScope.SCOPE_NOTIFICATIONS_WRITE",
-        "justification": "Previously unknown Zonky API scope."
-      }
     ]
   }
 }
