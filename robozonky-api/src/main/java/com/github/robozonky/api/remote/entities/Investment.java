@@ -78,46 +78,46 @@ public class Investment extends BaseInvestment {
     // string-based money
 
     @XmlElement
-    private String paid;
+    private String paid = "0";
     private final Lazy<Money> moneyPaid = Lazy.of(() -> Money.from(paid));
     @XmlElement
-    private String toPay;
+    private String toPay = "0";
     private final Lazy<Money> moneyToPay = Lazy.of(() -> Money.from(toPay));
     @XmlElement
-    private String amountDue;
+    private String amountDue = "0";
     private final Lazy<Money> moneyAmountDue = Lazy.of(() -> Money.from(amountDue));
     @XmlElement
-    private String paidInterest;
+    private String paidInterest = "0";
     private final Lazy<Money> moneyPaidInterest = Lazy.of(() -> Money.from(paidInterest));
     @XmlElement
-    private String dueInterest;
+    private String dueInterest = "0";
     private final Lazy<Money> moneyDueInterest = Lazy.of(() -> Money.from(dueInterest));
     @XmlElement
-    private String paidPrincipal;
+    private String paidPrincipal = "0";
     private final Lazy<Money> moneyPaidPrincipal = Lazy.of(() -> Money.from(paidPrincipal));
     @XmlElement
-    private String duePrincipal;
+    private String duePrincipal = "0";
     private final Lazy<Money> moneyDuePrincipal = Lazy.of(() -> Money.from(duePrincipal));
     @XmlElement
-    private String expectedInterest;
+    private String expectedInterest = "0";
     private final Lazy<Money> moneyExpectedInterest = Lazy.of(() -> Money.from(expectedInterest));
     @XmlElement
-    private String purchasePrice;
+    private String purchasePrice = "0";
     private final Lazy<Money> moneyPurchasePrice = Lazy.of(() -> Money.from(purchasePrice));
     @XmlElement
-    private String remainingPrincipal;
+    private String remainingPrincipal = "0";
     private final Lazy<Money> moneyRemainingPrincipal = Lazy.of(() -> Money.from(remainingPrincipal));
     @XmlElement
-    private String smpPrice;
+    private String smpPrice = "0";
     private final Lazy<Money> moneySmpPrice = Lazy.of(() -> Money.from(smpPrice));
     @XmlElement
-    private String smpSoldFor;
+    private String smpSoldFor = "0";
     private final Lazy<Money> moneySmpSoldFor = Lazy.of(() -> Money.from(smpSoldFor));
     @XmlElement
-    private String smpFee;
+    private String smpFee = "0";
     private final Lazy<Money> moneySmpFee = Lazy.of(() -> Money.from(smpFee));
     @XmlElement
-    private String paidPenalty;
+    private String paidPenalty = "0";
     private final Lazy<Money> moneyPaidPenalty = Lazy.of(() -> Money.from(paidPenalty));
 
     Investment() {
