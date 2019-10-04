@@ -16,20 +16,16 @@
 
 package com.github.robozonky.notifications;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.internal.async.Refreshable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 final class NotificationEventListenerSupplier<T extends Event> implements Refreshable.RefreshListener<ConfigStorage>,
                                                                           Function<Target, Optional<EventListener<T>>> {
@@ -74,7 +70,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
     @SuppressWarnings("unchecked")
     private Optional<EventListener<T>> findListener(final AbstractTargetHandler handler) {
         final EventListener<T> result = Stream.of(SupportedListener.values())
-                .filter(l -> Objects.equals(eventType, l.getEventType()))
+                .filter(l -> Objects.equals(eventType, l.getSampleEvent().getClass()))
                 .peek(l -> LOGGER.trace("Found listener: {}.", l))
                 .filter(handler::isEnabled)
                 .peek(l -> LOGGER.debug("{} notification enabled for '{}'.", l, handler.getTarget()))
