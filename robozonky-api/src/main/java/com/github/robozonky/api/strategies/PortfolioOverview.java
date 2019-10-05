@@ -101,7 +101,7 @@ public interface PortfolioOverview {
     }
 
     private Money calculateProfit(Ratio rate) {
-        return getInvested().multiplyBy(rate.bigDecimalValue()).divideBy(12);
+        return rate.apply(getInvested()).divideBy(12);
     }
 
     /**

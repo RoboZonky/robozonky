@@ -37,11 +37,11 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @return Percentage.
      */
     default Ratio getShareAtRisk() {
-        final Money czkInvested = getInvested();
-        if (czkInvested.isZero()) { // protected against division by zero
+        final Money invested = getInvested();
+        if (invested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getAtRisk().divideBy(czkInvested).getValue());
+        return Ratio.fromRaw(getAtRisk().divideBy(invested).getValue());
     }
 
     /**
@@ -75,11 +75,11 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @return Percentage.
      */
     default Ratio getShareSellable() {
-        final Money czkInvested = getInvested();
-        if (czkInvested.isZero()) { // protected against division by zero
+        final Money invested = getInvested();
+        if (invested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getSellable().divideBy(czkInvested).getValue());
+        return Ratio.fromRaw(getSellable().divideBy(invested).getValue());
     }
 
     /**
@@ -113,11 +113,11 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @return Percentage.
      */
     default Ratio getShareSellableFeeless() {
-        final Money czkInvested = getInvested();
-        if (czkInvested.isZero()) { // protected against division by zero
+        final Money invested = getInvested();
+        if (invested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getSellableFeeless().divideBy(czkInvested).getValue());
+        return Ratio.fromRaw(getSellableFeeless().divideBy(invested).getValue());
     }
 
     /**
