@@ -115,31 +115,6 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Ratio getMinimalAnnualProfitability() {
-        return parent.getMinimalAnnualProfitability();
-    }
-
-    @Override
-    public Ratio getOptimalAnnualProfitability() {
-        return parent.getOptimalAnnualProfitability();
-    }
-
-    @Override
-    public Money getMonthlyProfit() {
-        return parent.getMonthlyProfit();
-    }
-
-    @Override
-    public Money getMinimalMonthlyProfit() {
-        return parent.getMinimalMonthlyProfit();
-    }
-
-    @Override
-    public Money getOptimalMonthlyProfit() {
-        return parent.getOptimalMonthlyProfit();
-    }
-
-    @Override
     public ZonedDateTime getTimestamp() {
         return parent.getTimestamp();
     }
