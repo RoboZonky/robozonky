@@ -128,6 +128,16 @@ public class Investment extends BaseInvestment {
         super(loan, amount);
         this.rating = loan.getRating();
         this.remainingPrincipal = amount.getValue().toPlainString();
+        this.remainingMonths = loan.getTermInMonths();
+        this.loanTermInMonth = loan.getTermInMonths();
+    }
+
+    public Investment(final Participation participation, final Money amount) {
+        super(participation, amount);
+        this.rating = participation.getRating();
+        this.remainingPrincipal = amount.getValue().toPlainString();
+        this.remainingMonths = participation.getRemainingInstalmentCount();
+        this.loanTermInMonth = participation.getOriginalInstalmentCount();
     }
 
     @XmlElement

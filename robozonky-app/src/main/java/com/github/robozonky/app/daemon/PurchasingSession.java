@@ -105,7 +105,7 @@ final class PurchasingSession extends
         final Participation participation = recommendation.descriptor().item();
         final Loan l = recommendation.descriptor().related();
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);
-        final Investment i = new Investment(l, recommendation.amount());
+        final Investment i = new Investment(participation, recommendation.amount());
         discard(recommendation.descriptor());
         if (succeeded) {
             result.add(i);
