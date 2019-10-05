@@ -26,6 +26,10 @@
   <artifactId>robozonky-notifications</artifactId>
   <name>RoboZonky: Sends e-mail notifications</name>
 
+  <properties>
+    <com.github.robozonky.notifications.generator.mainClass>com.github.robozonky.notifications.samples.Generator</com.github.robozonky.notifications.generator.mainClass>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
@@ -111,5 +115,56 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>build-sample-generator</id>
+      <activation>
+        <property>
+          <name>sampleGenerator</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <configuration>
+                  <attach>false</attach>
+                  <archive>
+                    <manifest>
+                      <mainClass>${com.github.robozonky.notifications.generator.mainClass}</mainClass>
+                    </manifest>
+                  </archive>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jar.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>jar</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <attach>false</attach>
+                  <descriptors>
+                    <descriptor>src/main/assembly/zip.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>zip</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
