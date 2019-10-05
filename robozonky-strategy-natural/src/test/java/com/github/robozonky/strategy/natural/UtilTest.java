@@ -37,9 +37,9 @@ class UtilTest extends AbstractRoboZonkyTest {
     private static PortfolioOverview preparePortfolio(final Number ratingA, final Number ratingB,
                                                       final Number ratingC) {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getShareOnInvestment(eq(Rating.A))).thenReturn(fromPercentage(ratingA));
-        when(portfolioOverview.getShareOnInvestment(eq(Rating.B))).thenReturn(fromPercentage(ratingB));
-        when(portfolioOverview.getShareOnInvestment(eq(Rating.C))).thenReturn(fromPercentage(ratingC));
+        doReturn(fromPercentage(ratingA)).when(portfolioOverview).getShareOnInvestment(eq(Rating.A));
+        doReturn(fromPercentage(ratingB)).when(portfolioOverview).getShareOnInvestment(eq(Rating.B));
+        doReturn(fromPercentage(ratingC)).when(portfolioOverview).getShareOnInvestment(eq(Rating.C));
         return portfolioOverview;
     }
 
