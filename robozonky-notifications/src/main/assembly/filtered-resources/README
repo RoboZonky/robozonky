@@ -1,0 +1,16 @@
+V tomto adresáři najdete všechny šablony pro e-mailové HTML notifikace RoboZonky. Spuštěním následujícího příkazu dojde
+k vygenerování ukázkových HTML souborů:
+
+    java -jar robozonky-notifications-${project.version}-html-sample-generator.jar
+
+Výstup aplikace najdete v adresáři output/.
+
+Kompletní zdrojový kód pro e-mailovou notifikaci obvykle sestává z vícero souborů. Prvně soubor "core.ftl", který
+obsahuje sdílené hlavičky a patičky všech notifikací. Do tohoto souboru se pak automaticky vkládá šablona pro konkrétní
+notifikaci.
+
+Příklad:
+- Notikace pro novou investici má kód "investment-made".
+- Šablona s názvem "investment-made.ftl" je tedy nejprve vložena do šablony "core.ftl".
+- Soubor "investment-made.ftl.html" je následně vygenerován v adresáři "output/".
+- Tento soubor obsahuje konečný text notifikace, který bude e-mailem odeslán uživateli.

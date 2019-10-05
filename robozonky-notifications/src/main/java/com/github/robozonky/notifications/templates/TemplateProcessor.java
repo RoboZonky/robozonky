@@ -16,12 +16,6 @@
 
 package com.github.robozonky.notifications.templates;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.notifications.templates.html.HtmlTemplate;
@@ -31,21 +25,26 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+
 import static java.util.Map.entry;
 
 public enum TemplateProcessor {
 
     INSTANCE;
 
-    private final Configuration config = TemplateProcessor.getFreemarkerConfiguration(PlainTextTemplate.class);
-    private final Configuration htmlConfig = TemplateProcessor.getFreemarkerConfiguration(HtmlTemplate.class);
+    private static final Configuration PLAIN_TEXT_CONFIG = getFreemarkerConfiguration(PlainTextTemplate.class);
+    private static final Configuration HTML_CLASSPATH_CONFIG = getFreemarkerConfiguration(HtmlTemplate.class);
 
-    static Configuration getFreemarkerConfiguration(final Class<?> templateRoot) {
+    public static Configuration getFreemarkerConfiguration() {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
         final Map<String, TemplateNumberFormatFactory> customNumberFormats =
                 Collections.singletonMap("interest", InterestNumberFormatFactory.INSTANCE);
         cfg.setCustomNumberFormats(customNumberFormats);
-        cfg.setClassForTemplateLoading(templateRoot, "");
         cfg.setLogTemplateExceptions(false);
         /*
          * This is important! We don't control installer's encoding, it will always be selected by the user running the
@@ -59,8 +58,15 @@ public enum TemplateProcessor {
         return cfg;
     }
 
+    static Configuration getFreemarkerConfiguration(final Class<?> templateRoot) {
+        final Configuration cfg = getFreemarkerConfiguration();
+        cfg.setClassForTemplateLoading(templateRoot, "");
+        return cfg;
+    }
+
     private static String process(final Configuration configuration, final String embeddedTemplate,
-                                  final Map<String, Object> embeddedData) throws IOException, TemplateException {
+                                  final Map<String, Object> embeddedData)
+            throws IOException, TemplateException {
         final Map<String, Object> data = Map.ofEntries(
                 entry("timestamp", Date.from(DateUtil.now())),
                 entry("robozonkyUrl", Defaults.ROBOZONKY_URL),
@@ -74,12 +80,12 @@ public enum TemplateProcessor {
 
     public String processPlainText(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
-        return process(config, embeddedTemplate, embeddedData);
+        return process(PLAIN_TEXT_CONFIG, embeddedTemplate, embeddedData);
     }
 
     public String processHtml(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
-        return process(htmlConfig, embeddedTemplate, embeddedData);
+        return process(HTML_CLASSPATH_CONFIG, embeddedTemplate, embeddedData);
     }
 
 }

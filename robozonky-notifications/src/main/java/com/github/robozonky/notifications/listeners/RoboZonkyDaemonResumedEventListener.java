@@ -16,13 +16,13 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RoboZonkyDaemonResumedEventListener extends AbstractListener<RoboZonkyDaemonResumedEvent> {
 
@@ -31,12 +31,12 @@ public class RoboZonkyDaemonResumedEventListener extends AbstractListener<RoboZo
     }
 
     @Override
-    String getSubject(final RoboZonkyDaemonResumedEvent event) {
+    public String getSubject(final RoboZonkyDaemonResumedEvent event) {
         return "RoboZonky se zotavil";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "daemon-resumed.ftl";
     }
 

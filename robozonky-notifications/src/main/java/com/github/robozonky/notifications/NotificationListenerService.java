@@ -16,13 +16,6 @@
 
 package com.github.robozonky.notifications;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -33,6 +26,13 @@ import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.state.TenantState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class NotificationListenerService implements ListenerService {
 
@@ -71,7 +71,7 @@ public final class NotificationListenerService implements ListenerService {
     private Stream<RefreshableConfigStorage> getTenantConfigurations() {
         return TenantState.getKnownTenants()
                 .map(this::getTenantConfigurations)
-                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+                .flatMap(Optional::stream);
     }
 
     @Override

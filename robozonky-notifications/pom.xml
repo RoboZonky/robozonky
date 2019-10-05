@@ -26,6 +26,10 @@
   <artifactId>robozonky-notifications</artifactId>
   <name>RoboZonky: Sends e-mail notifications</name>
 
+  <properties>
+    <com.github.robozonky.notifications.generator.mainClass>com.github.robozonky.notifications.samples.Generator</com.github.robozonky.notifications.generator.mainClass>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
@@ -56,6 +60,10 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
@@ -93,5 +101,70 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <configuration>
+          <excludedClasses> <!-- Assorted code used mostly for testing and development purposes. -->
+            <param>com.github.robozonky.notifications.samples.*</param>
+          </excludedClasses>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>build-sample-generator</id>
+      <activation>
+        <property>
+          <name>sampleGenerator</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <configuration>
+                  <attach>false</attach>
+                  <archive>
+                    <manifest>
+                      <mainClass>${com.github.robozonky.notifications.generator.mainClass}</mainClass>
+                    </manifest>
+                  </archive>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jar.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>jar</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <attach>false</attach>
+                  <descriptors>
+                    <descriptor>src/main/assembly/zip.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>zip</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

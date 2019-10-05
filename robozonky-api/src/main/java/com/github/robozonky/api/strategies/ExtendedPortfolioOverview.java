@@ -36,7 +36,13 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * How much is at risk out of the entire portfolio, in relative terms.
      * @return Percentage.
      */
-    Ratio getShareAtRisk();
+    default Ratio getShareAtRisk() {
+        final Money invested = getInvested();
+        if (invested.isZero()) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(getAtRisk().divideBy(invested).getValue());
+    }
 
     /**
      * Sum total of all remaining principal where loans in a given rating are currently overdue.
@@ -50,7 +56,13 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
-    Ratio getAtRiskShareOnInvestment(final Rating r);
+    default Ratio getAtRiskShareOnInvestment(final Rating r) {
+        final Money investedPerRating = this.getInvested(r);
+        if (investedPerRating.isZero()) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(getAtRisk(r).divideBy(investedPerRating).getValue());
+    }
 
     /**
      * Sum total of all remaining principal which can be sold right now.
@@ -62,7 +74,13 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * How much can be sold of the entire portfolio, in relative terms.
      * @return Percentage.
      */
-    Ratio getShareSellable();
+    default Ratio getShareSellable() {
+        final Money invested = getInvested();
+        if (invested.isZero()) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(getSellable().divideBy(invested).getValue());
+    }
 
     /**
      * Sum total of all remaining principal which can be sold right now in a given rating.
@@ -76,7 +94,13 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @param r Rating in question.
      * @return Share of sellable on overall investments in a given rating.
      */
-    Ratio getShareSellable(final Rating r);
+    default Ratio getShareSellable(final Rating r) {
+        final Money investedPerRating = this.getInvested(r);
+        if (investedPerRating.isZero()) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(getSellable(r).divideBy(investedPerRating).getValue());
+    }
 
     /**
      * Sum total of all remaining principal which can be sold right now, without sale fees.
@@ -88,7 +112,13 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * How much can be sold of the entire portfolio without fees, in relative terms.
      * @return Percentage.
      */
-    Ratio getShareSellableFeeless();
+    default Ratio getShareSellableFeeless() {
+        final Money invested = getInvested();
+        if (invested.isZero()) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(getSellableFeeless().divideBy(invested).getValue());
+    }
 
     /**
      * Sum total of all remaining principal which can be sold right now without fees in a given rating.
@@ -102,6 +132,12 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @param r Rating in question.
      * @return Share of sellable on overall investments in a given rating.
      */
-    Ratio getShareSellableFeeless(final Rating r);
+    default Ratio getShareSellableFeeless(final Rating r) {
+        final Money investedPerRating = this.getInvested(r);
+        if (investedPerRating.isZero()) { // protected against division by zero
+            return Ratio.ZERO;
+        }
+        return Ratio.fromRaw(getSellableFeeless(r).divideBy(investedPerRating).getValue());
+    }
 
 }

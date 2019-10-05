@@ -16,13 +16,13 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import com.github.robozonky.internal.Defaults;
+
+import javax.xml.bind.annotation.XmlElement;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import javax.xml.bind.annotation.XmlElement;
-
-import com.github.robozonky.internal.Defaults;
 
 import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
 import static java.time.temporal.ChronoField.YEAR;
@@ -34,8 +34,8 @@ public class DateDescriptor extends BaseEntity {
             .appendLiteral('-')
             .appendValue(MONTH_OF_YEAR, 2)
             .toFormatter();
-    private String date;
-    private String format;
+    protected String date;
+    protected String format;
 
     public static OffsetDateTime toOffsetDateTime(final DateDescriptor descriptor) {
         return toOffsetDateTime(descriptor.getFormat(), descriptor.getDate());
@@ -63,4 +63,5 @@ public class DateDescriptor extends BaseEntity {
     public String getFormat() {
         return format;
     }
+
 }

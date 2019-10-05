@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+
+import java.util.Map;
 
 public class LoanDefaultedEventListener extends AbstractListener<LoanDefaultedEvent> {
 
@@ -29,7 +29,7 @@ public class LoanDefaultedEventListener extends AbstractListener<LoanDefaultedEv
     }
 
     @Override
-    String getSubject(final LoanDefaultedEvent event) {
+    public String getSubject(final LoanDefaultedEvent event) {
         return "Půjčka " + Util.identifyLoan(event) + " byla zesplatněna";
     }
 
@@ -40,7 +40,7 @@ public class LoanDefaultedEventListener extends AbstractListener<LoanDefaultedEv
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "loan-defaulted.ftl";
     }
 }

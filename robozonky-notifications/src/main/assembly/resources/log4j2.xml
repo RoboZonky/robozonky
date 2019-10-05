@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright 2019 The RoboZonky Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<Configuration status="WARN" monitorInterval="30">
+
+  <Properties> <!-- These are the common pattern layouts to be used later in the file. -->
+    <Property name="consoleAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level %msg%n</Property>
+    <Property name=   "fileAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level [%t] %logger{-36} - %msg%n</Property>
+  </Properties>
+
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <Filters>
+        <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
+        <ThresholdFilter level="info"  onMatch="ACCEPT" onMismatch="DENY"/>
+      </Filters>
+      <PatternLayout pattern="${consoleAppenderPatternLayout}"/>
+    </Console>
+    <Console name="STDERR" target="SYSTEM_ERR">
+      <!-- Only send error and fatal messages. -->
+      <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
+      <PatternLayout pattern="${consoleAppenderPatternLayout}"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="STDOUT"/> <!-- Infos go to the standard output. -->
+      <AppenderRef ref="STDERR"/> <!-- Errors and warnings go to the standard error output. -->
+    </Root>
+    <Logger name="javax.mail" level="error" />  <!-- avoid an unkillable useless warning -->
+    <Logger name="com.github.robozonky" level="debug" /> <!-- change "debug" to "trace" for more detailed logging -->
+  </Loggers>
+</Configuration>

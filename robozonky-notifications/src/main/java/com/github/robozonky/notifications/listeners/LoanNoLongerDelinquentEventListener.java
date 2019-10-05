@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ public class LoanNoLongerDelinquentEventListener extends AbstractListener<LoanNo
     }
 
     @Override
-    String getSubject(final LoanNoLongerDelinquentEvent event) {
+    public String getSubject(final LoanNoLongerDelinquentEvent event) {
         return "Půjčka " + Util.identifyLoan(event) + " již není v prodlení";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "loan-not-delinquent.ftl";
     }
 }

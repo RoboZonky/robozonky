@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ public class RoboZonkyEndingEventListener extends AbstractListener<RoboZonkyEndi
     }
 
     @Override
-    String getSubject(final RoboZonkyEndingEvent event) {
+    public String getSubject(final RoboZonkyEndingEvent event) {
         return "RoboZonky byl ukončen";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "ending.ftl";
     }
 }

@@ -18,46 +18,9 @@ package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanLostEvent;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.notifications.listeners.InvestmentMadeEventListener;
-import com.github.robozonky.notifications.listeners.InvestmentPurchasedEventListener;
-import com.github.robozonky.notifications.listeners.InvestmentSoldEventListener;
-import com.github.robozonky.notifications.listeners.LoanDefaultedEventListener;
-import com.github.robozonky.notifications.listeners.LoanDelinquentEventListener;
-import com.github.robozonky.notifications.listeners.LoanLostEventListener;
-import com.github.robozonky.notifications.listeners.LoanNoLongerDelinquentEventListener;
-import com.github.robozonky.notifications.listeners.ReservationAcceptedEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyCrashedEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyDaemonResumedEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyDaemonSuspendedEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyEndingEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyExperimentalUpdateDetectedEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyInitializedEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
-import com.github.robozonky.notifications.listeners.RoboZonkyUpdateDetectedEventListener;
-import com.github.robozonky.notifications.listeners.SaleOfferedEventListener;
-import com.github.robozonky.notifications.listeners.WeeklySummaryEventListener;
+import com.github.robozonky.notifications.listeners.*;
+import com.github.robozonky.notifications.samples.*;
+import io.vavr.Lazy;
 import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("rawtypes")
@@ -65,57 +28,57 @@ public enum SupportedListener {
 
     INVESTMENT_MADE {
         @Override
-        public Class<? extends Event> getEventType() {
-            return InvestmentMadeEvent.class;
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new InvestmentMadeEventListener(this, targetHandler);
         }
 
         @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new InvestmentMadeEventListener(this, targetHandler);
+        protected Event createSampleEvent() {
+            return new MyInvestmentMadeEvent();
         }
     },
     INVESTMENT_SOLD {
         @Override
-        public Class<? extends Event> getEventType() {
-            return InvestmentSoldEvent.class;
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new InvestmentSoldEventListener(this, targetHandler);
         }
 
         @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new InvestmentSoldEventListener(this, targetHandler);
+        protected Event createSampleEvent() {
+            return new MyInvestmentSoldEvent();
         }
     },
     INVESTMENT_PURCHASED {
         @Override
-        public Class<? extends Event> getEventType() {
-            return InvestmentPurchasedEvent.class;
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new InvestmentPurchasedEventListener(this, targetHandler);
         }
 
         @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new InvestmentPurchasedEventListener(this, targetHandler);
+        protected Event createSampleEvent() {
+            return new MyInvestmentPurchasedEvent();
         }
     },
     SALE_OFFERED {
         @Override
-        public Class<? extends Event> getEventType() {
-            return SaleOfferedEvent.class;
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new SaleOfferedEventListener(this, targetHandler);
         }
 
         @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new SaleOfferedEventListener(this, targetHandler);
+        protected Event createSampleEvent() {
+            return new MySaleOfferedEvent();
         }
     },
     RESERVATION_ACCEPTED {
         @Override
-        public Class<? extends Event> getEventType() {
-            return ReservationAcceptedEvent.class;
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new ReservationAcceptedEventListener(this, targetHandler);
         }
 
         @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new ReservationAcceptedEventListener(this, targetHandler);
+        protected Event createSampleEvent() {
+            return new MyReservationAcceptedEvent();
         }
     },
     LOAN_NOW_DELINQUENT {
@@ -125,8 +88,8 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanNowDelinquentEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanNowDelinquentEvent();
         }
     },
     LOAN_DELINQUENT_10_PLUS {
@@ -136,8 +99,8 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanDelinquent10DaysOrMoreEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanDelinquent10DaysOrMoreEvent();
         }
     },
     LOAN_DELINQUENT_30_PLUS {
@@ -147,8 +110,8 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanDelinquent30DaysOrMoreEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanDelinquent30DaysOrMoreEvent();
         }
     },
     LOAN_DELINQUENT_60_PLUS {
@@ -158,8 +121,8 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanDelinquent60DaysOrMoreEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanDelinquent60DaysOrMoreEvent();
         }
     },
     LOAN_DELINQUENT_90_PLUS {
@@ -169,8 +132,8 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanDelinquent90DaysOrMoreEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanDelinquent90DaysOrMoreEvent();
         }
     },
     LOAN_NO_LONGER_DELINQUENT {
@@ -180,8 +143,8 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanNoLongerDelinquentEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanNoLongerDelinquentEvent();
         }
     },
     LOAN_DEFAULTED {
@@ -191,8 +154,8 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanDefaultedEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanDefaultedEvent();
         }
     },
     LOAN_LOST {
@@ -202,19 +165,19 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return LoanLostEvent.class;
+        protected Event createSampleEvent() {
+            return new MyLoanLostEvent();
         }
     },
     WEEKLY_SUMMARY {
         @Override
-        public Class<? extends Event> getEventType() {
-            return WeeklySummaryEvent.class;
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new WeeklySummaryEventListener(this, targetHandler);
         }
 
         @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new WeeklySummaryEventListener(this, targetHandler);
+        protected Event createSampleEvent() {
+            return new MyWeeklySummaryEvent();
         }
 
         @Override
@@ -224,11 +187,6 @@ public enum SupportedListener {
     },
     CRASHED {
         @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyCrashedEvent.class;
-        }
-
-        @Override
         public boolean overrideGlobalGag() {
             return true;
         }
@@ -236,6 +194,11 @@ public enum SupportedListener {
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyCrashedEventListener(this, targetHandler);
+        }
+
+        @Override
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyCrashedEvent();
         }
     },
     DAEMON_SUSPENDED {
@@ -245,13 +208,13 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyDaemonSuspendedEvent.class;
+        public EventListener getListener(final AbstractTargetHandler targetHandler) {
+            return new RoboZonkyDaemonSuspendedEventListener(this, targetHandler);
         }
 
         @Override
-        public EventListener getListener(final AbstractTargetHandler targetHandler) {
-            return new RoboZonkyDaemonSuspendedEventListener(this, targetHandler);
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyDaemonSuspendedEvent();
         }
     },
     DAEMON_RESUMED {
@@ -261,21 +224,16 @@ public enum SupportedListener {
         }
 
         @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyDaemonResumedEvent.class;
-        }
-
-        @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyDaemonResumedEventListener(this, targetHandler);
         }
+
+        @Override
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyDaemonResumedEvent();
+        }
     },
     INITIALIZED {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyInitializedEvent.class;
-        }
-
         @Override
         public boolean overrideGlobalGag() {
             return true;
@@ -285,13 +243,13 @@ public enum SupportedListener {
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyInitializedEventListener(this, targetHandler);
         }
+
+        @Override
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyInitializedEvent();
+        }
     },
     ENDING {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyEndingEvent.class;
-        }
-
         @Override
         public boolean overrideGlobalGag() {
             return true;
@@ -301,24 +259,24 @@ public enum SupportedListener {
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyEndingEventListener(this, targetHandler);
         }
+
+        @Override
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyEndingEvent();
+        }
     },
     TESTING {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyTestingEvent.class;
-        }
-
         @Override
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyTestingEventListener(this, targetHandler);
         }
+
+        @Override
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyTestingEvent();
+        }
     },
     UPDATE_DETECTED {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyUpdateDetectedEvent.class;
-        }
-
         @Override
         public boolean overrideGlobalGag() {
             return true;
@@ -328,13 +286,13 @@ public enum SupportedListener {
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyUpdateDetectedEventListener(this, targetHandler);
         }
+
+        @Override
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyUpdateDetectedEvent();
+        }
     },
     EXPERIMENTAL_UPDATE_DETECTED {
-        @Override
-        public Class<? extends Event> getEventType() {
-            return RoboZonkyExperimentalUpdateDetectedEvent.class;
-        }
-
         @Override
         public boolean overrideGlobalGag() {
             return true;
@@ -344,31 +302,40 @@ public enum SupportedListener {
         public EventListener getListener(final AbstractTargetHandler targetHandler) {
             return new RoboZonkyExperimentalUpdateDetectedEventListener(this, targetHandler);
         }
+
+        @Override
+        protected Event createSampleEvent() {
+            return new MyRoboZonkyExperimentalUpdateDetectedEvent();
+        }
     };
+
+    private final Lazy<? extends Event> sampleEvent = Lazy.of(this::createSampleEvent);
 
     public abstract EventListener getListener(final AbstractTargetHandler targetHandler);
 
     /**
      * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
+     *
      * @return ID of the listener which will be used as namespace in the config file.
      */
     public String getLabel() {
-        final String className = this.getEventType().getSimpleName();
-        final String decapitalized = StringUtils.uncapitalize(className);
+        final String interfaceName = this.getSampleEvent().getClass().getInterfaces()[0].getSimpleName();
+        final String decapitalized = StringUtils.uncapitalize(interfaceName);
         // this works because Event subclasses must be named (Something)Event; check Event().
         return decapitalized.substring(0, decapitalized.length() - "Event".length());
     }
 
-    /**
-     * Type of event that this listener responds to.
-     * @return Event type.
-     */
-    public abstract Class<? extends Event> getEventType();
+    protected abstract Event createSampleEvent();
+
+    public Event getSampleEvent() {
+        return sampleEvent.get();
+    }
 
     /**
      * Whether or not the listener will ignore global anti-spam settings. The reason for this is that some very
      * important notifications can be ignored due to some other notification already exceeding the global e-mail
      * allowance. This should only be allowed for the most important notifications.
+     *
      * @return True if global anti-spam settings will be ignored for this notification.
      */
     public boolean overrideGlobalGag() {
@@ -376,3 +343,4 @@ public enum SupportedListener {
     }
 
 }
+

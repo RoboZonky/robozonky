@@ -45,9 +45,9 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(tested.getShareOnInvestment(Rating.A)).isEqualTo(Ratio.ZERO);
             softly.assertThat(tested.getMinimalMonthlyProfit()).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getMinimalAnnualProfitability()).isEqualTo(Ratio.ZERO);
-            softly.assertThat(tested.getOptimalMonthlyProfit()).isEqualTo(Money.from(10));
-            softly.assertThat(tested.getOptimalAnnualProfitability()).isEqualTo(Ratio.ONE);
-            softly.assertThat(tested.getMonthlyProfit()).isEqualTo(Money.from(1));
+            softly.assertThat(tested.getOptimalMonthlyProfit()).isEqualTo(Money.ZERO);
+            softly.assertThat(tested.getOptimalAnnualProfitability()).isEqualTo(Ratio.ZERO);
+            softly.assertThat(tested.getMonthlyProfit()).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getAnnualProfitability()).isEqualTo(Ratio.fromPercentage("5"));
         });
     }

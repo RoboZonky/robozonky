@@ -1665,6 +1665,69 @@
         "new": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.BaseInvestment::getFirstAmount() @ com.github.robozonky.api.remote.entities.MyInvestment",
         "annotation": "@javax.xml.bind.annotation.XmlTransient",
         "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.amount",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.amount",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.annuity",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.annuity",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.annuityWithInsurance",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.annuityWithInsurance",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.insuranceHistory",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.insuranceHistory",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.premium",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.premium",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.remainingInvestment",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.remainingInvestment",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.reservedAmount",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.reservedAmount",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.revenueRate",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.revenueRate",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.zonkyPlusAmount",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.zonkyPlusAmount",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
       }
     ]
   }

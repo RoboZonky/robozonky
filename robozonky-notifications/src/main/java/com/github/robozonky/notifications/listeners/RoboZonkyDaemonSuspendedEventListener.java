@@ -16,12 +16,12 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Collections;
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+
+import java.util.Collections;
+import java.util.Map;
 
 public class RoboZonkyDaemonSuspendedEventListener extends AbstractListener<RoboZonkyDaemonSuspendedEvent> {
 
@@ -30,12 +30,12 @@ public class RoboZonkyDaemonSuspendedEventListener extends AbstractListener<Robo
     }
 
     @Override
-    String getSubject(final RoboZonkyDaemonSuspendedEvent event) {
+    public String getSubject(final RoboZonkyDaemonSuspendedEvent event) {
         return "Uvnitř RoboZonky došlo k chybě!";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "daemon-suspended.ftl";
     }
 

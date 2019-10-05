@@ -19,8 +19,14 @@ package com.github.robozonky.api.strategies;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.function.Function;
+
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 /**
  * Class with some aggregate statistics about user's portfolio. Used primarily as the main input into
@@ -46,7 +52,15 @@ public interface PortfolioOverview {
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
-    Ratio getShareOnInvestment(final Rating r);
+    default Ratio getShareOnInvestment(final Rating r) {
+        Money total = getInvested();
+        if (total.isZero()) {
+            return Ratio.ZERO;
+        }
+        Money investedInRating = getInvested(r);
+        BigDecimal ratio = BigDecimalCalculator.divide(investedInRating.getValue(), total.getValue());
+        return Ratio.fromRaw(ratio);
+    }
 
     /**
      * Retrieve annual rate of return of the entire portfolio as reported by Zonky.
@@ -54,37 +68,65 @@ public interface PortfolioOverview {
      */
     Ratio getAnnualProfitability();
 
+    private BigDecimal calculateProfitability(final Rating r, final Function<Rating, Ratio> metric) {
+        final Ratio ratingShare = getShareOnInvestment(r);
+        final Ratio ratingProfitability = metric.apply(r);
+        return times(ratingShare.bigDecimalValue(), ratingProfitability.bigDecimalValue());
+    }
+
+    private Ratio getProfitability(final Function<Rating, Ratio> metric) {
+        final BigDecimal result = Arrays.stream(Rating.values())
+                .map(r -> calculateProfitability(r, metric))
+                .reduce(BigDecimalCalculator::plus)
+                .orElse(BigDecimal.ZERO);
+        return Ratio.fromRaw(result);
+    }
+
     /**
      * Retrieve minimal annual rate of return of the entire portfolio, assuming Zonky rist cost model holds.
      * (See {@link Rating#getMinimalRevenueRate(Money)}.)
      * @return
      */
-    Ratio getMinimalAnnualProfitability();
+    default Ratio getMinimalAnnualProfitability() {
+        return getProfitability(r -> r.getMinimalRevenueRate(getInvested()));
+    }
 
     /**
      * Retrieve maximal annual rate of return of the entire portfolio, assuming none of the loans are ever delinquent.
      * (See {@link Rating#getMaximalRevenueRate(Money)}.)
      * @return
      */
-    Ratio getOptimalAnnualProfitability();
+    default Ratio getOptimalAnnualProfitability() {
+        return getProfitability(r -> r.getMaximalRevenueRate(getInvested()));
+    }
+
+    private Money calculateProfit(Ratio rate) {
+        return rate.apply(getInvested()).divideBy(12);
+    }
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getAnnualProfitability()}.
      * @return Amount.
      */
-    Money getMonthlyProfit();
+    default Money getMonthlyProfit() {
+        return calculateProfit(getAnnualProfitability());
+    }
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getMinimalAnnualProfitability()}.
      * @return Amount.
      */
-    Money getMinimalMonthlyProfit();
+    default Money getMinimalMonthlyProfit() {
+        return calculateProfit(getMinimalAnnualProfitability());
+    }
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getOptimalAnnualProfitability()}.
      * @return Amount.
      */
-    Money getOptimalMonthlyProfit();
+    default Money getOptimalMonthlyProfit() {
+        return calculateProfit(getOptimalAnnualProfitability());
+    }
 
     /**
      * @return When this instance was created.

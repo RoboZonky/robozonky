@@ -109,8 +109,8 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         }
         final File distDir = new File(installDir, "Dist/");
         distDir.mkdirs();
-        final File logback = new File(distDir, "log4j2.xml");
-        logback.createNewFile();
+        final File loggingConfig = new File(distDir, "log4j2.xml");
+        loggingConfig.createNewFile();
         final File strategy = new File(Variables.STRATEGY_SOURCE.getValue(data));
         strategy.createNewFile();
     }

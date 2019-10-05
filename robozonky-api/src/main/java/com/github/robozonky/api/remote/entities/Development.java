@@ -31,11 +31,11 @@ import java.util.Optional;
  */
 public class Development extends BaseEntity {
 
-    private DevelopmentType businessCode;
+    protected DevelopmentType businessCode;
     @XmlElement
-    private String publicNote;
-    private Object metadata;
-    private int loanId;
+    protected String publicNote;
+    protected Object metadata;
+    protected int loanId;
     @XmlElement
     private DateDescriptor dateFrom;
     @XmlElement
@@ -68,4 +68,5 @@ public class Development extends BaseEntity {
     public Optional<OffsetDateTime> getDateTo() {
         return Optional.ofNullable(dateTo).map(DateDescriptor::toOffsetDateTime);
     }
+
 }

@@ -128,6 +128,19 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     protected static ExtendedPortfolioOverview mockPortfolioOverview() {
         final ExtendedPortfolioOverview po = mock(ExtendedPortfolioOverview.class);
+        when(po.getShareAtRisk()).thenCallRealMethod();
+        when(po.getShareOnInvestment(any())).thenCallRealMethod();
+        when(po.getAtRiskShareOnInvestment(any())).thenCallRealMethod();
+        when(po.getShareSellable()).thenCallRealMethod();
+        when(po.getShareSellable(any())).thenCallRealMethod();
+        when(po.getShareSellableFeeless()).thenCallRealMethod();
+        when(po.getShareSellableFeeless(any())).thenCallRealMethod();
+        when(po.getMinimalMonthlyProfit()).thenCallRealMethod();
+        when(po.getMonthlyProfit()).thenCallRealMethod();
+        when(po.getOptimalMonthlyProfit()).thenCallRealMethod();
+        when(po.getMinimalAnnualProfitability()).thenCallRealMethod();
+        when(po.getOptimalAnnualProfitability()).thenCallRealMethod();
+        when(po.getAnnualProfitability()).thenReturn(Ratio.fromPercentage(5));
         when(po.getInvested()).thenReturn(Money.ZERO);
         when(po.getInvested(any())).thenReturn(Money.ZERO);
         when(po.getAtRisk()).thenReturn(Money.ZERO);
@@ -136,19 +149,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(po.getSellable(any())).thenReturn(Money.ZERO);
         when(po.getSellableFeeless()).thenReturn(Money.ZERO);
         when(po.getSellableFeeless(any())).thenReturn(Money.ZERO);
-        when(po.getShareAtRisk()).thenReturn(Ratio.ZERO);
-        when(po.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        when(po.getAtRiskShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        when(po.getShareSellable()).thenReturn(Ratio.ZERO);
-        when(po.getShareSellable(any())).thenReturn(Ratio.ZERO);
-        when(po.getShareSellableFeeless()).thenReturn(Ratio.ZERO);
-        when(po.getShareSellableFeeless(any())).thenReturn(Ratio.ZERO);
-        when(po.getMinimalMonthlyProfit()).thenReturn(Money.from(0));
-        when(po.getMonthlyProfit()).thenReturn(Money.from(1));
-        when(po.getOptimalMonthlyProfit()).thenReturn(Money.from(10));
-        when(po.getMinimalAnnualProfitability()).thenReturn(Ratio.ZERO);
-        when(po.getAnnualProfitability()).thenReturn(Ratio.fromPercentage(5));
-        when(po.getOptimalAnnualProfitability()).thenReturn(Ratio.ONE);
         when(po.getTimestamp()).thenReturn(ZonedDateTime.now());
         return po;
     }
