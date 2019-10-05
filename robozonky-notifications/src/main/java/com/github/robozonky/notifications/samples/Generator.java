@@ -22,7 +22,6 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.listeners.AbstractListener;
-import com.github.robozonky.notifications.templates.TemplateProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,8 +57,9 @@ public final class Generator {
         templateData.put("subject", eventListener.getSubject(event));
         final String templateFilename = eventListener.getTemplateFileName();
         try {
-            final String string = TemplateProcessor.INSTANCE.processHtml(templateFilename, templateData, true);
+            final String string = FileBasedTemplateProcessor.INSTANCE.process(templateFilename, templateData);
             final File target = new File(TARGET, templateFilename + ".html");
+            LOGGER.info("Storing generated HTML for template {} to {}.", templateFilename, TARGET);
             Files.write(target.toPath(), string.getBytes(Defaults.CHARSET));
         } catch (final Exception ex) {
             LOGGER.error("Failed generating HTML for template {}.", templateFilename, ex);
