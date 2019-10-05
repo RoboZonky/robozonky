@@ -214,12 +214,12 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         }
 
         @Override
-        String getSubject(final RoboZonkyTestingEvent event) {
+        public String getSubject(final RoboZonkyTestingEvent event) {
             return "No actual subject";
         }
 
         @Override
-        String getTemplateFileName() {
+        public String getTemplateFileName() {
             return "testing.ftl";
         }
     }

@@ -16,24 +16,8 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.DelinquencyBased;
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.api.notifications.Financial;
-import com.github.robozonky.api.notifications.InvestmentBased;
-import com.github.robozonky.api.notifications.LoanBased;
-import com.github.robozonky.api.notifications.LoanLostEvent;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.MarketplaceInvestmentBased;
-import com.github.robozonky.api.notifications.MarketplaceLoanBased;
+import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
@@ -45,9 +29,16 @@ import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static java.util.Map.entry;
 
-abstract class AbstractListener<T extends Event> implements EventListener<T> {
+public abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
     protected final Logger logger = LogManager.getLogger(this.getClass());
     final DelinquencyTracker delinquencyTracker;
@@ -78,9 +69,9 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         return true;
     }
 
-    abstract String getSubject(final T event);
+    public abstract String getSubject(final T event);
 
-    abstract String getTemplateFileName();
+    public abstract String getTemplateFileName();
 
     private Map<String, Object> getBaseData(final T event) {
         if (event instanceof LoanBased) {
@@ -112,7 +103,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         return result;
     }
 
-    final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
+    public final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
         final Map<String, Object> result = new HashMap<>(this.getData(event));
         // ratings here need to have a stable iteration order, as they will be used to list them in notifications
         result.put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));

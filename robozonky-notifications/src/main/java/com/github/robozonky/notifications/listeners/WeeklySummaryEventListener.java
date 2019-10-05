@@ -16,12 +16,12 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+
+import java.util.Map;
 
 import static java.util.Map.entry;
 
@@ -32,12 +32,12 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
     }
 
     @Override
-    String getSubject(final WeeklySummaryEvent event) {
+    public String getSubject(final WeeklySummaryEvent event) {
         return "Týdenní přehled informací o Vašem Zonky portfoliu";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "weekly-summary.ftl";
     }
 

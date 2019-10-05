@@ -28,13 +28,13 @@ public class ReservationAcceptedEventListener extends AbstractListener<Reservati
     }
 
     @Override
-    String getSubject(final ReservationAcceptedEvent event) {
+    public String getSubject(final ReservationAcceptedEvent event) {
         final Investment i = event.getInvestment();
         return "Rezervace potvrzena - " + i.getAmount().getValue().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "reservation-accepted.ftl";
     }
 

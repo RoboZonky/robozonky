@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Collections;
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+
+import java.util.Collections;
+import java.util.Map;
 
 public class RoboZonkyUpdateDetectedEventListener extends AbstractListener<RoboZonkyUpdateDetectedEvent> {
 
@@ -30,12 +30,12 @@ public class RoboZonkyUpdateDetectedEventListener extends AbstractListener<RoboZ
     }
 
     @Override
-    String getSubject(final RoboZonkyUpdateDetectedEvent event) {
+    public String getSubject(final RoboZonkyUpdateDetectedEvent event) {
         return "Nový RoboZonky " + event.getNewVersion() + " je k dispozici";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "update-detected.ftl";
     }
 

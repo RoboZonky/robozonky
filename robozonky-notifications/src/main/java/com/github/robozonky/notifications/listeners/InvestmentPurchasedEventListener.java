@@ -27,12 +27,12 @@ public class InvestmentPurchasedEventListener extends AbstractListener<Investmen
     }
 
     @Override
-    String getSubject(final InvestmentPurchasedEvent event) {
+    public String getSubject(final InvestmentPurchasedEvent event) {
         return "Zakoupena participace k půjčce " + Util.identifyLoan(event);
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "investment-purchased.ftl";
     }
 

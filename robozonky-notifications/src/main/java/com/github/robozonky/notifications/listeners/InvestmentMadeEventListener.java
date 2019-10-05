@@ -28,13 +28,13 @@ public class InvestmentMadeEventListener extends AbstractListener<InvestmentMade
     }
 
     @Override
-    String getSubject(final InvestmentMadeEvent event) {
+    public String getSubject(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
         return "Nová investice - " + i.getAmount().getValue().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "investment-made.ftl";
     }
 

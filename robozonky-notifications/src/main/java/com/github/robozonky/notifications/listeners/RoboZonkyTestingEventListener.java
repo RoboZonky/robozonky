@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ public class RoboZonkyTestingEventListener extends AbstractListener<RoboZonkyTes
     }
 
     @Override
-    String getSubject(final RoboZonkyTestingEvent event) {
+    public String getSubject(final RoboZonkyTestingEvent event) {
         return "Zkušební notifikace z RoboZonky!";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "testing.ftl";
     }
 }

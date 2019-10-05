@@ -16,13 +16,13 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RoboZonkyCrashedEventListener extends AbstractListener<RoboZonkyCrashedEvent> {
 
@@ -31,12 +31,12 @@ public class RoboZonkyCrashedEventListener extends AbstractListener<RoboZonkyCra
     }
 
     @Override
-    String getSubject(final RoboZonkyCrashedEvent event) {
+    public String getSubject(final RoboZonkyCrashedEvent event) {
         return "RoboZonky selhal!";
     }
 
     @Override
-    String getTemplateFileName() {
+    public String getTemplateFileName() {
         return "crashed.ftl";
     }
 
