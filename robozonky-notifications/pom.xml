@@ -94,4 +94,18 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <configuration>
+          <excludedClasses> <!-- Assorted code used mostly for testing and development purposes. -->
+            <param>com.github.robozonky.notifications.samples.*</param>
+          </excludedClasses>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
