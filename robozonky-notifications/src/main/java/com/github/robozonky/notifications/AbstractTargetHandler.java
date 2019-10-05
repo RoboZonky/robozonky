@@ -16,16 +16,16 @@
 
 package com.github.robozonky.notifications;
 
+import com.github.robozonky.api.SessionInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.Duration;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
-
-import com.github.robozonky.api.SessionInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractTargetHandler {
 

@@ -80,15 +80,6 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Ratio getShareAtRisk() {
-        final Money czkInvested = getInvested();
-        if (czkInvested.isZero()) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        return Ratio.fromRaw(atRisk.divideBy(czkInvested).getValue());
-    }
-
-    @Override
     public Money getAtRisk(final Rating r) {
         return this.atRiskPerRating.getOrDefault(r, atRisk.getZero());
     }
@@ -99,26 +90,8 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Ratio getAtRiskShareOnInvestment(final Rating r) {
-        final Money investedPerRating = this.getInvested(r);
-        if (investedPerRating.isZero()) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        return Ratio.fromRaw(getAtRisk(r).divideBy(investedPerRating).getValue());
-    }
-
-    @Override
     public Money getSellable() {
         return sellable;
-    }
-
-    @Override
-    public Ratio getShareSellable() {
-        final Money czkInvested = getInvested();
-        if (czkInvested.isZero()) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        return Ratio.fromRaw(sellable.divideBy(czkInvested).getValue());
     }
 
     @Override
@@ -127,40 +100,13 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Ratio getShareSellable(final Rating r) {
-        final Money investedPerRating = this.getInvested(r);
-        if (investedPerRating.isZero()) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        return Ratio.fromRaw(getSellable(r).divideBy(investedPerRating).getValue());
-    }
-
-    @Override
     public Money getSellableFeeless() {
         return sellableFeeless;
     }
 
     @Override
-    public Ratio getShareSellableFeeless() {
-        final Money czkInvested = getInvested();
-        if (czkInvested.isZero()) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        return Ratio.fromRaw(sellableFeeless.divideBy(czkInvested).getValue());
-    }
-
-    @Override
     public Money getSellableFeeless(final Rating r) {
         return sellableFeelessPerRating.getOrDefault(r, sellable.getZero());
-    }
-
-    @Override
-    public Ratio getShareSellableFeeless(final Rating r) {
-        final Money investedPerRating = this.getInvested(r);
-        if (investedPerRating.isZero()) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        return Ratio.fromRaw(getSellableFeeless(r).divideBy(investedPerRating).getValue());
     }
 
     @Override

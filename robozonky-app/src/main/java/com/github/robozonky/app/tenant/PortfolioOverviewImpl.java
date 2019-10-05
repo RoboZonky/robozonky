@@ -21,16 +21,10 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
-
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
 
@@ -64,56 +58,8 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     }
 
     @Override
-    public Ratio getShareOnInvestment(final Rating r) {
-        if (invested.isZero()) { // protected against division by zero
-            return Ratio.ZERO;
-        }
-        final Money investedPerRating = this.getInvested(r);
-        return Ratio.fromRaw(investedPerRating.divideBy(invested).getValue());
-    }
-
-    @Override
     public Ratio getAnnualProfitability() {
         return profitability;
-    }
-
-    private BigDecimal calculateProfitability(final Rating r, final Function<Rating, Ratio> metric) {
-        final Ratio ratingShare = getShareOnInvestment(r);
-        final Ratio ratingProfitability = metric.apply(r);
-        return times(ratingShare.bigDecimalValue(), ratingProfitability.bigDecimalValue());
-    }
-
-    private Ratio getProfitability(final Function<Rating, Ratio> metric) {
-        final BigDecimal result = Arrays.stream(Rating.values())
-                .map(r -> calculateProfitability(r, metric))
-                .reduce(BigDecimalCalculator::plus)
-                .orElse(BigDecimal.ZERO);
-        return Ratio.fromRaw(result);
-    }
-
-    @Override
-    public Ratio getMinimalAnnualProfitability() {
-        return getProfitability(r -> r.getMinimalRevenueRate(getInvested()));
-    }
-
-    @Override
-    public Ratio getOptimalAnnualProfitability() {
-        return getProfitability(r -> r.getMaximalRevenueRate(getInvested()));
-    }
-
-    @Override
-    public Money getMonthlyProfit() {
-        return profitability.apply(getInvested()).divideBy(12);
-    }
-
-    @Override
-    public Money getMinimalMonthlyProfit() {
-        return getMinimalAnnualProfitability().apply(getInvested()).divideBy(12);
-    }
-
-    @Override
-    public Money getOptimalMonthlyProfit() {
-        return getOptimalAnnualProfitability().apply(getInvested()).divideBy(12);
     }
 
     @Override

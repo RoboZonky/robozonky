@@ -33,67 +33,67 @@ import java.util.Optional;
 
 public abstract class BaseLoan extends BaseEntity {
 
-    private boolean topped;
-    private boolean covered;
-    private boolean published;
-    private boolean questionsAllowed;
-    private boolean insuranceActive;
-    private boolean insuredInFuture;
-    private boolean additionallyInsured;
-    private boolean multicash;
-    private int id;
-    private int termInMonths;
-    private int investmentsCount;
-    private int questionsCount;
-    private int userId;
-    private int activeLoansCount;
-    private String name;
-    private String nickName;
-    private String story;
-    private OffsetDateTime datePublished;
-    private OffsetDateTime deadline;
-    private Rating rating;
-    private Collection<Photo> photos;
-    private BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
-    private OtherInvestments myOtherInvestments;
-    private MainIncomeType mainIncomeType;
-    private Region region;
-    private Purpose purpose;
+    protected boolean topped;
+    protected boolean covered;
+    protected boolean published;
+    protected boolean questionsAllowed;
+    protected boolean insuranceActive;
+    protected boolean insuredInFuture;
+    protected boolean additionallyInsured;
+    protected boolean multicash;
+    protected int id;
+    protected int termInMonths;
+    protected int investmentsCount;
+    protected int questionsCount;
+    protected int userId;
+    protected int activeLoansCount;
+    protected String name;
+    protected String nickName;
+    protected String story;
+    protected OffsetDateTime datePublished;
+    protected OffsetDateTime deadline;
+    protected Rating rating;
+    protected Collection<Photo> photos;
+    protected BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
+    protected OtherInvestments myOtherInvestments;
+    protected MainIncomeType mainIncomeType;
+    protected Region region;
+    protected Purpose purpose;
     @XmlElement
-    private Collection<InsurancePolicyPeriod> insuranceHistory;
+    protected Collection<InsurancePolicyPeriod> insuranceHistory;
 
     // various ratios
 
-    private Ratio interestRate;
-    private Ratio investmentRate;
+    protected Ratio interestRate;
+    protected Ratio investmentRate;
     @XmlElement
-    private Ratio revenueRate;
+    protected Ratio revenueRate;
 
-    private Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
-    private Currency currency = Defaults.CURRENCY;
+    protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
+    protected Currency currency = Defaults.CURRENCY;
 
     // strings to be represented as money
 
     @XmlElement
-    private String amount;
+    protected String amount;
     private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
     @XmlElement
-    private String remainingInvestment;
+    protected String remainingInvestment;
     private final Lazy<Money> moneyRemainingInvestment = Lazy.of(() -> Money.from(remainingInvestment, currency));
     @XmlElement
-    private String reservedAmount;
+    protected String reservedAmount;
     private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount, currency));
     @XmlElement
-    private String annuity;
+    protected String annuity;
     private final Lazy<Money> moneyAnnuity = Lazy.of(() -> Money.from(annuity, currency));
     @XmlElement
-    private String annuityWithInsurance;
+    protected String annuityWithInsurance;
     private final Lazy<Money> moneyAnnuityWithInsurance = Lazy.of(() -> Money.from(annuityWithInsurance, currency));
     @XmlElement
-    private String premium;
+    protected String premium;
     private final Lazy<Money> moneyPremium = Lazy.of(() -> Money.from(premium, currency));
     @XmlElement
-    private String zonkyPlusAmount;
+    protected String zonkyPlusAmount;
     private final Lazy<Money> moneyZonkyPlusAmount = Lazy.of(() -> Money.from(zonkyPlusAmount, currency));
 
     protected BaseLoan() {
@@ -326,4 +326,5 @@ public abstract class BaseLoan extends BaseEntity {
     public Money getAnnuityWithInsurance() {
         return moneyAnnuityWithInsurance.get();
     }
+
 }

@@ -19,6 +19,7 @@ package com.github.robozonky.notifications;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.notifications.listeners.*;
+import com.github.robozonky.notifications.samples.*;
 import io.vavr.Lazy;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,7 +34,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyInvestmentMadeEvent();
         }
     },
     INVESTMENT_SOLD {
@@ -44,7 +45,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyInvestmentSoldEvent();
         }
     },
     INVESTMENT_PURCHASED {
@@ -55,7 +56,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyInvestmentPurchasedEvent();
         }
     },
     SALE_OFFERED {
@@ -66,7 +67,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MySaleOfferedEvent();
         }
     },
     RESERVATION_ACCEPTED {
@@ -77,7 +78,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyReservationAcceptedEvent();
         }
     },
     LOAN_NOW_DELINQUENT {
@@ -88,7 +89,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanNowDelinquentEvent();
         }
     },
     LOAN_DELINQUENT_10_PLUS {
@@ -99,7 +100,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanDelinquent10DaysOrMoreEvent();
         }
     },
     LOAN_DELINQUENT_30_PLUS {
@@ -110,7 +111,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanDelinquent30DaysOrMoreEvent();
         }
     },
     LOAN_DELINQUENT_60_PLUS {
@@ -121,7 +122,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanDelinquent60DaysOrMoreEvent();
         }
     },
     LOAN_DELINQUENT_90_PLUS {
@@ -132,7 +133,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanDelinquent90DaysOrMoreEvent();
         }
     },
     LOAN_NO_LONGER_DELINQUENT {
@@ -143,7 +144,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanNoLongerDelinquentEvent();
         }
     },
     LOAN_DEFAULTED {
@@ -154,7 +155,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanDefaultedEvent();
         }
     },
     LOAN_LOST {
@@ -165,7 +166,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyLoanLostEvent();
         }
     },
     WEEKLY_SUMMARY {
@@ -176,7 +177,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyWeeklySummaryEvent();
         }
 
         @Override
@@ -197,7 +198,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyCrashedEvent();
         }
     },
     DAEMON_SUSPENDED {
@@ -213,7 +214,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyDaemonSuspendedEvent();
         }
     },
     DAEMON_RESUMED {
@@ -229,7 +230,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyDaemonResumedEvent();
         }
     },
     INITIALIZED {
@@ -245,7 +246,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyInitializedEvent();
         }
     },
     ENDING {
@@ -261,7 +262,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyEndingEvent();
         }
     },
     TESTING {
@@ -272,7 +273,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyTestingEvent();
         }
     },
     UPDATE_DETECTED {
@@ -288,7 +289,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyUpdateDetectedEvent();
         }
     },
     EXPERIMENTAL_UPDATE_DETECTED {
@@ -304,7 +305,7 @@ public enum SupportedListener {
 
         @Override
         protected Event createSampleEvent() {
-            return null;
+            return new MyRoboZonkyExperimentalUpdateDetectedEvent();
         }
     };
 
@@ -314,11 +315,12 @@ public enum SupportedListener {
 
     /**
      * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
+     *
      * @return ID of the listener which will be used as namespace in the config file.
      */
     public String getLabel() {
-        final String className = this.getSampleEvent().getClass().getSimpleName();
-        final String decapitalized = StringUtils.uncapitalize(className);
+        final String interfaceName = this.getSampleEvent().getClass().getInterfaces()[0].getSimpleName();
+        final String decapitalized = StringUtils.uncapitalize(interfaceName);
         // this works because Event subclasses must be named (Something)Event; check Event().
         return decapitalized.substring(0, decapitalized.length() - "Event".length());
     }
@@ -333,6 +335,7 @@ public enum SupportedListener {
      * Whether or not the listener will ignore global anti-spam settings. The reason for this is that some very
      * important notifications can be ignored due to some other notification already exceeding the global e-mail
      * allowance. This should only be allowed for the most important notifications.
+     *
      * @return True if global anti-spam settings will be ignored for this notification.
      */
     public boolean overrideGlobalGag() {
@@ -340,3 +343,4 @@ public enum SupportedListener {
     }
 
 }
+

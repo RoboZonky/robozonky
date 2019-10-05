@@ -33,9 +33,9 @@ import java.util.Optional;
  */
 public class Loan extends BaseLoan {
 
-    private String url;
+    protected String url;
     @XmlElement
-    private MyInvestment myInvestment;
+    protected MyInvestment myInvestment;
 
     protected Loan() {
         // for JAXB
