@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
@@ -28,13 +29,13 @@ interface OperationDescriptor<T, S> {
 
     Optional<S> getStrategy(final Tenant tenant);
 
-    MarketplaceAccessor<T> newMarketplaceAccessor(final Tenant tenant);
+    MarketplaceAccessor<T> newMarketplaceAccessor(final PowerTenant tenant);
 
     long identify(final T descriptor);
 
     Operation<T, S> getOperation();
 
-    Money getMinimumBalance(final Tenant tenant);
+    Money getMinimumBalance(final PowerTenant tenant);
 
     Logger getLogger();
 

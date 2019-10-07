@@ -19,6 +19,7 @@ package com.github.robozonky.app.daemon;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +42,7 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
-    public MarketplaceAccessor<ParticipationDescriptor> newMarketplaceAccessor(final Tenant tenant) {
+    public MarketplaceAccessor<ParticipationDescriptor> newMarketplaceAccessor(final PowerTenant tenant) {
         return new SecondaryMarketplaceAccessor(tenant, lastChecked::getAndSet, this::identify);
     }
 
@@ -56,7 +57,7 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
-    public Money getMinimumBalance(final Tenant tenant) {
+    public Money getMinimumBalance(final PowerTenant tenant) {
         return Money.from(1);
     }
 

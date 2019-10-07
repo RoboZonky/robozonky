@@ -16,6 +16,12 @@
 
 package com.github.robozonky.app.daemon;
 
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.remote.Select;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToLongFunction;
@@ -23,22 +29,16 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.internal.remote.Select;
-import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.Logger;
-
 final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
 
     private static final Logger LOGGER = Audit.purchasing();
 
-    private final Tenant tenant;
+    private final PowerTenant tenant;
     private final UnaryOperator<long[]> stateAccessor;
     private final ToLongFunction<ParticipationDescriptor> identifier;
     private final AtomicReference<Collection<ParticipationDescriptor>> marketplace = new AtomicReference<>();
 
-    public SecondaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<long[]> stateAccessor,
+    public SecondaryMarketplaceAccessor(final PowerTenant tenant, final UnaryOperator<long[]> stateAccessor,
                                         final ToLongFunction<ParticipationDescriptor> identifier) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
@@ -83,7 +83,8 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
 
     private Stream<ParticipationDescriptor> readMarketplace() {
         final Select s = new Select()
-                .equalsPlain("willNotExceedLoanInvestmentLimit", "true");
+                .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
+                .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
                 .filter(p -> p.getLoanHealthInfo() == LoanHealthInfo.HEALTHY) // TODO enable discounted (=overdue)

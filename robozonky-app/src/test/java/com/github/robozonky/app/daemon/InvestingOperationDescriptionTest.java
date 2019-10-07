@@ -21,8 +21,8 @@ import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +45,7 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     void freshAccessorEveryTimeButTheyShareState() {
         final Zonky z = harmlessZonky();
         when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
-        final Tenant t = mockTenant(z);
+        final PowerTenant t = mockTenant(z);
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
         final MarketplaceAccessor<LoanDescriptor> a1 = d.newMarketplaceAccessor(t);
         assertThat(a1.hasUpdates()).isTrue();

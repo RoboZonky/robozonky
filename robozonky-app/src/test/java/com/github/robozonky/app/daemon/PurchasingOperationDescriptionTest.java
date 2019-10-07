@@ -22,8 +22,8 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +52,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
         final Zonky z = harmlessZonky();
         when(z.getAvailableParticipations(any())).thenAnswer(i -> Stream.of(p));
-        final Tenant t = mockTenant(z);
+        final PowerTenant t = mockTenant(z);
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         final MarketplaceAccessor<ParticipationDescriptor> a1 = d.newMarketplaceAccessor(t);
         assertThat(a1.hasUpdates()).isTrue();

@@ -20,8 +20,8 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -54,7 +54,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
-        final Tenant tenant = mockTenant(zonky);
+        final PowerTenant tenant = mockTenant(zonky);
         final MarketplaceAccessor<ParticipationDescriptor> d = new SecondaryMarketplaceAccessor(tenant,
                                                                                                 UnaryOperator.identity(),
                                                                                                 f -> f.item().getId());
@@ -72,7 +72,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
-        final Tenant tenant = mockTenant(zonky);
+        final PowerTenant tenant = mockTenant(zonky);
         final AtomicReference<long[]> state = new AtomicReference<>(new long[0]);
         final MarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(tenant,
                                                                                                 state::getAndSet,

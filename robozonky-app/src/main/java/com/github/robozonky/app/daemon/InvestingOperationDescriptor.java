@@ -20,6 +20,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +42,7 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public MarketplaceAccessor<LoanDescriptor> newMarketplaceAccessor(final Tenant tenant) {
+    public MarketplaceAccessor<LoanDescriptor> newMarketplaceAccessor(final PowerTenant tenant) {
         return new PrimaryMarketplaceAccessor(tenant, lastChecked::getAndSet);
     }
 
@@ -56,7 +57,7 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public Money getMinimumBalance(final Tenant tenant) {
+    public Money getMinimumBalance(final PowerTenant tenant) {
         return tenant.getRestrictions().getMinimumInvestmentAmount();
     }
 
