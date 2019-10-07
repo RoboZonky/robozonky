@@ -111,7 +111,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void keepsBalance() throws Exception {
         try (final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS).build()) {
-            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(Long.MAX_VALUE));
+            assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(StatefulBoundedBalance.MAXIMUM);
             tenant.setKnownBalanceUpperBound(Money.from(100));
             assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(100));
         }

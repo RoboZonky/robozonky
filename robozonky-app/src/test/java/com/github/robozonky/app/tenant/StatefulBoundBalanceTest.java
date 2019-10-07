@@ -26,6 +26,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 
+import static com.github.robozonky.app.tenant.StatefulBoundedBalance.MAXIMUM;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
@@ -35,22 +36,16 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
     @Test
     void progression() {
         final StatefulBoundedBalance balance = new StatefulBoundedBalance(tenant);
-        assertThat(balance.get()).isEqualTo(Money.from(Long.MAX_VALUE));
+        assertThat(balance.get()).isEqualTo(MAXIMUM);
         Instant newNow = Instant.now().plus(Duration.ofDays(1));
         setClock(Clock.fixed(newNow, Defaults.ZONE_ID));
-        assertThat(balance.get()).isEqualTo(Money.from(Long.MAX_VALUE)); // doesn't change as time moves on
+        assertThat(balance.get()).isEqualTo(MAXIMUM); // doesn't change as time moves on
         balance.set(Money.from(1000));
         assertThat(balance.get()).isEqualTo(Money.from(1_000));
-        // increases as time moves on
-        newNow = newNow.plus(Duration.ofHours(2));
-        setClock(Clock.fixed(newNow, Defaults.ZONE_ID));
-        assertThat(balance.get())
-                .isEqualTo(Money.from(4_096_000))
-                .isLessThan(Money.from(Long.MAX_VALUE));
         // resets as too much time passes
         newNow = newNow.plus(Duration.ofDays(1));
         setClock(Clock.fixed(newNow, Defaults.ZONE_ID));
-        assertThat(balance.get()).isEqualTo(Money.from(Long.MAX_VALUE));
+        assertThat(balance.get()).isEqualTo(MAXIMUM);
     }
 
     @Test
@@ -66,7 +61,7 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
         final StatefulBoundedBalance balance = new StatefulBoundedBalance(tenant);
         balance.set(Money.from(199));
         setClock(Clock.fixed(Instant.now().plus(Duration.ofDays(1)), Defaults.ZONE_ID));
-        assertThat(balance.get()).isEqualTo(Money.from(Long.MAX_VALUE)); // balance is too old, so it is reset to maximum
+        assertThat(balance.get()).isEqualTo(MAXIMUM); // balance is too old, so it is reset to maximum
         balance.set(Money.from(199)); // set it to a different value
         assertThat(balance.get()).isEqualTo(Money.from(199)); // make sure the different value is stored and returned
     }

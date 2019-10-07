@@ -65,6 +65,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Participation p = mock(Participation.class);
         doReturn(l.getId()).when(p).getLoanId();
+        when(p.getRating()).thenReturn(Rating.D);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenAnswer(i -> {

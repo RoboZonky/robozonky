@@ -126,7 +126,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void keepsBalance() {
-        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(Money.from(Long.MAX_VALUE));
+        assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(Money.from(Integer.MAX_VALUE));
         transactional.setKnownBalanceUpperBound(Money.from(100));
         assertThat(transactional.getKnownBalanceUpperBound()).isEqualTo(Money.from(100));
     }

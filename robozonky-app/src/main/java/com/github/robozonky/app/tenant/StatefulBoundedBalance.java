@@ -33,9 +33,9 @@ import java.util.concurrent.atomic.AtomicReference;
  * effectively and not repeat useless Zonky calls etc., some information about balance is still required. This class
  * helps with that.
  * <p>
- * By default, the balance is {@link Long#MAX_VALUE}. Every time {@link #set(Money)} is called, the balance is set to
+ * By default, the balance is {@link Integer#MAX_VALUE}. Every time {@link #set(Money)} is called, the balance is set to
  * this new value. Also, a timer is reset - unless {@link #set(Money)} is called within reasonable time, the balance
- * as returned by {@link #get()} will be gradually increasing to simulate the user's possible real-life balance changes.
+ * as returned by {@link #get()} will be increased back to max.
  * <p>
  * The external code is expected to {@link #set(Money)} whatever value it thinks may still be available. For example, if
  * we attempt to invest 600 and Zonky gives us an insufficient balance error, we should {@link #set(Money)} 599 as that
@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 final class StatefulBoundedBalance {
 
+    static final Money MAXIMUM = Money.from(Integer.MAX_VALUE);
     private static final Duration BALANCE_INCREASE_INTERVAL_STEP = Duration.ofMinutes(10);
     private static final String VALUE_KEY = "lastKnownUpperBound";
     private static final Logger LOGGER = LogManager.getLogger(StatefulBoundedBalance.class);
@@ -59,13 +60,13 @@ final class StatefulBoundedBalance {
     private synchronized void reloadFromState() {
         final Instant lastModified = state.getLastUpdated().map(OffsetDateTime::toInstant).orElse(Instant.EPOCH);
         lastModificationDate.set(lastModified);
-        final Money lastKnownValue = state.getValue(VALUE_KEY).map(Money::from).orElse(Money.from(Long.MAX_VALUE));
+        final Money lastKnownValue = state.getValue(VALUE_KEY).map(Money::from).orElse(MAXIMUM);
         currentValue.set(lastKnownValue);
         LOGGER.trace("Loaded {} from {}", lastKnownValue, lastModified);
     }
 
     public synchronized void set(final Money value) {
-        final Money newValue = value.max(Money.from(1)); // if < 1, the multiplication in get() does not increase balance
+        final Money newValue = value.max(Money.from(1));
         currentValue.set(newValue);
         lastModificationDate.set(DateUtil.now());
         state.update(m -> m.put(VALUE_KEY, newValue.getValue().toPlainString()));
@@ -78,7 +79,7 @@ final class StatefulBoundedBalance {
 
     public synchronized Money get() {
         final Money balance = currentValue.get();
-        if (balance.getValue().longValue() == Long.MAX_VALUE) { // no need to do any other magic
+        if (balance.equals(MAXIMUM)) { // no need to do any other magic
             LOGGER.trace("Balance already at maximum.");
             return balance;
         }
@@ -88,21 +89,7 @@ final class StatefulBoundedBalance {
             LOGGER.trace("Balance of {} is still fresh ({}).", balance, lastModified);
             return balance;
         }
-        // try to increase the balance; double it for every BALANCE_INCREASE_INTERVAL_STEP
-        final long nanosPeriod = BALANCE_INCREASE_INTERVAL_STEP.toNanos();
-        final long nanosBetween = timeBetweenLastBalanceCheckAndNow.toNanos();
-        final long elapsedCycles = nanosBetween / nanosPeriod;
-        if (elapsedCycles > 12) {
-            LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
-            return Money.from(Long.MAX_VALUE);
-        }
-        final Money newBalance = balance.multiplyBy((long) Math.pow(2, elapsedCycles));
-        if (newBalance.compareTo(balance) < 0) { // long overflow
-            LOGGER.trace("Balance upper bound reached the theoretical limit.");
-            return Money.from(Long.MAX_VALUE);
-        } else {
-            LOGGER.trace("Changing balance upper bound from {} to {}.", balance, newBalance);
-            return newBalance;
-        }
+        LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
+        return MAXIMUM;
     }
 }
