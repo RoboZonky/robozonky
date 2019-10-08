@@ -16,25 +16,28 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.client.ResponseProcessingException;
-import javax.ws.rs.core.Response;
-
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ResponseProcessingException;
+import javax.ws.rs.core.Response;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
+
 import static com.github.robozonky.app.tenant.AvailabilityImpl.MANDATORY_DELAY_IN_SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AvailabilityImplTest extends AbstractRoboZonkyTest {
 
@@ -93,6 +96,40 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(success).isPresent();
             softly.assertThat(a.isAvailable()).isTrue();
             softly.assertThat(a.nextAvailabilityCheck()).isEqualTo(now);
+        });
+    }
+
+    @Test
+    void noSuccessUntilRequestCounterIncrease() {
+        final RequestCounter counter = mock(RequestCounter.class);
+        final Availability a = new AvailabilityImpl(s, counter);
+        final Instant now = Instant.now();
+        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        a.registerException(new IllegalStateException());
+        assertThat(a.isAvailable()).isFalse();
+        // move time, but don't increase the request counter
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONE_ID));
+        assertThat(a.registerSuccess()).isEmpty();
+        assertThat(a.isAvailable()).isFalse();
+        // move time and increase the request counter
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(2)), Defaults.ZONE_ID));
+        when(counter.current()).thenReturn(2L);
+        assertThat(a.registerSuccess()).contains(now);
+        assertThat(a.isAvailable()).isTrue();
+    }
+
+    @Test
+    void longerDelayWhenHttp429Encountered() {
+        final Availability a = new AvailabilityImpl(s);
+        final Instant now = Instant.now();
+        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        final Exception ex = new ClientErrorException(Response.Status.TOO_MANY_REQUESTS);
+        final boolean reg = a.registerException(ex);
+        assertSoftly(softly -> {
+            softly.assertThat(reg).isTrue();
+            softly.assertThat(a.isAvailable()).isFalse();
+            softly.assertThat(a.nextAvailabilityCheck())
+                    .isEqualTo(now.plus(Duration.ofSeconds(60 + 1)));
         });
     }
 

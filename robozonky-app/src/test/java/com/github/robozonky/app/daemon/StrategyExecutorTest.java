@@ -319,14 +319,14 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy> d = new InvestingOperationDescriptor();
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
-        verify(zonky, never()).getLastPublishedLoanInfo();
-        verify(zonky, times(1)).getAvailableLoans(any());
-        assertThat(e.get()).isEmpty(); // the second time, marketplace was checked and the cache was not
         verify(zonky, times(1)).getLastPublishedLoanInfo();
+        verify(zonky, times(1)).getAvailableLoans(any());
+        assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked but the cache was
+        verify(zonky, times(2)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
         setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONE_ID));
         assertThat(e.get()).isEmpty(); // after 1 minute, marketplace was force-checked
-        verify(zonky, times(1)).getLastPublishedLoanInfo();
+        verify(zonky, times(3)).getLastPublishedLoanInfo();
         verify(zonky, times(2)).getAvailableLoans(any());
     }
 

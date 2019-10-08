@@ -35,8 +35,8 @@ public interface Availability {
 
     /**
      * Report that the app's operation has finished successfully.
-     * @return Empty if {@link #isAvailable()} is true. Otherwise {@link #isAvailable()} becomes true and we return
-     * an {@link Instant} of when the unavailability originally started.
+     * @return Empty if {@link #isAvailable()} is true, or when it is decided that the unavailability should continue.
+     * Otherwise {@link #isAvailable()} becomes true.
      */
     Optional<Instant> registerSuccess();
 

@@ -71,7 +71,7 @@ class PowerTenantImpl implements PowerTenant {
                 });
         this.sessionInfo = sessionInfo;
         this.token = Lazy.of(tokenSupplier);
-        this.availability = Lazy.of(() -> new AvailabilityImpl(token.get()));
+        this.availability = Lazy.of(() -> new AvailabilityImpl(token.get(), apis.getRequestCounter().orElse(null)));
         this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
                 .reloadAfter(Duration.ofHours(1))

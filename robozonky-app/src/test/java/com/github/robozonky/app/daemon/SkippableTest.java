@@ -16,14 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.function.Consumer;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.client.ResponseProcessingException;
-
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -33,7 +25,17 @@ import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ResponseProcessingException;
+import javax.ws.rs.core.Response;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.function.Consumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class SkippableTest extends AbstractZonkyLeveragingTest {
@@ -66,7 +68,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final Instant now = Instant.now();
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
         final Runnable r = mock(Runnable.class);
-        doThrow(ClientErrorException.class).when(r).run();
+        doThrow(new ClientErrorException(Response.Status.TOO_MANY_REQUESTS)).when(r).run();
         final PowerTenant t = new TenantBuilder()
                 .withApi(new ApiProvider(null))
                 .withSecrets(SecretProvider.inMemory("someone@somewhere.cz"))
@@ -77,7 +79,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         verify(r, times(1)).run();
         assertThat(t.getAvailability().isAvailable()).isFalse();
         // move one second, make sure it checks again
-        final int mandatoryDelay = 5;
+        final int mandatoryDelay = 60;
         setClock(Clock.fixed(now.plus(Duration.ofSeconds(mandatoryDelay + 1)), Defaults.ZONE_ID));
         logger.debug("Second run.");
         doThrow(ServerErrorException.class).when(r).run();

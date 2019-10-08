@@ -16,27 +16,43 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.ws.rs.ClientErrorException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.function.LongSupplier;
 
 final class AvailabilityImpl implements Availability {
 
-    static final int MANDATORY_DELAY_IN_SECONDS = 5;
+    static final long MANDATORY_DELAY_IN_SECONDS = 5;
     private static final Logger LOGGER = LogManager.getLogger(AvailabilityImpl.class);
     private final ZonkyApiTokenSupplier zonkyApiTokenSupplier;
-    private final AtomicReference<Tuple2<Instant, Long>> pause = new AtomicReference<>();
+    private final AtomicReference<Status> pause = new AtomicReference<>();
+    private final LongSupplier currentRequestIdSupplier;
 
-    public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier) {
+    public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier, final RequestCounter requestCounter) {
         this.zonkyApiTokenSupplier = zonkyTokenSupplier;
+        if (requestCounter == null) { // for easier testing
+            final LongAdder adder = new LongAdder();
+            this.currentRequestIdSupplier = () -> {
+                adder.increment();
+                return adder.longValue();
+            };
+        } else {
+            this.currentRequestIdSupplier = requestCounter::current;
+        }
+    }
+
+    AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier) {
+        this(zonkyTokenSupplier, null);
     }
 
     @Override
@@ -47,11 +63,13 @@ final class AvailabilityImpl implements Availability {
         } else if (isAvailable()) { // no waiting for anything
             return DateUtil.now();
         }
-        final Tuple2<Instant, Long> paused = pause.get();
-        final long retries = paused._2;
+        final Status paused = pause.get();
         // add 5 seconds of initial delay to give time to recover from HTTP 429 or whatever other problem there was
-        final long secondsFromPauseToNextCheck = MANDATORY_DELAY_IN_SECONDS + (long) Math.pow(2, retries);
-        return paused._1.plus(Duration.ofSeconds(secondsFromPauseToNextCheck));
+        final boolean unavailableDueToQuota = paused.isQuotaLimited();
+        final long initialMandatoryDelayInSeconds = unavailableDueToQuota ? 60 : MANDATORY_DELAY_IN_SECONDS;
+        final long secondsFromPauseToNextCheck =
+                initialMandatoryDelayInSeconds + (long) Math.pow(2, paused.getFailedRetries());
+        return paused.getExceptionRegisteredOn().plus(Duration.ofSeconds(secondsFromPauseToNextCheck));
     }
 
     @Override
@@ -64,23 +82,84 @@ final class AvailabilityImpl implements Availability {
         if (isAvailable()) {
             return Optional.empty();
         }
-        final Tuple2<Instant, Long> paused = pause.getAndSet(null);
-        LOGGER.info("Resumed after a forced pause.");
-        return Optional.of(paused._1);
+        final Status paused = pause.get();
+        if (currentRequestIdSupplier.getAsLong() > paused.getLastRequestId()) {
+            pause.set(null);
+            LOGGER.info("Resumed after a forced pause.");
+            return Optional.of(paused.getExceptionRegisteredOn());
+        } else { // make sure we have actually performed a metered operation, safeguarding against HTTP 429
+            LOGGER.info("Not resuming after a forced pause, request counter ({}) did not change.", paused.getLastRequestId());
+            return Optional.empty();
+        }
     }
+
+    static boolean isQuotaLimitHit(Throwable throwable) {
+        if (throwable == null) {
+            return false;
+        } else if (throwable instanceof ClientErrorException) {
+            final int code = ((ClientErrorException)throwable).getResponse().getStatus();
+            if (code == 429) {
+                return true;
+            }
+        }
+        return isQuotaLimitHit(throwable.getCause());
+    }
+
 
     @Override
     public boolean registerException(final Exception ex) {
         if (isAvailable()) {
-            pause.set(Tuple.of(DateUtil.now(), 0L));
+            pause.set(new Status(currentRequestIdSupplier.getAsLong(), isQuotaLimitHit(ex)));
             LOGGER.debug("Fault identified, forcing pause.", ex);
             // will go to console, no stack trace
             LOGGER.warn("Forcing a pause due to a remote failure.");
             return true;
         } else {
-            final Tuple2<Instant, Long> paused = pause.updateAndGet(f -> Tuple.of(f._1, f._2 + 1));
-            LOGGER.debug("Forced pause in effect since {}, {} retries.", paused._1, paused._2, ex);
+            final Status paused = pause.updateAndGet(f -> f.anotherFailure(currentRequestIdSupplier.getAsLong()));
+            LOGGER.debug("Forced pause in effect since {}, {} failed retries.", paused.getExceptionRegisteredOn(),
+                    paused.getFailedRetries(), ex);
             return false;
         }
     }
+
+    private static final class Status {
+
+        private final Instant exceptionRegisteredOn;
+        private final int failedRetries;
+        private final long lastRequestId;
+        private final boolean isQuotaLimited;
+
+        public Status(final Instant exceptionRegisteredOn, final int failedRetries, final long currentRequestId,
+                      final boolean isQuotaLimited) {
+            this.exceptionRegisteredOn = exceptionRegisteredOn;
+            this.failedRetries = failedRetries;
+            this.lastRequestId = currentRequestId;
+            this.isQuotaLimited = isQuotaLimited;
+        }
+
+        public Status(final long currentRequestId, final boolean isQuotaLimited) {
+            this(DateUtil.now(), 0, currentRequestId, isQuotaLimited);
+        }
+
+        public Status anotherFailure(final long currentRequestId) {
+            return new Status(exceptionRegisteredOn, failedRetries + 1, currentRequestId, isQuotaLimited);
+        }
+
+        public Instant getExceptionRegisteredOn() {
+            return exceptionRegisteredOn;
+        }
+
+        public int getFailedRetries() {
+            return failedRetries;
+        }
+
+        public long getLastRequestId() {
+            return lastRequestId;
+        }
+
+        public boolean isQuotaLimited() {
+            return isQuotaLimited;
+        }
+    }
+
 }
