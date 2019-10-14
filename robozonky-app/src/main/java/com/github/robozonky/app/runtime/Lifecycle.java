@@ -16,19 +16,19 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
@@ -103,7 +103,10 @@ public class Lifecycle {
      * Triggered by the deamon to make {@link #suspend()} unblock.
      */
     public void resumeToFail(final Throwable t) {
-        failed.set(true);
+        final boolean failedAlready = failed.getAndSet(true);
+        if (failedAlready) { // sometimes two operations would request this at nearly the same time
+            return;
+        }
         LOGGER.error("Caught unexpected error, terminating.", t);
         Events.global().fire(EventFactory.roboZonkyCrashed(t));
         LOGGER.debug("Asking application to die through {}.", this);
