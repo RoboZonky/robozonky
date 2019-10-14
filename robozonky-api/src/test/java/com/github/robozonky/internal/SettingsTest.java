@@ -59,7 +59,7 @@ class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(10));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(10));
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(50);
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(443);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).isEmpty();
         });

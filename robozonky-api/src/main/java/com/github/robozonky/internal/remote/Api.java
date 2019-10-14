@@ -16,12 +16,14 @@
 
 package com.github.robozonky.internal.remote;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.ProcessingException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class Api<T> {
 
@@ -41,16 +43,35 @@ class Api<T> {
         this.counter = counter;
     }
 
+    private static boolean isTimeout(final Throwable throwable) {
+        if (throwable == null) {
+            return false;
+        } else if (throwable instanceof SocketTimeoutException) {
+            return true;
+        } else {
+            return isTimeout(throwable.getCause());
+        }
+    }
+
     private static String assembleLogMessage(final long id, final RequestCounter counter) {
         final int count1 = counter.count(ONE_MINUTE);
         final int count5 = counter.count(FIVE_MINUTES);
         return "... done. (Request #" + id + ", " + count1 + " in last 60 sec., " + count5 + " in last 5 min.)";
     }
 
-    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter) {
+    private static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter,
+                                 final int attemptNo) {
         LOGGER.trace("Executing...");
         try {
             return function.apply(proxy);
+        } catch (final ProcessingException ex) {
+            if (!isTimeout(ex)) { // nothing to retry
+                throw new ProcessingException("Operation failed and can not be retried.", ex);
+            } else if (attemptNo > 2) { // no longer retry
+                throw new ProcessingException("Operation failed ever after " + attemptNo + " retries.", ex);
+            }
+            LOGGER.debug("Caught socket timeout. Retry #{} starting.", attemptNo, ex);
+            return call(function, proxy, counter, attemptNo + 1);
         } finally {
             if (counter != null) {
                 final long id = counter.mark();
@@ -59,6 +80,10 @@ class Api<T> {
                 LOGGER.trace("... done. (Not counting towards the API quota.)");
             }
         }
+    }
+
+    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter) {
+        return call(function, proxy, counter, 1);
     }
 
     <S> S call(final Function<T, S> function) {

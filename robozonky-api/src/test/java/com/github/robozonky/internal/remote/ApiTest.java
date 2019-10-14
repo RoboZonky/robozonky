@@ -16,17 +16,21 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import com.github.robozonky.api.remote.LoanApi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.ws.rs.ProcessingException;
+import java.net.SocketTimeoutException;
+import java.util.UUID;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +50,49 @@ class ApiTest {
         final String result = api.call(function);
         assertThat(result).isSameAs(expected);
         assertThat(counter.count()).isEqualTo(1);
+    }
+
+    @Test
+    void failsImmediately() {
+        final LoanApi mock = mock(LoanApi.class);
+        final Api<LoanApi> api = new Api<>(mock, counter);
+        final Function<LoanApi, String> function = (a) -> {
+            throw new IllegalStateException();
+        };
+        assertThatThrownBy(() -> api.call(function)).isInstanceOf(IllegalStateException.class);
+        assertThat(counter.count()).isEqualTo(1);
+    }
+
+    @Test
+    void failsAndDoesNotRetry() {
+        final LoanApi mock = mock(LoanApi.class);
+        final Api<LoanApi> api = new Api<>(mock, counter);
+        final Function<LoanApi, String> function = (a) -> {
+            throw new ProcessingException(new IllegalStateException());
+        };
+        assertThatThrownBy(() -> api.call(function))
+                .isInstanceOf(ProcessingException.class)
+                .hasCauseInstanceOf(ProcessingException.class);
+        assertThat(counter.count()).isEqualTo(1);
+    }
+
+    @Test
+    void retriesAfterTimeout() {
+        final LoanApi mock = mock(LoanApi.class);
+        final Api<LoanApi> api = new Api<>(mock, counter);
+        final String expected = UUID.randomUUID().toString();
+        final LongAdder adder = new LongAdder();
+        final Function<LoanApi, String> function = (a) -> {
+            adder.add(1);
+            if (adder.sum() > 1) {
+                return expected;
+            } else {
+                throw new ProcessingException(new SocketTimeoutException());
+            }
+        };
+        final String result = api.call(function);
+        assertThat(result).isSameAs(expected);
+        assertThat(counter.count()).isEqualTo(2);
     }
 
     @Test
