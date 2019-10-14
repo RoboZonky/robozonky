@@ -19,7 +19,6 @@ package com.github.robozonky.app.tenant;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -33,7 +32,6 @@ import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -66,7 +64,6 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         }
         verify(a).refresh(any());
         assertThatThrownBy(() -> tenant.getLoan(1)).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> tenant.getInvestment(1)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -93,15 +90,12 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final Loan l = new MockLoanBuilder()
                 .setRemainingInvestment(1_000)
                 .build();
-        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        when(z.getInvestmentByLoanId(eq(l.getId()))).thenReturn(Optional.of(i));
         doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(s).build()) {
             assertThat(tenant.getAvailability()).isNotNull();
             assertThat(tenant.getLoan(l.getId())).isSameAs(l);
-            assertThat(tenant.getInvestment(l.getId())).isSameAs(i);
             assertThat(tenant.getPortfolio()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
             assertThatThrownBy(tenant::getRestrictions).isInstanceOf(IllegalStateException.class);

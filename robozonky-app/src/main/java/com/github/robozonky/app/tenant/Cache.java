@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -30,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -63,25 +61,6 @@ final class Cache<T> implements AutoCloseable {
         }
     };
 
-    private static final Backend<Investment> INVESTMENT_BACKEND = new Backend<>() {
-        @Override
-        public Class<Investment> getItemClass() {
-            return Investment.class;
-        }
-
-        @Override
-        public Either<Exception, Investment> getItem(final int id, final Tenant tenant) {
-            return tenant.call(zonky -> zonky.getInvestmentByLoanId(id))
-                    .map(Either::<Exception, Investment>right)
-                    .orElseGet(() -> Either.left(new NoSuchElementException(identify(getItemClass(), id))));
-        }
-
-        @Override
-        public boolean shouldCache(final Investment item) {
-            return true;
-        }
-    };
-
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final Tenant tenant;
     private final Backend<T> backend;
@@ -97,10 +76,6 @@ final class Cache<T> implements AutoCloseable {
 
     public static Cache<Loan> forLoan(final Tenant tenant) {
         return new Cache<>(tenant, LOAN_BACKEND);
-    }
-
-    public static Cache<Investment> forInvestment(final Tenant tenant) {
-        return new Cache<>(tenant, INVESTMENT_BACKEND);
     }
 
     private boolean isExpired(final Tuple2<T, Instant> p) {

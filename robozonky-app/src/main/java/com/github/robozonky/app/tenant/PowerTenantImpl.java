@@ -19,7 +19,6 @@ package com.github.robozonky.app.tenant;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -42,7 +41,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 class PowerTenantImpl implements PowerTenant {
 
@@ -55,7 +53,6 @@ class PowerTenantImpl implements PowerTenant {
     private final Lazy<ZonkyApiTokenSupplier> token;
     private final Lazy<StrategyProvider> strategyProvider;
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
-    private final Lazy<Cache<Investment>> investmentCache = Lazy.of(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
     private final Lazy<Availability> availability;
 
@@ -138,11 +135,6 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public Investment getInvestment(final int loanId) {
-        return investmentCache.get().get(loanId);
-    }
-
-    @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);
     }
@@ -150,7 +142,7 @@ class PowerTenantImpl implements PowerTenant {
     @Override
     public void close() {
         token.get().close();
-        Stream.of(loanCache, investmentCache).forEach(cache -> cache.get().close()); // clean up the caches
+        loanCache.get().close();
     }
 
     @Override

@@ -17,7 +17,6 @@
 package com.github.robozonky.internal.tenant;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -86,14 +85,6 @@ public interface Tenant extends AutoCloseable {
      * @return
      */
     Loan getLoan(final int loanId);
-
-    /**
-     * Retrieve an {@link Investment} from Zonky, possibly caching it in the process. If you don't wish to cache the
-     * loan, simply use {@link #call(Function)} to get to {@link Zonky#getInvestmentByLoanId(int)}.
-     * @param loanId ID of the loan that the investment is tied to.
-     * @return
-     */
-    Investment getInvestment(final int loanId);
 
     <T> InstanceState<T> getState(final Class<T> clz);
 }

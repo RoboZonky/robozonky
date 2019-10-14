@@ -19,7 +19,6 @@ package com.github.robozonky.app.tenant;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -144,11 +143,6 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     @Override
     public Loan getLoan(final int loanId) {
         return parent.getLoan(loanId);
-    }
-
-    @Override
-    public Investment getInvestment(final int loanId) {
-        return parent.getInvestment(loanId);
     }
 
     @Override

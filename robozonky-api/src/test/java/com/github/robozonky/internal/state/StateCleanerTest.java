@@ -17,7 +17,6 @@
 package com.github.robozonky.internal.state;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -107,11 +106,6 @@ class StateCleanerTest {
         @Override
         public Loan getLoan(final int loanId) {
             return call(z -> z.getLoan(loanId));
-        }
-
-        @Override
-        public Investment getInvestment(final int loanId) {
-            return call(z -> z.getInvestmentByLoanId(loanId)).orElseThrow();
         }
 
         @Override

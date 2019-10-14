@@ -17,7 +17,6 @@
 package com.github.robozonky.test;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -98,11 +97,6 @@ public class TestingTenant implements Tenant {
     @Override
     public Loan getLoan(final int loanId) {
         return call(z -> z.getLoan(loanId));
-    }
-
-    @Override
-    public Investment getInvestment(final int loanId) {
-        return call(z -> z.getInvestmentByLoanId(loanId)).orElseThrow();
     }
 
     @Override
