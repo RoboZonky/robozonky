@@ -67,7 +67,6 @@ public final class Money implements Comparable<Money> {
 
     public static Money from(final String number, final Currency currency) {
         Objects.requireNonNull(number);
-        Objects.requireNonNull(currency);
         return from(new BigDecimal(number), currency);
     }
 
@@ -90,7 +89,6 @@ public final class Money implements Comparable<Money> {
     }
 
     public static Money from(final long number, final Currency currency) {
-        Objects.requireNonNull(currency);
         return from(valueOf(number), currency);
     }
 
@@ -99,7 +97,6 @@ public final class Money implements Comparable<Money> {
     }
 
     public static Money from(final double number, final Currency currency) {
-        Objects.requireNonNull(currency);
         return from(valueOf(number), currency);
     }
 

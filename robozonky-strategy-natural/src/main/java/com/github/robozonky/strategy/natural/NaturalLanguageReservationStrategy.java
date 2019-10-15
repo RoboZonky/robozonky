@@ -62,9 +62,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final Money amount = d.item().getMyReservation().getReservedAmount();
-                    return d.recommend(amount)
-                            .map(Stream::of)
-                            .orElse(Stream.empty());
+                    return d.recommend(amount).stream();
                 });
     }
 }

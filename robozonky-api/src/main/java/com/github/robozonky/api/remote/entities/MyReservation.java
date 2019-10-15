@@ -22,26 +22,19 @@ import io.vavr.Lazy;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.time.OffsetDateTime;
-import java.util.Currency;
 
 public class MyReservation extends BaseEntity {
 
     private long id;
-    private Currency currency;
     private OffsetDateTime timeCreated;
     private OffsetDateTime deadline;
 
     @XmlElement
-    private String reservedAmount;
-    private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount, currency));
+    private String reservedAmount = "0";
+    private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount));
 
     MyReservation() {
         // for JAXB
-    }
-
-    @XmlElement
-    public Currency getCurrency() {
-        return currency;
     }
 
     @XmlElement
