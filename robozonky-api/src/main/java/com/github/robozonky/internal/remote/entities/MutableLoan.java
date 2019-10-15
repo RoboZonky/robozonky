@@ -62,10 +62,6 @@ public final class MutableLoan extends Loan {
         this.additionallyInsured = additionallyInsured;
     }
 
-    public void setMulticash(final boolean multicash) {
-        this.multicash = multicash;
-    }
-
     public void setId(final int id) {
         this.id = id;
     }

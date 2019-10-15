@@ -40,7 +40,6 @@ public abstract class BaseLoan extends BaseEntity {
     protected boolean insuranceActive;
     protected boolean insuredInFuture;
     protected boolean additionallyInsured;
-    protected boolean multicash;
     protected int id;
     protected int termInMonths;
     protected int investmentsCount;
@@ -173,11 +172,6 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public boolean isCovered() {
         return covered;
-    }
-
-    @XmlElement
-    public boolean isMulticash() {
-        return multicash;
     }
 
     @XmlElement
