@@ -39,12 +39,12 @@ abstract class BaseInvestment extends BaseEntity {
     private Currency currency = Defaults.CURRENCY;
     @XmlElement
     private String amount;
+    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
     @XmlElement
     private String additionalAmount;
+    private final Lazy<Money> moneyAdditionalAmount = Lazy.of(() -> Money.from(additionalAmount, currency));
     @XmlElement
     private String firstAmount;
-    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
-    private final Lazy<Money> moneyAdditionalAmount = Lazy.of(() -> Money.from(additionalAmount, currency));
     private final Lazy<Money> moneyFirstAmount = Lazy.of(() -> Money.from(firstAmount, currency));
     private InvestmentStatus status;
     private OffsetDateTime timeCreated = DateUtil.offsetNow();

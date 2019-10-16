@@ -374,12 +374,13 @@ public class Investment extends BaseInvestment {
      */
     @XmlTransient
     public Optional<Money> getRemainingPrincipal() {
-        return Optional.ofNullable(moneyRemainingPrincipal.getOrElse((Money) null));
+        return Optional.ofNullable(remainingPrincipal)
+                .map(principal -> moneyRemainingPrincipal.getOrElse((Money) null));
     }
 
     @XmlTransient
     public Optional<Money> getSmpSoldFor() {
-        return Optional.ofNullable(moneySmpSoldFor.getOrElse((Money) null));
+        return Optional.ofNullable(smpSoldFor).map(soldFor -> moneySmpSoldFor.getOrElse((Money) null));
     }
 
     @XmlTransient
@@ -389,7 +390,7 @@ public class Investment extends BaseInvestment {
 
     @XmlTransient
     public Optional<Money> getSmpFee() {
-        return Optional.ofNullable(moneySmpFee.getOrElse((Money) null));
+        return Optional.ofNullable(smpFee).map(fee -> moneySmpFee.getOrElse((Money) null));
     }
 
     /**
@@ -398,7 +399,7 @@ public class Investment extends BaseInvestment {
      */
     @XmlTransient
     public Optional<Money> getSmpPrice() {
-        return Optional.ofNullable(moneySmpPrice.getOrElse((Money) null));
+        return Optional.ofNullable(smpPrice).map(price -> moneySmpPrice.getOrElse((Money) null));
     }
 
 }

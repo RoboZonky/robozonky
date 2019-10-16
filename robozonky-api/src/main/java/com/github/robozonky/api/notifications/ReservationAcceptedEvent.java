@@ -19,7 +19,7 @@ package com.github.robozonky.api.notifications;
 /**
  * Fired immediately after an investment was confirmed through the reservation system's API.
  */
-public interface ReservationAcceptedEvent extends MarketplaceInvestmentBased,
+public interface ReservationAcceptedEvent extends InvestmentBased,
                                                   Financial {
 
 }

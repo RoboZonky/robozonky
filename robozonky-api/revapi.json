@@ -1738,6 +1738,16 @@
         "code": "java.method.removed",
         "old": "method boolean com.github.robozonky.api.remote.entities.BaseLoan::isMulticash()",
         "justification": "The flag was removed from the API."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.MarketplaceInvestmentBased",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.MarketplaceLoanBased",
+        "justification": "Entities are no longer sanitized and amounts are represented by a Money type."
       }
     ]
   }

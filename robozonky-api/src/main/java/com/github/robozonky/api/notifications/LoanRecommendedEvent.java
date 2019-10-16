@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 
 /**
  * Fired immediately after {@link InvestmentStrategy} has recommended a particular loan.
- * {@link InvestmentRequestedEvent} may be fired next.
+ * {@link InvestmentMadeEvent} may be fired next.
  */
-public interface LoanRecommendedEvent extends MarketplaceLoanBased,
+public interface LoanRecommendedEvent extends LoanBased,
                                               Recommending {
 
 }

@@ -18,7 +18,6 @@ package com.github.robozonky.notifications.listeners;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.LoanBased;
-import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -70,10 +69,6 @@ final class Util {
         final BigDecimal interestRate = loan.getInterestRate().asPercentage();
         // string formatting ensures proper locale-specific floating point separator
         return String.format("č. %d (%.2f %% p.a., %d m.)", loan.getId(), interestRate, loan.getTermInMonths());
-    }
-
-    public static String identifyLoan(final MarketplaceLoanBased event) {
-        return identifyLoan(event.getLoan());
     }
 
     public static String identifyLoan(final LoanBased event) {

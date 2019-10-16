@@ -16,12 +16,9 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.MarketplaceLoanBased;
 import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -102,27 +99,6 @@ class UtilTest {
         final Throwable t3 = new IllegalStateException();
         assertThat(Util.isNetworkProblem(t3)).isFalse();
         assertThat(Util.isNetworkProblem(null)).isFalse();
-    }
-
-    @Test
-    void identifyMarketplaceLoanBased() {
-        final MarketplaceLoanBased l = new LoanRecommendedEvent() {
-            @Override
-            public Loan getLoan() {
-                return new MockLoanBuilder().setRating(Rating.C).setInterestRate(Ratio.ONE).build();
-            }
-
-            @Override
-            public Money getRecommendation() {
-                return Money.ZERO;
-            }
-
-            @Override
-            public OffsetDateTime getCreatedOn() {
-                return OffsetDateTime.now();
-            }
-        };
-        assertThat(Util.identifyLoan(l)).isNotEmpty();
     }
 
     @Test

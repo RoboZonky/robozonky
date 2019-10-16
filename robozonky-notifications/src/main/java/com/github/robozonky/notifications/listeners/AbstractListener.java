@@ -82,14 +82,6 @@ public abstract class AbstractListener<T extends Event> implements EventListener
                 final LoanBased e = (LoanBased) event;
                 return Util.getLoanData(e.getLoan());
             }
-        } else if (event instanceof MarketplaceLoanBased) {
-            if (event instanceof MarketplaceInvestmentBased) {
-                final MarketplaceInvestmentBased e = (MarketplaceInvestmentBased) event;
-                return Util.getLoanData(e.getInvestment(), e.getLoan());
-            } else {
-                final MarketplaceLoanBased e = (MarketplaceLoanBased) event;
-                return Util.getLoanData(e.getLoan());
-            }
         }
         return Collections.emptyMap();
     }
