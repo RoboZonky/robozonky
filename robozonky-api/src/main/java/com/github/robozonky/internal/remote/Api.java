@@ -68,7 +68,7 @@ class Api<T> {
             if (!isTimeout(ex)) { // nothing to retry
                 throw new ProcessingException("Operation failed and can not be retried.", ex);
             } else if (attemptNo > 2) { // no longer retry
-                throw new ProcessingException("Operation failed ever after " + attemptNo + " retries.", ex);
+                throw new ProcessingException("Operation failed even after " + attemptNo + " retries.", ex);
             }
             LOGGER.debug("Caught socket timeout. Retry #{} starting.", attemptNo, ex);
             return call(function, proxy, counter, attemptNo + 1);
