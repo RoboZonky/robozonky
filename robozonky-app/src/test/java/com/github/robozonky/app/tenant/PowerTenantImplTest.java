@@ -59,10 +59,11 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         try (tenant) {
             final Statistics s = tenant.call(Zonky::getStatistics);
             assertThat(s).isSameAs(Statistics.empty());
+            verify(a).refresh(any());
         } catch (final Exception e) {
             fail(e);
         }
-        verify(a).refresh(any());
+        verify(a, times(2)).refresh(any()); // token will be refreshed on close
         assertThatThrownBy(() -> tenant.getLoan(1)).isInstanceOf(IllegalStateException.class);
     }
 

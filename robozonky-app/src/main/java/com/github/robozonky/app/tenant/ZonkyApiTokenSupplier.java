@@ -92,8 +92,8 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
             throw createException("Token expired.");
         }
         LOGGER.debug("Current token #{} expiring on {}.", token.getId(), token.getExpiresOn());
-        LOGGER.info("Refreshing access token for '{}'.", secrets.getUsername());
         final ZonkyApiToken newToken = apis.oauth(oauth -> oauth.refresh(token));
+        LOGGER.info("Refreshed access token for '{}'.", secrets.getUsername());
         secrets.setToken(newToken);
         return newToken;
     }
@@ -113,6 +113,13 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     @Override
     public void close() {
         isClosed.set(true);
-        LOGGER.debug("Token closed.");
+        try {
+            LOGGER.debug("Will attempt to refresh token to maximize the time RoboZonky can survive offline.");
+            refreshOrFail();
+        } catch (final Exception ex) {
+            LOGGER.debug("Failed refreshing token.", ex);
+        } finally {
+            LOGGER.debug("Token closed.");
+        }
     }
 }
