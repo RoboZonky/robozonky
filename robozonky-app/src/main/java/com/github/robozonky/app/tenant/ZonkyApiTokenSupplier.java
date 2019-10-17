@@ -20,6 +20,7 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
@@ -37,6 +38,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                                        Closeable {
 
     private static final Logger LOGGER = LogManager.getLogger(ZonkyApiTokenSupplier.class);
+    private static final Duration ONE_HOUR = Duration.ofHours(1);
 
     private final SecretProvider secrets;
     private final ApiProvider apis;
@@ -53,7 +55,14 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     private static Duration reloadAfter(final ZonkyApiToken token) {
-        return Duration.ofSeconds(token.getExpiresIn() / 2);
+        var now = DateUtil.offsetNow();
+        var expiresOn = token.getExpiresOn();
+        var halfLife = Duration.between(now, expiresOn).abs().dividedBy(2);
+        if (halfLife.compareTo(ONE_HOUR) > 0) {
+            return ONE_HOUR;
+        } else {
+            return halfLife;
+        }
     }
 
     private static NotAuthorizedException createException(final String message) {
