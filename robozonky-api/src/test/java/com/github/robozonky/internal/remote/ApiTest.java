@@ -18,9 +18,6 @@ package com.github.robozonky.internal.remote;
 
 import com.github.robozonky.api.remote.LoanApi;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.ProcessingException;
 import java.net.SocketTimeoutException;
@@ -33,13 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class ApiTest {
 
     private final RequestCounter counter = new RequestCounterImpl();
-
-    @Mock
-    private Consumer<LoanApi> procedure;
 
     @Test
     void executeFunction() {
@@ -79,12 +72,12 @@ class ApiTest {
     @Test
     void retriesAfterTimeout() {
         final LoanApi mock = mock(LoanApi.class);
-        final Api<LoanApi> api = new Api<>(mock, counter);
+        final Api<LoanApi> api = new Api<>(mock);
         final String expected = UUID.randomUUID().toString();
         final LongAdder adder = new LongAdder();
         final Function<LoanApi, String> function = (a) -> {
             adder.add(1);
-            if (adder.sum() > 1) {
+            if (adder.intValue() > 1) {
                 return expected;
             } else {
                 throw new ProcessingException(new SocketTimeoutException());
@@ -92,13 +85,13 @@ class ApiTest {
         };
         final String result = api.call(function);
         assertThat(result).isSameAs(expected);
-        assertThat(counter.count()).isEqualTo(2);
     }
 
     @Test
     void executeProcedure() {
         final LoanApi mock = mock(LoanApi.class);
         final Api<LoanApi> api = new Api<>(mock, counter);
+        final Consumer<LoanApi> procedure = mock(Consumer.class);
         api.run(procedure);
         verify(procedure, times(1)).accept(eq(mock));
         assertThat(counter.count()).isEqualTo(1);
