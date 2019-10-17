@@ -170,7 +170,7 @@ final class Util {
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
-        loanData.put("amountRemaining", i.getRemainingPrincipal().get().getValue());
+        loanData.put("amountRemaining", i.getRemainingPrincipal().orElse(Money.ZERO));
         loanData.put("amountHeld", originalPrincipal.getValue());
         loanData.put("amountPaid", totalPaid.getValue());
         loanData.put("balance", balance.getValue());
