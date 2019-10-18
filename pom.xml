@@ -667,6 +667,7 @@
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.apache.httpcomponents</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.jaxrs</ignoredUsedUndeclaredDependency>
