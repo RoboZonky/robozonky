@@ -16,13 +16,14 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.ClientBuilder;
-
 import com.github.robozonky.internal.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import javax.ws.rs.client.ClientBuilder;
+import java.util.concurrent.TimeUnit;
 
 final class ProxyFactory {
 
@@ -39,7 +40,8 @@ final class ProxyFactory {
         LOGGER.debug("Set socket timeout to {} ms.", socketTimeout);
         final long connectionTimeout = settings.getConnectionTimeout().toMillis();
         LOGGER.debug("Set connection timeout to {} ms.", connectionTimeout);
-        final ClientBuilder builder = ClientBuilder.newBuilder()
+        final ResteasyClientBuilder builder = ((ResteasyClientBuilder)ClientBuilder.newBuilder())
+                .useAsyncHttpEngine()
                 .readTimeout(socketTimeout, TimeUnit.MILLISECONDS)
                 .connectTimeout(connectionTimeout, TimeUnit.MILLISECONDS);
         /*
@@ -52,7 +54,7 @@ final class ProxyFactory {
                     .property("org.jboss.resteasy.jaxrs.client.proxy.port", port);
             LOGGER.debug("Set HTTP proxy to {}:{}.", host, port);
         });
-        return (ResteasyClient)builder.build();
+        return builder.build();
     }
 
     public static <T> T newProxy(final ResteasyClient client, final RoboZonkyFilter filter, final Class<T> api,
