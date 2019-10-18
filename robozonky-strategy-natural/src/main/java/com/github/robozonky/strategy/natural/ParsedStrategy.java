@@ -88,10 +88,10 @@ class ParsedStrategy {
 
     private long sumMinimalShares() {
         return Math.round(Stream.of(Rating.values())
-                                  .map(this::getMinimumShare)
-                                  .map(Ratio::asPercentage)
-                                  .mapToDouble(BigDecimal::doubleValue)
-                                  .sum());
+                .map(this::getMinimumShare)
+                .map(Ratio::asPercentage)
+                .mapToDouble(BigDecimal::doubleValue)
+                .sum());
     }
 
     public int getMinimumInvestmentShareInPercent() {
@@ -143,11 +143,11 @@ class ParsedStrategy {
     }
 
     private <T> Stream<T> getApplicable(final Stream<Wrapper<T>> wrappers) {
+        var loanFilters = filters.getPrimaryMarketplaceFilters();
+        var investmentFilters = filters.getSellFilters();
         return wrappers
-                .filter(w -> !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
-                                            "{} to be ignored as it matched primary marketplace filter {}."))
-                .filter(w -> !matchesFilter(w, filters.getSellFilters(),
-                                            "{} to be ignored as it matched sell filter {}."))
+                .filter(w -> !matchesFilter(w, loanFilters, "{} skipped due to primary marketplace filter {}."))
+                .filter(w -> !matchesFilter(w, investmentFilters, "{} skipped due to sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
@@ -163,15 +163,12 @@ class ParsedStrategy {
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(final Collection<ParticipationDescriptor> p,
                                                                        final PortfolioOverview portfolioOverview) {
-        if (!isPurchasingEnabled()) {
-            return Stream.empty();
-        }
+        var participationFilters = filters.getSecondaryMarketplaceFilters();
+        var sellFilters = filters.getSellFilters();
         return p.parallelStream()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
-                                            "{} to be ignored as it matched secondary marketplace filter {}."))
-                .filter(w -> !matchesFilter(w, filters.getSellFilters(),
-                                            "{} to be ignored as it matched sell filter {}."))
+                .filter(w -> !matchesFilter(w, participationFilters, "{} skipped due to secondary marketplace filter {}."))
+                .filter(w -> !matchesFilter(w, sellFilters, "{} skipped due to sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
@@ -193,19 +190,19 @@ class ParsedStrategy {
 
     public Stream<InvestmentDescriptor> getMatchingSellFilters(final Collection<InvestmentDescriptor> i,
                                                                final PortfolioOverview portfolioOverview) {
+        var investmentFilters = filters.getSellFilters();
         return i.parallelStream()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> matchesFilter(w, filters.getSellFilters(),
-                                           "{} to be sold as it matched sell filter {}."))
+                .filter(w -> matchesFilter(w, investmentFilters, "{} to be sold due to sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
     public Stream<InvestmentDescriptor> getMatchingPrimaryMarketplaceFilters(final Collection<InvestmentDescriptor> i,
                                                                              final PortfolioOverview portfolioOverview) {
+        var loanFilters = filters.getPrimaryMarketplaceFilters();
         return i.parallelStream()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
-                                           "{} sellable as it matched primary marketplace filter {}."))
+                .filter(w -> matchesFilter(w, loanFilters, "{} sellable due to primary marketplace filter {}."))
                 .map(Wrapper::getOriginal);
     }
 

@@ -16,16 +16,16 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Supplier;
-
 import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.Supplier;
 
 /**
  * The set of filters prescribed by the strategy changes based on whether or not the user has chosen to gradually exit
@@ -39,7 +39,6 @@ class FilterSupplier {
     private static final Logger LOGGER = LogManager.getLogger(FilterSupplier.class);
 
     private final DefaultValues defaults;
-    private final Supplier<Collection<MarketplaceFilter>> primarySupplier, secondarySupplier, sellSupplier;
     private final boolean primaryMarketplaceEnabled, secondaryMarketplaceEnabled;
     private volatile Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters, sellFilters;
     private volatile long lastCheckedMonthsBeforeExit = -1;
@@ -57,9 +56,9 @@ class FilterSupplier {
         this.defaults = defaults;
         this.primaryMarketplaceEnabled = primaryMarketplaceFilters != null;
         this.secondaryMarketplaceEnabled = secondaryMarketplaceFilters != null;
-        this.primarySupplier = () -> primaryMarketplaceFilters;
-        this.secondarySupplier = () -> secondaryMarketplaceFilters;
-        this.sellSupplier = () -> sellFilters;
+        this.primaryMarketplaceFilters = primaryMarketplaceFilters;
+        this.secondaryMarketplaceFilters = secondaryMarketplaceFilters;
+        this.sellFilters = sellFilters;
         refresh();
     }
 
@@ -91,12 +90,12 @@ class FilterSupplier {
             final int filteredTerms = (int)Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
             final MarketplaceFilterCondition c = LoanTermCondition.moreThan(filteredTerms);
             final MarketplaceFilter f = MarketplaceFilter.of(c);
-            final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size());
+            final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size() + 1);
             result.add(f);
             result.addAll(filters);
-            return Collections.unmodifiableCollection(result);
+            return result;
         } else {
-            return Collections.unmodifiableCollection(filters);
+            return filters;
         }
     }
 
@@ -109,8 +108,8 @@ class FilterSupplier {
     }
 
     private Collection<MarketplaceFilter> refreshPrimaryMarketplaceFilters() {
-        if (isPrimaryMarketplaceEnabled()) {
-            return getFilters(() -> supplyFilters(primarySupplier.get(), defaults.getMonthsBeforeExit()),
+        if (primaryMarketplaceEnabled) {
+            return getFilters(() -> supplyFilters(primaryMarketplaceFilters, defaults.getMonthsBeforeExit()),
                               defaults.isSelloffStarted());
         } else {
             return Collections.emptyList();
@@ -118,8 +117,8 @@ class FilterSupplier {
     }
 
     private Collection<MarketplaceFilter> refreshSecondaryMarketplaceFilters() {
-        if (isSecondaryMarketplaceEnabled()) {
-            return getFilters(() -> supplyFilters(secondarySupplier.get(), defaults.getMonthsBeforeExit()),
+        if (secondaryMarketplaceEnabled) {
+            return getFilters(() -> supplyFilters(secondaryMarketplaceFilters, defaults.getMonthsBeforeExit()),
                               defaults.isSelloffStarted());
         } else {
             return Collections.emptyList();
@@ -127,7 +126,7 @@ class FilterSupplier {
     }
 
     private Collection<MarketplaceFilter> refreshSellFilters() {
-        return getFilters(() -> Collections.unmodifiableCollection(sellSupplier.get()), defaults.isSelloffStarted());
+        return getFilters(() -> Collections.unmodifiableCollection(sellFilters), defaults.isSelloffStarted());
     }
 
     private synchronized void refresh() {
@@ -150,7 +149,7 @@ class FilterSupplier {
 
     private Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> filters) {
         refresh();
-        return filters.get();
+        return Collections.unmodifiableCollection(filters.get());
     }
 
     public Collection<MarketplaceFilter> getPrimaryMarketplaceFilters() {
