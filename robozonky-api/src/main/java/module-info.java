@@ -30,6 +30,7 @@ module com.github.robozonky.api {
     requires ini4j;
     requires paging.streams;
     requires resteasy.client.api;
+    requires org.apache.httpcomponents.httpcore;
 
     /*
      * Public APIs are available for everyone.

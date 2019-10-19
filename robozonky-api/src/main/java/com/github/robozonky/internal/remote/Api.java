@@ -16,6 +16,7 @@
 
 package com.github.robozonky.internal.remote;
 
+import org.apache.http.ConnectionClosedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,13 +44,13 @@ class Api<T> {
         this.counter = counter;
     }
 
-    private static boolean isTimeout(final Throwable throwable) {
+    private static boolean isConnectionIssue(final Throwable throwable) {
         if (throwable == null) {
             return false;
-        } else if (throwable instanceof SocketTimeoutException) {
+        } else if (throwable instanceof SocketTimeoutException || throwable instanceof ConnectionClosedException) {
             return true;
         } else {
-            return isTimeout(throwable.getCause());
+            return isConnectionIssue(throwable.getCause());
         }
     }
 
@@ -65,7 +66,7 @@ class Api<T> {
         try {
             return function.apply(proxy);
         } catch (final ProcessingException ex) {
-            if (!isTimeout(ex)) { // nothing to retry
+            if (!isConnectionIssue(ex)) { // nothing to retry
                 throw new ProcessingException("Operation failed and can not be retried.", ex);
             } else if (attemptNo > 2) { // no longer retry
                 throw new ProcessingException("Operation failed even after " + attemptNo + " retries.", ex);

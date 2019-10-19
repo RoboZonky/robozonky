@@ -17,6 +17,7 @@
 package com.github.robozonky.internal.remote;
 
 import com.github.robozonky.api.remote.LoanApi;
+import org.apache.http.ConnectionClosedException;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.ProcessingException;
@@ -77,8 +78,10 @@ class ApiTest {
         final LongAdder adder = new LongAdder();
         final Function<LoanApi, String> function = (a) -> {
             adder.add(1);
-            if (adder.intValue() > 1) {
+            if (adder.intValue() > 2) {
                 return expected;
+            } else if (adder.intValue() == 2) {
+                throw new ProcessingException(new ConnectionClosedException());
             } else {
                 throw new ProcessingException(new SocketTimeoutException());
             }
