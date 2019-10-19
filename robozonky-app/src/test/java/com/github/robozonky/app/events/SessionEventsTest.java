@@ -123,13 +123,16 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @Test
     void differentInstancesForDifferentUsernames() {
         final SessionEvents a = Events.forSession(tenant);
+        assertThat(a.getSessionInfo().getUsername()).isEqualTo(tenant.getSessionInfo().getUsername());
         final SessionEvents b = Events.forSession(tenantDry);
+        assertThat(a.getSessionInfo().getUsername()).isEqualTo(tenantDry.getSessionInfo().getUsername());
         assertThat(a)
                 .isNotNull()
                 .isSameAs(b);
         final PowerTenant t3 = mockTenant();
         when(t3.getSessionInfo()).thenReturn(new SessionInfo(UUID.randomUUID().toString()));
         final SessionEvents c = Events.forSession(t3);
+        assertThat(c.getSessionInfo()).isEqualTo(t3.getSessionInfo());
         assertThat(a)
                 .isNotNull()
                 .isNotSameAs(c);

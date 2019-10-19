@@ -35,6 +35,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.robozonky.app.tenant.ZonkyApiTokenSupplier.reloadAfter;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -99,5 +101,13 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
         t.close();
+    }
+
+    @Test
+    void reloadInterval() {
+        var token = getTokenExpiringIn(Duration.ofSeconds(2));
+        assertThat(reloadAfter(token)).isBetween(Duration.ofMillis(1), Duration.ofSeconds(1));
+        var token3 = getTokenExpiringIn(Duration.ofHours(10));
+        assertThat(reloadAfter(token3)).isEqualTo(Duration.ofHours(1));
     }
 }

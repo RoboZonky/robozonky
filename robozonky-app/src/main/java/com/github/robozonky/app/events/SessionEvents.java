@@ -16,18 +16,6 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
@@ -39,6 +27,12 @@ import com.github.robozonky.internal.tenant.LazyEvent;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public final class SessionEvents {
 
@@ -52,6 +46,10 @@ public final class SessionEvents {
     private SessionEvents(final SessionInfo sessionInfo) {
         this.sessionInfo = sessionInfo;
         addListener(new LoggingEventFiringListener(sessionInfo));
+    }
+
+    public SessionInfo getSessionInfo() {
+        return sessionInfo;
     }
 
     static Collection<SessionEvents> all() { // defensive copy

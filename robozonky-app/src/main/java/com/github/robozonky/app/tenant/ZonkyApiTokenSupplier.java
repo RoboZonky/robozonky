@@ -39,6 +39,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     private static final Logger LOGGER = LogManager.getLogger(ZonkyApiTokenSupplier.class);
     private static final Duration ONE_HOUR = Duration.ofHours(1);
+    private static final Duration ONE_MINUTE = Duration.ofMinutes(1);
 
     private final SecretProvider secrets;
     private final ApiProvider apis;
@@ -54,7 +55,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
                 .build();
     }
 
-    private static Duration reloadAfter(final ZonkyApiToken token) {
+    static Duration reloadAfter(final ZonkyApiToken token) {
         var now = DateUtil.offsetNow();
         var expiresOn = token.getExpiresOn();
         var halfLife = Duration.between(now, expiresOn).abs().dividedBy(2);
