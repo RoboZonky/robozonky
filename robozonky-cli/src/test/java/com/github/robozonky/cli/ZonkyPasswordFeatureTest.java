@@ -87,7 +87,7 @@ class ZonkyPasswordFeatureTest {
         final String username = "someone@somewhere.cz";
         final String pwd = UUID.randomUUID().toString();
         final ApiProvider api = mockFailingApi();
-        final Feature feature = new ZonkyPasswordFeature(api, f, KEYSTORE_PASSWORD.toCharArray(), username,
+        final Feature feature = new ZonkyCredentialsFeature(api, f, KEYSTORE_PASSWORD.toCharArray(), username,
                                                          pwd.toCharArray());
         feature.setup();
         assertThatThrownBy(feature::test).isInstanceOf(TestFailedException.class); // remote failure caught
@@ -99,7 +99,7 @@ class ZonkyPasswordFeatureTest {
         final String username = "someone@somewhere.cz";
         final String pwd = UUID.randomUUID().toString();
         final ApiProvider api = mockApi(pwd.toCharArray());
-        final Feature feature = new ZonkyPasswordFeature(api, f, KEYSTORE_PASSWORD.toCharArray(), username,
+        final Feature feature = new ZonkyCredentialsFeature(api, f, KEYSTORE_PASSWORD.toCharArray(), username,
                                                          pwd.toCharArray());
         assertThatThrownBy(feature::test).isInstanceOf(TestFailedException.class); // no keystore exists
     }

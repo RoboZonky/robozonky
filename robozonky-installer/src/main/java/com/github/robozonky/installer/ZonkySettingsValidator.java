@@ -16,7 +16,7 @@
 
 package com.github.robozonky.installer;
 
-import com.github.robozonky.cli.ZonkyPasswordFeature;
+import com.github.robozonky.cli.ZonkyCredentialsFeature;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.izforge.izpack.api.data.InstallData;
@@ -57,7 +57,7 @@ public class ZonkySettingsValidator extends AbstractValidator {
             Files.delete(f.toPath()); // or else the next step fails
             final KeyStoreHandler k = KeyStoreHandler.create(f, p);
             logger.debug("Keystore created, attempting login.");
-            ZonkyPasswordFeature.attemptLoginAndStore(k, apiSupplier.get(), username, password.toCharArray());
+            ZonkyCredentialsFeature.attemptLoginAndStore(k, apiSupplier.get(), username, password.toCharArray());
             logger.debug("Over and out.");
             RoboZonkyInstallerListener.setKeystoreInformation(f, p);
             return DataValidator.Status.OK;

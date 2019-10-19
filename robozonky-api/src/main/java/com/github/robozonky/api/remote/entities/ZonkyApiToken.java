@@ -61,7 +61,7 @@ public class ZonkyApiToken extends BaseEntity {
     /**
      * This is not part of the Zonky API, but it will be useful inside RoboZonky.
      */
-    @XmlElement(name = "obtained_on")
+    @XmlTransient
     private OffsetDateTime obtainedOn = DateUtil.offsetNow();
 
     ZonkyApiToken() {
@@ -106,6 +106,10 @@ public class ZonkyApiToken extends BaseEntity {
         }
     }
 
+    /**
+     * Requires {@link CharArrayAdapter} to work properly, otherwise the char[] is represented as a sequence of
+     * character elements.
+     */
     public static String marshal(final ZonkyApiToken token) {
         try {
             final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);

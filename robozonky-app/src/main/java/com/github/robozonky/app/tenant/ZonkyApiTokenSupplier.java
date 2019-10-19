@@ -91,7 +91,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
             secrets.setToken(null);
             throw createException("Token expired.");
         }
-        LOGGER.debug("Current token #{} expiring on {}.", token.getId(), token.getExpiresOn());
+        LOGGER.debug("Current token {} expiring on {}.", token, token.getExpiresOn());
         final ZonkyApiToken newToken = apis.oauth(oauth -> oauth.refresh(token));
         secrets.setToken(newToken);
         LOGGER.info("Refreshed access token for '{}', will expire on {}.", secrets.getUsername(), newToken.getExpiresOn());

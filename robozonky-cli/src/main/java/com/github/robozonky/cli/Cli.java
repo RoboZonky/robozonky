@@ -16,9 +16,9 @@
 
 package com.github.robozonky.cli;
 
-import java.util.concurrent.Callable;
-
 import picocli.CommandLine;
+
+import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "java -jar robozonky-cli.jar",
         subcommands = {
@@ -26,7 +26,7 @@ import picocli.CommandLine;
                 MasterPasswordFeature.class,
                 NotificationTestingFeature.class,
                 StrategyValidationFeature.class,
-                ZonkyPasswordFeature.class
+                ZonkyCredentialsFeature.class
         })
 final class Cli implements Callable<Integer> {
 
