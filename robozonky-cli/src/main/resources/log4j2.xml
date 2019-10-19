@@ -44,9 +44,7 @@
         <TimeBasedTriggeringPolicy />
       </Policies>
       <DefaultRolloverStrategy max="100">
-        <!--
-        * delete only files older than 7days
-        -->
+        <!-- Delete only files older than 7 days. -->
         <Delete basePath="." maxDepth="1">
           <IfFileName glob="robozonky*log*">
             <IfLastModified age="7d" />
@@ -61,7 +59,9 @@
       <AppenderRef ref="STDERR"/> <!-- Errors and warnings go to the standard error output. -->
       <AppenderRef ref="DEBUG"/>  <!-- All RoboZonky logging goes into a single file. -->
     </Root>
+
     <Logger name="javax.mail" level="error" />  <!-- avoid an unkillable useless warning -->
+    <Logger name="org.apache.http" level="warn" />  <!-- not interested in org.apache.http.NoHttpResponseException as they get retried anyway -->
     <Logger name="com.github.robozonky" level="debug" /> <!-- change "debug" to "trace" for more detailed logging -->
   </Loggers>
 </Configuration>

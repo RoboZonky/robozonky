@@ -464,6 +464,11 @@
         <artifactId>log4j-jcl</artifactId>
         <version>${version.org.apache.logging.log4j}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-jul</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
       <!-- For the sake of used/unused dependency analysis and convergence. -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>
