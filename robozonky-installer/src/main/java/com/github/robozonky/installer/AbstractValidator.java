@@ -31,7 +31,8 @@ abstract class AbstractValidator implements DataValidator {
 
     protected final Logger logger = LogManager.getLogger(this.getClass());
 
-    protected abstract DataValidator.Status validateDataPossiblyThrowingException(InstallData installData);
+    protected abstract DataValidator.Status validateDataPossiblyThrowingException(InstallData installData)
+            throws Exception;
 
     private static Duration getTimeout() {
         Duration connection = Settings.INSTANCE.getConnectionTimeout();
@@ -44,7 +45,13 @@ abstract class AbstractValidator implements DataValidator {
         try {
             final long timeoutInSeconds = getTimeout().toSeconds();
             logger.info("Starting background validation, will wait for up to {} seconds.", timeoutInSeconds);
-            final Supplier<Status> c = () -> this.validateDataPossiblyThrowingException(installData);
+            final Supplier<Status> c = () -> {
+                try {
+                    return this.validateDataPossiblyThrowingException(installData);
+                } catch (final Exception ex) {
+                    throw new IllegalStateException(ex);
+                }
+            };
             return CompletableFuture.supplyAsync(c)
                     .get(timeoutInSeconds, TimeUnit.SECONDS);
         } catch (final Exception ex) { // the installer must never ever throw an exception (= neverending spinner)

@@ -43,6 +43,9 @@ enum Variables {
     JMX_PORT("jmxPort"),
     STRATEGY_SOURCE("strategy"),
     STRATEGY_TYPE("strategyType"),
+    KEYSTORE_TYPE("keystoreType"),
+    KEYSTORE_PATH("keystoreFile"),
+    KEYSTORE_PASSWORD("keystorePassword"),
     ZONKY_USERNAME("zonkyUsername"),
     ZONKY_PASSWORD("zonkyPassword");
 

@@ -23,7 +23,10 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -47,23 +50,43 @@ public class ZonkySettingsValidator extends AbstractValidator {
     }
 
     @Override
-    public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
-        final String username = Variables.ZONKY_USERNAME.getValue(installData);
-        final String password = Variables.ZONKY_PASSWORD.getValue(installData);
-        try {
-            final File f = File.createTempFile("robozonky", "keystore");
-            logger.debug("Created temporary keystore file {}.", f.getAbsolutePath());
-            final char[] p = UUID.randomUUID().toString().toCharArray();
-            Files.delete(f.toPath()); // or else the next step fails
-            final KeyStoreHandler k = KeyStoreHandler.create(f, p);
-            logger.debug("Keystore created, attempting login.");
-            ZonkyCredentialsFeature.attemptLoginAndStore(k, apiSupplier.get(), username, password.toCharArray());
-            logger.debug("Over and out.");
-            RoboZonkyInstallerListener.setKeystoreInformation(f, p);
-            return DataValidator.Status.OK;
-        } catch (final Exception t) {
-            logger.warn("Failed obtaining Zonky API token.", t);
-            return DataValidator.Status.ERROR;
+    public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) throws IOException {
+        final File f = File.createTempFile("robozonky", "keystore");
+        logger.debug("Created temporary keystore file {}.", f.getAbsolutePath());
+        Files.delete(f.toPath()); // or else the next step fails
+        final String keystoreType = Variables.KEYSTORE_TYPE.getValue(installData);
+        if (Objects.equals(keystoreType, "file")) { // use existing token
+            final String keystorePath = Variables.KEYSTORE_PATH.getValue(installData);
+            logger.info("Will use existing keystore {}.", keystorePath);
+            final char[] password = Variables.KEYSTORE_PASSWORD.getValue(installData).toCharArray();
+            try {
+                Files.copy(Path.of(keystorePath), f.toPath());
+                final KeyStoreHandler k = KeyStoreHandler.open(f, password);
+                logger.debug("Keystore open, attempting token refresh.");
+                ZonkyCredentialsFeature.refreshToken(k, apiSupplier.get());
+                logger.debug("Over and out.");
+                RoboZonkyInstallerListener.setKeystoreInformation(f, password);
+                return DataValidator.Status.OK;
+            } catch (final Exception t) {
+                logger.warn("Failed obtaining Zonky API token.", t);
+                return Status.WARNING;
+            }
+        } else {  // fresh login
+            final String username = Variables.ZONKY_USERNAME.getValue(installData);
+            logger.info("Will use new authorization code for '{}'.", username);
+            final String password = Variables.ZONKY_PASSWORD.getValue(installData);
+            try {
+                final char[] p = UUID.randomUUID().toString().toCharArray();
+                final KeyStoreHandler k = KeyStoreHandler.create(f, p);
+                logger.debug("Keystore created, attempting login.");
+                ZonkyCredentialsFeature.attemptLoginAndStore(k, apiSupplier.get(), username, password.toCharArray());
+                logger.debug("Over and out.");
+                RoboZonkyInstallerListener.setKeystoreInformation(f, p);
+                return DataValidator.Status.OK;
+            } catch (final Exception t) {
+                logger.warn("Failed obtaining Zonky API token.", t);
+                return DataValidator.Status.ERROR;
+            }
         }
     }
 
@@ -72,4 +95,9 @@ public class ZonkySettingsValidator extends AbstractValidator {
         return "Přihlašovací udaje nebylo možné ověřit, instalace nemůže pokračovat.";
     }
 
+    @Override
+    public String getWarningMessageId() {
+        return "Přihlášení existujícím klíčem se nezdařilo. Ujistěte se, že heslo je správné a platnost klíče " +
+                "nevypršela, nebo zvolte přihlášení novým autorizačním kódem.";
+    }
 }

@@ -18,26 +18,59 @@
   <panel id="zonkyUserInput" summaryKey="Základní nastavení robota">
     <field type="title" align="left" txt="Nastavení komunikace se Zonky" />
 
-    <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky:"/>
-    <field type="divider" />
-    <field type="text" variable="zonkyUsername">
+    <field type="radio" variable="keystoreType">
+      <description txt="Chci se přihlásit:"/>
+      <spec>
+        <choice txt="S novým autorizačním kódem ze Zonky." value="none" set="true" />
+        <choice txt="S platným klíčem z předchozí instalace RoboZonky." value="file" />
+      </spec>
+    </field>
+
+    <field type="space"/>
+
+    <!-- Optional fields for when the user selected new keystore. -->
+    <field type="staticText" conditionid="needsNewKeystore" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky:"/>
+    <field type="divider" conditionid="needsNewKeystore" />
+    <field type="text" conditionid="needsNewKeystore" variable="zonkyUsername">
       <spec txt="Uživatelské jméno na Zonky:" size="20" set="" summaryKey="Uživatelské jméno na Zonky"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Uživatelské jméno musí mít tvar e-mailové adresy.">
         <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
       </validator>
     </field>
-    <field type="password" variable="zonkyPassword">
+    <field type="password" conditionid="needsNewKeystore" variable="zonkyPassword">
       <spec>
         <pwd txt="Autorizační kód:" size="20" set=""/>
       </spec>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Kód je povinná položka." />
     </field>
-    <field type="space" />
-    <field type="space" />
-    <field type="staticText" align="left" bold="true" txt="POZOR! Autorizační kód není Vaše heslo. Více informací najdete na této adrese:"/>
-    <field type="staticText" align="left" bold="true" txt="https://github.com/RoboZonky/robozonky/wiki/2FA-a-RoboZonky"/>
+    <field type="space" conditionid="needsNewKeystore" />
+    <field type="space" conditionid="needsNewKeystore" />
+    <field type="staticText" conditionid="needsNewKeystore" align="left" bold="true" txt="POZOR! Autorizační kód není Vaše heslo. Více informací najdete na této adrese:"/>
+    <field type="staticText" conditionid="needsNewKeystore" align="left" bold="true" txt="https://github.com/RoboZonky/robozonky/wiki/2FA-a-RoboZonky"/>
+
+    <!-- Optional fields for when the user selected existing keystore. -->
+    <field type="staticText" conditionid="useExistingKeystore" align="left" bold="true" txt="Vložte cestu a heslo k souboru robozonky.keystore:"/>
+    <field type="divider" conditionid="useExistingKeystore" />
+    <field type="file" conditionid="useExistingKeystore" variable="keystoreFile">
+        <spec txt="Cesta ke klíči:" size="30" />
+        <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                   txt="Cesta ke klíči je povinná položka." />
+    </field>
+    <field type="password" conditionid="useExistingKeystore" variable="keystorePassword">
+      <spec>
+        <pwd txt="Heslo ke klíči:" size="20" set=""/>
+      </spec>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Heslo ke klíči je povinná položka." />
+    </field>
+    <field type="space" conditionid="useExistingKeystore" />
+    <field type="space" conditionid="useExistingKeystore" />
+    <field type="staticText" conditionid="useExistingKeystore" align="left" bold="true" txt="Soubor robozonky.kestore byl vytvořen při předchozí instalaci. Heslo k němu najdete v souboru robozonky.cli."/>
+    <field type="staticText" conditionid="useExistingKeystore" align="left" bold="true" txt="Oba soubory byly vytvořeny při předchozí instalaci."/>
+
+    <!-- Shared advanced settings. -->
     <field type="space" />
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:"/>

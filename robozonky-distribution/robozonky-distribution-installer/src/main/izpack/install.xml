@@ -61,6 +61,14 @@
       <name>isJmxEnabled</name>
       <value>true</value>
     </condition>
+    <condition type="variable" id="needsNewKeystore">
+      <name>keystoreType</name>
+      <value>none</value>
+    </condition>
+    <condition type="variable" id="useExistingKeystore">
+      <name>keystoreType</name>
+      <value>file</value>
+    </condition>
     <condition type="variable" id="isStrategyByFile">
       <name>strategyType</name>
       <value>file</value>
