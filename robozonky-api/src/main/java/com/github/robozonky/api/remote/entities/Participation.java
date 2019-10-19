@@ -32,6 +32,7 @@ public class Participation extends BaseEntity {
 
     private OffsetDateTime deadline;
     private LocalDate nextPaymentDate;
+    private long borrowerNo;
     private int loanId;
     private int originalInstalmentCount;
     private int remainingInstalmentCount;
@@ -84,6 +85,11 @@ public class Participation extends BaseEntity {
     @XmlElement
     public int getLoanId() {
         return loanId;
+    }
+
+    @XmlElement
+    public long getBorrowerNo() {
+        return borrowerNo;
     }
 
     @XmlElement

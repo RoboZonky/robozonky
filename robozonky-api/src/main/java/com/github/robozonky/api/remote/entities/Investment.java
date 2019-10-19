@@ -35,6 +35,8 @@ public class Investment extends BaseInvestment {
     private PaymentStatus paymentStatus;
     @XmlElement
     private LoanHealthInfo loanHealthInfo;
+    @XmlElement
+    private Object loanHealthStats; // TODO implement this
     private boolean smpRelated;
     private boolean onSmp;
     private boolean canBeOffered;
@@ -44,6 +46,7 @@ public class Investment extends BaseInvestment {
     private boolean additionallyInsured;
     private boolean instalmentPostponement;
     private int legalDpd;
+    private int loanInvestmentsCount = 0;
     private int loanTermInMonth = 84;
     private int currentTerm = 0;
     private int remainingMonths = loanTermInMonth - currentTerm;
@@ -76,7 +79,12 @@ public class Investment extends BaseInvestment {
     private Collection<InsurancePolicyPeriod> insuranceHistory;
 
     // string-based money
-
+    @XmlElement
+    private String loanAnnuity = "0";
+    private final Lazy<Money> moneyLoanAnnuity = Lazy.of(() -> Money.from(loanAnnuity));
+    @XmlElement
+    private String loanAmount = "0";
+    private final Lazy<Money> moneyLoanAmount = Lazy.of(() -> Money.from(loanAmount));
     @XmlElement
     private String paid = "0";
     private final Lazy<Money> moneyPaid = Lazy.of(() -> Money.from(paid));
@@ -157,6 +165,11 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public Integer getLegalDpd() {
         return legalDpd;
+    }
+
+    @XmlElement
+    public int getLoanInvestmentsCount() {
+        return loanInvestmentsCount;
     }
 
     /**
@@ -323,6 +336,17 @@ public class Investment extends BaseInvestment {
     }
 
     // money types are all transient
+
+
+    @XmlTransient
+    public Money getLoanAnnuity() {
+        return moneyLoanAnnuity.get();
+    }
+
+    @XmlTransient
+    public Money getLoanAmount() {
+        return moneyLoanAmount.get();
+    }
 
     @XmlTransient
     public Money getPurchasePrice() {

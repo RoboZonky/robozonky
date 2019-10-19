@@ -79,12 +79,12 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalAmount() {
-        return getLoan().getAmount().getValue().intValue();
+        return investment.getLoanAmount().getValue().intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return getLoan().getAnnuity().getValue().intValue();
+        return investment.getLoanAnnuity().getValue().intValue();
     }
 
     @Override

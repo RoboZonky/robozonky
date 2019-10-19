@@ -47,6 +47,8 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
                 .setRevenueRate(loan.getRevenueRate().orElse(null))
                 .setCurrency(loan.getCurrency())
                 .setAmount(invested)
+                .setLoanAnnuity(loan.getAnnuity())
+                .setLoanAmount(loan.getAmount())
                 .setRemainingPrincipal(invested)
                 .setRating(loan.getRating())
                 .setPaidInterest(BigDecimal.ZERO)
@@ -62,6 +64,16 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
 
     public MockInvestmentBuilder setAmount(final BigDecimal amount) {
         when(mock.getAmount()).thenReturn(Money.from(amount));
+        return this;
+    }
+
+    public MockInvestmentBuilder setLoanAnnuity(final Money annuity) {
+        when(mock.getLoanAnnuity()).thenReturn(annuity);
+        return this;
+    }
+
+    public MockInvestmentBuilder setLoanAmount(final Money amount) {
+        when(mock.getLoanAmount()).thenReturn(amount);
         return this;
     }
 

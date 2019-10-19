@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import io.vavr.Lazy;
 
@@ -25,6 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 public class RiskPortfolio extends BaseEntity {
 
+    private Ratio interestRate;
     @XmlElement
     private String unpaid;
     private final Lazy<Money> moneyUnpaid = Lazy.of(() -> Money.from(unpaid));
@@ -44,11 +46,17 @@ public class RiskPortfolio extends BaseEntity {
     }
 
     public RiskPortfolio(final Rating rating, final Money paid, final Money unpaid, final Money due) {
+        this.interestRate = rating.getInterestRate();
         this.paid = paid.getValue().toPlainString();
         this.unpaid = unpaid.getValue().toPlainString();
         this.due = due.getValue().toPlainString();
         this.rating = rating;
         this.totalAmount = paid.add(unpaid).add(due).getValue().toPlainString();
+    }
+
+    @XmlElement
+    public Ratio getInterestRate() {
+        return interestRate;
     }
 
     @XmlTransient
