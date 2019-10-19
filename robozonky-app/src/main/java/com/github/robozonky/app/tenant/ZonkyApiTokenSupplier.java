@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import java.io.Closeable;
 import java.time.Duration;
@@ -74,9 +75,9 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     private static RuntimeException createException(final Throwable throwable) {
-        if (throwable instanceof NotAuthorizedException) {
+        if (throwable instanceof NotAuthorizedException || throwable instanceof BadRequestException) {
             return (RuntimeException) throwable;
-        } else { // we have a problem, but that problem is not HTTP 401
+        } else { // we have a problem, but that problem is not HTTP 40x, indicating auth failure
             return new IllegalStateException("Recoverable authentication failure.", throwable);
         }
     }
