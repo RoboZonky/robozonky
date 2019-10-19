@@ -92,6 +92,7 @@ public final class ZonkyPasswordFeature extends KeyStoreLeveragingFeature {
                     .map(token -> api.oauth(oAuth -> oAuth.refresh(token)))
                     .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
             s.setToken(newToken);
+            LOGGER.info("Access token for '{}' will expire on {}.", s.getUsername(), newToken.getExpiresOn());
         } catch (final Exception ex) {
             throw new TestFailedException(ex);
         }

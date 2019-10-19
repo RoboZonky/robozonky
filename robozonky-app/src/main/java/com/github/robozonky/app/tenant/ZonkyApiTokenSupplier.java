@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  * Will keep permanent user authentication running in the background.
  */
 class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
-                                       Closeable {
+        Closeable {
 
     private static final Logger LOGGER = LogManager.getLogger(ZonkyApiTokenSupplier.class);
     private static final Duration ONE_HOUR = Duration.ofHours(1);
@@ -74,7 +74,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     private static RuntimeException createException(final Throwable throwable) {
         if (throwable instanceof NotAuthorizedException) {
-            return (RuntimeException)throwable;
+            return (RuntimeException) throwable;
         } else { // we have a problem, but that problem is not HTTP 401
             return new IllegalStateException("Recoverable authentication failure.", throwable);
         }
@@ -92,9 +92,9 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
             throw createException("Token expired.");
         }
         LOGGER.debug("Current token #{} expiring on {}.", token.getId(), token.getExpiresOn());
-        LOGGER.info("Refreshing access token for '{}'.", secrets.getUsername());
         final ZonkyApiToken newToken = apis.oauth(oauth -> oauth.refresh(token));
         secrets.setToken(newToken);
+        LOGGER.info("Refreshed access token for '{}', will expire on {}.", secrets.getUsername(), newToken.getExpiresOn());
         return newToken;
     }
 
