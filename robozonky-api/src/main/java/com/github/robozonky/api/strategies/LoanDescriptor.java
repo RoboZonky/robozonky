@@ -21,9 +21,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -38,19 +35,6 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
 
     public LoanDescriptor(final Loan loan) {
         this.loan = loan;
-    }
-
-    /**
-     * If protected by CAPTCHA, gives the first instant when the CAPTCHA protection is over.
-     * @return Present if loan protected by CAPTCHA, otherwise empty.
-     */
-    public Optional<OffsetDateTime> getLoanCaptchaProtectionEndDateTime() {
-        final Duration captchaDelay = loan.getRating().getCaptchaDelay();
-        if (captchaDelay.get(ChronoUnit.SECONDS) == 0) {
-            return Optional.empty();
-        } else {
-            return Optional.of(loan.getDatePublished().plus(captchaDelay));
-        }
     }
 
     @Override

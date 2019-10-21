@@ -31,7 +31,6 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
@@ -308,7 +307,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
         final Zonky zonky = harmlessZonky();
         final Loan loan = new MockLoanBuilder()
-                .setDatePublished(DateUtil.offsetNow().minusMinutes(10)) // avoid CAPTCHA
                 .setRating(Rating.D)
                 .build();
         when(zonky.getAvailableLoans(any())).thenAnswer(i -> Stream.of(loan));

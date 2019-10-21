@@ -19,11 +19,9 @@ package com.github.robozonky.api.remote.enums;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.test.DateUtil;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
@@ -192,10 +190,6 @@ public enum Rating implements BaseEnum {
 
     public Ratio getMaximalRevenueRate(final Instant dateForFees) {
         return getMaximalRevenueRate(dateForFees, Money.ZERO);
-    }
-
-    public Duration getCaptchaDelay() {
-        return Settings.INSTANCE.getCaptchaDelay(this);
     }
 
     @Override

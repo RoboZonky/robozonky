@@ -16,7 +16,6 @@
 
 package com.github.robozonky.internal;
 
-import com.github.robozonky.api.remote.enums.Rating;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,37 +40,8 @@ public enum Settings {
 
     public static final String FILE_LOCATION_PROPERTY = "robozonky.properties.file";
     private static final int HTTPS_DEFAULT_PORT = 443;
-    private final Logger LOGGER = LogManager.getLogger(Settings.class);
+    private static final Logger LOGGER = LogManager.getLogger(Settings.class);
     private final AtomicReference<Properties> properties = new AtomicReference<>();
-
-    private static Settings.Key getRatingKey(final Rating r) {
-        switch (r) {
-            case AAAAAA:
-                return Settings.Key.CAPTCHA_DELAY_AAAAAA;
-            case AAAAA:
-                return Settings.Key.CAPTCHA_DELAY_AAAAA;
-            case AAAA:
-                return Settings.Key.CAPTCHA_DELAY_AAAA;
-            case AAA:
-                return Settings.Key.CAPTCHA_DELAY_AAA;
-            case AAE:
-                return Settings.Key.CAPTCHA_DELAY_AAE;
-            case AA:
-                return Settings.Key.CAPTCHA_DELAY_AA;
-            case AE:
-                return Settings.Key.CAPTCHA_DELAY_AE;
-            case A:
-                return Settings.Key.CAPTCHA_DELAY_A;
-            case B:
-                return Settings.Key.CAPTCHA_DELAY_B;
-            case C:
-                return Settings.Key.CAPTCHA_DELAY_C;
-            case D:
-                return Settings.Key.CAPTCHA_DELAY_D;
-            default:
-                throw new IllegalStateException("Impossible");
-        }
-    }
 
     private Properties getProperties() {
         final String filename = System.getProperty(Settings.FILE_LOCATION_PROPERTY);
@@ -175,10 +145,6 @@ public enum Settings {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 10));
     }
 
-    public Duration getCaptchaDelay(final Rating r) {
-        return get(getRatingKey(r), delay -> Duration.ofSeconds(Long.parseLong(delay)), getCaptchaDelay());
-    }
-
     public Optional<String> getHttpsProxyHostname() {
         return Optional.ofNullable(get(Key.HTTPS_PROXY_HOSTNAME, (String) null));
     }
@@ -191,16 +157,6 @@ public enum Settings {
                 return HTTPS_DEFAULT_PORT;
             }
         }, HTTPS_DEFAULT_PORT);
-    }
-
-    /**
-     * The default delay for CAPTCHA protected loans. Right now, it is 0 due to the fact that no loans are protected by
-     * CAPTCHA. If this ever changes, the delay MUST be increased here, as other bits of code - such as marketplace
-     * activity detection - depend on it.
-     * @return Duration of CAPTCHA protection for a standard loan.
-     */
-    public Duration getCaptchaDelay() {
-        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 0));
     }
 
     public int getDryRunBalanceMinimum() {
@@ -217,19 +173,7 @@ public enum Settings {
         DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),
         DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
-        DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
         DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size"),
-        CAPTCHA_DELAY_AAAAAA("robozonky.aaaaaa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AAAAA("robozonky.aaaaa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AAAA("robozonky.aaaa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AAA("robozonky.aaa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AAE("robozonky.aae_loan_protection_seconds"),
-        CAPTCHA_DELAY_AA("robozonky.aa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AE("robozonky.ae_loan_protection_seconds"),
-        CAPTCHA_DELAY_A("robozonky.a_loan_protection_seconds"),
-        CAPTCHA_DELAY_B("robozonky.b_loan_protection_seconds"),
-        CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
-        CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds"),
         DRY_RUN_BALANCE_MINIMUM("robozonky.dry_run_balance_minimum"),
         STATE_FILE_LOCATION("robozonky.state_file"),
         HTTPS_PROXY_HOSTNAME("https.proxyHost"),

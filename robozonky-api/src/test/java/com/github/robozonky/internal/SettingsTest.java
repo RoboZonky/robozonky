@@ -16,7 +16,6 @@
 
 package com.github.robozonky.internal;
 
-import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,12 +47,6 @@ class SettingsTest {
                     .isEqualTo("");
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
                     .matches(new SettingsTest.TemporalPredicate(5 * 60));
-            softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
-                    .matches(new SettingsTest.TemporalPredicate(0));
-            Stream.of(Rating.values())
-                    .forEach(r -> softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
-                            .as(r.toString())
-                            .matches(new TemporalPredicate(0)));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(10));
@@ -79,11 +72,6 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled()).isFalse();
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
                     .matches(new SettingsTest.TemporalPredicate(1000 * 60));
-            softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
-                    .matches(new SettingsTest.TemporalPredicate(1000));
-            Stream.of(Rating.values())
-                    .forEach(r -> softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
-                            .matches(new TemporalPredicate(1000)));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(1000);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));

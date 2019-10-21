@@ -16,11 +16,11 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.Optional;
-import java.util.function.Predicate;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Due to the inability for enums to extend a base shared class, this enum has its twin in
@@ -29,7 +29,6 @@ import javax.ws.rs.NotFoundException;
 public enum InvestmentFailureType implements Predicate<ClientErrorException> {
 
     TOO_MANY_REQUESTS("TOO_MANY_REQUESTS"),
-    CAPTCHA_REQUIRED("CAPTCHA_REQUIRED"),
     INSUFFICIENT_BALANCE("insufficientBalance"),
     CANCELLED("cancelled"),
     WITHDRAWN("withdrawn"),

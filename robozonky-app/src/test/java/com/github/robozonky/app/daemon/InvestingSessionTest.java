@@ -68,7 +68,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         // run test
         final int amount = 200;
-        final LoanDescriptor ld = mockLoanDescriptorWithoutCaptcha();
+        final LoanDescriptor ld = mockLoanDescriptor();
         final int loanId = ld.item().getId();
         final PowerTenant auth = mockTenant(z);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, mockLoanDescriptor());

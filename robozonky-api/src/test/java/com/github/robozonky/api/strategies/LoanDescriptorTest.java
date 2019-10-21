@@ -19,8 +19,6 @@ package com.github.robozonky.api.strategies;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.Settings;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
@@ -47,27 +45,13 @@ class LoanDescriptorTest {
         return loan;
     }
 
-    @Disabled("Looks like CAPTCHA is disabled for now. Let's wait and see if it comes back.")
     @Test
-    void constructorForCaptcha() {
-        final Loan mockedLoan = LoanDescriptorTest.mockLoan();
-        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        assertSoftly(softly -> {
-            softly.assertThat(ld.item()).isSameAs(mockedLoan);
-            softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime())
-                    .isPresent()
-                    .contains(mockedLoan.getDatePublished().plus(Settings.INSTANCE.getCaptchaDelay()));
-        });
-    }
-
-    @Test
-    void constructorForCaptchaLess() {
+    void constructor() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan(Rating.AAAAA);
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         assertSoftly(softly -> {
             softly.assertThat(ld.item()).isSameAs(mockedLoan);
             softly.assertThat(ld.item()).isSameAs(ld.related());
-            softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime()).isEmpty();
         });
     }
 

@@ -20,7 +20,6 @@ import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import com.github.robozonky.internal.Settings;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 import java.time.OffsetDateTime;
@@ -45,24 +44,10 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
     }
 
     protected static LoanDescriptor mockLoanDescriptor() {
-        return AbstractZonkyLeveragingTest.mockLoanDescriptor(true);
-    }
-
-    protected static LoanDescriptor mockLoanDescriptorWithoutCaptcha() {
-        return AbstractZonkyLeveragingTest.mockLoanDescriptor(false);
-    }
-
-    private static LoanDescriptor mockLoanDescriptor(final boolean withCaptcha) {
         final MockLoanBuilder b = new MockLoanBuilder()
                 .setNonReservedRemainingInvestment(Integer.MAX_VALUE)
-                .setDatePublished(OffsetDateTime.now());
-        if (withCaptcha) {
-            System.setProperty(Settings.Key.CAPTCHA_DELAY_D.getName(), "120"); // enable CAPTCHA for the rating
-            b.setRating(Rating.D);
-        } else {
-            System.setProperty(Settings.Key.CAPTCHA_DELAY_AAAAA.getName(), "0"); // disable CAPTCHA for the rating
-            b.setRating(Rating.AAAAA);
-        }
+                .setDatePublished(OffsetDateTime.now())
+                .setRating(Rating.AAAAA);
         return new LoanDescriptor(b.build());
     }
 

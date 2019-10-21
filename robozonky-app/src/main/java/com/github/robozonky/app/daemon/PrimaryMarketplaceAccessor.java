@@ -16,19 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Collection;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
 
@@ -45,20 +43,12 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
         this.stateAccessor = stateAccessor;
     }
 
-    private static boolean isActionable(final LoanDescriptor loanDescriptor) {
-        final OffsetDateTime now = DateUtil.offsetNow();
-        return loanDescriptor.getLoanCaptchaProtectionEndDateTime()
-                .map(d -> d.isBefore(now))
-                .orElse(true);
-    }
-
     @Override
     public Collection<LoanDescriptor> getMarketplace() {
         return tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
                 .parallel()
-                .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
+                .filter(l -> l.getMyInvestment().isEmpty()) // re-investing would fail
                 .map(LoanDescriptor::new)
-                .filter(PrimaryMarketplaceAccessor::isActionable)
                 .collect(Collectors.toList());
     }
 
