@@ -55,6 +55,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
     }
 
     protected void discard(final S item) {
+        logger.debug("Will not show {} again.", item);
         discarded.put(item);
     }
 
