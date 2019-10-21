@@ -95,6 +95,8 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.");
         } else if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
             tenant.setKnownBalanceUpperBound(recommendation.amount().subtract(1));
+        } else if (failureType != InvestmentFailureType.UNKNOWN) { // we don't want to see this loan ever again
+            discard(recommendation.descriptor());
         }
         logger.debug("Failed investing {} into loan #{}, reason: {}.",
                      recommendation.amount(), recommendation.descriptor().item().getId(), failureType);
