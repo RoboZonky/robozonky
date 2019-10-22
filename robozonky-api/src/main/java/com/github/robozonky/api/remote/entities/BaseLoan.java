@@ -52,7 +52,6 @@ public abstract class BaseLoan extends BaseEntity {
     protected OffsetDateTime datePublished;
     protected OffsetDateTime deadline;
     protected Rating rating;
-    protected Collection<Photo> photos;
     protected BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
     protected OtherInvestments myOtherInvestments;
     protected MainIncomeType mainIncomeType;
@@ -60,6 +59,8 @@ public abstract class BaseLoan extends BaseEntity {
     protected Purpose purpose;
     @XmlElement
     protected Collection<InsurancePolicyPeriod> insuranceHistory;
+    @XmlElement
+    private Object photos; // don't waste time deserializing a collection of images, as we're never going to need it
 
     // various ratios
 
@@ -207,11 +208,6 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public boolean isQuestionsAllowed() {
         return questionsAllowed;
-    }
-
-    @XmlElement
-    public Collection<Photo> getPhotos() {
-        return photos;
     }
 
     /**

@@ -110,10 +110,6 @@ public final class MutableLoan extends Loan {
         this.rating = rating;
     }
 
-    public void setPhotos(final Collection<Photo> photos) {
-        this.photos = photos;
-    }
-
     public void setBorrowerRelatedInvestmentInfo(final BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo) {
         this.borrowerRelatedInvestmentInfo = borrowerRelatedInvestmentInfo;
     }
