@@ -50,6 +50,7 @@ public class Investment extends BaseInvestment {
     private int loanTermInMonth = 84;
     private int currentTerm = 0;
     private int remainingMonths = loanTermInMonth - currentTerm;
+    private long borrowerNo = 0;
     private String loanName;
     private String nickname;
     private String firstName;
@@ -222,6 +223,11 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public int getRemainingMonths() {
         return remainingMonths;
+    }
+
+    @XmlElement
+    public long getBorrowerNo() {
+        return borrowerNo;
     }
 
     @XmlElement

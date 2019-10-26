@@ -26,6 +26,7 @@ public enum LoanHealthInfo {
 
     HEALTHY,
     CURRENTLY_IN_DUE,
+    HISTORICALLY_IN_DUE,
     UNKNOWN;
 
     static final class LoanHealthInfoDeserializer extends AbstractDeserializer<LoanHealthInfo> {

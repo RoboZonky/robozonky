@@ -46,6 +46,7 @@ public abstract class BaseLoan extends BaseEntity {
     protected int questionsCount;
     protected int userId;
     protected int activeLoansCount;
+    protected long borrowerNo;
     protected String name;
     protected String nickName;
     protected String story;
@@ -139,6 +140,11 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public int getId() {
         return id;
+    }
+
+    @XmlElement
+    public long getBorrowerNo() {
+        return borrowerNo;
     }
 
     @XmlElement
