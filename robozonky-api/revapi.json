@@ -38,6 +38,172 @@
         "code": "java.class.removed",
         "old": "class com.github.robozonky.api.remote.entities.Photo",
         "justification": "Loan photos are no longer accessible, as they were never useful anyway."
+      },
+      {
+        "code": "java.field.typeChanged",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.field.typeChanged",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished()",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished()",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline()",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline()",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished @ com.github.robozonky.api.remote.entities.Loan",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished @ com.github.robozonky.api.remote.entities.Loan",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline @ com.github.robozonky.api.remote.entities.Loan",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline @ com.github.robozonky.api.remote.entities.Loan",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Loan",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Loan",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Loan",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Loan",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Loan",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Loan",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Loan",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Loan",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Participation::getDeadline()",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Participation::getDeadline()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Participation::getDeadline()",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Participation::getDeadline()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.LocalDate com.github.robozonky.api.remote.entities.Participation::getNextPaymentDate()",
+        "new": "method java.time.LocalDate com.github.robozonky.api.remote.entities.Participation::getNextPaymentDate()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.LocalDate com.github.robozonky.api.remote.entities.Participation::getNextPaymentDate()",
+        "new": "method java.time.LocalDate com.github.robozonky.api.remote.entities.Participation::getNextPaymentDate()",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished @ com.github.robozonky.api.remote.entities.Reservation",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.datePublished @ com.github.robozonky.api.remote.entities.Reservation",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline @ com.github.robozonky.api.remote.entities.Reservation",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.deadline @ com.github.robozonky.api.remote.entities.Reservation",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Reservation",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Reservation",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Reservation",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDatePublished() @ com.github.robozonky.api.remote.entities.Reservation",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Reservation",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Reservation",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Reservation",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Reservation",
+        "annotation": "@javax.xml.bind.annotation.XmlTransient",
+        "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
       }
     ]
   }
