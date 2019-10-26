@@ -680,6 +680,7 @@
                 <ignoredUnusedDeclaredDependency>org.apache.httpcomponents</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>com.lmax</ignoredUnusedDeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.jaxrs</ignoredUsedUndeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
               <ignoredUsedUndeclaredDependencies>
