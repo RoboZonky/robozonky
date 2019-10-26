@@ -469,6 +469,11 @@
         <artifactId>log4j-jul</artifactId>
         <version>${version.org.apache.logging.log4j}</version>
       </dependency>
+      <dependency> <!-- For log4j's async logging. -->
+        <groupId>com.lmax</groupId>
+        <artifactId>disruptor</artifactId>
+        <version>3.4.2</version>
+      </dependency>
       <!-- For the sake of used/unused dependency analysis and convergence. -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>
