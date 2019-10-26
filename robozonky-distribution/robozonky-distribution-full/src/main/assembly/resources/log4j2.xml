@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<Configuration status="WARN" monitorInterval="30">
+<Configuration status="WARN" monitorInterval="30" shutdownHook="disable">
 
   <Properties> <!-- These are the common pattern layouts to be used later in the file. -->
     <Property name="consoleAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level %msg%n</Property>
@@ -34,7 +34,7 @@
       <PatternLayout pattern="${consoleAppenderPatternLayout}"/>
     </Console>
     <!-- Log everything to robozonky.log file. Roll the file every day, compress the results. -->
-    <RollingFile
+    <RollingRandomAccessFile
         append="false"
         name="DEBUG"
         fileName="robozonky.log"
@@ -53,7 +53,7 @@
           </IfFileName>
         </Delete>
       </DefaultRolloverStrategy>
-    </RollingFile>
+    </RollingRandomAccessFile>
   </Appenders>
   <Loggers>
     <Root level="info">
