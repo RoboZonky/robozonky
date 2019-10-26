@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<Configuration status="TRACE" monitorInterval="30">
+<Configuration status="TRACE" monitorInterval="30" shutdownHook="disable">
 
   <Properties> <!-- These are the common pattern layouts to be used later in the file. -->
     <Property name="consoleAppenderPatternLayout">%d{HH:mm:ss.SSS} %-5level %msg%n</Property>

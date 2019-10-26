@@ -16,11 +16,6 @@
 
 package com.github.robozonky.app;
 
-import java.nio.charset.Charset;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.function.Function;
-
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -28,6 +23,11 @@ import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.management.Management;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.nio.charset.Charset;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * You are required to exit this app by calling {@link #exit(ReturnCode)}.
@@ -80,6 +80,7 @@ public class App implements Runnable {
         final InvestmentMode m = modeProvider.apply(new Lifecycle(shutdownHooks));
         Events.global().fire(EventFactory.roboZonkyStarting());
         // will close event-firing thread == must be triggered last == must be registered first
+        shutdownHooks.register(() -> Optional.of(r -> LogManager.shutdown()));
         shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
         // will trigger events, therefore needs to come before the above
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
