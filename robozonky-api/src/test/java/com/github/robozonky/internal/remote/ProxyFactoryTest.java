@@ -20,7 +20,7 @@ import com.github.robozonky.api.remote.LoanApi;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ProxyFactoryTest {
 
@@ -31,9 +31,4 @@ class ProxyFactoryTest {
         assertThat(ProxyFactory.newProxy(client, f, LoanApi.class, "https://api.zonky.cz")).isNotNull();
     }
 
-    @Test
-    void unfilteredApi() {
-        final ResteasyClient client = ProxyFactory.newResteasyClient();
-        assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
-    }
 }

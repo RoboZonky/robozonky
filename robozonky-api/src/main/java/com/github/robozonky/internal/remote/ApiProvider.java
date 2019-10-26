@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
@@ -34,7 +33,7 @@ import java.util.function.Supplier;
 
 public class ApiProvider implements AutoCloseable {
 
-    public static final String ZONKY_URL = "https://api.zonky.cz";
+    private static final String ZONKY_URL = "https://api.zonky.cz";
     private static final Logger LOGGER = LogManager.getLogger(ApiProvider.class);
     /**
      * Instances of the Zonky API are kept for as long as the token supplier is kept by the GC. This guarantees that,
@@ -108,16 +107,6 @@ public class ApiProvider implements AutoCloseable {
      */
     public <T> T oauth(final Function<OAuth, T> operation) {
         return operation.apply(oauth());
-    }
-
-    /**
-     * Retrieve available loans from Zonky marketplace cache, which requires no authentication. Does not support paging.
-     * @return Loans existing in the marketplace at the time this method was called.
-     */
-    public Collection<Loan> marketplace() {
-        final EntityCollectionApi<Loan> proxy = ProxyFactory.newProxy(client.get(), LoanApi.class, ZONKY_URL);
-        final Api<? extends EntityCollectionApi<Loan>> api = actuallyObtainNormal(proxy, counter);
-        return api.call(EntityCollectionApi::items);
     }
 
     private synchronized Zonky authenticated(final Supplier<ZonkyApiToken> token) {

@@ -62,7 +62,4 @@ final class ProxyFactory {
         return client.target(url).register(filter).proxy(api);
     }
 
-    public static <T> T newProxy(final ResteasyClient client, final Class<T> api, final String url) {
-        return client.target(url).proxy(api);
-    }
 }
