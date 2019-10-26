@@ -30,8 +30,6 @@ import java.util.Currency;
 
 public class Participation extends BaseEntity {
 
-    private OffsetDateTime deadline;
-    private LocalDate nextPaymentDate;
     private long borrowerNo;
     private int loanId;
     private int originalInstalmentCount;
@@ -50,6 +48,14 @@ public class Participation extends BaseEntity {
     private boolean additionallyInsured;
     private Object loanInvestments;
 
+    // dates and times are expensive to parse, and Participations are on the hot path. Only do it when needed.
+    @XmlElement
+    private String deadline;
+    private final Lazy<OffsetDateTime> deadlineParsed = Lazy.of(() -> OffsetDateTimeAdapter.fromString(deadline));
+    @XmlElement
+    private String nextPaymentDate;
+    private final Lazy<LocalDate> nextPaymentDateParsed = Lazy.of(() -> LocalDateAdapter.fromString(nextPaymentDate));
+
     private Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     private Currency currency;
     @XmlElement
@@ -61,16 +67,6 @@ public class Participation extends BaseEntity {
     @XmlElement
     private String price;
     private final Lazy<Money> moneyPrice = Lazy.of(() -> Money.from(price, currency));
-
-    @XmlElement
-    public OffsetDateTime getDeadline() {
-        return deadline;
-    }
-
-    @XmlElement
-    public LocalDate getNextPaymentDate() {
-        return nextPaymentDate;
-    }
 
     @XmlElement
     public long getId() {
@@ -173,6 +169,16 @@ public class Participation extends BaseEntity {
     @XmlElement
     public Currency getCurrency() {
         return currency;
+    }
+
+    @XmlTransient
+    public OffsetDateTime getDeadline() {
+        return deadlineParsed.get();
+    }
+
+    @XmlTransient
+    public LocalDate getNextPaymentDate() {
+        return nextPaymentDateParsed.get();
     }
 
     @XmlTransient

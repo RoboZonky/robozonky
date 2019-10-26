@@ -49,8 +49,6 @@ public abstract class BaseLoan extends BaseEntity {
     protected String name;
     protected String nickName;
     protected String story;
-    protected OffsetDateTime datePublished;
-    protected OffsetDateTime deadline;
     protected Rating rating;
     protected BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
     protected OtherInvestments myOtherInvestments;
@@ -68,6 +66,14 @@ public abstract class BaseLoan extends BaseEntity {
     protected Ratio investmentRate;
     @XmlElement
     protected Ratio revenueRate;
+
+    // OffsetDateTime is expensive to parse, and Loans are on the hot path. Only do it when needed.
+    @XmlElement
+    protected String datePublished;
+    private final Lazy<OffsetDateTime> datePublishedParsed = Lazy.of(() -> OffsetDateTimeAdapter.fromString(datePublished));
+    @XmlElement
+    protected String deadline;
+    private final Lazy<OffsetDateTime> deadlineParsed = Lazy.of(() -> OffsetDateTimeAdapter.fromString(deadline));
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     protected Currency currency = Defaults.CURRENCY;
@@ -181,16 +187,6 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     @XmlElement
-    public OffsetDateTime getDatePublished() {
-        return datePublished;
-    }
-
-    @XmlElement
-    public OffsetDateTime getDeadline() {
-        return deadline;
-    }
-
-    @XmlElement
     public int getInvestmentsCount() {
         return investmentsCount;
     }
@@ -270,6 +266,18 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlTransient
     public Optional<Ratio> getRevenueRate() {
         return Optional.ofNullable(revenueRate);
+    }
+
+    // datetime fields are all transient
+
+    @XmlTransient
+    public OffsetDateTime getDatePublished() {
+        return datePublishedParsed.get();
+    }
+
+    @XmlTransient
+    public OffsetDateTime getDeadline() {
+        return deadlineParsed.get();
     }
 
     // money-based fields are all transient

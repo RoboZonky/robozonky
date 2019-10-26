@@ -99,11 +99,11 @@ public final class MutableLoan extends Loan {
     }
 
     public void setDatePublished(final OffsetDateTime datePublished) {
-        this.datePublished = datePublished;
+        this.datePublished = datePublished.toString();
     }
 
     public void setDeadline(final OffsetDateTime deadline) {
-        this.deadline = deadline;
+        this.deadline = deadline.toString();
     }
 
     public void setRating(final Rating rating) {

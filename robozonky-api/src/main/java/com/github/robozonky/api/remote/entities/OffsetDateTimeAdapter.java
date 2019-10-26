@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.time.OffsetDateTime;
 
 class OffsetDateTimeAdapter extends XmlAdapter<String, OffsetDateTime> {
+
+    public static OffsetDateTime fromString(final String s) {
+        return new OffsetDateTimeAdapter().unmarshal(s);
+    }
 
     @Override
     public OffsetDateTime unmarshal(final String s) {

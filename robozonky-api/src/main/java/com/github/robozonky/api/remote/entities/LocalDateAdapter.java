@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.LocalDate;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.time.LocalDate;
 
 class LocalDateAdapter extends XmlAdapter<String, LocalDate> {
+
+    public static LocalDate fromString(final String s) {
+        return new LocalDateAdapter().unmarshal(s);
+    }
 
     @Override
     public LocalDate unmarshal(final String s) {
