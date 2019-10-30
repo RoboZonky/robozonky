@@ -79,12 +79,12 @@ public class App implements Runnable {
     private ReturnCode executeSafe(final Function<Lifecycle, InvestmentMode> modeProvider) {
         final InvestmentMode m = modeProvider.apply(new Lifecycle(shutdownHooks));
         Events.global().fire(EventFactory.roboZonkyStarting());
-        // will close event-firing thread == must be triggered last == must be registered first
-        shutdownHooks.register(() -> Optional.of(r -> LogManager.shutdown()));
-        shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
-        // will trigger events, therefore needs to come before the above
-        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
+        shutdownHooks.register(() -> Optional.of(r -> LogManager.shutdown()));
+        // will close event-firing thread == must be triggered last == must be registered first
+        shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
+        // will trigger events on startup and shutdown, therefore needs to be shut down before the one above
+        shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         // trigger all shutdown hooks in reverse order, before the token is closed after exiting this method
         final ReturnCode code = m.get();
         shutdownHooks.execute(code);

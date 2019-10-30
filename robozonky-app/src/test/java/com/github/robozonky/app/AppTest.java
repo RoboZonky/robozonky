@@ -16,10 +16,6 @@
 
 package com.github.robozonky.app;
 
-import java.lang.management.ManagementFactory;
-import java.time.OffsetDateTime;
-import java.util.List;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -32,7 +28,10 @@ import com.github.robozonky.internal.management.Management;
 import com.github.robozonky.internal.management.ManagementBean;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -82,16 +81,6 @@ class AppTest extends AbstractEventLeveragingTest {
             softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
             softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
         });
-    }
-
-    @Test
-    void unregistersBeans() {
-        final App main = spy(new App());
-        doNothing().when(main).actuallyExit(anyInt());
-        final int countBefore = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
-        main.execute(l -> new MyInvestmentMode());
-        final int countAfter = ManagementFactory.getPlatformMBeanServer().getMBeanCount();
-        assertThat(countAfter).isEqualTo(countBefore);
     }
 
     /**
