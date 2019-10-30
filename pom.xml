@@ -40,22 +40,19 @@
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
     <!-- Various dependency versions to be used later. -->
     <surefire.version>3.0.0-M3</surefire.version>
-    <jaxb.version>2.3.2</jaxb.version>
-    <version.com.fasterxml.jackson>2.9.10</version.com.fasterxml.jackson>
+    <version.com.fasterxml.jackson>2.9.10</version.com.fasterxml.jackson> <!-- 2.10.0 has bad JPMS, waiting for 2.10.1 -->
     <version.com.fasterxml.jackson.databind>${version.com.fasterxml.jackson}</version.com.fasterxml.jackson.databind>
-    <version.jakarta.activation>1.2.1</version.jakarta.activation>
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
     <version.info.picocli>4.0.2</version.info.picocli>
-    <version.org.jboss.resteasy>4.3.1.Final</version.org.jboss.resteasy>
+    <version.org.jboss.resteasy>4.4.0.Final</version.org.jboss.resteasy>
     <version.org.junit5>5.1</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
     <version.org.mockito>3.0.6</version.org.mockito>
     <version.org.mock-server>5.6.1</version.org.mock-server>
     <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>
-    <!-- For whatever reason, SMTP auth fails in Windows with the default version. -->
-    <version.com.sun.mail>1.6.2</version.com.sun.mail>
+    <version.com.sun.mail>1.6.4</version.com.sun.mail>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
@@ -154,34 +151,12 @@
             <groupId>org.jboss.spec.javax.annotation</groupId>
             <artifactId>jboss-annotations-api_1.3_spec</artifactId>
           </exclusion>
-          <exclusion>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-core-spi</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
@@ -189,20 +164,16 @@
         <version>${version.org.jboss.resteasy}</version>
         <exclusions>
           <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
           </exclusion>
           <exclusion>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+            <groupId>org.jboss.spec.javax.xml.bind</groupId>
+            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
           </exclusion>
           <exclusion>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
+            <groupId>org.jboss.spec.javax.annotation</groupId>
+            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
           </exclusion>
           <exclusion>
             <groupId>javax.enterprise</groupId>
@@ -272,14 +243,25 @@
         <version>2.3.29</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-email</artifactId>
-        <version>1.5</version>
+        <groupId>jakarta.mail</groupId>
+        <artifactId>jakarta.mail-api</artifactId>
+        <version>${version.com.sun.mail}</version>
       </dependency>
       <dependency>
         <groupId>com.sun.mail</groupId>
-        <artifactId>javax.mail</artifactId>
+        <artifactId>jakarta.mail</artifactId>
         <version>${version.com.sun.mail}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-email</artifactId>
+        <version>1.5</version>
+        <exclusions>
+          <exclusion> <!-- Already have one, Jakarta EE based. -->
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>com.icegreen</groupId>
@@ -287,6 +269,10 @@
         <version>1.5.10</version>
         <scope>test</scope>
         <exclusions>
+          <exclusion> <!-- Already have one, Jakarta EE based. -->
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+          </exclusion>
           <exclusion>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -486,41 +472,6 @@
         <version>${version.org.junit.platform}</version>
       </dependency>
       <dependency>
-        <groupId>com.sun.activation</groupId>
-        <artifactId>jakarta.activation</artifactId>
-        <version>${version.jakarta.activation}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>${jaxb.version}</version>
-        <exclusions>
-          <!--
-            replace with com.sun.activation:jakarta-activation, which includes the API
-            otherwise there are nasty clashes between this and com.sun.mail later
-            -->
-          <exclusion>
-            <groupId>jakarta.activation</groupId>
-            <artifactId>jakarta.activation-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.glassfish.jaxb</groupId>
-        <artifactId>jaxb-runtime</artifactId>
-        <version>${jaxb.version}</version>
-        <exclusions>
-          <!--
-            replace with com.sun.activation:jakarta-activation, which includes the API
-            otherwise there are nasty clashes between this and com.sun.mail later
-          -->
-          <exclusion>
-            <groupId>jakarta.activation</groupId>
-            <artifactId>jakarta.activation-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
         <groupId>jakarta.ws.rs</groupId>
         <artifactId>jakarta.ws.rs-api</artifactId>
         <version>2.1.5</version>
@@ -670,22 +621,19 @@
             <configuration>
               <failOnWarning>true</failOnWarning>
               <ignoredUnusedDeclaredDependencies> <!-- Mostly service-loaded stuff, APIs, also some of our own. -->
-                <ignoredUnusedDeclaredDependency>com.sun.activation</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>jakarta.xml.bind</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>jakarta.annotation</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>jakarta.enterprise</ignoredUnusedDeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.jaxrs</ignoredUsedUndeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>com.sun.mail</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>com.lmax</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>jakarta.enterprise</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.apache.httpcomponents</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>com.lmax</ignoredUnusedDeclaredDependency>
-                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.jaxrs</ignoredUsedUndeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
               <ignoredUsedUndeclaredDependencies>
-                <ignoredUsedUndeclaredDependency>com.sun.mail</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.sun.mail</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>jakarta.xml.bind</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
             </configuration>
           </execution>

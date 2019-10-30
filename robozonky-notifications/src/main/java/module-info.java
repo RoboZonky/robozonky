@@ -1,5 +1,5 @@
 module com.github.robozonky.notifications {
-    requires java.mail;
+    requires jakarta.mail;
     requires commons.email;
     requires freemarker;
     requires io.vavr;
