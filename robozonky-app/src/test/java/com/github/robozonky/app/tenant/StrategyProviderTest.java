@@ -16,15 +16,15 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -48,7 +48,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
             softly.assertThat(r.getToPurchase()).isPresent();
             softly.assertThat(r.getForReservations()).isEmpty();
         });
-        r.valueChanged(MINIMAL_STRATEGY, UUID.randomUUID().toString()); // store invalid strategy
+        r.valueSet(UUID.randomUUID().toString()); // store invalid strategy
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();

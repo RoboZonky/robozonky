@@ -90,11 +90,6 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
     }
 
     @Override
-    public void valueChanged(final ConfigStorage oldValue, final ConfigStorage newValue) {
-        valueSet(newValue);
-    }
-
-    @Override
     public String toString() {
         return "EventListenerSupplier{" +
                 "eventType=" + eventType +

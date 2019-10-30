@@ -16,6 +16,9 @@
 
 package com.github.robozonky.internal.async;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,9 +27,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Represents a resource that can be periodically checked for new results.
@@ -124,12 +124,10 @@ public abstract class Refreshable<T> implements Runnable,
             logger.trace("Value not changed: {}.", this);
             return;
         }
-        if (previous == null) { // value newly available
-            this.listeners.forEach(l -> l.valueSet(result));
-        } else if (result == null) { // value lost
+        if (result == null) { // value lost
             this.listeners.forEach(l -> l.valueUnset(previous));
         } else { // value changed
-            this.listeners.forEach(l -> l.valueChanged(previous, result));
+            this.listeners.forEach(l -> l.valueSet(result));
         }
     }
 
@@ -213,14 +211,6 @@ public abstract class Refreshable<T> implements Runnable,
             // do nothing
         }
 
-        /**
-         * Resource continues to have a value, and that value has changed.
-         * @param oldValue Former value of the resource.
-         * @param newValue New value of the resource.
-         */
-        default void valueChanged(final T oldValue, final T newValue) {
-            valueSet(newValue);
-        }
     }
 
     private final class UpdateNotification implements Refreshable.RefreshListener<T> {
@@ -235,9 +225,5 @@ public abstract class Refreshable<T> implements Runnable,
             logger.trace("Value removed: {}.", this);
         }
 
-        @Override
-        public void valueChanged(final T oldValue, final T newValue) {
-            logger.trace("Value changed to '{}': {}.", newValue, this);
-        }
     }
 }

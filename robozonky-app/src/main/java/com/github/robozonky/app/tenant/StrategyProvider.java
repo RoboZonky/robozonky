@@ -16,13 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -32,6 +25,13 @@ import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.extensions.StrategyLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 class StrategyProvider implements Refreshable.RefreshListener<String> {
 
@@ -90,11 +90,6 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
     public void valueUnset(final String oldValue) {
         Stream.of(toInvest, toSell, toPurchase, forReservations).forEach(ref -> ref.set(null));
         LOGGER.warn("There are no strategies, all operations are disabled.");
-    }
-
-    @Override
-    public void valueChanged(final String oldValue, final String newValue) {
-        valueSet(newValue);
     }
 
     public Optional<InvestmentStrategy> getToInvest() {

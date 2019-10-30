@@ -16,16 +16,16 @@
 
 package com.github.robozonky.internal.async;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,8 +90,7 @@ class RefreshableTest {
         final String otherValue = "other";
         r.setLatestSource(otherValue);
         r.run();
-        verify(l, times(1))
-                .valueChanged(RefreshableTest.transform(initial), RefreshableTest.transform(otherValue));
+        verify(l, times(1)).valueSet(RefreshableTest.transform(otherValue));
         r.setLatestSource(null);
         r.run();
         verify(l, times(1))
@@ -101,7 +100,7 @@ class RefreshableTest {
     @Test
     void refreshListenerDefaultMethod() {
         final Refreshable.RefreshListener<String> l = Mockito.spy(Refreshable.RefreshListener.class);
-        l.valueChanged("a", "b");
+        l.valueSet("b");
         verify(l).valueSet(eq("b"));
     }
 

@@ -16,16 +16,16 @@
 
 package com.github.robozonky.notifications;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.notifications.listeners.RoboZonkyInitializedEventListener;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
 
 class NotificationEventListenerSupplierTest {
 
@@ -51,10 +51,10 @@ class NotificationEventListenerSupplierTest {
         assertThat(s.apply(Target.EMAIL)).isPresent();
         // disabled here
         final ConfigStorage p2 = mockProperties();
-        s.valueChanged(p, p2);
+        s.valueSet(p2);
         assertThat(s.apply(Target.EMAIL)).isEmpty();
         // and re-enabled
-        s.valueChanged(p2, p);
+        s.valueSet(p);
         assertThat(s.apply(Target.EMAIL)).isPresent();
         s.valueUnset(p);
         assertThat(s.apply(Target.EMAIL)).isEmpty();
