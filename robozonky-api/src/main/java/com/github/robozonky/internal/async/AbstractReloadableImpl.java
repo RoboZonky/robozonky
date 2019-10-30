@@ -33,17 +33,17 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
     protected final Logger logger = LogManager.getLogger(getClass());
     private final UnaryOperator<T> operation;
     private final ReloadDetection<T> needsReload;
-    private final List<ChangeListener<T>> listeners;
+    private final List<ReloadListener<T>> listeners;
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                                  final Consumer<T> runWhenReloaded, final Set<ChangeListener<T>> listeners) {
+                                  final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new ManualReload<>();
         this.listeners = new ArrayList<>(listeners);
     }
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                                  final Consumer<T> runWhenReloaded, final Set<ChangeListener<T>> listeners,
+                                  final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
                                   final Function<T, Duration> reloadAfter) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new TimeBasedReload<>(reloadAfter);
@@ -69,7 +69,7 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
         logger.trace("Supplier finished on {}.", this);
         valueSetter.accept(value);
         needsReload.markReloaded(value);
-        listeners.forEach(l -> l.valueSet(value));
+        listeners.forEach(l -> l.newValue(value));
         logger.debug("Reloaded {}, new value is {}.", this, value);
     }
 
@@ -79,7 +79,7 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
 
     @Override
     public void clear() {
-        listeners.forEach(ChangeListener::valueUnset);
+        listeners.forEach(ReloadListener::valueUnset);
         needsReload.forceReload();
     }
 }

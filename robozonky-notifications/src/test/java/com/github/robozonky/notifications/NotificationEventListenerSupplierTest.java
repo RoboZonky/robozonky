@@ -47,14 +47,14 @@ class NotificationEventListenerSupplierTest {
         // the listener is enabled here
         final ConfigStorage p =
                 mockProperties(RoboZonkyInitializedEventListener.class.getResourceAsStream("notifications-enabled.cfg"));
-        s.valueSet(p);
+        s.newValue(p);
         assertThat(s.apply(Target.EMAIL)).isPresent();
         // disabled here
         final ConfigStorage p2 = mockProperties();
-        s.valueSet(p2);
+        s.newValue(p2);
         assertThat(s.apply(Target.EMAIL)).isEmpty();
         // and re-enabled
-        s.valueSet(p);
+        s.newValue(p);
         assertThat(s.apply(Target.EMAIL)).isPresent();
         s.valueUnset();
         assertThat(s.apply(Target.EMAIL)).isEmpty();
@@ -65,7 +65,7 @@ class NotificationEventListenerSupplierTest {
         final NotificationEventListenerSupplier<RoboZonkyCrashedEvent> s =
                 new NotificationEventListenerSupplier<>(RoboZonkyCrashedEvent.class);
         final ConfigStorage p = mockProperties();
-        s.valueSet(p);
+        s.newValue(p);
         assertThat(s.apply(Target.EMAIL)).isEmpty();
     }
 }

@@ -32,8 +32,8 @@ import java.util.function.Supplier;
  * Represents a resource that can be periodically checked for new results.
  * <p>
  * The aim of this class is to be scheduled using a {@link ScheduledExecutorService}, while another thread is reading
- * the latest result. Preferred use is through {@link ChangeListener} as registered via
- * {@link Refreshable#Refreshable(ChangeListener[])}. Alternatively, the latest result is also available
+ * the latest result. Preferred use is through {@link ReloadListener} as registered via
+ * {@link Refreshable#Refreshable(ReloadListener[])}. Alternatively, the latest result is also available
  * via {@link #get()}.
  * <p>
  * Only use this class if you need to periodically refresh a given remote resource and have the latest version of the
@@ -48,17 +48,17 @@ public abstract class Refreshable<T> implements Runnable,
     private final String id;
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
-    private final Collection<ChangeListener<T>> listeners = new CopyOnWriteArraySet<>();
+    private final Collection<ReloadListener<T>> listeners = new CopyOnWriteArraySet<>();
 
     @SafeVarargs
-    protected Refreshable(final ChangeListener<T>... listeners) {
+    protected Refreshable(final ReloadListener<T>... listeners) {
         this(UUID.randomUUID().toString(), listeners);
     }
 
     @SafeVarargs
-    protected Refreshable(final String id, final ChangeListener<T>... listeners) {
+    protected Refreshable(final String id, final ReloadListener<T>... listeners) {
         this.id = id;
-        for (final ChangeListener<T> l : listeners) {
+        for (final ReloadListener<T> l : listeners) {
             this.registerListener(l);
         }
     }
@@ -94,21 +94,21 @@ public abstract class Refreshable<T> implements Runnable,
      * @param listener Listener to register.
      * @return False if already registered.
      */
-    public boolean registerListener(final ChangeListener<T> listener) {
+    public boolean registerListener(final ReloadListener<T> listener) {
         final boolean added = this.listeners.add(listener);
         if (!added) {
             return false;
         }
-        get().ifPresent(listener::valueSet);
+        get().ifPresent(listener::newValue);
         return true;
     }
 
     /**
-     * Unregister a listener previously registered through {@link #registerListener(ChangeListener)}.
+     * Unregister a listener previously registered through {@link #registerListener(ReloadListener)}.
      * @param listener Listener to unregister.
      * @return False if not registered before.
      */
-    public boolean unregisterListener(final ChangeListener<T> listener) {
+    public boolean unregisterListener(final ReloadListener<T> listener) {
         final boolean removed = this.listeners.remove(listener);
         if (!removed) {
             return false;
@@ -124,9 +124,9 @@ public abstract class Refreshable<T> implements Runnable,
             return;
         }
         if (result == null) { // value lost
-            this.listeners.forEach(ChangeListener::valueUnset);
+            this.listeners.forEach(ReloadListener::valueUnset);
         } else { // value changed
-            this.listeners.forEach(l -> l.valueSet(result));
+            this.listeners.forEach(l -> l.newValue(result));
         }
     }
 

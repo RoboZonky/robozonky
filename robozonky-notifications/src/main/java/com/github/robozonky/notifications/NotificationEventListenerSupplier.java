@@ -18,7 +18,7 @@ package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.internal.async.ChangeListener;
+import com.github.robozonky.internal.async.ReloadListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-final class NotificationEventListenerSupplier<T extends Event> implements ChangeListener<ConfigStorage>,
+final class NotificationEventListenerSupplier<T extends Event> implements ReloadListener<ConfigStorage>,
                                                                           Function<Target, Optional<EventListener<T>>> {
 
     private static final Logger LOGGER = LogManager.getLogger(NotificationEventListenerSupplier.class);
@@ -56,7 +56,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Change
     }
 
     @Override
-    public void valueSet(final ConfigStorage newValue) {
+    public void newValue(final ConfigStorage newValue) {
         final Map<Target, EventListener<T>> result = new EnumMap<>(Target.class);
         for (final Target target : Target.values()) {
             final AbstractTargetHandler handler = getTargetHandler(newValue, target);

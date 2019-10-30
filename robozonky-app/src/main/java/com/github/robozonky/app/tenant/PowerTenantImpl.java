@@ -51,15 +51,14 @@ class PowerTenantImpl implements PowerTenant {
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
     private final Lazy<ZonkyApiTokenSupplier> token;
-    private final Lazy<StrategyProvider> strategyProvider;
+    private final StrategyProvider strategyProvider;
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
     private final StatefulBoundedBalance balance;
     private final Lazy<Availability> availability;
 
-    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis,
-                    final Supplier<StrategyProvider> strategyProvider,
+    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
                     final Supplier<ZonkyApiTokenSupplier> tokenSupplier) {
-        this.strategyProvider = Lazy.of(strategyProvider);
+        this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.quotaMonitor = apis.getRequestCounter()
                 .map(r -> (Runnable) new QuotaMonitor(r))
@@ -111,22 +110,22 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Optional<InvestmentStrategy> getInvestmentStrategy() {
-        return strategyProvider.get().getToInvest();
+        return strategyProvider.getToInvest();
     }
 
     @Override
     public Optional<SellStrategy> getSellStrategy() {
-        return strategyProvider.get().getToSell();
+        return strategyProvider.getToSell();
     }
 
     @Override
     public Optional<PurchaseStrategy> getPurchaseStrategy() {
-        return strategyProvider.get().getToPurchase();
+        return strategyProvider.getToPurchase();
     }
 
     @Override
     public Optional<ReservationStrategy> getReservationStrategy() {
-        return strategyProvider.get().getForReservations();
+        return strategyProvider.getForReservations();
     }
 
     @Override

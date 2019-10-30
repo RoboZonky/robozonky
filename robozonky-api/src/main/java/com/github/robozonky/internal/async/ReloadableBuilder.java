@@ -43,7 +43,7 @@ public final class ReloadableBuilder<T> {
     private UnaryOperator<T> reloader;
     private Function<T, Duration> reloadAfter;
     private Consumer<T> finisher;
-    private Set<ChangeListener<T>> listeners = new LinkedHashSet<>(0);
+    private Set<ReloadListener<T>> listeners = new LinkedHashSet<>(0);
     private boolean async = false;
 
     ReloadableBuilder(final Supplier<T> supplier) {
@@ -90,7 +90,7 @@ public final class ReloadableBuilder<T> {
      * @param changeListener
      * @return This.
      */
-    public ReloadableBuilder<T> addListener(final ChangeListener<T> changeListener) {
+    public ReloadableBuilder<T> addListener(final ReloadListener<T> changeListener) {
         listeners.add(changeListener);
         return this;
     }

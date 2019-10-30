@@ -35,7 +35,7 @@ class RefreshableTest {
     }
 
     @Mock
-    private ChangeListener<String> l;
+    private ReloadListener<String> l;
 
     @Test
     void mutableNoRefresh() {
@@ -67,15 +67,15 @@ class RefreshableTest {
         final Refreshable<String> r = new TestingRefreshable(s);
         r.run();
         assertThat(r.registerListener(l)).isTrue();
-        verify(l).valueSet(eq(transformed));
+        verify(l).newValue(eq(transformed));
         assertThat(r.registerListener(l)).isFalse(); // repeat registration
-        verify(l, times(1)).valueSet(eq(transformed));
+        verify(l, times(1)).newValue(eq(transformed));
         assertThat(r.unregisterListener(l)).isTrue();
         verify(l).valueUnset();
         assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
         verify(l, times(1)).valueUnset();
         assertThat(r.registerListener(l)).isTrue(); // re-registration
-        verify(l, times(2)).valueSet(eq(transformed));
+        verify(l, times(2)).newValue(eq(transformed));
     }
 
     @Test
@@ -85,11 +85,11 @@ class RefreshableTest {
         r.registerListener(l);
         r.setLatestSource(initial);
         r.run();
-        verify(l, times(1)).valueSet(RefreshableTest.transform(initial));
+        verify(l, times(1)).newValue(RefreshableTest.transform(initial));
         final String otherValue = "other";
         r.setLatestSource(otherValue);
         r.run();
-        verify(l, times(1)).valueSet(RefreshableTest.transform(otherValue));
+        verify(l, times(1)).newValue(RefreshableTest.transform(otherValue));
         r.setLatestSource(null);
         r.run();
         verify(l, times(1)).valueUnset();
@@ -97,9 +97,9 @@ class RefreshableTest {
 
     @Test
     void refreshListenerDefaultMethod() {
-        final ChangeListener<String> l = spy(ChangeListener.class);
-        l.valueSet("b");
-        verify(l).valueSet(eq("b"));
+        final ReloadListener<String> l = spy(ReloadListener.class);
+        l.newValue("b");
+        verify(l).newValue(eq("b"));
     }
 
     private static final class TestingRefreshable extends Refreshable<String> {

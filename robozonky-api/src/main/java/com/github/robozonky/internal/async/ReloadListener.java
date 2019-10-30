@@ -16,18 +16,13 @@
 
 package com.github.robozonky.internal.async;
 
-/**
- * Listener for changes to the original resource. Use {@link #registerListener(ChangeListener)} to
- * enable. Implementations of methods in this interface must not throw exceptions.
- * @param <T> Target {@link Refreshable}'s generic type.
- */
-public interface ChangeListener<T> {
+public interface ReloadListener<T> {
 
     /**
-     * Resource now has a value where there was none before.
+     * Resource has a new value.
      * @param newValue New value for the resource.
      */
-    default void valueSet(final T newValue) {
+    default void newValue(final T newValue) {
         // do nothing
     }
 
