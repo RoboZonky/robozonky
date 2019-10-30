@@ -95,7 +95,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
         final ZonkyApiToken token = s.getToken()
                 .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
         Files.write(target, ZonkyApiToken.marshal(token).getBytes(Defaults.CHARSET));
-        LOGGER.info("Raw token JSON written to {}.", target);
+        LOGGER.info("Raw token XML written to {}.", target);
     }
 
     @Override
