@@ -20,6 +20,8 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+
 /**
  * Class with some aggregate statistics about user's portfolio. Used primarily as the main input into
  * {@link InvestmentStrategy}.
@@ -41,7 +43,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
         if (invested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getAtRisk().divideBy(invested).getValue());
+        return Ratio.fromRaw(divide(getAtRisk().getValue(), invested.getValue()));
     }
 
     /**
@@ -61,7 +63,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
         if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getAtRisk(r).divideBy(investedPerRating).getValue());
+        return Ratio.fromRaw(divide(getAtRisk(r).getValue(), investedPerRating.getValue()));
     }
 
     /**
@@ -79,7 +81,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
         if (invested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getSellable().divideBy(invested).getValue());
+        return Ratio.fromRaw(divide(getSellable().getValue(), invested.getValue()));
     }
 
     /**
@@ -99,7 +101,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
         if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getSellable(r).divideBy(investedPerRating).getValue());
+        return Ratio.fromRaw(divide(getSellable(r).getValue(), investedPerRating.getValue()));
     }
 
     /**
@@ -117,7 +119,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
         if (invested.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getSellableFeeless().divideBy(invested).getValue());
+        return Ratio.fromRaw(divide(getSellableFeeless().getValue(), invested.getValue()));
     }
 
     /**
@@ -137,7 +139,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
         if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
         }
-        return Ratio.fromRaw(getSellableFeeless(r).divideBy(investedPerRating).getValue());
+        return Ratio.fromRaw(divide(getSellableFeeless(r).getValue(), investedPerRating.getValue()));
     }
 
 }

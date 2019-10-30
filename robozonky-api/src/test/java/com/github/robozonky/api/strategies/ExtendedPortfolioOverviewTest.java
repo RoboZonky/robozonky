@@ -30,15 +30,15 @@ import static org.mockito.Mockito.when;
 
 class ExtendedPortfolioOverviewTest {
 
-    private final ExtendedPortfolioOverview portfolioOverview = new ExtendedPortfolioOverview() {
+    private static final ExtendedPortfolioOverview OVERVIEW = new ExtendedPortfolioOverview() {
         @Override
         public Money getInvested() {
-            return Money.from(100_000);
+            return Money.from(110_000);
         }
 
         @Override
         public Money getInvested(Rating r) {
-            return getInvested().divideBy(Rating.values().length);
+            return Money.from(10_000);
         }
 
         @Override
@@ -53,32 +53,32 @@ class ExtendedPortfolioOverviewTest {
 
         @Override
         public Money getAtRisk() {
-            return Money.from(10_000);
+            return Money.from(11_000);
         }
 
         @Override
         public Money getAtRisk(Rating r) {
-            return getAtRisk().divideBy(Rating.values().length);
+            return Money.from(1_000);
         }
 
         @Override
         public Money getSellable() {
-            return Money.from(50_000);
+            return Money.from(55_000);
         }
 
         @Override
         public Money getSellable(Rating r) {
-            return getSellable().divideBy(Rating.values().length);
+            return Money.from(5_000);
         }
 
         @Override
         public Money getSellableFeeless() {
-            return Money.from(30_000);
+            return Money.from(33_000);
         }
 
         @Override
         public Money getSellableFeeless(Rating r) {
-            return getSellableFeeless().divideBy(Rating.values().length);
+            return Money.from(3_000);
         }
 
     };
@@ -86,12 +86,12 @@ class ExtendedPortfolioOverviewTest {
     @Test
     void values() {
         assertSoftly(softly -> {
-            softly.assertThat(portfolioOverview.getShareAtRisk()).isEqualTo(Ratio.fromRaw("0.1"));
-            softly.assertThat(portfolioOverview.getAtRiskShareOnInvestment(Rating.A)).isEqualTo(Ratio.fromRaw("0.1"));
-            softly.assertThat(portfolioOverview.getShareSellable()).isEqualTo(Ratio.fromRaw("0.5"));
-            softly.assertThat(portfolioOverview.getShareSellable(Rating.A)).isEqualTo(Ratio.fromRaw("0.5"));
-            softly.assertThat(portfolioOverview.getShareSellableFeeless()).isEqualTo(Ratio.fromRaw("0.3"));
-            softly.assertThat(portfolioOverview.getShareSellableFeeless(Rating.A)).isEqualTo(Ratio.fromRaw("0.3"));
+            softly.assertThat(OVERVIEW.getShareAtRisk()).isEqualTo(Ratio.fromRaw("0.10"));
+            softly.assertThat(OVERVIEW.getAtRiskShareOnInvestment(Rating.A)).isEqualTo(Ratio.fromRaw("0.1"));
+            softly.assertThat(OVERVIEW.getShareSellable()).isEqualTo(Ratio.fromRaw("0.5"));
+            softly.assertThat(OVERVIEW.getShareSellable(Rating.A)).isEqualTo(Ratio.fromRaw("0.5"));
+            softly.assertThat(OVERVIEW.getShareSellableFeeless()).isEqualTo(Ratio.fromRaw("0.3"));
+            softly.assertThat(OVERVIEW.getShareSellableFeeless(Rating.A)).isEqualTo(Ratio.fromRaw("0.3"));
         });
     }
 

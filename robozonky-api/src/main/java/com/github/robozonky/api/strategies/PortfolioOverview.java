@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.function.Function;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 /**
@@ -58,7 +59,7 @@ public interface PortfolioOverview {
             return Ratio.ZERO;
         }
         Money investedInRating = getInvested(r);
-        BigDecimal ratio = BigDecimalCalculator.divide(investedInRating.getValue(), total.getValue());
+        BigDecimal ratio = divide(investedInRating.getValue(), total.getValue());
         return Ratio.fromRaw(ratio);
     }
 
