@@ -20,7 +20,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.internal.async.Refreshable;
+import com.github.robozonky.internal.async.ChangeListener;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.extensions.StrategyLoader;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-class StrategyProvider implements Refreshable.RefreshListener<String> {
+class StrategyProvider implements ChangeListener<String> {
 
     private static final Logger LOGGER = LogManager.getLogger(StrategyProvider.class);
 

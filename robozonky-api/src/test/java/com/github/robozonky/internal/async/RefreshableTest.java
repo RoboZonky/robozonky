@@ -36,7 +36,7 @@ class RefreshableTest {
     }
 
     @Mock
-    private Refreshable.RefreshListener<String> l;
+    private ChangeListener<String> l;
 
     @Test
     void mutableNoRefresh() {
@@ -99,7 +99,7 @@ class RefreshableTest {
 
     @Test
     void refreshListenerDefaultMethod() {
-        final Refreshable.RefreshListener<String> l = Mockito.spy(Refreshable.RefreshListener.class);
+        final ChangeListener<String> l = Mockito.spy(ChangeListener.class);
         l.valueSet("b");
         verify(l).valueSet(eq("b"));
     }

@@ -32,8 +32,8 @@ import java.util.function.Supplier;
  * Represents a resource that can be periodically checked for new results.
  * <p>
  * The aim of this class is to be scheduled using a {@link ScheduledExecutorService}, while another thread is reading
- * the latest result. Preferred use is through {@link Refreshable.RefreshListener} as registered via
- * {@link Refreshable#Refreshable(Refreshable.RefreshListener[])}. Alternatively, the latest result is also available
+ * the latest result. Preferred use is through {@link ChangeListener} as registered via
+ * {@link Refreshable#Refreshable(ChangeListener[])}. Alternatively, the latest result is also available
  * via {@link #get()}.
  * <p>
  * Only use this class if you need to periodically refresh a given remote resource and have the latest version of the
@@ -48,18 +48,18 @@ public abstract class Refreshable<T> implements Runnable,
     private final String id;
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
-    private final Collection<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
+    private final Collection<ChangeListener<T>> listeners = new CopyOnWriteArraySet<>();
 
     @SafeVarargs
-    protected Refreshable(final Refreshable.RefreshListener<T>... listeners) {
+    protected Refreshable(final ChangeListener<T>... listeners) {
         this(UUID.randomUUID().toString(), listeners);
     }
 
     @SafeVarargs
-    protected Refreshable(final String id, final Refreshable.RefreshListener<T>... listeners) {
+    protected Refreshable(final String id, final ChangeListener<T>... listeners) {
         this.id = id;
         this.registerListener(new UpdateNotification());
-        for (final Refreshable.RefreshListener<T> l : listeners) {
+        for (final ChangeListener<T> l : listeners) {
             this.registerListener(l);
         }
     }
@@ -95,7 +95,7 @@ public abstract class Refreshable<T> implements Runnable,
      * @param listener Listener to register.
      * @return False if already registered.
      */
-    public boolean registerListener(final Refreshable.RefreshListener<T> listener) {
+    public boolean registerListener(final ChangeListener<T> listener) {
         final boolean added = this.listeners.add(listener);
         if (!added) {
             return false;
@@ -105,11 +105,11 @@ public abstract class Refreshable<T> implements Runnable,
     }
 
     /**
-     * Unregister a listener previously registered through {@link #registerListener(Refreshable.RefreshListener)}.
+     * Unregister a listener previously registered through {@link #registerListener(ChangeListener)}.
      * @param listener Listener to unregister.
      * @return False if not registered before.
      */
-    public boolean unregisterListener(final Refreshable.RefreshListener<T> listener) {
+    public boolean unregisterListener(final ChangeListener<T> listener) {
         final boolean removed = this.listeners.remove(listener);
         if (!removed) {
             return false;
@@ -188,32 +188,7 @@ public abstract class Refreshable<T> implements Runnable,
         return this.getClass().getSimpleName() + "{id='" + id + "'}";
     }
 
-    /**
-     * Listener for changes to the original resource. Use {@link #registerListener(Refreshable.RefreshListener)} to
-     * enable. Implementations of methods in this interface must not throw exceptions.
-     * @param <T> Target {@link Refreshable}'s generic type.
-     */
-    public interface RefreshListener<T> {
-
-        /**
-         * Resource now has a value where there was none before.
-         * @param newValue New value for the resource.
-         */
-        default void valueSet(final T newValue) {
-            // do nothing
-        }
-
-        /**
-         * Resource used to have a value but no longer has one.
-         * @param oldValue Former value of the resource.
-         */
-        default void valueUnset(final T oldValue) {
-            // do nothing
-        }
-
-    }
-
-    private final class UpdateNotification implements Refreshable.RefreshListener<T> {
+    private final class UpdateNotification implements ChangeListener<T> {
 
         @Override
         public void valueSet(final T newValue) {

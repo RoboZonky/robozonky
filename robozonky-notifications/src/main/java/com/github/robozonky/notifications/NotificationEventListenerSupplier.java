@@ -18,7 +18,7 @@ package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.internal.async.Refreshable;
+import com.github.robozonky.internal.async.ChangeListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-final class NotificationEventListenerSupplier<T extends Event> implements Refreshable.RefreshListener<ConfigStorage>,
+final class NotificationEventListenerSupplier<T extends Event> implements ChangeListener<ConfigStorage>,
                                                                           Function<Target, Optional<EventListener<T>>> {
 
     private static final Logger LOGGER = LogManager.getLogger(NotificationEventListenerSupplier.class);
