@@ -67,7 +67,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
             softly.assertThat(r.getToPurchase()).isPresent();
             softly.assertThat(r.getForReservations()).isEmpty();
         });
-        r.valueUnset(MINIMAL_STRATEGY);
+        r.valueUnset();
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();

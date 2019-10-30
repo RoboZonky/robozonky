@@ -56,7 +56,7 @@ class NotificationEventListenerSupplierTest {
         // and re-enabled
         s.valueSet(p);
         assertThat(s.apply(Target.EMAIL)).isPresent();
-        s.valueUnset(p);
+        s.valueUnset();
         assertThat(s.apply(Target.EMAIL)).isEmpty();
     }
 

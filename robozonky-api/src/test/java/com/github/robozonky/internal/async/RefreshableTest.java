@@ -19,7 +19,6 @@ package com.github.robozonky.internal.async;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -72,9 +71,9 @@ class RefreshableTest {
         assertThat(r.registerListener(l)).isFalse(); // repeat registration
         verify(l, times(1)).valueSet(eq(transformed));
         assertThat(r.unregisterListener(l)).isTrue();
-        verify(l).valueUnset(eq(transformed));
+        verify(l).valueUnset();
         assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
-        verify(l, times(1)).valueUnset(eq(transformed));
+        verify(l, times(1)).valueUnset();
         assertThat(r.registerListener(l)).isTrue(); // re-registration
         verify(l, times(2)).valueSet(eq(transformed));
     }
@@ -93,13 +92,12 @@ class RefreshableTest {
         verify(l, times(1)).valueSet(RefreshableTest.transform(otherValue));
         r.setLatestSource(null);
         r.run();
-        verify(l, times(1))
-                .valueUnset(RefreshableTest.transform(otherValue));
+        verify(l, times(1)).valueUnset();
     }
 
     @Test
     void refreshListenerDefaultMethod() {
-        final ChangeListener<String> l = Mockito.spy(ChangeListener.class);
+        final ChangeListener<String> l = spy(ChangeListener.class);
         l.valueSet("b");
         verify(l).valueSet(eq("b"));
     }

@@ -87,7 +87,7 @@ class StrategyProvider implements ChangeListener<String> {
     }
 
     @Override
-    public void valueUnset(final String oldValue) {
+    public void valueUnset() {
         Stream.of(toInvest, toSell, toPurchase, forReservations).forEach(ref -> ref.set(null));
         LOGGER.warn("There are no strategies, all operations are disabled.");
     }

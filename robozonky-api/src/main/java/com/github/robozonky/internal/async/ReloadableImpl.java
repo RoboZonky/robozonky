@@ -16,28 +16,30 @@
 
 package com.github.robozonky.internal.async;
 
+import io.vavr.control.Either;
+import io.vavr.control.Try;
+
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import io.vavr.control.Either;
-import io.vavr.control.Try;
-
 final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
 
     private final AtomicReference<T> value = new AtomicReference<>();
 
     public ReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                          final Consumer<T> runWhenReloaded) {
-        super(supplier, reloader, runWhenReloaded);
+                          final Consumer<T> runWhenReloaded, final Set<ChangeListener<T>> listeners) {
+        super(supplier, reloader, runWhenReloaded, listeners);
     }
 
     public ReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                          final Consumer<T> runWhenReloaded, final Function<T, Duration> reloadAfter) {
-        super(supplier, reloader, runWhenReloaded, reloadAfter);
+                          final Consumer<T> runWhenReloaded, final Set<ChangeListener<T>> listeners,
+                          final Function<T, Duration> reloadAfter) {
+        super(supplier, reloader, runWhenReloaded, listeners, reloadAfter);
     }
 
     @Override

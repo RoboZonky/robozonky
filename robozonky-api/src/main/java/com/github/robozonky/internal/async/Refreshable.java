@@ -58,7 +58,6 @@ public abstract class Refreshable<T> implements Runnable,
     @SafeVarargs
     protected Refreshable(final String id, final ChangeListener<T>... listeners) {
         this.id = id;
-        this.registerListener(new UpdateNotification());
         for (final ChangeListener<T> l : listeners) {
             this.registerListener(l);
         }
@@ -114,7 +113,7 @@ public abstract class Refreshable<T> implements Runnable,
         if (!removed) {
             return false;
         }
-        get().ifPresent(listener::valueUnset);
+        get().ifPresent(v -> listener.valueUnset());
         return true;
     }
 
@@ -125,7 +124,7 @@ public abstract class Refreshable<T> implements Runnable,
             return;
         }
         if (result == null) { // value lost
-            this.listeners.forEach(l -> l.valueUnset(previous));
+            this.listeners.forEach(ChangeListener::valueUnset);
         } else { // value changed
             this.listeners.forEach(l -> l.valueSet(result));
         }
@@ -188,17 +187,4 @@ public abstract class Refreshable<T> implements Runnable,
         return this.getClass().getSimpleName() + "{id='" + id + "'}";
     }
 
-    private final class UpdateNotification implements ChangeListener<T> {
-
-        @Override
-        public void valueSet(final T newValue) {
-            logger.trace("New value '{}': {}.", newValue, this);
-        }
-
-        @Override
-        public void valueUnset(final T oldValue) {
-            logger.trace("Value removed: {}.", this);
-        }
-
-    }
 }

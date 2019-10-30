@@ -85,7 +85,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Change
     }
 
     @Override
-    public void valueUnset(final ConfigStorage oldValue) {
+    public void valueUnset() {
         value.set(Collections.emptyMap());
     }
 

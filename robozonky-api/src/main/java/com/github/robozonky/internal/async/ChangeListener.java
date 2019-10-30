@@ -33,9 +33,8 @@ public interface ChangeListener<T> {
 
     /**
      * Resource used to have a value but no longer has one.
-     * @param oldValue Former value of the resource.
      */
-    default void valueUnset(final T oldValue) {
+    default void valueUnset() {
         // do nothing
     }
 

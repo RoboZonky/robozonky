@@ -16,15 +16,17 @@
 
 package com.github.robozonky.internal.async;
 
+import io.vavr.control.Either;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.Duration;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-
-import io.vavr.control.Either;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Builds an instance of {@link Reloadable}.
@@ -41,6 +43,7 @@ public final class ReloadableBuilder<T> {
     private UnaryOperator<T> reloader;
     private Function<T, Duration> reloadAfter;
     private Consumer<T> finisher;
+    private Set<ChangeListener<T>> listeners = new LinkedHashSet<>(0);
     private boolean async = false;
 
     ReloadableBuilder(final Supplier<T> supplier) {
@@ -75,10 +78,20 @@ public final class ReloadableBuilder<T> {
      * every other instance will be retrieved using the function provided here.
      * @param reloader Previous instance retrieved by previous invocation of the supplier above or the function
      * provided here.
-     * @return Fresh instance.
+     * @return This.
      */
     public ReloadableBuilder<T> reloadWith(final UnaryOperator<T> reloader) {
         this.reloader = reloader;
+        return this;
+    }
+
+    /**
+     * Add a listener to run every time a value changes.
+     * @param changeListener
+     * @return This.
+     */
+    public ReloadableBuilder<T> addListener(final ChangeListener<T> changeListener) {
+        listeners.add(changeListener);
         return this;
     }
 
@@ -127,12 +140,12 @@ public final class ReloadableBuilder<T> {
         final UnaryOperator<T> reload = reloader == null ? t -> supplier.get() : reloader;
         if (reloadAfter == null) {
             return async ?
-                    new AsyncReloadableImpl<>(supplier, reload, finish) :
-                    new ReloadableImpl<>(supplier, reload, finish);
+                    new AsyncReloadableImpl<>(supplier, reload, finish, listeners) :
+                    new ReloadableImpl<>(supplier, reload, finish, listeners);
         } else {
             return async ?
-                    new AsyncReloadableImpl<>(supplier, reload, finish, reloadAfter) :
-                    new ReloadableImpl<>(supplier, reload, finish, reloadAfter);
+                    new AsyncReloadableImpl<>(supplier, reload, finish, listeners, reloadAfter) :
+                    new ReloadableImpl<>(supplier, reload, finish, listeners, reloadAfter);
         }
     }
 }
