@@ -19,7 +19,6 @@ package com.github.robozonky.app;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.management.Management;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,8 +80,6 @@ public class App implements Runnable {
         Events.global().fire(EventFactory.roboZonkyStarting());
         shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         shutdownHooks.register(() -> Optional.of(r -> LogManager.shutdown()));
-        // will close event-firing thread == must be triggered last == must be registered first
-        shutdownHooks.register(() -> Optional.of(r -> Tasks.closeAll()));
         // will trigger events on startup and shutdown, therefore needs to be shut down before the one above
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         // trigger all shutdown hooks in reverse order, before the token is closed after exiting this method

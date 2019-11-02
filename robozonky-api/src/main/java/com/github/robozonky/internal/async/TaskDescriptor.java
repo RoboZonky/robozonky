@@ -16,15 +16,15 @@
 
 package com.github.robozonky.internal.async;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.LongAdder;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class TaskDescriptor {
 
@@ -49,7 +49,7 @@ final class TaskDescriptor {
         this.timeout = timeout;
     }
 
-    public void schedule(final Scheduler scheduler) {
+    public void schedule(final ForkJoinPoolBasedScheduler scheduler) {
         schedule(scheduler, true);
     }
 
@@ -73,8 +73,8 @@ final class TaskDescriptor {
         return timeoutCount.sum();
     }
 
-    private void schedule(final Scheduler scheduler, final boolean firstCall) {
-        if (scheduler.getExecutor().isShutdown()) {
+    private void schedule(final ForkJoinPoolBasedScheduler scheduler, final boolean firstCall) {
+        if (Tasks.INSTANCE.isShuttingDown()) {
             LOGGER.debug("Not scheduling {} as {} shutdown.", toSchedule, scheduler);
             return;
         }
@@ -82,28 +82,28 @@ final class TaskDescriptor {
         final Duration delay = firstCall ? initialDelay : delayInBetween;
         final long totalNanos = delay.toNanos();
         LOGGER.trace("Scheduling {} to happen after {} ns.", toSchedule, totalNanos);
-        final ScheduledFuture<?> f =
-                scheduler.getSchedulingExecutor().schedule(toSubmit, totalNanos, TimeUnit.NANOSECONDS);
+        final ScheduledFuture<?> f = Tasks.INSTANCE.schedulingExecutor().schedule(toSubmit, totalNanos, TimeUnit.NANOSECONDS);
         schedulingCount.increment();
         future.setCurrent(f);
     }
 
-    private void submit(final Scheduler scheduler) {
+    private void submit(final ForkJoinPoolBasedScheduler scheduler) {
         final Runnable runnable = () -> {
             LOGGER.trace("Running {}.", toSchedule);
             toSchedule.run();
         };
         final long totalNanos = timeout.toNanos();
         LOGGER.debug("Submitting {} for actual execution.", toSchedule);
-        CompletableFuture<Void> cf = CompletableFuture.runAsync(runnable, scheduler.getExecutor());
+        CompletableFuture<Void> cf = CompletableFuture.runAsync(runnable);
         if (totalNanos > 0) {
             LOGGER.debug("Will be killed in {} ns.", totalNanos);
             cf = cf.orTimeout(totalNanos, TimeUnit.NANOSECONDS);
         }
-        cf.handleAsync((r, t) -> rescheduleOrFail(scheduler, r, t), scheduler.getExecutor());
+        cf.handleAsync((r, t) -> rescheduleOrFail(scheduler, r, t));
     }
 
-    private Void rescheduleOrFail(final Scheduler scheduler, final Void result, final Throwable failure) {
+    private Void rescheduleOrFail(final ForkJoinPoolBasedScheduler scheduler, final Void result,
+                                  final Throwable failure) {
         if (failure == null) { // reschedule
             LOGGER.trace("Completed {} successfully.", toSchedule);
             schedule(scheduler, false);

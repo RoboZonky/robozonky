@@ -23,7 +23,6 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.remote.*;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.TenantState;
@@ -160,8 +159,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     @AfterEach
     void closeSchedulers() {
-        logger.debug("Shutting down internal executors.");
-        Tasks.closeAll();
         logger.debug("Awaiting common ForkJoinPool quiescence.");
         final boolean success = ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.SECONDS);
         if (success) {

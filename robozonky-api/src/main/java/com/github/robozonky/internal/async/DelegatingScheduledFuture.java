@@ -16,16 +16,12 @@
 
 package com.github.robozonky.internal.async;
 
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The point of this class is to always provide access to the latest {@link ScheduledFuture} as specific in
- * {@link ThreadPoolExecutorBasedScheduler}. It doesn't do anything other than delegate all calls to the most recent
+ * {@link ForkJoinPoolBasedScheduler}. It doesn't do anything other than delegate all calls to the most recent
  * {@link ScheduledFuture}.
  * @param <T>
  */

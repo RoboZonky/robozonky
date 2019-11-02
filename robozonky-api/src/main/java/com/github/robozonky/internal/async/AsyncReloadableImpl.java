@@ -57,7 +57,7 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
 
     CompletableFuture<Void> refreshIfNotAlreadyRefreshing(final CompletableFuture<Void> old) {
         if (old == null || old.isDone()) {
-            return CompletableFuture.runAsync(this::asyncReload, Tasks.INSTANCE.scheduler().getExecutor());
+            return CompletableFuture.runAsync(this::asyncReload);
         } else {
             logger.trace("Reload already in progress on {} with {}.", this, old);
             return old;

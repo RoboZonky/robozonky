@@ -16,68 +16,36 @@
 
 package com.github.robozonky.internal.async;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public enum Tasks implements AutoCloseable {
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
-    INSTANCE(Executors::newCachedThreadPool);
+public enum Tasks {
 
-    private static final Logger LOGGER = LogManager.getLogger(Tasks.class);
-    private static final Reloadable<ScheduledExecutorService> SCHEDULING_EXECUTOR =
-            Reloadable.with(Tasks::createSchedulingExecutor).build();
-    private final Reloadable<? extends Scheduler> scheduler;
+    INSTANCE;
 
-    Tasks(final Supplier<ExecutorService> service) {
-        this.scheduler = Reloadable.with(() -> createScheduler(service.get())).build();
+    private final Logger logger = LogManager.getLogger(Tasks.class);
+    private final ScheduledExecutorService schedulingExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final ForkJoinPoolBasedScheduler scheduler = new ForkJoinPoolBasedScheduler();
+
+    Tasks() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.debug("Requesting scheduling executor shutdown.");
+            schedulingExecutor.shutdownNow();
+        }));
     }
 
-    private static ScheduledExecutorService createSchedulingExecutor() {
-        return Executors.newSingleThreadScheduledExecutor();
+    public boolean isShuttingDown() {
+        return schedulingExecutor.isShutdown();
     }
 
-    public static void closeAll() {
-        if (SCHEDULING_EXECUTOR.hasValue()) {
-            schedulingExecutor().shutdown();
-            SCHEDULING_EXECUTOR.clear();
-        }
-        Stream.of(values()).forEach(Tasks::close);
-    }
-
-    static ScheduledExecutorService schedulingExecutor() {
-        return SCHEDULING_EXECUTOR.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
-    }
-
-    private Scheduler createScheduler(final ExecutorService actualExecutor) {
-        LOGGER.debug("Instantiating new background scheduler {}.", this);
-        return new ThreadPoolExecutorBasedScheduler(schedulingExecutor(), actualExecutor, this::clear);
-    }
-
-    private void clear() {
-        scheduler.clear();
-        LOGGER.debug("Cleared background scheduler: {}.", this);
+    ScheduledExecutorService schedulingExecutor() {
+        return schedulingExecutor;
     }
 
     public Scheduler scheduler() {
-        return scheduler.get().getOrElseThrow(() -> new IllegalStateException("Impossible."));
-    }
-
-    @Override
-    public void close() {
-        if (!scheduler.hasValue()) {
-            LOGGER.debug("No scheduler to close: {}.", this);
-            return;
-        }
-        try {
-            scheduler().close();
-        } catch (final Exception ex) { // nothing we can actually do here
-            LOGGER.debug("Failed closing scheduler {}.", this, ex);
-        }
+        return scheduler;
     }
 }
