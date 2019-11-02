@@ -43,21 +43,21 @@ class NotificationEventListenerSupplierTest {
     void lifecycle() throws IOException {
         final NotificationEventListenerSupplier<RoboZonkyInitializedEvent> s =
                 new NotificationEventListenerSupplier<>(RoboZonkyInitializedEvent.class);
-        assertThat(s.apply(Target.EMAIL)).isEmpty();
+        assertThat(s.apply(Target.EMAIL)).isNull();
         // the listener is enabled here
         final ConfigStorage p =
                 mockProperties(RoboZonkyInitializedEventListener.class.getResourceAsStream("notifications-enabled.cfg"));
-        s.newValue(p);
-        assertThat(s.apply(Target.EMAIL)).isPresent();
+        s.configure(p);
+        assertThat(s.apply(Target.EMAIL)).isNotNull();
         // disabled here
         final ConfigStorage p2 = mockProperties();
-        s.newValue(p2);
-        assertThat(s.apply(Target.EMAIL)).isEmpty();
+        s.configure(p2);
+        assertThat(s.apply(Target.EMAIL)).isNull();
         // and re-enabled
-        s.newValue(p);
-        assertThat(s.apply(Target.EMAIL)).isPresent();
-        s.valueUnset();
-        assertThat(s.apply(Target.EMAIL)).isEmpty();
+        s.configure(p);
+        assertThat(s.apply(Target.EMAIL)).isNotNull();
+        s.disable();
+        assertThat(s.apply(Target.EMAIL)).isNull();
     }
 
     @Test
@@ -65,7 +65,7 @@ class NotificationEventListenerSupplierTest {
         final NotificationEventListenerSupplier<RoboZonkyCrashedEvent> s =
                 new NotificationEventListenerSupplier<>(RoboZonkyCrashedEvent.class);
         final ConfigStorage p = mockProperties();
-        s.newValue(p);
-        assertThat(s.apply(Target.EMAIL)).isEmpty();
+        s.configure(p);
+        assertThat(s.apply(Target.EMAIL)).isNull();
     }
 }

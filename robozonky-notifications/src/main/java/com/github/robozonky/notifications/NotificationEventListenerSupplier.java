@@ -18,24 +18,20 @@ package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.internal.async.ReloadListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-final class NotificationEventListenerSupplier<T extends Event> implements ReloadListener<ConfigStorage>,
-                                                                          Function<Target, Optional<EventListener<T>>> {
+final class NotificationEventListenerSupplier<T extends Event> implements Function<Target, EventListener<T>> {
 
     private static final Logger LOGGER = LogManager.getLogger(NotificationEventListenerSupplier.class);
 
     private final Class<T> eventType;
+    private final AtomicReference<ConfigStorage> lastConfigUsed = new AtomicReference<>();
     private final AtomicReference<Map<Target, EventListener<T>>> value = new AtomicReference<>(Collections.emptyMap());
 
     public NotificationEventListenerSupplier(final Class<T> eventType) {
@@ -51,15 +47,19 @@ final class NotificationEventListenerSupplier<T extends Event> implements Reload
         }
     }
 
-    public Optional<EventListener<T>> apply(final Target target) {
-        return Optional.ofNullable(value.get().get(target));
+    public EventListener<T> apply(final Target target) {
+        return value.get().get(target);
     }
 
-    @Override
-    public void newValue(final ConfigStorage newValue) {
+    public void configure(final ConfigStorage newConfig) {
+        var oldConfig = lastConfigUsed.getAndSet(newConfig);
+        if (Objects.equals(oldConfig, newConfig)) {
+            LOGGER.debug("Not reconfiguring listener for {}.", eventType);
+            return;
+        }
         final Map<Target, EventListener<T>> result = new EnumMap<>(Target.class);
         for (final Target target : Target.values()) {
-            final AbstractTargetHandler handler = getTargetHandler(newValue, target);
+            final AbstractTargetHandler handler = getTargetHandler(newConfig, target);
             if (!handler.isEnabledInSettings()) {
                 LOGGER.debug("Notifications are disabled: {}.", target.getId());
                 continue;
@@ -84,8 +84,8 @@ final class NotificationEventListenerSupplier<T extends Event> implements Reload
         return Optional.ofNullable(result);
     }
 
-    @Override
-    public void valueUnset() {
+    public void disable() {
+        LOGGER.debug("Disabling notifications for {}.", eventType);
         value.set(Collections.emptyMap());
     }
 
