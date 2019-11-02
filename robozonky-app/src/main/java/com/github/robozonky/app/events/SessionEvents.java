@@ -88,10 +88,10 @@ public final class SessionEvents {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static List<EventListenerSupplier<? extends Event>> retrieveListenerSuppliers(final Class eventType) {
+    private List<EventListenerSupplier<? extends Event>> retrieveListenerSuppliers(final Class eventType) {
         final Class<? extends Event> impl = getImplementingEvent(eventType);
         LOGGER.trace("Event {} implements {}.", eventType, impl);
-        return Collections.unmodifiableList(ListenerServiceLoader.load(impl));
+        return Collections.unmodifiableList(ListenerServiceLoader.load(sessionInfo, impl));
     }
 
     /**
@@ -119,7 +119,7 @@ public final class SessionEvents {
         debugListeners.forEach(l -> l.requested(event));
         final Class<? extends Event> eventType = event.getEventType();
         final List<EventListenerSupplier<? extends Event>> s =
-                suppliers.computeIfAbsent(eventType, SessionEvents::retrieveListenerSuppliers);
+                suppliers.computeIfAbsent(eventType, this::retrieveListenerSuppliers);
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream()
                 .map(Supplier::get)

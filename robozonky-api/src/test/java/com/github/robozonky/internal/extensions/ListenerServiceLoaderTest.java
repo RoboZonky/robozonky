@@ -16,20 +16,8 @@
 
 package com.github.robozonky.internal.extensions;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.api.notifications.EventListenerSupplier;
-import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.internal.state.TenantState;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
@@ -38,11 +26,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ListenerServiceLoaderTest {
+
+    private static final SessionInfo SESSION = new SessionInfo("someone@somewhere.cz");
 
     @Mock
     private EventListener<RoboZonkyStartingEvent> l;
@@ -56,13 +54,13 @@ class ListenerServiceLoaderTest {
     void correctLoading() {
         final ListenerService s1 = mock(ListenerService.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> returned = () -> Optional.of(l);
-        doAnswer(i -> Stream.of(returned)).when(s1).findListeners(eq(RoboZonkyStartingEvent.class));
+        doAnswer(i -> Stream.of(returned)).when(s1).findListeners(eq(SESSION), eq(RoboZonkyStartingEvent.class));
         final ListenerService s2 = mock(ListenerService.class);
         doAnswer(i -> Stream.of((EventListenerSupplier<RoboZonkyStartingEvent>) Optional::empty))
-                .when(s2).findListeners(eq(RoboZonkyStartingEvent.class));
+                .when(s2).findListeners(eq(SESSION), eq(RoboZonkyStartingEvent.class));
         final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2).iterator();
         final List<EventListenerSupplier<RoboZonkyStartingEvent>> r =
-                ListenerServiceLoader.load(RoboZonkyStartingEvent.class, s);
+                ListenerServiceLoader.load(SESSION, RoboZonkyStartingEvent.class, s);
         assertThat(r).hasSize(2);
         assertThat(r)
                 .first()
@@ -76,18 +74,17 @@ class ListenerServiceLoaderTest {
     @Test
     void empty() {
         final List<EventListenerSupplier<RoboZonkyTestingEvent>> r =
-                ListenerServiceLoader.load(RoboZonkyTestingEvent.class);
+                ListenerServiceLoader.load(SESSION, RoboZonkyTestingEvent.class);
         assertThat(r).isEmpty(); // no providers registered by default
     }
 
     @Test
     void configuration() throws MalformedURLException {
-        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
         final String url = "http://localhost";
-        assertThat(ListenerServiceLoader.getNotificationConfiguration(sessionInfo)).isEmpty();
-        ListenerServiceLoader.registerConfiguration(sessionInfo, new URL(url));
-        assertThat(ListenerServiceLoader.getNotificationConfiguration(sessionInfo)).contains(url);
-        ListenerServiceLoader.unregisterConfiguration(sessionInfo);
-        assertThat(ListenerServiceLoader.getNotificationConfiguration(sessionInfo)).isEmpty();
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(SESSION)).isEmpty();
+        ListenerServiceLoader.registerConfiguration(SESSION, new URL(url));
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(SESSION)).contains(url);
+        ListenerServiceLoader.unregisterConfiguration(SESSION);
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(SESSION)).isEmpty();
     }
 }

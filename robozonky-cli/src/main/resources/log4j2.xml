@@ -61,8 +61,10 @@
       <AppenderRef ref="DEBUG"/>  <!-- All RoboZonky logging goes into a single file. -->
     </Root>
 
-    <Logger name="javax.mail" level="error" />  <!-- avoid an unkillable useless warning -->
-    <Logger name="org.apache.http" level="warn" />  <!-- not interested in org.apache.http.NoHttpResponseException as they get retried anyway -->
     <Logger name="com.github.robozonky" level="debug" /> <!-- change "debug" to "trace" for more detailed logging -->
+    <!-- kill various unavoidable messages -->
+    <Logger name="javax.mail" level="error" />
+    <Logger name="org.apache.http" level="warn" />
+    <Logger name="org.jboss.resteasy" level="warn" />
   </Loggers>
 </Configuration>

@@ -20,70 +20,94 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.internal.Settings;
-import com.github.robozonky.internal.async.Tasks;
+import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
-import com.github.robozonky.internal.state.TenantState;
+import com.github.robozonky.internal.util.UrlUtil;
+import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.github.robozonky.internal.Defaults.CHARSET;
 
 public final class NotificationListenerService implements ListenerService {
 
     private static final Logger LOGGER = LogManager.getLogger(NotificationListenerService.class);
 
-    private final Map<String, RefreshableConfigStorage> CONFIGURATIONS = new HashMap<>(0);
+    private final Map<String, Reloadable<ConfigStorage>> configurations = new HashMap<>(0);
 
-    private static Optional<RefreshableConfigStorage> readConfig(final String configLocation) {
+    private static ConfigStorage transform(final String source) {
+        return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(CHARSET)))
+                .of(ConfigStorage::create)
+                .getOrElseThrow(t -> new IllegalStateException("Failed parsing notification configuration.", t));
+    }
+
+    private static String retrieve(final URL source) {
+        LOGGER.debug("Reading notification configuration from '{}'.", source);
+        return Try.withResources(() -> new BufferedReader(new InputStreamReader(UrlUtil.open(source), CHARSET)))
+                .of(r -> r.lines().collect(Collectors.joining(System.lineSeparator())))
+                .getOrElseThrow(t -> new IllegalStateException("Failed reading notification configuration from " + source, t));
+    }
+
+    private Optional<Reloadable<ConfigStorage>> readConfig(final String configLocation) {
         try {
-            final URL config = new URL(configLocation);
-            return Optional.of(new RefreshableConfigStorage(config));
+            var config = new URL(configLocation);
+            var configStorage = Reloadable.with(() -> transform(retrieve(config)))
+                    .reloadAfter(Duration.ofHours(1))
+                    .async()
+                    .build();
+            return Optional.of(configStorage);
         } catch (final MalformedURLException ex) {
             LOGGER.warn("Wrong notification configuration location.", ex);
             return Optional.empty();
         }
     }
 
-    private synchronized Optional<RefreshableConfigStorage> getTenantConfigurations(final SessionInfo sessionInfo) {
-        final String username = sessionInfo.getUsername();
-        if (!CONFIGURATIONS.containsKey(username)) { // already initialized
-            final Optional<String> value = ListenerServiceLoader.getNotificationConfiguration(sessionInfo);
-            if (!value.isPresent()) {
+    private synchronized Optional<Reloadable<ConfigStorage>> getTenantConfiguration(final SessionInfo sessionInfo) {
+        var username = sessionInfo.getUsername();
+        if (!configurations.containsKey(username)) { // already initialized
+            var maybeConfig = ListenerServiceLoader.getNotificationConfiguration(sessionInfo);
+            if (maybeConfig.isEmpty()) {
                 LOGGER.debug("Notifications disabled for '{}'.", username);
                 return Optional.empty();
             }
-            final String config = value.get();
-            readConfig(config).ifPresent(props -> {
-                LOGGER.debug("Initializing notifications for '{}' from {}.", username, config);
-                Tasks.INSTANCE.scheduler().submit(props, Settings.INSTANCE.getRemoteResourceRefreshInterval());
-                CONFIGURATIONS.put(username, props);
-            });
+            maybeConfig.flatMap(this::readConfig)
+                    .ifPresent(props -> {
+                        LOGGER.debug("Initializing notifications for '{}'.", username);
+                        configurations.put(username, props);
+                    });
         }
-        return Optional.ofNullable(CONFIGURATIONS.get(username));
+        return Optional.ofNullable(configurations.get(username));
     }
 
-    private Stream<RefreshableConfigStorage> getTenantConfigurations() {
-        return TenantState.getKnownTenants()
-                .map(this::getTenantConfigurations)
-                .flatMap(Optional::stream);
+    private <T extends Event> EventListenerSupplier<T> getEventListenerSupplier(final SessionInfo sessionInfo,
+                                                                                final Class<T> eventType,
+                                                                                final Target target) {
+        var listenerSupplier = new NotificationEventListenerSupplier<>(eventType);
+        return () -> {
+            getTenantConfiguration(sessionInfo)
+                    .map(reloadable -> reloadable.get().fold(ex -> null, Function.identity()))
+                    .ifPresentOrElse(listenerSupplier::configure, listenerSupplier::disable);
+            return Optional.ofNullable(listenerSupplier.apply(target));
+        };
     }
 
     @Override
-    public <T extends Event> Stream<EventListenerSupplier<T>> findListeners(final Class<T> eventType) {
-        final NotificationEventListenerSupplier<T> l = new NotificationEventListenerSupplier<>(eventType);
-        final long tenants = getTenantConfigurations()
-                .peek(config -> config.registerListener(l))
-                .count();
-        if (tenants > 0) {
-            return Stream.of(Target.values()).map(e -> () -> l.apply(e));
-        } else {
-            return Stream.empty();
-        }
+    public <T extends Event> Stream<EventListenerSupplier<T>> findListeners(final SessionInfo sessionInfo,
+                                                                            final Class<T> eventType) {
+        return Stream.of(Target.values())
+                .map(target -> getEventListenerSupplier(sessionInfo, eventType, target));
     }
 }

@@ -16,13 +16,6 @@
 
 package com.github.robozonky.internal.extensions;
 
-import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.stream.Collectors;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -32,6 +25,13 @@ import com.github.robozonky.internal.util.StreamUtil;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.net.URL;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 public final class ListenerServiceLoader {
 
@@ -91,17 +91,19 @@ public final class ListenerServiceLoader {
         LOGGER.debug("Tenant '{}' notification configuration deleted.", session.getUsername());
     }
 
-    static <T extends Event> List<EventListenerSupplier<T>> load(final Class<T> eventType,
+    static <T extends Event> List<EventListenerSupplier<T>> load(final SessionInfo sessionInfo,
+                                                                 final Class<T> eventType,
                                                                  final Iterable<ListenerService> loader) {
         LOGGER.debug("Loading listeners for {}.", eventType);
         return StreamUtil.toStream(loader)
                 .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
-                .flatMap(s -> s.findListeners(eventType))
+                .flatMap(s -> s.findListeners(sessionInfo, eventType))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
-    public static <T extends Event> List<EventListenerSupplier<T>> load(final Class<T> eventType) {
-        return ListenerServiceLoader.load(eventType, ListenerServiceLoader.LOADER.get());
+    public static <T extends Event> List<EventListenerSupplier<T>> load(final SessionInfo sessionInfo,
+                                                                        final Class<T> eventType) {
+        return ListenerServiceLoader.load(sessionInfo, eventType, ListenerServiceLoader.LOADER.get());
     }
 }

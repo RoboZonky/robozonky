@@ -16,12 +16,11 @@
 
 package com.github.robozonky.internal;
 
+import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Optional;
@@ -44,22 +43,21 @@ public enum Settings {
     private final AtomicReference<Properties> properties = new AtomicReference<>();
 
     private Properties getProperties() {
-        final String filename = System.getProperty(Settings.FILE_LOCATION_PROPERTY);
-        if (filename == null) {
+        var propertyFilename = System.getProperty(Settings.FILE_LOCATION_PROPERTY);
+        if (propertyFilename == null) {
             return new Properties();
         }
-        final File f = new File(filename);
-        if (!f.exists()) {
-            throw new IllegalStateException("Properties file does not exist: " + f.getAbsolutePath());
+        var propertyFile = new File(propertyFilename);
+        if (!propertyFile.exists()) {
+            throw new IllegalStateException("Properties file does not exist: " + propertyFile.getAbsolutePath());
         }
-        try (final Reader r = Files.newBufferedReader(f.toPath(), Defaults.CHARSET)) {
-            final Properties p = new Properties();
-            p.load(r);
-            LOGGER.debug("Loaded from '{}'.", f.getAbsolutePath());
-            return p;
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Cannot read properties.", ex);
-        }
+        return Try.withResources(() -> Files.newBufferedReader(propertyFile.toPath(), Defaults.CHARSET))
+                .of(r -> {
+                    var props = new Properties();
+                    props.load(r);
+                    LOGGER.debug("Loaded from '{}'.", propertyFile.getAbsolutePath());
+                    return props;
+                }).getOrElseThrow(t -> new IllegalStateException("Cannot read properties.", t));
     }
 
     /**
@@ -113,10 +111,6 @@ public enum Settings {
         return get(key.getName(), adapter, defaultValue);
     }
 
-    public <T> T get(final Settings.Key key, final Function<String, T> adapter) {
-        return get(key.getName(), adapter);
-    }
-
     public String get(final Settings.Key key, final String defaultValue) {
         return get(key.getName(), defaultValue);
     }
@@ -146,7 +140,7 @@ public enum Settings {
     }
 
     public Optional<String> getHttpsProxyHostname() {
-        return Optional.ofNullable(get(Key.HTTPS_PROXY_HOSTNAME, (String) null));
+        return Optional.ofNullable(get(Key.HTTPS_PROXY_HOSTNAME, null));
     }
 
     public int getHttpsProxyPort() {

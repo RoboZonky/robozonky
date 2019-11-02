@@ -20,8 +20,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 public final class TenantBuilder {
@@ -29,18 +27,8 @@ public final class TenantBuilder {
     private String name = null;
     private boolean dryRun = false;
     private SecretProvider secrets = null;
-    private Supplier<StrategyProvider> strategyProvider = StrategyProvider::empty;
+    private StrategyProvider strategyProvider = StrategyProvider.empty();
     private ApiProvider api;
-
-    private static StrategyProvider supplyStrategyProvider(final String strategyLocation) {
-        final Future<StrategyProvider> f = StrategyProvider.createFor(strategyLocation);
-        try {
-            return f.get();
-        } catch (final InterruptedException | ExecutionException ex) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(ex);
-        }
-    }
 
     public TenantBuilder withSecrets(final SecretProvider secrets) {
         this.secrets = secrets;
@@ -48,7 +36,7 @@ public final class TenantBuilder {
     }
 
     public TenantBuilder withStrategy(final String strategyLocation) {
-        this.strategyProvider = () -> TenantBuilder.supplyStrategyProvider(strategyLocation);
+        this.strategyProvider = StrategyProvider.createFor(strategyLocation);
         return this;
     }
 

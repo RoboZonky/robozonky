@@ -16,24 +16,28 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.internal.async.Refreshable;
-import com.github.robozonky.internal.async.Tasks;
+import com.github.robozonky.internal.async.ReloadListener;
+import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.extensions.StrategyLoader;
+import com.github.robozonky.internal.util.StringUtil;
+import com.github.robozonky.internal.util.UrlUtil;
+import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-class StrategyProvider implements Refreshable.RefreshListener<String> {
+import java.time.Duration;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+class StrategyProvider implements ReloadListener<String> {
 
     private static final Logger LOGGER = LogManager.getLogger(StrategyProvider.class);
 
@@ -41,21 +45,25 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
     private final AtomicReference<SellStrategy> toSell = new AtomicReference<>();
     private final AtomicReference<PurchaseStrategy> toPurchase = new AtomicReference<>();
     private final AtomicReference<ReservationStrategy> forReservations = new AtomicReference<>();
+    private final Reloadable<String> reloadableStrategy;
 
-    StrategyProvider() {
-        // no external instances
+    StrategyProvider(final String strategyLocation) {
+        this.reloadableStrategy = Reloadable.with(() ->
+                Try.withResources(() -> UrlUtil.open(UrlUtil.toURL(strategyLocation)))
+                        .of(StringUtil::toString)
+                        .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new))
+                .addListener(this)
+                .reloadAfter(Duration.ofHours(1))
+                .async()
+                .build();
     }
 
-    public static Future<StrategyProvider> createFor(final String strategyLocation) {
-        final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
-        final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
-        strategy.registerListener(sp);
-        // start strategy refresh after the listener was registered
-        return Tasks.INSTANCE.scheduler().getExecutor().submit(() -> {
-            // return a future; we only want to read the strategy provider when it's been initialized
-            strategy.run();
-            return sp;
-        });
+    StrategyProvider() {
+        this.reloadableStrategy = null;
+    }
+
+    public static StrategyProvider createFor(final String strategyLocation) {
+        return new StrategyProvider(strategyLocation);
     }
 
     public static StrategyProvider empty() { // for testing purposes only
@@ -72,13 +80,13 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
     }
 
     @Override
-    public void valueSet(final String newValue) {
+    public void newValue(final String newValue) {
         LOGGER.trace("Loading strategies.");
         final InvestmentStrategy i = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
         final PurchaseStrategy p = set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
         final SellStrategy s = set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
         final ReservationStrategy r = set(forReservations, () -> StrategyLoader.forReservations(newValue),
-                                          "Reservations");
+                "Reservations");
         final boolean allMissing = Stream.of(i, p, s, r).allMatch(Objects::isNull);
         if (allMissing) {
             LOGGER.warn("No strategies are available. Check log for parser errors.");
@@ -87,29 +95,34 @@ class StrategyProvider implements Refreshable.RefreshListener<String> {
     }
 
     @Override
-    public void valueUnset(final String oldValue) {
+    public void valueUnset() {
         Stream.of(toInvest, toSell, toPurchase, forReservations).forEach(ref -> ref.set(null));
         LOGGER.warn("There are no strategies, all operations are disabled.");
     }
 
-    @Override
-    public void valueChanged(final String oldValue, final String newValue) {
-        valueSet(newValue);
+    private void possiblyReloadStrategy() {
+        if (reloadableStrategy != null) {
+            reloadableStrategy.get();
+        }
     }
 
     public Optional<InvestmentStrategy> getToInvest() {
+        possiblyReloadStrategy();
         return Optional.ofNullable(toInvest.get());
     }
 
     public Optional<SellStrategy> getToSell() {
+        possiblyReloadStrategy();
         return Optional.ofNullable(toSell.get());
     }
 
     public Optional<PurchaseStrategy> getToPurchase() {
+        possiblyReloadStrategy();
         return Optional.ofNullable(toPurchase.get());
     }
 
     public Optional<ReservationStrategy> getForReservations() {
+        possiblyReloadStrategy();
         return Optional.ofNullable(forReservations.get());
     }
 }

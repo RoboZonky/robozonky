@@ -16,31 +16,38 @@
 
 package com.github.robozonky.internal.async;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
 
     protected final Logger logger = LogManager.getLogger(getClass());
     private final UnaryOperator<T> operation;
     private final ReloadDetection<T> needsReload;
+    private final List<ReloadListener<T>> listeners;
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                                  final Consumer<T> runWhenReloaded) {
+                                  final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new ManualReload<>();
+        this.listeners = new ArrayList<>(listeners);
     }
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                                  final Consumer<T> runWhenReloaded, final Function<T, Duration> reloadAfter) {
+                                  final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
+                                  final Function<T, Duration> reloadAfter) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new TimeBasedReload<>(reloadAfter);
+        this.listeners = new ArrayList<>(listeners);
     }
 
     private <X> UnaryOperator<X> getOperation(final Supplier<X> supplier, final UnaryOperator<X> reloader,
@@ -62,6 +69,7 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
         logger.trace("Supplier finished on {}.", this);
         valueSetter.accept(value);
         needsReload.markReloaded(value);
+        listeners.forEach(l -> l.newValue(value));
         logger.debug("Reloaded {}, new value is {}.", this, value);
     }
 
@@ -71,6 +79,7 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
 
     @Override
     public void clear() {
+        listeners.forEach(ReloadListener::valueUnset);
         needsReload.forceReload();
     }
 }

@@ -17,12 +17,10 @@
 package com.github.robozonky.internal.async;
 
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 @SuppressWarnings("rawtypes")
-public interface Scheduler extends AutoCloseable {
+public interface Scheduler {
 
     /**
      * Calls {@link #submit(Runnable, Duration, Duration)} with a zero firstDelay.
@@ -57,9 +55,4 @@ public interface Scheduler extends AutoCloseable {
     ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
                               final Duration timeout);
 
-    boolean isClosed();
-
-    ExecutorService getExecutor();
-
-    ScheduledExecutorService getSchedulingExecutor();
 }

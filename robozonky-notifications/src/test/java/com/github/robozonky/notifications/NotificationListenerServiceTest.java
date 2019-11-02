@@ -16,27 +16,56 @@
 
 package com.github.robozonky.notifications;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NotificationListenerServiceTest extends AbstractRoboZonkyTest {
 
     @Test
     void noConfigs() {
         final ListenerService s = new NotificationListenerService();
-        assertThat(s.findListeners(RoboZonkyTestingEvent.class)).isEmpty();
+        assertThat(s.findListeners(SESSION, RoboZonkyTestingEvent.class))
+                .hasSize(1)
+                .first()
+                .returns(Optional.empty(), Supplier::get);
     }
 
     @Test
     void noValidConfigs() {
-        ListenerServiceLoader.registerConfiguration(new SessionInfo("a@b.c"), "invalid-url");
+        ListenerServiceLoader.registerConfiguration(SESSION, "invalid-url");
         final ListenerService s = new NotificationListenerService();
-        assertThat(s.findListeners(RoboZonkyTestingEvent.class)).isEmpty();
+        assertThat(s.findListeners(SESSION, RoboZonkyTestingEvent.class))
+                .hasSize(1)
+                .first()
+                .returns(Optional.empty(), Supplier::get);
     }
+
+    @Test
+    void validConfigs() throws IOException {
+        final Path path = Files.createTempFile("robozonky-", ".cfg");
+        try (InputStream s = getClass().getResourceAsStream("listeners/notifications-enabled.cfg")) {
+            Files.write(path, s.readAllBytes());
+        }
+        ListenerServiceLoader.registerConfiguration(SESSION, path.toUri().toURL());
+        final ListenerService s = new NotificationListenerService();
+        assertThat(s.findListeners(SESSION, RoboZonkyTestingEvent.class))
+                .hasSize(1)
+                .first()
+                .extracting(Supplier::get)
+                .extracting(Optional::isPresent)
+                .isEqualTo(true);
+    }
+
 }

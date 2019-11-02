@@ -204,6 +204,12 @@
         "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline() @ com.github.robozonky.api.remote.entities.Reservation",
         "annotation": "@javax.xml.bind.annotation.XmlTransient",
         "justification": "OffsetDateTime is no longer automatically deserialized on the hot path."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method <T extends com.github.robozonky.api.notifications.Event> java.util.stream.Stream<com.github.robozonky.api.notifications.EventListenerSupplier<T>> com.github.robozonky.api.notifications.ListenerService::findListeners(java.lang.Class<T>)",
+        "new": "method <T extends com.github.robozonky.api.notifications.Event> java.util.stream.Stream<com.github.robozonky.api.notifications.EventListenerSupplier<T>> com.github.robozonky.api.notifications.ListenerService::findListeners(com.github.robozonky.api.SessionInfo, java.lang.Class<T>)",
+        "justification": "Notifications are newly tenant-based."
       }
     ]
   }

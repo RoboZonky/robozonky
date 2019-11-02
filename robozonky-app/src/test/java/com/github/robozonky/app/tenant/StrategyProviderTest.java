@@ -16,15 +16,15 @@
 
 package com.github.robozonky.app.tenant;
 
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -41,14 +41,14 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     @Test
     void setAndWrong() {
         final StrategyProvider r = new StrategyProvider();
-        r.valueSet(MINIMAL_STRATEGY); // store correct strategy
+        r.newValue(MINIMAL_STRATEGY); // store correct strategy
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
             softly.assertThat(r.getForReservations()).isEmpty();
         });
-        r.valueChanged(MINIMAL_STRATEGY, UUID.randomUUID().toString()); // store invalid strategy
+        r.newValue(UUID.randomUUID().toString()); // store invalid strategy
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
@@ -60,14 +60,14 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     @Test
     void setAndUnset() {
         final StrategyProvider r = new StrategyProvider();
-        r.valueSet(MINIMAL_STRATEGY); // store correct strategy
+        r.newValue(MINIMAL_STRATEGY); // store correct strategy
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
             softly.assertThat(r.getForReservations()).isEmpty();
         });
-        r.valueUnset(MINIMAL_STRATEGY);
+        r.valueUnset();
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
@@ -78,7 +78,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
 
     @Test
     void loadStrategyAsFile() throws IOException, ExecutionException, InterruptedException {
-        final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath()).get();
+        final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
@@ -90,7 +90,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     @Test
     void loadWrongStrategyAsFile() throws IOException, ExecutionException, InterruptedException {
         final File tmp = File.createTempFile("robozonky-", ".cfg");
-        final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath()).get();
+        final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
@@ -102,7 +102,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     @Test
     void loadStrategyAsUrl() throws IOException, ExecutionException, InterruptedException {
         final String url = newStrategyFile().toURI().toURL().toString();
-        final StrategyProvider r = StrategyProvider.createFor(url).get();
+        final StrategyProvider r = StrategyProvider.createFor(url);
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();

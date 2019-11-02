@@ -16,16 +16,11 @@
 
 package com.github.robozonky.internal.async;
 
-import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.Duration;
+import java.util.concurrent.*;
 
 /**
  * This attempts to provide functionality similar to {@link ScheduledExecutorService}, but with a fully configurable
@@ -50,19 +45,9 @@ import org.apache.logging.log4j.Logger;
  * request is already finished.</li>
  * </ul>
  */
-final class ThreadPoolExecutorBasedScheduler implements Scheduler {
+final class ForkJoinPoolBasedScheduler implements Scheduler {
 
-    private static final Logger LOGGER = LogManager.getLogger(ThreadPoolExecutorBasedScheduler.class);
-    private final ScheduledExecutorService schedulingExecutor;
-    private final ExecutorService executor;
-    private final Runnable onClose;
-
-    public ThreadPoolExecutorBasedScheduler(final ScheduledExecutorService schedulingExecutor,
-                                            final ExecutorService actualExecutor, final Runnable onClose) {
-        this.schedulingExecutor = schedulingExecutor;
-        this.executor = actualExecutor;
-        this.onClose = onClose;
-    }
+    private static final Logger LOGGER = LogManager.getLogger(ForkJoinPoolBasedScheduler.class);
 
     @Override
     public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween,
@@ -74,36 +59,4 @@ final class ThreadPoolExecutorBasedScheduler implements Scheduler {
         return task.getFuture();
     }
 
-    @Override
-    public boolean isClosed() {
-        return executor.isShutdown();
-    }
-
-    @Override
-    public ExecutorService getExecutor() {
-        return executor;
-    }
-
-    @Override
-    public ScheduledExecutorService getSchedulingExecutor() {
-        return schedulingExecutor;
-    }
-
-    @Override
-    public void close() {
-        LOGGER.trace("Shutting down {}.", this);
-        executor.shutdown();
-        try {
-            LOGGER.debug("Waiting until {} shutdown.", this);
-            executor.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (final InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            LOGGER.debug("Wait failed.", ex);
-        } finally {
-            LOGGER.trace("Wait over.");
-            if (onClose != null) {
-                onClose.run();
-            }
-        }
-    }
 }

@@ -59,13 +59,12 @@ import static org.mockito.Mockito.*;
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static final RoboZonkyTestingEvent EVENT = OffsetDateTime::now;
-    private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,
                                                                  final AbstractTargetHandler p) {
         final AbstractListener<? extends Event> e = spy((AbstractListener<? extends Event>) s.getListener(p));
         // always return a listener that WILL send an e-mail, even though this means shouldSendEmail() is not tested
-        doReturn(true).when(e).shouldNotify(any(), eq(SESSION_INFO));
+        doReturn(true).when(e).shouldNotify(any(), eq(SESSION));
         return e;
     }
 
@@ -80,7 +79,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     private static void testListenerEnabled(final Event event) {
         final NotificationListenerService service = new NotificationListenerService();
         final Stream<? extends EventListenerSupplier<? extends Event>> supplier =
-                service.findListeners(event.getClass());
+                service.findListeners(SESSION, event.getClass());
         assertThat(supplier).isNotEmpty();
     }
 
@@ -101,13 +100,13 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     private static <T extends Event> void testTriggered(final AbstractTargetHandler h,
                                                         final AbstractListener<T> listener,
                                                         final T event) throws Exception {
-        listener.handle(event, SESSION_INFO);
-        verify(h, times(1)).send(eq(SESSION_INFO), notNull(), notNull(), notNull());
+        listener.handle(event, SESSION);
+        verify(h, times(1)).send(eq(SESSION), notNull(), notNull(), notNull());
     }
 
     private <T extends Event> void testPlainTextProcessing(final AbstractListener<T> listener, final T event) throws IOException, TemplateException {
         final String s = TemplateProcessor.INSTANCE.processPlainText(listener.getTemplateFileName(),
-                listener.getData(event, SESSION_INFO));
+                listener.getData(event, SESSION));
         logger.debug("Plain text was: {}.", s);
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
         assertThat(s).contains("uživatel"); // check that UTF-8 is properly encoded
@@ -129,7 +128,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private <T extends Event> void testHtmlProcessing(final AbstractListener<T> listener,
                                                       final T event) throws IOException, TemplateException {
-        final Map<String, Object> data = new HashMap<>(listener.getData(event, SESSION_INFO));
+        final Map<String, Object> data = new HashMap<>(listener.getData(event, SESSION));
         data.put("subject", UUID.randomUUID().toString());
         final String s = TemplateProcessor.INSTANCE.processHtml(listener.getTemplateFileName(),
                 Collections.unmodifiableMap(data));
@@ -140,7 +139,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     @BeforeEach
     void configureNotifications() throws URISyntaxException, MalformedURLException {
-        ListenerServiceLoader.registerConfiguration(SESSION_INFO,
+        ListenerServiceLoader.registerConfiguration(SESSION,
                 AbstractListenerTest.class.getResource(
                         "notifications-enabled.cfg").toURI().toURL());
     }
@@ -151,9 +150,9 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 ConfigStorage.create(getClass().getResourceAsStream("notifications-enabled-spamless.cfg"));
         final AbstractTargetHandler p = getHandler(cs);
         final TestingEmailingListener l = new TestingEmailingListener(p);
-        l.handle(EVENT, SESSION_INFO);
+        l.handle(EVENT, SESSION);
         verify(p, times(1)).send(notNull(), notNull(), notNull(), notNull());
-        l.handle(EVENT, SESSION_INFO);
+        l.handle(EVENT, SESSION);
         // e-mail not re-sent, finisher not called again
         verify(p, times(1)).send(notNull(), notNull(), notNull(), notNull());
     }
