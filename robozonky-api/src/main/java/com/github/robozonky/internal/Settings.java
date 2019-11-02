@@ -53,10 +53,10 @@ public enum Settings {
         }
         return Try.withResources(() -> Files.newBufferedReader(propertyFile.toPath(), Defaults.CHARSET))
                 .of(r -> {
-                    var properties = new Properties();
-                    properties.load(r);
+                    var props = new Properties();
+                    props.load(r);
                     LOGGER.debug("Loaded from '{}'.", propertyFile.getAbsolutePath());
-                    return properties;
+                    return props;
                 }).getOrElseThrow(t -> new IllegalStateException("Cannot read properties.", t));
     }
 
@@ -140,7 +140,7 @@ public enum Settings {
     }
 
     public Optional<String> getHttpsProxyHostname() {
-        return Optional.ofNullable(get(Key.HTTPS_PROXY_HOSTNAME, (String) null));
+        return Optional.ofNullable(get(Key.HTTPS_PROXY_HOSTNAME, null));
     }
 
     public int getHttpsProxyPort() {
