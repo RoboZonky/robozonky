@@ -56,15 +56,7 @@ oldMarketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, C
         }) | (s=secondaryMarketplaceFilter {
             $secondary.add($s.result);
         })
-    )* {
-        if ($primary.isEmpty()) {
-            LogManager.getLogger(this.getClass())
-                .warn("Primary marketplace filters missing without excuse. This is deprecated and will eventually break.");
-        }
-        if ($secondary.isEmpty()) {
-            LogManager.getLogger(this.getClass())
-                .warn("Secondary marketplace filters missing without excuse. This is deprecated and will eventually break.");
-        }
+    )+ {
    }
 ;
 

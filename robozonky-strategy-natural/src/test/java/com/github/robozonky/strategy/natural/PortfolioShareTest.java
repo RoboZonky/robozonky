@@ -48,8 +48,7 @@ class PortfolioShareTest {
     void correct() {
         final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ZERO, Ratio.ONE);
         assertSoftly(softly -> {
-            softly.assertThat(p.getMininum()).isEqualTo(Ratio.ZERO);
-            softly.assertThat(p.getMaximum()).isEqualTo(Ratio.ONE);
+            softly.assertThat(p.getPermitted()).isEqualTo(Ratio.ONE);
             softly.assertThat(p.getRating()).isEqualTo(Rating.C);
         });
     }
@@ -58,8 +57,7 @@ class PortfolioShareTest {
     void reversed() {
         final PortfolioShare p = new PortfolioShare(Rating.D, Ratio.fromPercentage(51), Ratio.fromPercentage(50));
         assertSoftly(softly -> {
-            softly.assertThat(p.getMininum()).isEqualTo(Ratio.fromPercentage(50));
-            softly.assertThat(p.getMaximum()).isEqualTo(Ratio.fromPercentage(51));
+            softly.assertThat(p.getPermitted()).isEqualTo(Ratio.fromPercentage(51));
             softly.assertThat(p.getRating()).isEqualTo(Rating.D);
         });
     }

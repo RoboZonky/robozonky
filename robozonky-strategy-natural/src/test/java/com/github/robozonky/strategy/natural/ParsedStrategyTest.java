@@ -64,9 +64,7 @@ class ParsedStrategyTest {
         final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
         assertSoftly(softly -> {
             softly.assertThat(strategy.getMaximumInvestmentSize()).isEqualTo(Money.from(Long.MAX_VALUE));
-            softly.assertThat(strategy.getMinimumShare(Rating.A))
-                    .isEqualTo(portfolio.getDefaultShare(Rating.A));
-            softly.assertThat(strategy.getMaximumShare(Rating.B))
+            softly.assertThat(strategy.getPermittedShare(Rating.B))
                     .isEqualTo(portfolio.getDefaultShare(Rating.B));
             softly.assertThat(strategy.getMinimumInvestmentSize(Rating.C)).isEqualTo(Money.from(0));
             softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D)).isEqualTo(Money.from(20_000));
@@ -147,10 +145,7 @@ class ParsedStrategyTest {
         final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(50), Ratio.fromPercentage(100));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
                                                            Collections.emptyMap());
-        assertSoftly(softly -> {
-            softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(Ratio.fromPercentage(50));
-            softly.assertThat(strategy.getMaximumShare(Rating.D)).isEqualTo(Ratio.ONE);
-        });
+        assertThat(strategy.getPermittedShare(Rating.D)).isEqualTo(Ratio.ONE);
     }
 
     @Test

@@ -79,12 +79,13 @@ class NaturalLanguageInvestmentStrategyTest {
 
     @Test
     void nothingRecommendedDueToRatingOverinvested() {
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
+        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
-        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Loan l = mockLoan(1000);
+        final Rating r = l.getRating();
+        when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(l)),
                                                            portfolio, new Restrictions());
         assertThat(result).isEmpty();
