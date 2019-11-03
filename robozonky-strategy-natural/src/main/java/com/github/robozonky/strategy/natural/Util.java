@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
@@ -25,11 +26,14 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
 final class Util {
+
+    private static final BigDecimal HUNDRED = BigDecimal.TEN.pow(2);
 
     private Util() {
         // no instances
@@ -43,28 +47,42 @@ final class Util {
 
     static Stream<Rating> rankRatingsByDemand(final ParsedStrategy strategy, final Collection<Rating> ratings,
                                               final PortfolioOverview portfolio) {
-        final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
+        final SortedMap<Ratio, SortedMap<Ratio, EnumSet<Rating>>> mostWantedRatings = new TreeMap<>();
         // put the ratings into buckets based on how much we're missing them
         ratings.forEach(r -> {
-            final BigDecimal currentRatingShare = portfolio.getShareOnInvestment(r).asPercentage();
-            final BigDecimal maximumAllowedShare = strategy.getMaximumShare(r).asPercentage();
-            final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
-            if (undershare.signum() < 1) { // we over-invested into this rating; do not include
-                final BigDecimal pp = undershare.negate();
-                LOGGER.debug("Rating {} over-invested by {} percentage point(s).", r, pp);
+            final Ratio currentRatingShare = portfolio.getShareOnInvestment(r);
+            final Ratio permittedShare = strategy.getPermittedShare(r);
+            if (permittedShare.compareTo(Ratio.ZERO) <= 0) { // prevent division by zero later
+                LOGGER.debug("Rating {} permitted share is {} %, skipping.", r, permittedShare.asPercentage());
                 return;
             }
-            // rank the rating
-            mostWantedRatings.computeIfAbsent(undershare, k -> EnumSet.noneOf(Rating.class));
-            mostWantedRatings.get(undershare).add(r);
-            // inform that the rating is under-invested
-            final BigDecimal minimumNeededShare = strategy.getMinimumShare(r).asPercentage();
-            if (currentRatingShare.compareTo(minimumNeededShare) < 0) {
-                final BigDecimal pp = minimumNeededShare.subtract(currentRatingShare);
-                LOGGER.debug("Rating {} under-invested by {} percentage point(s).", r, pp);
+            // under 0 = underinvested, over 0 = overinvested
+            final Ratio ratio = Ratio.fromRaw(divide(currentRatingShare.bigDecimalValue(),
+                    permittedShare.bigDecimalValue()));
+            final boolean overinvested = ratio.compareTo(Ratio.ONE) >= 0;
+            if (overinvested) { // we over-invested into this rating; do not include
+                final BigDecimal percentOver = ratio.asPercentage().subtract(HUNDRED);
+                LOGGER.debug("Rating {} over-invested by {} %, skipping. (Expected {}, got {}.)", r, percentOver,
+                        permittedShare, currentRatingShare);
+                return;
             }
+            LOGGER.debug("Rating {} under-invested by {} %. (Expected {}, got {}.)", r,
+                    HUNDRED.subtract(ratio.asPercentage()), permittedShare, currentRatingShare);
+            // rank the rating
+            mostWantedRatings.computeIfAbsent(ratio, k -> new TreeMap<>(Comparator.reverseOrder()));
+            mostWantedRatings.get(ratio).compute(permittedShare, (k, v) -> {
+                if (v == null) {
+                    return EnumSet.of(r);
+                } else {
+                    v.add(r);
+                    return v;
+                }
+            });
         });
-        return mostWantedRatings.values().stream().flatMap(Collection::stream);
+        return mostWantedRatings.values()
+                .stream()
+                .flatMap(s -> s.values().stream())
+                .flatMap(Collection::stream);
     }
 
     static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {

@@ -23,11 +23,15 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.robozonky.api.Ratio.fromPercentage;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
@@ -51,7 +55,6 @@ class UtilTest extends AbstractRoboZonkyTest {
         final Rating first = result.get(0);
         final Rating last = result.get(ratingsOrderedDown.length - 1);
         assertSoftly(softly -> {
-            softly.assertThat(first).isGreaterThan(last);
             softly.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
             softly.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
         });
@@ -71,17 +74,11 @@ class UtilTest extends AbstractRoboZonkyTest {
         final int targetShareB = targetShareA * 5;
         final int targetShareC = targetShareB * 5;
         final ParsedStrategy parsed = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
-                                                         Arrays.asList(
-                                                                 new PortfolioShare(Rating.A,
-                                                                                    fromPercentage(targetShareA),
-                                                                                    fromPercentage(targetShareA)),
-                                                                 new PortfolioShare(Rating.B,
-                                                                                    fromPercentage(targetShareB),
-                                                                                    fromPercentage(targetShareB)),
-                                                                 new PortfolioShare(Rating.C,
-                                                                                    fromPercentage(targetShareC),
-                                                                                    fromPercentage(targetShareC))),
-                                                         Collections.emptyMap());
+                asList(
+                        new PortfolioShare(Rating.A, fromPercentage(targetShareA)),
+                        new PortfolioShare(Rating.B, fromPercentage(targetShareB)),
+                        new PortfolioShare(Rating.C, fromPercentage(targetShareC))
+                ), Collections.emptyMap());
         // all ratings have zero share; C > B > A
         final Set<Rating> ratings = EnumSet.of(Rating.A, Rating.B, Rating.C);
         PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
@@ -91,9 +88,9 @@ class UtilTest extends AbstractRoboZonkyTest {
         portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.valueOf(10), BigDecimal.valueOf(30));
         assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.A);
 
-        // B > C > A
+        // B > A > C
         portfolio = preparePortfolio(BigDecimal.valueOf(0.99), BigDecimal.ZERO, BigDecimal.valueOf(24.9));
-        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.B, Rating.C, Rating.A);
+        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.B, Rating.A, Rating.C);
     }
 
     @Test

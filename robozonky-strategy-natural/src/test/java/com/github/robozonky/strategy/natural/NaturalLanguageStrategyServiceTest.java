@@ -16,12 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.StringUtil;
@@ -29,7 +23,13 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -44,8 +44,6 @@ class NaturalLanguageStrategyServiceTest {
                 dynamicTest("with disabled filters", () -> disabled(type)),
                 dynamicTest("with enabled filters", () -> enabled(type)),
                 dynamicTest("with some filters missing", () -> missingFilters1(type)),
-                dynamicTest("with other filters missing", () -> missingFilters2(type)),
-                dynamicTest("with yet other filters missing", () -> missingFilters3(type)),
                 dynamicTest("with headers missing", () -> missingHeaders(type)),
                 dynamicTest("all possible newlines", () -> newlines(type)),
                 dynamicTest("newlines saved on Windows", () -> windows1250WindowsNewlines(type)),
@@ -149,28 +147,6 @@ class NaturalLanguageStrategyServiceTest {
 
     private static void missingFilters1(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters1");
-        final String str = StringUtil.toString(s, Defaults.CHARSET);
-        final Optional<?> actualStrategy = getStrategy(strategy, str);
-        if (strategy == Type.SELLING || strategy == Type.RESERVATIONS) {
-            assertThat(actualStrategy).isEmpty();
-        } else {
-            assertThat(actualStrategy).isPresent();
-        }
-    }
-
-    private static void missingFilters2(final Type strategy) {
-        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters2");
-        final String str = StringUtil.toString(s, Defaults.CHARSET);
-        final Optional<?> actualStrategy = getStrategy(strategy, str);
-        if (strategy == Type.RESERVATIONS) {
-            assertThat(actualStrategy).isEmpty();
-        } else {
-            assertThat(actualStrategy).isPresent();
-        }
-    }
-
-    private static void missingFilters3(final Type strategy) {
-        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters3");
         final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         if (strategy == Type.SELLING || strategy == Type.RESERVATIONS) {

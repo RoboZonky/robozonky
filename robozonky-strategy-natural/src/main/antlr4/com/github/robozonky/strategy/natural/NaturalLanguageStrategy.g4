@@ -63,20 +63,13 @@ complexExpression returns [ParsedStrategy result]
 
     (
         (
-            { boolean marketplaceFiltersMissing = true; }
             (
                 DELIM 'Filtrování tržiště'
                 m=marketplaceFilterExpression {
                     primaryFilters = $m.primaryEnabled ? $m.primary : null;
                     secondaryFilters = $m.secondaryEnabled ? $m.secondary : null;
-                    marketplaceFiltersMissing = false;
                 }
-            )? {
-                if (marketplaceFiltersMissing) {
-                    LogManager.getLogger(this.getClass())
-                        .warn("Marketplace filters are missing without excuse. This is deprecated and will eventually break.");
-                }
-            }
+            )
         ) | (
             'Ignorovat všechny půjčky i participace.' {
                 primaryFilters = null;

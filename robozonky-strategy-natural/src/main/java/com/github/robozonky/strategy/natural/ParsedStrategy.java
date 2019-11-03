@@ -24,7 +24,6 @@ import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -69,12 +68,6 @@ class ParsedStrategy {
                         collect(Collectors.toMap(PortfolioShare::getRating, Function.identity())));
         this.investmentSizes = investmentSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(investmentSizes);
         this.filters = filters;
-        final long shareSum = sumMinimalShares();
-        if (shareSum > 100) {
-            throw new IllegalArgumentException("Sum of minimal rating shares in portfolio is over 100 %.");
-        } else if (shareSum < 100) {
-            LOGGER.info("Sum of minimal rating shares in the portfolio is less than 100 %.");
-        }
     }
 
     private static boolean matchesFilter(final Wrapper<?> item, final Collection<MarketplaceFilter> filters,
@@ -84,14 +77,6 @@ class ParsedStrategy {
                 .peek(f -> Audit.LOGGER.debug(logMessage, item, f))
                 .findFirst()
                 .isPresent();
-    }
-
-    private long sumMinimalShares() {
-        return Math.round(Stream.of(Rating.values())
-                .map(this::getMinimumShare)
-                .map(Ratio::asPercentage)
-                .mapToDouble(BigDecimal::doubleValue)
-                .sum());
     }
 
     public int getMinimumInvestmentShareInPercent() {
@@ -114,19 +99,11 @@ class ParsedStrategy {
         this.minimumVersion = minimumVersion;
     }
 
-    public Ratio getMinimumShare(final Rating rating) {
+    public Ratio getPermittedShare(final Rating rating) {
         if (portfolio.containsKey(rating)) {
-            return portfolio.get(rating).getMininum();
-        } else { // no minimum share specified; use the one from default portfolio
-            return defaults.getPortfolio().getDefaultShare(rating);
-        }
-    }
-
-    public Ratio getMaximumShare(final Rating rating) {
-        if (portfolio.containsKey(rating)) {
-            return portfolio.get(rating).getMaximum();
+            return portfolio.get(rating).getPermitted();
         } else { // no maximum share specified; calculate minimum share and use it as maximum too
-            return this.getMinimumShare(rating);
+            return defaults.getPortfolio().getDefaultShare(rating);
         }
     }
 

@@ -18,18 +18,25 @@ package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class PortfolioShare {
 
-    private final Ratio mininum, maximum;
+    private static final Logger LOGGER = LogManager.getLogger(PortfolioShare.class);
+
+    private final Ratio permitted;
     private final Rating rating;
 
     public PortfolioShare(final Rating r, final Ratio min, final Ratio max) {
         this.rating = r;
         PortfolioShare.assertIsInRange(min);
-        this.mininum = min.min(max);
         PortfolioShare.assertIsInRange(max);
-        this.maximum = min.max(max);
+        this.permitted = min.max(max);
+        if (min.compareTo(max) != 0) {
+            LOGGER.warn("Portfolio share for rating {} gives a range of <{}; {}>. " +
+                    "The minimum has been deprecated and will be ignored. Please update your strategy.", r, min, max);
+        }
     }
 
     public PortfolioShare(final Rating r, final Ratio max) {
@@ -43,12 +50,8 @@ class PortfolioShare {
         }
     }
 
-    public Ratio getMininum() {
-        return mininum;
-    }
-
-    public Ratio getMaximum() {
-        return maximum;
+    public Ratio getPermitted() {
+        return permitted;
     }
 
     public Rating getRating() {
@@ -58,8 +61,7 @@ class PortfolioShare {
     @Override
     public String toString() {
         return "PortfolioShare{" +
-                "mininum=" + mininum +
-                ", maximum=" + maximum +
+                "maximum=" + permitted +
                 ", rating=" + rating +
                 '}';
     }
