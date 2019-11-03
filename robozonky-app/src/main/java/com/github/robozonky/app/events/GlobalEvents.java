@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
@@ -25,6 +23,9 @@ import com.github.robozonky.internal.tenant.LazyEvent;
 import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 public final class GlobalEvents {
 
@@ -41,6 +42,10 @@ public final class GlobalEvents {
 
     static Runnable merge(final Runnable... runnables){
         return () -> Stream.of(runnables).forEach(Runnable::run);
+    }
+
+    static Runnable merge(final CompletableFuture... runnables){
+        return () -> CompletableFuture.allOf(runnables).join();
     }
 
     @SuppressWarnings("rawtypes")

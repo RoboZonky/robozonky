@@ -29,8 +29,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -38,6 +40,7 @@ public final class SessionEvents {
 
     private static final Logger LOGGER = LogManager.getLogger(SessionEvents.class);
     private static final Map<String, SessionEvents> BY_TENANT = new ConcurrentHashMap<>(0);
+    private static final AtomicLong EVENT_COUNTER = new AtomicLong(0);
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> debugListeners = new CopyOnWriteArraySet<>();
     private final SessionInfo sessionInfo;
@@ -74,6 +77,15 @@ public final class SessionEvents {
                 .orElseThrow(() -> new IllegalStateException("Not an event:" + original));
     }
 
+    private static void submittable(final Runnable runnable) {
+        var eventId = EVENT_COUNTER.getAndIncrement();
+        LOGGER.trace("Starting event {} ({}).", eventId, runnable);
+        try {
+            runnable.run();
+        } finally {
+            LOGGER.trace("Finished processing event {}.", eventId);
+        }
+    }
     /**
      * Takes a set of {@link Runnable}s and queues them to be fired on a background thread, in the guaranteed order of
      * appearance.
@@ -82,8 +94,8 @@ public final class SessionEvents {
      */
     @SuppressWarnings("rawtypes")
     private static Runnable runAsync(final Stream<Runnable> futures) {
-        final Runnable[] results = futures.map(EventFiringQueue.INSTANCE::fire)
-                .toArray(Runnable[]::new);
+        final CompletableFuture[] results = futures.map(future -> CompletableFuture.runAsync(() -> submittable(future)))
+                .toArray(CompletableFuture[]::new);
         return GlobalEvents.merge(results);
     }
 

@@ -16,13 +16,6 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -33,8 +26,11 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
@@ -52,63 +48,34 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         return Mockito.spy(new TestingPowerTenant(isDryRun ? SESSION_DRY : SESSION, zonky));
     }
 
-    private void waitForEventProcessing() {
-        while (!EventFiringQueue.INSTANCE.getQueue().isEmpty()) {
-            logger.debug("Sleeping a while to wait for events to be processed.");
-            try {
-                Thread.sleep(100);
-            } catch (final InterruptedException ex) {
-                // nothing to do here
-            }
-        }
-    }
-
     protected List<Event> getEventsFired() {
-        waitForEventProcessing();
+        awaitTerminationOfParallelTasks();
         return listener.getEventsFired();
     }
 
     protected List<Event> getEventsRequested() {
-        waitForEventProcessing();
+        awaitTerminationOfParallelTasks();
         return listener.getEventsRequested();
     }
 
     protected List<Event> getEventsReady() {
-        waitForEventProcessing();
+        awaitTerminationOfParallelTasks();
         return listener.getEventsReady();
     }
 
     protected List<Event> getEventsFailed() {
-        waitForEventProcessing();
+        awaitTerminationOfParallelTasks();
         return listener.getEventsFailed();
     }
 
     protected void readPreexistingEvents() {
-        waitForEventProcessing();
+        awaitTerminationOfParallelTasks();
         listener.clear();
-    }
-
-    private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-
-    @BeforeEach
-    public void startListeningForEvents() { // initialize session and create a listener
-        final PowerTenant t = mockTenant();
-        Events.forSession(t).addListener(listener);
-        // make sure there is something reading the queue
-        service.scheduleAtFixedRate(new EventFiring(), 0, 1, TimeUnit.SECONDS);
     }
 
     @AfterEach
     private void unregisterBeansCreatedByUs() {
         Management.unregisterAll();
-    }
-
-    @AfterEach
-    public void stopListeningForEvents() {
-        final PowerTenant t = mockTenant();
-        Events.forSession(t).removeListener(listener);
-        readPreexistingEvents();
-        service.shutdown();
     }
 
     @AfterEach
