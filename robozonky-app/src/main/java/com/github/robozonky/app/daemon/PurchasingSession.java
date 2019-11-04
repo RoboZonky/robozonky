@@ -109,7 +109,7 @@ final class PurchasingSession extends
             result.add(participation);
             tenant.getPortfolio().simulateCharge(l.getId(), l.getRating(), recommendation.amount());
             tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
-            tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(l, recommendation.amount(),
+            tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(participation, l, recommendation.amount(),
                     tenant.getPortfolio().getOverview())));
         }
         return succeeded;

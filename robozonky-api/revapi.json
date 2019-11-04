@@ -255,6 +255,25 @@
         "code": "java.method.addedToInterface",
         "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.Reservation> com.github.robozonky.api.notifications.ReservationCheckCompletedEvent::getReservationsAccepted()",
         "justification": "Replaces the Investment."
+      },{
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.Participation.deadline",
+        "new": "field com.github.robozonky.api.remote.entities.Participation.deadline",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Nothing actually changed."
+      },
+      {
+        "code": "java.annotation.added",
+        "old": "field com.github.robozonky.api.remote.entities.Participation.nextPaymentDate",
+        "new": "field com.github.robozonky.api.remote.entities.Participation.nextPaymentDate",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Nothing actually changed."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void com.github.robozonky.api.remote.entities.Participation::<init>()",
+        "new": "method void com.github.robozonky.api.remote.entities.Participation::<init>(com.github.robozonky.api.remote.entities.Loan)",
+        "justification": "Allow the participation to be pre-filled."
       }
     ]
   }

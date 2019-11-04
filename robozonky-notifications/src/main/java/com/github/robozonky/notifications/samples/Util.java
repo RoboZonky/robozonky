@@ -21,12 +21,14 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.*;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.entities.MutableDevelopment;
 import com.github.robozonky.internal.remote.entities.MutableLoan;
+import com.github.robozonky.internal.remote.entities.MutableParticipation;
 import com.github.robozonky.internal.test.DateUtil;
 
 import java.math.BigDecimal;
@@ -124,6 +126,11 @@ final class Util {
 
     public static Investment randomizeInvestment(final Loan loan) {
         return new Investment(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L))); // from 200 to 5000
+    }
+
+    public static Participation randomizeParticipation(final Loan loan) {
+        return new MutableParticipation(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L)),
+                RANDOM.nextInt(loan.getTermInMonths()));
     }
 
     public static PortfolioOverview randomizePortfolioOverview() {

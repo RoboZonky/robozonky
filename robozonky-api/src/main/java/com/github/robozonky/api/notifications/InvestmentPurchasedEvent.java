@@ -21,7 +21,7 @@ import com.github.robozonky.api.Money;
 /**
  * Fired immediately after secondary market purchase was submitted to the API.
  */
-public interface InvestmentPurchasedEvent extends LoanBased, Financial {
+public interface InvestmentPurchasedEvent extends ParticipationBased, Financial {
 
     Money getPurchasedAmount();
 

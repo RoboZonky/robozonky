@@ -20,6 +20,9 @@ import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ReservationAcceptedEventListener extends AbstractListener<ReservationAcceptedEvent> {
 
     public ReservationAcceptedEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
@@ -30,6 +33,13 @@ public class ReservationAcceptedEventListener extends AbstractListener<Reservati
     public String getSubject(final ReservationAcceptedEvent event) {
         return "Rezervace potvrzena - " + event.getInvestedAmount().getValue().intValue() + ",- Kč, půjčka " +
                 Util.identifyLoan(event);
+    }
+
+    @Override
+    protected Map<String, Object> getData(ReservationAcceptedEvent event) {
+        final Map<String, Object> result = new HashMap<>(super.getData(event));
+        result.put("amountHeld", event.getInvestedAmount().getValue());
+        return result;
     }
 
     @Override

@@ -52,9 +52,10 @@ public final class EventFactory {
         return new InvestmentMadeEventImpl(loan, investedAmount, portfolioOverview);
     }
 
-    public static InvestmentPurchasedEvent investmentPurchased(final Loan loan, final Money purchasedAmount,
+    public static InvestmentPurchasedEvent investmentPurchased(final Participation participation, final Loan loan,
+                                                               final Money purchasedAmount,
                                                                final PortfolioOverview portfolioOverview) {
-        return new InvestmentPurchasedEventImpl(loan, purchasedAmount, portfolioOverview);
+        return new InvestmentPurchasedEventImpl(participation, loan, purchasedAmount, portfolioOverview);
     }
 
     public static InvestmentSoldEvent investmentSold(final Investment investment, final Loan loan,

@@ -22,6 +22,7 @@ import com.github.robozonky.api.remote.entities.*;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.*;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.remote.entities.MutableParticipation;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
@@ -122,8 +123,11 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentPurchased() {
-        final InvestmentPurchasedEvent e = EventFactory.investmentPurchased(MockLoanBuilder.fresh(), Money.from(200),
-                                                                            mockPortfolioOverview());
+        final Loan loan = MockLoanBuilder.fresh();
+        final Participation participation = new MutableParticipation(loan, Money.from(200),
+                loan.getTermInMonths() - 1);
+        final InvestmentPurchasedEvent e = EventFactory.investmentPurchased(participation, loan, Money.from(200),
+                mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getPurchasedAmount()).isEqualTo(Money.from(200));

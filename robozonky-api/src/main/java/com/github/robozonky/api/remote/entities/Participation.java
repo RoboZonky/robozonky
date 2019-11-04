@@ -30,43 +30,61 @@ import java.util.Currency;
 
 public class Participation extends BaseEntity {
 
-    private long borrowerNo;
-    private int loanId;
-    private int originalInstalmentCount;
-    private int remainingInstalmentCount;
-    private int userId;
-    private long id;
-    private long investmentId;
-    private MainIncomeType incomeType;
-    private Ratio interestRate;
-    private LoanHealthInfo loanHealthInfo;
-    private String loanName;
-    private Purpose purpose;
-    private Rating rating;
-    private boolean willExceedLoanInvestmentLimit;
-    private boolean insuranceActive;
-    private boolean additionallyInsured;
+    protected long borrowerNo;
+    protected int loanId;
+    protected int originalInstalmentCount;
+    protected int remainingInstalmentCount;
+    protected int userId;
+    protected long id;
+    protected long investmentId;
+    protected MainIncomeType incomeType;
+    protected Ratio interestRate;
+    protected LoanHealthInfo loanHealthInfo;
+    protected String loanName;
+    protected Purpose purpose;
+    protected Rating rating;
+    protected boolean willExceedLoanInvestmentLimit;
+    protected boolean insuranceActive;
+    protected boolean additionallyInsured;
     private Object loanInvestments;
 
     // dates and times are expensive to parse, and Participations are on the hot path. Only do it when needed.
     @XmlElement
-    private String deadline;
+    protected String deadline;
     private final Lazy<OffsetDateTime> deadlineParsed = Lazy.of(() -> OffsetDateTimeAdapter.fromString(deadline));
     @XmlElement
-    private String nextPaymentDate;
+    protected String nextPaymentDate;
     private final Lazy<LocalDate> nextPaymentDateParsed = Lazy.of(() -> LocalDateAdapter.fromString(nextPaymentDate));
 
-    private Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
-    private Currency currency;
+    protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
+    protected Currency currency;
     @XmlElement
-    private String remainingPrincipal;
+    protected String remainingPrincipal;
     private final Lazy<Money> moneyRemainingPrincipal = Lazy.of(() -> Money.from(remainingPrincipal, currency));
     @XmlElement
-    private String discount;
+    protected String discount;
     private final Lazy<Money> moneyDiscount = Lazy.of(() -> Money.from(discount, currency));
     @XmlElement
-    private String price;
+    protected String price;
     private final Lazy<Money> moneyPrice = Lazy.of(() -> Money.from(price, currency));
+
+    public Participation(final Loan loan, final Money remainingPrincipal, final int remainingInstalmentCount) {
+        this.loanId = loan.getId();
+        this.borrowerNo = loan.getBorrowerNo();
+        this.countryOfOrigin = loan.getCountryOfOrigin();
+        this.currency = loan.getCurrency();
+        this.incomeType = loan.getMainIncomeType();
+        this.interestRate = loan.getInterestRate();
+        this.loanName = loan.getName();
+        this.originalInstalmentCount = loan.getTermInMonths();
+        this.purpose = loan.getPurpose();
+        this.rating = loan.getRating();
+        this.userId = loan.getUserId();
+        this.additionallyInsured = loan.isAdditionallyInsured();
+        this.insuranceActive = loan.isInsuranceActive();
+        this.remainingPrincipal = remainingPrincipal.getValue().toPlainString();
+        this.remainingInstalmentCount = remainingInstalmentCount;
+    }
 
     @XmlElement
     public long getId() {
