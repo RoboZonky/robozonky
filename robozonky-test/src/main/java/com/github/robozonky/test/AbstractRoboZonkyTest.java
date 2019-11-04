@@ -160,7 +160,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     @AfterEach
     protected void awaitTerminationOfParallelTasks() {
         logger.debug("Awaiting common ForkJoinPool quiescence.");
-        final boolean success = ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS);
+        final boolean success = ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.SECONDS);
         if (success) {
             logger.debug("All executors shut down.");
         } else {

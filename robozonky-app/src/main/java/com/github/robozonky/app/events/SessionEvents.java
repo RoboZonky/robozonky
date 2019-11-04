@@ -39,8 +39,8 @@ import java.util.stream.Stream;
 public final class SessionEvents {
 
     private static final Logger LOGGER = LogManager.getLogger(SessionEvents.class);
-    private static final Map<String, SessionEvents> BY_TENANT = new ConcurrentHashMap<>(0);
     private static final AtomicLong EVENT_COUNTER = new AtomicLong(0);
+    private static final Map<String, SessionEvents> BY_TENANT = new ConcurrentHashMap<>(0);
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> debugListeners = new CopyOnWriteArraySet<>();
     private final SessionInfo sessionInfo;
@@ -77,15 +77,6 @@ public final class SessionEvents {
                 .orElseThrow(() -> new IllegalStateException("Not an event:" + original));
     }
 
-    private static void submittable(final Runnable runnable) {
-        var eventId = EVENT_COUNTER.getAndIncrement();
-        LOGGER.trace("Starting event {} ({}).", eventId, runnable);
-        try {
-            runnable.run();
-        } finally {
-            LOGGER.trace("Finished processing event {}.", eventId);
-        }
-    }
     /**
      * Takes a set of {@link Runnable}s and queues them to be fired on a background thread, in the guaranteed order of
      * appearance.
@@ -94,7 +85,7 @@ public final class SessionEvents {
      */
     @SuppressWarnings("rawtypes")
     private static Runnable runAsync(final Stream<Runnable> futures) {
-        final CompletableFuture[] results = futures.map(future -> CompletableFuture.runAsync(() -> submittable(future)))
+        final CompletableFuture[] results = futures.map(CompletableFuture::runAsync)
                 .toArray(CompletableFuture[]::new);
         return GlobalEvents.merge(results);
     }
@@ -135,6 +126,11 @@ public final class SessionEvents {
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream()
                 .map(Supplier::get)
+                .peek(o -> {
+                    if (o.isEmpty()) { // will not be fired, yet needs to be marked as complete
+                        debugListeners.forEach(l -> l.fired(event.get(), null));
+                    }
+                })
                 .flatMap(l -> l.stream().flatMap(Stream::of));
         final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :
@@ -181,7 +177,13 @@ public final class SessionEvents {
 
         @Override
         public void run() {
-            SessionEvents.this.fireAny(event, listener);
+            var eventId = EVENT_COUNTER.getAndIncrement();
+            LOGGER.debug("Starting event {} ({}).", eventId, event);
+            try {
+                SessionEvents.this.fireAny(event, listener);
+            } finally {
+                LOGGER.debug("Finished processing event {}.", eventId);
+            }
         }
 
         @Override

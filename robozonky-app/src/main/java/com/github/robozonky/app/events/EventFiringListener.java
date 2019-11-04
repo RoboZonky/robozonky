@@ -42,7 +42,8 @@ public interface EventFiringListener {
 
     /**
      * Event was processed and delivered to the {@link EventListener}.
-     * @param event The event that was delivered.
+     * @param event The event that was delivered. If null, there was no listener to deliver the event to, likely
+     *              notifications disabled.
      * @param listener
      */
     <T extends Event> void fired(T event, Class<? extends EventListener<T>> listener);

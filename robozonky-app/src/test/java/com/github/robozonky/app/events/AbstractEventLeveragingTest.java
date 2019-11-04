@@ -26,11 +26,16 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
@@ -49,28 +54,65 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     }
 
     protected List<Event> getEventsFired() {
-        awaitTerminationOfParallelTasks();
+        waitForEventProcessing();
         return listener.getEventsFired();
     }
 
     protected List<Event> getEventsRequested() {
-        awaitTerminationOfParallelTasks();
+        waitForEventProcessing();
         return listener.getEventsRequested();
     }
 
     protected List<Event> getEventsReady() {
-        awaitTerminationOfParallelTasks();
+        waitForEventProcessing();
         return listener.getEventsReady();
     }
 
     protected List<Event> getEventsFailed() {
-        awaitTerminationOfParallelTasks();
+        waitForEventProcessing();
         return listener.getEventsFailed();
     }
 
     protected void readPreexistingEvents() {
-        awaitTerminationOfParallelTasks();
+        waitForEventProcessing();
         listener.clear();
+    }
+
+    @BeforeEach
+    public void startListeningForEvents() { // initialize session and create a listener
+        final PowerTenant t = mockTenant();
+        Events.forSession(t).addListener(listener);
+    }
+
+    @AfterEach
+    public void stopListeningForEvents() {
+        final PowerTenant t = mockTenant();
+        Events.forSession(t).removeListener(listener);
+        readPreexistingEvents();
+    }
+
+    private void waitForEventProcessing() {
+        Set<Event> requested = new CopyOnWriteArraySet<>(listener.getEventsRequested());
+        Instant start = Instant.now();
+        do {
+            for (Event e : requested) {
+                if (listener.getEventsFailed().contains(e) || listener.getEventsFired().contains(e)) {
+                    logger.debug("Event {} registered.", e);
+                    requested.remove(e);
+                }
+            }
+            if (requested.isEmpty()) {
+                return;
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // don't do anything
+            }
+        } while (Duration.between(start, Instant.now()).abs().compareTo(Duration.ofSeconds(5)) < 0);
+        if (!requested.isEmpty()) {
+            throw new IllegalStateException("Not all events were processed: " + requested);
+        }
     }
 
     @AfterEach
@@ -90,10 +132,10 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
      */
     private static class MyEventFiringListener implements EventFiringListener {
 
-        private final List<Event> eventsFired = new ArrayList<>(0);
-        private final List<Event> eventsRequested = new ArrayList<>(0);
-        private final List<Event> eventsFailed = new ArrayList<>(0);
-        private final List<Event> eventsReady = new ArrayList<>(0);
+        private final List<Event> eventsFired = new CopyOnWriteArrayList<>();
+        private final List<Event> eventsRequested = new CopyOnWriteArrayList<>();
+        private final List<Event> eventsFailed = new CopyOnWriteArrayList<>();
+        private final List<Event> eventsReady = new CopyOnWriteArrayList<>();
 
         @Override
         public synchronized void requested(final LazyEvent<? extends Event> event) {

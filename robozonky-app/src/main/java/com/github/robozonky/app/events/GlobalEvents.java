@@ -40,7 +40,7 @@ public final class GlobalEvents {
         return INSTANCE.get();
     }
 
-    static Runnable merge(final Runnable... runnables){
+    private static Runnable merge(final Runnable... runnables){
         return () -> Stream.of(runnables).forEach(Runnable::run);
     }
 
