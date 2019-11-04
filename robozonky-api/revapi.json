@@ -272,7 +272,7 @@
       {
         "code": "java.method.numberOfParametersChanged",
         "old": "method void com.github.robozonky.api.remote.entities.Participation::<init>()",
-        "new": "method void com.github.robozonky.api.remote.entities.Participation::<init>(com.github.robozonky.api.remote.entities.Loan)",
+        "new": "method void com.github.robozonky.api.remote.entities.Participation::<init>(com.github.robozonky.api.remote.entities.Loan, com.github.robozonky.api.Money, int)",
         "justification": "Allow the participation to be pre-filled."
       }
     ]
