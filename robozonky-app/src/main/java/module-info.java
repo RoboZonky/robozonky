@@ -19,7 +19,6 @@ import com.github.robozonky.internal.jobs.JobService;
 module com.github.robozonky.app {
     requires java.ws.rs;
     requires java.xml;
-    requires com.fasterxml.jackson.databind;
     requires info.picocli;
     requires io.vavr;
     requires org.apache.commons.lang3;
