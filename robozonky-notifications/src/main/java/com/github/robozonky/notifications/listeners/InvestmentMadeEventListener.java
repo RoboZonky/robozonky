@@ -17,9 +17,11 @@
 package com.github.robozonky.notifications.listeners;
 
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class InvestmentMadeEventListener extends AbstractListener<InvestmentMadeEvent> {
 
@@ -29,8 +31,15 @@ public class InvestmentMadeEventListener extends AbstractListener<InvestmentMade
 
     @Override
     public String getSubject(final InvestmentMadeEvent event) {
-        final Investment i = event.getInvestment();
-        return "Nová investice - " + i.getAmount().getValue().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
+        return "Nová investice - " + event.getInvestedAmount().getValue().intValue() + ",- Kč, půjčka " +
+                Util.identifyLoan(event);
+    }
+
+    @Override
+    protected Map<String, Object> getData(InvestmentMadeEvent event) {
+        final Map<String, Object> result = new HashMap<>(super.getData(event));
+        result.put("amountHeld", event.getInvestedAmount().getValue());
+        return result;
     }
 
     @Override

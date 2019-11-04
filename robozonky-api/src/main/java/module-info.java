@@ -68,7 +68,8 @@ module com.github.robozonky.api {
      * For the purposes of testing notification generation. We do not want any other code to create mutable entities.
      */
     exports com.github.robozonky.internal.remote.entities to
-            com.github.robozonky.notifications;
+            com.github.robozonky.notifications,
+            com.github.robozonky.app;
 
     uses JobService;
     uses com.github.robozonky.api.strategies.StrategyService;

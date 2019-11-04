@@ -92,6 +92,32 @@ final class Util {
         );
     }
 
+    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
+        final Money totalPaid = getTotalPaid(i);
+        final Money originalPrincipal = i.getAmount();
+        final Money balance = i.getSmpSoldFor()
+                .map(soldFor -> {
+                    final Money partial = totalPaid.subtract(originalPrincipal);
+                    final Money saleFee = i.getSmpFee().orElse(soldFor.getZero());
+                    return partial.add(soldFor).subtract(saleFee);
+                })
+                .orElseGet(() -> totalPaid.subtract(originalPrincipal));
+        final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
+        loanData.put("investedOn", toDate(i.getInvestmentDate()));
+        loanData.put("loanTermRemaining", i.getRemainingMonths());
+        loanData.put("amountRemaining", i.getRemainingPrincipal().orElse(Money.ZERO).getValue());
+        loanData.put("amountHeld", originalPrincipal.getValue());
+        loanData.put("amountPaid", totalPaid.getValue());
+        loanData.put("balance", balance.getValue());
+        loanData.put("interestExpected", i.getExpectedInterest().getValue());
+        loanData.put("interestPaid", i.getPaidInterest().getValue());
+        loanData.put("penaltiesPaid", i.getPaidPenalty().getValue());
+        loanData.put("monthsElapsed", getMonthsElapsed(i));
+        loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
+        loanData.put("postponed", i.isInstalmentPostponement());
+        return loanData;
+    }
+
     private static Map<String, Object> moneyPerRating(final Function<Rating, Money> provider) {
         final Function<Rating, Number> converter = m -> provider.apply(m).getValue();
         return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, converter));
@@ -155,32 +181,6 @@ final class Util {
 
     private static long getMonthsElapsed(final Investment i) {
         return Period.between(i.getInvestmentDate().toLocalDate(), DateUtil.localNow().toLocalDate()).toTotalMonths();
-    }
-
-    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
-        final Money totalPaid = getTotalPaid(i);
-        final Money originalPrincipal = i.getAmount();
-        final Money balance = i.getSmpSoldFor()
-                .map(soldFor -> {
-                    final Money partial = totalPaid.subtract(originalPrincipal);
-                    final Money saleFee = i.getSmpFee().orElse(soldFor.getZero());
-                    return partial.add(soldFor).subtract(saleFee);
-                })
-                .orElseGet(() -> totalPaid.subtract(originalPrincipal));
-        final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
-        loanData.put("investedOn", toDate(i.getInvestmentDate()));
-        loanData.put("loanTermRemaining", i.getRemainingMonths());
-        loanData.put("amountRemaining", i.getRemainingPrincipal().orElse(Money.ZERO).getValue());
-        loanData.put("amountHeld", originalPrincipal.getValue());
-        loanData.put("amountPaid", totalPaid.getValue());
-        loanData.put("balance", balance.getValue());
-        loanData.put("interestExpected", i.getExpectedInterest().getValue());
-        loanData.put("interestPaid", i.getPaidInterest().getValue());
-        loanData.put("penaltiesPaid", i.getPaidPenalty().getValue());
-        loanData.put("monthsElapsed", getMonthsElapsed(i));
-        loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
-        loanData.put("postponed", i.isInstalmentPostponement());
-        return loanData;
     }
 
     public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan,

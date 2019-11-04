@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -50,7 +49,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     void empty() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
-        final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.emptyList(), null);
+        final Collection<Participation> i = PurchasingSession.purchase(auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
     }
 
@@ -78,7 +77,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
+        final Collection<Participation> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(4);
         verify(z).purchase(eq(p));
@@ -115,7 +114,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.purchase(any())).thenReturn(PurchaseResult.failure(thrown));
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Collection<Investment> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
+        final Collection<Participation> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
         assertThat(i).isEmpty();
         assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(Money.from(199));
     }

@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
@@ -53,7 +52,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     void empty() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
-        final Collection<Investment> i = ReservationSession.process(auth, Collections.emptyList(), null);
+        final Collection<Reservation> i = ReservationSession.process(auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
     }
 
@@ -79,7 +78,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Collection<Investment> i = ReservationSession.process(auth, Collections.singleton(pd), s);
+        final Collection<Reservation> i = ReservationSession.process(auth, Collections.singleton(pd), s);
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(4);
         verify(z).accept(eq(p));
@@ -110,7 +109,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Collection<Investment> i = ReservationSession.process(auth, Collections.singleton(pd), s);
+        final Collection<Reservation> i = ReservationSession.process(auth, Collections.singleton(pd), s);
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(4);
         verify(z, never()).accept(eq(p));
@@ -142,7 +141,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(z).accept(any());
         final PowerTenant auth = mockTenant(z, false);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Collection<Investment> i = ReservationSession.process(auth, Collections.singleton(pd), s);
+        final Collection<Reservation> i = ReservationSession.process(auth, Collections.singleton(pd), s);
         assertThat(i).isEmpty();
         assertThat(getEventsRequested()).hasSize(3);
         verify(z).accept(eq(p));

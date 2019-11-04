@@ -18,6 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -27,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy> {
+class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy, Loan> {
 
     private final AtomicReference<LastPublishedLoan> lastChecked = new AtomicReference<>(null);
 
@@ -52,7 +53,7 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public Operation<LoanDescriptor, InvestmentStrategy> getOperation() {
+    public Operation<LoanDescriptor, InvestmentStrategy, Loan> getOperation() {
         return InvestingSession::invest;
     }
 

@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Participation;
 
 import java.util.Collection;
 
@@ -28,6 +28,6 @@ public interface PurchasingCompletedEvent extends Financial {
     /**
      * @return The investments that were made.
      */
-    Collection<Investment> getInvestments();
+    Collection<Participation> getParticipationsPurchased();
 
 }

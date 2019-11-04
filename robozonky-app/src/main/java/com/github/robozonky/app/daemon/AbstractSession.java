@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.Recommended;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -32,7 +31,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
 
     protected final PowerTenant tenant;
     protected final Logger logger;
-    protected final List<Investment> result = new ArrayList<>(0);
+    protected final List<X> result = new ArrayList<>(0);
     private final SessionState<S> discarded;
     private final Collection<S> stillAvailable;
 
@@ -75,7 +74,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
      * Get investments made during this session.
      * @return Investments made so far during this session. Unmodifiable.
      */
-    List<Investment> getResult() {
+    List<X> getResult() {
         return Collections.unmodifiableList(result);
     }
 }

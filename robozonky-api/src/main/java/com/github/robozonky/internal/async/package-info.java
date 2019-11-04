@@ -21,8 +21,6 @@
  * <ul>
  * <li>{@link com.github.robozonky.internal.async.Backoff} implements a mechanism to repeat a remote operation
  * over and over until it is eventually successful.</li>
- * <li>{@link com.github.robozonky.internal.async.Refreshable} provides a variable that automatically refreshes
- * itself from a remote operation on the background.</li>
  * <li>{@link com.github.robozonky.internal.async.Reloadable} provides a variable that refreshes itself from a remote
  * operation when accessed.</li>
  * </ul>

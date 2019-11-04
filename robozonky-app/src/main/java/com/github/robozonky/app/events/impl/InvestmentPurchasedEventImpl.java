@@ -16,27 +16,25 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class InvestmentPurchasedEventImpl extends AbstractEventImpl implements InvestmentPurchasedEvent {
 
-    private final Investment investment;
+    private final Participation participation;
     private final Loan loan;
+    private final Money purchasedAmount;
     private final PortfolioOverview portfolioOverview;
 
-    public InvestmentPurchasedEventImpl(final Investment investment, final Loan loan,
+    public InvestmentPurchasedEventImpl(final Participation participation, final Loan loan, final Money amount,
                                         final PortfolioOverview portfolio) {
-        this.investment = investment;
+        this.participation = participation;
         this.loan = loan;
+        this.purchasedAmount = amount;
         this.portfolioOverview = portfolio;
-    }
-
-    @Override
-    public Investment getInvestment() {
-        return this.investment;
     }
 
     @Override
@@ -45,7 +43,17 @@ final class InvestmentPurchasedEventImpl extends AbstractEventImpl implements In
     }
 
     @Override
+    public Money getPurchasedAmount() {
+        return purchasedAmount;
+    }
+
+    @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public Participation getParticipation() {
+        return participation;
     }
 }

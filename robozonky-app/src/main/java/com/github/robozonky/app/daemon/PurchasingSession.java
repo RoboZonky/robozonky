@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -46,9 +45,9 @@ final class PurchasingSession extends
                 Audit.purchasing());
     }
 
-    public static Collection<Investment> purchase(final PowerTenant auth,
-                                                  final Collection<ParticipationDescriptor> items,
-                                                  final PurchaseStrategy strategy) {
+    public static Collection<Participation> purchase(final PowerTenant auth,
+                                                     final Collection<ParticipationDescriptor> items,
+                                                     final PurchaseStrategy strategy) {
         final PurchasingSession s = new PurchasingSession(items, auth);
         final Collection<ParticipationDescriptor> c = s.getAvailable();
         if (c.isEmpty()) {
@@ -56,7 +55,7 @@ final class PurchasingSession extends
         }
         s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(c, auth.getPortfolio().getOverview())));
         s.purchase(strategy);
-        final Collection<Investment> result = s.getResult();
+        final Collection<Participation> result = s.getResult();
         s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio().getOverview())));
         return Collections.unmodifiableCollection(result);
     }
@@ -105,13 +104,13 @@ final class PurchasingSession extends
         final Participation participation = recommendation.descriptor().item();
         final Loan l = recommendation.descriptor().related();
         final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);
-        final Investment i = new Investment(participation, recommendation.amount());
         discard(recommendation.descriptor());
         if (succeeded) {
-            result.add(i);
-            tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getRemainingPrincipal().orElseThrow());
+            result.add(participation);
+            tenant.getPortfolio().simulateCharge(l.getId(), l.getRating(), recommendation.amount());
             tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
-            tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(i, l, tenant.getPortfolio().getOverview())));
+            tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(participation, l, recommendation.amount(),
+                    tenant.getPortfolio().getOverview())));
         }
         return succeeded;
     }

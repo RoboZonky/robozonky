@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 
 /**
  * Fired immediately after {@link PurchaseStrategy} has recommended a particular loan.
- * {@link PurchaseRequestedEvent} may be fired next.
+ * {@link InvestmentPurchasedEvent} may be fired next.
  */
 public interface PurchaseRecommendedEvent extends ParticipationBased,
                                                   Recommending {

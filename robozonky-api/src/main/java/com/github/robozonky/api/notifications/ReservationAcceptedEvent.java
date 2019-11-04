@@ -16,10 +16,14 @@
 
 package com.github.robozonky.api.notifications;
 
+import com.github.robozonky.api.Money;
+
 /**
  * Fired immediately after an investment was confirmed through the reservation system's API.
  */
-public interface ReservationAcceptedEvent extends InvestmentBased,
+public interface ReservationAcceptedEvent extends LoanBased,
                                                   Financial {
+
+    Money getInvestedAmount();
 
 }

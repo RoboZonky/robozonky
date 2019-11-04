@@ -17,7 +17,7 @@
 package com.github.robozonky.app.events.impl;
 
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 import java.util.Collection;
@@ -25,17 +25,17 @@ import java.util.Collections;
 
 final class PurchasingCompletedEventImpl extends AbstractEventImpl implements PurchasingCompletedEvent {
 
-    private final Collection<Investment> investments;
+    private final Collection<Participation> investments;
     private final PortfolioOverview portfolioOverview;
 
-    public PurchasingCompletedEventImpl(final Collection<Investment> investment, final PortfolioOverview portfolio) {
+    public PurchasingCompletedEventImpl(final Collection<Participation> investment, final PortfolioOverview portfolio) {
         super("investments");
         this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
     }
 
     @Override
-    public Collection<Investment> getInvestments() {
+    public Collection<Participation> getParticipationsPurchased() {
         return investments;
     }
 

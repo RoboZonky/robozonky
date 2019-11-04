@@ -16,14 +16,13 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.app.tenant.PowerTenant;
 
 import java.util.Collection;
 
 @FunctionalInterface
-interface Operation<B, C> {
+interface Operation<B, C, D> {
 
-    Collection<Investment> apply(PowerTenant a, Collection<B> b, C c);
+    Collection<D> apply(PowerTenant a, Collection<B> b, C c);
 
 }

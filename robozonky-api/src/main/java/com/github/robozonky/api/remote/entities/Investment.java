@@ -24,6 +24,7 @@ import io.vavr.Lazy;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -136,17 +137,13 @@ public class Investment extends BaseInvestment {
     public Investment(final Loan loan, final Money amount) {
         super(loan, amount);
         this.rating = loan.getRating();
+        this.interestRate = rating.getInterestRate();
+        this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
         this.remainingPrincipal = amount.getValue().toPlainString();
         this.remainingMonths = loan.getTermInMonths();
         this.loanTermInMonth = loan.getTermInMonths();
-    }
-
-    public Investment(final Participation participation, final Money amount) {
-        super(participation, amount);
-        this.rating = participation.getRating();
-        this.remainingPrincipal = amount.getValue().toPlainString();
-        this.remainingMonths = participation.getRemainingInstalmentCount();
-        this.loanTermInMonth = participation.getOriginalInstalmentCount();
+        this.insuranceActive = loan.isInsuranceActive();
+        this.additionallyInsured = loan.isAdditionallyInsured();
     }
 
     @XmlElement

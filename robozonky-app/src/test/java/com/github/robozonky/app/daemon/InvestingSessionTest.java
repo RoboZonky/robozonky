@@ -18,7 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.*;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -72,7 +72,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = ld.item().getId();
         final PowerTenant auth = mockTenant(z);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, mockLoanDescriptor());
-        final Collection<Investment> i = InvestingSession.invest(auth, lds,
+        final Collection<Loan> i = InvestingSession.invest(auth, lds,
                                                                  mockStrategy(loanId, amount));
         // check that one investment was made
         assertThat(i).hasSize(1);
@@ -140,9 +140,8 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(result).isTrue();
             softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
         });
-        final List<Investment> investments = t.getResult();
+        final List<Loan> investments = t.getResult();
         assertThat(investments).hasSize(1);
-        assertThat(investments.get(0).getAmount()).isEqualTo(Money.from(amountToInvest));
         // validate event sequence
         final List<Event> newEvents = getEventsRequested();
         assertThat(newEvents)
