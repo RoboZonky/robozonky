@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 public final class GlobalEvents {
 
@@ -40,20 +39,16 @@ public final class GlobalEvents {
         return INSTANCE.get();
     }
 
-    private static Runnable merge(final Runnable... runnables){
-        return () -> Stream.of(runnables).forEach(Runnable::run);
-    }
-
-    static Runnable merge(final CompletableFuture... runnables){
-        return () -> CompletableFuture.allOf(runnables).join();
+    static CompletableFuture<?> merge(final CompletableFuture... runnables){
+        return CompletableFuture.allOf(runnables);
     }
 
     @SuppressWarnings("rawtypes")
-    public Runnable fire(final LazyEvent<? extends GlobalEvent> event) {
+    public CompletableFuture<?> fire(final LazyEvent<? extends GlobalEvent> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
-        final Runnable[] futures = SessionEvents.all().stream()
+        final CompletableFuture[] futures = SessionEvents.all().stream()
                 .map(s -> s.fireAny(event))
-                .toArray(Runnable[]::new);
+                .toArray(CompletableFuture[]::new);
         return merge(futures);
     }
 
@@ -63,7 +58,7 @@ public final class GlobalEvents {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public Runnable fire(final GlobalEvent event) {
+    public CompletableFuture<?> fire(final GlobalEvent event) {
         return fire(EventFactory.async((Class<GlobalEvent>) event.getClass(), () -> event));
     }
 }

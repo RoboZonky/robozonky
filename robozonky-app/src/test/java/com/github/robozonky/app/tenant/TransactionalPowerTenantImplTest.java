@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static com.github.robozonky.app.events.impl.EventFactory.*;
 import static com.github.robozonky.app.tenant.PowerTenant.transactional;
@@ -130,9 +131,9 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
                                                                       .withApi(api)
                                                                       .withSecrets(SECRETS)
                                                                       .build())) {
-            final Runnable f = t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
+            final CompletableFuture<?> f = t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
             t.commit();
-            f.run();
+            f.join();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)
@@ -146,10 +147,10 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
         try (final TransactionalPowerTenant t = transactional(tenant)) {
-            final Runnable f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
+            final CompletableFuture<?> f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
                                                                                   mockPortfolioOverview())));
             t.commit();
-            f.run();
+            f.join();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)

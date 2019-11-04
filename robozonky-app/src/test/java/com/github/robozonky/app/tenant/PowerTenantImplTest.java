@@ -117,7 +117,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
-            tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException())).run();
+            tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException())).join();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)
@@ -132,7 +132,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
             tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
                                                                     mockPortfolioOverview())))
-                    .run();
+                    .join();
         }
         assertThat(this.getEventsRequested())
                 .hasSize(1)

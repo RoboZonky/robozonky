@@ -84,7 +84,7 @@ public final class SessionEvents {
      * @return When complete, all listeners have been notified of all the events.
      */
     @SuppressWarnings("rawtypes")
-    private static Runnable runAsync(final Stream<Runnable> futures) {
+    private static CompletableFuture<?> runAsync(final Stream<Runnable> futures) {
         final CompletableFuture[] results = futures.map(CompletableFuture::runAsync)
                 .toArray(CompletableFuture[]::new);
         return GlobalEvents.merge(results);
@@ -117,7 +117,7 @@ public final class SessionEvents {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    Runnable fireAny(final LazyEvent<? extends Event> event) {
+    CompletableFuture<?> fireAny(final LazyEvent<? extends Event> event) {
         // loan all listeners
         debugListeners.forEach(l -> l.requested(event));
         final Class<? extends Event> eventType = event.getEventType();
@@ -156,12 +156,12 @@ public final class SessionEvents {
         this.injectedDebugListener = listener;
     }
 
-    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
+    public CompletableFuture<?> fire(final LazyEvent<? extends SessionEvent> event) {
         return fireAny(event);
     }
 
     @SuppressWarnings("unchecked")
-    public Runnable fire(final SessionEvent event) {
+    public CompletableFuture<?> fire(final SessionEvent event) {
         return fire(EventFactory.async((Class<SessionEvent>) event.getClass(), () -> event));
     }
 

@@ -16,16 +16,16 @@
 
 package com.github.robozonky.app.tenant;
 
+import io.vavr.Lazy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import io.vavr.Lazy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class DelayedFiring implements Runnable {
 
@@ -53,12 +53,12 @@ final class DelayedFiring implements Runnable {
         return !all.isEmpty() && !isOver.get();
     }
 
-    public Runnable delay(final Runnable runnable) {
+    public CompletableFuture<?> delay(final Runnable runnable) {
         ensureNotOver();
         LOGGER.debug("Delaying {}.", runnable);
         final CompletableFuture<Void> result = blocksUntilAllUnblock.get().thenRunAsync(runnable);
         all.add(result);
-        return result::join;
+        return result;
     }
 
     public void cancel() {

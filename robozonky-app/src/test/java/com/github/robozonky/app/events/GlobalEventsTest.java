@@ -20,14 +20,16 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.events.impl.EventFactory;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GlobalEventsTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void fireReturnsFuture() {
-        final Runnable result = GlobalEvents.get().fire(EventFactory.roboZonkyEnding());
-        result.run(); // make sure it does not throw
+        final CompletableFuture<?> result = GlobalEvents.get().fire(EventFactory.roboZonkyEnding());
+        result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }
 }
