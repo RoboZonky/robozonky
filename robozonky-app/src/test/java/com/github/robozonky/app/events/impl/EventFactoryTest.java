@@ -93,7 +93,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         final ExecutionCompletedEvent e = EventFactory.executionCompleted(Collections.emptyList(),
                                                                           mockPortfolioOverview());
         assertSoftly(softly -> {
-            softly.assertThat(e.getInvestments()).isEmpty();
+            softly.assertThat(e.getLoansInvestedInto()).isEmpty();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
             softly.assertThat(e.getCreatedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
             softly.assertThat(e.toString()).isNotEmpty();
@@ -210,7 +210,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         final PurchasingCompletedEvent e = EventFactory.purchasingCompleted(Collections.emptyList(),
                                                                             mockPortfolioOverview());
         assertSoftly(softly -> {
-            softly.assertThat(e.getInvestments()).isEmpty();
+            softly.assertThat(e.getParticipationsPurchased()).isEmpty();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }
@@ -248,7 +248,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         final ReservationCheckCompletedEvent e = EventFactory.reservationCheckCompleted(Collections.emptyList(),
                                                                                         mockPortfolioOverview());
         assertSoftly(softly -> {
-            softly.assertThat(e.getInvestments()).isEmpty();
+            softly.assertThat(e.getReservationsAccepted()).isEmpty();
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }

@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -49,16 +48,15 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         this.investor = Investor.build(tenant);
     }
 
-    public static Collection<Investment> invest(final PowerTenant tenant,
-                                                final Collection<LoanDescriptor> loans,
-                                                final InvestmentStrategy strategy) {
+    public static Collection<Loan> invest(final PowerTenant tenant, final Collection<LoanDescriptor> loans,
+                                          final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
         if (!s.getAvailable().isEmpty()) {
             s.invest(strategy);
         }
-        final Collection<Investment> result = s.getResult();
+        final Collection<Loan> result = s.getResult();
         // make sure we get fresh portfolio reference here
         s.tenant.fire(executionCompletedLazy(() -> executionCompleted(result, tenant.getPortfolio().getOverview())));
         return Collections.unmodifiableCollection(result);
@@ -78,9 +76,8 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
 
     private boolean successfulInvestment(final RecommendedLoan recommendation, final Money amount) {
         final Loan l = recommendation.descriptor().item();
-        final Investment i = new Investment(l, amount);
-        result.add(i);
-        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), amount);
+        result.add(l);
+        tenant.getPortfolio().simulateCharge(l.getId(), l.getRating(), amount);
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(amount));
         discard(recommendation.descriptor()); // never show again
         tenant.fire(investmentMadeLazy(() -> investmentMade(l, amount, tenant.getPortfolio().getOverview())));

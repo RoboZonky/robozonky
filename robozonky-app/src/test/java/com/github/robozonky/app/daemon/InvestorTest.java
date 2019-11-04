@@ -19,6 +19,7 @@ package com.github.robozonky.app.daemon;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.*;
 class InvestorTest extends AbstractZonkyLeveragingTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
+            .setRating(Rating.A)
             .setNonReservedRemainingInvestment(100_000)
             .build();
     private static final LoanDescriptor DESCRIPTOR = new LoanDescriptor(LOAN);

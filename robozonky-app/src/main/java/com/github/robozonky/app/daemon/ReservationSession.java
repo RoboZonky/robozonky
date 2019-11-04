@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -44,9 +43,9 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
               Audit.reservations());
     }
 
-    public static Collection<Investment> process(final PowerTenant tenant,
-                                                 final Collection<ReservationDescriptor> loans,
-                                                 final ReservationStrategy strategy) {
+    public static Collection<Reservation> process(final PowerTenant tenant,
+                                                  final Collection<ReservationDescriptor> loans,
+                                                  final ReservationStrategy strategy) {
         final ReservationSession s = new ReservationSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
         s.tenant.fire(reservationCheckStarted(loans, portfolioOverview));
@@ -96,9 +95,8 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
             return false;
         }
         final Loan l = recommendation.descriptor().related();
-        final Investment i = new Investment(l, recommendation.amount());
-        result.add(i);
-        tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getAmount());
+        result.add(recommendation.descriptor().item());
+        tenant.getPortfolio().simulateCharge(l.getId(), l.getRating(), recommendation.amount());
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
         tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(l, recommendation.amount(),
                 tenant.getPortfolio().getOverview())));

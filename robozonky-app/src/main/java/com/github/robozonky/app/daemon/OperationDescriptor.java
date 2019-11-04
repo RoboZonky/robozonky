@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
-interface OperationDescriptor<T, S> {
+interface OperationDescriptor<T, S, R> {
 
     boolean isEnabled(final Tenant tenant);
 
@@ -33,7 +33,7 @@ interface OperationDescriptor<T, S> {
 
     long identify(final T descriptor);
 
-    Operation<T, S> getOperation();
+    Operation<T, S, R> getOperation();
 
     Money getMinimumBalance(final PowerTenant tenant);
 

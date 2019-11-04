@@ -17,7 +17,8 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -33,25 +34,25 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
+class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
 
     private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(30);
     private final Logger logger;
     private final PowerTenant tenant;
     private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
-    private final OperationDescriptor<T, S> operationDescriptor;
+    private final OperationDescriptor<T, S, R> operationDescriptor;
 
-    StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S> operationDescriptor) {
+    StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S, R> operationDescriptor) {
         this.tenant = tenant;
         this.operationDescriptor = operationDescriptor;
         this.logger = operationDescriptor.getLogger();
     }
 
-    public static StrategyExecutor<LoanDescriptor, InvestmentStrategy> forInvesting(final PowerTenant tenant) {
+    public static StrategyExecutor<LoanDescriptor, InvestmentStrategy, Loan> forInvesting(final PowerTenant tenant) {
         return new StrategyExecutor<>(tenant, new InvestingOperationDescriptor());
     }
 
-    public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy> forPurchasing(final PowerTenant tenant) {
+    public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy, Participation> forPurchasing(final PowerTenant tenant) {
         return new StrategyExecutor<>(tenant, new PurchasingOperationDescriptor());
     }
 
@@ -82,7 +83,7 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
                 .isBefore(DateUtil.now());
     }
 
-    private Collection<Investment> invest(final S strategy) {
+    private Collection<R> invest(final S strategy) {
         final MarketplaceAccessor<T> marketplaceAccessor = operationDescriptor.newMarketplaceAccessor(tenant);
         if (skipStrategyEvaluation(marketplaceAccessor)) {
             return Collections.emptyList();
@@ -93,14 +94,14 @@ class StrategyExecutor<T, S> implements Supplier<Collection<Investment>> {
             return Collections.emptyList();
         }
         logger.trace("Processing {} items from the marketplace.", marketplace.size());
-        final Collection<Investment> result = operationDescriptor.getOperation().apply(tenant, marketplace, strategy);
+        final Collection<R> result = operationDescriptor.getOperation().apply(tenant, marketplace, strategy);
         lastSuccessfulMarketplaceCheck.set(DateUtil.now());
         logger.trace("Marketplace processing complete.");
         return result;
     }
 
     @Override
-    public Collection<Investment> get() {
+    public Collection<R> get() {
         if (!operationDescriptor.isEnabled(tenant)) {
             logger.debug("Access to marketplace disabled by Zonky.");
             return Collections.emptyList();

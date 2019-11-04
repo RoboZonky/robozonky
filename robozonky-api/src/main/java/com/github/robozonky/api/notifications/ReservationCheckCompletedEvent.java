@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Reservation;
 
 import java.util.Collection;
 
@@ -25,6 +25,6 @@ import java.util.Collection;
  */
 public interface ReservationCheckCompletedEvent extends Financial {
 
-    Collection<Investment> getInvestments();
+    Collection<Reservation> getReservationsAccepted();
 
 }

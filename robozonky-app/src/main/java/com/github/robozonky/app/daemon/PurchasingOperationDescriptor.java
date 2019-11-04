@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -26,7 +27,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy> {
+class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy, Participation> {
 
     private static final long[] NO_LONGS = new long[0];
     private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
@@ -52,7 +53,7 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
     }
 
     @Override
-    public Operation<ParticipationDescriptor, PurchaseStrategy> getOperation() {
+    public Operation<ParticipationDescriptor, PurchaseStrategy, Participation> getOperation() {
         return PurchasingSession::purchase;
     }
 
