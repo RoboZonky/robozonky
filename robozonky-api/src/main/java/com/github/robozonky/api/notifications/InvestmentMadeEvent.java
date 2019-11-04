@@ -16,10 +16,14 @@
 
 package com.github.robozonky.api.notifications;
 
+import com.github.robozonky.api.Money;
+
 /**
  * Fired immediately after an investment was submitted to the API.
  */
-public interface InvestmentMadeEvent extends InvestmentBased,
+public interface InvestmentMadeEvent extends LoanBased,
                                              Financial {
+
+    Money getInvestedAmount();
 
 }

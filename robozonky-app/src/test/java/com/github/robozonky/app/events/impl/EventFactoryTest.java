@@ -111,23 +111,22 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investmentMade() {
-        final InvestmentMadeEvent e = EventFactory.investmentMade(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh(), mockPortfolioOverview());
+        final InvestmentMadeEvent e = EventFactory.investmentMade(MockLoanBuilder.fresh(), Money.from(200),
+                mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
-            softly.assertThat(e.getInvestment()).isNotNull();
+            softly.assertThat(e.getInvestedAmount()).isEqualTo(Money.from(200));
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }
 
     @Test
     void investmentPurchased() {
-        final InvestmentPurchasedEvent e = EventFactory.investmentPurchased(MockInvestmentBuilder.fresh().build(),
-                                                                            MockLoanBuilder.fresh(),
+        final InvestmentPurchasedEvent e = EventFactory.investmentPurchased(MockLoanBuilder.fresh(), Money.from(200),
                                                                             mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
-            softly.assertThat(e.getInvestment()).isNotNull();
+            softly.assertThat(e.getPurchasedAmount()).isEqualTo(Money.from(200));
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }
@@ -236,11 +235,10 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void reservationAccepted() {
         final Loan l = MockLoanBuilder.fresh();
-        final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
-        final ReservationAcceptedEvent e = EventFactory.reservationAccepted(i, l, mockPortfolioOverview());
+        final ReservationAcceptedEvent e = EventFactory.reservationAccepted(l, Money.from(200), mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
-            softly.assertThat(e.getInvestment()).isNotNull();
+            softly.assertThat(e.getInvestedAmount()).isEqualTo(Money.from(200));
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }

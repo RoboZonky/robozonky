@@ -16,15 +16,22 @@
 
 package com.github.robozonky.notifications.samples;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-public final class MyInvestmentPurchasedEvent extends AbstractInvestmentBasedEvent implements InvestmentPurchasedEvent {
+public final class MyInvestmentPurchasedEvent extends AbstractLoanBasedEvent implements InvestmentPurchasedEvent {
 
     private final PortfolioOverview portfolioOverview = Util.randomizePortfolioOverview();
+
+    @Override
+    public Money getPurchasedAmount() {
+        return Money.from("123.45");
+    }
 
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
     }
+
 }

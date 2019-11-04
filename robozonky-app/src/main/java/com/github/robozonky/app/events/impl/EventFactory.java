@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.events.impl;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.*;
 import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -48,14 +49,14 @@ public final class EventFactory {
         return new ExecutionStartedEventImpl(loans, portfolioOverview);
     }
 
-    public static InvestmentMadeEvent investmentMade(final Investment investment, final Loan loan,
+    public static InvestmentMadeEvent investmentMade(final Loan loan, final Money investedAmount,
                                                      final PortfolioOverview portfolioOverview) {
-        return new InvestmentMadeEventImpl(investment, loan, portfolioOverview);
+        return new InvestmentMadeEventImpl(loan, investedAmount, portfolioOverview);
     }
 
-    public static InvestmentPurchasedEvent investmentPurchased(final Investment investment, final Loan loan,
+    public static InvestmentPurchasedEvent investmentPurchased(final Loan loan, final Money purchasedAmount,
                                                                final PortfolioOverview portfolioOverview) {
-        return new InvestmentPurchasedEventImpl(investment, loan, portfolioOverview);
+        return new InvestmentPurchasedEventImpl(loan, purchasedAmount, portfolioOverview);
     }
 
     public static InvestmentSoldEvent investmentSold(final Investment investment, final Loan loan,
@@ -198,10 +199,9 @@ public final class EventFactory {
         return new ReservationAcceptationRecommendedEventImpl(recommendation);
     }
 
-    public static ReservationAcceptedEvent reservationAccepted(final Investment investment,
-                                                               final Loan loan,
+    public static ReservationAcceptedEvent reservationAccepted(final Loan loan, final Money investedAmount,
                                                                final PortfolioOverview portfolioOverview) {
-        return new ReservationAcceptedEventImpl(investment, loan, portfolioOverview);
+        return new ReservationAcceptedEventImpl(loan, investedAmount, portfolioOverview);
     }
 
     public static LazyEvent<ReservationAcceptedEvent> reservationAcceptedLazy(

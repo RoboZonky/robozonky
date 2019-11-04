@@ -83,7 +83,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), amount);
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(amount));
         discard(recommendation.descriptor()); // never show again
-        tenant.fire(investmentMadeLazy(() -> investmentMade(i, l, tenant.getPortfolio().getOverview())));
+        tenant.fire(investmentMadeLazy(() -> investmentMade(l, amount, tenant.getPortfolio().getOverview())));
         logger.info("Invested {} into loan #{}.", amount, l.getId());
         return true;
     }

@@ -100,7 +100,8 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
         result.add(i);
         tenant.getPortfolio().simulateCharge(i.getLoanId(), i.getRating(), i.getAmount());
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
-        tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(i, l, tenant.getPortfolio().getOverview())));
+        tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(l, recommendation.amount(),
+                tenant.getPortfolio().getOverview())));
         return true;
     }
 }
