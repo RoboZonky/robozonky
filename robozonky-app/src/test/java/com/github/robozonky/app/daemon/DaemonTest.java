@@ -16,12 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -29,7 +23,10 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.SimplePayload;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.concurrent.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class DaemonTest extends AbstractZonkyLeveragingTest {
@@ -49,7 +46,7 @@ class DaemonTest extends AbstractZonkyLeveragingTest {
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             // call all the jobs and daemons we know about
-            verify(d, times(2)).submitTenantless(any(), any(SimplePayload.class), any(), any(), any(), any());
+            verify(d, times(1)).submitTenantless(any(), any(SimplePayload.class), any(), any(), any(), any());
             verify(d, times(9)).submitWithTenant(any(), any(), any(), any(), any(), any());
         } finally {
             e.shutdownNow();

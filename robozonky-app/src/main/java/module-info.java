@@ -27,8 +27,7 @@ module com.github.robozonky.app {
     requires com.github.robozonky.api;
     requires resteasy.core;
 
-    provides JobService with com.github.robozonky.app.events.EventFiringJobService,
-            com.github.robozonky.app.version.VersionDetectionJobService,
+    provides JobService with com.github.robozonky.app.version.VersionDetectionJobService,
             com.github.robozonky.app.daemon.SellingJobService,
             com.github.robozonky.app.daemon.ReservationsJobService,
             com.github.robozonky.app.delinquencies.DelinquencyNotificationJobService,

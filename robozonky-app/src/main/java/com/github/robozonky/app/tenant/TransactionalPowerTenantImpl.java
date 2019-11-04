@@ -36,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
@@ -67,13 +68,13 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
-    public Runnable fire(final SessionEvent event) {
+    public CompletableFuture<?> fire(final SessionEvent event) {
         LOGGER.trace("Event stored within transaction: {}.", event);
         return getDelayedFiring().delay(() -> parent.fire(event));
     }
 
     @Override
-    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
+    public CompletableFuture<?> fire(final LazyEvent<? extends SessionEvent> event) {
         LOGGER.trace("Lazy event stored within transaction: {}.", event);
         return getDelayedFiring().delay(() -> parent.fire(event));
     }

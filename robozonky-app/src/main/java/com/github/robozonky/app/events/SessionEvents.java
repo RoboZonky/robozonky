@@ -29,14 +29,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class SessionEvents {
 
     private static final Logger LOGGER = LogManager.getLogger(SessionEvents.class);
+    private static final AtomicLong EVENT_COUNTER = new AtomicLong(0);
     private static final Map<String, SessionEvents> BY_TENANT = new ConcurrentHashMap<>(0);
     private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> debugListeners = new CopyOnWriteArraySet<>();
@@ -81,9 +84,9 @@ public final class SessionEvents {
      * @return When complete, all listeners have been notified of all the events.
      */
     @SuppressWarnings("rawtypes")
-    private static Runnable runAsync(final Stream<Runnable> futures) {
-        final Runnable[] results = futures.map(EventFiringQueue.INSTANCE::fire)
-                .toArray(Runnable[]::new);
+    private static CompletableFuture runAsync(final Stream<Runnable> futures) {
+        final CompletableFuture[] results = futures.map(CompletableFuture::runAsync)
+                .toArray(CompletableFuture[]::new);
         return GlobalEvents.merge(results);
     }
 
@@ -114,7 +117,7 @@ public final class SessionEvents {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    Runnable fireAny(final LazyEvent<? extends Event> event) {
+    CompletableFuture fireAny(final LazyEvent<? extends Event> event) {
         // loan all listeners
         debugListeners.forEach(l -> l.requested(event));
         final Class<? extends Event> eventType = event.getEventType();
@@ -123,6 +126,11 @@ public final class SessionEvents {
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream()
                 .map(Supplier::get)
+                .peek(o -> {
+                    if (o.isEmpty()) { // will not be fired, yet needs to be marked as complete
+                        debugListeners.forEach(l -> l.fired(event.get(), null));
+                    }
+                })
                 .flatMap(l -> l.stream().flatMap(Stream::of));
         final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :
@@ -148,12 +156,12 @@ public final class SessionEvents {
         this.injectedDebugListener = listener;
     }
 
-    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
+    public CompletableFuture fire(final LazyEvent<? extends SessionEvent> event) {
         return fireAny(event);
     }
 
     @SuppressWarnings("unchecked")
-    public Runnable fire(final SessionEvent event) {
+    public CompletableFuture fire(final SessionEvent event) {
         return fire(EventFactory.async((Class<SessionEvent>) event.getClass(), () -> event));
     }
 
@@ -169,7 +177,13 @@ public final class SessionEvents {
 
         @Override
         public void run() {
-            SessionEvents.this.fireAny(event, listener);
+            var eventId = EVENT_COUNTER.getAndIncrement();
+            LOGGER.debug("Starting event {} ({}).", eventId, event);
+            try {
+                SessionEvents.this.fireAny(event, listener);
+            } finally {
+                LOGGER.debug("Finished processing event {}.", eventId);
+            }
         }
 
         @Override

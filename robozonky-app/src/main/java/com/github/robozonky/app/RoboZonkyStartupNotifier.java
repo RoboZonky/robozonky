@@ -16,9 +16,6 @@
 
 package com.github.robozonky.app;
 
-import java.util.Optional;
-import java.util.function.Consumer;
-
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
@@ -26,6 +23,10 @@ import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.Defaults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyEnding;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyInitialized;
@@ -49,10 +50,10 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
         LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
         Events.global().fire(roboZonkyInitialized());
         return Optional.of(result -> {
-            final Runnable waitUntilFired = Events.global().fire(roboZonkyEnding());
+            final CompletableFuture<?> waitUntilFired = Events.global().fire(roboZonkyEnding());
             try {
                 LOGGER.debug("Waiting for events to be processed.");
-                waitUntilFired.run();
+                waitUntilFired.join();
             } catch (final Exception ex) {
                 LOGGER.debug("Exception while waiting for the final event being processed.", ex);
             } finally {

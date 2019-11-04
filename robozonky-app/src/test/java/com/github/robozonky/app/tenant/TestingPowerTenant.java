@@ -24,6 +24,8 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.test.TestingTenant;
 
+import java.util.concurrent.CompletableFuture;
+
 public class TestingPowerTenant extends TestingTenant implements PowerTenant {
 
     private final StatefulBoundedBalance balance = new StatefulBoundedBalance(this);
@@ -43,12 +45,12 @@ public class TestingPowerTenant extends TestingTenant implements PowerTenant {
     }
 
     @Override
-    public Runnable fire(final SessionEvent event) {
+    public CompletableFuture<?> fire(final SessionEvent event) {
         return Events.forSession(this).fire(event);
     }
 
     @Override
-    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
+    public CompletableFuture<?> fire(final LazyEvent<? extends SessionEvent> event) {
         return Events.forSession(this).fire(event);
     }
 }

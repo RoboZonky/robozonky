@@ -39,6 +39,7 @@ import io.vavr.Lazy;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -155,12 +156,12 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public Runnable fire(final SessionEvent event) {
+    public CompletableFuture<?> fire(final SessionEvent event) {
         return Events.forSession(this).fire(event);
     }
 
     @Override
-    public Runnable fire(final LazyEvent<? extends SessionEvent> event) {
+    public CompletableFuture<?> fire(final LazyEvent<? extends SessionEvent> event) {
         return Events.forSession(this).fire(event);
     }
 

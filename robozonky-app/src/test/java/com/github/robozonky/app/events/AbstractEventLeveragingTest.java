@@ -16,13 +16,6 @@
 
 package com.github.robozonky.app.events;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -35,6 +28,14 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
@@ -50,17 +51,6 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
     protected static PowerTenant mockTenant(final Zonky zonky, final boolean isDryRun) {
         return Mockito.spy(new TestingPowerTenant(isDryRun ? SESSION_DRY : SESSION, zonky));
-    }
-
-    private void waitForEventProcessing() {
-        while (!EventFiringQueue.INSTANCE.getQueue().isEmpty()) {
-            logger.debug("Sleeping a while to wait for events to be processed.");
-            try {
-                Thread.sleep(100);
-            } catch (final InterruptedException ex) {
-                // nothing to do here
-            }
-        }
     }
 
     protected List<Event> getEventsFired() {
@@ -88,19 +78,10 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         listener.clear();
     }
 
-    private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-
     @BeforeEach
     public void startListeningForEvents() { // initialize session and create a listener
         final PowerTenant t = mockTenant();
         Events.forSession(t).addListener(listener);
-        // make sure there is something reading the queue
-        service.scheduleAtFixedRate(new EventFiring(), 0, 1, TimeUnit.SECONDS);
-    }
-
-    @AfterEach
-    private void unregisterBeansCreatedByUs() {
-        Management.unregisterAll();
     }
 
     @AfterEach
@@ -108,7 +89,35 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         final PowerTenant t = mockTenant();
         Events.forSession(t).removeListener(listener);
         readPreexistingEvents();
-        service.shutdown();
+    }
+
+    private void waitForEventProcessing() {
+        Set<Event> requested = new CopyOnWriteArraySet<>(listener.getEventsRequested());
+        Instant start = Instant.now();
+        do {
+            for (Event e : requested) {
+                if (listener.getEventsFailed().contains(e) || listener.getEventsFired().contains(e)) {
+                    logger.debug("Event {} registered.", e);
+                    requested.remove(e);
+                }
+            }
+            if (requested.isEmpty()) {
+                return;
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // don't do anything
+            }
+        } while (Duration.between(start, Instant.now()).abs().compareTo(Duration.ofSeconds(5)) < 0);
+        if (!requested.isEmpty()) {
+            throw new IllegalStateException("Not all events were processed: " + requested);
+        }
+    }
+
+    @AfterEach
+    private void unregisterBeansCreatedByUs() {
+        Management.unregisterAll();
     }
 
     @AfterEach
@@ -123,10 +132,10 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
      */
     private static class MyEventFiringListener implements EventFiringListener {
 
-        private final List<Event> eventsFired = new ArrayList<>(0);
-        private final List<Event> eventsRequested = new ArrayList<>(0);
-        private final List<Event> eventsFailed = new ArrayList<>(0);
-        private final List<Event> eventsReady = new ArrayList<>(0);
+        private final List<Event> eventsFired = new CopyOnWriteArrayList<>();
+        private final List<Event> eventsRequested = new CopyOnWriteArrayList<>();
+        private final List<Event> eventsFailed = new CopyOnWriteArrayList<>();
+        private final List<Event> eventsReady = new CopyOnWriteArrayList<>();
 
         @Override
         public synchronized void requested(final LazyEvent<? extends Event> event) {

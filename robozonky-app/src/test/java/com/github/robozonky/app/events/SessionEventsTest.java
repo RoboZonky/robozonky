@@ -33,6 +33,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
@@ -48,9 +49,9 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     void lazyFireReturnsFuture() {
         final Loan l = MockLoanBuilder.fresh();
         final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
-        final Runnable result = SessionEvents.forSession(SESSION)
+        final CompletableFuture<?> result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanNoLongerDelinquentLazy(() -> EventFactory.loanNoLongerDelinquent(i, l)));
-        result.run(); // make sure it does not throw
+        result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }
 
@@ -58,9 +59,9 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     void fireReturnsFuture() {
         final Loan l = MockLoanBuilder.fresh();
         final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
-        final Runnable result = SessionEvents.forSession(SESSION)
+        final CompletableFuture<?> result = SessionEvents.forSession(SESSION)
                 .fire(EventFactory.loanNoLongerDelinquent(i, l));
-        result.run(); // make sure it does not throw
+        result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }
 
@@ -98,8 +99,8 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         events.addListener(e);
         events.injectEventListener(l);
-        final Runnable r = events.fire(s);
-        assertTimeoutPreemptively(Duration.ofSeconds(5), r::run);
+        final CompletableFuture<?> r = events.fire(s);
+        assertTimeoutPreemptively(Duration.ofSeconds(5), r::join);
         assertThat(getEventsRequested()).isNotEmpty();
         assertThat(getEventsReady()).isNotEmpty();
         assertThat(getEventsFired()).isNotEmpty();
@@ -115,8 +116,8 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         doThrow(IllegalStateException.class).when(l).handle(any(), any());
         events.injectEventListener(l);
-        final Runnable r = events.fire(s);
-        assertTimeoutPreemptively(Duration.ofSeconds(5), r::run);
+        final CompletableFuture<?> r = events.fire(s);
+        assertTimeoutPreemptively(Duration.ofSeconds(5), r::join);
         assertThat(this.getEventsFailed()).isNotEmpty();
     }
 

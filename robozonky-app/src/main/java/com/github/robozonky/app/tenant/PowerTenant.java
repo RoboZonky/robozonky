@@ -23,6 +23,7 @@ import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -73,12 +74,12 @@ public interface PowerTenant extends Tenant {
      * @param event
      * @return
      */
-    Runnable fire(SessionEvent event);
+    CompletableFuture fire(SessionEvent event);
 
     /**
      * See {@link SessionEvents#fire(LazyEvent)} for the semantics of this method.
      * @param event
      * @return
      */
-    Runnable fire(LazyEvent<? extends SessionEvent> event);
+    CompletableFuture fire(LazyEvent<? extends SessionEvent> event);
 }

@@ -22,6 +22,8 @@ import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.tenant.TransactionalTenant;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * This add the semantics of {@link TransactionalTenant} to firing {@link Event}s as well. Unless {@link #commit()} is
  * called, no events are fired and no state is persisted. All unpersisted changes can be rolled back via
@@ -43,7 +45,7 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
      * @return
      */
     @Override
-    Runnable fire(SessionEvent event);
+    CompletableFuture<?> fire(SessionEvent event);
 
     /**
      * Do not block on the return value of this method, unless some other thread is still able to call
@@ -52,6 +54,6 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
      * @return
      */
     @Override
-    Runnable fire(LazyEvent<? extends SessionEvent> event);
+    CompletableFuture<?> fire(LazyEvent<? extends SessionEvent> event);
 
 }
