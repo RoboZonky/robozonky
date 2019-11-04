@@ -146,18 +146,6 @@ public class Investment extends BaseInvestment {
         this.additionallyInsured = loan.isAdditionallyInsured();
     }
 
-    public Investment(final Participation participation, final Money amount) {
-        super(participation, amount);
-        this.rating = participation.getRating();
-        this.interestRate = rating.getInterestRate();
-        this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
-        this.remainingPrincipal = amount.getValue().toPlainString();
-        this.remainingMonths = participation.getRemainingInstalmentCount();
-        this.loanTermInMonth = participation.getOriginalInstalmentCount();
-        this.insuranceActive = participation.isInsuranceActive();
-        this.additionallyInsured = participation.isAdditionallyInsured();
-    }
-
     @XmlElement
     public Rating getRating() {
         return rating;
