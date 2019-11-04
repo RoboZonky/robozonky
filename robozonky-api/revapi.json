@@ -280,6 +280,14 @@
         "code": "java.method.removed",
         "old": "method void com.github.robozonky.api.remote.entities.Investment::<init>(com.github.robozonky.api.remote.entities.Participation, com.github.robozonky.api.Money)",
         "justification": "Unused."
+      },
+      {
+        "code": "java.method.visibilityReduced",
+        "old": "method void com.github.robozonky.api.remote.entities.Participation::<init>()",
+        "new": "method void com.github.robozonky.api.remote.entities.Participation::<init>()",
+        "oldVisibility": "public",
+        "newVisibility": "package",
+        "justification": "Fix JAXB."
       }
     ]
   }
