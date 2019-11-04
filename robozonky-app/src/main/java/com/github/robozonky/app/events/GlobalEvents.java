@@ -39,12 +39,12 @@ public final class GlobalEvents {
         return INSTANCE.get();
     }
 
-    static CompletableFuture<?> merge(final CompletableFuture... runnables){
+    static CompletableFuture merge(final CompletableFuture... runnables){
         return CompletableFuture.allOf(runnables);
     }
 
     @SuppressWarnings("rawtypes")
-    public CompletableFuture<?> fire(final LazyEvent<? extends GlobalEvent> event) {
+    public CompletableFuture fire(final LazyEvent<? extends GlobalEvent> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
         final CompletableFuture[] futures = SessionEvents.all().stream()
                 .map(s -> s.fireAny(event))
@@ -58,7 +58,7 @@ public final class GlobalEvents {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public CompletableFuture<?> fire(final GlobalEvent event) {
+    public CompletableFuture fire(final GlobalEvent event) {
         return fire(EventFactory.async((Class<GlobalEvent>) event.getClass(), () -> event));
     }
 }
