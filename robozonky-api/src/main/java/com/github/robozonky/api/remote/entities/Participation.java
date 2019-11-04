@@ -68,6 +68,10 @@ public class Participation extends BaseEntity {
     protected String price;
     private final Lazy<Money> moneyPrice = Lazy.of(() -> Money.from(price, currency));
 
+    Participation() {
+        // for JAXB
+    }
+
     public Participation(final Loan loan, final Money remainingPrincipal, final int remainingInstalmentCount) {
         this.loanId = loan.getId();
         this.borrowerNo = loan.getBorrowerNo();
