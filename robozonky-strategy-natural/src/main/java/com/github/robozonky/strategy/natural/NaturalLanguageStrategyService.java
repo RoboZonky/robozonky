@@ -16,28 +16,34 @@
 
 package com.github.robozonky.strategy.natural;
 
+import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.internal.Defaults;
+import org.antlr.v4.runtime.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import com.github.robozonky.api.strategies.InvestmentStrategy;
-import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.api.strategies.ReservationStrategy;
-import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.api.strategies.StrategyService;
-import com.github.robozonky.internal.Defaults;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class NaturalLanguageStrategyService implements StrategyService {
 
     private static final Logger LOGGER = LogManager.getLogger(NaturalLanguageStrategyService.class);
     private static final AtomicReference<Map<String, ParsedStrategy>> CACHE =
             new AtomicReference<>(Collections.emptyMap());
+    private static final ANTLRErrorListener ERROR_LISTENER = new BaseErrorListener() {
+
+        @Override
+        public void syntaxError(final Recognizer<?, ?> recognizer, final Object offendingSymbol, final int line,
+                                final int charPositionInLine, final String msg, final RecognitionException e) {
+            final String error = "Syntax error at " + line + ":" + charPositionInLine + ", offending symbol "
+                    + offendingSymbol + ", message: " + msg;
+            throw new IllegalStateException(error, e);
+        }
+
+    };
 
     private static void setCached(final String strategy, final ParsedStrategy parsed) {
         CACHE.set(Collections.singletonMap(strategy, parsed));
@@ -59,7 +65,13 @@ public class NaturalLanguageStrategyService implements StrategyService {
     }
 
     static ParsedStrategy parseWithAntlr(final CharStream s) {
-        return SideEffectFreeParser.apply(s);
+        final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
+        l.removeErrorListeners(); // no sysout
+        final CommonTokenStream ts = new CommonTokenStream(l);
+        final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(ts);
+        p.removeErrorListeners(); // turn sysout into an exception
+        p.addErrorListener(ERROR_LISTENER);
+        return p.primaryExpression().result;
     }
 
     private static boolean isSupported(final ParsedStrategy s) {
