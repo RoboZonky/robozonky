@@ -91,6 +91,7 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
     @Override
     public void abort() {
+        LOGGER.debug("Aborting transaction.");
         stateUpdates.clear();
         getDelayedFiring().cancel();
         delayedFiring.clear();
@@ -154,6 +155,7 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
     @Override
     public void close() {
+        LOGGER.trace("Closing.");
         if (!stateUpdates.isEmpty()) {
             throw new IllegalStateException("There are uncommitted changes.");
         }

@@ -16,10 +16,10 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import java.time.Duration;
-
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.internal.jobs.TenantPayload;
+
+import java.time.Duration;
 
 class DelinquencyNotificationJob implements TenantJob {
 
@@ -34,4 +34,10 @@ class DelinquencyNotificationJob implements TenantJob {
     public TenantPayload payload() {
         return payload;
     }
+
+    @Override
+    public Duration killIn() {
+        return Duration.ofMinutes(5); // possibly a lot of investments, and the endpoint itself is slow
+    }
+
 }
