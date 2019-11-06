@@ -54,7 +54,11 @@ public interface PowerTenant extends Tenant {
             toExecute.accept(transactional);
             transactional.commit();
         } catch (final Exception ex) {
-            transactional.abort();
+            try {
+                transactional.abort();
+            } catch (final Exception ex2) {
+                LogManager.getLogger(PowerTenant.class).debug("Failed aborting transaction.", ex2);
+            }
             throw ex;
         } finally {
             try {

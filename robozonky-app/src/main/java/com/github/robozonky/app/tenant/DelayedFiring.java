@@ -73,7 +73,6 @@ final class DelayedFiring implements Runnable {
     public void run() {
         ensureNotOver();
         LOGGER.debug("Requesting delayed event firing.");
-        isOver.set(true);
         try {
             if (all.isEmpty()) {
                 return;
@@ -86,6 +85,7 @@ final class DelayedFiring implements Runnable {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed firing events in a transaction.", e);
         } finally {
+            isOver.set(true);
             LOGGER.debug("Firing over.");
         }
     }
