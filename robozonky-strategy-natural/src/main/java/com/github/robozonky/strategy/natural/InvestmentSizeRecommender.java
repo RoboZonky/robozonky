@@ -24,13 +24,11 @@ import com.github.robozonky.api.remote.enums.Rating;
 import java.math.BigDecimal;
 import java.util.function.BiFunction;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
 class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money> {
 
-    private static final BigDecimal HUNDRED = BigDecimal.TEN.pow(2);
     private final ParsedStrategy strategy;
 
     public InvestmentSizeRecommender(final ParsedStrategy strategy) {
@@ -47,7 +45,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money>
         if (percentage == 0) {
             return original.getZero();
         }
-        final BigDecimal result = divide(times(original.getValue(), percentage), HUNDRED);
+        final BigDecimal result = times(original.getValue(), percentage).scaleByPowerOfTen(-2);
         return Money.from(result);
     }
 

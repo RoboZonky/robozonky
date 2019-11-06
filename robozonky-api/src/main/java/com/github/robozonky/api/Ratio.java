@@ -19,11 +19,10 @@ package com.github.robozonky.api;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.*;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.toScale;
 
 public final class Ratio extends Number implements Comparable<Ratio> {
-
-    private static final BigDecimal HUNDRED = BigDecimal.TEN.pow(2);
 
     public static final Ratio ZERO = new Ratio(BigDecimal.ZERO);
     public static final Ratio ONE = new Ratio(BigDecimal.ONE);
@@ -32,7 +31,7 @@ public final class Ratio extends Number implements Comparable<Ratio> {
 
     private Ratio(final BigDecimal raw) {
         this.raw = raw;
-        this.percentage = times(raw, HUNDRED);
+        this.percentage = toScale(raw.scaleByPowerOfTen(2));
     }
 
     public static Ratio fromRaw(final Number rate) {
@@ -55,7 +54,7 @@ public final class Ratio extends Number implements Comparable<Ratio> {
 
     public static Ratio fromPercentage(final String rate) {
         final BigDecimal original = new BigDecimal(rate);
-        final BigDecimal raw = divide(original, HUNDRED);
+        final BigDecimal raw = toScale(original.scaleByPowerOfTen(-2));
         return fromRaw(raw);
     }
 
