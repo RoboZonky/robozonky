@@ -16,16 +16,15 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.UUID;
+import org.junit.jupiter.api.Test;
+
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class FailureTypeUtilTest {
 
@@ -46,8 +45,7 @@ class FailureTypeUtilTest {
     @Test
     void expectedReasonMatches() {
         final String reason = UUID.randomUUID().toString();
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
+        final Response response = Response.status(400)
                 .entity(reason)
                 .build();
         final ClientErrorException actual = new BadRequestException(response);
@@ -58,8 +56,7 @@ class FailureTypeUtilTest {
     @Test
     void expectedReasonDoesNotMatch() {
         final String reason = UUID.randomUUID().toString();
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
+        final Response response = Response.status(400)
                 .entity(reason)
                 .build();
         final ClientErrorException actual = new BadRequestException(response);

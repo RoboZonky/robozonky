@@ -27,7 +27,6 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.BadRequestException;
@@ -102,8 +101,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
         final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200)).get();
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
+        final Response response = Response.status(400)
                 .entity(InvestmentFailureType.TOO_MANY_REQUESTS.getReason().get())
                 .build();
         final ClientErrorException thrown = new BadRequestException(response);
@@ -117,8 +115,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
         final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200)).get();
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
+        final Response response = Response.status(400)
                 .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason().get())
                 .build();
         final ClientErrorException thrown = new BadRequestException(response);

@@ -20,7 +20,6 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.ClientErrorException;
@@ -69,7 +68,7 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
         final Availability a = new AvailabilityImpl(s);
         final Instant now = Instant.now();
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
-        final Response r = new ResponseBuilderImpl().build();
+        final Response r = Response.ok().build();
         final boolean reg = a.registerException(new ResponseProcessingException(r, UUID.randomUUID().toString()));
         assertSoftly(softly -> {
             softly.assertThat(reg).isTrue();

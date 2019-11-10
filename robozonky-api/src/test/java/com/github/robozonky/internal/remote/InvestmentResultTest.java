@@ -16,13 +16,12 @@
 
 package com.github.robozonky.internal.remote;
 
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Test;
+
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
-
-import org.assertj.core.api.SoftAssertions;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
-import org.junit.jupiter.api.Test;
 
 import static com.github.robozonky.internal.remote.InvestmentFailureType.INSUFFICIENT_BALANCE;
 import static com.github.robozonky.internal.remote.InvestmentFailureType.UNKNOWN;
@@ -73,9 +72,7 @@ class InvestmentResultTest {
 
     @Test
     void noReason() {
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
-                .build();
+        final Response response = Response.status(400).build();
         final ClientErrorException ex = new BadRequestException(response);
         assertThat(InvestmentResult.failure(ex))
                 .matches(r -> !r.isSuccess())
@@ -84,8 +81,7 @@ class InvestmentResultTest {
 
     @Test
     void insufficientBalance() {
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
+        final Response response = Response.status(400)
                 .entity(INSUFFICIENT_BALANCE.getReason().get())
                 .build();
         final ClientErrorException ex = new BadRequestException(response);

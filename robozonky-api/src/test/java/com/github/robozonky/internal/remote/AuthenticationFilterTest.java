@@ -16,15 +16,14 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.core.MultivaluedHashMap;
-
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import javax.ws.rs.client.ClientRequestContext;
+import java.net.URISyntaxException;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 class AuthenticationFilterTest extends AbstractCommonFilterTest {
 
@@ -35,10 +34,8 @@ class AuthenticationFilterTest extends AbstractCommonFilterTest {
 
     @Test
     void wasAuthorizationAdded() throws URISyntaxException {
-        final ClientRequestContext crc = mock(ClientRequestContext.class);
-        when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
-        when(crc.getUri()).thenReturn(new URI("http://somewhere"));
+        final ClientRequestContext crc = mockClientRequestContext();
         this.getTestedFilter().filter(crc);
-        assertThat(crc.getHeaders()).containsKey("Authorization");
+        verify(crc.getHeaders()).putSingle(eq("Authorization"), any());
     }
 }

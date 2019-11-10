@@ -23,10 +23,10 @@ import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.core.Response;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,7 +40,6 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     private static final Logger LOGGER = LogManager.getLogger(ZonkyApiTokenSupplier.class);
     private static final Duration ONE_HOUR = Duration.ofHours(1);
-    private static final Duration ONE_MINUTE = Duration.ofMinutes(1);
 
     private final SecretProvider secrets;
     private final ApiProvider apis;
@@ -68,8 +67,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     private static NotAuthorizedException createException(final String message) {
-        var response = new ResponseBuilderImpl()
-                .status(401, message)
+        var response = Response.status(401, message)
                 .build();
         return new NotAuthorizedException(response);
     }

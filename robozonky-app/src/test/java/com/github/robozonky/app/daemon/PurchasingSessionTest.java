@@ -29,7 +29,6 @@ import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.BadRequestException;
@@ -106,8 +105,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
+        final Response response = Response.status(400)
                 .entity(PurchaseFailureType.INSUFFICIENT_BALANCE.getReason().get())
                 .build();
         final ClientErrorException thrown = new BadRequestException(response);
@@ -139,8 +137,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Response response = new ResponseBuilderImpl()
-                .status(400)
+        final Response response = Response.status(400)
                 .entity(PurchaseFailureType.TOO_MANY_REQUESTS.getReason().get())
                 .build();
         final ClientErrorException thrown = new BadRequestException(response);

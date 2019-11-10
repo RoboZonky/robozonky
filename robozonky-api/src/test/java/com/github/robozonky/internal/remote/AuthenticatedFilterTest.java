@@ -16,24 +16,20 @@
 
 package com.github.robozonky.internal.remote;
 
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.Defaults;
+import org.junit.jupiter.api.Test;
+
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.UUID;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.internal.Defaults;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class AuthenticatedFilterTest extends AbstractCommonFilterTest {
@@ -54,26 +50,21 @@ class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
     @Test
     void hasToken() throws URISyntaxException {
-        final ClientRequestContext crc = mock(ClientRequestContext.class);
-        when(crc.getUri()).thenReturn(new URI("http://somewhere"));
-        when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
+        final ClientRequestContext crc = mockClientRequestContext();
         getTestedFilter().filter(crc);
-        assertThat(crc.getHeaders().getFirst("Authorization"))
-                .isEqualTo("Bearer " + String.valueOf(AuthenticatedFilterTest.TOKEN.getAccessToken()));
+        verify(crc.getHeaders()).putSingle(eq("Authorization"), eq("Bearer " + String.valueOf(TOKEN.getAccessToken())));
     }
 
     @Test
-    void changes400to401() throws IOException {
+    void changes400to401() throws IOException, URISyntaxException {
         final int expectedCode = 400;
-        final ClientRequestContext ctx = mock(ClientRequestContext.class);
-        final ClientResponseContext ctx2 = mock(ClientResponseContext.class);
-        final ZonkyApiToken token = new ZonkyApiToken("", "", 299);
+        final ClientRequestContext ctx = mockClientRequestContext();
+        final ClientResponseContext ctx2 = mockClientResponseContext();
         when(ctx2.hasEntity()).thenReturn(true);
-        when(ctx2.getHeaders()).thenReturn(new MultivaluedMapImpl<>());
-        when(ctx2.getEntityStream()).thenReturn(c(token));
+        when(ctx2.getEntityStream()).thenReturn(c(TOKEN));
         when(ctx2.getStatusInfo()).thenReturn(Response.Status.fromStatusCode(expectedCode));
         when(ctx2.getStatus()).thenReturn(expectedCode);
-        final RoboZonkyFilter filter = new AuthenticatedFilter(() -> token);
+        final RoboZonkyFilter filter = getTestedFilter();
         filter.filter(ctx, ctx2);
         verify(ctx2, times(1)).setStatus(401);
     }

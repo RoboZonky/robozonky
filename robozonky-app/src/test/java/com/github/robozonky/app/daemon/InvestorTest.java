@@ -29,7 +29,6 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import io.vavr.control.Either;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -69,8 +68,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     void knownFail(final SessionInfo sessionType) {
         final boolean isDryRun = sessionType.isDryRun();
         final Tenant t = mockTenant(zonky, isDryRun);
-        final Response failure = new ResponseBuilderImpl()
-                .status(400)
+        final Response failure = Response.status(400)
                 .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason().get())
                 .build();
         when(zonky.invest(any())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
@@ -89,8 +87,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     void unknownFail(final SessionInfo sessionType) {
         final boolean isDryRun = sessionType.isDryRun();
         final Tenant t = mockTenant(zonky, isDryRun);
-        final Response failure = new ResponseBuilderImpl()
-                .status(400)
+        final Response failure = Response.status(400)
                 .build();
         when(zonky.invest(any())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
