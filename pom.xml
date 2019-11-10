@@ -50,7 +50,7 @@
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
     <version.org.mockito>3.1.5</version.org.mockito>
-    <version.org.mock-server>5.6.1</version.org.mock-server>
+    <version.org.mock-server>5.7.1</version.org.mock-server>
     <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>
     <version.com.sun.mail>1.6.4</version.com.sun.mail>
     <!--
@@ -140,16 +140,8 @@
         <version>${version.org.jboss.resteasy}</version>
         <exclusions>
           <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -157,6 +149,16 @@
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-core-spi</artifactId>
         <version>${version.org.jboss.resteasy}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.jboss.spec.javax.xml.bind</groupId>
+            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jboss.spec.javax.annotation</groupId>
+            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
@@ -380,22 +382,23 @@
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>
-        <artifactId>mockserver-netty</artifactId>
+        <artifactId>mockserver-junit-jupiter</artifactId>
+        <version>${version.org.mock-server}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mock-server</groupId>
+        <artifactId>mockserver-client-java</artifactId>
         <version>${version.org.mock-server}</version>
         <exclusions>
           <exclusion>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
           </exclusion>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>
-        <artifactId>mockserver-client-java</artifactId>
+        <artifactId>mockserver-netty</artifactId>
         <version>${version.org.mock-server}</version>
         <exclusions>
           <exclusion>
@@ -413,14 +416,6 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
           </exclusion>
-          <exclusion> <!-- We use JUnit 5 -->
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-          </exclusion>
-          <exclusion> <!-- comes from jakarta.annotations already -->
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
         </exclusions>
       </dependency>
       <!-- Logging. -->
@@ -431,12 +426,12 @@
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-slf4j18-impl</artifactId>
+        <artifactId>log4j-core</artifactId>
         <version>${version.org.apache.logging.log4j}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
+        <artifactId>log4j-slf4j18-impl</artifactId>
         <version>${version.org.apache.logging.log4j}</version>
       </dependency>
       <dependency>
@@ -478,17 +473,12 @@
       <dependency>
         <groupId>jakarta.annotation</groupId>
         <artifactId>jakarta.annotation-api</artifactId>
-        <version>1.3.4</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.enterprise</groupId>
-        <artifactId>jakarta.enterprise.cdi-api</artifactId>
-        <version>2.0.1</version>
+        <version>1.3.5</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.logging</groupId>
         <artifactId>jboss-logging</artifactId>
-        <version>3.3.2.Final</version>
+        <version>3.4.1.Final</version>
       </dependency>
       <dependency>
         <groupId>commons-logging</groupId>
@@ -499,6 +489,11 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>2.0.0-alpha0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -619,19 +614,24 @@
             </goals>
             <configuration>
               <failOnWarning>true</failOnWarning>
-              <ignoredUnusedDeclaredDependencies> <!-- Mostly service-loaded stuff, APIs, also some of our own. -->
-                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.jaxrs</ignoredUsedUndeclaredDependency>
+              <ignoredUnusedDeclaredDependencies>
+                <!-- Mostly service-loaded stuff. -->
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
+                <!-- For async logging, configured at runtime. -->
                 <ignoredUnusedDeclaredDependency>com.lmax</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>jakarta.enterprise</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
+                <!-- Runtime dependency for javax/annotation/Priority. -->
+                <ignoredUnusedDeclaredDependency>jakarta.annotation</ignoredUnusedDeclaredDependency>
+                <!-- httpasyncclient replaces the regular client in runtime. -->
                 <ignoredUnusedDeclaredDependency>org.apache.httpcomponents</ignoredUnusedDeclaredDependency>
+                <!-- log4j-core is a base dependency of Log4J. -->
+                <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
+                <!-- Service-loaded stuff such as Jackson provider. -->
                 <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.mock-server</ignoredUnusedDeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
               <ignoredUsedUndeclaredDependencies>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core</ignoredUsedUndeclaredDependency>
-                <ignoredUsedUndeclaredDependency>com.sun.mail</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>jakarta.xml.bind</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
             </configuration>

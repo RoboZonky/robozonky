@@ -24,8 +24,6 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Response;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -104,7 +102,7 @@ class ZonkySettingsValidatorTest {
     void error() {
         // mock data
         final OAuth oauth = mock(OAuth.class);
-        when(oauth.login(any())).thenThrow(new ServerErrorException(Response.Status.INTERNAL_SERVER_ERROR));
+        when(oauth.login(any())).thenThrow(new IllegalStateException());
         final ApiProvider provider = mockApiProvider(oauth);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT

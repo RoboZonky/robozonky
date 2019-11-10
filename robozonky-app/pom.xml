@@ -120,7 +120,7 @@
     </dependency>
     <dependency>
       <groupId>org.mock-server</groupId>
-      <artifactId>mockserver-netty</artifactId>
+      <artifactId>mockserver-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -137,12 +137,11 @@
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-core</artifactId>
       <scope>test</scope>
-      <exclusions> <!-- this comes from elsewhere -->
-        <exclusion>
-          <groupId>javax.mail</groupId>
-          <artifactId>mailapi</artifactId>
-        </exclusion>
-      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
