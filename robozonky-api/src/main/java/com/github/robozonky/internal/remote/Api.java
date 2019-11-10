@@ -16,12 +16,11 @@
 
 package com.github.robozonky.internal.remote;
 
-import org.apache.http.ConnectionClosedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.ProcessingException;
-import java.net.SocketTimeoutException;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -47,7 +46,7 @@ class Api<T> {
     private static boolean isConnectionIssue(final Throwable throwable) {
         if (throwable == null) {
             return false;
-        } else if (throwable instanceof SocketTimeoutException || throwable instanceof ConnectionClosedException) {
+        } else if (throwable instanceof IOException) {
             return true;
         } else {
             return isConnectionIssue(throwable.getCause());

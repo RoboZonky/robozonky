@@ -30,7 +30,6 @@ module com.github.robozonky.api {
     requires ini4j;
     requires paging.streams;
     requires resteasy.client.api;
-    requires org.apache.httpcomponents.httpcore;
     requires jdk.unsupported; // For sun.misc.unsafe, required by Log4J's async logging.
 
     /*
