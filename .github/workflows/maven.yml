@@ -18,6 +18,11 @@ jobs:
       run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
     - name: Test all modules incl. mutation coverage
       run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@v1.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   quick:
     name: Quick test on other platforms
     strategy:
