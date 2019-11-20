@@ -2,6 +2,10 @@ name: RoboZonky PR Check
 
 on: [push, pull_request]
 
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   full:
     name: Full test on Linux
@@ -17,8 +21,27 @@ jobs:
       run: mvn --batch-mode clean install dependency:go-offline -Dgpg.skip -DskipTests
     - name: Test all modules
       run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
-    - name: Test all modules incl. mutation coverage
-      run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+    - name: Test all modules incl. PITest and JaCoCo
+      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+    - name: Aggregate JaCoCo reports
+      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate
+    - name: Trigger SonarCloud
+      run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout from Github
+        uses: actions/checkout@v1
+      - name: Set up the JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Test all modules incl. PITest and JaCoCo
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+      - name: Aggregate JaCoCo reports
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate
+      - name: Trigger SonarCloud
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky
   quick:
     name: Sanity check on other platforms
     strategy:
