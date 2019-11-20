@@ -39,8 +39,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
     <!-- Various dependency versions to be used later. -->
-    <surefire.version>3.0.0-M3</surefire.version>
-    <version.com.fasterxml.jackson>2.9.10</version.com.fasterxml.jackson> <!-- 2.10.0 has bad JPMS, waiting for 2.10.1 -->
+    <surefire.version>3.0.0-M4</surefire.version>
+    <version.com.fasterxml.jackson>2.9.10</version.com.fasterxml.jackson> <!-- 2.10.0|.1 have bad JPMS, need .2 -->
     <version.com.fasterxml.jackson.databind>${version.com.fasterxml.jackson}</version.com.fasterxml.jackson.databind>
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
