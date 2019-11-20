@@ -21,10 +21,9 @@ jobs:
   quick:
     name: Quick test on other platforms
     strategy:
+      fail-fast: false # Always see all results on all platforms.
       matrix:
           os: [windows-latest, macos-latest]
-    env:
-      mvnCommand: ${{ matrix.os ==  }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v1
