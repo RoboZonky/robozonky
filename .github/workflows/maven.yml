@@ -31,5 +31,5 @@ jobs:
         with:
           java-version: 11
       - name: Compile and test all modules, skipping mutation coverage
-        run: mvn --batch-mode install -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+        run: mvn --% --batch-mode install -Denforcer.skip -Dgpg.skip -Dpit.skip=true
 
