@@ -17,8 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rzModule: [robozonky-api, robozonky-app, robozonky-cli, robozonky-installer, robozonky-notifications,
-                   robozonky-strategy-natural]
+        rzModule: [robozonky-api, robozonky-app, robozonky-cli, robozonky-installer, robozonky-notifications, robozonky-strategy-natural]
       - uses: actions/checkout@v1
       - name: Set up the JDK
         uses: actions/setup-java@v1
