@@ -1,0 +1,51 @@
+name: RoboZonky PR Check
+
+on: [push, pull_request]
+
+jobs:
+  full:
+    name: Full test on Linux
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout from Github
+      uses: actions/checkout@v1
+    - name: Set up the JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Compile all modules without testing
+      run: mvn --batch-mode clean install dependency:go-offline -Dgpg.skip -DskipTests
+    - name: Test all modules
+      run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+    - name: Test all modules incl. mutation coverage
+      run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+  quick:
+    name: Sanity check on other platforms
+    strategy:
+      fail-fast: false # Always see all results on all platforms.
+      matrix:
+          os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout from Github
+      uses: actions/checkout@v1
+    - name: Set up the JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Compile and test all modules, skipping mutation coverage
+      shell: bash
+      run: mvn --batch-mode install -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+  sonar:
+    name: SonarCloud scan
+    runs-on: ubuntu-latest
+    - name: Run code coverage
+      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify
+    - name: Merge JaCoCo reports
+      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate verify
+    - name: Trigger SonarCloud
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky
+
+
