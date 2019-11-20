@@ -1,0 +1,25 @@
+name: SonarCloud Scan
+
+on: push
+
+jobs:
+  sonar:
+    name: SonarCloud scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout from Github
+        uses: actions/checkout@v1
+      - name: Set up the JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Run JaCoCo over all modules
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test
+      - name: Merge JaCoCo reports
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate test
+      - name: Trigger SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky
+
+
