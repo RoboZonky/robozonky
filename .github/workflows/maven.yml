@@ -23,6 +23,8 @@ jobs:
     strategy:
       matrix:
           os: [windows-latest, macos-latest]
+    env:
+      mvnCommand: ${{ matrix.os ==  }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v1
@@ -31,5 +33,6 @@ jobs:
         with:
           java-version: 11
       - name: Compile and test all modules, skipping mutation coverage
-        run: mvn --% --batch-mode install -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+        shell: bash
+        run: mvn --batch-mode install -Denforcer.skip -Dgpg.skip -Dpit.skip=true
 
