@@ -18,6 +18,7 @@ jobs:
     strategy:
       matrix:
         rzModule: [robozonky-api, robozonky-app, robozonky-cli, robozonky-installer, robozonky-notifications, robozonky-strategy-natural]
+    steps:
       - uses: actions/checkout@v1
       - name: Set up the JDK
         uses: actions/setup-java@v1
