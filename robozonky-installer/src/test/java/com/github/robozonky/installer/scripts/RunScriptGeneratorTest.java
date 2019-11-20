@@ -16,15 +16,17 @@
 
 package com.github.robozonky.installer.scripts;
 
+import com.github.robozonky.installer.CommandLinePart;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.function.Function;
 
-import com.github.robozonky.installer.CommandLinePart;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RunScriptGeneratorTest {
@@ -86,6 +88,7 @@ class RunScriptGeneratorTest {
     }
 
     @Test
+    @DisabledOnOs(OS.WINDOWS)
     void unix() throws IOException {
         final File optionsFile = getTempFile().getAbsoluteFile();
         final File root = optionsFile.getParentFile();
