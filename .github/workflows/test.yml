@@ -37,7 +37,7 @@ jobs:
         with:
           java-version: 11
       - name: Run tests with JaCoCo
-        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dsonar.coverage.jacoco.xmlReportPaths=/tmp/jacoco.xml
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test org.jacoco:jacoco-maven-plugin:report -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dsonar.coverage.jacoco.xmlReportPaths=/tmp/jacoco.xml
       - name: Aggregate JaCoCo reports
         run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate -Dsonar.coverage.jacoco.xmlReportPaths=/tmp/jacoco.xml
       - name: Trigger SonarCloud
