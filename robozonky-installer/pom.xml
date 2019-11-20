@@ -28,6 +28,10 @@
   <!-- Installer will be packaged as an uber-jar with IZPack, therefore no need for modularization. -->
   <name>RoboZonky: Custom panels for the installer (no JPMS)</name>
 
+  <properties>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>

@@ -58,6 +58,9 @@
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
      -->
     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+    <!-- For the purposes of JaCoCo aggregate report. -->
+    <aggregate.report.dir>robozonky-distribution/robozonky-distribution-aggregate/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
+    <!-- Mutation coverage details. -->
     <pit.skip>${skipTests}</pit.skip>
     <pit.threshold>90</pit.threshold>
   </properties>
