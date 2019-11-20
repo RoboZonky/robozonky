@@ -35,7 +35,7 @@ jobs:
         with:
           java-version: 11
       - name: Test all modules incl. PITest and JaCoCo
-        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report -Denforcer.skip -Dgpg.skip -Dpit.skip=true
       - name: Trigger SonarCloud
         run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky
   quick:
