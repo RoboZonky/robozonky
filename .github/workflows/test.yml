@@ -37,9 +37,16 @@ jobs:
       shell: bash
       run: mvn --batch-mode install -Denforcer.skip -Dgpg.skip -Dpit.skip=true
   sonar:
+    on: push
     name: SonarCloud scan
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout from Github
+      uses: actions/checkout@v1
+    - name: Set up the JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
     - name: Run JaCoCo over all modules
       run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test
     - name: Merge JaCoCo reports
