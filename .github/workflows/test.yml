@@ -36,8 +36,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Test all modules incl. PITest and JaCoCo
-        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+      - name: Run tests with JaCoCo
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
       - name: Aggregate JaCoCo reports
         run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate
       - name: Trigger SonarCloud
