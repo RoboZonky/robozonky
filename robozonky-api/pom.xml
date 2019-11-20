@@ -26,6 +26,10 @@
   <artifactId>robozonky-api</artifactId>
   <name>RoboZonky: Public, stable APIs</name>
 
+  <properties>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.rutledgepaulv</groupId>

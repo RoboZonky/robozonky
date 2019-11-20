@@ -28,6 +28,7 @@
 
   <properties>
     <com.github.robozonky.notifications.generator.mainClass>com.github.robozonky.notifications.samples.Generator</com.github.robozonky.notifications.generator.mainClass>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <dependencies>

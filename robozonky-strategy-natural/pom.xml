@@ -26,6 +26,10 @@
   <artifactId>robozonky-strategy-natural</artifactId>
   <name>RoboZonky: Investment strategy based on natural language</name>
 
+  <properties>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.antlr</groupId>

@@ -29,6 +29,7 @@
 
   <properties>
     <pit.threshold>70</pit.threshold> <!-- This is a command-line utility, therefore near impossible to test fully. -->
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <dependencies>

@@ -28,6 +28,7 @@
 
   <properties>
     <mainClass>com.github.robozonky.app.App</mainClass>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <dependencies>
