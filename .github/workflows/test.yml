@@ -39,10 +39,11 @@ jobs:
   sonar:
     name: SonarCloud scan
     runs-on: ubuntu-latest
-    - name: Run code coverage
-      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify
+    steps:
+    - name: Run JaCoCo over all modules
+      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test
     - name: Merge JaCoCo reports
-      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate verify
+      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate test
     - name: Trigger SonarCloud
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
