@@ -37,11 +37,11 @@ jobs:
         with:
           java-version: 11
       - name: Run tests with JaCoCo
-        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent test -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dsonar.coverage.jacoco.xmlReportPaths=/tmp/jacoco.xml
       - name: Aggregate JaCoCo reports
-        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:report-aggregate -Dsonar.coverage.jacoco.xmlReportPaths=/tmp/jacoco.xml
       - name: Trigger SonarCloud
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky -Dsonar.coverage.jacoco.xmlReportPaths=/tmp/jacoco.xml
   quick:
     name: Sanity check on other platforms
     strategy:
