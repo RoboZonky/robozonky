@@ -16,22 +16,6 @@
 
 package com.github.robozonky.test;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.internal.remote.*;
-import com.github.robozonky.internal.secrets.SecretProvider;
-import com.github.robozonky.internal.state.TenantState;
-import com.github.robozonky.internal.tenant.RemotePortfolio;
-import com.github.robozonky.internal.tenant.Tenant;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.mockito.stubbing.Answer;
-
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
@@ -41,6 +25,26 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.InvestmentResult;
+import com.github.robozonky.internal.remote.OAuth;
+import com.github.robozonky.internal.remote.PurchaseResult;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.state.TenantState;
+import com.github.robozonky.internal.tenant.RemotePortfolio;
+import com.github.robozonky.internal.tenant.Tenant;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.mockito.stubbing.Answer;
 
 import static org.mockito.Mockito.*;
 
@@ -70,7 +74,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(zonky.purchase(any())).thenReturn(PurchaseResult.success());
         when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
-        when(zonky.getDevelopments(anyInt())).thenAnswer(i -> Stream.empty());
         when(zonky.getInvestments(any())).thenAnswer(i -> Stream.empty());
         return zonky;
     }

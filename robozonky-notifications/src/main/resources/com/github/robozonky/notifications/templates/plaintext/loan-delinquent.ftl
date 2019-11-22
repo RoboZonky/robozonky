@@ -8,6 +8,4 @@ Půjčka s následujícími parametry je v prodlení:
 - Záchranná vesta:             <#if data.insurance>Ano<#else>Ne</#if>.
 - Odklad splácení:             <#if data.postponed>Ano<#else>Ne</#if>.
 
-<#include "additional-collections-info.ftl">
-
 <#include "additional-loan-info.ftl">

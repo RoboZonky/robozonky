@@ -288,6 +288,36 @@
         "oldVisibility": "public",
         "newVisibility": "package",
         "justification": "Fix JAXB."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.Development> com.github.robozonky.api.notifications.DelinquencyBased::getCollectionActions()",
+        "justification": "Removed collections information as it's not available in the API anymore."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.remote.CollectionsApi",
+        "justification": "Removed collections information as it's not available in the API anymore."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.DateDescriptor",
+        "justification": "Removed collections information as it's not available in the API anymore."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.Development",
+        "justification": "Removed collections information as it's not available in the API anymore."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.DevelopmentType",
+        "justification": "Removed collections information as it's not available in the API anymore."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.CollectionActionSource",
+        "justification": "Removed collections information as it's not available in the API anymore."
       }
     ]
   }

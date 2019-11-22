@@ -16,29 +16,22 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.time.LocalDate;
+
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
 
 abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl implements LoanDelinquentEvent {
 
     private final Investment investment;
     private final Loan loan;
     private final LocalDate since;
-    private final Collection<Development> collectionActions;
 
-    AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since,
-                                    final Collection<Development> collectionActions) {
-        super("collectionActions");
+    AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since) {
         this.investment = investment;
         this.loan = loan;
         this.since = since;
-        this.collectionActions = Collections.unmodifiableCollection(collectionActions);
     }
 
     @Override
@@ -49,11 +42,6 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
     @Override
     public Loan getLoan() {
         return loan;
-    }
-
-    @Override
-    public Collection<Development> getCollectionActions() {
-        return collectionActions;
     }
 
     @Override

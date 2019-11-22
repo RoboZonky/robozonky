@@ -16,14 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.Development;
-
 import java.time.LocalDate;
-import java.util.Collection;
 
 public interface DelinquencyBased extends InvestmentBased {
 
     LocalDate getDelinquentSince();
 
-    Collection<Development> getCollectionActions();
 }

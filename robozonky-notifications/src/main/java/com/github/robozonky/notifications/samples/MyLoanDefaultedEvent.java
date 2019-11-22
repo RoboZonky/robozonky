@@ -16,22 +16,17 @@
 
 package com.github.robozonky.notifications.samples;
 
-import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.remote.entities.Development;
-import com.github.robozonky.internal.Defaults;
-
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collection;
+
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.internal.Defaults;
 
 public final class MyLoanDefaultedEvent extends AbstractInvestmentBasedEvent implements LoanDefaultedEvent {
+
     @Override
     public LocalDate getDelinquentSince() {
         return Instant.EPOCH.atZone(Defaults.ZONE_ID).toLocalDate();
     }
 
-    @Override
-    public Collection<Development> getCollectionActions() {
-        return Util.randomizeDevelopments(getLoan());
-    }
 }

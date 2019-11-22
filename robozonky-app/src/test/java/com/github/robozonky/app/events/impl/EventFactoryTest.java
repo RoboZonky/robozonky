@@ -16,11 +16,54 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.notifications.*;
-import com.github.robozonky.api.remote.entities.*;
+import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
+import com.github.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
+import com.github.robozonky.api.notifications.InvestmentSoldEvent;
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanLostEvent;
+import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanRecommendedEvent;
+import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
+import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
+import com.github.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
+import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
+import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
+import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.api.notifications.SaleRecommendedEvent;
+import com.github.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.robozonky.api.notifications.SellingStartedEvent;
+import com.github.robozonky.api.notifications.WeeklySummaryEvent;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
+import com.github.robozonky.api.strategies.InvestmentDescriptor;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.RecommendedInvestment;
+import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.api.strategies.RecommendedParticipation;
+import com.github.robozonky.api.strategies.RecommendedReservation;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.entities.MutableParticipation;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
@@ -28,16 +71,9 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
@@ -78,14 +114,13 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         final Loan loan = new MockLoanBuilder().setRating(Rating.D).setAmount(100_000).build();
         final Investment investment = MockInvestmentBuilder.fresh(loan, BigDecimal.TEN).build();
         final LocalDate now = LocalDate.now();
-        final Collection<Development> developments = Collections.emptyList();
-        final LoanDelinquentEvent e = EventFactory.loanDelinquent90plus(investment, loan, now, developments);
+        final LoanDelinquentEvent e = EventFactory.loanDelinquent90plus(investment, loan, now);
         assertCorrectThreshold(e, 90);
-        final LoanDelinquentEvent e2 = EventFactory.loanDelinquent60plus(investment, loan, now, developments);
+        final LoanDelinquentEvent e2 = EventFactory.loanDelinquent60plus(investment, loan, now);
         assertCorrectThreshold(e2, 60);
-        final LoanDelinquentEvent e3 = EventFactory.loanDelinquent30plus(investment, loan, now, developments);
+        final LoanDelinquentEvent e3 = EventFactory.loanDelinquent30plus(investment, loan, now);
         assertCorrectThreshold(e3, 30);
-        final LoanDelinquentEvent e4 = EventFactory.loanDelinquent10plus(investment, loan, now, developments);
+        final LoanDelinquentEvent e4 = EventFactory.loanDelinquent10plus(investment, loan, now);
         assertCorrectThreshold(e4, 10);
     }
 
@@ -149,12 +184,11 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanDefaulted() {
         final LoanDefaultedEvent e = EventFactory.loanDefaulted(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh(), LocalDate.now(), Collections.emptyList());
+                MockLoanBuilder.fresh(), LocalDate.now());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
             softly.assertThat(e.getDelinquentSince()).isNotNull();
-            softly.assertThat(e.getCollectionActions()).isEmpty();
         });
     }
 
@@ -171,12 +205,11 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNowDelinquent() {
         final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh(), LocalDate.now(), Collections.emptyList());
+                MockLoanBuilder.fresh(), LocalDate.now());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
             softly.assertThat(e.getDelinquentSince()).isNotNull();
-            softly.assertThat(e.getCollectionActions()).isEmpty();
             softly.assertThat(e.getThresholdInDays()).isEqualTo(0);
         });
     }

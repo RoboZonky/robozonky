@@ -16,11 +16,11 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.util.Map;
+
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-
-import java.util.Map;
 
 public class LoanDelinquentEventListener extends AbstractListener<LoanDelinquentEvent> {
 
@@ -45,7 +45,6 @@ public class LoanDelinquentEventListener extends AbstractListener<LoanDelinquent
 
     @Override
     protected Map<String, Object> getData(final LoanDelinquentEvent event) {
-        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
-                                      event.getDelinquentSince());
+        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getDelinquentSince());
     }
 }

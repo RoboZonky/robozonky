@@ -33,6 +33,7 @@
 
   <properties>
     <sonar.coverage.jacoco.xmlReportPaths>${basedir}/../../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+    <pit.skip>true</pit.skip>
   </properties>
 
   <dependencies>

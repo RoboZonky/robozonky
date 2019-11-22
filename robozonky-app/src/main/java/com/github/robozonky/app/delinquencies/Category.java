@@ -16,8 +16,18 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import com.github.robozonky.api.notifications.*;
-import com.github.robozonky.api.remote.entities.Development;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.events.impl.EventFactory;
@@ -27,16 +37,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Keeps active delinquencies over a given threshold. When a new delinquency over a particular threshold arrives, an
@@ -106,10 +106,8 @@ enum Category {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
         final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getLegalDpd());
         final int loanId = investment.getLoanId();
-        final Collection<Development> developments = getDevelopments(tenant, loanId, since);
         final Loan loan = tenant.getLoan(loanId);
-        final SessionEvent e = getEventSupplierConstructor(threshold)
-                .apply(investment, loan, since, developments);
+        final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since);
         LOGGER.trace("Done.");
         return e;
     }
@@ -117,16 +115,6 @@ enum Category {
     private static LazyEvent<? extends SessionEvent> getEvent(final Tenant tenant, final Investment investment,
                                                               final int threshold) {
         return getLazyEventSupplier(threshold, () -> supplyEvent(tenant, investment, threshold));
-    }
-
-    private static List<Development> getDevelopments(final Tenant auth, final int loanId,
-                                                     final LocalDate delinquentSince) {
-        final LocalDate lastNonDelinquentDay = delinquentSince.minusDays(1);
-        final List<Development> developments = auth.call(z -> z.getDevelopments(loanId))
-                .filter(d -> d.getDateFrom().toLocalDate().isAfter(lastNonDelinquentDay))
-                .collect(toList());
-        Collections.reverse(developments);
-        return developments;
     }
 
     public int getThresholdInDays() {
@@ -151,8 +139,7 @@ enum Category {
     @FunctionalInterface
     private interface EventSupplier {
 
-        SessionEvent apply(final Investment i, final Loan l, final LocalDate d,
-                           final Collection<Development> collections);
+        SessionEvent apply(final Investment i, final Loan l, final LocalDate d);
     }
 
 }

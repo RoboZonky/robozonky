@@ -16,30 +16,21 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.*;
-import com.github.robozonky.test.mock.MockDevelopmentBuilder;
-import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class UtilTest {
 
@@ -55,28 +46,6 @@ class UtilTest {
     void stackTrace() {
         final String result = Util.stackTraceToString(new IllegalStateException());
         assertThat(result).contains("IllegalStateException");
-    }
-
-    @Test
-    void missingToDateInCollectionHistory() throws MalformedURLException { // https://github.com/RoboZonky/robozonky/issues/278
-        final Development d = new MockDevelopmentBuilder()
-                .setDateFrom(OffsetDateTime.now())
-                .setDevelopmentType(DevelopmentType.OTHER)
-                .build();
-        final Loan l = new MockLoanBuilder()
-                .setAmount(100_000)
-                .setRating(Rating.D)
-                .setAnnuity(BigDecimal.TEN)
-                .setUrl(new URL("http://localhost"))
-                .setRegion(Region.JIHOCESKY)
-                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-                .setPurpose(Purpose.AUTO_MOTO)
-                .setName(UUID.randomUUID().toString())
-                .build();
-        final Investment i = MockInvestmentBuilder.fresh(l, 200)
-                .setExpectedInterest(BigDecimal.ONE)
-                .build();
-        Util.getDelinquentData(i, l, Collections.singleton(d), LocalDate.now());
     }
 
     @Test
@@ -104,6 +73,7 @@ class UtilTest {
     @Test
     void identifyLoanBased() {
         final LoanBased l = new LoanDefaultedEvent() {
+
             @Override
             public OffsetDateTime getCreatedOn() {
                 return OffsetDateTime.now();
@@ -124,10 +94,6 @@ class UtilTest {
                 return LocalDate.now();
             }
 
-            @Override
-            public Collection<Development> getCollectionActions() {
-                return Collections.emptyList();
-            }
         };
         assertThat(Util.identifyLoan(l)).isNotEmpty();
     }

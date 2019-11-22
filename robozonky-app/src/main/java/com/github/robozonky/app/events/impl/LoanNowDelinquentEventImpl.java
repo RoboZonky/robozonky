@@ -16,19 +16,16 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.time.LocalDate;
+
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 
-import java.time.LocalDate;
-import java.util.Collection;
-
 final class LoanNowDelinquentEventImpl extends AbstractLoanDelinquentEventImpl implements LoanNowDelinquentEvent {
 
-    public LoanNowDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since,
-                                      final Collection<Development> collectionActions) {
-        super(investment, loan, since, collectionActions);
+    public LoanNowDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since) {
+        super(investment, loan, since);
     }
 
     @Override

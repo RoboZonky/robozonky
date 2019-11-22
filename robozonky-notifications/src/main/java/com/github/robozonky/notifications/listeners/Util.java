@@ -16,17 +16,6 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.notifications.LoanBased;
-import com.github.robozonky.api.remote.entities.Development;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.test.DateUtil;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -36,11 +25,24 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
 
 import static java.util.Map.entry;
 
@@ -183,30 +185,9 @@ final class Util {
         return Period.between(i.getInvestmentDate().toLocalDate(), DateUtil.localNow().toLocalDate()).toTotalMonths();
     }
 
-    public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan,
-                                                        final Collection<Development> collections,
-                                                        final LocalDate date) {
+    public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan, final LocalDate date) {
         final Map<String, Object> result = new HashMap<>(getLoanData(i, loan));
         result.put("since", toDate(date));
-        result.put("collections", collections.stream()
-                .sorted(Comparator.comparing(Development::getDateFrom).reversed())
-                .limit(5)
-                .map(action -> {
-                    final String code = action.getBusinessCode().getCode();
-                    final String note = action.getPublicNote().orElse("Bez dalšího vysvětlení.");
-                    final Date dateFrom = toDate(action.getDateFrom());
-                    return action.getDateTo()
-                            .map(dateTo -> Map.ofEntries(
-                                    entry("code", code),
-                                    entry("note", note),
-                                    entry("startDate", dateFrom),
-                                    entry("endDate", toDate(dateTo))))
-                            .orElseGet(() -> Map.ofEntries(
-                                    entry("code", code),
-                                    entry("note", note),
-                                    entry("startDate", dateFrom)));
-                })
-                .collect(Collectors.toList()));
         return result;
     }
 

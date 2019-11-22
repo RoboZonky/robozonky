@@ -16,7 +16,12 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -28,8 +33,13 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.github.robozonky.app.delinquencies.Category.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.robozonky.app.delinquencies.Category.CRITICAL;
+import static com.github.robozonky.app.delinquencies.Category.DEFAULTED;
+import static com.github.robozonky.app.delinquencies.Category.HOPELESS;
+import static com.github.robozonky.app.delinquencies.Category.MILD;
+import static com.github.robozonky.app.delinquencies.Category.NEW;
+import static com.github.robozonky.app.delinquencies.Category.SEVERE;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -75,7 +85,6 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanNowDelinquentEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
-        verify(zonky).getDevelopments(eq(loan.getId()));
     }
 
     @Test
@@ -86,7 +95,6 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent10DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
-        verify(zonky).getDevelopments(eq(loan.getId()));
     }
 
     @Test
@@ -97,7 +105,6 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent30DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
-        verify(zonky).getDevelopments(eq(loan.getId()));
     }
 
     @Test
@@ -108,7 +115,6 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent60DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
-        verify(zonky).getDevelopments(eq(loan.getId()));
     }
 
     @Test
@@ -119,7 +125,6 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
-        verify(zonky).getDevelopments(eq(loan.getId()));
     }
 
     @Test
@@ -130,6 +135,5 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
                 .first().isInstanceOf(LoanDefaultedEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
-        verify(zonky).getDevelopments(eq(loan.getId()));
     }
 }

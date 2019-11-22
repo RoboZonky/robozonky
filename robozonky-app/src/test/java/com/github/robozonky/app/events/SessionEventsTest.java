@@ -16,6 +16,12 @@
 
 package com.github.robozonky.app.events;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
@@ -29,13 +35,7 @@ import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.Mockito.*;
 
@@ -68,7 +68,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @Test
     void identifiesEventTypeWhenClass() {
         final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh(), LocalDate.now(), Collections.emptyList());
+                MockLoanBuilder.fresh(), LocalDate.now());
         assertThat(SessionEvents.getImplementingEvent(e.getClass()))
                 .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);
     }

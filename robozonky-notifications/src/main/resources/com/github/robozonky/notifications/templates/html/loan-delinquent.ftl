@@ -2,6 +2,4 @@
 
 <#include "additional-investment-info.ftl">
 
-<#include "additional-collections-info.ftl">
-
 <#include "additional-loan-info.ftl">

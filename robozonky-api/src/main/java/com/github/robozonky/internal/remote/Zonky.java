@@ -16,20 +16,40 @@
 
 package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.api.remote.*;
-import com.github.robozonky.api.remote.entities.*;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import javax.ws.rs.ClientErrorException;
+
+import com.github.robozonky.api.remote.ControlApi;
+import com.github.robozonky.api.remote.LoanApi;
+import com.github.robozonky.api.remote.ParticipationApi;
+import com.github.robozonky.api.remote.PortfolioApi;
+import com.github.robozonky.api.remote.ReservationApi;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.LastPublishedLoan;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.PurchaseRequest;
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
+import com.github.robozonky.api.remote.entities.ResolutionRequest;
+import com.github.robozonky.api.remote.entities.Resolutions;
+import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.SellRequest;
+import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.ws.rs.ClientErrorException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
@@ -57,7 +77,6 @@ public class Zonky {
     private final PaginatedApi<Loan, LoanApi> loanApi;
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<Investment, PortfolioApi> portfolioApi;
-    private final PaginatedApi<Development, CollectionsApi> collectionsApi;
 
     Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
         this.controlApi = api.control(tokenSupplier);
@@ -65,7 +84,6 @@ public class Zonky {
         this.reservationApi = api.reservations(tokenSupplier);
         this.participationApi = api.secondaryMarketplace(tokenSupplier);
         this.portfolioApi = api.portfolio(tokenSupplier);
-        this.collectionsApi = api.collections(tokenSupplier);
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function) {
@@ -188,15 +206,6 @@ public class Zonky {
      */
     public Stream<Loan> getAvailableLoans(final Select select) {
         return excludeNonCZK(getStream(loanApi, LoanApi::items, select), Loan::getCurrency);
-    }
-
-    /**
-     * Retrieve loan collections information via {@link CollectionsApi}.
-     * @param loanId Loan in question.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<Development> getDevelopments(final int loanId) {
-        return getStream(collectionsApi, a -> a.items(loanId));
     }
 
     /**

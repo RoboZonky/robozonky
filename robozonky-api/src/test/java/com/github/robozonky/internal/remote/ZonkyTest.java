@@ -16,18 +16,29 @@
 
 package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.*;
-import com.github.robozonky.api.remote.entities.*;
-import com.github.robozonky.internal.Defaults;
-import org.junit.jupiter.api.Test;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.ControlApi;
+import com.github.robozonky.api.remote.EntityCollectionApi;
+import com.github.robozonky.api.remote.LoanApi;
+import com.github.robozonky.api.remote.ParticipationApi;
+import com.github.robozonky.api.remote.PortfolioApi;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
+import com.github.robozonky.api.remote.entities.ResolutionRequest;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.Defaults;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -81,7 +92,6 @@ class ZonkyTest {
         mockPaginated(apiProvider, LoanApi.class);
         mockPaginated(apiProvider, PortfolioApi.class);
         mockPaginated(apiProvider, ParticipationApi.class);
-        mockPaginated(apiProvider, CollectionsApi.class);
         return apiProvider;
     }
 
@@ -146,7 +156,6 @@ class ZonkyTest {
             softly.assertThat(z.getInvestment(1)).isEmpty();
             softly.assertThat(z.getDelinquentInvestments()).isEmpty();
             softly.assertThat(z.getAvailableParticipations(Select.unrestricted())).isEmpty();
-            softly.assertThat(z.getDevelopments(1)).isEmpty();
         });
     }
 

@@ -16,13 +16,18 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -38,15 +43,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
@@ -127,11 +124,6 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         @Override
         public LocalDate getDelinquentSince() {
             return LocalDate.now();
-        }
-
-        @Override
-        public Collection<Development> getCollectionActions() {
-            return Collections.emptyList();
         }
 
         @Override

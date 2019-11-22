@@ -16,24 +16,20 @@
 
 package com.github.robozonky.notifications.samples;
 
-import com.github.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Development;
-import com.github.robozonky.internal.test.DateUtil;
-
 import java.time.LocalDate;
-import java.util.Collection;
+
+import com.github.robozonky.api.notifications.LoanDelinquentEvent;
+import com.github.robozonky.internal.test.DateUtil;
 
 abstract class AbstractLoanDelinquentEvent extends AbstractInvestmentBasedEvent
         implements LoanDelinquentEvent {
 
     private final int thresholdInDays;
     private final LocalDate delinquentSince;
-    private final Collection<Development> collectionActions;
 
     protected AbstractLoanDelinquentEvent(final int threshold) {
         this.thresholdInDays = threshold;
         this.delinquentSince = DateUtil.offsetNow().minusDays(thresholdInDays).toLocalDate();
-        this.collectionActions = Util.randomizeDevelopments(getLoan());
     }
 
     @Override
@@ -46,8 +42,4 @@ abstract class AbstractLoanDelinquentEvent extends AbstractInvestmentBasedEvent
         return delinquentSince;
     }
 
-    @Override
-    public Collection<Development> getCollectionActions() {
-        return collectionActions;
-    }
 }

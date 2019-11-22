@@ -16,15 +16,14 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
-
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class BaseEnumTest {
@@ -55,9 +54,6 @@ class BaseEnumTest {
         var rating = code(Rating.class, Rating.values(), Rating::findByCode);
         var region = code(Region.class, Region.values(), Region::findByCode);
         var country = code(Country.class, Country.values(), Country::findByCode);
-        var developmentType = code(DevelopmentType.class, Stream.of(DevelopmentType.values())
-                .filter(v -> v != DevelopmentType.PAYMENT_PAIRED) // multiple codes evaluate to one type
-                .toArray(DevelopmentType[]::new), DevelopmentType::findByCode);
-        return Stream.of(purpose, mainIncomeType, rating, region, country, developmentType).flatMap(s -> s);
+        return Stream.of(purpose, mainIncomeType, rating, region, country).flatMap(s -> s);
     }
 }

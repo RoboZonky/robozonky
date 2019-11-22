@@ -16,28 +16,32 @@
 
 package com.github.robozonky.notifications.samples;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Development;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.enums.*;
+import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.entities.MutableDevelopment;
 import com.github.robozonky.internal.remote.entities.MutableLoan;
 import com.github.robozonky.internal.remote.entities.MutableParticipation;
 import com.github.robozonky.internal.test.DateUtil;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
@@ -75,11 +79,6 @@ final class Util {
 
     private static String generateShortText() {
         final int wordCount = 2 + RANDOM.nextInt(10);
-        return generateText(wordCount);
-    }
-
-    private static String generateMediumText() {
-        final int wordCount = 5 + RANDOM.nextInt(20);
         return generateText(wordCount);
     }
 
@@ -231,30 +230,6 @@ final class Util {
                 return portfolioOverview.getTimestamp();
             }
         };
-    }
-
-    public static Collection<Development> randomizeDevelopments(final Loan loan) {
-        final int count = RANDOM.nextInt(5);
-        final List<MutableDevelopment> developments = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            final MutableDevelopment development = new MutableDevelopment();
-            development.setLoanId(loan.getId());
-            development.setBusinessCode(randomize(DevelopmentType.values()));
-            if (RANDOM.nextBoolean()) { // some notes will be empty
-                development.setPublicNote(generateMediumText());
-            }
-            if (i == 0) {
-                development.setDateFrom(Instant.EPOCH.atZone(Defaults.ZONE_ID).toOffsetDateTime());
-            } else {
-                development.setDateFrom(developments.get(i - 1).getDateTo().orElseThrow());
-            }
-            if (i < count - 1) { // last note will not have any toDate
-                development.setDateTo(development.getDateFrom().plusSeconds(RANDOM.nextInt(1_000_000)));
-            }
-            developments.add(development);
-        }
-        Collections.reverse(developments);
-        return new ArrayList<>(developments);
     }
 
 }

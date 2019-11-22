@@ -16,20 +16,29 @@
 
 package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.api.remote.*;
-import com.github.robozonky.api.remote.entities.*;
-import com.github.robozonky.internal.util.StreamUtil;
-import io.vavr.Lazy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import com.github.robozonky.api.remote.ControlApi;
+import com.github.robozonky.api.remote.EntityCollectionApi;
+import com.github.robozonky.api.remote.LoanApi;
+import com.github.robozonky.api.remote.ParticipationApi;
+import com.github.robozonky.api.remote.PortfolioApi;
+import com.github.robozonky.api.remote.ReservationApi;
+import com.github.robozonky.api.remote.ZonkyOAuthApi;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.util.StreamUtil;
+import io.vavr.Lazy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 public class ApiProvider implements AutoCloseable {
 
@@ -168,15 +177,6 @@ public class ApiProvider implements AutoCloseable {
      */
     Api<ReservationApi> reservations(final Supplier<ZonkyApiToken> token) {
         return obtainNormal(ReservationApi.class, token);
-    }
-
-    /**
-     * Retrieve user-specific Zonky API which provides information on loan collections.
-     * @param token Supplier of a valid Zonky API token, always representing the active user.
-     * @return New API instance.
-     */
-    PaginatedApi<Development, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
-        return this.obtainPaginated(CollectionsApi.class, token);
     }
 
     public Optional<RequestCounter> getRequestCounter() {
