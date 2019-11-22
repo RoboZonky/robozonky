@@ -48,7 +48,7 @@ class ZonkyTest {
         return mockApi(Collections.emptyList());
     }
 
-    private static final Investment mockInvestment(final Loan loan, final int amount) {
+    private static Investment mockInvestment(final Loan loan, final int amount) {
         final Investment i = mock(Investment.class);
         doReturn(loan.getId()).when(i).getLoanId();
         doReturn(loan.getCurrency()).when(i).getCurrency();

@@ -16,15 +16,14 @@
 
 package com.github.robozonky.app.tenant;
 
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
+
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -77,7 +76,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void loadStrategyAsFile() throws IOException, ExecutionException, InterruptedException {
+    void loadStrategyAsFile() throws IOException {
         final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
@@ -88,7 +87,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void loadWrongStrategyAsFile() throws IOException, ExecutionException, InterruptedException {
+    void loadWrongStrategyAsFile() throws IOException {
         final File tmp = File.createTempFile("robozonky-", ".cfg");
         final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
         assertSoftly(softly -> {
@@ -100,7 +99,7 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void loadStrategyAsUrl() throws IOException, ExecutionException, InterruptedException {
+    void loadStrategyAsUrl() throws IOException {
         final String url = newStrategyFile().toURI().toURL().toString();
         final StrategyProvider r = StrategyProvider.createFor(url);
         assertSoftly(softly -> {

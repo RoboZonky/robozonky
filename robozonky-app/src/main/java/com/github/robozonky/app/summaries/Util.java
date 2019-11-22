@@ -16,6 +16,11 @@
 
 package com.github.robozonky.app.summaries;
 
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.stream.Collector;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -28,13 +33,10 @@ import io.vavr.Tuple3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.toList;
 
 final class Util {
 
@@ -72,7 +74,7 @@ final class Util {
         final Collection<Tuple3<Rating, Money, Money>> sellable = tenant.call(z -> z.getInvestments(select))
                 .parallel() // possibly many pages' worth of results; fetch in parallel
                 .map(i -> Tuple.of(i.getRating(), i.getRemainingPrincipal().orElseThrow(), i.getSmpFee().orElse(Money.ZERO)))
-                .collect(Collectors.toList());
+                .collect(toList());
         final Map<Rating, Money> justFeeless = sellable.stream()
                 .filter(t -> t._3.isZero())
                 .collect(groupingBy(t -> t._1,

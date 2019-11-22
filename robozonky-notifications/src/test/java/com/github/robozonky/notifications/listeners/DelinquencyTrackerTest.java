@@ -40,7 +40,6 @@ import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -83,7 +82,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         try {
             return new URL("http://localhost");
         } catch (final MalformedURLException ex) {
-            Assertions.fail("Shouldn't have happened.", ex);
+            fail("Shouldn't have happened.", ex);
             return null;
         }
     }

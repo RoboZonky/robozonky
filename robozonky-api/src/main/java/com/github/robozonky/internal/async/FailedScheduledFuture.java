@@ -21,7 +21,6 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 final class FailedScheduledFuture<T> implements ScheduledFuture<T> {
 
@@ -59,13 +58,12 @@ final class FailedScheduledFuture<T> implements ScheduledFuture<T> {
     }
 
     @Override
-    public T get() throws InterruptedException, ExecutionException {
+    public T get() throws ExecutionException {
         throw new ExecutionException(exception);
     }
 
     @Override
-    public T get(final long timeout,
-                 final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public T get(final long timeout, final TimeUnit unit) throws ExecutionException {
         throw new ExecutionException(exception);
     }
 }

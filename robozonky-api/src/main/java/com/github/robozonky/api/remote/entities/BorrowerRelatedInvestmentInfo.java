@@ -16,14 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
 
 public class BorrowerRelatedInvestmentInfo extends BaseEntity {
 
@@ -48,7 +48,7 @@ public class BorrowerRelatedInvestmentInfo extends BaseEntity {
     private String remainingPrincipalToBorrower;
     private final Lazy<Money> moneyRemainingPrincipalToBorrower = Lazy.of(() -> Money.from(remainingPrincipalToBorrower));
     @XmlElement
-    private String totalSoldAmountToLoan;;
+    private String totalSoldAmountToLoan;
     private final Lazy<Money> moneyTotalSoldAmountToLoan = Lazy.of(() -> Money.from(totalSoldAmountToLoan));
 
     BorrowerRelatedInvestmentInfo() {

@@ -16,16 +16,6 @@
 
 package com.github.robozonky.internal.extensions;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.*;
-import com.github.robozonky.internal.state.TenantState;
-import org.assertj.core.api.Condition;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -34,7 +24,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
+import com.github.robozonky.api.notifications.ListenerService;
+import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.state.TenantState;
+import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,7 +72,7 @@ class ListenerServiceLoaderTest {
                                      "Exists"));
         assertThat(r)
                 .last()
-                .has(new Condition<>(result -> !result.get().isPresent(), "Does not exist"));
+                .has(new Condition<>(result -> result.get().isEmpty(), "Does not exist"));
     }
 
     @Test

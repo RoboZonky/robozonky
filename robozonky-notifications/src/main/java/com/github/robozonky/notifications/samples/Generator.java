@@ -16,6 +16,14 @@
 
 package com.github.robozonky.notifications.samples;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.Defaults;
@@ -24,14 +32,6 @@ import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.listeners.AbstractListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 public final class Generator {
 
@@ -43,7 +43,7 @@ public final class Generator {
      */
     private static final AbstractTargetHandler HANDLER = new AbstractTargetHandler(null, null) {
         @Override
-        public void send(SessionInfo sessionInfo, String subject, String message, String fallbackMessage) throws Exception {
+        public void send(SessionInfo sessionInfo, String subject, String message, String fallbackMessage) {
             throw new UnsupportedOperationException();
         }
     };

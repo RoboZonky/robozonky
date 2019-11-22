@@ -31,7 +31,7 @@ class UrlValidator implements Validator {
     public boolean validate(final ProcessingClient client) {
         final String text = client.getText();
         try {
-            final URL url = new URL(text);
+            new URL(text);
             return true;
         } catch (final Exception ex) {
             LOGGER.error("Wrong URL: {}.", text, ex);

@@ -61,6 +61,6 @@ final class FileUtil {
                         LOGGER.debug("Skipping file: '{}'.", f, e);
                         return Optional.<URL>empty();
                     }
-                }).flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+                }).flatMap(Optional::stream);
     }
 }

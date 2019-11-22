@@ -19,6 +19,5 @@ package com.github.robozonky.api.remote.enums;
 public enum InvestmentType {
 
     N,
-    P;
-
+    P
 }

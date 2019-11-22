@@ -19,7 +19,6 @@ package com.github.robozonky.internal.extensions;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.BiFunction;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -58,7 +57,7 @@ public final class StrategyLoader {
                                 final BiFunction<StrategyService, String, Optional<T>> provider) {
         return StreamUtil.toStream(loader)
                 .map(iss -> processStrategyService(iss, strategy, provider))
-                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
+                .flatMap(Optional::stream)
                 .findFirst();
     }
 

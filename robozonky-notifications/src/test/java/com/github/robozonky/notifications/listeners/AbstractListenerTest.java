@@ -16,35 +16,9 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.EventListenerSupplier;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.extensions.ListenerServiceLoader;
-import com.github.robozonky.notifications.*;
-import com.github.robozonky.notifications.templates.TemplateProcessor;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import com.github.robozonky.test.mock.MockInvestmentBuilder;
-import com.github.robozonky.test.mock.MockLoanBuilder;
-import freemarker.template.TemplateException;
-import org.junit.jupiter.api.*;
-
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,7 +26,28 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.notifications.AbstractTargetHandler;
+import com.github.robozonky.notifications.ConfigStorage;
+import com.github.robozonky.notifications.NotificationListenerService;
+import com.github.robozonky.notifications.SupportedListener;
+import com.github.robozonky.notifications.Target;
+import com.github.robozonky.notifications.templates.TemplateProcessor;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import freemarker.template.TemplateException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicContainer;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.Mockito.*;
 
@@ -165,29 +160,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     }
 
     @TestFactory
-    Stream<DynamicNode> listeners() throws IOException {
-        // prepare data
-        final Loan loan = new MockLoanBuilder()
-                .setAmount(100_000)
-                .setAnnuity(BigDecimal.TEN)
-                .setInterestRate(Ratio.ONE)
-                .setDatePublished(OffsetDateTime.now().minusMonths(2))
-                .setName("Úvěr")
-                .setRegion(Region.JIHOCESKY)
-                .setPurpose(Purpose.AUTO_MOTO)
-                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-                .setNonReservedRemainingInvestment(2000)
-                .setRating(Rating.AAAAA)
-                .setTermInMonths(25)
-                .setUrl(new URL("http://www.robozonky.cz"))
-                .build();
-        final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
-        final RecommendedLoan recommendation = loanDescriptor.recommend(Money.from(1200)).get();
-        final Investment i = MockInvestmentBuilder.fresh(loan, 1000)
-                .setExpectedInterest(BigDecimal.TEN)
-                .setPaidPenalty(BigDecimal.ZERO)
-                .setInvestmentDate(OffsetDateTime.now())
-                .build();
+    Stream<DynamicNode> listeners() {
         // create events for listeners
         return Stream.of(SupportedListener.values())
                 .map(this::forListener);

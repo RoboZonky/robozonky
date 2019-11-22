@@ -86,10 +86,6 @@ public class Zonky {
         this.portfolioApi = api.portfolio(tokenSupplier);
     }
 
-    private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function) {
-        return getStream(api, function, Settings.INSTANCE.getDefaultApiPageSize());
-    }
-
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
                                               final int pageSize) {
         return getStream(api, function, new Select(), pageSize);

@@ -16,15 +16,16 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.stream.Stream;
 
 class NaturalLanguageSellStrategy implements SellStrategy {
 
@@ -57,7 +58,7 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                 })
                 .orElse(Stream.empty())
                 .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
-                .flatMap(r -> r.map(Stream::of).orElse(Stream.empty()))
+                .flatMap(Optional::stream)
                 .sorted(COMPARATOR); // investments without sale fee come first
     }
 }

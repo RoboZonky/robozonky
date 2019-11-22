@@ -16,12 +16,18 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.internal.tenant.Tenant;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 final class Registry {
 
@@ -56,7 +62,7 @@ final class Registry {
         return storages.get(Category.NEW).complement(idsToComplement)
                 .parallel()
                 .mapToObj(id -> tenant.call(z -> z.getInvestment(id)))
-                .flatMap(i -> i.map(Stream::of).orElse(Stream.empty()))
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }
 
