@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,18 @@ package com.github.robozonky.internal.test;
 
 import java.util.Random;
 
-import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class RandomUtilTest {
 
     private final Random random = mock(Random.class);
 
-    @BeforeEach
-    void replaceRandom() {
-        RandomUtil.setRandom(random);
-    }
-
-    @BeforeEach
+    @AfterEach
     void resetRandom() {
         RandomUtil.resetRandom();
     }
@@ -43,10 +39,13 @@ class RandomUtilTest {
         final int first = 123456;
         when(random.nextInt()).thenReturn(first);
         when(random.nextInt(anyInt())).thenAnswer(i -> i.getArgument(0));
-        SoftAssertions.assertSoftly(softly -> {
+        RandomUtil.setRandom(random);
+        assertSoftly(softly -> {
             softly.assertThat(RandomUtil.getNextInt()).isEqualTo(first);
             final int second = 234567;
             softly.assertThat(RandomUtil.getNextInt(second)).isEqualTo(second);
         });
+        RandomUtil.resetRandom();
+        assertThat(RandomUtil.getNextInt()).isNotEqualTo(first);
     }
 }
