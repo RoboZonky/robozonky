@@ -37,6 +37,13 @@ public class Select implements Consumer<RoboZonkyFilter> {
 
     private final Map<String, List<Object>> conditions = new HashMap<>(0);
 
+    public static Select sellableParticipations() { // TODO enable selling of discounted investments
+        return unrestricted()
+                .equalsPlain("delinquent", "true")
+                .equalsPlain("loanHealthInfo", "HEALTHY")
+                .equals("loan.status", "ACTIVE"); // this is how Zonky queries for this
+    }
+
     public static Select unrestricted() {
         return new Select();
     }

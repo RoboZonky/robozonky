@@ -16,8 +16,13 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -28,12 +33,6 @@ import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 
@@ -59,13 +58,9 @@ final class Selling implements TenantPayload {
     }
 
     private static void sell(final PowerTenant tenant, final SellStrategy strategy) {
-        final Select sellable = new Select()
-                .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
-                .equals("status", "ACTIVE"); // this is how Zonky queries for this
+        final Select sellable = Select.sellableParticipations();
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
-                // TODO enable selling of discounted investments
-                .filter(i -> i.getLoanHealthInfo().orElse(LoanHealthInfo.HEALTHY) == LoanHealthInfo.HEALTHY)
                 .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
                 .filter(i -> !sold.wasOnceSold(i.getLoanId()))
                 .map(i -> new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId())))

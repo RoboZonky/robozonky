@@ -87,17 +87,8 @@ public class Zonky {
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                              final int pageSize) {
-        return getStream(api, function, new Select(), pageSize);
-    }
-
-    private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
                                               final Select select) {
-        return getStream(api, function, select, Settings.INSTANCE.getDefaultApiPageSize());
-    }
-
-    private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                              final Select select, final int pageSize) {
+        var pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         return PagingStreams.streamBuilder(new EntityCollectionPageSource<>(api, function, select, pageSize))
                 .pageSize(pageSize)
                 .build();

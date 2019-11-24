@@ -68,9 +68,7 @@ final class Util {
      * @return First is sellable with or without fee, second just without.
      */
     static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
-        final Select select = new Select()
-                .equals("status", "ACTIVE")
-                .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY");
+        final Select select = Select.sellableParticipations();
         final Collection<Tuple3<Rating, Money, Money>> sellable = tenant.call(z -> z.getInvestments(select))
                 .parallel() // possibly many pages' worth of results; fetch in parallel
                 .map(i -> Tuple.of(i.getRating(), i.getRemainingPrincipal().orElseThrow(), i.getSmpFee().orElse(Money.ZERO)))
