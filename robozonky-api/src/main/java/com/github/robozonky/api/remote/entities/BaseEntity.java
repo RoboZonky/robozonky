@@ -16,8 +16,10 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -37,10 +39,13 @@ abstract class BaseEntity {
     private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
     protected final Logger logger = LogManager.getLogger(getClass());
     @XmlTransient
-    private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
+    private final Lazy<String> toString;
 
-    BaseEntity() {
-        // no instances from outside of this package
+    protected BaseEntity(String... ignoredFields) {
+        toString = Lazy.of(() -> {
+            var fields = Stream.concat(Arrays.stream(ignoredFields), Stream.of("toString")).toArray(String[]::new);
+            return ToStringBuilder.createFor(this, fields);
+        });
     }
 
     private boolean hasBeenCalledBefore(final String key) {

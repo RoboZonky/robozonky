@@ -16,15 +16,15 @@
 
 package com.github.robozonky.internal.util;
 
-import io.vavr.Lazy;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.logging.log4j.Logger;
-
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
+
+import io.vavr.Lazy;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.logging.log4j.Logger;
 
 public final class ToStringBuilder {
 
@@ -50,8 +50,9 @@ public final class ToStringBuilder {
 
         private static final int MAX_STRING_LENGTH = 70;
 
-        // ignore passwords, loggers and memoizers
-        private static final Collection<Class<?>> IGNORED_TYPES = Arrays.asList(char[].class, Logger.class, Lazy.class);
+        // ignore passwords, loggers, memoizers and unimplemented fields
+        private static final Collection<Class<?>> IGNORED_TYPES = Arrays.asList(char[].class, Logger.class, Lazy.class,
+                                                                                Object.class);
 
         public CustomReflectionToStringBuilder(final Object o) {
             super(o);

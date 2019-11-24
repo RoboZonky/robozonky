@@ -16,22 +16,28 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.time.OffsetDateTime;
+
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
 
 public class MyReservation extends BaseEntity {
 
     private long id;
-    private OffsetDateTime timeCreated;
-    private OffsetDateTime deadline;
 
     @XmlElement
     private String reservedAmount = "0";
     private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount));
+
+    /*
+     * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
+     * unknown fields by Jackson.
+     */
+    @XmlElement
+    private Object timeCreated;
+    @XmlElement
+    private Object deadline;
 
     MyReservation() {
         // for JAXB
@@ -40,16 +46,6 @@ public class MyReservation extends BaseEntity {
     @XmlElement
     public long getId() {
         return id;
-    }
-
-    @XmlElement
-    public OffsetDateTime getTimeCreated() {
-        return timeCreated;
-    }
-
-    @XmlElement
-    public OffsetDateTime getDeadline() {
-        return deadline;
     }
 
     @XmlTransient
