@@ -16,6 +16,10 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.xml.bind.annotation.XmlTransient;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.github.robozonky.internal.util.ToStringBuilder;
@@ -23,19 +27,15 @@ import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * All JAX-RS entity classes in this package should extend this class in order to be able to gracefully handle
  * missing JSON properties. This happens occasionally when Zonky deploys a new version of the API and the app was not
  * yet updated with the changes.
  */
-public abstract class BaseEntity {
+abstract class BaseEntity {
 
     private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
-    protected final Logger logger = LogManager.getLogger(BaseEntity.class);
+    protected final Logger logger = LogManager.getLogger(getClass());
     @XmlTransient
     private final Lazy<String> toString = Lazy.of(() -> ToStringBuilder.createFor(this, "toString"));
 
@@ -51,16 +51,15 @@ public abstract class BaseEntity {
     @JsonAnyGetter
     void handleUnknownGetter(final String key) {
         if (!hasBeenCalledBefore(key)) {
-            logger.info("Trying to get value of unknown property '{}' on {}. Indicates unexpected API change.", key,
-                        this.getClass());
+            logger.debug("Trying to get value of unknown property '{}'. Indicates unsupported API.", key);
         }
     }
 
     @JsonAnySetter
     void handleUnknownSetter(final String key, final Object value) {
         if (!hasBeenCalledBefore(key)) {
-            logger.info("Trying to set value '{}' to unknown property '{}' on {}. Indicates unexpected API change.",
-                        value, key, this.getClass());
+            logger.debug("Trying to set value '{}' to unknown property '{}'. Indicates unsupported API.",
+                        value, key);
         }
     }
 

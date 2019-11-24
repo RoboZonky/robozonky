@@ -16,20 +16,21 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.enums.*;
-import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Optional;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.Defaults;
+import io.vavr.Lazy;
 
 public abstract class BaseLoan extends BaseEntity {
 
@@ -51,18 +52,11 @@ public abstract class BaseLoan extends BaseEntity {
     protected String nickName;
     protected String story;
     protected Rating rating;
-    protected BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
-    protected OtherInvestments myOtherInvestments;
     protected MainIncomeType mainIncomeType;
     protected Region region;
     protected Purpose purpose;
-    @XmlElement
-    protected Collection<InsurancePolicyPeriod> insuranceHistory;
-    @XmlElement
-    private Object photos; // don't waste time deserializing a collection of images, as we're never going to need it
 
     // various ratios
-
     protected Ratio interestRate;
     protected Ratio investmentRate;
     @XmlElement
@@ -80,7 +74,6 @@ public abstract class BaseLoan extends BaseEntity {
     protected Currency currency = Defaults.CURRENCY;
 
     // strings to be represented as money
-
     @XmlElement
     protected String amount;
     private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
@@ -102,6 +95,21 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     protected String zonkyPlusAmount;
     private final Lazy<Money> moneyZonkyPlusAmount = Lazy.of(() -> Money.from(zonkyPlusAmount, currency));
+
+    /*
+     * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
+     * unknown fields by Jackson.
+     */
+    @XmlElement
+    private Object photos;
+    @XmlElement
+    private Object flags;
+    @XmlElement
+    private Object borrowerRelatedInvestmentInfo;
+    @XmlElement
+    private Object myOtherInvestments;
+    @XmlElement
+    private Object insuranceHistory;
 
     protected BaseLoan() {
         // for JAXB
@@ -213,15 +221,6 @@ public abstract class BaseLoan extends BaseEntity {
     }
 
     /**
-     * Holds the same information as {@link #getBorrowerRelatedInvestmentInfo()}, no need to use this.
-     * @return
-     */
-    @XmlElement
-    public OtherInvestments getMyOtherInvestments() {
-        return myOtherInvestments;
-    }
-
-    /**
      * @return True if the loan is insured at this very moment. Uninsured loans will have both this and
      * {@link #isAdditionallyInsured()} return false.
      */
@@ -246,22 +245,6 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public boolean isAdditionallyInsured() {
         return additionallyInsured;
-    }
-
-    /**
-     * @return
-     */
-    @XmlElement
-    public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
-        return insuranceHistory == null ? Collections.emptySet() : insuranceHistory;
-    }
-
-    /**
-     * @return Null unless the loan was queried using {@link LoanApi#item(int)}.
-     */
-    @XmlElement
-    public BorrowerRelatedInvestmentInfo getBorrowerRelatedInvestmentInfo() {
-        return borrowerRelatedInvestmentInfo;
     }
 
     @XmlElement

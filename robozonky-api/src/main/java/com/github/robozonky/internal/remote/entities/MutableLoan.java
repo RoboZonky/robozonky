@@ -16,13 +16,17 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.*;
-import com.github.robozonky.api.remote.enums.*;
-
 import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.Currency;
+
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.Region;
 
 public final class MutableLoan extends Loan {
 
@@ -110,14 +114,6 @@ public final class MutableLoan extends Loan {
         this.rating = rating;
     }
 
-    public void setBorrowerRelatedInvestmentInfo(final BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo) {
-        this.borrowerRelatedInvestmentInfo = borrowerRelatedInvestmentInfo;
-    }
-
-    public void setMyOtherInvestments(final OtherInvestments myOtherInvestments) {
-        this.myOtherInvestments = myOtherInvestments;
-    }
-
     public void setMainIncomeType(final MainIncomeType mainIncomeType) {
         this.mainIncomeType = mainIncomeType;
     }
@@ -128,10 +124,6 @@ public final class MutableLoan extends Loan {
 
     public void setPurpose(final Purpose purpose) {
         this.purpose = purpose;
-    }
-
-    public void setInsuranceHistory(final Collection<InsurancePolicyPeriod> insuranceHistory) {
-        this.insuranceHistory = insuranceHistory;
     }
 
     public void setInterestRate(final Ratio interestRate) {

@@ -16,19 +16,21 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.*;
-import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.InsuranceStatus;
+import com.github.robozonky.api.remote.enums.InvestmentType;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Lazy;
 
 public class Investment extends BaseInvestment {
 
@@ -36,8 +38,6 @@ public class Investment extends BaseInvestment {
     private PaymentStatus paymentStatus;
     @XmlElement
     private LoanHealthInfo loanHealthInfo;
-    @XmlElement
-    private Object loanHealthStats; // TODO implement this
     private boolean smpRelated;
     private boolean onSmp;
     private boolean canBeOffered;
@@ -59,7 +59,7 @@ public class Investment extends BaseInvestment {
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
     @XmlElement
     private OffsetDateTime investmentDate = DateUtil.offsetNow();
-    private Lazy<OffsetDateTime> actualInvestmentDate = Lazy.of(() -> {
+    private final Lazy<OffsetDateTime> actualInvestmentDate = Lazy.of(() -> {
         final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
         final OffsetDateTime d = DateUtil.offsetNow().minusMonths(monthsElapsed);
         logger.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
@@ -77,8 +77,6 @@ public class Investment extends BaseInvestment {
     private Ratio revenueRate;
     private Rating rating;
     private InvestmentType investmentType;
-    @XmlElement
-    private Collection<InsurancePolicyPeriod> insuranceHistory;
 
     // string-based money
     @XmlElement
@@ -129,6 +127,15 @@ public class Investment extends BaseInvestment {
     @XmlElement
     private String paidPenalty = "0";
     private final Lazy<Money> moneyPaidPenalty = Lazy.of(() -> Money.from(paidPenalty));
+
+    /*
+     * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
+     * unknown fields by Jackson.
+     */
+    @XmlElement
+    private Object insuranceHistory;
+    @XmlElement
+    private Object loanHealthStats;
 
     Investment() {
         // for JAXB
@@ -256,7 +263,7 @@ public class Investment extends BaseInvestment {
      * @return This appears to always be null, so we guess from other fields.
      */
     public OffsetDateTime getInvestmentDate() {
-        return actualInvestmentDate.get();
+        return Optional.ofNullable(investmentDate).orElseGet(actualInvestmentDate::get);
     }
 
     /**
@@ -318,10 +325,6 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public boolean isInstalmentPostponement() {
         return instalmentPostponement;
-    }
-
-    public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
-        return insuranceHistory == null ? Collections.emptySet() : Collections.unmodifiableCollection(insuranceHistory);
     }
 
     @XmlElement

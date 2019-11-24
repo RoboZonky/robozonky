@@ -19,7 +19,6 @@ package com.github.robozonky.notifications.samples;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -106,7 +105,6 @@ final class Util {
             loan.setInsuranceActive(false);
             loan.setAnnuityWithInsurance(annuity.toPlainString());
         }
-        loan.setInsuranceHistory(Collections.emptyList());
         loan.setAdditionallyInsured(false);
         loan.setInsuredInFuture(false);
         // set rating and infer other dependent properties

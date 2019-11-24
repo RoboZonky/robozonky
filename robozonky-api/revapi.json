@@ -318,6 +318,71 @@
         "code": "java.class.removed",
         "old": "enum com.github.robozonky.api.remote.enums.CollectionActionSource",
         "justification": "Removed collections information as it's not available in the API anymore."
+      },
+      {
+        "code": "java.class.visibilityReduced",
+        "old": "class com.github.robozonky.api.remote.entities.BaseEntity",
+        "new": "class com.github.robozonky.api.remote.entities.BaseEntity",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.field.visibilityReduced",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.borrowerRelatedInvestmentInfo",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.borrowerRelatedInvestmentInfo",
+        "oldVisibility": "protected",
+        "newVisibility": "private",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.field.visibilityReduced",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.insuranceHistory",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.insuranceHistory",
+        "oldVisibility": "protected",
+        "newVisibility": "private",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.field.visibilityReduced",
+        "old": "field com.github.robozonky.api.remote.entities.BaseLoan.myOtherInvestments",
+        "new": "field com.github.robozonky.api.remote.entities.BaseLoan.myOtherInvestments",
+        "oldVisibility": "protected",
+        "newVisibility": "private",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo com.github.robozonky.api.remote.entities.BaseLoan::getBorrowerRelatedInvestmentInfo()",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.InsurancePolicyPeriod> com.github.robozonky.api.remote.entities.BaseLoan::getInsuranceHistory()",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.entities.OtherInvestments com.github.robozonky.api.remote.entities.BaseLoan::getMyOtherInvestments()",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.InsurancePolicyPeriod> com.github.robozonky.api.remote.entities.Investment::getInsuranceHistory()",
+        "justification": "Further streamline deserialization by removing unused things."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.OtherInvestments",
+        "justification": "Further streamline deserialization by removing unused things."
       }
     ]
   }
