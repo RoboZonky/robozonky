@@ -19,7 +19,12 @@ package com.github.robozonky.internal;
 public final class ApiConstants {
 
     public static final String ME = "/users/me";
-    public static final String INVESTOR_ME = "/investors/me";
+    public static final String LOANS = "/loans";
+    public static final String MARKETPLACE = LOANS + "/marketplace";
+    private static final String RESERVATIONS_BASE = "/loans/marketplace/reservations";
+    public static final String RESERVATION_PREFERENCES = RESERVATIONS_BASE + "/my-preferences";
+    public static final String RESERVATIONS = RESERVATIONS_BASE + "/my-reservations";
+    public static final String SMP_INVESTMENTS = "/smp/investments";
 
     private ApiConstants() {
         // no instances

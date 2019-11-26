@@ -16,14 +16,18 @@
 
 package com.github.robozonky.api.remote;
 
+import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 
-import javax.ws.rs.*;
-import java.util.List;
-
-@Path("/loans")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
 public interface LoanApi extends EntityCollectionApi<Loan> {
@@ -33,15 +37,15 @@ public interface LoanApi extends EntityCollectionApi<Loan> {
      * @see <a href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Filtering Zonky.</a>
      */
     @GET
-    @Path("marketplace")
+    @Path(ApiConstants.MARKETPLACE)
     @Override
     List<Loan> items();
 
     @GET
-    @Path("last-published")
+    @Path(ApiConstants.LOANS + "/last-published")
     LastPublishedLoan lastPublished();
 
     @GET
-    @Path("{loanId}")
+    @Path(ApiConstants.LOANS + "/{loanId}")
     Loan item(@PathParam("loanId") int id);
 }

@@ -40,6 +40,94 @@
         "code": "java.class.removed",
         "old": "class com.github.robozonky.api.remote.enums.PaymentStatuses",
         "justification": "Removed unused enums."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "interface com.github.robozonky.api.remote.ControlApi",
+        "new": "interface com.github.robozonky.api.remote.ControlApi",
+        "annotation": "@javax.ws.rs.Path(\"\/\")",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.remote.LoanApi::item(int)",
+        "new": "method com.github.robozonky.api.remote.entities.Loan com.github.robozonky.api.remote.LoanApi::item(int)",
+        "annotationType": "javax.ws.rs.Path",
+        "attribute": "value",
+        "oldValue": "\"{loanId}\"",
+        "newValue": "\"\/loans\/{loanId}\"",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.Loan> com.github.robozonky.api.remote.LoanApi::items()",
+        "new": "method java.util.List<com.github.robozonky.api.remote.entities.Loan> com.github.robozonky.api.remote.LoanApi::items()",
+        "annotationType": "javax.ws.rs.Path",
+        "attribute": "value",
+        "oldValue": "\"marketplace\"",
+        "newValue": "\"\/loans\/marketplace\"",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "method com.github.robozonky.api.remote.entities.LastPublishedLoan com.github.robozonky.api.remote.LoanApi::lastPublished()",
+        "new": "method com.github.robozonky.api.remote.entities.LastPublishedLoan com.github.robozonky.api.remote.LoanApi::lastPublished()",
+        "annotationType": "javax.ws.rs.Path",
+        "attribute": "value",
+        "oldValue": "\"last-published\"",
+        "newValue": "\"\/loans\/last-published\"",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "interface com.github.robozonky.api.remote.LoanApi",
+        "new": "interface com.github.robozonky.api.remote.LoanApi",
+        "annotation": "@javax.ws.rs.Path(\"\/loans\")",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.Participation> com.github.robozonky.api.remote.ParticipationApi::items()",
+        "new": "method java.util.List<com.github.robozonky.api.remote.entities.Participation> com.github.robozonky.api.remote.ParticipationApi::items()",
+        "annotation": "@javax.ws.rs.Path(\"\/smp\/investments\")",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "interface com.github.robozonky.api.remote.ParticipationApi",
+        "new": "interface com.github.robozonky.api.remote.ParticipationApi",
+        "annotationType": "javax.ws.rs.Path",
+        "attribute": "value",
+        "oldValue": "\"\/\"",
+        "newValue": "\"\/smp\/investments\"",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "method com.github.robozonky.api.remote.entities.Reservations com.github.robozonky.api.remote.ReservationApi::items()",
+        "new": "method com.github.robozonky.api.remote.entities.Reservations com.github.robozonky.api.remote.ReservationApi::items()",
+        "annotationType": "javax.ws.rs.Path",
+        "attribute": "value",
+        "oldValue": "\"my-reservations\"",
+        "newValue": "\"\/loans\/marketplace\/reservations\/my-reservations\"",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.attributeValueChanged",
+        "old": "method com.github.robozonky.api.remote.entities.ReservationPreferences com.github.robozonky.api.remote.ReservationApi::preferences()",
+        "new": "method com.github.robozonky.api.remote.entities.ReservationPreferences com.github.robozonky.api.remote.ReservationApi::preferences()",
+        "annotationType": "javax.ws.rs.Path",
+        "attribute": "value",
+        "oldValue": "\"my-preferences\"",
+        "newValue": "\"\/loans\/marketplace\/reservations\/my-preferences\"",
+        "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "interface com.github.robozonky.api.remote.ReservationApi",
+        "new": "interface com.github.robozonky.api.remote.ReservationApi",
+        "annotation": "@javax.ws.rs.Path(\"\/loans\/marketplace\/reservations\")",
+        "justification": "Refactored API constants."
       }
     ]
   }

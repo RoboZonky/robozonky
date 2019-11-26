@@ -23,15 +23,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 
-@Path("/")
+@Path(ApiConstants.SMP_INVESTMENTS)
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
 public interface ParticipationApi extends EntityCollectionApi<Participation> {
 
     @GET
-    @Path("/smp/investments")
     @Override
     List<Participation> items();
 }
