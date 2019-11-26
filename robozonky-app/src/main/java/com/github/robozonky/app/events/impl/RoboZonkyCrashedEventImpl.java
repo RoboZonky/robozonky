@@ -17,6 +17,7 @@
 package com.github.robozonky.app.events.impl;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 
@@ -31,5 +32,13 @@ final class RoboZonkyCrashedEventImpl extends AbstractEventImpl implements RoboZ
     @Override
     public Optional<Throwable> getCause() {
         return Optional.ofNullable(this.cause);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RoboZonkyCrashedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("cause=" + cause)
+                .toString();
     }
 }

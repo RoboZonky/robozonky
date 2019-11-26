@@ -16,12 +16,13 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-
-import java.util.Collection;
-import java.util.Collections;
 
 final class ExecutionCompletedEventImpl extends AbstractEventImpl implements ExecutionCompletedEvent {
 
@@ -29,7 +30,6 @@ final class ExecutionCompletedEventImpl extends AbstractEventImpl implements Exe
     private final PortfolioOverview portfolioOverview;
 
     public ExecutionCompletedEventImpl(final Collection<Loan> investment, final PortfolioOverview portfolio) {
-        super("investments");
         this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
     }
@@ -42,5 +42,13 @@ final class ExecutionCompletedEventImpl extends AbstractEventImpl implements Exe
     @Override
     public Collection<Loan> getLoansInvestedInto() {
         return investments;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ExecutionCompletedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

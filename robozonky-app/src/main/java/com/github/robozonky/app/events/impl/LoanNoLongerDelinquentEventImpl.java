@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -38,5 +40,14 @@ final class LoanNoLongerDelinquentEventImpl extends AbstractEventImpl implements
     @Override
     public Investment getInvestment() {
         return investment;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", LoanNoLongerDelinquentEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("investment=" + investment)
+                .add("loan=" + loan)
+                .toString();
     }
 }

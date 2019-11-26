@@ -17,6 +17,7 @@
 package com.github.robozonky.app.events.impl;
 
 import java.time.LocalDate;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -47,5 +48,15 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
     @Override
     public LocalDate getDelinquentSince() {
         return since;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", getClass().getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("loan=" + loan)
+                .add("investment=" + investment)
+                .add("since=" + since)
+                .toString();
     }
 }

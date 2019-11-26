@@ -16,17 +16,18 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Currency;
+import java.util.StringJoiner;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Currency;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
@@ -63,6 +64,7 @@ abstract class BaseInvestment extends BaseEntity {
     }
 
     BaseInvestment(final Participation participation, final Money amount) {
+        super();
         this.currency = amount.getCurrency();
         this.loanId = participation.getLoanId();
         this.amount = amount.getValue().toPlainString();
@@ -113,4 +115,17 @@ abstract class BaseInvestment extends BaseEntity {
         return moneyFirstAmount.get();
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", BaseInvestment.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("loanId=" + loanId)
+                .add("additionalAmount='" + additionalAmount + "'")
+                .add("amount='" + amount + "'")
+                .add("currency=" + currency)
+                .add("firstAmount='" + firstAmount + "'")
+                .add("status=" + status)
+                .add("timeCreated=" + timeCreated)
+                .toString();
+    }
 }

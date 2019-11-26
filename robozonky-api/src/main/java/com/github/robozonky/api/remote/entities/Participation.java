@@ -16,17 +16,22 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.*;
-import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Currency;
+import java.util.StringJoiner;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.Defaults;
+import io.vavr.Lazy;
 
 public class Participation extends BaseEntity {
 
@@ -218,4 +223,32 @@ public class Participation extends BaseEntity {
         return moneyPrice.get();
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Participation.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("loanId=" + loanId)
+                .add("additionallyInsured=" + additionallyInsured)
+                .add("borrowerNo=" + borrowerNo)
+                .add("countryOfOrigin=" + countryOfOrigin)
+                .add("currency=" + currency)
+                .add("deadline='" + deadline + "'")
+                .add("discount='" + discount + "'")
+                .add("incomeType=" + incomeType)
+                .add("insuranceActive=" + insuranceActive)
+                .add("interestRate=" + interestRate)
+                .add("investmentId=" + investmentId)
+                .add("loanHealthInfo=" + loanHealthInfo)
+                .add("loanName='" + loanName + "'")
+                .add("nextPaymentDate='" + nextPaymentDate + "'")
+                .add("originalInstalmentCount=" + originalInstalmentCount)
+                .add("price='" + price + "'")
+                .add("purpose=" + purpose)
+                .add("rating=" + rating)
+                .add("remainingInstalmentCount=" + remainingInstalmentCount)
+                .add("remainingPrincipal='" + remainingPrincipal + "'")
+                .add("userId=" + userId)
+                .add("willExceedLoanInvestmentLimit=" + willExceedLoanInvestmentLimit)
+                .toString();
+    }
 }

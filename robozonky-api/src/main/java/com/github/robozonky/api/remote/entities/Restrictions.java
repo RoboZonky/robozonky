@@ -16,15 +16,16 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.StringJoiner;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.internal.Defaults;
+import io.vavr.Lazy;
 
 public class Restrictions extends BaseEntity {
 
@@ -96,5 +97,18 @@ public class Restrictions extends BaseEntity {
     @XmlTransient
     public Money getMaximumInvestmentAmount() {
         return moneyMaximumInvestmentAmount.get();
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Restrictions.class.getSimpleName() + "[", "]")
+                .add("cannotAccessSmp=" + cannotAccessSmp)
+                .add("cannotInvest=" + cannotInvest)
+                .add("investmentStep=" + investmentStep)
+                .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
+                .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
+                .add("requestDate=" + requestDate)
+                .add("withdrawalDate=" + withdrawalDate)
+                .toString();
     }
 }

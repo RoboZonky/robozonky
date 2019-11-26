@@ -17,12 +17,10 @@
 package com.github.robozonky.app.events.impl;
 
 import java.time.OffsetDateTime;
-import java.util.stream.Stream;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.internal.util.ToStringBuilder;
 
 /**
  * Mandatory parent for any event that may be fired any time during RoboZonky's runtime.
@@ -30,15 +28,7 @@ import com.github.robozonky.internal.util.ToStringBuilder;
 abstract class AbstractEventImpl implements Event {
 
     private final OffsetDateTime creationDateTime = DateUtil.offsetNow();
-    private final Reloadable<String> toString;
     private OffsetDateTime conceptionDateTime = creationDateTime;
-
-    protected AbstractEventImpl(final String... toStringIgnoredFields) {
-        final String[] ignored = Stream.concat(Stream.of("toString"), Stream.of(toStringIgnoredFields))
-                .toArray(String[]::new);
-        this.toString = Reloadable.with(() -> ToStringBuilder.createFor(this, ignored))
-                .build();
-    }
 
     public OffsetDateTime getCreatedOn() {
         return creationDateTime;
@@ -51,11 +41,13 @@ abstract class AbstractEventImpl implements Event {
 
     public void setConceivedOn(final OffsetDateTime offsetDateTime) {
         conceptionDateTime = offsetDateTime;
-        toString.clear(); // toString() will have changed by this
     }
 
     @Override
-    public final String toString() {
-        return toString.get().getOrElse("ERROR");
+    public String toString() {
+        return new StringJoiner(", ", AbstractEventImpl.class.getSimpleName() + "[", "]")
+                .add("conceptionDateTime=" + conceptionDateTime)
+                .add("creationDateTime=" + creationDateTime)
+                .toString();
     }
 }

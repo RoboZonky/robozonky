@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -42,5 +44,14 @@ final class LoanRecommendedEventImpl extends AbstractEventImpl implements LoanRe
     @Override
     public Loan getLoan() {
         return loan;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", LoanRecommendedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("loan=" + loan)
+                .add("recommendation=" + recommendation)
+                .toString();
     }
 }

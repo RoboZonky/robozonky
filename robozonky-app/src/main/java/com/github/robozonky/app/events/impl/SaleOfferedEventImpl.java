@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -40,4 +42,12 @@ final class SaleOfferedEventImpl extends AbstractEventImpl implements SaleOffere
         return investment;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SaleOfferedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("investment=" + investment)
+                .add("loan=" + loan)
+                .toString();
+    }
 }

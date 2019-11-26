@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
 import com.github.robozonky.api.strategies.RecommendedReservation;
@@ -34,4 +36,11 @@ final class ReservationAcceptationRecommendedEventImpl extends AbstractEventImpl
         return recommendation;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ReservationAcceptationRecommendedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("recommendation=" + recommendation)
+                .toString();
+    }
 }

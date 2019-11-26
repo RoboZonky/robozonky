@@ -16,16 +16,11 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.github.robozonky.internal.util.ToStringBuilder;
-import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,15 +33,6 @@ abstract class BaseEntity {
 
     private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
     protected final Logger logger = LogManager.getLogger(getClass());
-    @XmlTransient
-    private final Lazy<String> toString;
-
-    protected BaseEntity(String... ignoredFields) {
-        toString = Lazy.of(() -> {
-            var fields = Stream.concat(Arrays.stream(ignoredFields), Stream.of("toString")).toArray(String[]::new);
-            return ToStringBuilder.createFor(this, fields);
-        });
-    }
 
     private boolean hasBeenCalledBefore(final String key) {
         final String id = this.getClass().getCanonicalName() + ":" + key;
@@ -68,8 +54,4 @@ abstract class BaseEntity {
         }
     }
 
-    @Override
-    public String toString() {
-        return toString.get();
-    }
 }

@@ -16,9 +16,10 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.StringJoiner;
+import javax.xml.bind.annotation.XmlElement;
 
 public class Reservations extends BaseEntity {
 
@@ -31,5 +32,12 @@ public class Reservations extends BaseEntity {
     @XmlElement
     public Collection<Reservation> getReservations() {
         return reservations;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Reservations.class.getSimpleName() + "[", "]")
+                .add("reservations=" + reservations)
+                .toString();
     }
 }

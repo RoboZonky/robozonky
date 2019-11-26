@@ -16,11 +16,12 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
-
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
 
 public class InvestmentSummary extends BaseEntity {
 
@@ -49,5 +50,13 @@ public class InvestmentSummary extends BaseEntity {
     @XmlElement
     public int getCount() {
         return count;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", InvestmentSummary.class.getSimpleName() + "[", "]")
+                .add("amount='" + amount + "'")
+                .add("count=" + count)
+                .toString();
     }
 }

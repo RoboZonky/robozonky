@@ -25,7 +25,6 @@ module com.github.robozonky.api {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires io.vavr;
-    requires org.apache.commons.lang3;
     requires org.apache.logging.log4j;
     requires ini4j;
     requires paging.streams;
@@ -78,10 +77,8 @@ module com.github.robozonky.api {
 
     opens com.github.robozonky.api.remote.entities to
             java.xml.bind,
-            com.fasterxml.jackson.databind,
-            org.apache.commons.lang3;
+            com.fasterxml.jackson.databind;
     opens com.github.robozonky.api.remote.enums to
-            com.fasterxml.jackson.databind,
-            org.apache.commons.lang3;
+            com.fasterxml.jackson.databind;
 
 }

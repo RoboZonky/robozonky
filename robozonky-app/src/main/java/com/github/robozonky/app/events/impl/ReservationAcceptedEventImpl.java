@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -47,5 +49,15 @@ final class ReservationAcceptedEventImpl extends AbstractEventImpl implements Re
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ReservationAcceptedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("loan=" + loan)
+                .add("investedAmount=" + investedAmount)
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

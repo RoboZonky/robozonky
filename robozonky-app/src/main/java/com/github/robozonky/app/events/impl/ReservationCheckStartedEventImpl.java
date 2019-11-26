@@ -18,6 +18,7 @@ package com.github.robozonky.app.events.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -30,7 +31,6 @@ final class ReservationCheckStartedEventImpl extends AbstractEventImpl implement
 
     public ReservationCheckStartedEventImpl(final Collection<ReservationDescriptor> reservationDescriptors,
                                             final PortfolioOverview portfolio) {
-        super("loanDescriptors");
         this.reservationDescriptors = Collections.unmodifiableCollection(reservationDescriptors);
         this.portfolioOverview = portfolio;
     }
@@ -45,4 +45,10 @@ final class ReservationCheckStartedEventImpl extends AbstractEventImpl implement
         return this.reservationDescriptors;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ReservationCheckStartedEventImpl.class.getSimpleName() + "[", "]")
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
+    }
 }

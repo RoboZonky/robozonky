@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 
@@ -30,5 +32,13 @@ final class WeeklySummaryEventImpl extends AbstractEventImpl implements WeeklySu
     @Override
     public ExtendedPortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", WeeklySummaryEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 public class CurrentPortfolio extends BaseEntity {
@@ -28,6 +29,7 @@ public class CurrentPortfolio extends BaseEntity {
 
     CurrentPortfolio() {
         // fox JAXB
+        super();
     }
 
     @XmlElement
@@ -53,5 +55,16 @@ public class CurrentPortfolio extends BaseEntity {
     @XmlElement
     public DelinquentPortfolio getDue() {
         return due;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CurrentPortfolio.class.getSimpleName() + "[", "]")
+                .add("due=" + due)
+                .add("dueInPast=" + dueInPast)
+                .add("onWay=" + onWay)
+                .add("running=" + running)
+                .add("terminated=" + terminated)
+                .toString();
     }
 }

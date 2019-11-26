@@ -16,15 +16,16 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
+import javax.xml.bind.annotation.XmlElement;
+
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Lazy;
 
 public class Statistics extends BaseEntity {
 
@@ -45,6 +46,7 @@ public class Statistics extends BaseEntity {
 
     private Statistics() {
         // for JAXB
+        super();
     }
 
     public static Statistics empty() {
@@ -95,5 +97,16 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public OffsetDateTime getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Statistics.class.getSimpleName() + "[", "]")
+                .add("currentOverview=" + currentOverview)
+                .add("overallOverview=" + overallOverview)
+                .add("profitability=" + profitability)
+                .add("riskPortfolio=" + riskPortfolio)
+                .add("timestamp=" + timestamp)
+                .toString();
     }
 }

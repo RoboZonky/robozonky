@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.Optional;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -112,7 +113,7 @@ public abstract class BaseLoan extends BaseEntity {
     private Object insuranceHistory;
 
     protected BaseLoan() {
-        super("story"); // story needlessly clutters the output
+        super(); // story needlessly clutters the output
     }
 
     @XmlElement
@@ -314,4 +315,44 @@ public abstract class BaseLoan extends BaseEntity {
         return moneyAnnuityWithInsurance.get();
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", BaseLoan.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("activeLoansCount=" + activeLoansCount)
+                .add("additionallyInsured=" + additionallyInsured)
+                .add("amount='" + amount + "'")
+                .add("annuity='" + annuity + "'")
+                .add("annuityWithInsurance='" + annuityWithInsurance + "'")
+                .add("borrowerNo=" + borrowerNo)
+                .add("countryOfOrigin=" + countryOfOrigin)
+                .add("covered=" + covered)
+                .add("currency=" + currency)
+                .add("datePublished='" + datePublished + "'")
+                .add("deadline='" + deadline + "'")
+                .add("insuranceActive=" + insuranceActive)
+                .add("insuredInFuture=" + insuredInFuture)
+                .add("interestRate=" + interestRate)
+                .add("investmentRate=" + investmentRate)
+                .add("investmentsCount=" + investmentsCount)
+                .add("mainIncomeType=" + mainIncomeType)
+                .add("name='" + name + "'")
+                .add("nickName='" + nickName + "'")
+                .add("premium='" + premium + "'")
+                .add("published=" + published)
+                .add("purpose=" + purpose)
+                .add("questionsAllowed=" + questionsAllowed)
+                .add("questionsCount=" + questionsCount)
+                .add("rating=" + rating)
+                .add("region=" + region)
+                .add("remainingInvestment='" + remainingInvestment + "'")
+                .add("reservedAmount='" + reservedAmount + "'")
+                .add("revenueRate=" + revenueRate)
+                .add("story='" + story + "'")
+                .add("termInMonths=" + termInMonths)
+                .add("topped=" + topped)
+                .add("userId=" + userId)
+                .add("zonkyPlusAmount='" + zonkyPlusAmount + "'")
+                .toString();
+    }
 }

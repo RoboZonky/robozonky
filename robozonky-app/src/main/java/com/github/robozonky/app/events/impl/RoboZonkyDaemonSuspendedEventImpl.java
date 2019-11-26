@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 
 final class RoboZonkyDaemonSuspendedEventImpl extends AbstractEventImpl implements RoboZonkyDaemonSuspendedEvent {
@@ -29,5 +31,13 @@ final class RoboZonkyDaemonSuspendedEventImpl extends AbstractEventImpl implemen
     @Override
     public Throwable getCause() {
         return cause;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RoboZonkyDaemonSuspendedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("cause=" + cause)
+                .toString();
     }
 }

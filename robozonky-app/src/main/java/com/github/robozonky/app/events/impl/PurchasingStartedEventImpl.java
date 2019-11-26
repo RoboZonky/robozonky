@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.app.events.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -30,7 +31,6 @@ final class PurchasingStartedEventImpl extends AbstractEventImpl implements Purc
 
     public PurchasingStartedEventImpl(final Collection<ParticipationDescriptor> descriptors,
                                       final PortfolioOverview portfolio) {
-        super("descriptors");
         this.descriptors = Collections.unmodifiableCollection(descriptors);
         this.portfolioOverview = portfolio;
     }
@@ -43,5 +43,13 @@ final class PurchasingStartedEventImpl extends AbstractEventImpl implements Purc
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PurchasingStartedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

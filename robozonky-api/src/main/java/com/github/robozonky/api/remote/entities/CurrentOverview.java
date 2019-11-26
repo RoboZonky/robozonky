@@ -16,12 +16,13 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
-
+import java.util.Optional;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.Optional;
+
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
 
 public class CurrentOverview extends BaseOverview {
 
@@ -93,4 +94,18 @@ public class CurrentOverview extends BaseOverview {
         return Optional.ofNullable(currentInvestments);
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CurrentOverview.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("currentInvestments=" + currentInvestments)
+                .add("interestLeft=" + interestLeft)
+                .add("interestLeftDue=" + interestLeftDue)
+                .add("interestLeftToPay=" + interestLeftToPay)
+                .add("interestPlanned=" + interestPlanned)
+                .add("principalLeft=" + principalLeft)
+                .add("principalLeftDue=" + principalLeftDue)
+                .add("principalLeftToPay=" + principalLeftToPay)
+                .toString();
+    }
 }

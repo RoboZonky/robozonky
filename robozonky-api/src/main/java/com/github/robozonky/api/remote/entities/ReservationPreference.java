@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
@@ -70,5 +71,14 @@ public class ReservationPreference extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(loanTermInterval, ratingType);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ReservationPreference.class.getSimpleName() + "[", "]")
+                .add("insuredOnly=" + insuredOnly)
+                .add("loanTermInterval=" + loanTermInterval)
+                .add("ratingType=" + ratingType)
+                .toString();
     }
 }

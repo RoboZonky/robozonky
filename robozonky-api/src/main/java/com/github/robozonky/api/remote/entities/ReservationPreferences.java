@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.xml.bind.annotation.XmlElement;
@@ -41,7 +42,8 @@ public class ReservationPreferences extends BaseEntity {
     private boolean reservationsEnabled;
     private Set<ReservationPreference> reservationPreferences;
 
-    private ReservationPreferences() { // fox JAXB
+    private ReservationPreferences() {
+        // fox JAXB
     }
 
     public ReservationPreferences(final ReservationPreference... reservationPreferences) {
@@ -80,5 +82,13 @@ public class ReservationPreferences extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(reservationsEnabled, reservationPreferences);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ReservationPreferences.class.getSimpleName() + "[", "]")
+                .add("reservationPreferences=" + reservationPreferences)
+                .add("reservationsEnabled=" + reservationsEnabled)
+                .toString();
     }
 }
