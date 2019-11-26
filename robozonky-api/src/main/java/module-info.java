@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import com.github.robozonky.api.notifications.ListenerService;
+import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.jobs.JobService;
 import com.github.robozonky.internal.state.StateCleanerJobService;
 
@@ -70,8 +72,8 @@ module com.github.robozonky.api {
             com.github.robozonky.app;
 
     uses JobService;
-    uses com.github.robozonky.api.strategies.StrategyService;
-    uses com.github.robozonky.api.notifications.ListenerService;
+    uses StrategyService;
+    uses ListenerService;
 
     provides JobService with StateCleanerJobService;
 

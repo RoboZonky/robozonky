@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.internal.async;
+
+import java.time.Duration;
+import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-class PaymentStatusTest {
+class SchedulerTest {
 
     @Test
-    void nonEmpty() {
-        assertThat(PaymentStatus.getActive().getPaymentStatuses()).isNotEmpty();
-        assertThat(PaymentStatus.getDelinquent().getPaymentStatuses()).isNotEmpty();
+    void schedule() {
+        Runnable toRun = mock(Runnable.class);
+        Scheduler s = new ForkJoinPoolBasedScheduler();
+        ScheduledFuture<?> f = s.submit(toRun, Duration.ofMillis(1));
+        assertThat(f.cancel(true)).isTrue();
     }
 
 }

@@ -19,16 +19,14 @@
         @XmlJavaTypeAdapter(type = OffsetDateTime.class, value = OffsetDateTimeAdapter.class),
         @XmlJavaTypeAdapter(type = LocalDate.class, value = LocalDateAdapter.class),
         @XmlJavaTypeAdapter(type = YearMonth.class, value = YearMonthAdapter.class),
-        @XmlJavaTypeAdapter(type = OAuthScopes.class, value = OAuthScopeAdapter.class),
         @XmlJavaTypeAdapter(type = Ratio.class, value = RatioAdapter.class)
 })
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.OAuthScopes;
-
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+
+import com.github.robozonky.api.Ratio;

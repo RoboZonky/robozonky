@@ -16,9 +16,6 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.util.Objects;
-import java.util.stream.Stream;
-
 public enum OAuthScope {
 
     SCOPE_APP_BASIC_INFO,
@@ -30,12 +27,5 @@ public enum OAuthScope {
     SCOPE_RESERVATIONS_SETTINGS_WRITE,
     SCOPE_NOTIFICATIONS_READ,
     SCOPE_NOTIFICATIONS_WRITE;
-
-    public static OAuthScope findByCode(final String code) {
-        return Stream.of(OAuthScope.values())
-                .filter(r -> Objects.equals(r.name(), code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown OAuth scope: " + code));
-    }
 
 }

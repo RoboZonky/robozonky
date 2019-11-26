@@ -36,7 +36,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.remote.enums.OAuthScope;
-import com.github.robozonky.api.remote.enums.OAuthScopes;
 import com.github.robozonky.internal.test.DateUtil;
 
 /**
@@ -60,7 +59,7 @@ public class ZonkyApiToken extends BaseEntity {
     @XmlElement(name = "token_type")
     private String type;
     @XmlElement
-    private OAuthScopes scope;
+    private OAuthScope[] scopes = new OAuthScope[0];
     @XmlElement(name = "expires_in")
     private int expiresIn;
     /**
@@ -82,8 +81,8 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
-                         final OAuthScope scope) {
-        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, scope);
+                         final OAuthScope scopes) {
+        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING, scopes);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
@@ -92,12 +91,12 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
-                         final OffsetDateTime obtainedOn, final String type, final OAuthScope... scope) {
+                         final OffsetDateTime obtainedOn, final String type, final OAuthScope... scopes) {
         this.accessToken = accessToken.toCharArray();
         this.refreshToken = refreshToken.toCharArray();
         this.expiresIn = expiresIn;
         this.type = type;
-        this.scope = scope.length == 0 ? OAuthScopes.of() : OAuthScopes.of(scope);
+        this.scopes = scopes;
         this.obtainedOn = obtainedOn;
     }
 
@@ -155,8 +154,8 @@ public class ZonkyApiToken extends BaseEntity {
         return willExpireIn(Duration.ZERO);
     }
 
-    public OAuthScopes getScope() {
-        return scope;
+    public OAuthScope[] getScopes() {
+        return scopes.clone(); // Defensive copy.
     }
 
     public OffsetDateTime getObtainedOn() {
@@ -183,7 +182,7 @@ public class ZonkyApiToken extends BaseEntity {
         final ZonkyApiToken that = (ZonkyApiToken) o;
         if (Arrays.equals(accessToken, that.accessToken)) {
             if (Arrays.equals(refreshToken, that.refreshToken)) {
-                return Objects.equals(scope, that.scope);
+                return Arrays.equals(scopes, that.scopes);
             }
         }
         return false;
@@ -191,7 +190,7 @@ public class ZonkyApiToken extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accessToken, refreshToken, scope);
+        return Objects.hash(accessToken, refreshToken, scopes);
     }
 
     @Override
@@ -200,7 +199,7 @@ public class ZonkyApiToken extends BaseEntity {
                 .add("id=" + id)
                 .add("expiresIn=" + expiresIn)
                 .add("obtainedOn=" + obtainedOn)
-                .add("scope=" + scope)
+                .add("scope=" + scopes)
                 .add("type='" + type + "'")
                 .toString();
     }

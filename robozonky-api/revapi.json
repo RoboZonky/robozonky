@@ -11,6 +11,36 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.enums.OAuthScopes com.github.robozonky.api.remote.entities.ZonkyApiToken::getScope()",
+        "justification": "Removed unused enums."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.enums.OAuthScope com.github.robozonky.api.remote.enums.OAuthScope::findByCode(java.lang.String)",
+        "justification": "Removed unused enums."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.enums.OAuthScopes",
+        "justification": "Removed unused enums."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.enums.PaymentStatuses com.github.robozonky.api.remote.enums.PaymentStatus::getActive()",
+        "justification": "Removed unused enums."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.enums.PaymentStatuses com.github.robozonky.api.remote.enums.PaymentStatus::getDelinquent()",
+        "justification": "Removed unused enums."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.enums.PaymentStatuses",
+        "justification": "Removed unused enums."
+      }
     ]
   }
 }
