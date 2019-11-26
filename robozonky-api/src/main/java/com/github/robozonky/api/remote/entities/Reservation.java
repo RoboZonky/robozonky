@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 public class Reservation extends BaseLoan {
@@ -29,5 +30,13 @@ public class Reservation extends BaseLoan {
     @XmlElement
     public MyReservation getMyReservation() {
         return myReservation;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Reservation.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("myReservation=" + myReservation)
+                .toString();
     }
 }

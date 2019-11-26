@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -193,5 +194,16 @@ public class ZonkyApiToken extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(accessToken, refreshToken, scope);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ZonkyApiToken.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("expiresIn=" + expiresIn)
+                .add("obtainedOn=" + obtainedOn)
+                .add("scope=" + scope)
+                .add("type='" + type + "'")
+                .toString();
     }
 }

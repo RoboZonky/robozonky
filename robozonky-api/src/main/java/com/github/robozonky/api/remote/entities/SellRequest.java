@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 public class SellRequest extends BaseEntity {
@@ -45,5 +46,14 @@ public class SellRequest extends BaseEntity {
     @XmlElement
     public BigDecimal getRemainingPrincipal() {
         return remainingPrincipal;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SellRequest.class.getSimpleName() + "[", "]")
+                .add("investmentId=" + investmentId)
+                .add("feeAmount=" + feeAmount)
+                .add("remainingPrincipal=" + remainingPrincipal)
+                .toString();
     }
 }

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.Resolution;
@@ -46,4 +47,11 @@ public class ResolutionRequest extends BaseEntity {
         return resolution;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ResolutionRequest.class.getSimpleName() + "[", "]")
+                .add("reservationId=" + reservationId)
+                .add("resolution=" + resolution)
+                .toString();
+    }
 }

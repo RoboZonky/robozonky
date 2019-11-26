@@ -16,11 +16,12 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
-
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
 
 public class OverallOverview extends BaseOverview {
 
@@ -59,5 +60,16 @@ public class OverallOverview extends BaseOverview {
     @XmlTransient
     public Money getPrincipalLost() {
         return moneyPrincipalLost.get();
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", OverallOverview.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("feesAmount='" + feesAmount + "'")
+                .add("feesDiscount='" + feesDiscount + "'")
+                .add("netIncome='" + netIncome + "'")
+                .add("principalLost='" + principalLost + "'")
+                .toString();
     }
 }

@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -34,11 +35,9 @@ public class InvestmentSummary extends BaseEntity {
 
     InvestmentSummary() {
         // fox JAXB
-        super();
     }
 
     public InvestmentSummary(final Money amount, final int count) {
-        super();
         this.amount = amount.getValue().toPlainString();
         this.count = count;
     }
@@ -51,5 +50,13 @@ public class InvestmentSummary extends BaseEntity {
     @XmlElement
     public int getCount() {
         return count;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", InvestmentSummary.class.getSimpleName() + "[", "]")
+                .add("amount='" + amount + "'")
+                .add("count=" + count)
+                .toString();
     }
 }

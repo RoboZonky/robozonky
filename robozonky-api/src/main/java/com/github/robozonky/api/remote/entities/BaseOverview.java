@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -72,4 +73,14 @@ abstract class BaseOverview extends BaseEntity {
         return moneyPenaltyPaid.get();
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", BaseOverview.class.getSimpleName() + "[", "]")
+                .add("interestPaid=" + interestPaid)
+                .add("investmentCount=" + investmentCount)
+                .add("penaltyPaid=" + penaltyPaid)
+                .add("principalPaid=" + principalPaid)
+                .add("totalInvestment=" + totalInvestment)
+                .toString();
+    }
 }

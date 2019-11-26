@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -432,4 +433,56 @@ public class Investment extends BaseInvestment {
         return Optional.ofNullable(smpPrice).map(price -> moneySmpPrice.getOrElse((Money) null));
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Investment.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("activeFrom=" + activeFrom)
+                .add("activeTo=" + activeTo)
+                .add("additionallyInsured=" + additionallyInsured)
+                .add("amountDue='" + amountDue + "'")
+                .add("borrowerNo=" + borrowerNo)
+                .add("canBeOffered=" + canBeOffered)
+                .add("currentTerm=" + currentTerm)
+                .add("dueInterest='" + dueInterest + "'")
+                .add("duePrincipal='" + duePrincipal + "'")
+                .add("expectedInterest='" + expectedInterest + "'")
+                .add("firstName='" + firstName + "'")
+                .add("hasCollectionHistory=" + hasCollectionHistory)
+                .add("instalmentPostponement=" + instalmentPostponement)
+                .add("insuranceActive=" + insuranceActive)
+                .add("insuranceStatus=" + insuranceStatus)
+                .add("interestRate=" + interestRate)
+                .add("investmentDate=" + investmentDate)
+                .add("investmentType=" + investmentType)
+                .add("inWithdrawal=" + inWithdrawal)
+                .add("legalDpd=" + legalDpd)
+                .add("loanAmount='" + loanAmount + "'")
+                .add("loanAnnuity='" + loanAnnuity + "'")
+                .add("loanHealthInfo=" + loanHealthInfo)
+                .add("loanInvestmentsCount=" + loanInvestmentsCount)
+                .add("loanName='" + loanName + "'")
+                .add("loanTermInMonth=" + loanTermInMonth)
+                .add("nextPaymentDate=" + nextPaymentDate)
+                .add("nickname='" + nickname + "'")
+                .add("onSmp=" + onSmp)
+                .add("paid='" + paid + "'")
+                .add("paidInterest='" + paidInterest + "'")
+                .add("paidPenalty='" + paidPenalty + "'")
+                .add("paidPrincipal='" + paidPrincipal + "'")
+                .add("paymentStatus=" + paymentStatus)
+                .add("purchasePrice='" + purchasePrice + "'")
+                .add("rating=" + rating)
+                .add("remainingMonths=" + remainingMonths)
+                .add("remainingPrincipal='" + remainingPrincipal + "'")
+                .add("revenueRate=" + revenueRate)
+                .add("smpFee='" + smpFee + "'")
+                .add("smpFeeExpirationDate=" + smpFeeExpirationDate)
+                .add("smpPrice='" + smpPrice + "'")
+                .add("smpRelated=" + smpRelated)
+                .add("smpSoldFor='" + smpSoldFor + "'")
+                .add("surname='" + surname + "'")
+                .add("toPay='" + toPay + "'")
+                .toString();
+    }
 }

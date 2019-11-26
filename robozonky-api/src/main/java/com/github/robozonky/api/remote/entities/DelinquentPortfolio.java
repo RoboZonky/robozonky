@@ -16,6 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 public class DelinquentPortfolio extends BaseEntity {
@@ -54,5 +55,16 @@ public class DelinquentPortfolio extends BaseEntity {
     @XmlElement
     public InvestmentSummary getDpd91Plus() {
         return dpd91Plus;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DelinquentPortfolio.class.getSimpleName() + "[", "]")
+                .add("dpd1To15=" + dpd1To15)
+                .add("dpd16To30=" + dpd16To30)
+                .add("dpd31To60=" + dpd31To60)
+                .add("dpd61To90=" + dpd61To90)
+                .add("dpd91Plus=" + dpd91Plus)
+                .toString();
     }
 }

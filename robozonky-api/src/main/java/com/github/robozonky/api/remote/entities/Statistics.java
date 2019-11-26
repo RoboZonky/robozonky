@@ -20,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -96,5 +97,16 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public OffsetDateTime getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Statistics.class.getSimpleName() + "[", "]")
+                .add("currentOverview=" + currentOverview)
+                .add("overallOverview=" + overallOverview)
+                .add("profitability=" + profitability)
+                .add("riskPortfolio=" + riskPortfolio)
+                .add("timestamp=" + timestamp)
+                .toString();
     }
 }

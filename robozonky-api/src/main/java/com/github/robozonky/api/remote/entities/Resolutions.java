@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 public class Resolutions extends BaseEntity {
@@ -27,17 +28,22 @@ public class Resolutions extends BaseEntity {
     private List<ResolutionRequest> resolutions = Collections.emptyList();
 
     public Resolutions(final Collection<ResolutionRequest> resolutions) {
-        super();
         this.resolutions = new ArrayList<>(resolutions);
     }
 
     Resolutions() {
         // for JAXB
-        super();
     }
 
     @XmlElement
     public List<ResolutionRequest> getResolutions() {
         return resolutions;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Resolutions.class.getSimpleName() + "[", "]")
+                .add("resolutions=" + resolutions)
+                .toString();
     }
 }

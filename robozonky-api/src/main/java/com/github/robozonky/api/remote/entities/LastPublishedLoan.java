@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.internal.test.DateUtil;
@@ -29,7 +30,6 @@ public class LastPublishedLoan extends BaseEntity {
 
     LastPublishedLoan() {
         // for JAXB
-        super();
     }
 
     public LastPublishedLoan(final int loanId) {
@@ -37,7 +37,6 @@ public class LastPublishedLoan extends BaseEntity {
     }
 
     public LastPublishedLoan(final int loanId, final OffsetDateTime datePublished) {
-        super();
         this.id = loanId;
         this.datePublished = datePublished;
     }
@@ -68,5 +67,13 @@ public class LastPublishedLoan extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(id, datePublished);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", LastPublishedLoan.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("datePublished=" + datePublished)
+                .toString();
     }
 }

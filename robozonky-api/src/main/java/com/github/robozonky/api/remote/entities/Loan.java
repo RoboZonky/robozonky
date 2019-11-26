@@ -16,13 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.Optional;
+import java.util.StringJoiner;
+import javax.xml.bind.annotation.XmlElement;
+
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-
-import javax.xml.bind.annotation.XmlElement;
-import java.util.Optional;
 
 /**
  * This class carries several enumeration-based fields. Some of the enums are extremely important to the core function
@@ -53,4 +54,12 @@ public class Loan extends BaseLoan {
         return url;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Loan.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("myInvestment=" + myInvestment)
+                .add("url='" + url + "'")
+                .toString();
+    }
 }
