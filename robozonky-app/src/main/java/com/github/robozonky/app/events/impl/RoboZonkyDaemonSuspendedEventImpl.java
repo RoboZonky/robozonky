@@ -23,6 +23,7 @@ final class RoboZonkyDaemonSuspendedEventImpl extends AbstractEventImpl implemen
     private final Throwable cause;
 
     public RoboZonkyDaemonSuspendedEventImpl(final Throwable cause) {
+        super();
         this.cause = cause;
     }
 

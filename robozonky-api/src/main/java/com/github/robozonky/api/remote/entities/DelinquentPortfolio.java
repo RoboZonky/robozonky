@@ -28,6 +28,7 @@ public class DelinquentPortfolio extends BaseEntity {
 
     DelinquentPortfolio() {
         // fox JAXB
+        super();
     }
 
     @XmlElement

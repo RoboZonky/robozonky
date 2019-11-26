@@ -30,7 +30,7 @@ final class ReservationCheckStartedEventImpl extends AbstractEventImpl implement
 
     public ReservationCheckStartedEventImpl(final Collection<ReservationDescriptor> reservationDescriptors,
                                             final PortfolioOverview portfolio) {
-        super("loanDescriptors");
+        super();
         this.reservationDescriptors = Collections.unmodifiableCollection(reservationDescriptors);
         this.portfolioOverview = portfolio;
     }

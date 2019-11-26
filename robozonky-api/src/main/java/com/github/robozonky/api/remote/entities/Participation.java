@@ -16,17 +16,21 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.*;
-import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Currency;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.Defaults;
+import io.vavr.Lazy;
 
 public class Participation extends BaseEntity {
 
@@ -70,9 +74,11 @@ public class Participation extends BaseEntity {
 
     Participation() {
         // for JAXB
+        super();
     }
 
     public Participation(final Loan loan, final Money remainingPrincipal, final int remainingInstalmentCount) {
+        super();
         this.loanId = loan.getId();
         this.borrowerNo = loan.getBorrowerNo();
         this.countryOfOrigin = loan.getCountryOfOrigin();

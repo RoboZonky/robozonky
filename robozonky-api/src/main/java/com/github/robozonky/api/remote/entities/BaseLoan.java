@@ -112,7 +112,7 @@ public abstract class BaseLoan extends BaseEntity {
     private Object insuranceHistory;
 
     protected BaseLoan() {
-        super("story"); // story needlessly clutters the output
+        super(); // story needlessly clutters the output
     }
 
     @XmlElement

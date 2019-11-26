@@ -27,11 +27,13 @@ public class Resolutions extends BaseEntity {
     private List<ResolutionRequest> resolutions = Collections.emptyList();
 
     public Resolutions(final Collection<ResolutionRequest> resolutions) {
+        super();
         this.resolutions = new ArrayList<>(resolutions);
     }
 
     Resolutions() {
         // for JAXB
+        super();
     }
 
     @XmlElement

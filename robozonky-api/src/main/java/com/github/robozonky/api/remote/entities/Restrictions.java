@@ -16,15 +16,15 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.internal.Defaults;
+import io.vavr.Lazy;
 
 public class Restrictions extends BaseEntity {
 
@@ -44,6 +44,7 @@ public class Restrictions extends BaseEntity {
     private final Lazy<Money> moneyInvestmentStep = Lazy.of(() -> Money.from(investmentStep));
 
     public Restrictions(final boolean permissive) {
+        super();
         this.cannotAccessSmp = !permissive;
         this.cannotInvest = !permissive;
     }

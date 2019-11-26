@@ -29,7 +29,7 @@ final class LoanDefaultedEventImpl extends AbstractEventImpl implements LoanDefa
     private final LocalDate delinquentSince;
 
     public LoanDefaultedEventImpl(final Investment investment, final Loan loan, final LocalDate since) {
-        super("collectionActions");
+        super();
         this.investment = investment;
         this.loan = loan;
         this.delinquentSince = since;

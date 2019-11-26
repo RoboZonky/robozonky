@@ -41,6 +41,7 @@ public class MyReservation extends BaseEntity {
 
     MyReservation() {
         // for JAXB
+        super();
     }
 
     @XmlElement

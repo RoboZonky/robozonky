@@ -27,6 +27,7 @@ final class LoanRecommendedEventImpl extends AbstractEventImpl implements LoanRe
     private final Money recommendation;
 
     public LoanRecommendedEventImpl(final RecommendedLoan recommendation) {
+        super();
         this.loan = recommendation.descriptor().item();
         this.recommendation = recommendation.amount();
     }

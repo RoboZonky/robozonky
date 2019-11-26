@@ -26,6 +26,7 @@ final class SaleOfferedEventImpl extends AbstractEventImpl implements SaleOffere
     private final Loan loan;
 
     public SaleOfferedEventImpl(final Investment investment, final Loan loan) {
+        super();
         this.investment = investment;
         this.loan = loan;
     }

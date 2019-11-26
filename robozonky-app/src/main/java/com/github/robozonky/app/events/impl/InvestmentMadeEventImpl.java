@@ -28,6 +28,7 @@ final class InvestmentMadeEventImpl extends AbstractEventImpl implements Investm
     private final PortfolioOverview portfolioOverview;
 
     public InvestmentMadeEventImpl(final Loan loan, final Money amount, final PortfolioOverview portfolioOverview) {
+        super();
         this.loan = loan;
         this.investedAmount = amount;
         this.portfolioOverview = portfolioOverview;

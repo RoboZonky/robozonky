@@ -3,7 +3,6 @@ module com.github.robozonky.notifications {
     requires commons.email;
     requires freemarker;
     requires io.vavr;
-    requires org.apache.commons.lang3;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
 

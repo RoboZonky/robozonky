@@ -28,6 +28,7 @@ final class InvestmentSoldEventImpl extends AbstractEventImpl implements Investm
     private final PortfolioOverview portfolioOverview;
 
     public InvestmentSoldEventImpl(final Investment investment, final Loan loan, final PortfolioOverview portfolio) {
+        super();
         this.investment = investment;
         this.loan = loan;
         this.portfolioOverview = portfolio;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ final class ExecutionStartedEventImpl extends AbstractEventImpl implements Execu
     private final PortfolioOverview portfolioOverview;
 
     public ExecutionStartedEventImpl(final Collection<LoanDescriptor> loanDescriptors, final PortfolioOverview portfolio) {
-        super("loanDescriptors");
+        super();
         this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
         this.portfolioOverview = portfolio;
     }

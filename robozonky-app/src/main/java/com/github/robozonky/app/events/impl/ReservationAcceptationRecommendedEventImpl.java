@@ -26,6 +26,7 @@ final class ReservationAcceptationRecommendedEventImpl extends AbstractEventImpl
     private final Money recommendation;
 
     public ReservationAcceptationRecommendedEventImpl(final RecommendedReservation recommendation) {
+        super();
         this.recommendation = recommendation.amount();
     }
 

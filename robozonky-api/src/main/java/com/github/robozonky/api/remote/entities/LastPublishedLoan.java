@@ -29,6 +29,7 @@ public class LastPublishedLoan extends BaseEntity {
 
     LastPublishedLoan() {
         // for JAXB
+        super();
     }
 
     public LastPublishedLoan(final int loanId) {
@@ -36,6 +37,7 @@ public class LastPublishedLoan extends BaseEntity {
     }
 
     public LastPublishedLoan(final int loanId, final OffsetDateTime datePublished) {
+        super();
         this.id = loanId;
         this.datePublished = datePublished;
     }

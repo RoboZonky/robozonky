@@ -30,10 +30,12 @@ public class ReservationPreference extends BaseEntity {
 
     private ReservationPreference() {
         // for JAXB
+        super();
     }
 
     public ReservationPreference(final LoanTermInterval loanTermInterval, final Rating rating,
                                  final boolean insuredOnly) {
+        super();
         this.loanTermInterval = loanTermInterval;
         this.ratingType = rating;
         this.insuredOnly = insuredOnly;

@@ -16,15 +16,6 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.remote.enums.OAuthScope;
-import com.github.robozonky.api.remote.enums.OAuthScopes;
-import com.github.robozonky.internal.test.DateUtil;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.Duration;
@@ -33,6 +24,19 @@ import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.remote.enums.OAuthScope;
+import com.github.robozonky.api.remote.enums.OAuthScopes;
+import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * OAuth access token for Zonky API.
@@ -66,6 +70,7 @@ public class ZonkyApiToken extends BaseEntity {
 
     ZonkyApiToken() {
         // fox JAXB
+        super();
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final OffsetDateTime obtainedOn) {
@@ -88,6 +93,7 @@ public class ZonkyApiToken extends BaseEntity {
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
                          final OffsetDateTime obtainedOn, final String type, final OAuthScope... scope) {
+        super();
         this.accessToken = accessToken.toCharArray();
         this.refreshToken = refreshToken.toCharArray();
         this.expiresIn = expiresIn;

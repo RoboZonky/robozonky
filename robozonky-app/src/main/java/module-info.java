@@ -21,7 +21,6 @@ module com.github.robozonky.app {
     requires java.xml;
     requires info.picocli;
     requires io.vavr;
-    requires org.apache.commons.lang3;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
     requires resteasy.core;
@@ -34,5 +33,4 @@ module com.github.robozonky.app {
             com.github.robozonky.app.daemon.SaleCheckJobService;
 
     opens com.github.robozonky.app to info.picocli;
-    opens com.github.robozonky.app.events.impl to org.apache.commons.lang3;
 }

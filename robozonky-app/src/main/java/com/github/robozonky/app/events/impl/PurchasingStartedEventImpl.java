@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ final class PurchasingStartedEventImpl extends AbstractEventImpl implements Purc
 
     public PurchasingStartedEventImpl(final Collection<ParticipationDescriptor> descriptors,
                                       final PortfolioOverview portfolio) {
-        super("descriptors");
+        super();
         this.descriptors = Collections.unmodifiableCollection(descriptors);
         this.portfolioOverview = portfolio;
     }

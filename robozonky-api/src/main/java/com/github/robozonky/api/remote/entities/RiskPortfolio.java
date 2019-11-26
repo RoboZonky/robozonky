@@ -16,13 +16,13 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 public class RiskPortfolio extends BaseEntity {
 
@@ -43,9 +43,11 @@ public class RiskPortfolio extends BaseEntity {
 
     RiskPortfolio() {
         // for JAXB
+        super();
     }
 
     public RiskPortfolio(final Rating rating, final Money paid, final Money unpaid, final Money due) {
+        super();
         this.interestRate = rating.getInterestRate();
         this.paid = paid.getValue().toPlainString();
         this.unpaid = unpaid.getValue().toPlainString();

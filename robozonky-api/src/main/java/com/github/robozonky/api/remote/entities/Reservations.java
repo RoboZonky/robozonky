@@ -16,9 +16,9 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.util.Collection;
 import java.util.Collections;
+import javax.xml.bind.annotation.XmlElement;
 
 public class Reservations extends BaseEntity {
 
@@ -26,6 +26,7 @@ public class Reservations extends BaseEntity {
 
     Reservations() {
         // for JAXB
+        super();
     }
 
     @XmlElement

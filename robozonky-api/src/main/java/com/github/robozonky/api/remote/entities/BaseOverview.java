@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
 
 abstract class BaseOverview extends BaseEntity {
 
@@ -40,6 +40,10 @@ abstract class BaseOverview extends BaseEntity {
     @XmlElement
     private long penaltyPaid;
     private final Lazy<Money> moneyPenaltyPaid = Lazy.of(() -> Money.from(penaltyPaid));
+
+    BaseOverview() {
+        super();
+    }
 
     @XmlElement
     public long getInvestmentCount() {

@@ -16,14 +16,15 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.math.BigDecimal;
+import javax.xml.bind.annotation.XmlElement;
 
 public class PurchaseRequest extends BaseEntity {
 
     private BigDecimal amount;
 
     public PurchaseRequest(final Participation participation) {
+        super();
         this.amount = participation.getRemainingPrincipal().getValue();
     }
 

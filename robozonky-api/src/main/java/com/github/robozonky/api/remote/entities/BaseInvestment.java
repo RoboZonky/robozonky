@@ -16,17 +16,17 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Currency;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import io.vavr.Lazy;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Currency;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
@@ -51,9 +51,11 @@ abstract class BaseInvestment extends BaseEntity {
 
     BaseInvestment() {
         // for JAXB
+        super();
     }
 
     BaseInvestment(final Loan loan, final Money amount) {
+        super();
         this.currency = amount.getCurrency();
         this.loanId = loan.getId();
         this.amount = amount.getValue().toPlainString();
@@ -63,6 +65,7 @@ abstract class BaseInvestment extends BaseEntity {
     }
 
     BaseInvestment(final Participation participation, final Money amount) {
+        super();
         this.currency = amount.getCurrency();
         this.loanId = participation.getLoanId();
         this.amount = amount.getValue().toPlainString();

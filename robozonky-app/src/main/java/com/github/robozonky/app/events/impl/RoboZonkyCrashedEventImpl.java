@@ -25,6 +25,7 @@ final class RoboZonkyCrashedEventImpl extends AbstractEventImpl implements RoboZ
     private final Throwable cause;
 
     public RoboZonkyCrashedEventImpl(final Throwable cause) {
+        super();
         this.cause = cause;
     }
 

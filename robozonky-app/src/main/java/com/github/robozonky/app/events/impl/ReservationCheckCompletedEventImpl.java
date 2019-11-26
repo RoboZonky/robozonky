@@ -16,12 +16,12 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-
-import java.util.Collection;
-import java.util.Collections;
 
 final class ReservationCheckCompletedEventImpl extends AbstractEventImpl implements ReservationCheckCompletedEvent {
 
@@ -30,7 +30,7 @@ final class ReservationCheckCompletedEventImpl extends AbstractEventImpl impleme
 
     public ReservationCheckCompletedEventImpl(final Collection<Reservation> reservations,
                                               final PortfolioOverview portfolio) {
-        super("investments");
+        super();
         this.investments = Collections.unmodifiableCollection(reservations);
         this.portfolioOverview = portfolio;
     }

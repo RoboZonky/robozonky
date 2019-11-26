@@ -42,9 +42,11 @@ public class ReservationPreferences extends BaseEntity {
     private Set<ReservationPreference> reservationPreferences;
 
     private ReservationPreferences() { // fox JAXB
+        super();
     }
 
     public ReservationPreferences(final ReservationPreference... reservationPreferences) {
+        super();
         this.reservationsEnabled = reservationPreferences.length != 0;
         this.reservationPreferences = Arrays.stream(reservationPreferences).collect(Collectors.toSet());
     }

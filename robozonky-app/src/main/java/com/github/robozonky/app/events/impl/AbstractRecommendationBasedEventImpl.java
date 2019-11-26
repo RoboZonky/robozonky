@@ -29,6 +29,7 @@ abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, 
     private final Money recommendation;
 
     protected AbstractRecommendationBasedEventImpl(final T recommendation) {
+        super();
         this.participation = recommendation.descriptor().item();
         this.loan = (Loan) recommendation.descriptor().related();
         this.recommendation = recommendation.amount();

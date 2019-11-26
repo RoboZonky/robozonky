@@ -29,6 +29,7 @@ final class ReservationAcceptedEventImpl extends AbstractEventImpl implements Re
 
     public ReservationAcceptedEventImpl(final Loan loan, final Money amount,
                                         final PortfolioOverview portfolioOverview) {
+        super();
         this.loan = loan;
         this.investedAmount = amount;
         this.portfolioOverview = portfolioOverview;

@@ -26,6 +26,7 @@ final class RoboZonkyDaemonResumedEventImpl extends AbstractEventImpl implements
     private final OffsetDateTime unavailableUntil;
 
     public RoboZonkyDaemonResumedEventImpl(final OffsetDateTime since, final OffsetDateTime until) {
+        super();
         this.unavailableSince = since;
         this.unavailableUntil = until;
     }

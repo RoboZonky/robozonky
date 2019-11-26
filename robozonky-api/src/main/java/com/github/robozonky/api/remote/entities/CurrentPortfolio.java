@@ -28,6 +28,7 @@ public class CurrentPortfolio extends BaseEntity {
 
     CurrentPortfolio() {
         // fox JAXB
+        super();
     }
 
     @XmlElement

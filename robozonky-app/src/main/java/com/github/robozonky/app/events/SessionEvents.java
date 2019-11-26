@@ -16,6 +16,21 @@
 
 package com.github.robozonky.app.events;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
@@ -24,17 +39,8 @@ import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.tenant.LazyEvent;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class SessionEvents {
 
@@ -63,9 +69,30 @@ public final class SessionEvents {
         return BY_TENANT.computeIfAbsent(sessionInfo.getUsername(), i -> new SessionEvents(sessionInfo));
     }
 
+    private static void getAllInterfaces(final Class<?> cls, final Set<Class<?>> interfacesFound) {
+        if (cls == null) {
+            return;
+        }
+        for (var i : cls.getInterfaces()) {
+            if (interfacesFound.add(i)) {
+                getAllInterfaces(i, interfacesFound);
+            }
+        }
+        getAllInterfaces(cls.getSuperclass(), interfacesFound);
+    }
+
+    private static Stream<Class<?>> getAllInterfaces(final Class<?> original) {
+        if (original == null) {
+            return Stream.empty();
+        }
+        var interfacesFound = new LinkedHashSet<Class<?>>(0);
+        getAllInterfaces(original, interfacesFound);
+        return interfacesFound.stream();
+    }
+
     @SuppressWarnings("unchecked")
     static <T extends Event> Class<T> getImplementingEvent(final Class<T> original) {
-        final Stream<Class<?>> provided = ClassUtils.getAllInterfaces(original).stream();
+        final Stream<Class<?>> provided = getAllInterfaces(original);
         final Stream<Class<?>> interfaces = original.isInterface() ? // interface could be extending it directly
                 Stream.concat(Stream.of(original), provided) :
                 provided;

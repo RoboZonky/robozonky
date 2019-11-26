@@ -31,6 +31,7 @@ final class InvestmentPurchasedEventImpl extends AbstractEventImpl implements In
 
     public InvestmentPurchasedEventImpl(final Participation participation, final Loan loan, final Money amount,
                                         final PortfolioOverview portfolio) {
+        super();
         this.participation = participation;
         this.loan = loan;
         this.purchasedAmount = amount;

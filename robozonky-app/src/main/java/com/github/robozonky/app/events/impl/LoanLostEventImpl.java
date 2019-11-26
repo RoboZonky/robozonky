@@ -26,6 +26,7 @@ final class LoanLostEventImpl extends AbstractEventImpl implements LoanLostEvent
     private final Loan loan;
 
     public LoanLostEventImpl(final Investment investment, final Loan loan) {
+        super();
         this.investment = investment;
         this.loan = loan;
     }

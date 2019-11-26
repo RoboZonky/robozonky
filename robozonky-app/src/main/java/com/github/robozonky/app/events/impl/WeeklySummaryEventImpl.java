@@ -24,6 +24,7 @@ final class WeeklySummaryEventImpl extends AbstractEventImpl implements WeeklySu
     private final ExtendedPortfolioOverview portfolioOverview;
 
     public WeeklySummaryEventImpl(final ExtendedPortfolioOverview extendedPortfolioOverview) {
+        super();
         this.portfolioOverview = extendedPortfolioOverview;
     }
 

@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import com.github.robozonky.api.Money;
+import io.vavr.Lazy;
 
 public class InvestmentSummary extends BaseEntity {
 
@@ -34,9 +34,11 @@ public class InvestmentSummary extends BaseEntity {
 
     InvestmentSummary() {
         // fox JAXB
+        super();
     }
 
     public InvestmentSummary(final Money amount, final int count) {
+        super();
         this.amount = amount.getValue().toPlainString();
         this.count = count;
     }

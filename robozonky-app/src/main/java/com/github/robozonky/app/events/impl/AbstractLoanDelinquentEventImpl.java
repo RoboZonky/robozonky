@@ -29,6 +29,7 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
     private final LocalDate since;
 
     AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since) {
+        super();
         this.investment = investment;
         this.loan = loan;
         this.since = since;

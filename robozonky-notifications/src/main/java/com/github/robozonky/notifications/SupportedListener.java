@@ -18,10 +18,47 @@ package com.github.robozonky.notifications;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.notifications.listeners.*;
-import com.github.robozonky.notifications.samples.*;
+import com.github.robozonky.notifications.listeners.InvestmentMadeEventListener;
+import com.github.robozonky.notifications.listeners.InvestmentPurchasedEventListener;
+import com.github.robozonky.notifications.listeners.InvestmentSoldEventListener;
+import com.github.robozonky.notifications.listeners.LoanDefaultedEventListener;
+import com.github.robozonky.notifications.listeners.LoanDelinquentEventListener;
+import com.github.robozonky.notifications.listeners.LoanLostEventListener;
+import com.github.robozonky.notifications.listeners.LoanNoLongerDelinquentEventListener;
+import com.github.robozonky.notifications.listeners.ReservationAcceptedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyCrashedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyDaemonResumedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyDaemonSuspendedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyEndingEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyExperimentalUpdateDetectedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyInitializedEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
+import com.github.robozonky.notifications.listeners.RoboZonkyUpdateDetectedEventListener;
+import com.github.robozonky.notifications.listeners.SaleOfferedEventListener;
+import com.github.robozonky.notifications.listeners.WeeklySummaryEventListener;
+import com.github.robozonky.notifications.samples.MyInvestmentMadeEvent;
+import com.github.robozonky.notifications.samples.MyInvestmentPurchasedEvent;
+import com.github.robozonky.notifications.samples.MyInvestmentSoldEvent;
+import com.github.robozonky.notifications.samples.MyLoanDefaultedEvent;
+import com.github.robozonky.notifications.samples.MyLoanDelinquent10DaysOrMoreEvent;
+import com.github.robozonky.notifications.samples.MyLoanDelinquent30DaysOrMoreEvent;
+import com.github.robozonky.notifications.samples.MyLoanDelinquent60DaysOrMoreEvent;
+import com.github.robozonky.notifications.samples.MyLoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.notifications.samples.MyLoanLostEvent;
+import com.github.robozonky.notifications.samples.MyLoanNoLongerDelinquentEvent;
+import com.github.robozonky.notifications.samples.MyLoanNowDelinquentEvent;
+import com.github.robozonky.notifications.samples.MyReservationAcceptedEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyCrashedEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyDaemonResumedEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyDaemonSuspendedEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyEndingEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyExperimentalUpdateDetectedEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyInitializedEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyTestingEvent;
+import com.github.robozonky.notifications.samples.MyRoboZonkyUpdateDetectedEvent;
+import com.github.robozonky.notifications.samples.MySaleOfferedEvent;
+import com.github.robozonky.notifications.samples.MyWeeklySummaryEvent;
 import io.vavr.Lazy;
-import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("rawtypes")
 public enum SupportedListener {
@@ -320,9 +357,18 @@ public enum SupportedListener {
      */
     public String getLabel() {
         final String interfaceName = this.getSampleEvent().getClass().getInterfaces()[0].getSimpleName();
-        final String decapitalized = StringUtils.uncapitalize(interfaceName);
+        final String decapitalized = uncapitalize(interfaceName);
         // this works because Event subclasses must be named (Something)Event; check Event().
         return decapitalized.substring(0, decapitalized.length() - "Event".length());
+    }
+
+    private static String uncapitalize(final String string) {
+        if (string.isEmpty()) {
+            return string;
+        } else if (string.length() == 1) {
+            return string.toLowerCase();
+        }
+        return Character.toLowerCase(string.charAt(0)) + string.substring(1);
     }
 
     protected abstract Event createSampleEvent();
