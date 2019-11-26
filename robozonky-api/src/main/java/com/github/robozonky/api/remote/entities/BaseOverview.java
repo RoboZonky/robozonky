@@ -42,10 +42,6 @@ abstract class BaseOverview extends BaseEntity {
     private long penaltyPaid;
     private final Lazy<Money> moneyPenaltyPaid = Lazy.of(() -> Money.from(penaltyPaid));
 
-    BaseOverview() {
-        super();
-    }
-
     @XmlElement
     public long getInvestmentCount() {
         return investmentCount;

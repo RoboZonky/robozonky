@@ -27,7 +27,6 @@ public class SellRequest extends BaseEntity {
     private BigDecimal remainingPrincipal;
 
     public SellRequest(final Investment investment) {
-        super();
         this.investmentId = investment.getId();
         this.remainingPrincipal = investment.getRemainingPrincipal().orElseThrow().getValue();
         this.feeAmount = investment.getSmpFee().orElseThrow().getValue();

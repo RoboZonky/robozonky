@@ -63,16 +63,6 @@ abstract class BaseInvestment extends BaseEntity {
         this.status = InvestmentStatus.ACTIVE;
     }
 
-    BaseInvestment(final Participation participation, final Money amount) {
-        super();
-        this.currency = amount.getCurrency();
-        this.loanId = participation.getLoanId();
-        this.amount = amount.getValue().toPlainString();
-        this.additionalAmount = BigDecimal.ZERO.toPlainString();
-        this.firstAmount = amount.getValue().toPlainString();
-        this.status = InvestmentStatus.ACTIVE;
-    }
-
     @XmlElement
     public OffsetDateTime getTimeCreated() {
         return timeCreated;

@@ -71,7 +71,6 @@ public class ZonkyApiToken extends BaseEntity {
 
     ZonkyApiToken() {
         // fox JAXB
-        super();
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final OffsetDateTime obtainedOn) {
@@ -94,7 +93,6 @@ public class ZonkyApiToken extends BaseEntity {
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
                          final OffsetDateTime obtainedOn, final String type, final OAuthScope... scope) {
-        super();
         this.accessToken = accessToken.toCharArray();
         this.refreshToken = refreshToken.toCharArray();
         this.expiresIn = expiresIn;

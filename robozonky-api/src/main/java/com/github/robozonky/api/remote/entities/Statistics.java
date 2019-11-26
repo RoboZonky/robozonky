@@ -46,7 +46,6 @@ public class Statistics extends BaseEntity {
 
     private Statistics() {
         // for JAXB
-        super();
     }
 
     public static Statistics empty() {

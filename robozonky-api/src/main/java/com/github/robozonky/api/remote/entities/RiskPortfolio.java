@@ -44,11 +44,9 @@ public class RiskPortfolio extends BaseEntity {
 
     RiskPortfolio() {
         // for JAXB
-        super();
     }
 
     public RiskPortfolio(final Rating rating, final Money paid, final Money unpaid, final Money due) {
-        super();
         this.interestRate = rating.getInterestRate();
         this.paid = paid.getValue().toPlainString();
         this.unpaid = unpaid.getValue().toPlainString();

@@ -27,14 +27,12 @@ public class ResolutionRequest extends BaseEntity {
     private Resolution resolution;
 
     public ResolutionRequest(final long reservationId, final Resolution resolution) {
-        super();
         this.reservationId = reservationId;
         this.resolution = resolution;
     }
 
     ResolutionRequest() {
         // for JAXB
-        super();
     }
 
     @XmlElement

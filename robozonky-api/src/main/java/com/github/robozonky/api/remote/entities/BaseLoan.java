@@ -112,10 +112,6 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     private Object insuranceHistory;
 
-    protected BaseLoan() {
-        super(); // story needlessly clutters the output
-    }
-
     @XmlElement
     public Country getCountryOfOrigin() {
         return countryOfOrigin;
