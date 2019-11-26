@@ -71,7 +71,8 @@ final class Util {
         final Select select = Select.sellableParticipations();
         final Collection<Tuple3<Rating, Money, Money>> sellable = tenant.call(z -> z.getInvestments(select))
                 .parallel() // possibly many pages' worth of results; fetch in parallel
-                .map(i -> Tuple.of(i.getRating(), i.getRemainingPrincipal().orElseThrow(), i.getSmpFee().orElse(Money.ZERO)))
+                .map(i -> Tuple.of(i.getRating(), i.getRemainingPrincipal().orElse(Money.ZERO),
+                                   i.getSmpFee().orElse(Money.ZERO)))
                 .collect(toList());
         final Map<Rating, Money> justFeeless = sellable.stream()
                 .filter(t -> t._3.isZero())
