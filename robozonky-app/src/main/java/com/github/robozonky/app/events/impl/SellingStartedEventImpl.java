@@ -18,6 +18,7 @@ package com.github.robozonky.app.events.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
@@ -30,7 +31,6 @@ final class SellingStartedEventImpl extends AbstractEventImpl implements Selling
 
     public SellingStartedEventImpl(final Collection<InvestmentDescriptor> descriptors,
                                    final PortfolioOverview portfolio) {
-        super();
         this.descriptors = Collections.unmodifiableCollection(descriptors);
         this.portfolioOverview = portfolio;
     }
@@ -43,5 +43,13 @@ final class SellingStartedEventImpl extends AbstractEventImpl implements Selling
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SellingStartedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

@@ -18,6 +18,7 @@ package com.github.robozonky.app.events.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -29,7 +30,6 @@ final class ExecutionStartedEventImpl extends AbstractEventImpl implements Execu
     private final PortfolioOverview portfolioOverview;
 
     public ExecutionStartedEventImpl(final Collection<LoanDescriptor> loanDescriptors, final PortfolioOverview portfolio) {
-        super();
         this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
         this.portfolioOverview = portfolio;
     }
@@ -44,4 +44,11 @@ final class ExecutionStartedEventImpl extends AbstractEventImpl implements Execu
         return this.loanDescriptors;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ExecutionStartedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
+    }
 }

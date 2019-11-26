@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 
 final class RoboZonkyUpdateDetectedEventImpl extends AbstractEventImpl implements RoboZonkyUpdateDetectedEvent {
@@ -23,12 +25,19 @@ final class RoboZonkyUpdateDetectedEventImpl extends AbstractEventImpl implement
     private final String newVersion;
 
     public RoboZonkyUpdateDetectedEventImpl(final String newVersion) {
-        super();
         this.newVersion = newVersion;
     }
 
     @Override
     public final String getNewVersion() {
         return newVersion;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RoboZonkyUpdateDetectedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("newVersion='" + newVersion + "'")
+                .toString();
     }
 }

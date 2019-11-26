@@ -17,6 +17,7 @@
 package com.github.robozonky.app.events.impl;
 
 import java.time.OffsetDateTime;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.test.DateUtil;
@@ -42,4 +43,11 @@ abstract class AbstractEventImpl implements Event {
         conceptionDateTime = offsetDateTime;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", AbstractEventImpl.class.getSimpleName() + "[", "]")
+                .add("conceptionDateTime=" + conceptionDateTime)
+                .add("creationDateTime=" + creationDateTime)
+                .toString();
+    }
 }

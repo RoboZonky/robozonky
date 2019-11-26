@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -28,7 +30,6 @@ final class InvestmentMadeEventImpl extends AbstractEventImpl implements Investm
     private final PortfolioOverview portfolioOverview;
 
     public InvestmentMadeEventImpl(final Loan loan, final Money amount, final PortfolioOverview portfolioOverview) {
-        super();
         this.loan = loan;
         this.investedAmount = amount;
         this.portfolioOverview = portfolioOverview;
@@ -49,4 +50,13 @@ final class InvestmentMadeEventImpl extends AbstractEventImpl implements Investm
         return portfolioOverview;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", InvestmentMadeEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("loan=" + loan)
+                .add("investedAmount=" + investedAmount)
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
+    }
 }

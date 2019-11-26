@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -28,7 +30,6 @@ final class InvestmentSoldEventImpl extends AbstractEventImpl implements Investm
     private final PortfolioOverview portfolioOverview;
 
     public InvestmentSoldEventImpl(final Investment investment, final Loan loan, final PortfolioOverview portfolio) {
-        super();
         this.investment = investment;
         this.loan = loan;
         this.portfolioOverview = portfolio;
@@ -47,5 +48,15 @@ final class InvestmentSoldEventImpl extends AbstractEventImpl implements Investm
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", InvestmentSoldEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("investment=" + investment)
+                .add("loan=" + loan)
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

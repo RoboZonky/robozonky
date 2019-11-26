@@ -18,6 +18,7 @@ package com.github.robozonky.app.events.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -29,7 +30,6 @@ final class SellingCompletedEventImpl extends AbstractEventImpl implements Selli
     private final PortfolioOverview portfolioOverview;
 
     public SellingCompletedEventImpl(final Collection<Investment> investment, final PortfolioOverview portfolio) {
-        super();
         this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
     }
@@ -42,5 +42,13 @@ final class SellingCompletedEventImpl extends AbstractEventImpl implements Selli
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SellingCompletedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

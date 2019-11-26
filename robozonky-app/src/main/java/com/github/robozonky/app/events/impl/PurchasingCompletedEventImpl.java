@@ -18,6 +18,7 @@ package com.github.robozonky.app.events.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -29,7 +30,6 @@ final class PurchasingCompletedEventImpl extends AbstractEventImpl implements Pu
     private final PortfolioOverview portfolioOverview;
 
     public PurchasingCompletedEventImpl(final Collection<Participation> investment, final PortfolioOverview portfolio) {
-        super();
         this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
     }
@@ -42,5 +42,13 @@ final class PurchasingCompletedEventImpl extends AbstractEventImpl implements Pu
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PurchasingCompletedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("portfolioOverview=" + portfolioOverview)
+                .toString();
     }
 }

@@ -17,6 +17,7 @@
 package com.github.robozonky.app.events.impl;
 
 import java.time.OffsetDateTime;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
 
@@ -26,7 +27,6 @@ final class RoboZonkyDaemonResumedEventImpl extends AbstractEventImpl implements
     private final OffsetDateTime unavailableUntil;
 
     public RoboZonkyDaemonResumedEventImpl(final OffsetDateTime since, final OffsetDateTime until) {
-        super();
         this.unavailableSince = since;
         this.unavailableUntil = until;
     }
@@ -39,5 +39,14 @@ final class RoboZonkyDaemonResumedEventImpl extends AbstractEventImpl implements
     @Override
     public OffsetDateTime getUnavailableUntil() {
         return unavailableUntil;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RoboZonkyDaemonResumedEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("unavailableSince=" + unavailableSince)
+                .add("unavailableUntil=" + unavailableUntil)
+                .toString();
     }
 }

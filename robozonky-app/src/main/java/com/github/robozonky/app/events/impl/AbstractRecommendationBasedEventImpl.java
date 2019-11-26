@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.Descriptor;
@@ -24,14 +26,13 @@ import com.github.robozonky.api.strategies.Recommended;
 abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X>
         extends AbstractEventImpl {
 
-    private final X participation;
+    private final X recommending;
     private final Loan loan;
     private final Money recommendation;
 
     protected AbstractRecommendationBasedEventImpl(final T recommendation) {
-        super();
-        this.participation = recommendation.descriptor().item();
-        this.loan = (Loan) recommendation.descriptor().related();
+        this.recommending = recommendation.descriptor().item();
+        this.loan = recommendation.descriptor().related();
         this.recommendation = recommendation.amount();
     }
 
@@ -39,11 +40,21 @@ abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, 
         return loan;
     }
 
-    protected X getItem() {
-        return participation;
+    protected X getRecommending() {
+        return recommending;
     }
 
     public Money getRecommendation() {
         return recommendation;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", getClass().getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("loan=" + loan)
+                .add("recommending=" + recommending)
+                .add("recommendation=" + recommendation)
+                .toString();
     }
 }

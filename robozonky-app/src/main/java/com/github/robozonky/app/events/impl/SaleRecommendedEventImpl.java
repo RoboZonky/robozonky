@@ -30,6 +30,6 @@ final class SaleRecommendedEventImpl extends AbstractRecommendationBasedEventImp
 
     @Override
     public Investment getInvestment() {
-        return super.getItem();
+        return super.getRecommending();
     }
 }

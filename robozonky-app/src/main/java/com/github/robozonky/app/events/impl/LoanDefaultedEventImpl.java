@@ -17,6 +17,7 @@
 package com.github.robozonky.app.events.impl;
 
 import java.time.LocalDate;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -29,7 +30,6 @@ final class LoanDefaultedEventImpl extends AbstractEventImpl implements LoanDefa
     private final LocalDate delinquentSince;
 
     public LoanDefaultedEventImpl(final Investment investment, final Loan loan, final LocalDate since) {
-        super();
         this.investment = investment;
         this.loan = loan;
         this.delinquentSince = since;
@@ -50,4 +50,12 @@ final class LoanDefaultedEventImpl extends AbstractEventImpl implements LoanDefa
         return delinquentSince;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", LoanDefaultedEventImpl.class.getSimpleName() + "[", "]")
+                .add("loan=" + loan)
+                .add("investment=" + investment)
+                .add("delinquentSince=" + delinquentSince)
+                .toString();
+    }
 }

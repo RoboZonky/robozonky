@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -26,7 +28,6 @@ final class LoanLostEventImpl extends AbstractEventImpl implements LoanLostEvent
     private final Loan loan;
 
     public LoanLostEventImpl(final Investment investment, final Loan loan) {
-        super();
         this.investment = investment;
         this.loan = loan;
     }
@@ -39,5 +40,14 @@ final class LoanLostEventImpl extends AbstractEventImpl implements LoanLostEvent
     @Override
     public Loan getLoan() {
         return loan;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", LoanLostEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .add("investment=" + investment)
+                .add("loan=" + loan)
+                .toString();
     }
 }

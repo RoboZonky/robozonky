@@ -16,11 +16,16 @@
 
 package com.github.robozonky.app.events.impl;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 
 final class RoboZonkyTestingEventImpl extends AbstractEventImpl implements RoboZonkyTestingEvent {
 
-    RoboZonkyTestingEventImpl() {
-        super();
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RoboZonkyTestingEventImpl.class.getSimpleName() + "[", "]")
+                .add("super=" + super.toString())
+                .toString();
     }
 }
