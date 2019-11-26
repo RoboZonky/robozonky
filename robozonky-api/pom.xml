@@ -69,10 +69,6 @@
       <version>0.5.4</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-vavr</artifactId>
       <version>0.0.1</version>
