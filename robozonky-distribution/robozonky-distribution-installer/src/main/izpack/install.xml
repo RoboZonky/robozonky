@@ -186,6 +186,9 @@
             targetdir="${INSTALL_PATH}/Dist"
             override="true"
             unpack="true" />
+      <updatecheck> <!-- Delete existing modules, otherwise JVM may refuse to start due to duplicate JPMS modules. -->
+        <include name="Dist/**" />
+      </updatecheck>
     </pack>
   </packs>
 
