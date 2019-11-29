@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
     }
 
     private static int[] digits(final String version) {
-        if (version == null) { // this means we're on a SNAPSHOT, which is assumed to be the latest version
+        if (version == null || Objects.equals(version, "unknown")) { // this means we're on a SNAPSHOT, which is assumed to be the latest version
             return new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
         }
         final int dashIndex = version.indexOf('-');
