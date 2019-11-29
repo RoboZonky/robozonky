@@ -16,18 +16,18 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.remote.Select;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.remote.Select;
+import org.apache.logging.log4j.Logger;
 
 final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
 
@@ -84,6 +84,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
     private Stream<ParticipationDescriptor> readMarketplace() {
         final Select s = new Select()
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
+                .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
