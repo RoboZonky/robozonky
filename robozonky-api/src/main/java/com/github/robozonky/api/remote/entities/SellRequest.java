@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.Money;
+
 public class SellRequest extends BaseEntity {
 
     private long investmentId;
@@ -29,7 +31,7 @@ public class SellRequest extends BaseEntity {
     public SellRequest(final Investment investment) {
         this.investmentId = investment.getId();
         this.remainingPrincipal = investment.getRemainingPrincipal().orElseThrow().getValue();
-        this.feeAmount = investment.getSmpFee().orElseThrow().getValue();
+        this.feeAmount = investment.getSmpFee().orElse(Money.ZERO).getValue();
     }
 
     @XmlElement
