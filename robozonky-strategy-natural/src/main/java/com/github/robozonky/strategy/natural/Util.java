@@ -45,6 +45,11 @@ final class Util {
         // no instances
     }
 
+    /**
+     *
+     * @param ratingsInOrderOfPreference Iteration order from more demanded to less.
+     * @return
+     */
     static Comparator<Rating> getRatingByDemandComparator(final Set<Rating> ratingsInOrderOfPreference) {
         Map<Rating, Integer> ratingRanking = new EnumMap<>(Rating.class);
         AtomicInteger rank = new AtomicInteger();

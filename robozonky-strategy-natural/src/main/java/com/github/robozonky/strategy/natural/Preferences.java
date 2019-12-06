@@ -52,11 +52,11 @@ final class Preferences {
             INSTANCE = createInstance(portfolio, Util.rankRatingsByDemand(strategy, portfolio));
             return INSTANCE;
         }
-        if (Objects.equals(INSTANCE.getReferencePortfolio(), portfolio)) {
+        if (Objects.equals(INSTANCE.referencePortfolio, portfolio)) {
             return INSTANCE;
         }
         Set<Rating> ratingRanking = Util.rankRatingsByDemand(strategy, portfolio);
-        if (Objects.equals(INSTANCE.getRatingRanking(), ratingRanking)) {
+        if (Objects.equals(INSTANCE.ratingRanking, ratingRanking)) {
             return INSTANCE;
         }
         INSTANCE = createInstance(portfolio, ratingRanking);
@@ -67,11 +67,11 @@ final class Preferences {
         return new Preferences(portfolio, ratingRanking);
     }
 
-    private PortfolioOverview getReferencePortfolio() {
-        return referencePortfolio;
-    }
-
-    public Set<Rating> getRatingRanking() {
+    /**
+     *
+     * @return Iteration order from the most desirable to the least.
+     */
+    public Set<Rating> getDesirableRatings() {
         return ratingRanking;
     }
 

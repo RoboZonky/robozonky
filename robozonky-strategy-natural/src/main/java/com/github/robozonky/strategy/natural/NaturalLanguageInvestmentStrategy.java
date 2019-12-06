@@ -46,9 +46,8 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         }
         var preferences = Preferences.get(strategy, portfolio);
         var withoutUndesirable = available.parallelStream()
-                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> { // skip loans in ratings which are not required by the strategy
-                    boolean isAcceptable = preferences.getRatingRanking().contains(d.item().getRating());
+                    boolean isAcceptable = preferences.getDesirableRatings().contains(d.item().getRating());
                     if (!isAcceptable) {
                         LOGGER.debug("{} skipped due to an undesirable rating.", d.item());
                     }

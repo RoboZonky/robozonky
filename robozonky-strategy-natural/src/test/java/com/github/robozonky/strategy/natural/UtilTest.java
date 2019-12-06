@@ -19,7 +19,9 @@ package com.github.robozonky.strategy.natural;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -57,6 +59,22 @@ class UtilTest extends AbstractRoboZonkyTest {
             softly.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
             softly.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
         });
+    }
+
+    private static <T> Set<T> inOrder(T... items) {
+        Set<T> result = new LinkedHashSet<>(items.length);
+        result.addAll(asList(items));
+        return result;
+    }
+
+    @Test
+    void comparator() {
+        Comparator<Rating> comparator = Util.getRatingByDemandComparator(inOrder(Rating.A, Rating.D, Rating.AAAAA));
+        assertSoftly(softly -> softly.assertThat(Rating.D).usingComparator(comparator)
+                .isGreaterThan(Rating.A)
+                .isLessThan(Rating.AAAAA)
+                .isLessThan(Rating.AAAAAA) // Not included == greatest.
+        .isLessThan(Rating.C));
     }
 
     @Test

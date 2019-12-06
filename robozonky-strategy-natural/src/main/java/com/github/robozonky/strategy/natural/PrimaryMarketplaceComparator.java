@@ -25,6 +25,10 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 
 final class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
 
+    /**
+     * Attempt to first invest into loans that have been on the marketplace for the least amount of time, as it's more
+     * likely that we're processing them for the first time.
+     */
     private static final Comparator<Loan> BASE = Comparator.comparing(Loan::getDatePublished, Comparator.reverseOrder())
             .thenComparing(BaseLoan::getNonReservedRemainingInvestment, Comparator.reverseOrder());
     private final Comparator<Loan> comparator;

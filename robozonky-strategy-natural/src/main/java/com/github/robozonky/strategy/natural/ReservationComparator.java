@@ -24,13 +24,10 @@ import com.github.robozonky.api.strategies.ReservationDescriptor;
 
 final class ReservationComparator implements Comparator<ReservationDescriptor> {
 
-    private static final Comparator<Reservation> BASE = Comparator.comparing(Reservation::getDatePublished,
-                                                                             Comparator.reverseOrder());
     private final Comparator<Reservation> comparator;
 
     public ReservationComparator(Comparator<Rating> ratingByDemandComparator) {
-        this.comparator = Comparator.comparing(Reservation::getRating, ratingByDemandComparator)
-                .thenComparing(BASE);
+        this.comparator = Comparator.comparing(Reservation::getRating, ratingByDemandComparator);
     }
 
     @Override
