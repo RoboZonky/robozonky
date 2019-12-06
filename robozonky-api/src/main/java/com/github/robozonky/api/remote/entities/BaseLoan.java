@@ -344,7 +344,6 @@ public abstract class BaseLoan extends BaseEntity {
                 .add("remainingInvestment='" + remainingInvestment + "'")
                 .add("reservedAmount='" + reservedAmount + "'")
                 .add("revenueRate=" + revenueRate)
-                .add("story='" + story + "'")
                 .add("termInMonths=" + termInMonths)
                 .add("topped=" + topped)
                 .add("userId=" + userId)
