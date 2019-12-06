@@ -128,6 +128,41 @@
         "new": "interface com.github.robozonky.api.remote.ReservationApi",
         "annotation": "@javax.ws.rs.Path(\"\/loans\/marketplace\/reservations\")",
         "justification": "Refactored API constants."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.CurrentOverview",
+        "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.CurrentPortfolio",
+        "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.DelinquentPortfolio",
+        "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.InvestmentSummary",
+        "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "class com.github.robozonky.api.remote.entities.OverallOverview",
+        "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.entities.CurrentOverview com.github.robozonky.api.remote.entities.Statistics::getCurrentOverview()",
+        "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.entities.OverallOverview com.github.robozonky.api.remote.entities.Statistics::getOverallOverview()",
+        "justification": "Removed unused data structures."
       }
     ]
   }

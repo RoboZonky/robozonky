@@ -33,16 +33,18 @@ public class Statistics extends BaseEntity {
 
     @XmlElement
     private Ratio profitability;
-    private CurrentOverview currentOverview;
-    private OverallOverview overallOverview;
     private List<RiskPortfolio> riskPortfolio;
     private OffsetDateTime timestamp;
 
     /**
-     * Data structure intentionally not implemented. We do not need this information.
+     * Data structures intentionally not implemented. We do not need this information.
      */
     @XmlElement
-    private Object superInvestorOverview = "";
+    private Object superInvestorOverview;
+    @XmlElement
+    private Object currentOverview;
+    @XmlElement
+    private Object overallOverview;
 
     private Statistics() {
         // for JAXB
@@ -56,8 +58,6 @@ public class Statistics extends BaseEntity {
         final Statistics s = new Statistics();
         s.profitability = Ratio.ZERO;
         s.riskPortfolio = Collections.emptyList();
-        s.currentOverview = new CurrentOverview();
-        s.overallOverview = new OverallOverview();
         s.timestamp = DateUtil.offsetNow();
         return s;
     }
@@ -72,16 +72,6 @@ public class Statistics extends BaseEntity {
      */
     public Optional<Ratio> getProfitability() {
         return Optional.ofNullable(profitability);
-    }
-
-    @XmlElement
-    public CurrentOverview getCurrentOverview() {
-        return currentOverview;
-    }
-
-    @XmlElement
-    public OverallOverview getOverallOverview() {
-        return overallOverview;
     }
 
     @XmlElement
@@ -101,8 +91,6 @@ public class Statistics extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", Statistics.class.getSimpleName() + "[", "]")
-                .add("currentOverview=" + currentOverview)
-                .add("overallOverview=" + overallOverview)
                 .add("profitability=" + profitability)
                 .add("riskPortfolio=" + riskPortfolio)
                 .add("timestamp=" + timestamp)
