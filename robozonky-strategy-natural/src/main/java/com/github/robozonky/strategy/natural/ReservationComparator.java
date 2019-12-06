@@ -22,7 +22,7 @@ import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 
-class ReservationComparator implements Comparator<ReservationDescriptor> {
+final class ReservationComparator implements Comparator<ReservationDescriptor> {
 
     private static final Comparator<Reservation> BASE = Comparator.comparing(Reservation::getDatePublished,
                                                                              Comparator.reverseOrder());

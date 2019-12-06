@@ -17,13 +17,10 @@
 package com.github.robozonky.strategy.natural;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -41,29 +38,24 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         this.recommender = new InvestmentSizeRecommender(p);
     }
 
-    private static Comparator<LoanDescriptor> getPreferenceComparator(Set<Rating> ratingsInOrderOfPreference) {
-        Comparator<Rating> ratingsByDemand = Util.getRatingByDemandComparator(ratingsInOrderOfPreference);
-        return new PrimaryMarketplaceComparator(ratingsByDemand);
-    }
-
     @Override
     public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> available,
                                              final PortfolioOverview portfolio, final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
-        var desirableRatingsInOrderOfPreference = Util.rankRatingsByDemand(strategy, portfolio);
+        var preferences = Preferences.get(strategy, portfolio);
         var withoutUndesirable = available.parallelStream()
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> { // skip loans in ratings which are not required by the strategy
-                    boolean isAcceptable = desirableRatingsInOrderOfPreference.contains(d.item().getRating());
+                    boolean isAcceptable = preferences.getRatingRanking().contains(d.item().getRating());
                     if (!isAcceptable) {
                         LOGGER.debug("{} skipped due to an undesirable rating.", d.item());
                     }
                     return isAcceptable;
                 });
         return strategy.getApplicableLoans(withoutUndesirable, portfolio)
-                .sorted(getPreferenceComparator(desirableRatingsInOrderOfPreference))
+                .sorted(preferences.getPrimaryMarketplaceComparator())
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final Money recommendedAmount = recommender.apply(d.item(), restrictions);
                     if (recommendedAmount.compareTo(recommendedAmount.getZero()) > 0) {

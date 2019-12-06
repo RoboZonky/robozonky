@@ -22,7 +22,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 
-class SecondaryMarketplaceComparator implements Comparator<ParticipationDescriptor> {
+final class SecondaryMarketplaceComparator implements Comparator<ParticipationDescriptor> {
 
     private final Comparator<Participation> comparator;
 

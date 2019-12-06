@@ -23,7 +23,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 
-class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
+final class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
 
     private static final Comparator<Loan> BASE = Comparator.comparing(Loan::getDatePublished, Comparator.reverseOrder())
             .thenComparing(BaseLoan::getNonReservedRemainingInvestment, Comparator.reverseOrder());

@@ -17,13 +17,10 @@
 package com.github.robozonky.strategy.natural;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
@@ -46,11 +43,6 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
                 .orElseThrow(() -> new IllegalStateException("Reservations are not enabled, yet strategy exists."));
     }
 
-    private static Comparator<ReservationDescriptor> getPreferenceComparator(Set<Rating> ratingsInOrderOfPreference) {
-        Comparator<Rating> ratingsByDemand = Util.getRatingByDemandComparator(ratingsInOrderOfPreference);
-        return new ReservationComparator(ratingsByDemand);
-    }
-
     @Override
     public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
                                                     final PortfolioOverview portfolio,
@@ -58,18 +50,18 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
-        var desirableRatingsInOrderOfPreference = Util.rankRatingsByDemand(strategy, portfolio);
+        var preferences = Preferences.get(strategy, portfolio);
         var withoutUndesirable = available.parallelStream()
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> { // skip loans in ratings which are not required by the strategy
-                    boolean isAcceptable = desirableRatingsInOrderOfPreference.contains(d.item().getRating());
+                    boolean isAcceptable = preferences.getRatingRanking().contains(d.item().getRating());
                     if (!isAcceptable) {
                         LOGGER.debug("{} skipped due to an undesirable rating.", d.item());
                     }
                     return isAcceptable;
                 });
         return strategy.getApplicableReservations(withoutUndesirable, portfolio)
-                .sorted(getPreferenceComparator(desirableRatingsInOrderOfPreference))
+                .sorted(preferences.getReservationComparator())
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final Money amount = d.item().getMyReservation().getReservedAmount();
                     return d.recommend(amount).stream();

@@ -17,8 +17,6 @@
 package com.github.robozonky.strategy.natural;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
@@ -68,11 +66,6 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         return false;
     }
 
-    private static Comparator<ParticipationDescriptor> getPreferenceComparator(Set<Rating> ratingsInOrderOfPreference) {
-        Comparator<Rating> ratingsByDemand = Util.getRatingByDemandComparator(ratingsInOrderOfPreference);
-        return new SecondaryMarketplaceComparator(ratingsByDemand);
-    }
-
     @Override
     public Stream<RecommendedParticipation> recommend(final Collection<ParticipationDescriptor> available,
                                                       final PortfolioOverview portfolio,
@@ -80,18 +73,18 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
-        var desirableRatingsInOrderOfPreference = Util.rankRatingsByDemand(strategy, portfolio);
+        var preferences = Preferences.get(strategy, portfolio);
         var withoutUndesirable = available.parallelStream()
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> { // skip loans in ratings which are not required by the strategy
-                    boolean isAcceptable = desirableRatingsInOrderOfPreference.contains(d.item().getRating());
+                    boolean isAcceptable = preferences.getRatingRanking().contains(d.item().getRating());
                     if (!isAcceptable) {
                         LOGGER.debug("{} skipped due to an undesirable rating.", d.item());
                     }
                     return isAcceptable;
                 });
         return strategy.getApplicableParticipations(withoutUndesirable, portfolio)
-                .sorted(getPreferenceComparator(desirableRatingsInOrderOfPreference))
+                .sorted(preferences.getSecondaryMarketplaceComparator())
                 .filter(d -> sizeMatchesStrategy(d.item()))
                 .flatMap(d -> d.recommend().stream());
     }
