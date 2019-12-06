@@ -55,8 +55,6 @@ public class Investment extends BaseInvestment {
     private long borrowerNo = 0;
     private String loanName;
     private String nickname;
-    private String firstName;
-    private String surname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
     @XmlElement
     private OffsetDateTime investmentDate = DateUtil.offsetNow();
@@ -137,6 +135,10 @@ public class Investment extends BaseInvestment {
     private Object insuranceHistory;
     @XmlElement
     private Object loanHealthStats;
+    @XmlElement
+    private Object firstName;
+    @XmlElement
+    private Object surname;
 
     Investment() {
         // for JAXB
@@ -243,16 +245,6 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public String getNickname() {
         return nickname;
-    }
-
-    @XmlElement
-    public String getFirstName() {
-        return firstName;
-    }
-
-    @XmlElement
-    public String getSurname() {
-        return surname;
     }
 
     public Optional<PaymentStatus> getPaymentStatus() {
@@ -447,7 +439,6 @@ public class Investment extends BaseInvestment {
                 .add("dueInterest='" + dueInterest + "'")
                 .add("duePrincipal='" + duePrincipal + "'")
                 .add("expectedInterest='" + expectedInterest + "'")
-                .add("firstName='" + firstName + "'")
                 .add("hasCollectionHistory=" + hasCollectionHistory)
                 .add("instalmentPostponement=" + instalmentPostponement)
                 .add("insuranceActive=" + insuranceActive)
@@ -481,7 +472,6 @@ public class Investment extends BaseInvestment {
                 .add("smpPrice='" + smpPrice + "'")
                 .add("smpRelated=" + smpRelated)
                 .add("smpSoldFor='" + smpSoldFor + "'")
-                .add("surname='" + surname + "'")
                 .add("toPay='" + toPay + "'")
                 .toString();
     }

@@ -163,6 +163,16 @@
         "code": "java.method.removed",
         "old": "method com.github.robozonky.api.remote.entities.OverallOverview com.github.robozonky.api.remote.entities.Statistics::getOverallOverview()",
         "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String com.github.robozonky.api.remote.entities.Investment::getFirstName()",
+        "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String com.github.robozonky.api.remote.entities.Investment::getSurname()",
+        "justification": "Removed unused data structures."
       }
     ]
   }
