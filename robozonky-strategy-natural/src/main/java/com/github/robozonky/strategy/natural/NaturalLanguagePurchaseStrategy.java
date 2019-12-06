@@ -78,7 +78,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                 .filter(d -> { // skip loans in ratings which are not required by the strategy
                     boolean isAcceptable = preferences.getDesirableRatings().contains(d.item().getRating());
                     if (!isAcceptable) {
-                        LOGGER.debug("{} skipped due to an undesirable rating.", d.item());
+                        LOGGER.debug("Participation #{} skipped due to an undesirable rating.", d.item().getId());
                     }
                     return isAcceptable;
                 });
