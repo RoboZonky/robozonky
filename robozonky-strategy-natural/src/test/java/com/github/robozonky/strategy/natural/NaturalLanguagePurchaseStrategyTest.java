@@ -16,6 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -31,13 +37,7 @@ import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterConditi
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -79,6 +79,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), w);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());

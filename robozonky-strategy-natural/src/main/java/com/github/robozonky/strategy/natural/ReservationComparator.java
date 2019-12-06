@@ -16,20 +16,22 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-
 import java.util.Comparator;
 
-class ReservationComparator implements Comparator<ReservationDescriptor> {
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 
-    private static final Comparator<Reservation>
-            LEAST_RECENT_FIRST = Comparator.comparing(Reservation::getDatePublished),
-            INSURED_FIRST = Comparator.comparing(Reservation::isInsuranceActive).reversed(),
-            FINAL = INSURED_FIRST.thenComparing(LEAST_RECENT_FIRST);
+final class ReservationComparator implements Comparator<ReservationDescriptor> {
+
+    private final Comparator<Reservation> comparator;
+
+    public ReservationComparator(Comparator<Rating> ratingByDemandComparator) {
+        this.comparator = Comparator.comparing(Reservation::getRating, ratingByDemandComparator);
+    }
 
     @Override
     public int compare(final ReservationDescriptor loan1, final ReservationDescriptor loan2) {
-        return FINAL.compare(loan1.item(), loan2.item());
+        return comparator.compare(loan1.item(), loan2.item());
     }
 }

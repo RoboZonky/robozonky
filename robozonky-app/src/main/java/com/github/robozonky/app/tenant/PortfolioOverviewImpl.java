@@ -16,15 +16,16 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
-
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Map;
 
 final class PortfolioOverviewImpl implements PortfolioOverview {
 
@@ -75,5 +76,23 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
                 ", profitability=" + profitability +
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final PortfolioOverviewImpl that = (PortfolioOverviewImpl) o;
+        return Objects.equals(timestamp, that.timestamp) &&
+                Objects.equals(invested, that.invested);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(timestamp, invested);
     }
 }

@@ -16,6 +16,11 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -32,12 +37,7 @@ import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -85,9 +85,9 @@ class ParsedStrategyTest {
         final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> l);
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getApplicableLoans(Collections.singleton(ld), FOLIO)).isEmpty();
-            softly.assertThat(strategy.getApplicableParticipations(Collections.singleton(pd), FOLIO)).isEmpty();
-            softly.assertThat(strategy.getMatchingSellFilters(Collections.singleton(id), FOLIO)).containsOnly(id);
+            softly.assertThat(strategy.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
+            softly.assertThat(strategy.getApplicableParticipations(Stream.of(pd), FOLIO)).isEmpty();
+            softly.assertThat(strategy.getMatchingSellFilters(Stream.of(id), FOLIO)).containsOnly(id);
         });
     }
 
@@ -115,10 +115,10 @@ class ParsedStrategyTest {
         final Investment iOver = MockInvestmentBuilder.fresh(loanOver, 200).build();
         final InvestmentDescriptor idOver = new InvestmentDescriptor(iOver, () -> loanOver);
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getApplicableLoans(Arrays.asList(ldOver, ldUnder), FOLIO)).containsOnly(ldUnder);
-            softly.assertThat(strategy.getApplicableParticipations(Arrays.asList(pdOver, pdUnder), FOLIO))
+            softly.assertThat(strategy.getApplicableLoans(Stream.of(ldOver, ldUnder), FOLIO)).containsOnly(ldUnder);
+            softly.assertThat(strategy.getApplicableParticipations(Stream.of(pdOver, pdUnder), FOLIO))
                     .containsOnly(pdUnder);
-            softly.assertThat(strategy.getMatchingSellFilters(Arrays.asList(idOver, idUnder), FOLIO)).isEmpty();
+            softly.assertThat(strategy.getMatchingSellFilters(Stream.of(idOver, idUnder), FOLIO)).isEmpty();
         });
     }
 
@@ -126,16 +126,16 @@ class ParsedStrategyTest {
     void conditions() {
         final DefaultPortfolio portfolio = DefaultPortfolio.PROGRESSIVE;
         final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
-        assertThat(strategy.getApplicableLoans(Collections.emptyList(), FOLIO)).isEmpty();
+        assertThat(strategy.getApplicableLoans(Stream.empty(), FOLIO)).isEmpty();
         // add loan; without filters, should be applicable
         final Loan loan = ParsedStrategyTest.mockLoan(2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        assertThat(strategy.getApplicableLoans(Collections.singletonList(ld), FOLIO)).contains(ld);
+        assertThat(strategy.getApplicableLoans(Stream.of(ld), FOLIO)).contains(ld);
         // now add a filter and see no loans applicable
         final MarketplaceFilter f = mock(MarketplaceFilter.class);
         when(f.test(eq(Wrapper.wrap(ld, FOLIO)))).thenReturn(true);
         final ParsedStrategy strategy2 = new ParsedStrategy(portfolio, Collections.singleton(f));
-        assertThat(strategy2.getApplicableLoans(Collections.singletonList(ld), FOLIO)).isEmpty();
+        assertThat(strategy2.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
     }
 
     @Test
@@ -170,9 +170,9 @@ class ParsedStrategyTest {
         final ParsedStrategy ps = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(), s);
         final Loan l = ParsedStrategyTest.mockLoan(200_000);
         final LoanDescriptor ld = new LoanDescriptor(l);
-        assertThat(ps.getApplicableLoans(Collections.singleton(ld), FOLIO)).isEmpty();
+        assertThat(ps.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
         final Participation p = mock(Participation.class);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        assertThat(ps.getApplicableParticipations(Collections.singleton(pd), FOLIO)).isEmpty();
+        assertThat(ps.getApplicableParticipations(Stream.of(pd), FOLIO)).isEmpty();
     }
 }

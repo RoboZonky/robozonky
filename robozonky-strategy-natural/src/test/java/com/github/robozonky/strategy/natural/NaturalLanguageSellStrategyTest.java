@@ -16,6 +16,11 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
@@ -26,13 +31,7 @@ import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class NaturalLanguageSellStrategyTest {
@@ -77,10 +76,7 @@ class NaturalLanguageSellStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         v.setSellingMode(SellingMode.SELL_FILTERS);
         final ParsedStrategy p = spy(new ParsedStrategy(v));
-        doAnswer(e -> {
-            final Collection<InvestmentDescriptor> i = e.getArgument(0);
-            return i.stream();
-        }).when(p).getMatchingSellFilters(any(), any());
+        doAnswer(e -> e.getArgument(0)).when(p).getMatchingSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Stream<RecommendedInvestment> result =
@@ -93,10 +89,7 @@ class NaturalLanguageSellStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         v.setSellingMode(SellingMode.FREE_AND_OUTSIDE_STRATEGY);
         final ParsedStrategy p = spy(new ParsedStrategy(v));
-        doAnswer(e -> {
-            final Collection<InvestmentDescriptor> i = e.getArgument(0);
-            return i.stream();
-        }).when(p).getMatchingPrimaryMarketplaceFilters(any(), any());
+        doAnswer(e -> e.getArgument(0)).when(p).getMatchingPrimaryMarketplaceFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Investment i1 = mockInvestment();

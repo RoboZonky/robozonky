@@ -16,22 +16,20 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.*;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.RecommendedReservation;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.api.strategies.ReservationMode;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
 class NaturalLanguageReservationStrategy implements ReservationStrategy {
-
-    private static final Comparator<ReservationDescriptor> COMPARATOR = new ReservationComparator();
 
     private final ParsedStrategy strategy;
 
@@ -52,14 +50,17 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
-        // split available marketplace into buckets per rating
-        final Map<Rating, List<ReservationDescriptor>> splitByRating =
-                Util.sortByRating(strategy.getApplicableReservations(available, portfolio), d -> d.item().getRating());
-        // and now return recommendations in the order in which investment should be attempted
-        return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
-                .peek(rating -> LOGGER.trace("Processing rating {}.", rating))
-                .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
-                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+        var preferences = Preferences.get(strategy, portfolio);
+        var withoutUndesirable = available.parallelStream()
+                .filter(d -> { // skip loans in ratings which are not required by the strategy
+                    boolean isAcceptable = preferences.getDesirableRatings().contains(d.item().getRating());
+                    if (!isAcceptable) {
+                        LOGGER.debug("{} skipped due to an undesirable rating.", d.item());
+                    }
+                    return isAcceptable;
+                });
+        return strategy.getApplicableReservations(withoutUndesirable, portfolio)
+                .sorted(preferences.getReservationComparator())
                 .flatMap(d -> { // recommend amount to invest per strategy
                     final Money amount = d.item().getMyReservation().getReservedAmount();
                     return d.recommend(amount).stream();
