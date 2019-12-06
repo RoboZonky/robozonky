@@ -60,13 +60,12 @@ public class LastPublishedLoan extends BaseEntity {
             return false;
         }
         final LastPublishedLoan that = (LastPublishedLoan) o;
-        return id == that.id &&
-                Objects.equals(datePublished, that.datePublished);
+        return id == that.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, datePublished);
+        return Objects.hash(id);
     }
 
     @Override

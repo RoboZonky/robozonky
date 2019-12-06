@@ -28,14 +28,15 @@ class LastPublishedLoanTest {
     @Test
     void equality() {
         final LastPublishedLoan l = new LastPublishedLoan(1);
-        assertThat(l).isEqualTo(l);
-        assertThat(l).isNotEqualTo(null);
-        assertThat(l).isNotEqualTo("");
+        assertThat(l).isEqualTo(l)
+                .isNotEqualTo(null)
+                .isNotEqualTo("")
+                .isNotEqualTo(new LastPublishedLoan(l.getId() + 1));
         final LastPublishedLoan equal = new LastPublishedLoan(l.getId(), l.getDatePublished());
         assertThat(l).isEqualTo(equal);
         assertThat(equal).isEqualTo(l);
         final LastPublishedLoan diff = new LastPublishedLoan(l.getId(), offsetNow().plus(Duration.ofSeconds(1)));
-        assertThat(diff).isNotEqualTo(l);
-        assertThat(l).isNotEqualTo(diff);
+        assertThat(diff).isEqualTo(l);
+        assertThat(l).isEqualTo(diff);
     }
 }
