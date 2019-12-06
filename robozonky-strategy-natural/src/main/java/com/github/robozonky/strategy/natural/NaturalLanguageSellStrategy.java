@@ -48,9 +48,9 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                 .map(mode -> {
                     switch (mode) {
                         case SELL_FILTERS:
-                            return strategy.getMatchingSellFilters(available, portfolio);
+                            return strategy.getMatchingSellFilters(available.stream(), portfolio);
                         case FREE_AND_OUTSIDE_STRATEGY:
-                            return strategy.getMatchingPrimaryMarketplaceFilters(available, portfolio)
+                            return strategy.getMatchingPrimaryMarketplaceFilters(available.stream(), portfolio)
                                     .filter(NaturalLanguageSellStrategy::isFree);
                         default:
                             throw new IllegalStateException("Impossible.");

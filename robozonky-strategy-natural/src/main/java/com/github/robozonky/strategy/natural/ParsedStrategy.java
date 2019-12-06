@@ -133,21 +133,21 @@ class ParsedStrategy {
                 .map(Wrapper::getOriginal);
     }
 
-    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> l,
+    public Stream<LoanDescriptor> getApplicableLoans(final Stream<LoanDescriptor> l,
                                                      final PortfolioOverview portfolioOverview) {
-        return getApplicable(l.parallelStream().map(d -> Wrapper.wrap(d, portfolioOverview)));
+        return getApplicable(l.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)));
     }
 
-    public Stream<ReservationDescriptor> getApplicableReservations(final Collection<ReservationDescriptor> r,
+    public Stream<ReservationDescriptor> getApplicableReservations(final Stream<ReservationDescriptor> r,
                                                                    final PortfolioOverview portfolioOverview) {
-        return getApplicable(r.parallelStream().map(d -> Wrapper.wrap(d, portfolioOverview)));
+        return getApplicable(r.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)));
     }
 
-    public Stream<ParticipationDescriptor> getApplicableParticipations(final Collection<ParticipationDescriptor> p,
+    public Stream<ParticipationDescriptor> getApplicableParticipations(final Stream<ParticipationDescriptor> p,
                                                                        final PortfolioOverview portfolioOverview) {
         var participationFilters = filters.getSecondaryMarketplaceFilters();
         var sellFilters = filters.getSellFilters();
-        return p.parallelStream()
+        return p.parallel()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
                 .filter(w -> !matchesFilter(w, participationFilters, "{} skipped due to secondary marketplace filter {}."))
                 .filter(w -> !matchesFilter(w, sellFilters, "{} skipped due to sell filter {}."))
@@ -170,19 +170,19 @@ class ParsedStrategy {
         return defaults.getSellingMode();
     }
 
-    public Stream<InvestmentDescriptor> getMatchingSellFilters(final Collection<InvestmentDescriptor> i,
+    public Stream<InvestmentDescriptor> getMatchingSellFilters(final Stream<InvestmentDescriptor> i,
                                                                final PortfolioOverview portfolioOverview) {
         var investmentFilters = filters.getSellFilters();
-        return i.parallelStream()
+        return i.parallel()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
                 .filter(w -> matchesFilter(w, investmentFilters, "{} to be sold due to sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
-    public Stream<InvestmentDescriptor> getMatchingPrimaryMarketplaceFilters(final Collection<InvestmentDescriptor> i,
+    public Stream<InvestmentDescriptor> getMatchingPrimaryMarketplaceFilters(final Stream<InvestmentDescriptor> i,
                                                                              final PortfolioOverview portfolioOverview) {
         var loanFilters = filters.getPrimaryMarketplaceFilters();
-        return i.parallelStream()
+        return i.parallel()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
                 .filter(w -> matchesFilter(w, loanFilters, "{} sellable due to primary marketplace filter {}."))
                 .map(Wrapper::getOriginal);

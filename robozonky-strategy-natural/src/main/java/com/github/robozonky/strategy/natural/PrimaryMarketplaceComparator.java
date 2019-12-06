@@ -16,25 +16,26 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-
 import java.util.Comparator;
 
-/**
- * Loan ordering such that it maximizes the chances the loan is still available on the marketplace when the investment
- * operation is triggered. In other words, this tries to implement a heuristic of "most popular insured loans first."
- */
+import com.github.robozonky.api.remote.entities.BaseLoan;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+
 class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
 
-    private static final Comparator<Loan>
-            MOST_RECENT_FIRST = Comparator.comparing(Loan::getDatePublished).reversed(),
-            BIGGEST_FIRST = Comparator.comparing(Loan::getNonReservedRemainingInvestment).reversed(),
-            INSURED_FIRST = Comparator.comparing(Loan::isInsuranceActive).reversed(),
-            FINAL = INSURED_FIRST.thenComparing(MOST_RECENT_FIRST).thenComparing(BIGGEST_FIRST);
+    private static final Comparator<Loan> BASE = Comparator.comparing(Loan::getDatePublished, Comparator.reverseOrder())
+            .thenComparing(BaseLoan::getNonReservedRemainingInvestment, Comparator.reverseOrder());
+    private final Comparator<Loan> comparator;
+
+    public PrimaryMarketplaceComparator(Comparator<Rating> ratingByDemandComparator) {
+        this.comparator = Comparator.comparing(Loan::getRating, ratingByDemandComparator)
+                .thenComparing(BASE);
+    }
 
     @Override
     public int compare(final LoanDescriptor loan1, final LoanDescriptor loan2) {
-        return FINAL.compare(loan1.item(), loan2.item());
+        return comparator.compare(loan1.item(), loan2.item());
     }
 }

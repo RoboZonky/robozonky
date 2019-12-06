@@ -16,6 +16,11 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -25,17 +30,9 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
 class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
-
-    private static final Comparator<ParticipationDescriptor> COMPARATOR = new SecondaryMarketplaceComparator();
 
     private final ParsedStrategy strategy;
 
@@ -71,6 +68,11 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         return false;
     }
 
+    private static Comparator<ParticipationDescriptor> getPreferenceComparator(Set<Rating> ratingsInOrderOfPreference) {
+        Comparator<Rating> ratingsByDemand = Util.getRatingByDemandComparator(ratingsInOrderOfPreference);
+        return new SecondaryMarketplaceComparator(ratingsByDemand);
+    }
+
     @Override
     public Stream<RecommendedParticipation> recommend(final Collection<ParticipationDescriptor> available,
                                                       final PortfolioOverview portfolio,
@@ -78,14 +80,18 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
-        // split available marketplace into buckets per rating
-        final Map<Rating, List<ParticipationDescriptor>> splitByRating =
-                Util.sortByRating(strategy.getApplicableParticipations(available, portfolio),
-                                  d -> d.item().getRating());
-        // recommend amount to invest per strategy
-        return Util.rankRatingsByDemand(strategy, splitByRating.keySet(), portfolio)
-                .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
+        var desirableRatingsInOrderOfPreference = Util.rankRatingsByDemand(strategy, portfolio);
+        var withoutUndesirable = available.parallelStream()
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+                .filter(d -> { // skip loans in ratings which are not required by the strategy
+                    boolean isAcceptable = desirableRatingsInOrderOfPreference.contains(d.item().getRating());
+                    if (!isAcceptable) {
+                        LOGGER.debug("{} skipped due to an undesirable rating.", d.item());
+                    }
+                    return isAcceptable;
+                });
+        return strategy.getApplicableParticipations(withoutUndesirable, portfolio)
+                .sorted(getPreferenceComparator(desirableRatingsInOrderOfPreference))
                 .filter(d -> sizeMatchesStrategy(d.item()))
                 .flatMap(d -> d.recommend().stream());
     }

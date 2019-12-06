@@ -16,23 +16,22 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static com.github.robozonky.api.Ratio.fromPercentage;
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -47,8 +46,8 @@ class UtilTest extends AbstractRoboZonkyTest {
         return portfolioOverview;
     }
 
-    private static void assertOrder(final Stream<Rating> result, final Rating... ratingsOrderedDown) {
-        assertOrder(result.collect(Collectors.toList()), ratingsOrderedDown);
+    private static void assertOrder(final Set<Rating> result, final Rating... ratingsOrderedDown) {
+        assertOrder(new ArrayList<>(result), ratingsOrderedDown);
     }
 
     private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
@@ -58,14 +57,6 @@ class UtilTest extends AbstractRoboZonkyTest {
             softly.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
             softly.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
         });
-    }
-
-    private static void assertOrder(final Stream<Rating> result, final Rating r) {
-        assertOrder(result.collect(Collectors.toList()), r);
-    }
-
-    private static void assertOrder(final List<Rating> result, final Rating r) {
-        assertThat(result.get(0)).isEqualTo(r);
     }
 
     @Test
@@ -82,15 +73,15 @@ class UtilTest extends AbstractRoboZonkyTest {
         // all ratings have zero share; C > B > A
         final Set<Rating> ratings = EnumSet.of(Rating.A, Rating.B, Rating.C);
         PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.C, Rating.B, Rating.A);
+        assertOrder(Util.rankRatingsByDemand(parsed, portfolio), Rating.C, Rating.B, Rating.A);
 
         // A only; B, C overinvested
         portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.valueOf(10), BigDecimal.valueOf(30));
-        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.A);
+        assertOrder(Util.rankRatingsByDemand(parsed, portfolio), Rating.A);
 
         // B > A > C
         portfolio = preparePortfolio(BigDecimal.valueOf(0.99), BigDecimal.ZERO, BigDecimal.valueOf(24.9));
-        assertOrder(Util.rankRatingsByDemand(parsed, ratings, portfolio), Rating.B, Rating.A, Rating.C);
+        assertOrder(Util.rankRatingsByDemand(parsed, portfolio), Rating.B, Rating.A, Rating.C);
     }
 
     @Test

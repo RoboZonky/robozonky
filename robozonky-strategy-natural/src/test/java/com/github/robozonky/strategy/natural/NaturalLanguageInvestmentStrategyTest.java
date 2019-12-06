@@ -16,6 +16,13 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -30,14 +37,7 @@ import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterConditi
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -71,6 +71,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
                                                            portfolio, new Restrictions());
@@ -82,6 +83,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
         final Loan l = mockLoan(1000);
         final Rating r = l.getRating();
