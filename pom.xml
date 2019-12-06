@@ -713,7 +713,7 @@
             <path>
               <groupId>info.picocli</groupId>
               <artifactId>picocli-codegen</artifactId>
-              <version>4.1.0</version> <!-- For some reason, 4.1.1 is not in Maven Central -->
+              <version>${version.info.picocli}</version>
             </path>
           </annotationProcessorPaths>
           <compilerArgs>
