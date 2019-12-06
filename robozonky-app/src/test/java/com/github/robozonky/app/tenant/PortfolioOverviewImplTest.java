@@ -16,23 +16,43 @@
 
 package com.github.robozonky.app.tenant;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
+import java.time.Clock;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
+
+    @Test
+    void equality() {
+        setClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
+        PortfolioOverview po = new PortfolioOverviewImpl(Collections.emptyMap(), Ratio.ZERO);
+        assertThat(po)
+                .isEqualTo(po)
+                .isNotEqualTo(null)
+                .isNotEqualTo("");
+        PortfolioOverview po2 = new PortfolioOverviewImpl(Collections.emptyMap(), Ratio.ZERO);
+        assertThat(po).isEqualTo(po2);
+        assertThat(po2).isEqualTo(po);
+        resetClock();
+        PortfolioOverview po3 = new PortfolioOverviewImpl(Collections.emptyMap(), Ratio.ZERO);
+        assertThat(po3)
+                .isNotEqualTo(po)
+                .isNotEqualTo(po2);
+    }
 
     @Test
     void timestamp() {
