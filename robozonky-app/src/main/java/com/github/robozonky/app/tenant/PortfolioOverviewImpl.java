@@ -87,12 +87,12 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
             return false;
         }
         final PortfolioOverviewImpl that = (PortfolioOverviewImpl) o;
-        return Objects.equals(timestamp, that.timestamp) &&
-                Objects.equals(invested, that.invested);
+        return Objects.equals(invested, that.invested) &&
+                Objects.equals(investedPerRating, that.investedPerRating);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, invested);
+        return Objects.hash(invested, investedPerRating);
     }
 }
