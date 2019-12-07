@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -25,8 +27,6 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 
-import java.math.BigDecimal;
-
 final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     private final Reservation reservation;
@@ -34,6 +34,11 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
     public ReservationWrapper(final ReservationDescriptor original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
         this.reservation = original.item();
+    }
+
+    @Override
+    public long getId() {
+        return reservation.getId();
     }
 
     @Override
@@ -103,6 +108,6 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     @Override
     public String toString() {
-        return "Wrapper for reservation #" + reservation.getId();
+        return "Wrapper for reservation #" + getId();
     }
 }

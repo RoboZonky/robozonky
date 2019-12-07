@@ -52,6 +52,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
         }
         var preferences = Preferences.get(strategy, portfolio);
         var withoutUndesirable = available.parallelStream()
+                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> { // skip loans in ratings which are not required by the strategy
                     boolean isAcceptable = preferences.getDesirableRatings().contains(d.item().getRating());
                     if (!isAcceptable) {

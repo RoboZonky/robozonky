@@ -79,7 +79,7 @@ class ParsedStrategy {
                                          final String logMessage) {
         return filters.stream()
                 .filter(f -> f.test(item))
-                .peek(f -> Audit.LOGGER.debug(logMessage, item, f))
+                .peek(f -> Audit.LOGGER.debug(logMessage, item.getId(), f))
                 .findFirst()
                 .isPresent();
     }
@@ -124,23 +124,23 @@ class ParsedStrategy {
         return getInvestmentSize(rating).getMaximumInvestment();
     }
 
-    private <T> Stream<T> getApplicable(final Stream<Wrapper<T>> wrappers) {
+    private <T> Stream<T> getApplicable(final Stream<Wrapper<T>> wrappers, final String type) {
         var loanFilters = filters.getPrimaryMarketplaceFilters();
         var investmentFilters = filters.getSellFilters();
         return wrappers
-                .filter(w -> !matchesFilter(w, loanFilters, "{} skipped due to primary marketplace filter {}."))
-                .filter(w -> !matchesFilter(w, investmentFilters, "{} skipped due to sell filter {}."))
+                .filter(w -> !matchesFilter(w, loanFilters, type + " #{} skipped due to primary marketplace filter {}."))
+                .filter(w -> !matchesFilter(w, investmentFilters, type + " #{} skipped due to sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Stream<LoanDescriptor> l,
                                                      final PortfolioOverview portfolioOverview) {
-        return getApplicable(l.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)));
+        return getApplicable(l.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)), "Loan");
     }
 
     public Stream<ReservationDescriptor> getApplicableReservations(final Stream<ReservationDescriptor> r,
                                                                    final PortfolioOverview portfolioOverview) {
-        return getApplicable(r.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)));
+        return getApplicable(r.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)), "Reservation");
     }
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(final Stream<ParticipationDescriptor> p,
@@ -149,8 +149,8 @@ class ParsedStrategy {
         var sellFilters = filters.getSellFilters();
         return p.parallel()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> !matchesFilter(w, participationFilters, "{} skipped due to secondary marketplace filter {}."))
-                .filter(w -> !matchesFilter(w, sellFilters, "{} skipped due to sell filter {}."))
+                .filter(w -> !matchesFilter(w, participationFilters, "Participation #{} skipped due to secondary marketplace filter {}."))
+                .filter(w -> !matchesFilter(w, sellFilters, "Participation #{} skipped due to sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
@@ -175,7 +175,7 @@ class ParsedStrategy {
         var investmentFilters = filters.getSellFilters();
         return i.parallel()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> matchesFilter(w, investmentFilters, "{} to be sold due to sell filter {}."))
+                .filter(w -> matchesFilter(w, investmentFilters, "Investment #{} to be sold due to sell filter {}."))
                 .map(Wrapper::getOriginal);
     }
 
@@ -184,7 +184,7 @@ class ParsedStrategy {
         var loanFilters = filters.getPrimaryMarketplaceFilters();
         return i.parallel()
                 .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> matchesFilter(w, loanFilters, "{} sellable due to primary marketplace filter {}."))
+                .filter(w -> matchesFilter(w, loanFilters, "Investment #{} sellable due to primary marketplace filter {}."))
                 .map(Wrapper::getOriginal);
     }
 

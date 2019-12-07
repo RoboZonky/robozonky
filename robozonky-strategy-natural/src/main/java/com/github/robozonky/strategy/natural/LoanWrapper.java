@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -25,8 +27,6 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-import java.math.BigDecimal;
-
 final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     private final Loan loan;
@@ -34,6 +34,11 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
     public LoanWrapper(final LoanDescriptor original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
         this.loan = original.item();
+    }
+
+    @Override
+    public long getId() {
+        return loan.getId();
     }
 
     @Override
@@ -103,6 +108,6 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     @Override
     public String toString() {
-        return "Wrapper for loan #" + loan.getId();
+        return "Wrapper for loan #" + getId();
     }
 }

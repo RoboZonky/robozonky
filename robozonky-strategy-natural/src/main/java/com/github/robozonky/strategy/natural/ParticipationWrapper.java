@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -25,8 +27,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-import java.math.BigDecimal;
-
 final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescriptor> {
 
     private final Participation participation;
@@ -34,6 +34,11 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     public ParticipationWrapper(final ParticipationDescriptor descriptor, final PortfolioOverview portfolioOverview) {
         super(descriptor, portfolioOverview);
         this.participation = descriptor.item();
+    }
+
+    @Override
+    public long getId() {
+        return participation.getId();
     }
 
     @Override
@@ -94,6 +99,6 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public String toString() {
-        return "Wrapper for loan #" + participation.getLoanId() + ", participation #" + participation.getId();
+        return "Wrapper for loan #" + participation.getLoanId() + ", participation #" + getId();
     }
 }

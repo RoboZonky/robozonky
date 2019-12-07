@@ -51,6 +51,8 @@ public interface Wrapper<T> {
         return new ReservationWrapper(descriptor, portfolioOverview);
     }
 
+    long getId();
+
     boolean isInsuranceActive();
 
     Region getRegion();
