@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
+abstract class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
 
     // these values were the first and third quartile of story length in all loans between 2016-10-01 and 2017-05-20
     static final int SHORT_STORY_THRESHOLD = 200, LONG_STORY_THRESHOLD = 600;
@@ -29,6 +29,7 @@ class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
     private final Predicate<String> storyLength;
 
     protected AbstractStoryCondition(final Predicate<String> storyLength) {
+        super(true);
         this.storyLength = storyLength;
     }
 

@@ -94,6 +94,7 @@ class NaturalLanguageReservationStrategyTest {
                 s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
                             portfolio, new Restrictions());
         assertThat(result).isEmpty();
+        assertThatThrownBy(s::getMode).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

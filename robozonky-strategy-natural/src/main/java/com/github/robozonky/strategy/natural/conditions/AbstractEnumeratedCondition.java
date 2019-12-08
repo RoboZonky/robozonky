@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,12 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl impl
     private final Collection<T> possibleValues = new HashSet<>(0);
 
     protected AbstractEnumeratedCondition(final Function<Wrapper<?>, T> fieldRetriever) {
+        this(fieldRetriever, false);
+    }
+
+    protected AbstractEnumeratedCondition(final Function<Wrapper<?>, T> fieldRetriever,
+                                          final boolean mayRequireRemoteRequests) {
+        super(mayRequireRemoteRequests);
         this.fieldRetriever = fieldRetriever;
     }
 

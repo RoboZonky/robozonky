@@ -17,13 +17,37 @@
 package com.github.robozonky.strategy.natural;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
+import com.github.robozonky.strategy.natural.conditions.VeryShortStoryCondition;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class FilterSupplierTest {
+
+    @Test
+    void filterOrdering() { // Fast filters come first as they do not require HTTP requests to be made.
+        MarketplaceFilterCondition requiresRequests = new VeryShortStoryCondition();
+        MarketplaceFilterCondition doesNotRequireRequests = LoanTermCondition.lessThan(10);
+        MarketplaceFilter slowFilter = new MarketplaceFilter();
+        slowFilter.when(List.of(requiresRequests));
+        MarketplaceFilter fastFilter = new MarketplaceFilter();
+        fastFilter.when(List.of(doesNotRequireRequests));
+        FilterSupplier filters = new FilterSupplier(new DefaultValues(DefaultPortfolio.PROGRESSIVE),
+                                                    Arrays.asList(slowFilter, fastFilter),
+                                                    Arrays.asList(slowFilter, fastFilter),
+                                                    Collections.emptyList());
+        assertSoftly(softly -> {
+            softly.assertThat(filters.getPrimaryMarketplaceFilters()).containsExactly(fastFilter, slowFilter);
+            softly.assertThat(filters.getSecondaryMarketplaceFilters()).containsExactly(fastFilter, slowFilter);
+        });
+    }
 
     @Test
     void extremeExitDate() { // https://github.com/RoboZonky/robozonky/issues/219

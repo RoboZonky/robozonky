@@ -16,16 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Supplier;
 
 /**
  * The set of filters prescribed by the strategy changes based on whether or not the user has chosen to gradually exit
@@ -56,9 +59,10 @@ class FilterSupplier {
         this.defaults = defaults;
         this.primaryMarketplaceEnabled = primaryMarketplaceFilters != null;
         this.secondaryMarketplaceEnabled = secondaryMarketplaceFilters != null;
-        this.primaryMarketplaceFilters = primaryMarketplaceFilters;
-        this.secondaryMarketplaceFilters = secondaryMarketplaceFilters;
         this.sellFilters = sellFilters;
+        // Order filters based on whether or not they may require HTTP requests, improving performance of the strategy.
+        this.primaryMarketplaceFilters = reorderFilters(primaryMarketplaceFilters);
+        this.secondaryMarketplaceFilters = reorderFilters(secondaryMarketplaceFilters);
         refresh();
     }
 
@@ -75,6 +79,21 @@ class FilterSupplier {
         this(defaults, null);
     }
 
+    /**
+     *
+     * @param marketplaceFilters
+     * @return Collection of filters with a stable iteration order, where the filters that do not require HTTP requests
+     * come first.
+     */
+    private static Set<MarketplaceFilter> reorderFilters(final Collection<MarketplaceFilter> marketplaceFilters) {
+        if (marketplaceFilters == null) {
+            return Collections.emptySet();
+        }
+        return marketplaceFilters.stream()
+                .sorted()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     private static Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> unlessSelloff,
                                                             final boolean isSelloff) {
         if (isSelloff) { // accept every sale, reject every investment and participation
@@ -87,7 +106,7 @@ class FilterSupplier {
     private static Collection<MarketplaceFilter> supplyFilters(final Collection<MarketplaceFilter> filters,
                                                                final long monthsBeforeExit) {
         if (monthsBeforeExit > -1) { // ignore marketplace items that go over the exit date
-            final int filteredTerms = (int)Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
+            final int filteredTerms = (int) Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
             final MarketplaceFilterCondition c = LoanTermCondition.moreThan(filteredTerms);
             final MarketplaceFilter f = MarketplaceFilter.of(c);
             final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size() + 1);

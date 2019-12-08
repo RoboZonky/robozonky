@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,36 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
+/**
+ * Note: this class has a natural ordering that is inconsistent with equals.
+ */
+abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondition,
+                                                         Comparable<MarketplaceFilterConditionImpl> {
+
+    private final boolean mayRequireRemoteRequests;
+
+    protected MarketplaceFilterConditionImpl(final boolean mayRequireRemoteRequests) {
+        this.mayRequireRemoteRequests = mayRequireRemoteRequests;
+    }
+
+    protected MarketplaceFilterConditionImpl() {
+        this(false);
+    }
+
+    @Override
+    public final boolean mayRequireRemoteRequests() {
+        return mayRequireRemoteRequests;
+    }
 
     @Override
     public String toString() {
         final String description = getDescription().orElse("N/A.");
         return this.getClass().getSimpleName() + " (" + description + ")";
+    }
+
+    @Override
+    public int compareTo(final MarketplaceFilterConditionImpl o) {
+        return Boolean.compare(mayRequireRemoteRequests(), o.mayRequireRemoteRequests());
     }
 
 }

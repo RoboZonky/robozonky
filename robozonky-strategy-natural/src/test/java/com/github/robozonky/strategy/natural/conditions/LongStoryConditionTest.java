@@ -40,4 +40,11 @@ class LongStoryConditionTest {
         when(l.getStory()).thenReturn(story);
         assertThat(new LongStoryCondition().test(l)).isFalse();
     }
+
+    @Test
+    void expectsRemoteRequest() {
+        final AbstractStoryCondition condition = new LongStoryCondition();
+        assertThat(condition.mayRequireRemoteRequests()).isTrue();
+    }
+
 }

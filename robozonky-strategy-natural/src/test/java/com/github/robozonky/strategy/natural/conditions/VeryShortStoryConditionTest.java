@@ -40,4 +40,11 @@ class VeryShortStoryConditionTest {
         when(l.getStory()).thenReturn(story);
         assertThat(new VeryShortStoryCondition().test(l)).isTrue();
     }
+
+    @Test
+    void expectsRemoteRequest() {
+        final AbstractStoryCondition condition = new VeryShortStoryCondition();
+        assertThat(condition.mayRequireRemoteRequests()).isTrue();
+    }
+
 }

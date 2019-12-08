@@ -26,6 +26,7 @@ class NeverAcceptingConditionTest {
     void negate() {
         final MarketplaceFilterCondition negated = NeverAceptingCondition.INSTANCE.negate();
         assertThat(negated).isEqualTo(AlwaysAcceptingCondition.INSTANCE);
+        assertThat(negated.mayRequireRemoteRequests()).isFalse();
     }
 
     @Test

@@ -22,7 +22,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 public final class RevenueRateCondition extends AbstractRangeCondition<Ratio> {
 
     private RevenueRateCondition(final RangeCondition<Ratio> condition) {
-        super(condition);
+        super(condition, true);
     }
 
     public static RevenueRateCondition lessThan(final Ratio threshold) {
@@ -40,4 +40,5 @@ public final class RevenueRateCondition extends AbstractRangeCondition<Ratio> {
                                                              minimumThreshold, maximumThreshold);
         return new RevenueRateCondition(c);
     }
+
 }
