@@ -16,12 +16,12 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.OffsetDateTime;
+import java.util.Objects;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
-
-import java.time.OffsetDateTime;
-import java.util.Objects;
 
 final class Blocked {
 
@@ -54,16 +54,9 @@ final class Blocked {
         return rating;
     }
 
-    public boolean isValidInStatistics(final RemoteData remoteData) {
-        return storedOn.isAfter(remoteData.getStatistics().getTimestamp());
-    }
-
-    public boolean isValidInBalance(final RemoteData remoteData) {
-        return storedOn.isAfter(remoteData.getRetrievedOn());
-    }
-
     public boolean isValid(final RemoteData remoteData) {
-        return persistent || isValidInStatistics(remoteData) || isValidInBalance(remoteData);
+        return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp())
+                || remoteData.getBlocked().stream().noneMatch(t -> t._1 == id);
     }
 
     @Override
