@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.function.Supplier;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
@@ -28,40 +27,46 @@ import static org.mockito.Mockito.*;
 
 class MarketplaceFilterTest {
 
-    private static final Supplier<MarketplaceFilterCondition> MATCHING = MarketplaceFilterCondition::alwaysAccepting;
-    private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = MarketplaceFilterCondition::neverAccepting;
+    private static final MarketplaceFilterCondition MATCHING = new MarketplaceFilterConditionImpl() {
+        @Override
+        public boolean test(Wrapper<?> item) {
+            return true;
+        }
+    };
+    private static final MarketplaceFilterCondition NOT_MATCHING = MATCHING.negate();
 
     @Test
     void noConditions() {
-        final MarketplaceFilterConditionImpl f = new MarketplaceFilter();
+        final MarketplaceFilterCondition f = new MarketplaceFilter();
         assertThat(f.test(mock(Wrapper.class))).isTrue();
+        assertThat(f.toString()).isNotEmpty();
     }
 
     @Test
     void oneMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.when(Collections.singletonList(MATCHING.get()));
+        f.when(Collections.singletonList(MATCHING));
         assertThat(f.test(mock(Wrapper.class))).isTrue();
     }
 
     @Test
     void notAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.when(Arrays.asList(MATCHING.get(), NOT_MATCHING.get(), MATCHING.get()));
+        f.when(Arrays.asList(MATCHING, NOT_MATCHING, MATCHING));
         assertThat(f.test(mock(Wrapper.class))).isFalse();
     }
 
     @Test
     void secondaryOneNotMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.butNotWhen(Collections.singleton(NOT_MATCHING.get()));
+        f.butNotWhen(Collections.singleton(NOT_MATCHING));
         assertThat(f.test(mock(Wrapper.class))).isTrue();
     }
 
     @Test
     void secondaryAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.butNotWhen(Arrays.asList(MATCHING.get(), MATCHING.get()));
+        f.butNotWhen(Arrays.asList(MATCHING, MATCHING));
         assertThat(f.test(mock(Wrapper.class))).isFalse();
     }
 }

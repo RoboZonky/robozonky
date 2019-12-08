@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 public class BorrowerRegionCondition extends AbstractEnumeratedCondition<Region> {
 
     public BorrowerRegionCondition() {
-        super(Wrapper::getRegion);
+        super(Wrapper::getRegion, true);
     }
+
 }

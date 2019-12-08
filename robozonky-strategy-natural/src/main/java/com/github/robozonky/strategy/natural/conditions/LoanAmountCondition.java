@@ -21,7 +21,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 public final class LoanAmountCondition extends AbstractRangeCondition<Integer> {
 
     private LoanAmountCondition(final RangeCondition<Integer> condition) {
-        super(condition);
+        super(condition, true);
     }
 
     public static LoanAmountCondition lessThan(final int threshold) {
@@ -41,4 +41,5 @@ public final class LoanAmountCondition extends AbstractRangeCondition<Integer> {
                                                                minimumThreshold, maximumThreshold);
         return new LoanAmountCondition(c);
     }
+
 }

@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.util.function.Predicate;
+
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -56,4 +58,12 @@ class AverageStoryConditionTest {
         when(l.getStory()).thenReturn(story);
         assertThat(new AverageStoryCondition().test(l)).isFalse();
     }
+
+    @Test
+    void basicProperties() {
+        final AbstractStoryCondition condition = new AverageStoryCondition();
+        assertThat(condition.mayRequireRemoteRequests()).isTrue();
+        assertThat((Predicate<Wrapper<?>>) condition).hasToString(AverageStoryCondition.class.getSimpleName() + " (N/A.)");
+    }
+
 }

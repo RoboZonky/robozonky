@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2019 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,14 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
@@ -39,10 +42,16 @@ import com.github.robozonky.strategy.natural.Wrapper;
  * </ul>
  * <p>
  * Result of the evaluation obtained via {@link #test(Wrapper)}.
+ * <p>
+ * Note: this class has a natural ordering that is inconsistent with equals.
  */
-public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
+public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable<MarketplaceFilter> {
 
+    private static final Comparator<MarketplaceFilter> COMPARATOR =
+            Comparator.comparing(MarketplaceFilter::mayRequireRemoteRequests)
+                    .thenComparing(f -> f.id);
     private static AtomicInteger COUNTER = new AtomicInteger(0);
+
     private final int id = COUNTER.incrementAndGet();
     private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
             butNotWhen = Collections.emptySet();
@@ -60,11 +69,23 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
     }
 
     /**
+     * @param conditions
+     * @return Collection of conditions with a stable iteration order, where the conditions that do not require HTTP
+     * requests come first.
+     */
+    private static Set<MarketplaceFilterCondition> processConditions(
+            final Collection<? extends MarketplaceFilterCondition> conditions) {
+        return conditions.stream()
+                .sorted()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /**
      * {@link #test(Wrapper)} will only return true if all of the conditions supplied here return true.
      * @param conditions All must return true for filter to return true.
      */
     public void when(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        when = new LinkedHashSet<>(conditions);
+        when = processConditions(conditions);
     }
 
     /**
@@ -73,7 +94,13 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return false for filter to return true.
      */
     public void butNotWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        butNotWhen = new LinkedHashSet<>(conditions);
+        butNotWhen = processConditions(conditions);
+    }
+
+    @Override
+    public boolean mayRequireRemoteRequests() {
+        return Stream.concat(when.stream(), butNotWhen.stream())
+                .anyMatch(MarketplaceFilterCondition::mayRequireRemoteRequests);
     }
 
     @Override
@@ -90,5 +117,16 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
     public boolean test(final Wrapper<?> item) {
         final Predicate<MarketplaceFilterCondition> f = c -> c.test(item);
         return when.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
+    }
+
+    @Override
+    public int compareTo(final MarketplaceFilter o) {
+        return COMPARATOR.compare(this, o);
+    }
+
+    @Override
+    public String toString() {
+        final String description = getDescription().orElse("N/A.");
+        return this.getClass().getSimpleName() + " (" + description + ")";
     }
 }

@@ -16,6 +16,11 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+import java.util.function.Predicate;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -30,11 +35,7 @@ import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -118,6 +119,6 @@ class ParticipationWrapperTest {
         when(p.getInterestRate()).thenReturn(Ratio.fromPercentage(15));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd, FOLIO);
-        assertThat(f).rejects(w);
+        assertThat((Predicate<Wrapper<?>>) f).rejects(w);
     }
 }

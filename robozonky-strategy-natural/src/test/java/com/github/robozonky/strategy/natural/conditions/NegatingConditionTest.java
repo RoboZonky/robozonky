@@ -22,12 +22,19 @@ import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class NegatingConditionTest {
 
     private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
+
+    @Test
+    void doubleNegation() {
+        final MarketplaceFilterCondition c = item -> true;
+        assertThat(c.negate().negate()).isSameAs(c);
+        assertThat(c.mayRequireRemoteRequests()).isFalse();
+    }
 
     @Test
     void negatingTrue() {
