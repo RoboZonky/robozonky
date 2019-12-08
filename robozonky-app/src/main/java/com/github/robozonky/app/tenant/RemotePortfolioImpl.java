@@ -97,9 +97,9 @@ class RemotePortfolioImpl implements RemotePortfolio {
                                           Money::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach(blocked -> {
-            Rating r = blocked._2;
-            Money amount = blocked._3;
+        data.getBlocked().forEach((id, blocked) -> {
+            Rating r = blocked._1;
+            Money amount = blocked._2;
             amounts.put(r, amounts.getOrDefault(r, amount.getZero()).add(amount));
         });
         LOGGER.debug("Plus remote blocked: {}.", amounts);

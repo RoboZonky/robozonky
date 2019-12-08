@@ -56,7 +56,7 @@ final class Blocked {
 
     public boolean isValid(final RemoteData remoteData) {
         return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp())
-                || remoteData.getBlocked().stream().noneMatch(t -> t._1 == id);
+                || !remoteData.getBlocked().containsKey(id);
     }
 
     @Override
