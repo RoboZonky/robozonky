@@ -16,6 +16,15 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Duration;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -26,32 +35,19 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
 class RemotePortfolioImpl implements RemotePortfolio {
 
     private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
     private final Reloadable<RemoteData> portfolio;
-    private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId =
-            new AtomicReference<>(new LinkedHashMap<>(0));
-    private final Reloadable<PortfolioOverview> portfolioOverview;
+    private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId = new AtomicReference<>(new HashMap<>(0));
+    private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
     private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
         this.isDryRun = tenant.getSessionInfo().isDryRun();
         this.portfolio = Reloadable.with(() -> RemoteData.load(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
-                .finishWith(this::refreshPortfolio)
-                .build();
-        this.portfolioOverview = Reloadable.with(() -> (PortfolioOverview) new PortfolioOverviewImpl(this))
-                .finishWith(po -> LOGGER.debug("New portfolio overview: {}.", po))
-                .reloadAfter(Duration.ofMinutes(5))
+                .finishWith(this::refresh)
                 .build();
     }
 
@@ -59,16 +55,15 @@ class RemotePortfolioImpl implements RemotePortfolio {
         return portfolio.getDue().add(portfolio.getUnpaid());
     }
 
-    private void refreshPortfolio(final RemoteData data) {
+    private void refresh(final RemoteData data) {
         // remove synthetic charges that are replaced by actual remote blocked amounts
         LOGGER.debug("New remote data: {}.", data);
         LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
                 .filter(e -> e.getValue().isValid(data))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        portfolioOverview.set(null); // Force overview recalculation now that we have registered a change.
         LOGGER.debug("New synthetics: {}.", updatedSynthetics);
-        // force overview recalculation now that we have the latest portfolio
-        portfolioOverview.clear();
     }
 
     @Override
@@ -83,10 +78,9 @@ class RemotePortfolioImpl implements RemotePortfolio {
             result.put(loanId, new Blocked(loanId, amount, rating, isDryRun));
             return result;
         });
+        // Force re-fetch of portfolio data now that we have registered a change.
+        portfolioOverview.set(null);
         LOGGER.debug("Synthetic added. New synthetics: {}", updatedSynthetics);
-        // force re-fetch of blocked amounts and portfolio data now that we have registered a change
-        portfolio.clear();
-        portfolioOverview.clear();
     }
 
     RemoteData getRemotePortfolio() {
@@ -103,10 +97,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
                                           Money::add, // should not be necessary
                                           () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach((r, amount) -> amounts.put(r, amounts.getOrDefault(r, amount.getZero()).add(amount)));
+        data.getBlocked().forEach((id, blocked) -> {
+            Rating r = blocked._1;
+            Money amount = blocked._2;
+            amounts.put(r, amounts.getOrDefault(r, amount.getZero()).add(amount));
+        });
         LOGGER.debug("Plus remote blocked: {}.", amounts);
         syntheticByLoanId.get().values().stream()
-                .filter(syntheticBlocked -> syntheticBlocked.isValidInStatistics(data))
+                .filter(syntheticBlocked -> syntheticBlocked.isValid(data))
                 .forEach(syntheticBlocked -> {
                     final Rating r = syntheticBlocked.getRating();
                     final Money zero = syntheticBlocked.getAmount().getZero();
@@ -118,7 +116,15 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     @Override
     public PortfolioOverview getOverview() {
-        return portfolioOverview.get()
-                .getOrElseThrow(t -> new IllegalStateException("Failed calculating portfolio overview.", t));
+        PortfolioOverview old = portfolioOverview.get();
+        if (old != null) {
+            return old;
+        }
+        PortfolioOverview current = new PortfolioOverviewImpl(this);
+        boolean haveNew = portfolioOverview.compareAndSet(null, current);
+        if (haveNew) {
+            LOGGER.debug("New portfolio overview: {}.", current);
+        }
+        return current;
     }
 }

@@ -16,8 +16,12 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
@@ -25,27 +29,20 @@ import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.stream.Collector;
-
-import static java.util.stream.Collectors.*;
 
 final class RemoteData {
 
     private static final Logger LOGGER = LogManager.getLogger(RemoteData.class);
-    private static final Collector<Money, ?, Money> MONEY_REDUCING_COLLECTOR = reducing(Money.ZERO, Money::add);
 
     private final Statistics statistics;
-    private final Map<Rating, Money> blocked;
+    private final Map<Integer, Tuple2<Rating, Money>> blocked;
     private final OffsetDateTime retrievedOn = DateUtil.offsetNow();
 
-    private RemoteData(final Statistics statistics, final Map<Rating, Money> blocked) {
+    private RemoteData(final Statistics statistics, final Map<Integer, Tuple2<Rating, Money>> blocked) {
         this.statistics = statistics;
         this.blocked = blocked;
     }
@@ -53,18 +50,17 @@ final class RemoteData {
     public static RemoteData load(final Tenant tenant) {
         LOGGER.debug("Loading the latest Zonky portfolio information.");
         final Statistics statistics = tenant.call(Zonky::getStatistics);
-        final Map<Rating, Money> blocked = getAmountsBlocked(tenant);
+        final Map<Integer, Tuple2<Rating, Money>> blocked = getAmountsBlocked(tenant);
         LOGGER.debug("Finished.");
         return new RemoteData(statistics, blocked);
     }
 
-    static Map<Rating, Money> getAmountsBlocked(final Tenant tenant) {
+    static Map<Integer, Tuple2<Rating, Money>> getAmountsBlocked(final Tenant tenant) {
         final Select select = new Select()
                 .lessThanOrNull("activeFrom", Instant.EPOCH.atZone(Defaults.ZONE_ID).toOffsetDateTime());
         return tenant.call(zonky -> zonky.getInvestments(select))
                 .peek(investment -> LOGGER.debug("Found: {}.", investment))
-                .collect(groupingBy(Investment::getRating, () -> new EnumMap<>(Rating.class),
-                        mapping(Investment::getAmount, MONEY_REDUCING_COLLECTOR)));
+                .collect(Collectors.toMap(i -> i.getLoanId(), i -> Tuple.of(i.getRating(), i.getAmount())));
     }
 
     public OffsetDateTime getRetrievedOn() {
@@ -75,7 +71,7 @@ final class RemoteData {
         return statistics;
     }
 
-    public Map<Rating, Money> getBlocked() {
+    public Map<Integer, Tuple2<Rating, Money>> getBlocked() {
         return blocked;
     }
 
