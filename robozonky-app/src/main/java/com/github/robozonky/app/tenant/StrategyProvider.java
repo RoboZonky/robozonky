@@ -16,6 +16,14 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Duration;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -29,18 +37,11 @@ import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.Duration;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 class StrategyProvider implements ReloadListener<String> {
 
     private static final Logger LOGGER = LogManager.getLogger(StrategyProvider.class);
 
+    private final AtomicReference<String> lastLoadedStrategy = new AtomicReference<>();
     private final AtomicReference<InvestmentStrategy> toInvest = new AtomicReference<>();
     private final AtomicReference<SellStrategy> toSell = new AtomicReference<>();
     private final AtomicReference<PurchaseStrategy> toPurchase = new AtomicReference<>();
@@ -72,30 +73,37 @@ class StrategyProvider implements ReloadListener<String> {
 
     private static <T> T set(final AtomicReference<T> ref, final Supplier<Optional<T>> provider, final String desc) {
         final T value = ref.updateAndGet(old -> provider.get().orElse(null));
-        final String log = Objects.isNull(value) ?
-                "{} strategy inactive or missing, disabling all such operations." :
-                "{} strategy correctly loaded.";
-        LOGGER.info(log, desc);
+        if (Objects.isNull(value)) {
+            LOGGER.info("{} strategy inactive or missing, disabling all such operations.", desc);
+        } else {
+            LOGGER.debug("{} strategy correctly loaded.", desc);
+        }
         return value;
     }
 
     @Override
     public void newValue(final String newValue) {
+        var oldStrategy = lastLoadedStrategy.getAndSet(newValue);
+        if (Objects.equals(oldStrategy, newValue)) {
+            LOGGER.debug("No change in strategy source code detected.");
+            return;
+        }
         LOGGER.trace("Loading strategies.");
-        final InvestmentStrategy i = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
-        final PurchaseStrategy p = set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
-        final SellStrategy s = set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
-        final ReservationStrategy r = set(forReservations, () -> StrategyLoader.forReservations(newValue),
-                "Reservations");
-        final boolean allMissing = Stream.of(i, p, s, r).allMatch(Objects::isNull);
-        if (allMissing) {
-            LOGGER.warn("No strategies are available. Check log for parser errors.");
+        var investStrategy = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
+        var purchaseStrategy = set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
+        var sellingStrategy = set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
+        var reserveStrategy = set(forReservations, () -> StrategyLoader.forReservations(newValue), "Reservations");
+        var allStrategiesMissing = Stream.of(investStrategy, purchaseStrategy, sellingStrategy, reserveStrategy)
+                .allMatch(Objects::isNull);
+        if (allStrategiesMissing) {
+            LOGGER.warn("No strategies are available, all operations are disabled. Check log for parser errors.");
         }
         LOGGER.trace("Finished.");
     }
 
     @Override
     public void valueUnset() {
+        lastLoadedStrategy.set(null);
         Stream.of(toInvest, toSell, toPurchase, forReservations).forEach(ref -> ref.set(null));
         LOGGER.warn("There are no strategies, all operations are disabled.");
     }
