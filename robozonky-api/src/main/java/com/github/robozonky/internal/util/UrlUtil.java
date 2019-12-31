@@ -24,8 +24,12 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import com.github.robozonky.internal.Settings;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class UrlUtil {
+
+    private static final Logger LOGGER = LogManager.getLogger(UrlUtil.class);
 
     private UrlUtil() {
         // no instances
@@ -33,10 +37,12 @@ public final class UrlUtil {
 
     public static URL toURL(final String string) {
         try {
+            LOGGER.trace("Converting '{}' to URL.", string);
             return new URL(string);
         } catch (final MalformedURLException ex) {
             final File f = new File(string);
             try {
+                LOGGER.trace("Converting '{}' to URL as a file.", string);
                 return f.getAbsoluteFile().toURI().toURL();
             } catch (final MalformedURLException ex2) {
                 throw new IllegalArgumentException("Incorrect location configuration.", ex2);
@@ -45,6 +51,7 @@ public final class UrlUtil {
     }
 
     public static InputStream open(final URL url) throws IOException {
+        LOGGER.trace("Opening {}.", url);
         final URLConnection con = url.openConnection();
         con.setConnectTimeout((int) Settings.INSTANCE.getConnectionTimeout().toMillis());
         con.setReadTimeout((int) Settings.INSTANCE.getSocketTimeout().toMillis());

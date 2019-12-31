@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -52,7 +51,10 @@ class StrategyProvider implements ReloadListener<String> {
         this.reloadableStrategy = Reloadable.with(() ->
                 Try.withResources(() -> UrlUtil.open(UrlUtil.toURL(strategyLocation)))
                         .of(StringUtil::toString)
-                        .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new))
+                        .getOrElseThrow(t -> {
+                            LOGGER.error("Failed reading strategy source.", t);
+                            throw new IllegalStateException("Failed reading strategy source.", t);
+                        }))
                 .addListener(this)
                 .reloadAfter(Duration.ofHours(1))
                 .async()
