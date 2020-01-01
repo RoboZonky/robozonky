@@ -31,11 +31,16 @@ hodnotou.</small></p>
   <caption><h2>Struktura portfolia k ${data.portfolio.timestamp?time?iso_local_ms_nz}</h2></caption>
   <thead>
     <tr>
+        <th style="padding: 5px; text-align: right;">&nbsp;</th>
+        <th style="padding: 5px; text-align: center;" colspan="4">Stav portfolia</th>
+        <th style="padding: 5px; text-align: center;" colspan="4">Odkupní hodnota</th>
+    </tr>
+    <tr>
         <th style="padding: 5px; text-align: right;">Úrok</th>
         <th style="padding: 5px;" colspan="2">Investováno</th>
         <th style="padding: 5px;" colspan="2">Ohroženo</th>
-        <th style="padding: 5px;" colspan="2">Prodatelné</th>
-        <th style="padding: 5px;" colspan="2">Prodatelné bez poplatku</th>
+        <th style="padding: 5px;" colspan="2">Celková</th>
+        <th style="padding: 5px;" colspan="2">Bez poplatků</th>
     </tr>
   </thead>
   <tfoot>
