@@ -45,13 +45,13 @@
     <version.org.antlr>4.7.2</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
     <version.info.picocli>4.1.4</version.info.picocli>
-    <version.org.jboss.resteasy>4.4.1.Final</version.org.jboss.resteasy>
+    <version.org.jboss.resteasy>4.4.1.Final</version.org.jboss.resteasy> <!-- 4.4.2+ requires Jackson 2.10.x -->
     <version.org.junit5>5.1</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
     <version.org.mockito>3.1.5</version.org.mockito>
     <version.org.mock-server>5.7.1</version.org.mock-server>
-    <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>
+    <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j> <!-- 2.13.0 has an annoying bug (LOG4J2-2739) -->
     <version.com.sun.mail>1.6.4</version.com.sun.mail>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
