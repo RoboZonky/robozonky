@@ -173,6 +173,21 @@
         "code": "java.method.removed",
         "old": "method java.lang.String com.github.robozonky.api.remote.entities.Investment::getSurname()",
         "justification": "Removed unused data structures."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.remote.entities.SellInfo com.github.robozonky.api.remote.PortfolioApi::getSellInfo(long)",
+        "justification": "Introducing Zonky's new API for secondary marketplace."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.remote.entities.Statistics com.github.robozonky.api.remote.PortfolioApi::getStatistics()",
+        "justification": "Introducing Zonky's new API for secondary marketplace."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.remote.entities.Statistics com.github.robozonky.api.remote.PortfolioApi::item()",
+        "justification": "Introducing Zonky's new API for secondary marketplace."
       }
     ]
   }

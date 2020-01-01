@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.robozonky.internal;
 public final class ApiConstants {
 
     public static final String ME = "/users/me";
+    public static final String INVESTMENTS = ME + "/investments";
     public static final String LOANS = "/loans";
     public static final String MARKETPLACE = LOANS + "/marketplace";
     private static final String RESERVATIONS_BASE = "/loans/marketplace/reservations";
