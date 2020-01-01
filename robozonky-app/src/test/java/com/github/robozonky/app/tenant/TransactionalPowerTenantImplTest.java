@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,18 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -39,15 +45,11 @@ import com.github.robozonky.internal.tenant.TransactionalTenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import static com.github.robozonky.app.events.impl.EventFactory.*;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 import static com.github.robozonky.app.tenant.PowerTenant.transactional;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
@@ -113,6 +115,15 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         final Loan result = tenant.getLoan(loanId);
         assertThat(transactional.getLoan(loanId)).isEqualTo(result);
+    }
+
+    @Test
+    void delegatesSellInfo() {
+        final SellInfo fresh = mock(SellInfo.class);
+        final long investmentId = 1;
+        when(zonky.getSellInfo(eq(investmentId))).thenReturn(fresh);
+        final SellInfo result = tenant.getSellInfo(investmentId);
+        assertThat(transactional.getSellInfo(investmentId)).isEqualTo(result);
     }
 
     @Test

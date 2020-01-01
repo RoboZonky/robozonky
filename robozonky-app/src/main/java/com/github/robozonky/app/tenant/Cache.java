@@ -38,10 +38,18 @@ import org.apache.logging.log4j.Logger;
 final class Cache<T> implements AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(Cache.class);
-    private static final Duration EVICT_AFTER = Duration.ofDays(1);
-    private static final Duration EVICT_EVERY = Duration.ofHours(1);
 
     private static final Backend<Loan> LOAN_BACKEND = new Backend<>() {
+        @Override
+        public Duration getEvictEvery() {
+            return Duration.ofHours(1);
+        }
+
+        @Override
+        public Duration getEvictAfter() {
+            return Duration.ofDays(1);
+        }
+
         @Override
         public Class<Loan> getItemClass() {
             return Loan.class;
@@ -63,6 +71,16 @@ final class Cache<T> implements AutoCloseable {
     };
 
     private static final Backend<SellInfo> SELL_INFO_BACKEND = new Backend<>() {
+        @Override
+        public Duration getEvictEvery() {
+            return Duration.ofHours(1);
+        }
+
+        @Override
+        public Duration getEvictAfter() {
+            return Duration.ofHours(1);
+        }
+
         @Override
         public Class<SellInfo> getItemClass() {
             return SellInfo.class;
@@ -93,7 +111,8 @@ final class Cache<T> implements AutoCloseable {
         LOGGER.debug("Starting {} cache for {}.", backend.getItemClass(), tenant);
         this.tenant = tenant;
         this.backend = backend;
-        this.evictionTask = Tasks.INSTANCE.scheduler().submit(this::evict, EVICT_EVERY, EVICT_EVERY);
+        this.evictionTask = Tasks.INSTANCE.scheduler().submit(this::evict, backend.getEvictEvery(),
+                                                              backend.getEvictEvery());
     }
 
     public static Cache<Loan> forLoan(final Tenant tenant) {
@@ -110,7 +129,7 @@ final class Cache<T> implements AutoCloseable {
 
     private boolean isExpired(final Tuple2<T, Instant> p) {
         final Instant now = DateUtil.now();
-        final Instant expiration = p._2().plus(EVICT_AFTER);
+        final Instant expiration = p._2().plus(backend.getEvictAfter());
         return expiration.isBefore(now);
     }
 
@@ -170,6 +189,10 @@ final class Cache<T> implements AutoCloseable {
     }
 
     private interface Backend<I> {
+
+        Duration getEvictEvery();
+
+        Duration getEvictAfter();
 
         Class<I> getItemClass();
 
