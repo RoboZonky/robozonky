@@ -41,6 +41,7 @@ import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -134,6 +135,14 @@ public class Zonky {
     public void sell(final Investment investment) {
         LOGGER.debug("Offering to sell investment in loan #{}.", investment.getLoanId());
         controlApi.run(api -> api.offer(new SellRequest(investment)));
+    }
+
+    public SellInfo getSellInfo(final Investment investment) {
+        return getSellInfo(investment.getId());
+    }
+
+    public SellInfo getSellInfo(final long investmentId) {
+        return portfolioApi.execute(api -> api.getSellInfo(investmentId));
     }
 
     public void accept(final Reservation reservation) {

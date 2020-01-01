@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,14 @@
 
 package com.github.robozonky.internal.tenant;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -26,10 +31,6 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.util.StreamUtil;
-
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Base tenant functionality. All changes made via these methods will be immediately persisted, unless the instance
@@ -79,12 +80,24 @@ public interface Tenant extends AutoCloseable {
     Optional<ReservationStrategy> getReservationStrategy();
 
     /**
-     * Retrieve a {@link Loan} from Zonky, possibly caching it in the process. If you don't wish to cache the loan,
+     * Retrieve a {@link Loan} from Zonky, possibly caching it in the process. If you don't wish to cache it,
      * simply use {@link #call(Function)} to get to {@link Zonky#getLoan(int)}.
      * @param loanId
      * @return
      */
-    Loan getLoan(final int loanId);
+    default Loan getLoan(final int loanId) {
+        return call(zonky -> zonky.getLoan(loanId));
+    }
+
+    /**
+     * Retrieve a {@link SellInfo} from Zonky, possibly caching it in the process. If you don't wish to cache it,
+     * simply use {@link #call(Function)} to get to {@link Zonky#getSellInfo(long)}.
+     * @param investmentId
+     * @return
+     */
+    default SellInfo getSellInfo(final long investmentId) {
+        return call(zonky -> zonky.getSellInfo(investmentId));
+    }
 
     <T> InstanceState<T> getState(final Class<T> clz);
 }

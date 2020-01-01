@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,20 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Duration;
+import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -35,15 +44,12 @@ import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import io.vavr.Lazy;
-
-import java.time.Duration;
-import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class PowerTenantImpl implements PowerTenant {
+
+    private static final Logger LOGGER = LogManager.getLogger(PowerTenantImpl.class);
 
     private final Random random = new Random();
     private final SessionInfo sessionInfo;
@@ -54,6 +60,7 @@ class PowerTenantImpl implements PowerTenant {
     private final Lazy<ZonkyApiTokenSupplier> token;
     private final StrategyProvider strategyProvider;
     private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
+    private final Lazy<Cache<SellInfo>> sellInfoCache = Lazy.of(() -> Cache.forSellInfo(this));
     private final StatefulBoundedBalance balance;
     private final Lazy<Availability> availability;
 
@@ -135,14 +142,26 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
+    public SellInfo getSellInfo(final long investmentId) {
+        return sellInfoCache.get().get(investmentId);
+    }
+
+    @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo()).in(clz);
     }
 
     @Override
     public void close() {
-        token.get().close();
-        loanCache.get().close();
+        Stream.of(token, loanCache, sellInfoCache)
+                .filter(lazy -> !lazy.isEmpty())
+                .forEach(lazy -> {
+                    try {
+                        lazy.get().close();
+                    } catch (final Exception ex) {
+                        LOGGER.debug("Failed closing tenant.", ex);
+                    }
+                });
     }
 
     @Override

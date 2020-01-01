@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.core.Response;
+
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.ApiProvider;
@@ -24,19 +31,11 @@ import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.Response;
-import java.io.Closeable;
-import java.time.Duration;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
-
 /**
  * Will keep permanent user authentication running in the background.
  */
 class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
-        Closeable {
+        AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(ZonkyApiTokenSupplier.class);
     private static final Duration ONE_HOUR = Duration.ofHours(1);

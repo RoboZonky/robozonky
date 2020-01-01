@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package com.github.robozonky.test;
 
+import java.time.Instant;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -30,11 +33,7 @@ import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 
-import java.time.Instant;
-import java.util.Optional;
-import java.util.function.Function;
-
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 public class TestingTenant implements Tenant {
 
@@ -92,11 +91,6 @@ public class TestingTenant implements Tenant {
     @Override
     public Optional<ReservationStrategy> getReservationStrategy() {
         return Optional.empty();
-    }
-
-    @Override
-    public Loan getLoan(final int loanId) {
-        return call(z -> z.getLoan(loanId));
     }
 
     @Override

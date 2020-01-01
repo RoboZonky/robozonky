@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package com.github.robozonky.test.mock;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.Rating;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.Rating;
+
+import static org.mockito.Mockito.*;
 
 public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInvestmentBuilder> {
 
@@ -42,7 +43,9 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     }
 
     public static MockInvestmentBuilder fresh(final Loan loan, final BigDecimal invested) {
-        return fresh().setLoanId(loan.getId())
+        return fresh()
+                .setId(RANDOM.nextInt())
+                .setLoanId(loan.getId())
                 .setInterestRate(loan.getInterestRate())
                 .setRevenueRate(loan.getRevenueRate().orElse(null))
                 .setCurrency(loan.getCurrency())
@@ -60,6 +63,11 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     public MockInvestmentBuilder() {
         super(Investment.class);
         when(mock.getId()).thenReturn(RANDOM.nextLong());
+    }
+
+    public MockInvestmentBuilder setId(final long id) {
+        when(mock.getId()).thenReturn(id);
+        return this;
     }
 
     public MockInvestmentBuilder setAmount(final BigDecimal amount) {
@@ -103,7 +111,11 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     }
 
     public MockInvestmentBuilder setSmpFee(final BigDecimal bigDecimal) {
-        when(mock.getSmpFee()).thenReturn(Optional.ofNullable(Money.from(bigDecimal)));
+        if (bigDecimal == null) {
+            when(mock.getSmpFee()).thenReturn(Optional.empty());
+        } else {
+            when(mock.getSmpFee()).thenReturn(Optional.ofNullable(Money.from(bigDecimal)));
+        }
         return this;
     }
 
@@ -140,6 +152,11 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
 
     public MockInvestmentBuilder setLoanTermInMonth(final int loanTermInMonth) {
         when(mock.getLoanTermInMonth()).thenReturn(loanTermInMonth);
+        return this;
+    }
+
+    public MockInvestmentBuilder setLoanHealthInfo(final LoanHealthInfo loanHealthInfo) {
+        when(mock.getLoanHealthInfo()).thenReturn(Optional.of(loanHealthInfo));
         return this;
     }
 
