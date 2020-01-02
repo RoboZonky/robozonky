@@ -64,9 +64,10 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void loadLoan() {
-        final Instant instant = Instant.now();
-        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        final Instant now = Instant.now();
         final SellInfo sellInfo = mockSellInfo(BigDecimal.TEN, BigDecimal.ONE);
+        final Instant instant = Instant.EPOCH;
+        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final long id = 2;
         final Zonky z = harmlessZonky();
         when(z.getSellInfo(eq(id))).thenReturn(sellInfo);
@@ -77,7 +78,7 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
         assertThat(c.getFromCache(id)).contains(sellInfo);
         verify(z, times(1)).getSellInfo(eq(id));
         // and now test eviction
-        setClock(Clock.fixed(instant.plus(Duration.ofHours(2)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofHours(2)), Defaults.ZONE_ID));
         assertThat(c.getFromCache(id)).isEmpty();
     }
 
