@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.summaries;
 
+import java.util.Map;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
@@ -25,12 +27,12 @@ import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
 import io.vavr.Tuple2;
 
-import java.util.Map;
+import static com.github.robozonky.app.summaries.Util.getAmountsSellable;
 
 final class Summarizer implements TenantPayload {
 
     private static ExtendedPortfolioOverview extend(final Tenant tenant) {
-        final Tuple2<Map<Rating, Money>, Map<Rating, Money>> amountsSellable = Util.getAmountsSellable(tenant);
+        final Tuple2<Map<Rating, Money>, Map<Rating, Money>> amountsSellable = getAmountsSellable(tenant);
         return ExtendedPortfolioOverviewImpl.extend(tenant.getPortfolio().getOverview(),
                 Util.getAmountsAtRisk(tenant), amountsSellable._1(), amountsSellable._2());
     }

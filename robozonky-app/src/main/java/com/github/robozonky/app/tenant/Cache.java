@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,16 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
@@ -26,30 +35,30 @@ import io.vavr.control.Either;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 final class Cache<T> implements AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(Cache.class);
-    private static final Duration EVICT_AFTER = Duration.ofDays(1);
-    private static final Duration EVICT_EVERY = Duration.ofHours(1);
 
     private static final Backend<Loan> LOAN_BACKEND = new Backend<>() {
+        @Override
+        public Duration getEvictEvery() {
+            return Duration.ofHours(1);
+        }
+
+        @Override
+        public Duration getEvictAfter() {
+            return Duration.ofDays(1);
+        }
+
         @Override
         public Class<Loan> getItemClass() {
             return Loan.class;
         }
 
         @Override
-        public Either<Exception, Loan> getItem(final int id, final Tenant tenant) {
-            try {
-                return Either.right(tenant.call(zonky -> zonky.getLoan(id)));
+        public Either<Exception, Loan> getItem(final long id, final Tenant tenant) {
+            try { // TODO convert loan IDs to longs to get rid of the cast.
+                return Either.right(tenant.call(zonky -> zonky.getLoan((int) id)));
             } catch (final Exception ex) {
                 return Either.left(ex);
             }
@@ -61,26 +70,70 @@ final class Cache<T> implements AutoCloseable {
         }
     };
 
+    private static final Backend<SellInfo> SELL_INFO_BACKEND = new Backend<>() {
+        @Override
+        public Duration getEvictEvery() {
+            return Duration.ofHours(1);
+        }
+
+        @Override
+        public Duration getEvictAfter() {
+            return Duration.ofHours(1);
+        }
+
+        @Override
+        public Class<SellInfo> getItemClass() {
+            return SellInfo.class;
+        }
+
+        @Override
+        public Either<Exception, SellInfo> getItem(final long id, final Tenant tenant) {
+            try {
+                return Either.right(tenant.call(zonky -> zonky.getSellInfo(id)));
+            } catch (final Exception ex) {
+                return Either.left(ex);
+            }
+        }
+
+        @Override
+        public boolean shouldCache(final SellInfo item) {
+            return item.getPriceInfo()
+                    .getFee()
+                    .getExpiresAt()
+                    .map(expiration -> expiration.isAfter(DateUtil.offsetNow()))
+                    .orElse(true);
+        }
+    };
+
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final Tenant tenant;
     private final Backend<T> backend;
-    private final Map<Integer, Tuple2<T, Instant>> storage = new ConcurrentHashMap<>(20);
+    private final Map<Long, Tuple2<T, Instant>> storage = new ConcurrentHashMap<>(20);
     private final ScheduledFuture<?> evictionTask;
 
     private Cache(final Tenant tenant, final Backend<T> backend) {
         LOGGER.debug("Starting {} cache for {}.", backend.getItemClass(), tenant);
         this.tenant = tenant;
         this.backend = backend;
-        this.evictionTask = Tasks.INSTANCE.scheduler().submit(this::evict, EVICT_EVERY, EVICT_EVERY);
+        this.evictionTask = Tasks.INSTANCE.scheduler().submit(this::evict, backend.getEvictEvery(),
+                                                              backend.getEvictEvery());
     }
 
     public static Cache<Loan> forLoan(final Tenant tenant) {
         return new Cache<>(tenant, LOAN_BACKEND);
     }
 
+    public static Cache<SellInfo> forSellInfo(final Tenant tenant) {
+        return new Cache<>(tenant, SELL_INFO_BACKEND);
+    }
+
+    private static String identify(final Class<?> clz, final long id) {
+        return clz.getCanonicalName() + " #" + id;
+    }
+
     private boolean isExpired(final Tuple2<T, Instant> p) {
         final Instant now = DateUtil.now();
-        final Instant expiration = p._2().plus(EVICT_AFTER);
+        final Instant expiration = p._2().plus(backend.getEvictAfter());
         return expiration.isBefore(now);
     }
 
@@ -93,7 +146,7 @@ final class Cache<T> implements AutoCloseable {
         LOGGER.trace("Evicted {} items.", evictedCount);
     }
 
-    Optional<T> getFromCache(final int id) {
+    Optional<T> getFromCache(final long id) {
         final Tuple2<T, Instant> result = storage.get(id);
         if (result == null || isExpired(result)) {
             LOGGER.trace("Miss for {}.", identify(id));
@@ -104,19 +157,15 @@ final class Cache<T> implements AutoCloseable {
         }
     }
 
-    private String identify(final int id) {
+    private String identify(final long id) {
         return identify(backend.getItemClass(), id);
     }
 
-    private static String identify(final Class<?> clz, final int id) {
-        return clz.getCanonicalName() + " #" + id;
-    }
-
-    private void add(final int id, final T item) {
+    private void add(final long id, final T item) {
         storage.put(id, Tuple.of(item, DateUtil.now()));
     }
 
-    public T get(final int id) {
+    public T get(final long id) {
         if (isClosed.get()) {
             throw new IllegalStateException("Already closed.");
         }
@@ -145,9 +194,13 @@ final class Cache<T> implements AutoCloseable {
 
     private interface Backend<I> {
 
+        Duration getEvictEvery();
+
+        Duration getEvictAfter();
+
         Class<I> getItemClass();
 
-        Either<Exception, I> getItem(int id, Tenant tenant);
+        Either<Exception, I> getItem(long id, Tenant tenant);
 
         boolean shouldCache(I item);
     }

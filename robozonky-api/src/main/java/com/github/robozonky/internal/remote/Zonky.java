@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -136,6 +137,14 @@ public class Zonky {
         controlApi.run(api -> api.offer(new SellRequest(investment)));
     }
 
+    public SellInfo getSellInfo(final Investment investment) {
+        return getSellInfo(investment.getId());
+    }
+
+    public SellInfo getSellInfo(final long investmentId) {
+        return portfolioApi.execute(api -> api.getSellInfo(investmentId));
+    }
+
     public void accept(final Reservation reservation) {
         final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation().getId(), Resolution.ACCEPTED);
         final Resolutions rs = new Resolutions(Collections.singleton(r));
@@ -217,7 +226,7 @@ public class Zonky {
     }
 
     public Statistics getStatistics() {
-        return portfolioApi.execute(PortfolioApi::item);
+        return portfolioApi.execute(PortfolioApi::getStatistics);
     }
 
 }

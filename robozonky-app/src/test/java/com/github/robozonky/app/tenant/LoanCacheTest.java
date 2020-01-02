@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -25,13 +30,7 @@ import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class LoanCacheTest extends AbstractZonkyLeveragingTest {
@@ -79,8 +78,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     void fail() {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
-        final Loan loan = MockLoanBuilder.fresh();
-        final int loanId = loan.getId();
+        final int loanId = 3;
         final Zonky z = harmlessZonky();
         doThrow(IllegalStateException.class).when(z).getLoan(eq(loanId));
         final Tenant t = mockTenant(z);

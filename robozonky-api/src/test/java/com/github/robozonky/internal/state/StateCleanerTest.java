@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package com.github.robozonky.internal.state;
 
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -30,12 +33,8 @@ import com.github.robozonky.internal.tenant.Tenant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.function.Function;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class StateCleanerTest {
 
@@ -101,11 +100,6 @@ class StateCleanerTest {
         @Override
         public Optional<ReservationStrategy> getReservationStrategy() {
             return Optional.empty();
-        }
-
-        @Override
-        public Loan getLoan(final int loanId) {
-            return call(z -> z.getLoan(loanId));
         }
 
         @Override
