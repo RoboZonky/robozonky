@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.SellFee;
@@ -40,7 +41,7 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
     public SellInfo mockSellInfo(final BigDecimal price, final BigDecimal fee) {
         SellFee sellFee = mock(SellFee.class);
         when(sellFee.getValue()).thenReturn(Money.from(fee));
-        when(sellFee.getExpiresAt()).thenReturn(OffsetDateTime.now());
+        when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
         SellPriceInfo sellPriceInfo = mock(SellPriceInfo.class);
         when(sellPriceInfo.getFee()).thenReturn(sellFee);
         SellInfo sellInfo = mock(SellInfo.class);

@@ -97,7 +97,11 @@ final class Cache<T> implements AutoCloseable {
 
         @Override
         public boolean shouldCache(final SellInfo item) {
-            return item.getPriceInfo().getFee().getExpiresAt().isAfter(DateUtil.offsetNow());
+            return item.getPriceInfo()
+                    .getFee()
+                    .getExpiresAt()
+                    .map(expiration -> expiration.isAfter(DateUtil.offsetNow()))
+                    .orElse(true);
         }
     };
 

@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
@@ -67,7 +68,7 @@ class UtilTest extends AbstractZonkyLeveragingTest {
     public void mockSellInfo(Zonky zonky, final BigDecimal price, final BigDecimal fee) {
         SellFee sellFee = mock(SellFee.class);
         when(sellFee.getValue()).thenReturn(Money.from(fee));
-        when(sellFee.getExpiresAt()).thenReturn(OffsetDateTime.now());
+        when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
         SellPriceInfo sellPriceInfo = mock(SellPriceInfo.class);
         when(sellPriceInfo.getFee()).thenReturn(sellFee);
         SellInfo sellInfo = mock(SellInfo.class);

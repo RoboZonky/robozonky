@@ -100,6 +100,7 @@ final class Util {
                 .collect(groupingBy(t -> t._1, () -> new EnumMap<>(Rating.class),
                                     mapping(t -> t._2, ADDING_REDUCTION)));
         var sellable = allSellableInvestments.stream()
+                .map(t -> Tuple.of(t._1, t._2.subtract(t._3))) // Account for the sale fee.
                 .collect(groupingBy(t -> t._1, () -> new EnumMap<>(Rating.class),
                                     mapping(t -> t._2, ADDING_REDUCTION)));
         return Tuple.of(sellable, sellableWithoutFees);

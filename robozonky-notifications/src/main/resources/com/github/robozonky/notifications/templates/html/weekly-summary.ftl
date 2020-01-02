@@ -33,13 +33,13 @@ hodnotou.</small></p>
     <tr>
         <th style="padding: 5px; text-align: right;">&nbsp;</th>
         <th style="padding: 5px; text-align: center;" colspan="4">Stav portfolia</th>
-        <th style="padding: 5px; text-align: center;" colspan="4">Odkupní hodnota</th>
+        <th style="padding: 5px; text-align: center;" colspan="4">Odkupní hodnota**</th>
     </tr>
     <tr>
         <th style="padding: 5px; text-align: right;">Úrok</th>
         <th style="padding: 5px;" colspan="2">Investováno</th>
         <th style="padding: 5px;" colspan="2">Ohroženo</th>
-        <th style="padding: 5px;" colspan="2">Celková</th>
+        <th style="padding: 5px;" colspan="2">Celková***</th>
         <th style="padding: 5px;" colspan="2">Bez poplatků</th>
     </tr>
   </thead>
@@ -81,6 +81,9 @@ hodnotou.</small></p>
   </tbody>
 </table>
 
-<p><small>Pozn.: Jsou-li pole "Prodatelné" vynulovaná, robot se zrovna trefil do chvíle, kdy Zonky aktualizuje portfolio
+<p><small>** Jsou-li tyto hodnoty vynulované, robot se zrovna trefil do chvíle, kdy Zonky aktualizuje portfolio
 a dočasně vypíná sekundár. Této situaci nelze zcela zabránit. V pozdějších notifikacích by již měla být čísla
 správně.</small></p>
+
+<p><small>*** Jedná se o částku, za kterou by se nabídly k prodeji všechny nyní prodatelné participace v portfoliu,
+dále očištěnou o poplatek z prodeje participací.</small></p>
