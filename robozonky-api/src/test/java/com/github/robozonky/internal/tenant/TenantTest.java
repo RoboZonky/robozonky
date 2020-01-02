@@ -16,24 +16,31 @@
 
 package com.github.robozonky.internal.tenant;
 
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class TenantTest {
 
     @Test
     void delegatesSellInfo() {
+        SellInfo result = mock(SellInfo.class);
         Tenant my = spy(Tenant.class);
-        my.getSellInfo(1);
-        verify(my).call(any());
+        when(my.call(any())).thenReturn(result);
+        SellInfo actual = my.getSellInfo(1);
+        assertThat(actual).isSameAs(result);
     }
 
     @Test
     void delegatesLoan() {
+        Loan result = mock(Loan.class);
         Tenant my = spy(Tenant.class);
-        my.getLoan(1);
-        verify(my).call(any());
+        when(my.call(any())).thenReturn(result);
+        Loan actual = my.getLoan(1);
+        assertThat(actual).isSameAs(result);
     }
 
 }
