@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
 
 public abstract class BaseLoan extends BaseEntity {
 
@@ -66,36 +65,27 @@ public abstract class BaseLoan extends BaseEntity {
     // OffsetDateTime is expensive to parse, and Loans are on the hot path. Only do it when needed.
     @XmlElement
     protected String datePublished;
-    private final Lazy<OffsetDateTime> datePublishedParsed = Lazy.of(() -> OffsetDateTimeAdapter.fromString(datePublished));
     @XmlElement
     protected String deadline;
-    private final Lazy<OffsetDateTime> deadlineParsed = Lazy.of(() -> OffsetDateTimeAdapter.fromString(deadline));
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     protected Currency currency = Defaults.CURRENCY;
 
-    // strings to be represented as money
+    // Strings to be represented as money.
     @XmlElement
     protected String amount;
-    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
     @XmlElement
     protected String remainingInvestment;
-    private final Lazy<Money> moneyRemainingInvestment = Lazy.of(() -> Money.from(remainingInvestment, currency));
     @XmlElement
     protected String reservedAmount;
-    private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount, currency));
     @XmlElement
     protected String annuity;
-    private final Lazy<Money> moneyAnnuity = Lazy.of(() -> Money.from(annuity, currency));
     @XmlElement
     protected String annuityWithInsurance;
-    private final Lazy<Money> moneyAnnuityWithInsurance = Lazy.of(() -> Money.from(annuityWithInsurance, currency));
     @XmlElement
     protected String premium;
-    private final Lazy<Money> moneyPremium = Lazy.of(() -> Money.from(premium, currency));
     @XmlElement
     protected String zonkyPlusAmount;
-    private final Lazy<Money> moneyZonkyPlusAmount = Lazy.of(() -> Money.from(zonkyPlusAmount, currency));
 
     /*
      * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
@@ -254,53 +244,53 @@ public abstract class BaseLoan extends BaseEntity {
         return Optional.ofNullable(revenueRate);
     }
 
-    // datetime fields are all transient
+    // Datetime fields are all transient.
 
     @XmlTransient
     public OffsetDateTime getDatePublished() {
-        return datePublishedParsed.get();
+        return OffsetDateTimeAdapter.fromString(datePublished);
     }
 
     @XmlTransient
     public OffsetDateTime getDeadline() {
-        return deadlineParsed.get();
+        return OffsetDateTimeAdapter.fromString(deadline);
     }
 
-    // money-based fields are all transient
+    // Money-based fields are all transient.
 
     @XmlTransient
     public Money getAmount() {
-        return moneyAmount.get();
+        return Money.from(amount, currency);
     }
 
     @XmlTransient
     public Money getRemainingInvestment() {
-        return moneyRemainingInvestment.get();
+        return Money.from(remainingInvestment, currency);
     }
 
     @XmlTransient
     public Money getNonReservedRemainingInvestment() {
-        return moneyRemainingInvestment.get().subtract(moneyReservedAmount.get());
+        return getRemainingInvestment().subtract(Money.from(reservedAmount, currency));
     }
 
     @XmlTransient
     public Money getReservedAmount() {
-        return moneyReservedAmount.get();
+        return Money.from(reservedAmount, currency);
     }
 
     @XmlTransient
     public Money getZonkyPlusAmount() {
-        return moneyZonkyPlusAmount.get();
+        return Money.from(zonkyPlusAmount, currency);
     }
 
     @XmlTransient
     public Money getAnnuity() {
-        return moneyAnnuity.get();
+        return Money.from(annuity, currency);
     }
 
     @XmlTransient
     public Money getPremium() {
-        return moneyPremium.get();
+        return Money.from(premium, currency);
     }
 
     /**
@@ -308,7 +298,7 @@ public abstract class BaseLoan extends BaseEntity {
      */
     @XmlTransient
     public Money getAnnuityWithInsurance() {
-        return moneyAnnuityWithInsurance.get();
+        return Money.from(annuityWithInsurance, currency);
     }
 
     @Override

@@ -20,9 +20,9 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
 
 public class SellFee extends BaseEntity {
 
@@ -32,7 +32,6 @@ public class SellFee extends BaseEntity {
     // String to be represented as money.
     @XmlElement
     private String value;
-    private final Lazy<Money> moneyValue = Lazy.of(() -> Money.from(value));
 
     SellFee() {
         // for JAXB
@@ -42,8 +41,9 @@ public class SellFee extends BaseEntity {
         return Optional.ofNullable(expiresAt);
     }
 
+    @XmlTransient
     public Money getValue() {
-        return moneyValue.get();
+        return Money.from(value);
     }
 
     @Override

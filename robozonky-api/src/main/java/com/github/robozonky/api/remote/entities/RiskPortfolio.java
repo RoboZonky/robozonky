@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,18 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
-import io.vavr.Lazy;
 
 public class RiskPortfolio extends BaseEntity {
 
     private Ratio interestRate;
     @XmlElement
     private String unpaid;
-    private final Lazy<Money> moneyUnpaid = Lazy.of(() -> Money.from(unpaid));
     @XmlElement
     private String paid;
-    private final Lazy<Money> moneyPaid = Lazy.of(() -> Money.from(paid));
     @XmlElement
     private String due;
-    private final Lazy<Money> moneyDue = Lazy.of(() -> Money.from(due));
     @XmlElement
     private String totalAmount;
-    private final Lazy<Money> moneyTotalAmount = Lazy.of(() -> Money.from(totalAmount));
     private Rating rating;
 
     RiskPortfolio() {
@@ -62,22 +57,22 @@ public class RiskPortfolio extends BaseEntity {
 
     @XmlTransient
     public Money getUnpaid() {
-        return moneyUnpaid.get();
+        return Money.from(unpaid);
     }
 
     @XmlTransient
     public Money getPaid() {
-        return moneyPaid.get();
+        return Money.from(paid);
     }
 
     @XmlTransient
     public Money getDue() {
-        return moneyDue.get();
+        return Money.from(due);
     }
 
     @XmlTransient
     public Money getTotalAmount() {
-        return moneyTotalAmount.get();
+        return Money.from(totalAmount);
     }
 
     @XmlElement

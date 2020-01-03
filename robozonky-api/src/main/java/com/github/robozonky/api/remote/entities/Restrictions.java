@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
 
 public class Restrictions extends BaseEntity {
 
@@ -36,13 +35,10 @@ public class Restrictions extends BaseEntity {
     private boolean cannotAccessSmp;
     @XmlElement
     private int minimumInvestmentAmount = 200;
-    private final Lazy<Money> moneyMinimumInvestmentAmount = Lazy.of(() -> Money.from(minimumInvestmentAmount));
     @XmlElement
     private int maximumInvestmentAmount = 5_000;
-    private final Lazy<Money> moneyMaximumInvestmentAmount = Lazy.of(() -> Money.from(maximumInvestmentAmount));
     @XmlElement
     private int investmentStep = 200;
-    private final Lazy<Money> moneyInvestmentStep = Lazy.of(() -> Money.from(investmentStep));
 
     public Restrictions(final boolean permissive) {
         this.cannotAccessSmp = !permissive;
@@ -82,12 +78,12 @@ public class Restrictions extends BaseEntity {
 
     @XmlTransient
     public Money getMinimumInvestmentAmount() {
-        return moneyMinimumInvestmentAmount.get();
+        return Money.from(minimumInvestmentAmount);
     }
 
     @XmlTransient
     public Money getInvestmentStep() {
-        return moneyInvestmentStep.get();
+        return Money.from(investmentStep);
     }
 
     /**
@@ -96,7 +92,7 @@ public class Restrictions extends BaseEntity {
      */
     @XmlTransient
     public Money getMaximumInvestmentAmount() {
-        return moneyMaximumInvestmentAmount.get();
+        return Money.from(maximumInvestmentAmount);
     }
 
     @Override

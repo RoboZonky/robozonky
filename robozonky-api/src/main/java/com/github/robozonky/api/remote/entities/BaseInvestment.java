@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Lazy;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
@@ -40,13 +39,10 @@ abstract class BaseInvestment extends BaseEntity {
     private Currency currency = Defaults.CURRENCY;
     @XmlElement
     private String amount;
-    private final Lazy<Money> moneyAmount = Lazy.of(() -> Money.from(amount, currency));
     @XmlElement
     private String additionalAmount;
-    private final Lazy<Money> moneyAdditionalAmount = Lazy.of(() -> Money.from(additionalAmount, currency));
     @XmlElement
     private String firstAmount;
-    private final Lazy<Money> moneyFirstAmount = Lazy.of(() -> Money.from(firstAmount, currency));
     private InvestmentStatus status;
     private OffsetDateTime timeCreated = DateUtil.offsetNow();
 
@@ -88,21 +84,21 @@ abstract class BaseInvestment extends BaseEntity {
         return id;
     }
 
-    // money types are all transient
+    // Money types are all transient.
 
     @XmlTransient
     public Money getAmount() {
-        return moneyAmount.get();
+        return Money.from(amount, currency);
     }
 
     @XmlTransient
     public Money getAdditionalAmount() {
-        return moneyAdditionalAmount.get();
+        return Money.from(additionalAmount, currency);
     }
 
     @XmlTransient
     public Money getFirstAmount() {
-        return moneyFirstAmount.get();
+        return Money.from(firstAmount, currency);
     }
 
     @Override

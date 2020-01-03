@@ -18,9 +18,9 @@ package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
 
 public class SellPriceInfo extends BaseEntity {
 
@@ -30,15 +30,12 @@ public class SellPriceInfo extends BaseEntity {
     // Strings to be represented as money.
     @XmlElement
     private String boughtFor;
-    private final Lazy<Money> moneyBoughtFor = Lazy.of(() -> Money.from(boughtFor));
 
     @XmlElement
     private String remainingPrincipal;
-    private final Lazy<Money> moneyRemainingPrincipal = Lazy.of(() -> Money.from(remainingPrincipal));
 
     @XmlElement
     private String discount;
-    private final Lazy<Money> moneyDiscount = Lazy.of(() -> Money.from(discount));
 
     SellPriceInfo() {
         // For JAXB.
@@ -48,16 +45,19 @@ public class SellPriceInfo extends BaseEntity {
         return fee;
     }
 
+    @XmlTransient
     public Money getBoughtFor() {
-        return moneyBoughtFor.get();
+        return Money.from(boughtFor);
     }
 
+    @XmlTransient
     public Money getRemainingPrincipal() {
-        return moneyRemainingPrincipal.get();
+        return Money.from(remainingPrincipal);
     }
 
+    @XmlTransient
     public Money getDiscount() {
-        return moneyDiscount.get();
+        return Money.from(discount);
     }
 
     @Override

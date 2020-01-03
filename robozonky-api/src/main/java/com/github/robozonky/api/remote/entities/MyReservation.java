@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
-import io.vavr.Lazy;
 
 public class MyReservation extends BaseEntity {
 
@@ -29,7 +28,6 @@ public class MyReservation extends BaseEntity {
 
     @XmlElement
     private String reservedAmount = "0";
-    private final Lazy<Money> moneyReservedAmount = Lazy.of(() -> Money.from(reservedAmount));
 
     /*
      * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
@@ -51,7 +49,7 @@ public class MyReservation extends BaseEntity {
 
     @XmlTransient
     public Money getReservedAmount() {
-        return moneyReservedAmount.get();
+        return Money.from(reservedAmount);
     }
 
     @Override

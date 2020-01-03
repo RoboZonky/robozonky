@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.enums.LoanHealthInfo;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Lazy;
 
 public class Investment extends BaseInvestment {
 
@@ -56,76 +55,56 @@ public class Investment extends BaseInvestment {
     private String loanName;
     private String nickname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
-    @XmlElement
-    private OffsetDateTime investmentDate = DateUtil.offsetNow();
-    private final Lazy<OffsetDateTime> actualInvestmentDate = Lazy.of(() -> {
-        final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
-        final OffsetDateTime d = DateUtil.offsetNow().minusMonths(monthsElapsed);
-        logger.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
-        return d;
-    });
-    @XmlElement
-    private OffsetDateTime nextPaymentDate = investmentDate.plusMonths(1);
-    @XmlElement
-    private OffsetDateTime activeFrom;
-    private OffsetDateTime activeTo;
-    @XmlElement
-    private OffsetDateTime smpFeeExpirationDate;
     private Ratio interestRate;
-    @XmlElement
     private Ratio revenueRate;
     private Rating rating;
     private InvestmentType investmentType;
 
+    // OffsetDateTime is expensive to parse, and Investments are on the hot path. Only do it when needed.
+    @XmlElement
+    private String investmentDate;
+    @XmlElement
+    private String nextPaymentDate;
+    @XmlElement
+    private String activeFrom;
+    @XmlElement
+    private String activeTo;
+    @XmlElement
+    private String smpFeeExpirationDate;
+
     // string-based money
     @XmlElement
     private String loanAnnuity = "0";
-    private final Lazy<Money> moneyLoanAnnuity = Lazy.of(() -> Money.from(loanAnnuity));
     @XmlElement
     private String loanAmount = "0";
-    private final Lazy<Money> moneyLoanAmount = Lazy.of(() -> Money.from(loanAmount));
     @XmlElement
     private String paid = "0";
-    private final Lazy<Money> moneyPaid = Lazy.of(() -> Money.from(paid));
     @XmlElement
     private String toPay = "0";
-    private final Lazy<Money> moneyToPay = Lazy.of(() -> Money.from(toPay));
     @XmlElement
     private String amountDue = "0";
-    private final Lazy<Money> moneyAmountDue = Lazy.of(() -> Money.from(amountDue));
     @XmlElement
     private String paidInterest = "0";
-    private final Lazy<Money> moneyPaidInterest = Lazy.of(() -> Money.from(paidInterest));
     @XmlElement
     private String dueInterest = "0";
-    private final Lazy<Money> moneyDueInterest = Lazy.of(() -> Money.from(dueInterest));
     @XmlElement
     private String paidPrincipal = "0";
-    private final Lazy<Money> moneyPaidPrincipal = Lazy.of(() -> Money.from(paidPrincipal));
     @XmlElement
     private String duePrincipal = "0";
-    private final Lazy<Money> moneyDuePrincipal = Lazy.of(() -> Money.from(duePrincipal));
     @XmlElement
     private String expectedInterest = "0";
-    private final Lazy<Money> moneyExpectedInterest = Lazy.of(() -> Money.from(expectedInterest));
     @XmlElement
     private String purchasePrice = "0";
-    private final Lazy<Money> moneyPurchasePrice = Lazy.of(() -> Money.from(purchasePrice));
     @XmlElement
     private String remainingPrincipal = "0";
-    private final Lazy<Money> moneyRemainingPrincipal = Lazy.of(() -> Money.from(remainingPrincipal));
     @XmlElement
     private String smpPrice = "0";
-    private final Lazy<Money> moneySmpPrice = Lazy.of(() -> Money.from(smpPrice));
     @XmlElement
     private String smpSoldFor = "0";
-    private final Lazy<Money> moneySmpSoldFor = Lazy.of(() -> Money.from(smpSoldFor));
     @XmlElement
     private String smpFee = "0";
-    private final Lazy<Money> moneySmpFee = Lazy.of(() -> Money.from(smpFee));
     @XmlElement
     private String paidPenalty = "0";
-    private final Lazy<Money> moneyPaidPenalty = Lazy.of(() -> Money.from(paidPenalty));
 
     /*
      * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
@@ -162,7 +141,6 @@ public class Investment extends BaseInvestment {
     }
 
     /**
-     *
      * @return Empty when no longer relevant, such as when sold.
      */
     @XmlElement
@@ -252,11 +230,18 @@ public class Investment extends BaseInvestment {
     }
 
     /**
-     *
      * @return This appears to always be null, so we guess from other fields.
      */
+    @XmlTransient
     public OffsetDateTime getInvestmentDate() {
-        return Optional.ofNullable(investmentDate).orElseGet(actualInvestmentDate::get);
+        return Optional.ofNullable(investmentDate)
+                .map(OffsetDateTimeAdapter::fromString)
+                .orElseGet(() -> {
+                    final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
+                    final OffsetDateTime d = DateUtil.offsetNow().minusMonths(monthsElapsed);
+                    logger.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
+                    return d;
+                });
     }
 
     /**
@@ -264,32 +249,41 @@ public class Investment extends BaseInvestment {
      * delinquent.
      * @return Empty for loans where no payments are expected anymore.
      */
+    @XmlTransient
     public Optional<OffsetDateTime> getNextPaymentDate() {
-        return Optional.ofNullable(nextPaymentDate);
+        return Optional.ofNullable(nextPaymentDate)
+                .map(OffsetDateTimeAdapter::fromString);
     }
 
     /**
-     *
      * @return If bought on SMP, then the timestamp of purchase. If invested from primary marketplace, then timestamp of
      * settlement (= empty when not yet settled).
      */
-    @XmlElement
+    @XmlTransient
     public Optional<OffsetDateTime> getActiveFrom() {
-        return Optional.ofNullable(activeFrom);
+        return Optional.ofNullable(activeFrom)
+                .map(OffsetDateTimeAdapter::fromString);
     }
 
-    @XmlElement
+    @XmlTransient
     public OffsetDateTime getActiveTo() {
-        return activeTo;
+        return OffsetDateTimeAdapter.fromString(activeTo);
     }
 
+    @XmlTransient
     public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
-        return Optional.ofNullable(smpFeeExpirationDate);
+        return Optional.ofNullable(smpFeeExpirationDate)
+                .map(OffsetDateTimeAdapter::fromString);
     }
 
     @XmlElement
     public Ratio getInterestRate() {
         return interestRate;
+    }
+
+    @XmlElement
+    public Optional<Ratio> getRevenueRate() {
+        return Optional.ofNullable(revenueRate);
     }
 
     @XmlElement
@@ -325,10 +319,6 @@ public class Investment extends BaseInvestment {
         return hasCollectionHistory;
     }
 
-    public Optional<Ratio> getRevenueRate() {
-        return Optional.ofNullable(revenueRate);
-    }
-
     @XmlElement
     public InvestmentType getInvestmentType() {
         return investmentType;
@@ -336,60 +326,59 @@ public class Investment extends BaseInvestment {
 
     // money types are all transient
 
-
     @XmlTransient
     public Money getLoanAnnuity() {
-        return moneyLoanAnnuity.get();
+        return Money.from(loanAnnuity);
     }
 
     @XmlTransient
     public Money getLoanAmount() {
-        return moneyLoanAmount.get();
+        return Money.from(loanAmount);
     }
 
     @XmlTransient
     public Money getPurchasePrice() {
-        return moneyPurchasePrice.get();
+        return Money.from(purchasePrice);
     }
 
     @XmlTransient
     public Money getPaid() {
-        return moneyPaid.get();
+        return Money.from(paid);
     }
 
     @XmlTransient
     public Money getToPay() {
-        return moneyToPay.get();
+        return Money.from(toPay);
     }
 
     @XmlTransient
     public Money getAmountDue() {
-        return moneyAmountDue.get();
+        return Money.from(amountDue);
     }
 
     @XmlTransient
     public Money getPaidInterest() {
-        return moneyPaidInterest.get();
+        return Money.from(paidInterest);
     }
 
     @XmlTransient
     public Money getDueInterest() {
-        return moneyDueInterest.get();
+        return Money.from(dueInterest);
     }
 
     @XmlTransient
     public Money getPaidPrincipal() {
-        return moneyPaidPrincipal.get();
+        return Money.from(paidPrincipal);
     }
 
     @XmlTransient
     public Money getDuePrincipal() {
-        return moneyDuePrincipal.get();
+        return Money.from(duePrincipal);
     }
 
     @XmlTransient
     public Money getExpectedInterest() {
-        return moneyExpectedInterest.get();
+        return Money.from(expectedInterest);
     }
 
     /**
@@ -398,39 +387,41 @@ public class Investment extends BaseInvestment {
     @XmlTransient
     public Optional<Money> getRemainingPrincipal() {
         return Optional.ofNullable(remainingPrincipal)
-                .map(principal -> moneyRemainingPrincipal.getOrElse((Money) null));
+                .map(Money::from);
     }
 
     @XmlTransient
     public Optional<Money> getSmpSoldFor() {
-        return Optional.ofNullable(smpSoldFor).map(soldFor -> moneySmpSoldFor.getOrElse((Money) null));
+        return Optional.ofNullable(smpSoldFor)
+                .map(Money::from);
     }
 
     @XmlTransient
     public Money getPaidPenalty() {
-        return moneyPaidPenalty.get();
+        return Money.from(paidPenalty);
     }
 
     @XmlTransient
     public Optional<Money> getSmpFee() {
-        return Optional.ofNullable(smpFee).map(fee -> moneySmpFee.getOrElse((Money) null));
+        return Optional.ofNullable(smpFee)
+                .map(Money::from);
     }
 
     /**
-     *
      * @return Empty when cannot be sold, that is when sold already.
      */
     @XmlTransient
     public Optional<Money> getSmpPrice() {
-        return Optional.ofNullable(smpPrice).map(price -> moneySmpPrice.getOrElse((Money) null));
+        return Optional.ofNullable(smpPrice)
+                .map(Money::from);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", Investment.class.getSimpleName() + "[", "]")
                 .add("super=" + super.toString())
-                .add("activeFrom=" + activeFrom)
-                .add("activeTo=" + activeTo)
+                .add("activeFrom='" + activeFrom + "'")
+                .add("activeTo='" + activeTo + "'")
                 .add("additionallyInsured=" + additionallyInsured)
                 .add("amountDue='" + amountDue + "'")
                 .add("borrowerNo=" + borrowerNo)
@@ -444,7 +435,7 @@ public class Investment extends BaseInvestment {
                 .add("insuranceActive=" + insuranceActive)
                 .add("insuranceStatus=" + insuranceStatus)
                 .add("interestRate=" + interestRate)
-                .add("investmentDate=" + investmentDate)
+                .add("investmentDate='" + investmentDate + "'")
                 .add("investmentType=" + investmentType)
                 .add("inWithdrawal=" + inWithdrawal)
                 .add("legalDpd=" + legalDpd)
@@ -454,7 +445,7 @@ public class Investment extends BaseInvestment {
                 .add("loanInvestmentsCount=" + loanInvestmentsCount)
                 .add("loanName='" + loanName + "'")
                 .add("loanTermInMonth=" + loanTermInMonth)
-                .add("nextPaymentDate=" + nextPaymentDate)
+                .add("nextPaymentDate='" + nextPaymentDate + "'")
                 .add("nickname='" + nickname + "'")
                 .add("onSmp=" + onSmp)
                 .add("paid='" + paid + "'")
@@ -468,7 +459,7 @@ public class Investment extends BaseInvestment {
                 .add("remainingPrincipal='" + remainingPrincipal + "'")
                 .add("revenueRate=" + revenueRate)
                 .add("smpFee='" + smpFee + "'")
-                .add("smpFeeExpirationDate=" + smpFeeExpirationDate)
+                .add("smpFeeExpirationDate='" + smpFeeExpirationDate + "'")
                 .add("smpPrice='" + smpPrice + "'")
                 .add("smpRelated=" + smpRelated)
                 .add("smpSoldFor='" + smpSoldFor + "'")

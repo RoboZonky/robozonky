@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
-import io.vavr.Lazy;
 
 public class Participation extends BaseEntity {
 
@@ -53,25 +52,20 @@ public class Participation extends BaseEntity {
     protected boolean additionallyInsured;
     private Object loanInvestments;
 
-    // dates and times are expensive to parse, and Participations are on the hot path. Only do it when needed.
+    // Dates and times are expensive to parse, and Participations are on the hot path. Only do it when needed.
     @XmlElement
     protected String deadline;
-    private final Lazy<OffsetDateTime> deadlineParsed = Lazy.of(() -> OffsetDateTimeAdapter.fromString(deadline));
     @XmlElement
     protected String nextPaymentDate;
-    private final Lazy<LocalDate> nextPaymentDateParsed = Lazy.of(() -> LocalDateAdapter.fromString(nextPaymentDate));
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     protected Currency currency;
     @XmlElement
     protected String remainingPrincipal;
-    private final Lazy<Money> moneyRemainingPrincipal = Lazy.of(() -> Money.from(remainingPrincipal, currency));
     @XmlElement
     protected String discount;
-    private final Lazy<Money> moneyDiscount = Lazy.of(() -> Money.from(discount, currency));
     @XmlElement
     protected String price;
-    private final Lazy<Money> moneyPrice = Lazy.of(() -> Money.from(price, currency));
 
     Participation() {
         // for JAXB
@@ -200,27 +194,27 @@ public class Participation extends BaseEntity {
 
     @XmlTransient
     public OffsetDateTime getDeadline() {
-        return deadlineParsed.get();
+        return OffsetDateTimeAdapter.fromString(deadline);
     }
 
     @XmlTransient
     public LocalDate getNextPaymentDate() {
-        return nextPaymentDateParsed.get();
+        return LocalDateAdapter.fromString(nextPaymentDate);
     }
 
     @XmlTransient
     public Money getRemainingPrincipal() {
-        return moneyRemainingPrincipal.get();
+        return Money.from(remainingPrincipal, currency);
     }
 
     @XmlTransient
     public Money getDiscount() {
-        return moneyDiscount.get();
+        return Money.from(discount, currency);
     }
 
     @XmlTransient
     public Money getPrice() {
-        return moneyPrice.get();
+        return Money.from(price, currency);
     }
 
     @Override
