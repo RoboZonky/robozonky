@@ -188,6 +188,28 @@
         "code": "java.method.removed",
         "old": "method com.github.robozonky.api.remote.entities.Statistics com.github.robozonky.api.remote.PortfolioApi::item()",
         "justification": "Introducing Zonky's new API for secondary marketplace."
+      },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, java.time.OffsetDateTime, java.lang.String, com.github.robozonky.api.remote.enums.OAuthScope[])",
+        "new": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, java.time.OffsetDateTime, java.lang.String)",
+        "justification": "Token scope details no longer have any practical use."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void com.github.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, com.github.robozonky.api.remote.enums.OAuthScope)",
+        "justification": "Token scope details no longer have any practical use."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.enums.OAuthScopes com.github.robozonky.api.remote.entities.ZonkyApiToken::getScope()",
+        "new": "method java.lang.String com.github.robozonky.api.remote.entities.ZonkyApiToken::getScope()",
+        "justification": "Token scope details no longer have any practical use."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.OAuthScope",
+        "justification": "Token scope details no longer have any practical use."
       }
     ]
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,11 +50,6 @@ class SerializationTest {
     @TestFactory
     Collection<DynamicTest> deserialize() {
         final Collection<DynamicTest> tests = new ArrayList<>(0);
-        // test deserialization of all income types
-        for (final OAuthScope toSerialize : OAuthScope.values()) {
-            final String serialized = escape(toSerialize.name());
-            tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
-        }
         // test deserialization of all income types
         for (final MainIncomeType toSerialize : MainIncomeType.values()) {
             final String serialized = escape(toSerialize.name());
