@@ -51,6 +51,11 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     }
 
     @Override
+    public Optional<BigDecimal> getReturns() {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<BigDecimal> getSellFee() {
         return Optional.empty();
     }

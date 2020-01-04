@@ -10,6 +10,65 @@ import Tokens;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
+relativeProfitCondition returns [MarketplaceFilterCondition result]:
+    'dosažený výnos ' (
+        (c1 = relativeProfitConditionRangeOpen { $result = $c1.result; })
+        | (c2 = relativeProfitConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = relativeProfitConditionRangeClosedRight { $result = $c3.result; })
+    ) ' % původní jistiny'
+;
+
+relativeProfitConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = RelativeProfitCondition.exact(Ratio.fromPercentage($min.result), Ratio.fromPercentage($max.result)); }
+;
+
+relativeProfitConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=intExpr
+    { $result = RelativeProfitCondition.moreThan(Ratio.fromPercentage($min.result)); }
+;
+
+relativeProfitConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=intExpr
+    { $result = RelativeProfitCondition.lessThan(Ratio.fromPercentage($max.result)); }
+;
+
+relativeSaleDiscountCondition returns [MarketplaceFilterCondition result]:
+    'prodejní sleva ' (
+        (c1 = relativeSaleDiscountConditionRangeOpen { $result = $c1.result; })
+        | (c2 = relativeSaleDiscountConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = relativeSaleDiscountConditionRangeClosedRight { $result = $c3.result; })
+    ) ' % zbývající jistiny'
+;
+
+relativeSaleDiscountConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = RelativeDiscountCondition.exact(Ratio.fromPercentage($min.result), Ratio.fromPercentage($max.result)); }
+;
+
+relativeSaleDiscountConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=intExpr
+    { $result = RelativeDiscountCondition.moreThan(Ratio.fromPercentage($min.result)); }
+;
+
+relativeSaleDiscountConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=intExpr
+    { $result = RelativeDiscountCondition.lessThan(Ratio.fromPercentage($max.result)); }
+;
+
+healthCondition returns [MarketplaceFilterCondition result]:
+    { HealthCondition c = new HealthCondition(); }
+    (
+        (
+            r1=healthExpression OR_COMMA { c.add($r1.result); }
+        )*
+        r2=healthExpression OR { c.add($r2.result); }
+    )?
+    r3=healthExpression { c.add($r3.result); }
+    ' po splatnosti'
+    { $result = c; }
+;
+
 saleFeeCondition returns [MarketplaceFilterCondition result]:
     'prodej '
     (

@@ -104,8 +104,21 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     }
 
     @Override
+    public Optional<BigDecimal> getReturns() {
+        var interest = investment.getPaidInterest();
+        var principal = investment.getPaidPrincipal();
+        var penalties = investment.getPaidPenalty();
+        return Optional.of(interest.add(principal).add(penalties).getValue());
+    }
+
+    @Override
     public Optional<BigDecimal> getSellFee() {
-        return investment.getSmpFee().map(Money::getValue);
+        var fee = investment.getSmpFee()
+                .orElseGet(() -> sellInfo.get()
+                        .map(si -> si.getPriceInfo().getFee().getValue())
+                        .orElse(Money.ZERO))
+                .getValue();
+        return Optional.of(fee);
     }
 
     private <T> T extractOrFail(final Function<SellInfo, T> extractor) {
@@ -116,7 +129,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Optional<LoanHealth> getHealth() {
-        LoanHealth healthInfo = investment.getLoanHealthInfo()
+        var healthInfo = investment.getLoanHealthInfo()
                 .orElseGet(() -> extractOrFail(si -> si.getLoanHealthStats().getLoanHealthInfo()));
         return Optional.of(healthInfo);
     }
@@ -128,16 +141,16 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Optional<BigDecimal> getSellPrice() {
-        Money price = investment.getSmpPrice()
+        var price = investment.getSmpPrice()
                 .orElseGet(() -> extractOrFail(SellInfo::getSellPrice));
         return Optional.of(price.getValue());
     }
 
     @Override
     public Optional<BigDecimal> getSellDiscount() {
-        Money price = sellInfo.get()
-            .map(si -> si.getPriceInfo().getDiscount())
-            .orElse(Money.ZERO);
+        var price = sellInfo.get()
+                .map(si -> si.getPriceInfo().getDiscount())
+                .orElse(Money.ZERO);
         return Optional.of(price.getValue());
     }
 

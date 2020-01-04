@@ -232,4 +232,6 @@ sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c14=annuityCondition { $result = $c14.result; }
     | c15=revenueRateCondition { $result = $c15.result; }
     | c16=saleFeeCondition { $result = $c16.result; }
+    | c17=relativeProfitCondition { $result = $c17.result; }
+    | c18=relativeSaleDiscountCondition { $result = $c18.result; }
 ;

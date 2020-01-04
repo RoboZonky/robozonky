@@ -80,6 +80,8 @@ public interface Wrapper<T> {
 
     BigDecimal getRemainingPrincipal();
 
+    Optional<BigDecimal> getReturns();
+
     Optional<LoanHealth> getHealth();
 
     Optional<BigDecimal> getOriginalPurchasePrice();
