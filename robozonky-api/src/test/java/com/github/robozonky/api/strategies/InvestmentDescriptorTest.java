@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class InvestmentDescriptorTest {
 
@@ -44,8 +44,9 @@ class InvestmentDescriptorTest {
     void recommend() {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
-        final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
+        final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN, () -> mock(SellInfo.class));
         assertThat(id.item()).isSameAs(i);
+        assertThat(id.sellInfo()).isNotEmpty();
         final Optional<RecommendedInvestment> r = id.recommend();
         assertThat(r).isPresent();
         assertSoftly(softly -> {
@@ -60,6 +61,7 @@ class InvestmentDescriptorTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
+        assertThat(id.sellInfo()).isEmpty();
         final Optional<RecommendedInvestment> r = id.recommend(Money.from(remainingPrincipal.subtract(BigDecimal.ONE)));
         assertThat(r).isEmpty();
     }

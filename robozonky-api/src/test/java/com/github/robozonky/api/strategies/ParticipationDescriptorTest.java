@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 package com.github.robozonky.api.strategies;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.UUID;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ParticipationDescriptorTest {
 
@@ -44,7 +43,7 @@ class ParticipationDescriptorTest {
     void recommend() {
         final Participation p = mockParticipation(BigDecimal.TEN);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
-        final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal());
+        final Optional<RecommendedParticipation> r = pd.recommend();
         assertThat(r).isPresent();
         assertSoftly(softly -> {
             softly.assertThat(r.get().amount()).isEqualTo(p.getRemainingPrincipal());

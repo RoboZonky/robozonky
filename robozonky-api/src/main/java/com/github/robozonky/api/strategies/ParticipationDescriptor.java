@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package com.github.robozonky.api.strategies;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import io.vavr.Lazy;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public final class ParticipationDescriptor
         implements Descriptor<RecommendedParticipation, ParticipationDescriptor, Participation> {
@@ -60,7 +60,7 @@ public final class ParticipationDescriptor
     public Optional<RecommendedParticipation> recommend(final Money amount) {
         if (participation.isWillExceedLoanInvestmentLimit() ||
                 !Objects.equals(amount, participation.getRemainingPrincipal())) {
-            return Optional.empty();
+            return Optional.empty(); // TODO Why do we query for limit here? should be excluded much earlier.
         }
         return Optional.of(new RecommendedParticipation(this));
     }

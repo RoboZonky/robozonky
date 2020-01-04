@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import io.vavr.Lazy;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import io.vavr.Lazy;
 
 /**
  * Carries metadata regarding an {@link Investment}.
@@ -32,16 +33,31 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
 
     private final Investment investment;
     private final Lazy<Loan> related;
+    private final Lazy<SellInfo> sellInfo;
 
     /**
      *
      * @param investment
-     * @param related Provided as a Supplier in order to allow the calling code to retrieve the (likely remote) entity
-     * on-demand.
+     * @param related Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely remote)
+     * entity on-demand.
      */
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related) {
+        this(investment, related, null);
+    }
+
+    /**
+     *
+     * @param investment
+     * @param related Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely remote)
+     * entity on-demand.
+     * @param sellInfo Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely remote)
+     * entity on-demand. Null means no such information exists.
+     */
+    public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related,
+                                final Supplier<SellInfo> sellInfo) {
         this.investment = investment;
         this.related = Lazy.of(related);
+        this.sellInfo = sellInfo == null ? null : Lazy.of(sellInfo);
     }
 
     @Override
@@ -52,6 +68,10 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
     @Override
     public Loan related() {
         return related.get();
+    }
+
+    public Optional<SellInfo> sellInfo() {
+        return sellInfo == null ? Optional.empty() : Optional.of(sellInfo.get());
     }
 
     private Money getRemainingPrincipal() {

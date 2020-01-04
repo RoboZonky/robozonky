@@ -26,12 +26,21 @@ import static org.mockito.Mockito.*;
 class TenantTest {
 
     @Test
+    void delegatesRun() {
+        Tenant my = spy(Tenant.class);
+        my.run(zonky -> { /* NOOP */ });
+        verify(my).call(any());
+    }
+
+    @Test
     void delegatesSellInfo() {
         SellInfo result = mock(SellInfo.class);
         Tenant my = spy(Tenant.class);
         when(my.call(any())).thenReturn(result);
         SellInfo actual = my.getSellInfo(1);
-        assertThat(actual).isSameAs(result);
+        assertThat(actual)
+                .isNotNull()
+                .isSameAs(result);
     }
 
     @Test
@@ -40,7 +49,8 @@ class TenantTest {
         Tenant my = spy(Tenant.class);
         when(my.call(any())).thenReturn(result);
         Loan actual = my.getLoan(1);
-        assertThat(actual).isSameAs(result);
+        assertThat(actual)
+                .isNotNull()
+                .isSameAs(result);
     }
-
 }

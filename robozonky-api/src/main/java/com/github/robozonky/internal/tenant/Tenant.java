@@ -40,17 +40,15 @@ public interface Tenant extends AutoCloseable {
 
     /**
      * Execute an operation using on the Zonky server.
-     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
-     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
+     * @param operation Operation to execute. It is expected to be stateless and limited solely to the remote call.
      * @param <T> Return type of the operation.
      * @return Whatever the operation returned.
      */
     <T> T call(final Function<Zonky, T> operation);
 
     /**
-     * Execute an operation using on the Zonky server.
-     * @param operation Operation to execute. Should be stateless. Should also only contain the blocking operation and
-     * nothing else, since the underlying code will block the thread for the entire duration of that operation.
+     * Execute an operation using the Zonky server.
+     * @param operation Operation to execute. It is expected to be stateless and limited solely to the remote call.
      */
     default void run(final Consumer<Zonky> operation) {
         call(StreamUtil.toFunction(operation));
