@@ -26,7 +26,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
@@ -155,7 +155,7 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
         return this;
     }
 
-    public MockInvestmentBuilder setLoanHealthInfo(final LoanHealthInfo loanHealthInfo) {
+    public MockInvestmentBuilder setLoanHealthInfo(final LoanHealth loanHealthInfo) {
         when(mock.getLoanHealthInfo()).thenReturn(Optional.of(loanHealthInfo));
         return this;
     }

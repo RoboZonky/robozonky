@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Country;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -43,7 +43,7 @@ public class Participation extends BaseEntity {
     protected long investmentId;
     protected MainIncomeType incomeType;
     protected Ratio interestRate;
-    protected LoanHealthInfo loanHealthInfo;
+    protected LoanHealth loanHealthInfo;
     protected String loanName;
     protected Purpose purpose;
     protected Rating rating;
@@ -178,7 +178,7 @@ public class Participation extends BaseEntity {
     }
 
     @XmlElement
-    public LoanHealthInfo getLoanHealthInfo() {
+    public LoanHealth getLoanHealthInfo() {
         return loanHealthInfo;
     }
 

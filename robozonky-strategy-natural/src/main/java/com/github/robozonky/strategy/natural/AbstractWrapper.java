@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.strategies.Descriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.test.DateUtil;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.Optional;
+
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.LoanHealth;
+import com.github.robozonky.api.strategies.Descriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.test.DateUtil;
 
 abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
 
@@ -50,7 +51,27 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     }
 
     @Override
-    public Optional<BigDecimal> saleFee() {
+    public Optional<BigDecimal> getSellFee() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<LoanHealth> getHealth() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<BigDecimal> getOriginalPurchasePrice() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<BigDecimal> getSellPrice() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<BigDecimal> getSellDiscount() {
         return Optional.empty();
     }
 

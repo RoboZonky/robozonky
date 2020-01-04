@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,17 @@
 
 package com.github.robozonky.internal.remote.entities;
 
+import java.util.Currency;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.enums.*;
-
-import java.util.Currency;
+import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.LoanHealth;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
 
 public final class MutableParticipation extends Participation {
 
@@ -66,7 +70,7 @@ public final class MutableParticipation extends Participation {
         this.interestRate = interestRate;
     }
 
-    public void setLoanHealthInfo(final LoanHealthInfo loanHealthInfo) {
+    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
         this.loanHealthInfo = loanHealthInfo;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,29 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import io.vavr.Lazy;
 
 final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
 
     private final Investment investment;
+    private final Lazy<Optional<SellInfo>> sellInfo;
 
     public InvestmentWrapper(final InvestmentDescriptor original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
         this.investment = original.item();
+        this.sellInfo = Lazy.of(original::sellInfo);
     }
 
     @Override
@@ -98,8 +104,41 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     }
 
     @Override
-    public Optional<BigDecimal> saleFee() {
+    public Optional<BigDecimal> getSellFee() {
         return investment.getSmpFee().map(Money::getValue);
+    }
+
+    private <T> T extractOrFail(final Function<SellInfo, T> extractor) {
+        return sellInfo.get()
+                .map(extractor)
+                .orElseThrow();
+    }
+
+    @Override
+    public Optional<LoanHealth> getHealth() {
+        LoanHealth healthInfo = investment.getLoanHealthInfo()
+                .orElseGet(() -> extractOrFail(si -> si.getLoanHealthStats().getLoanHealthInfo()));
+        return Optional.of(healthInfo);
+    }
+
+    @Override
+    public Optional<BigDecimal> getOriginalPurchasePrice() {
+        return Optional.of(investment.getPurchasePrice().getValue());
+    }
+
+    @Override
+    public Optional<BigDecimal> getSellPrice() {
+        Money price = investment.getSmpPrice()
+                .orElseGet(() -> extractOrFail(SellInfo::getSellPrice));
+        return Optional.of(price.getValue());
+    }
+
+    @Override
+    public Optional<BigDecimal> getSellDiscount() {
+        Money price = sellInfo.get()
+            .map(si -> si.getPriceInfo().getDiscount())
+            .orElse(Money.ZERO);
+        return Optional.of(price.getValue());
     }
 
     @Override

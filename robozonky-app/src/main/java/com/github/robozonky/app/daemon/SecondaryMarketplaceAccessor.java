@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Select;
@@ -88,7 +88,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
-                .filter(p -> p.getLoanHealthInfo() == LoanHealthInfo.HEALTHY) // TODO enable discounted (=overdue)
+                .filter(p -> p.getLoanHealthInfo() == LoanHealth.HEALTHY) // TODO enable discounted (=overdue)
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {

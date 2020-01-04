@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,20 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -51,7 +51,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     void readsMarketplace() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
-        when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
+        when(p.getLoanHealthInfo()).thenReturn(LoanHealth.HEALTHY);
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final PowerTenant tenant = mockTenant(zonky);
@@ -69,7 +69,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     void hasUpdatesWhenCurrentAndPreviousEmpty() {
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
-        when(p.getLoanHealthInfo()).thenReturn(LoanHealthInfo.HEALTHY);
+        when(p.getLoanHealthInfo()).thenReturn(LoanHealth.HEALTHY);
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final PowerTenant tenant = mockTenant(zonky);

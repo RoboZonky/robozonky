@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 /**
  * {@link #UNKNOWN} is an internal value, not in the Zonky API, and therefore should only ever go last.
  */
-@JsonDeserialize(using = LoanHealthInfo.LoanHealthInfoDeserializer.class)
-public enum LoanHealthInfo {
+@JsonDeserialize(using = LoanHealth.LoanHealthInfoDeserializer.class)
+public enum LoanHealth {
 
     HEALTHY,
     CURRENTLY_IN_DUE,
     HISTORICALLY_IN_DUE,
     UNKNOWN;
 
-    static final class LoanHealthInfoDeserializer extends AbstractDeserializer<LoanHealthInfo> {
+    static final class LoanHealthInfoDeserializer extends AbstractDeserializer<LoanHealth> {
 
         public LoanHealthInfoDeserializer() {
-            super(LoanHealthInfo::valueOf, UNKNOWN, true);
+            super(LoanHealth::valueOf, UNKNOWN, true);
         }
     }
 }

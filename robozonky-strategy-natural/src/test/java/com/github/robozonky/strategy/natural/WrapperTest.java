@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -24,15 +26,17 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.api.strategies.InvestmentDescriptor;
+import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -65,7 +69,7 @@ class WrapperTest {
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
             softly.assertThat(w.getRemainingPrincipal().stripTrailingZeros())
                     .isEqualTo(BigDecimal.valueOf(invested).stripTrailingZeros());
-            softly.assertThat(w.saleFee()).contains(Money.from(1).getValue());
+            softly.assertThat(w.getSellFee()).contains(Money.from(1).getValue());
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -105,7 +109,7 @@ class WrapperTest {
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(reservation.getAnnuity().getValue().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(reservation.getTermInMonths());
             softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
-            softly.assertThat(w.saleFee()).isEmpty();
+            softly.assertThat(w.getSellFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -140,7 +144,7 @@ class WrapperTest {
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().getValue().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(loan.getTermInMonths());
             softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
-            softly.assertThat(w.saleFee()).isEmpty();
+            softly.assertThat(w.getSellFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -179,7 +183,7 @@ class WrapperTest {
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(loan.getTermInMonths());
             softly.assertThat(w.getRemainingPrincipal().stripTrailingZeros())
                     .isEqualTo(BigDecimal.valueOf(invested).stripTrailingZeros());
-            softly.assertThat(w.saleFee()).isEmpty();
+            softly.assertThat(w.getSellFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }

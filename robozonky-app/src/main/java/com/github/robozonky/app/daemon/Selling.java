@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -68,7 +68,7 @@ final class Selling implements TenantPayload {
                 .filter(i -> !sold.wasOnceSold(i.getLoanId()))
                 .map(i -> {
                     Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoanId());
-                    LoanHealthInfo healthInfo = i.getLoanHealthInfo().orElse(LoanHealthInfo.UNKNOWN);
+                    LoanHealth healthInfo = i.getLoanHealthInfo().orElse(LoanHealth.UNKNOWN);
                     switch (healthInfo) {
                         case HEALTHY:
                             return new InvestmentDescriptor(i, loanSupplier);

@@ -28,7 +28,7 @@ import com.github.robozonky.api.Money;
 public class SellInfo extends BaseEntity {
 
     @XmlElement
-    private LoanHealthStats loanHealthStatsRo;
+    private LoanHealthInfo loanHealthStatsRo;
     @XmlElement
     private SellPriceInfo priceInfo;
 
@@ -40,7 +40,7 @@ public class SellInfo extends BaseEntity {
         // for JAXB
     }
 
-    public LoanHealthStats getLoanHealthStats() {
+    public LoanHealthInfo getLoanHealthStats() {
         return loanHealthStatsRo;
     }
 
