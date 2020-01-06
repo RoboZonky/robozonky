@@ -39,14 +39,14 @@
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
     </dependency>
-    <dependency> <!-- Jackson needs activation-api, yet we've removed it due to clashes with jakarta.mail. -->
-      <groupId>com.sun.activation</groupId>
-      <artifactId>jakarta.activation</artifactId>
-      <version>1.2.1</version>
-    </dependency>
     <dependency> <!-- RESTEasy excludes this while it would normally be brought in by jaxb-runtime. -->
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
+    </dependency>
+    <dependency> <!-- JAXB and Jackson need activation-api, yet we've removed it due to clashes with jakarta.mail. -->
+      <groupId>com.sun.activation</groupId>
+      <artifactId>jakarta.activation</artifactId>
+      <version>1.2.1</version>
     </dependency>
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
