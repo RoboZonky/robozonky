@@ -119,6 +119,16 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
         return this;
     }
 
+    public MockInvestmentBuilder setPurchasePrice(final BigDecimal bigDecimal) {
+        when(mock.getPurchasePrice()).thenReturn(Money.from(bigDecimal));
+        return this;
+    }
+
+    public MockInvestmentBuilder setSellPrice(final BigDecimal bigDecimal) {
+        when(mock.getSmpPrice()).thenReturn(Optional.of(Money.from(bigDecimal)));
+        return this;
+    }
+
     public MockInvestmentBuilder setOnSmp(final boolean isOnSmp) {
         when(mock.isOnSmp()).thenReturn(isOnSmp);
         return this;

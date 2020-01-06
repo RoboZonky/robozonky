@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,33 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural.conditions;
+package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.LoanHealthInfo;
+import com.github.robozonky.api.remote.entities.SellFee;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.entities.SellPriceInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 class InvestmentWrapperTest {
 
@@ -48,7 +55,11 @@ class InvestmentWrapperTest {
             .setStory(UUID.randomUUID().toString())
             .setTermInMonths(20)
             .build();
-    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000).build();
+    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000)
+            .setLoanHealthInfo(LoanHealth.HEALTHY)
+            .setPurchasePrice(BigDecimal.TEN)
+            .setSellPrice(BigDecimal.ONE)
+            .build();
     private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     @Test
@@ -56,6 +67,7 @@ class InvestmentWrapperTest {
         final InvestmentDescriptor original = new InvestmentDescriptor(INVESTMENT, () -> LOAN);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
+            softly.assertThat(w.getId()).isEqualTo(INVESTMENT.getId());
             softly.assertThat(w.isInsuranceActive()).isEqualTo(INVESTMENT.isInsuranceActive());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
             softly.assertThat(w.getRegion()).isEqualTo(LOAN.getRegion());
@@ -68,7 +80,48 @@ class InvestmentWrapperTest {
             softly.assertThat(w.getStory()).isEqualTo(LOAN.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(INVESTMENT.getLoanTermInMonth());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(INVESTMENT.getRemainingMonths());
+            softly.assertThat(w.getHealth()).contains(LoanHealth.HEALTHY);
+            softly.assertThat(w.getOriginalPurchasePrice()).contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getSellDiscount()).contains(BigDecimal.ZERO);
+            softly.assertThat(w.getSellPrice()).contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getSellFee()).contains(BigDecimal.ZERO);
+            softly.assertThat(w.getReturns()).contains(BigDecimal.ZERO);
             softly.assertThat(w.toString()).isNotNull();
+        });
+    }
+
+    @Test
+    void failsOnNoSellInfo() {
+        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 2_000).build();
+        final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN);
+        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
+        assertSoftly(softly -> {
+            softly.assertThatThrownBy(w::getHealth).isInstanceOf(NoSuchElementException.class);
+            softly.assertThatThrownBy(w::getSellPrice).isInstanceOf(NoSuchElementException.class);
+        });
+    }
+
+    @Test
+    void sellInfoValues() {
+        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 2_000).build();
+        final LoanHealthInfo healthInfo = mock(LoanHealthInfo.class);
+        when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
+        final SellPriceInfo priceInfo = mock(SellPriceInfo.class);
+        when(priceInfo.getDiscount()).thenReturn(Money.from(1));
+        final SellFee feeInfo = mock(SellFee.class);
+        when(feeInfo.getValue()).thenReturn(Money.from(2));
+        when(priceInfo.getFee()).thenReturn(feeInfo);
+        final SellInfo sellInfo = mock(SellInfo.class);
+        when(sellInfo.getLoanHealthStats()).thenReturn(healthInfo);
+        when(sellInfo.getPriceInfo()).thenReturn(priceInfo);
+        when(sellInfo.getSellPrice()).thenReturn(Money.from(10));
+        final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN, () -> sellInfo);
+        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
+        assertSoftly(softly -> {
+            softly.assertThat(w.getHealth()).contains(LoanHealth.HISTORICALLY_IN_DUE);
+            softly.assertThat(w.getSellDiscount()).contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getSellPrice()).contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getSellFee()).contains(new BigDecimal("2.00"));
         });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,8 @@ class AbstractEnumeratedConditionTest {
     @TestFactory
     Stream<DynamicNode> conditions() {
         return Stream.of(new BorrowerIncomeConditionSpec(), new BorrowerRegionConditionSpec(),
-                         new LoanPurposeConditionSpec(), new LoanRatingEnumeratedConditionSpec())
+                         new LoanPurposeConditionSpec(), new LoanRatingEnumeratedConditionSpec(),
+                         new HealthConditionSpec())
                 .map(spec -> dynamicContainer(spec.getImplementation().getClass().getSimpleName(), forSpec(spec)));
     }
 

@@ -32,7 +32,8 @@ public class RelativeProfitCondition extends AbstractRelativeRangeCondition {
     private static BigDecimal getProfit(final Wrapper<?> w) {
         BigDecimal income = w.getReturns().orElse(BigDecimal.ZERO);
         BigDecimal saleFee = w.getSellFee().orElse(BigDecimal.ZERO);
-        return minus(minus(income, saleFee), getOriginalPrice(w));
+        BigDecimal result = minus(minus(income, saleFee), getOriginalPrice(w));
+        return result;
     }
 
     private static BigDecimal getOriginalPrice(final Wrapper<?> w) {
