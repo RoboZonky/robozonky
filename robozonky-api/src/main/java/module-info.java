@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ module com.github.robozonky.api {
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.jaxrs.json; // Required transitively by RESTeasy, which is not modularized.
     requires io.vavr;
     requires org.apache.logging.log4j;
     requires ini4j;

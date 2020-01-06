@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2019 The RoboZonky Project
+  ~ Copyright 2020 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -38,6 +38,11 @@
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
+    </dependency>
+    <dependency> <!-- Jackson needs activation-api, yet we've removed it due to clashes with jakarta.mail. -->
+      <groupId>com.sun.activation</groupId>
+      <artifactId>jakarta.activation</artifactId>
+      <version>1.2.1</version>
     </dependency>
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
