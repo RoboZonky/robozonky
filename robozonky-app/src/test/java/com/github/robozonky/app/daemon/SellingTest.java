@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,20 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.notifications.*;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.api.notifications.SaleRecommendedEvent;
+import com.github.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -30,12 +40,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -50,6 +55,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .setLoanId(loan.getId())
                 .setRating(Rating.AAAAA)
                 .setLoanTermInMonth(1000)
+                .setLoanHealthInfo(LoanHealth.HEALTHY)
                 .setRemainingPrincipal(BigDecimal.valueOf(100))
                 .setStatus(InvestmentStatus.ACTIVE)
                 .setOnSmp(false)

@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -61,7 +62,10 @@ final class Selling implements TenantPayload {
     }
 
     private static void sell(final PowerTenant tenant, final SellStrategy strategy) {
-        final Select sellable = Select.sellableParticipations();
+        final Select sellable = Select.unrestricted()
+                .equalsPlain("delinquent", "true")
+                .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
+                .equals("status", "ACTIVE");
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
@@ -74,10 +78,13 @@ final class Selling implements TenantPayload {
                             return new InvestmentDescriptor(i, loanSupplier);
                         case HISTORICALLY_IN_DUE: // Additional sell info is available for possible future use.
                             return new InvestmentDescriptor(i, loanSupplier, () -> tenant.getSellInfo(i.getId()));
+                        case CURRENTLY_IN_DUE: // TODO Enable selling delinquents when Zonky enables it.
+                            return null;
                         default:
                             throw new IllegalStateException("Unsupported loan status: " + healthInfo);
                     }
-                }).collect(Collectors.toSet());
+                }).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
         tenant.fire(EventFactory.sellingStarted(eligible, overview));
         final Stream<RecommendedInvestment> recommended = strategy.recommend(eligible, overview)
