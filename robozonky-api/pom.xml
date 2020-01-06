@@ -44,6 +44,10 @@
       <artifactId>jakarta.activation</artifactId>
       <version>1.2.1</version>
     </dependency>
+    <dependency> <!-- RESTEasy excludes this while it would normally be brought in by jaxb-runtime. -->
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
