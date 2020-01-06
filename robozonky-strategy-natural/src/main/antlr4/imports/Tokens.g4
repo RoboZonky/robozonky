@@ -187,7 +187,7 @@ PURPOSE_HEALTH                  : 'zdraví';
 HEALTH          : HEALTH_ALWAYS | HEALTH_NOW | HEALTH_NOT;
 HEALTH_ALWAYS   : 'nikdy nebyla';
 HEALTH_NOW      : 'nyní není';
-HEALTH_NOT      : IS;
+HEALTH_NOT      : 'nyní je';
 
 // shared strings
 KC        : ' Kč' ;
