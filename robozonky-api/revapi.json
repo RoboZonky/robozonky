@@ -266,6 +266,29 @@
         "new": "method java.util.Optional<java.time.OffsetDateTime> com.github.robozonky.api.remote.entities.Investment::getSmpFeeExpirationDate()",
         "annotation": "@javax.xml.bind.annotation.XmlTransient",
         "justification": "Small changes to JAXB model with no impact on users."
+      },
+      {
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Optional<com.github.robozonky.api.remote.enums.LoanHealthInfo> com.github.robozonky.api.remote.entities.Investment::getLoanHealthInfo()",
+        "new": "method java.util.Optional<com.github.robozonky.api.remote.enums.LoanHealth> com.github.robozonky.api.remote.entities.Investment::getLoanHealthInfo()",
+        "justification": "Rename class to not conflict with another similarly named element in Zonky API."
+      },
+      {
+        "code": "java.field.typeChanged",
+        "old": "field com.github.robozonky.api.remote.entities.Participation.loanHealthInfo",
+        "new": "field com.github.robozonky.api.remote.entities.Participation.loanHealthInfo",
+        "justification": "Rename class to not conflict with another similarly named element in Zonky API."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.remote.enums.LoanHealthInfo com.github.robozonky.api.remote.entities.Participation::getLoanHealthInfo()",
+        "new": "method com.github.robozonky.api.remote.enums.LoanHealth com.github.robozonky.api.remote.entities.Participation::getLoanHealthInfo()",
+        "justification": "Rename class to not conflict with another similarly named element in Zonky API."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.LoanHealthInfo",
+        "justification": "Rename class to not conflict with another similarly named element in Zonky API."
       }
     ]
   }
