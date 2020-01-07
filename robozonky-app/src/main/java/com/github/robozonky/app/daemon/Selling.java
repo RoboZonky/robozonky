@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -58,12 +62,28 @@ final class Selling implements TenantPayload {
     }
 
     private static void sell(final PowerTenant tenant, final SellStrategy strategy) {
-        final Select sellable = Select.sellableParticipations();
+        final Select sellable = Select.unrestricted()
+                .equalsPlain("delinquent", "true")
+                .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
+                .equals("status", "ACTIVE");
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
                 .filter(i -> !sold.wasOnceSold(i.getLoanId()))
-                .map(i -> new InvestmentDescriptor(i, () -> tenant.getLoan(i.getLoanId())))
+                .map(i -> {
+                    Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoanId());
+                    LoanHealth healthInfo = i.getLoanHealthInfo().orElse(LoanHealth.UNKNOWN);
+                    switch (healthInfo) {
+                        case HEALTHY:
+                            return new InvestmentDescriptor(i, loanSupplier);
+                        case HISTORICALLY_IN_DUE: // Additional sell info is available for possible future use.
+                            return new InvestmentDescriptor(i, loanSupplier, () -> tenant.getSellInfo(i.getId()));
+                        case CURRENTLY_IN_DUE: // TODO Enable selling delinquents when Zonky enables it.
+                            return null;
+                        default:
+                            throw new IllegalStateException("Unsupported loan status: " + healthInfo);
+                    }
+                }).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
         tenant.fire(EventFactory.sellingStarted(eligible, overview));

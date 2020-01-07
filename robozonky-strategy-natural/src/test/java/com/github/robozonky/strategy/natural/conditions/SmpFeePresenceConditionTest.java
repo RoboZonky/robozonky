@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,22 +30,22 @@ class SmpFeePresenceConditionTest {
     @Test
     void present() {
         final Wrapper<?> l = mock(Wrapper.class);
-        when(l.saleFee()).thenReturn(Optional.empty());
+        when(l.getSellFee()).thenReturn(Optional.empty());
         assertThat(SmpFeePresenceCondition.PRESENT.test(l)).isFalse();
-        when(l.saleFee()).thenReturn(Optional.of(BigDecimal.ZERO));
+        when(l.getSellFee()).thenReturn(Optional.of(BigDecimal.ZERO));
         assertThat(SmpFeePresenceCondition.PRESENT.test(l)).isFalse();
-        when(l.saleFee()).thenReturn(Optional.of(BigDecimal.ONE));
+        when(l.getSellFee()).thenReturn(Optional.of(BigDecimal.ONE));
         assertThat(SmpFeePresenceCondition.PRESENT.test(l)).isTrue();
     }
 
     @Test
     void notPresent() {
         final Wrapper<?> l = mock(Wrapper.class);
-        when(l.saleFee()).thenReturn(Optional.empty());
+        when(l.getSellFee()).thenReturn(Optional.empty());
         assertThat(SmpFeePresenceCondition.NOT_PRESENT.test(l)).isTrue();
-        when(l.saleFee()).thenReturn(Optional.of(BigDecimal.ZERO));
+        when(l.getSellFee()).thenReturn(Optional.of(BigDecimal.ZERO));
         assertThat(SmpFeePresenceCondition.NOT_PRESENT.test(l)).isTrue();
-        when(l.saleFee()).thenReturn(Optional.of(BigDecimal.ONE));
+        when(l.getSellFee()).thenReturn(Optional.of(BigDecimal.ONE));
         assertThat(SmpFeePresenceCondition.NOT_PRESENT.test(l)).isFalse();
     }
 }

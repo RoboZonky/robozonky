@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural.conditions;
+package com.github.robozonky.strategy.natural;
+
+import java.util.UUID;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -24,14 +26,11 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 class LoanWrapperTest {
 
@@ -65,6 +64,12 @@ class LoanWrapperTest {
             softly.assertThat(w.getStory()).isEqualTo(l.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(l.getTermInMonths());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(l.getTermInMonths());
+            softly.assertThat(w.getHealth()).isEmpty();
+            softly.assertThat(w.getOriginalPurchasePrice()).isEmpty();
+            softly.assertThat(w.getSellDiscount()).isEmpty();
+            softly.assertThat(w.getSellPrice()).isEmpty();
+            softly.assertThat(w.getSellFee()).isEmpty();
+            softly.assertThat(w.getReturns()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }

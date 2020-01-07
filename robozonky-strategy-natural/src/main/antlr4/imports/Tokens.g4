@@ -106,6 +106,12 @@ purposeExpression returns [Purpose result] :
     }
 ;
 
+healthExpression returns [LoanHealth result] :
+    HEALTH_NOT { $result = LoanHealth.CURRENTLY_IN_DUE; }
+    | HEALTH_NOW { $result = LoanHealth.HISTORICALLY_IN_DUE; }
+    | HEALTH_ALWAYS  { $result = LoanHealth.HEALTHY; }
+;
+
 dateExpr returns [LocalDate result] :
     d=intExpr DOT m=intExpr DOT y=intExpr
     {
@@ -176,6 +182,12 @@ PURPOSE_REFINANCING             : 'refinancování půjček';
 PURPOSE_OWN_PROJECT             : 'vlastní projekt';
 PURPOSE_EDUCATION               : 'vzdělání';
 PURPOSE_HEALTH                  : 'zdraví';
+
+// loan healt states
+HEALTH          : HEALTH_ALWAYS | HEALTH_NOW | HEALTH_NOT;
+HEALTH_ALWAYS   : 'nikdy nebyla';
+HEALTH_NOW      : 'nyní není';
+HEALTH_NOT      : 'nyní je';
 
 // shared strings
 KC        : ' Kč' ;

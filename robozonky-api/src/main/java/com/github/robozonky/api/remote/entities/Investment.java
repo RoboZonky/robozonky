@@ -27,7 +27,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
 import com.github.robozonky.api.remote.enums.InvestmentType;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
@@ -37,7 +37,7 @@ public class Investment extends BaseInvestment {
     @XmlElement
     private PaymentStatus paymentStatus;
     @XmlElement
-    private LoanHealthInfo loanHealthInfo;
+    private LoanHealth loanHealthInfo;
     private boolean smpRelated;
     private boolean onSmp;
     private boolean canBeOffered;
@@ -144,7 +144,7 @@ public class Investment extends BaseInvestment {
      * @return Empty when no longer relevant, such as when sold.
      */
     @XmlElement
-    public Optional<LoanHealthInfo> getLoanHealthInfo() {
+    public Optional<LoanHealth> getLoanHealthInfo() {
         return Optional.ofNullable(loanHealthInfo);
     }
 

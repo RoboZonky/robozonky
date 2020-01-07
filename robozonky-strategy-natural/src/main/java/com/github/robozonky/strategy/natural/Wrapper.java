@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -79,7 +80,18 @@ public interface Wrapper<T> {
 
     BigDecimal getRemainingPrincipal();
 
-    Optional<BigDecimal> saleFee();
+    Optional<BigDecimal> getReturns();
+
+    Optional<LoanHealth> getHealth();
+
+    Optional<BigDecimal> getOriginalPurchasePrice();
+
+    Optional<BigDecimal> getSellPrice();
+
+    Optional<BigDecimal> getSellFee();
+
+    Optional<BigDecimal> getSellDiscount();
 
     T getOriginal();
+
 }

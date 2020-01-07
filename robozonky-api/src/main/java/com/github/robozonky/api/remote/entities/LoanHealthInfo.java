@@ -20,9 +20,9 @@ import java.util.OptionalInt;
 import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 
-public class LoanHealthStats extends BaseEntity {
+public class LoanHealthInfo extends BaseEntity {
 
     @XmlElement
     private int paidInstalments;
@@ -35,9 +35,9 @@ public class LoanHealthStats extends BaseEntity {
     @XmlElement
     private int daysSinceLastInDue;
     @XmlElement
-    private LoanHealthInfo loanHealthInfo = LoanHealthInfo.HISTORICALLY_IN_DUE;
+    private LoanHealth loanHealthInfo = LoanHealth.HISTORICALLY_IN_DUE;
 
-    LoanHealthStats() {
+    LoanHealthInfo() {
         // For JAXB.
     }
 
@@ -61,13 +61,13 @@ public class LoanHealthStats extends BaseEntity {
         return daysSinceLastInDue;
     }
 
-    public LoanHealthInfo getLoanHealthInfo() {
+    public LoanHealth getLoanHealthInfo() {
         return loanHealthInfo;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", LoanHealthStats.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", LoanHealthInfo.class.getSimpleName() + "[", "]")
                 .add("daysSinceLastInDue=" + daysSinceLastInDue)
                 .add("dueInstalments=" + dueInstalments)
                 .add("instalmentsCurrentlyInDue=" + instalmentsCurrentlyInDue)

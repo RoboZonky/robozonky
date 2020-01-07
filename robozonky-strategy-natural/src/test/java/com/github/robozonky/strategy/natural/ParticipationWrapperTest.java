@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural.conditions;
+package com.github.robozonky.strategy.natural;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -31,11 +28,9 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -83,6 +78,12 @@ class ParticipationWrapperTest {
             softly.assertThat(w.getStory()).isEqualTo(LOAN.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(PARTICIPATION.getOriginalInstalmentCount());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(PARTICIPATION.getRemainingInstalmentCount());
+            softly.assertThat(w.getHealth()).isEmpty();
+            softly.assertThat(w.getOriginalPurchasePrice()).isEmpty();
+            softly.assertThat(w.getSellDiscount()).isEmpty();
+            softly.assertThat(w.getSellPrice()).isEmpty();
+            softly.assertThat(w.getSellFee()).isEmpty();
+            softly.assertThat(w.getReturns()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
     }
@@ -99,26 +100,4 @@ class ParticipationWrapperTest {
         });
     }
 
-    @Test
-    void elseConditionWorks() {
-        final AbstractEnumeratedCondition<Region> c = new BorrowerRegionCondition();
-        c.add(Region.USTECKY);
-        c.add(Region.MORAVSKOSLEZSKY);
-        c.add(Region.KARLOVARSKY);
-        final MarketplaceFilter f = new MarketplaceFilter();
-        f.when(Collections.singleton(c));
-        final AbstractEnumeratedCondition<MainIncomeType> c2 = new BorrowerIncomeCondition();
-        c2.add(MainIncomeType.EMPLOYMENT);
-        final AbstractRangeCondition c3 = LoanInterestRateCondition.exact(Ratio.ZERO, Ratio.fromPercentage(16));
-        f.butNotWhen(Arrays.asList(c2, c3));
-        final Loan l = new MockLoanBuilder()
-                .setRegion(Region.USTECKY)
-                .build();
-        final Participation p = mock(Participation.class);
-        when(p.getIncomeType()).thenReturn(MainIncomeType.EMPLOYMENT);
-        when(p.getInterestRate()).thenReturn(Ratio.fromPercentage(15));
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd, FOLIO);
-        assertThat((Predicate<Wrapper<?>>) f).rejects(w);
-    }
 }

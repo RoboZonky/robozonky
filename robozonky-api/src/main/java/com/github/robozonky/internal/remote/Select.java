@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,6 @@ import java.util.stream.Stream;
 public class Select implements Consumer<RoboZonkyFilter> {
 
     private final Map<String, List<Object>> conditions = new HashMap<>(0);
-
-    public static Select sellableParticipations() { // TODO enable selling of discounted investments
-        return unrestricted()
-                .equalsPlain("delinquent", "true")
-                .equalsPlain("loanHealthInfo", "HEALTHY")
-                .equals("loan.status", "ACTIVE"); // this is how Zonky queries for this
-    }
 
     public static Select unrestricted() {
         return new Select();

@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.entities.SellFee;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellPriceInfo;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.enums.LoanHealthInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Select;
@@ -82,13 +82,13 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         final Investment i = MockInvestmentBuilder.fresh()
                 .setRating(Rating.D)
                 .setRemainingPrincipal(BigDecimal.TEN)
-                .setLoanHealthInfo(LoanHealthInfo.HEALTHY)
+                .setLoanHealthInfo(LoanHealth.HEALTHY)
                 .setSmpFee(BigDecimal.ONE)
                 .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
                 .setRating(Rating.A)
                 .setRemainingPrincipal(BigDecimal.ONE)
-                .setLoanHealthInfo(LoanHealthInfo.HISTORICALLY_IN_DUE)
+                .setLoanHealthInfo(LoanHealth.HISTORICALLY_IN_DUE)
                 .build();
         final Zonky zonky = harmlessZonky();
         mockSellInfo(zonky, BigDecimal.TEN, BigDecimal.ZERO);
