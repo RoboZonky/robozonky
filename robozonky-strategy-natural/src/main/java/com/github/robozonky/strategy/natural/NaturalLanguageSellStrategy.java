@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,14 @@ class NaturalLanguageSellStrategy implements SellStrategy {
     }
 
     private static boolean isFree(final InvestmentDescriptor descriptor) {
-        return descriptor.item().getSmpFee().map(Money::isZero).orElse(true);
+        return descriptor.item().getSmpFee()
+                .map(Money::isZero)
+                .orElseGet(() -> descriptor.sellInfo()
+                        .map(si -> si.getPriceInfo()
+                                .getFee()
+                                .getValue()
+                                .isZero())
+                        .orElse(true));
     }
 
     @Override
@@ -58,7 +65,6 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                 })
                 .orElse(Stream.empty())
                 .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
-                .flatMap(Optional::stream)
-                .sorted(COMPARATOR); // investments without sale fee come first
+                .flatMap(Optional::stream);
     }
 }
