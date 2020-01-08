@@ -49,11 +49,13 @@ final class Selling implements TenantPayload {
 
     private static Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
                                                     final SoldParticipationCache sold) {
-        final Investment i = r.descriptor().item();
+        final InvestmentDescriptor d = r.descriptor();
+        final Investment i = d.item();
         final boolean isRealRun = !tenant.getSessionInfo().isDryRun();
         LOGGER.debug("Will send sell request for loan #{}: {}.", i.getLoanId(), isRealRun);
         if (isRealRun) {
-            tenant.run(z -> z.sell(i));
+            d.sellInfo().ifPresentOrElse(sellInfo -> tenant.run(z -> z.sell(i, sellInfo)),
+                                         () -> tenant.run(z -> z.sell(i)));
             LOGGER.info("Offered to sell investment in loan #{}.", i.getLoanId());
         }
         sold.markAsOffered(i.getLoanId());

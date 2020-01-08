@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,39 @@ import com.github.robozonky.api.Money;
 public class SellRequest extends BaseEntity {
 
     private long investmentId;
-    private BigDecimal feeAmount;
     private BigDecimal remainingPrincipal;
+    private BigDecimal price;
+    private BigDecimal discount;
+    private BigDecimal feeAmount;
+
+    public SellRequest(final long investmentId, final SellInfo sellInfo) {
+        this.investmentId = investmentId;
+        this.remainingPrincipal = sellInfo.getPriceInfo()
+                .getRemainingPrincipal()
+                .getValue();
+        this.feeAmount = sellInfo.getPriceInfo()
+                .getFee()
+                .getValue()
+                .getValue();
+        this.discount = sellInfo.getPriceInfo()
+                .getDiscount()
+                .getValue();
+        this.price = sellInfo.getSellPrice()
+                .getValue();
+    }
 
     public SellRequest(final Investment investment) {
         this.investmentId = investment.getId();
-        this.remainingPrincipal = investment.getRemainingPrincipal().orElseThrow().getValue();
-        this.feeAmount = investment.getSmpFee().orElse(Money.ZERO).getValue();
+        this.remainingPrincipal = investment.getRemainingPrincipal()
+                .orElseThrow()
+                .getValue();
+        this.feeAmount = investment.getSmpFee()
+                .orElse(Money.ZERO)
+                .getValue();
+        this.discount = BigDecimal.ZERO;
+        this.price = investment.getSmpPrice()
+                .map(Money::getValue)
+                .orElse(remainingPrincipal);
     }
 
     @XmlElement
@@ -40,20 +66,32 @@ public class SellRequest extends BaseEntity {
     }
 
     @XmlElement
-    public BigDecimal getFeeAmount() {
-        return feeAmount;
+    public BigDecimal getRemainingPrincipal() {
+        return remainingPrincipal;
     }
 
     @XmlElement
-    public BigDecimal getRemainingPrincipal() {
-        return remainingPrincipal;
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    @XmlElement
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    @XmlElement
+    public BigDecimal getFeeAmount() {
+        return feeAmount;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", SellRequest.class.getSimpleName() + "[", "]")
-                .add("investmentId=" + investmentId)
+                .add("discount=" + discount)
                 .add("feeAmount=" + feeAmount)
+                .add("investmentId=" + investmentId)
+                .add("price=" + price)
                 .add("remainingPrincipal=" + remainingPrincipal)
                 .toString();
     }
