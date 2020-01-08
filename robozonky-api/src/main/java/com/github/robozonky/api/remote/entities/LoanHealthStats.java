@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanHealth;
 
-public class LoanHealthInfo extends BaseEntity {
+public class LoanHealthStats extends BaseEntity {
 
     @XmlElement
     private int paidInstalments;
@@ -37,7 +37,7 @@ public class LoanHealthInfo extends BaseEntity {
     @XmlElement
     private LoanHealth loanHealthInfo = LoanHealth.HISTORICALLY_IN_DUE;
 
-    LoanHealthInfo() {
+    LoanHealthStats() {
         // For JAXB.
     }
 
@@ -67,7 +67,7 @@ public class LoanHealthInfo extends BaseEntity {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", LoanHealthInfo.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", LoanHealthStats.class.getSimpleName() + "[", "]")
                 .add("daysSinceLastInDue=" + daysSinceLastInDue)
                 .add("dueInstalments=" + dueInstalments)
                 .add("instalmentsCurrentlyInDue=" + instalmentsCurrentlyInDue)

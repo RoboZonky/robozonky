@@ -25,7 +25,9 @@ import javax.xml.bind.annotation.XmlElement;
 public class SellInfo extends BaseEntity {
 
     @XmlElement
-    private LoanHealthInfo loanHealthStatsRo;
+    private Object loanHealthStatsRo; // For some reason, identical to loanHealthStats; ignore.
+    @XmlElement
+    private LoanHealthStats loanHealthStats;
     @XmlElement
     private SellPriceInfo priceInfo;
 
@@ -33,8 +35,8 @@ public class SellInfo extends BaseEntity {
         // for JAXB
     }
 
-    public LoanHealthInfo getLoanHealthStats() {
-        return loanHealthStatsRo;
+    public LoanHealthStats getLoanHealthStats() {
+        return loanHealthStats;
     }
 
     public SellPriceInfo getPriceInfo() {
@@ -44,7 +46,7 @@ public class SellInfo extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", SellInfo.class.getSimpleName() + "[", "]")
-                .add("loanHealthStats=" + loanHealthStatsRo)
+                .add("loanHealthStats=" + loanHealthStats)
                 .add("priceInfo=" + priceInfo)
                 .toString();
     }

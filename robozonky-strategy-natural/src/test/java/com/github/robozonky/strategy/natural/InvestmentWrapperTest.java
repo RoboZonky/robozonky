@@ -24,7 +24,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.LoanHealthInfo;
+import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.entities.SellFee;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellPriceInfo;
@@ -104,7 +104,7 @@ class InvestmentWrapperTest {
     @Test
     void sellInfoValues() {
         final Investment investment = MockInvestmentBuilder.fresh(LOAN, 2_000).build();
-        final LoanHealthInfo healthInfo = mock(LoanHealthInfo.class);
+        final LoanHealthStats healthInfo = mock(LoanHealthStats.class);
         when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
         final SellPriceInfo priceInfo = mock(SellPriceInfo.class);
         when(priceInfo.getDiscount()).thenReturn(Money.from(1));
