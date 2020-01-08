@@ -108,13 +108,13 @@ class InvestmentWrapperTest {
         when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
         final SellPriceInfo priceInfo = mock(SellPriceInfo.class);
         when(priceInfo.getDiscount()).thenReturn(Money.from(1));
+        when(priceInfo.getSellPrice()).thenReturn(Money.from(10));
         final SellFee feeInfo = mock(SellFee.class);
         when(feeInfo.getValue()).thenReturn(Money.from(2));
         when(priceInfo.getFee()).thenReturn(feeInfo);
         final SellInfo sellInfo = mock(SellInfo.class);
         when(sellInfo.getLoanHealthStats()).thenReturn(healthInfo);
         when(sellInfo.getPriceInfo()).thenReturn(priceInfo);
-        when(sellInfo.getSellPrice()).thenReturn(Money.from(10));
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN, () -> sellInfo);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {

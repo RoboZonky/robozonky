@@ -25,6 +25,9 @@ import com.github.robozonky.api.Money;
 public class SellPriceInfo extends BaseEntity {
 
     @XmlElement
+    private String sellPrice;
+
+    @XmlElement
     private SellFee fee;
 
     // Strings to be represented as money.
@@ -41,8 +44,14 @@ public class SellPriceInfo extends BaseEntity {
         // For JAXB.
     }
 
+
     public SellFee getFee() {
         return fee;
+    }
+
+    @XmlTransient
+    public Money getSellPrice() {
+        return Money.from(sellPrice);
     }
 
     @XmlTransient
@@ -64,6 +73,7 @@ public class SellPriceInfo extends BaseEntity {
     public String toString() {
         return new StringJoiner(", ", SellPriceInfo.class.getSimpleName() + "[", "]")
                 .add("boughtFor='" + boughtFor + "'")
+                .add("sellPrice='" + sellPrice + "'")
                 .add("discount='" + discount + "'")
                 .add("fee=" + fee)
                 .add("remainingPrincipal='" + remainingPrincipal + "'")

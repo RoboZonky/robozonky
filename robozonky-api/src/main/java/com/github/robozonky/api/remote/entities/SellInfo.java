@@ -18,9 +18,6 @@ package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-
-import com.github.robozonky.api.Money;
 
 /*
 "loanHealthStatsRo":,"priceInfo":,"sellPrice":308.58}
@@ -31,10 +28,6 @@ public class SellInfo extends BaseEntity {
     private LoanHealthInfo loanHealthStatsRo;
     @XmlElement
     private SellPriceInfo priceInfo;
-
-    // Strings to be represented as money.
-    @XmlElement
-    private String sellPrice = "0";
 
     SellInfo() {
         // for JAXB
@@ -48,17 +41,11 @@ public class SellInfo extends BaseEntity {
         return priceInfo;
     }
 
-    @XmlTransient
-    public Money getSellPrice() {
-        return Money.from(sellPrice);
-    }
-
     @Override
     public String toString() {
         return new StringJoiner(", ", SellInfo.class.getSimpleName() + "[", "]")
                 .add("loanHealthStats=" + loanHealthStatsRo)
                 .add("priceInfo=" + priceInfo)
-                .add("sellPrice='" + sellPrice + "'")
                 .toString();
     }
 }

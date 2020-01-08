@@ -44,8 +44,8 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
         when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
         SellPriceInfo sellPriceInfo = mock(SellPriceInfo.class);
         when(sellPriceInfo.getFee()).thenReturn(sellFee);
+        when(sellPriceInfo.getSellPrice()).thenReturn(Money.from(price));
         SellInfo sellInfo = mock(SellInfo.class);
-        when(sellInfo.getSellPrice()).thenReturn(Money.from(price));
         when(sellInfo.getPriceInfo()).thenReturn(sellPriceInfo);
         return sellInfo;
     }

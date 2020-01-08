@@ -86,7 +86,7 @@ final class Util {
                                             investment.getSmpFee().orElse(Money.ZERO));
                         case HISTORICALLY_IN_DUE:
                             var sellInfo = tenant.getSellInfo(investment.getId());
-                            return Tuple.of(investment.getRating(), sellInfo.getSellPrice(),
+                            return Tuple.of(investment.getRating(), sellInfo.getPriceInfo().getSellPrice(),
                                             sellInfo.getPriceInfo().getFee().getValue());
                         default:
                             throw new IllegalStateException(

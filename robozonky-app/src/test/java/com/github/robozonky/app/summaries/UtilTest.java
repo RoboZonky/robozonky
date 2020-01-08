@@ -65,14 +65,14 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         assertThat(result.get(Rating.D)).isEqualTo(Money.from(10));
     }
 
-    public void mockSellInfo(Zonky zonky, final BigDecimal price, final BigDecimal fee) {
+    private static void mockSellInfo(Zonky zonky, final BigDecimal price, final BigDecimal fee) {
         SellFee sellFee = mock(SellFee.class);
         when(sellFee.getValue()).thenReturn(Money.from(fee));
         when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
         SellPriceInfo sellPriceInfo = mock(SellPriceInfo.class);
+        when(sellPriceInfo.getSellPrice()).thenReturn(Money.from(price));
         when(sellPriceInfo.getFee()).thenReturn(sellFee);
         SellInfo sellInfo = mock(SellInfo.class);
-        when(sellInfo.getSellPrice()).thenReturn(Money.from(price));
         when(sellInfo.getPriceInfo()).thenReturn(sellPriceInfo);
         when(zonky.getSellInfo(anyLong())).thenReturn(sellInfo);
     }
