@@ -52,6 +52,7 @@ public class Investment extends BaseInvestment {
     private int currentTerm = 0;
     private int remainingMonths = loanTermInMonth - currentTerm;
     private long borrowerNo = 0;
+    private long loanPublicIdentifier = 0;
     private String loanName;
     private String nickname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
@@ -125,6 +126,7 @@ public class Investment extends BaseInvestment {
 
     public Investment(final Loan loan, final Money amount) {
         super(loan, amount);
+        this.loanPublicIdentifier = loan.getPublicIdentifier();
         this.rating = loan.getRating();
         this.interestRate = rating.getInterestRate();
         this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
@@ -213,6 +215,11 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public long getBorrowerNo() {
         return borrowerNo;
+    }
+
+    @XmlElement
+    public long getLoanPublicIdentifier() {
+        return loanPublicIdentifier;
     }
 
     @XmlElement
@@ -444,6 +451,7 @@ public class Investment extends BaseInvestment {
                 .add("loanHealthInfo=" + loanHealthInfo)
                 .add("loanInvestmentsCount=" + loanInvestmentsCount)
                 .add("loanName='" + loanName + "'")
+                .add("loanPublicIdentifier='" + loanPublicIdentifier + "'")
                 .add("loanTermInMonth=" + loanTermInMonth)
                 .add("nextPaymentDate='" + nextPaymentDate + "'")
                 .add("nickname='" + nickname + "'")

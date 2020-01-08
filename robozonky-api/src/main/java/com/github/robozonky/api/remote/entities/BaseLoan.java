@@ -47,7 +47,8 @@ public abstract class BaseLoan extends BaseEntity {
     protected int questionsCount;
     protected int userId;
     protected int activeLoansCount;
-    protected long borrowerNo;
+    protected long publicIdentifier = 0;
+    protected long borrowerNo = 0;
     protected String name;
     protected String nickName;
     protected String story;
@@ -135,6 +136,11 @@ public abstract class BaseLoan extends BaseEntity {
     @XmlElement
     public int getId() {
         return id;
+    }
+
+    @XmlElement
+    public long getPublicIdentifier() {
+        return publicIdentifier;
     }
 
     @XmlElement
@@ -325,6 +331,7 @@ public abstract class BaseLoan extends BaseEntity {
                 .add("name='" + name + "'")
                 .add("nickName='" + nickName + "'")
                 .add("premium='" + premium + "'")
+                .add("publicIdentifier=" + publicIdentifier)
                 .add("published=" + published)
                 .add("purpose=" + purpose)
                 .add("questionsAllowed=" + questionsAllowed)
