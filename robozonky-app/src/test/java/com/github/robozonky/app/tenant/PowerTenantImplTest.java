@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -33,6 +35,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
@@ -96,7 +99,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
                 .build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final SellFee sf = mock(SellFee.class);
-        when(sf.getExpiresAt()).thenReturn(Optional.empty());
+        when(sf.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)));
         final SellPriceInfo spi = mock(SellPriceInfo.class);
         when(spi.getFee()).thenReturn(sf);
         final SellInfo si = mock(SellInfo.class);
