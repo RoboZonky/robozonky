@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.time.Period;
+import java.util.Optional;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.internal.test.DateUtil;
-
-import java.time.Period;
-import java.util.Optional;
 
 class DefaultValues {
 
@@ -30,6 +30,7 @@ class DefaultValues {
     private SellingMode sellingMode = null;
     private Money targetPortfolioSize = Money.from(Long.MAX_VALUE);
     private InvestmentSize investmentSize = new InvestmentSize();
+    private InvestmentSize purchaseSize = new InvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private ExitProperties exitProperties;
 
@@ -106,6 +107,20 @@ class DefaultValues {
             throw new IllegalArgumentException("Default investment size must be provided.");
         }
         this.investmentSize = investmentSize;
+    }
+
+    public void setInvestmentSize(final int investmentSize) {
+        if (investmentSize % 200 != 0) {
+            throw new IllegalArgumentException("Investment size must be divisible by 200: " + investmentSize);
+        }
+        this.investmentSize = new InvestmentSize(investmentSize, investmentSize);
+    }
+
+    public InvestmentSize getPurchaseSize() {
+        return purchaseSize;
+    }
+    public void setPurchaseSize(final int purchaseSize) {
+        this.purchaseSize = new InvestmentSize(purchaseSize);
     }
 
     @Override

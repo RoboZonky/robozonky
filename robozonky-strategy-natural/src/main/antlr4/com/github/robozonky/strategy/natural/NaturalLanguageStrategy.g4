@@ -41,6 +41,7 @@ complexExpression returns [ParsedStrategy result]
     @init {
         Collection<PortfolioShare> portfolioStructures = Collections.emptyList();
         Map<Rating, InvestmentSize> investmentSizes = Collections.emptyMap();
+        Map<Rating, InvestmentSize> purchaseSizes = Collections.emptyMap();
         Collection<MarketplaceFilter> primaryFilters = Collections.emptyList();
         Collection<MarketplaceFilter> secondaryFilters = Collections.emptyList();
         Collection<MarketplaceFilter> sellFilters = Collections.emptyList();
@@ -56,9 +57,23 @@ complexExpression returns [ParsedStrategy result]
     )?
 
     (
-        DELIM 'Výše investice'
-        i=investmentSizeExpression
-        { investmentSizes = $i.result; }
+        (
+            DELIM 'Výše investice'
+            i1=legacyInvestmentSizeExpression
+            { investmentSizes = $i1.result; }
+        ) | (
+            (
+                DELIM 'Výše investice'
+                i2=investmentSizeExpression
+                { investmentSizes = $i2.result; }
+            )
+            (
+                DELIM 'Výše nákupu'
+                i3=purchaseSizeExpression
+                { purchaseSizes = $i3.result; }
+            )?
+
+        )
     )?
 
     (
@@ -102,7 +117,7 @@ complexExpression returns [ParsedStrategy result]
     )
 
     {
-        $result = new ParsedStrategy(v, portfolioStructures, investmentSizes,
+        $result = new ParsedStrategy(v, portfolioStructures, investmentSizes, purchaseSizes,
                                      new FilterSupplier(v, primaryFilters, secondaryFilters, sellFilters));
     }
 ;

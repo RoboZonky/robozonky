@@ -13,7 +13,14 @@ defaultExpression returns [DefaultValues result]:
  (v=reservationExpression { $result.setReservationMode($v.result); })
  (e=exitDateExpression { $result.setExitProperties($e.result); })?
  (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
- (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
+ (
+    (
+        (d=legacyDefaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })
+    ) | (
+        i=defaultInvestmentSizeExpression { $result.setInvestmentSize($i.result); }
+        (b=defaultPurchaseSizeExpression { $result.setPurchaseSize($b.result); })?
+    )
+ )?
  (s=defaultInvestmentShareExpression { $result.setInvestmentShare($s.result); })?
 ;
 
@@ -37,10 +44,18 @@ exitDateExpression returns [ExitProperties result]:
     ) DOT
 ;
 
-defaultInvestmentSizeExpression returns [InvestmentSize result] :
+legacyDefaultInvestmentSizeExpression returns [InvestmentSize result] :
     'Běžná výše investice je ' i=investmentSizeRatingSubExpression {
          $result = $i.result;
     }
+;
+
+defaultInvestmentSizeExpression returns [int result] :
+    'Investovat po ' amount=intExpr KC '.' { $result = $amount.result; }
+;
+
+defaultPurchaseSizeExpression returns [int result] :
+    'Nakupovat nejvýše za ' amount=intExpr KC '.' { $result = $amount.result; }
 ;
 
 defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
