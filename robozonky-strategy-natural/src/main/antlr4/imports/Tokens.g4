@@ -200,6 +200,7 @@ OR_COMMA  : COMMA ' ';
 LESS_THAN : 'nedosahuje ';
 MORE_THAN : 'přesahuje ';
 OTHER     : 'jiné';
+MONTHS    : ' měsíců';
 
 // basic types
 INTEGER    : DIGIT+;

@@ -178,7 +178,7 @@ jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
-    | c6=termCondition { $result = $c6.result; }
+    | c6=remainingTermCondition { $result = $c6.result; }
     | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c12=insuranceCondition { $result = $c12.result; }
@@ -191,7 +191,7 @@ primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
-    | c6=termCondition { $result = $c6.result; }
+    | c6=remainingTermCondition { $result = $c6.result; }
     | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c12=insuranceCondition { $result = $c12.result; }
@@ -204,7 +204,7 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
-    | c6=termCondition { $result = $c6.result; }
+    | c6=remainingTermCondition { $result = $c6.result; }
     | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c9=relativeTermCondition { $result = $c9.result; }
@@ -215,6 +215,7 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c14=annuityCondition { $result = $c14.result; }
     | c15=revenueRateCondition { $result = $c15.result; }
     | c18=relativeSaleDiscountCondition { $result = $c18.result; }
+    | c19=originalTermCondition { $result = $c19.result; }
 ;
 
 sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
@@ -222,7 +223,7 @@ sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c5=storyCondition { $result = $c5.result; }
-    | c6=termCondition { $result = $c6.result; }
+    | c6=remainingTermCondition { $result = $c6.result; }
     | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c9=relativeTermCondition { $result = $c9.result; }
@@ -235,4 +236,5 @@ sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c16=saleFeeCondition { $result = $c16.result; }
     | c17=relativeProfitCondition { $result = $c17.result; }
     | c18=relativeSaleDiscountCondition { $result = $c18.result; }
+    | c19=originalTermCondition { $result = $c19.result; }
 ;

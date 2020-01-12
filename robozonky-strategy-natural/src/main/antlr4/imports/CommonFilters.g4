@@ -136,25 +136,48 @@ insuranceCondition returns [MarketplaceFilterCondition result]:
     ) 'aktivní'
 ;
 
-termCondition returns [MarketplaceFilterCondition result]:
-    'délka ' (
-        (c1 = termConditionRangeOpen { $result = $c1.result; })
-        | (c2 = termConditionRangeClosedLeft { $result = $c2.result; })
-        | (c3 = termConditionRangeClosedRight { $result = $c3.result; })
-    ) ' měsíců'
+originalTermCondition returns [MarketplaceFilterCondition result]:
+    'původní délka ' (
+        (c1 = originalTermConditionRangeOpen { $result = $c1.result; })
+        | (c2 = originalTermConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = originalTermConditionRangeClosedRight { $result = $c3.result; })
+    ) MONTHS
 ;
 
-termConditionRangeOpen returns [MarketplaceFilterCondition result]:
+originalTermConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = OriginalLoanTermCondition.exact($min.result, $max.result); }
+;
+
+originalTermConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=intExpr
+    { $result = OriginalLoanTermCondition.moreThan($min.result); }
+;
+
+originalTermConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=intExpr
+    { $result = OriginalLoanTermCondition.lessThan($max.result); }
+;
+
+remainingTermCondition returns [MarketplaceFilterCondition result]:
+    'délka ' (
+        (c1 = remainingTermConditionRangeOpen { $result = $c1.result; })
+        | (c2 = remainingTermConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = remainingTermConditionRangeClosedRight { $result = $c3.result; })
+    ) MONTHS
+;
+
+remainingTermConditionRangeOpen returns [MarketplaceFilterCondition result]:
     IS min=intExpr UP_TO max=intExpr
     { $result = LoanTermCondition.exact($min.result, $max.result); }
 ;
 
-termConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+remainingTermConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     MORE_THAN min=intExpr
     { $result = LoanTermCondition.moreThan($min.result); }
 ;
 
-termConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+remainingTermConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     LESS_THAN max=intExpr
     { $result = LoanTermCondition.lessThan($max.result); }
 ;
