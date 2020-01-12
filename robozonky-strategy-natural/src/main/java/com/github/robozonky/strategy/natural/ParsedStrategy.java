@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ class ParsedStrategy {
 
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioShare> portfolio;
-    private final Map<Rating, InvestmentSize> investmentSizes;
+    private final Map<Rating, MoneyRange> investmentSizes;
+    private final Map<Rating, MoneyRange> purchaseSizes;
     private final FilterSupplier filters;
     private RoboZonkyVersion minimumVersion;
 
@@ -49,7 +50,8 @@ class ParsedStrategy {
     }
 
     ParsedStrategy(final DefaultValues values) {
-        this(values, Collections.emptySet(), Collections.emptyMap(), new FilterSupplier(values));
+        this(values, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(),
+             new FilterSupplier(values));
     }
 
     ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> filters) {
@@ -57,21 +59,27 @@ class ParsedStrategy {
     }
 
     ParsedStrategy(final DefaultValues values, final Collection<MarketplaceFilter> filters) {
-        this(values, Collections.emptyList(), Collections.emptyMap(), new FilterSupplier(values, filters));
+        this(values, new FilterSupplier(values, filters));
+    }
+
+    ParsedStrategy(final DefaultValues values, final FilterSupplier filters) {
+        this(values, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), filters);
     }
 
     ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-                   final Map<Rating, InvestmentSize> investmentSizes) {
-        this(defaults, portfolio, investmentSizes, new FilterSupplier(defaults));
+                   final Map<Rating, MoneyRange> investmentSizes, final Map<Rating, MoneyRange> purchaseSizes) {
+        this(defaults, portfolio, investmentSizes, purchaseSizes, new FilterSupplier(defaults));
     }
 
     public ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-                          final Map<Rating, InvestmentSize> investmentSizes, final FilterSupplier filters) {
+                          final Map<Rating, MoneyRange> investmentSizes,
+                          final Map<Rating, MoneyRange> purchaseSizes, final FilterSupplier filters) {
         this.defaults = defaults;
         this.portfolio = portfolio.isEmpty() ? Collections.emptyMap() :
                 new EnumMap<>(portfolio.stream().
                         collect(Collectors.toMap(PortfolioShare::getRating, Function.identity())));
         this.investmentSizes = investmentSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(investmentSizes);
+        this.purchaseSizes = purchaseSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(purchaseSizes);
         this.filters = filters;
     }
 
@@ -112,7 +120,7 @@ class ParsedStrategy {
         }
     }
 
-    private InvestmentSize getInvestmentSize(final Rating rating) {
+    private MoneyRange getInvestmentSize(final Rating rating) {
         return investmentSizes.getOrDefault(rating, defaults.getInvestmentSize());
     }
 
@@ -122,6 +130,18 @@ class ParsedStrategy {
 
     public Money getMaximumInvestmentSize(final Rating rating) {
         return getInvestmentSize(rating).getMaximumInvestment();
+    }
+
+    private MoneyRange getPurchaseSize(final Rating rating) {
+        return purchaseSizes.getOrDefault(rating, defaults.getPurchaseSize());
+    }
+
+    public Money getMinimumPurchaseSize(final Rating rating) {
+        return getPurchaseSize(rating).getMinimumInvestment();
+    }
+
+    public Money getMaximumPurchaseSize(final Rating rating) {
+        return getPurchaseSize(rating).getMaximumInvestment();
     }
 
     private <T> Stream<T> getApplicable(final Stream<Wrapper<T>> wrappers, final String type) {
@@ -193,6 +213,7 @@ class ParsedStrategy {
         return "ParsedStrategy{" +
                 "defaults=" + defaults +
                 ", investmentSizes=" + investmentSizes +
+                ", purchaseSizes=" + purchaseSizes +
                 ", minimumVersion=" + minimumVersion +
                 ", portfolio=" + portfolio +
                 ", filters=" + filters +

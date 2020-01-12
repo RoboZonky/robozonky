@@ -22,7 +22,7 @@ primaryExpression returns [ParsedStrategy result] :
             final DefaultValues v = new DefaultValues($s.result);
             // enable primary and secondary marketplaces, disable selling, do not enable reservation system
             final FilterSupplier f = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet());
-            $result = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), f); })
+            $result = new ParsedStrategy(v, f); })
         | ( c=complexExpression { $result = $c.result; })
     ) {
         // only set version when the optional expression was actually present
@@ -40,7 +40,8 @@ minimumVersionExpression returns [RoboZonkyVersion result] :
 complexExpression returns [ParsedStrategy result]
     @init {
         Collection<PortfolioShare> portfolioStructures = Collections.emptyList();
-        Map<Rating, InvestmentSize> investmentSizes = Collections.emptyMap();
+        Map<Rating, MoneyRange> investmentSizes = Collections.emptyMap();
+        Map<Rating, MoneyRange> purchaseSizes = Collections.emptyMap();
         Collection<MarketplaceFilter> primaryFilters = Collections.emptyList();
         Collection<MarketplaceFilter> secondaryFilters = Collections.emptyList();
         Collection<MarketplaceFilter> sellFilters = Collections.emptyList();
@@ -56,9 +57,23 @@ complexExpression returns [ParsedStrategy result]
     )?
 
     (
-        DELIM 'Výše investice'
-        i=investmentSizeExpression
-        { investmentSizes = $i.result; }
+        (
+            DELIM 'Výše investice'
+            i1=legacyInvestmentSizeExpression
+            { investmentSizes = $i1.result; }
+        ) | (
+            (
+                DELIM 'Výše investice'
+                i2=investmentSizeExpression
+                { investmentSizes = $i2.result; }
+            )
+            (
+                DELIM 'Výše nákupu'
+                i3=purchaseSizeExpression
+                { purchaseSizes = $i3.result; }
+            )?
+
+        )
     )?
 
     (
@@ -89,19 +104,20 @@ complexExpression returns [ParsedStrategy result]
                 sellFilters = $s.result;
             }
         ) | (
+             'Prodávat všechny participace bez poplatku a slevy, které odpovídají filtrům tržiště.' {
+                 v.setSellingMode(SellingMode.FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY);
+             }
+         ) | (
             'Prodávat všechny participace bez poplatku, které odpovídají filtrům tržiště.' {
                 v.setSellingMode(SellingMode.FREE_AND_OUTSIDE_STRATEGY);
-                sellFilters = Collections.emptySet();
             }
         ) | (
-            'Prodej participací zakázán.' {
-                sellFilters = Collections.emptySet();
-            }
+            'Prodej participací zakázán.'
         )
     )
 
     {
-        $result = new ParsedStrategy(v, portfolioStructures, investmentSizes,
+        $result = new ParsedStrategy(v, portfolioStructures, investmentSizes, purchaseSizes,
                                      new FilterSupplier(v, primaryFilters, secondaryFilters, sellFilters));
     }
 ;

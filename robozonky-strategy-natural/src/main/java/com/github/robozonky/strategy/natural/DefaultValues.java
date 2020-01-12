@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.time.Period;
+import java.util.Optional;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.internal.test.DateUtil;
-
-import java.time.Period;
-import java.util.Optional;
 
 class DefaultValues {
 
@@ -29,7 +29,8 @@ class DefaultValues {
     private ReservationMode reservationMode = null;
     private SellingMode sellingMode = null;
     private Money targetPortfolioSize = Money.from(Long.MAX_VALUE);
-    private InvestmentSize investmentSize = new InvestmentSize();
+    private MoneyRange investmentSize = new MoneyRange();
+    private MoneyRange purchaseSize = new MoneyRange();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private ExitProperties exitProperties;
 
@@ -97,15 +98,29 @@ class DefaultValues {
         this.investmentShare = investmentShare;
     }
 
-    public InvestmentSize getInvestmentSize() {
+    public MoneyRange getInvestmentSize() {
         return investmentSize;
     }
 
-    public void setInvestmentSize(final InvestmentSize investmentSize) {
+    public void setInvestmentSize(final MoneyRange investmentSize) {
         if (investmentSize == null) {
             throw new IllegalArgumentException("Default investment size must be provided.");
         }
         this.investmentSize = investmentSize;
+    }
+
+    public void setInvestmentSize(final int investmentSize) {
+        if (investmentSize % 200 != 0) {
+            throw new IllegalArgumentException("Investment size must be divisible by 200: " + investmentSize);
+        }
+        this.investmentSize = new MoneyRange(investmentSize, investmentSize);
+    }
+
+    public MoneyRange getPurchaseSize() {
+        return purchaseSize;
+    }
+    public void setPurchaseSize(final int purchaseSize) {
+        this.purchaseSize = new MoneyRange(purchaseSize);
     }
 
     @Override

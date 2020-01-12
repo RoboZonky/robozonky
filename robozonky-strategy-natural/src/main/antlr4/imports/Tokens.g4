@@ -77,14 +77,14 @@ interestRateBasedRatingExpression returns [Rating result] :
     r=floatExpr ' % p.a' DOT? { $result = Rating.findByCode($r.result.toString()); }
 ;
 
-investmentSizeRatingSubExpression returns [InvestmentSize result] :
+investmentSizeRatingSubExpression returns [MoneyRange result] :
     (
         (amount=intExpr
-            { $result = new InvestmentSize($amount.result, $amount.result); })
+            { $result = new MoneyRange($amount.result, $amount.result); })
         | ('až' max=intExpr
-            { $result = new InvestmentSize($max.result); })
+            { $result = new MoneyRange($max.result); })
         | (min=intExpr UP_TO max=intExpr
-            { $result = new InvestmentSize($min.result, $max.result); })
+            { $result = new MoneyRange($min.result, $max.result); })
     ) KC DOT
 ;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ class UtilTest extends AbstractRoboZonkyTest {
                         new PortfolioShare(Rating.A, fromPercentage(targetShareA)),
                         new PortfolioShare(Rating.B, fromPercentage(targetShareB)),
                         new PortfolioShare(Rating.C, fromPercentage(targetShareC))
-                ), Collections.emptyMap());
+                ), Collections.emptyMap(), Collections.emptyMap());
         // all ratings have zero share; C > B > A
         final Set<Rating> ratings = EnumSet.of(Rating.A, Rating.B, Rating.C);
         PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);

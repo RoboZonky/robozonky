@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     private Money[] getRecommendationBoundaries(final Participation participation) {
         final Rating rating = participation.getRating();
-        final Money minimumInvestment = strategy.getMinimumInvestmentSize(rating);
-        final Money maximumInvestment = strategy.getMaximumInvestmentSize(rating);
+        final Money minimumInvestment = strategy.getMinimumPurchaseSize(rating);
+        final Money maximumInvestment = strategy.getMaximumPurchaseSize(rating);
         return new Money[]{minimumInvestment, maximumInvestment};
     }
 

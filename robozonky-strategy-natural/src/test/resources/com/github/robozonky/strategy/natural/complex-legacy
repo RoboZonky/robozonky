@@ -10,8 +10,7 @@ Robot má udržovat uživatelem definované portfolio.
 Robot má převzít kontrolu nad rezervačním systémem a přijímat rezervace půjček odpovídajících této strategii.
 Opustit Zonky k 31.12.2021, výprodej zahájit 12. 3. 2020.
 Cílová zůstatková částka je                                 100000 Kč.
-Investovat po                                               200 Kč.
-Nakupovat nejvýše za                                        1000 Kč.
+Běžná výše investice je                                     200 Kč.
 Investovat maximálně                                        1 % výše úvěru.
 
 # Volitelná sekce.
@@ -22,16 +21,11 @@ Prostředky úročené     13,49 % p.a. mají tvořit     5 až 10 % aktuální 
 Prostředky úročené     19,99 % p.a. mají tvořit     1 až  2 % aktuální zůstatkové částky.
 
 # Volitelná sekce.
-# Neuvedené ratingy budou investovány ve výchozí výši.
+# Neuvedené ratingy budou investovány v běžné výši.
 - Výše investice
-S úročením  3,99 % p.a. investovat po   600 Kč.
-S úročením 15,49 % p.a. investovat po  1000 Kč.
-
-# Volitelná sekce.
-# Neuvedené ratingy budou nakupovány ve výchozí výši.
-- Výše nákupu
-S úročením  6,99 % p.a. nakupovat nejvýše za   200 Kč.
-S úročením 10,99 % p.a. nakupovat nejvýše za  1100 Kč.
+S úročením  3,99 % p.a. jednotlivě investovat       až 600 Kč.
+S úročením 10,99 % p.a. jednotlivě investovat   800 až 400 Kč.
+S úročením 15,49 % p.a. jednotlivě investovat         1000 Kč.
 
 # Volitelná sekce.
 # Jednotlivé řádky představují vzájemně nezávislé filtry.
@@ -78,6 +72,7 @@ Ignorovat participaci, kde: délka přesahuje 36 měsíců.
 # Náhradou slova "úvěr" nebo "participaci" za "vše" se bude filtr vztahovat shodně na primární i sekundární trh.
 # Většina filtrů lze tedy napsat tak, aby platila zároveň pro primární i sekundární trh.
 Ignorovat vše, kde: délka přesahuje 36 měsíců.
+
 
 # Volitelná sekce.
 # Jednotlivé řádky představují vzájemně nezávislé filtry.

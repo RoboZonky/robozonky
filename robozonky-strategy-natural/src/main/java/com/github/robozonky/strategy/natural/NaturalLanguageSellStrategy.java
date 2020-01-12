@@ -17,7 +17,6 @@
 package com.github.robozonky.strategy.natural;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -29,8 +28,6 @@ import com.github.robozonky.api.strategies.SellStrategy;
 
 class NaturalLanguageSellStrategy implements SellStrategy {
 
-    private static final Comparator<RecommendedInvestment> COMPARATOR =
-            Comparator.comparing(r -> r.descriptor().item().getSmpFee().orElse(Money.ZERO));
     private final ParsedStrategy strategy;
 
     public NaturalLanguageSellStrategy(final ParsedStrategy p) {
@@ -48,6 +45,20 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                         .orElse(true));
     }
 
+    private static boolean isUndiscounted(final InvestmentDescriptor descriptor) {
+        return descriptor.sellInfo()
+                        .map(si -> si.getPriceInfo()
+                                .getDiscount()
+                                .isZero())
+                        .orElse(true);
+    }
+
+    private Stream<InvestmentDescriptor> getFreeAndOutsideStrategy(final Collection<InvestmentDescriptor> available,
+                                                                   final PortfolioOverview portfolio) {
+        return strategy.getMatchingPrimaryMarketplaceFilters(available.stream(), portfolio)
+                .filter(NaturalLanguageSellStrategy::isFree);
+    }
+
     @Override
     public Stream<RecommendedInvestment> recommend(final Collection<InvestmentDescriptor> available,
                                                    final PortfolioOverview portfolio) {
@@ -57,8 +68,10 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                         case SELL_FILTERS:
                             return strategy.getMatchingSellFilters(available.stream(), portfolio);
                         case FREE_AND_OUTSIDE_STRATEGY:
-                            return strategy.getMatchingPrimaryMarketplaceFilters(available.stream(), portfolio)
-                                    .filter(NaturalLanguageSellStrategy::isFree);
+                            return getFreeAndOutsideStrategy(available, portfolio);
+                        case FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY:
+                            return getFreeAndOutsideStrategy(available, portfolio)
+                                    .filter(NaturalLanguageSellStrategy::isUndiscounted);
                         default:
                             throw new IllegalStateException("Impossible.");
                     }

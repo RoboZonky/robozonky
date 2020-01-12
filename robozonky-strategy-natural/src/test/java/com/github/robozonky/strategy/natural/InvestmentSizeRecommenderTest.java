@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.Collections;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -23,9 +25,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class InvestmentSizeRecommenderTest {
@@ -45,9 +45,10 @@ class InvestmentSizeRecommenderTest {
         // no filters, as the SUT doesn't do filtering; no portfolio, as that is not used either
         final DefaultValues defaults = new DefaultValues(DefaultPortfolio.EMPTY);
         defaults.setInvestmentShare(new DefaultInvestmentShare(MAXIMUM_SHARE));
-        final InvestmentSize target = new InvestmentSize(MAXIMUM_INVESTMENT);
+        final MoneyRange target = new MoneyRange(MAXIMUM_INVESTMENT);
         return new ParsedStrategy(defaults, Collections.emptyList(),
-                                  Collections.singletonMap(mockLoan(0).getRating(), target));
+                                  Collections.singletonMap(mockLoan(0).getRating(), target),
+                                  Collections.emptyMap());
     }
 
     @Test

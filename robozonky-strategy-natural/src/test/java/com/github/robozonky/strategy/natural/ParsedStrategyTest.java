@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         values.setExitProperties(new ExitProperties(LocalDate.now().plusMonths(6))); // exit active, no sell-off yet
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(), Collections.emptyMap(),
+                                                           Collections.emptyMap(),
                                                            new FilterSupplier(values, Collections.emptySet(),
                                                                               Collections.emptySet(),
                                                                               Collections.emptySet()));
@@ -144,7 +145,7 @@ class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(50), Ratio.fromPercentage(100));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
-                                                           Collections.emptyMap());
+                                                           Collections.emptyMap(), Collections.emptyMap());
         assertThat(strategy.getPermittedShare(Rating.D)).isEqualTo(Ratio.ONE);
     }
 
@@ -152,12 +153,26 @@ class ParsedStrategyTest {
     void investmentSizes() {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
-        final InvestmentSize size = new InvestmentSize(600, 1000);
+        final MoneyRange size = new MoneyRange(600, 1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(),
-                                                           Collections.singletonMap(Rating.D, size));
+                                                           Collections.singletonMap(Rating.D, size),
+                                                           Collections.emptyMap());
         assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumInvestmentSize(Rating.D)).isEqualTo(Money.from(600));
             softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D)).isEqualTo(Money.from(1_000));
+        });
+    }
+
+    @Test
+    void purchaseSizes() {
+        final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
+        final DefaultValues values = new DefaultValues(portfolio);
+        final MoneyRange size = new MoneyRange(1000);
+        final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(), Collections.emptyMap(),
+                                                           Collections.singletonMap(Rating.D, size));
+        assertSoftly(softly -> {
+            softly.assertThat(strategy.getMinimumPurchaseSize(Rating.D)).isEqualTo(Money.from(0));
+            softly.assertThat(strategy.getMaximumPurchaseSize(Rating.D)).isEqualTo(Money.from(1_000));
         });
     }
 
@@ -167,7 +182,8 @@ class ParsedStrategyTest {
         final Collection<MarketplaceFilter> filters = Collections.singleton(accepting);
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         final FilterSupplier s = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet(), filters);
-        final ParsedStrategy ps = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(), s);
+        final ParsedStrategy ps = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
+                                                     Collections.emptyMap(), s);
         final Loan l = ParsedStrategyTest.mockLoan(200_000);
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(ps.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
