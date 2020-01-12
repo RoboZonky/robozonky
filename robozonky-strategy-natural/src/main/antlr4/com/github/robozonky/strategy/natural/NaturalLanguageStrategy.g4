@@ -89,14 +89,15 @@ complexExpression returns [ParsedStrategy result]
                 sellFilters = $s.result;
             }
         ) | (
+             'Prodávat všechny participace bez poplatku a slevy, které odpovídají filtrům tržiště.' {
+                 v.setSellingMode(SellingMode.FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY);
+             }
+         ) | (
             'Prodávat všechny participace bez poplatku, které odpovídají filtrům tržiště.' {
                 v.setSellingMode(SellingMode.FREE_AND_OUTSIDE_STRATEGY);
-                sellFilters = Collections.emptySet();
             }
         ) | (
-            'Prodej participací zakázán.' {
-                sellFilters = Collections.emptySet();
-            }
+            'Prodej participací zakázán.'
         )
     )
 
