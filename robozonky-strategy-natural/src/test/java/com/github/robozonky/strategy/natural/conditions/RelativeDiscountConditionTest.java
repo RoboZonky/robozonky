@@ -32,7 +32,7 @@ class RelativeDiscountConditionTest {
     void lessThan() {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.lessThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getSellDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
+        when(w.getDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
         assertThat(condition).rejects(w);
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(11));
@@ -43,7 +43,7 @@ class RelativeDiscountConditionTest {
     void moreThan() {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.moreThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getSellDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
+        when(w.getDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
         assertThat(condition).rejects(w);
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(9));
@@ -55,7 +55,7 @@ class RelativeDiscountConditionTest {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.exact(Ratio.fromPercentage(8),
                                                                                      Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getSellDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
+        when(w.getDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
         assertThat(condition).accepts(w);
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(9));

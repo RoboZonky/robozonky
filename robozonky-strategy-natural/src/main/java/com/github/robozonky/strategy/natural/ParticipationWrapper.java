@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -88,6 +89,16 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     @Override
     public int getOriginalAnnuity() {
         return getLoan().getAnnuity().getValue().intValue();
+    }
+
+    @Override
+    public Optional<BigDecimal> getPrice() {
+        return Optional.of(participation.getPrice().getValue());
+    }
+
+    @Override
+    public Optional<BigDecimal> getDiscount() {
+        return Optional.of(participation.getDiscount().getValue());
     }
 
     @Override

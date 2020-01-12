@@ -87,8 +87,10 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                 .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
+        // TODO Enable selling delinquents when Zonky enables it.
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
-                .filter(p -> p.getLoanHealthInfo() == LoanHealth.HEALTHY) // TODO enable discounted (=overdue)
+                .filter(p -> p.getLoanHealthInfo() == LoanHealth.HEALTHY ||
+                        p.getLoanHealthInfo() == LoanHealth.HISTORICALLY_IN_DUE)
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {

@@ -140,14 +140,14 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     }
 
     @Override
-    public Optional<BigDecimal> getSellPrice() {
+    public Optional<BigDecimal> getPrice() {
         var price = investment.getSmpPrice()
                 .orElseGet(() -> extractOrFail(si -> si.getPriceInfo().getSellPrice()));
         return Optional.of(price.getValue());
     }
 
     @Override
-    public Optional<BigDecimal> getSellDiscount() {
+    public Optional<BigDecimal> getDiscount() {
         var price = sellInfo.get()
                 .map(si -> si.getPriceInfo().getDiscount())
                 .orElse(Money.ZERO);

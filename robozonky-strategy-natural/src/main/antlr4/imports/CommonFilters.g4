@@ -34,11 +34,17 @@ relativeProfitConditionRangeClosedRight returns [MarketplaceFilterCondition resu
 ;
 
 relativeSaleDiscountCondition returns [MarketplaceFilterCondition result]:
-    'prodejní sleva ' (
-        (c1 = relativeSaleDiscountConditionRangeOpen { $result = $c1.result; })
-        | (c2 = relativeSaleDiscountConditionRangeClosedLeft { $result = $c2.result; })
-        | (c3 = relativeSaleDiscountConditionRangeClosedRight { $result = $c3.result; })
-    ) ' % zbývající jistiny'
+    (
+        'sleva ' (
+            (c1 = relativeSaleDiscountConditionRangeOpen { $result = $c1.result; })
+            | (c2 = relativeSaleDiscountConditionRangeClosedLeft { $result = $c2.result; })
+            | (c3 = relativeSaleDiscountConditionRangeClosedRight { $result = $c3.result; })
+        ) ' % zbývající jistiny'
+    ) | (
+        'se slevou' { $result = RelativeDiscountCondition.moreThan(Ratio.fromPercentage(0)); }
+    ) | (
+        'bez slevy' { $result = RelativeDiscountCondition.exact(Ratio.fromPercentage(0), Ratio.fromPercentage(0)); }
+    )
 ;
 
 relativeSaleDiscountConditionRangeOpen returns [MarketplaceFilterCondition result]:

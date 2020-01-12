@@ -66,8 +66,8 @@ class LoanWrapperTest {
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(l.getTermInMonths());
             softly.assertThat(w.getHealth()).isEmpty();
             softly.assertThat(w.getOriginalPurchasePrice()).isEmpty();
-            softly.assertThat(w.getSellDiscount()).isEmpty();
-            softly.assertThat(w.getSellPrice()).isEmpty();
+            softly.assertThat(w.getDiscount()).isEmpty();
+            softly.assertThat(w.getPrice()).isEmpty();
             softly.assertThat(w.getSellFee()).isEmpty();
             softly.assertThat(w.getReturns()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
