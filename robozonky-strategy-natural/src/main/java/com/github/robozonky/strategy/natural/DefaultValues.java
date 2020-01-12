@@ -29,8 +29,8 @@ class DefaultValues {
     private ReservationMode reservationMode = null;
     private SellingMode sellingMode = null;
     private Money targetPortfolioSize = Money.from(Long.MAX_VALUE);
-    private InvestmentSize investmentSize = new InvestmentSize();
-    private InvestmentSize purchaseSize = new InvestmentSize();
+    private MoneyRange investmentSize = new MoneyRange();
+    private MoneyRange purchaseSize = new MoneyRange();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private ExitProperties exitProperties;
 
@@ -98,11 +98,11 @@ class DefaultValues {
         this.investmentShare = investmentShare;
     }
 
-    public InvestmentSize getInvestmentSize() {
+    public MoneyRange getInvestmentSize() {
         return investmentSize;
     }
 
-    public void setInvestmentSize(final InvestmentSize investmentSize) {
+    public void setInvestmentSize(final MoneyRange investmentSize) {
         if (investmentSize == null) {
             throw new IllegalArgumentException("Default investment size must be provided.");
         }
@@ -113,14 +113,14 @@ class DefaultValues {
         if (investmentSize % 200 != 0) {
             throw new IllegalArgumentException("Investment size must be divisible by 200: " + investmentSize);
         }
-        this.investmentSize = new InvestmentSize(investmentSize, investmentSize);
+        this.investmentSize = new MoneyRange(investmentSize, investmentSize);
     }
 
-    public InvestmentSize getPurchaseSize() {
+    public MoneyRange getPurchaseSize() {
         return purchaseSize;
     }
     public void setPurchaseSize(final int purchaseSize) {
-        this.purchaseSize = new InvestmentSize(purchaseSize);
+        this.purchaseSize = new MoneyRange(purchaseSize);
     }
 
     @Override

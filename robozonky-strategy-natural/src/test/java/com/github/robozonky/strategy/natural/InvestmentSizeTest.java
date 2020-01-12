@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ class InvestmentSizeTest {
 
     @Test
     void regular() {
-        final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MIN, InvestmentSizeTest.MAX);
+        final MoneyRange s = new MoneyRange(InvestmentSizeTest.MIN, InvestmentSizeTest.MAX);
         assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MIN));
             softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
@@ -36,7 +36,7 @@ class InvestmentSizeTest {
 
     @Test
     void switched() {
-        final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX, InvestmentSizeTest.MIN);
+        final MoneyRange s = new MoneyRange(InvestmentSizeTest.MAX, InvestmentSizeTest.MIN);
         assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MIN));
             softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
@@ -45,7 +45,7 @@ class InvestmentSizeTest {
 
     @Test
     void omitted() {
-        final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX);
+        final MoneyRange s = new MoneyRange(InvestmentSizeTest.MAX);
         assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.ZERO);
             softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));

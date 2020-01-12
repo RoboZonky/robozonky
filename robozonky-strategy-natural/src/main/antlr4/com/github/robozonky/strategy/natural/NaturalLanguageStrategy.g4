@@ -40,8 +40,8 @@ minimumVersionExpression returns [RoboZonkyVersion result] :
 complexExpression returns [ParsedStrategy result]
     @init {
         Collection<PortfolioShare> portfolioStructures = Collections.emptyList();
-        Map<Rating, InvestmentSize> investmentSizes = Collections.emptyMap();
-        Map<Rating, InvestmentSize> purchaseSizes = Collections.emptyMap();
+        Map<Rating, MoneyRange> investmentSizes = Collections.emptyMap();
+        Map<Rating, MoneyRange> purchaseSizes = Collections.emptyMap();
         Collection<MarketplaceFilter> primaryFilters = Collections.emptyList();
         Collection<MarketplaceFilter> secondaryFilters = Collections.emptyList();
         Collection<MarketplaceFilter> sellFilters = Collections.emptyList();

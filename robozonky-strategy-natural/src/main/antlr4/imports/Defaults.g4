@@ -44,7 +44,7 @@ exitDateExpression returns [ExitProperties result]:
     ) DOT
 ;
 
-legacyDefaultInvestmentSizeExpression returns [InvestmentSize result] :
+legacyDefaultInvestmentSizeExpression returns [MoneyRange result] :
     'Běžná výše investice je ' i=investmentSizeRatingSubExpression {
          $result = $i.result;
     }

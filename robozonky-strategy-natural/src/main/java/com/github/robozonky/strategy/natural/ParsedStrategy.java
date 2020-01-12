@@ -40,8 +40,8 @@ class ParsedStrategy {
 
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioShare> portfolio;
-    private final Map<Rating, InvestmentSize> investmentSizes;
-    private final Map<Rating, InvestmentSize> purchaseSizes;
+    private final Map<Rating, MoneyRange> investmentSizes;
+    private final Map<Rating, MoneyRange> purchaseSizes;
     private final FilterSupplier filters;
     private RoboZonkyVersion minimumVersion;
 
@@ -67,13 +67,13 @@ class ParsedStrategy {
     }
 
     ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-                   final Map<Rating, InvestmentSize> investmentSizes, final Map<Rating, InvestmentSize> purchaseSizes) {
+                   final Map<Rating, MoneyRange> investmentSizes, final Map<Rating, MoneyRange> purchaseSizes) {
         this(defaults, portfolio, investmentSizes, purchaseSizes, new FilterSupplier(defaults));
     }
 
     public ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-                          final Map<Rating, InvestmentSize> investmentSizes,
-                          final Map<Rating, InvestmentSize> purchaseSizes, final FilterSupplier filters) {
+                          final Map<Rating, MoneyRange> investmentSizes,
+                          final Map<Rating, MoneyRange> purchaseSizes, final FilterSupplier filters) {
         this.defaults = defaults;
         this.portfolio = portfolio.isEmpty() ? Collections.emptyMap() :
                 new EnumMap<>(portfolio.stream().
@@ -120,7 +120,7 @@ class ParsedStrategy {
         }
     }
 
-    private InvestmentSize getInvestmentSize(final Rating rating) {
+    private MoneyRange getInvestmentSize(final Rating rating) {
         return investmentSizes.getOrDefault(rating, defaults.getInvestmentSize());
     }
 
@@ -132,7 +132,7 @@ class ParsedStrategy {
         return getInvestmentSize(rating).getMaximumInvestment();
     }
 
-    private InvestmentSize getPurchaseSize(final Rating rating) {
+    private MoneyRange getPurchaseSize(final Rating rating) {
         return purchaseSizes.getOrDefault(rating, defaults.getPurchaseSize());
     }
 

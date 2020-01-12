@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@ package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.Money;
 
-class InvestmentSize {
+class MoneyRange {
 
     private final Money minimumInvestment;
     private final Money maximumInvestment;
 
-    public InvestmentSize() {
+    public MoneyRange() {
         this(20_000); // this is the theoretical maximum allowed by Zonky
     }
 
-    public InvestmentSize(final int maximumInvestmentInCzk) {
+    public MoneyRange(final int maximumInvestmentInCzk) {
         this(0, maximumInvestmentInCzk);
     }
 
-    public InvestmentSize(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
+    public MoneyRange(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
         this.minimumInvestment = Money.from(Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk));
         this.maximumInvestment = Money.from(Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk));
     }

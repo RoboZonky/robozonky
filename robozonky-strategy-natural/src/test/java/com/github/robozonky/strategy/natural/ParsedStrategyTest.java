@@ -153,7 +153,7 @@ class ParsedStrategyTest {
     void investmentSizes() {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
-        final InvestmentSize size = new InvestmentSize(600, 1000);
+        final MoneyRange size = new MoneyRange(600, 1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(),
                                                            Collections.singletonMap(Rating.D, size),
                                                            Collections.emptyMap());
@@ -167,7 +167,7 @@ class ParsedStrategyTest {
     void purchaseSizes() {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
-        final InvestmentSize size = new InvestmentSize(1000);
+        final MoneyRange size = new MoneyRange(1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(), Collections.emptyMap(),
                                                            Collections.singletonMap(Rating.D, size));
         assertSoftly(softly -> {

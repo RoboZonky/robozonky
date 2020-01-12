@@ -45,7 +45,7 @@ class InvestmentSizeRecommenderTest {
         // no filters, as the SUT doesn't do filtering; no portfolio, as that is not used either
         final DefaultValues defaults = new DefaultValues(DefaultPortfolio.EMPTY);
         defaults.setInvestmentShare(new DefaultInvestmentShare(MAXIMUM_SHARE));
-        final InvestmentSize target = new InvestmentSize(MAXIMUM_INVESTMENT);
+        final MoneyRange target = new MoneyRange(MAXIMUM_INVESTMENT);
         return new ParsedStrategy(defaults, Collections.emptyList(),
                                   Collections.singletonMap(mockLoan(0).getRating(), target),
                                   Collections.emptyMap());
