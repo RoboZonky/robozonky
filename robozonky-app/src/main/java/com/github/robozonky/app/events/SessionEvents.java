@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package com.github.robozonky.app.events;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +39,7 @@ import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.tenant.LazyEvent;
+import com.github.robozonky.internal.util.ClassUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,7 +48,7 @@ public final class SessionEvents {
     private static final Logger LOGGER = LogManager.getLogger(SessionEvents.class);
     private static final AtomicLong EVENT_COUNTER = new AtomicLong(0);
     private static final Map<String, SessionEvents> BY_TENANT = new ConcurrentHashMap<>(0);
-    private final Map<Class<?>, List<EventListenerSupplier<? extends Event>>> suppliers = new ConcurrentHashMap<>(0);
+    private final Map<Class, List<EventListenerSupplier>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> debugListeners = new CopyOnWriteArraySet<>();
     private final SessionInfo sessionInfo;
     private EventListener<? extends Event> injectedDebugListener;
@@ -69,30 +70,9 @@ public final class SessionEvents {
         return BY_TENANT.computeIfAbsent(sessionInfo.getUsername(), i -> new SessionEvents(sessionInfo));
     }
 
-    private static void getAllInterfaces(final Class<?> cls, final Set<Class<?>> interfacesFound) {
-        if (cls == null) {
-            return;
-        }
-        for (var i : cls.getInterfaces()) {
-            if (interfacesFound.add(i)) {
-                getAllInterfaces(i, interfacesFound);
-            }
-        }
-        getAllInterfaces(cls.getSuperclass(), interfacesFound);
-    }
-
-    private static Stream<Class<?>> getAllInterfaces(final Class<?> original) {
-        if (original == null) {
-            return Stream.empty();
-        }
-        var interfacesFound = new LinkedHashSet<Class<?>>(0);
-        getAllInterfaces(original, interfacesFound);
-        return interfacesFound.stream();
-    }
-
     @SuppressWarnings("unchecked")
     static <T extends Event> Class<T> getImplementingEvent(final Class<T> original) {
-        final Stream<Class<?>> provided = getAllInterfaces(original);
+        final Stream<Class<?>> provided = ClassUtil.getAllInterfaces(original);
         final Stream<Class<?>> interfaces = original.isInterface() ? // interface could be extending it directly
                 Stream.concat(Stream.of(original), provided) :
                 provided;
@@ -118,10 +98,10 @@ public final class SessionEvents {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private List<EventListenerSupplier<? extends Event>> retrieveListenerSuppliers(final Class eventType) {
-        final Class<? extends Event> impl = getImplementingEvent(eventType);
+    private <T extends Event> List<EventListenerSupplier<T>> retrieveListenerSuppliers(final Class<T> eventType) {
+        final Class<T> impl = getImplementingEvent(eventType);
         LOGGER.trace("Event {} implements {}.", eventType, impl);
-        return Collections.unmodifiableList(ListenerServiceLoader.load(sessionInfo, impl));
+        return ListenerServiceLoader.load(sessionInfo, impl);
     }
 
     /**
@@ -144,12 +124,12 @@ public final class SessionEvents {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    CompletableFuture fireAny(final LazyEvent<? extends Event> event) {
+    <T extends Event> CompletableFuture fireAny(final LazyEvent<T> event) {
         // loan all listeners
         debugListeners.forEach(l -> l.requested(event));
-        final Class<? extends Event> eventType = event.getEventType();
-        final List<EventListenerSupplier<? extends Event>> s =
-                suppliers.computeIfAbsent(eventType, this::retrieveListenerSuppliers);
+        final Class<T> eventType = event.getEventType();
+        final List<EventListenerSupplier<T>> s =
+                suppliers.computeIfAbsent(eventType, e -> retrieveListenerSuppliers(e));
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream()
                 .map(Supplier::get)
@@ -158,7 +138,7 @@ public final class SessionEvents {
                         debugListeners.forEach(l -> l.fired(event.get(), null));
                     }
                 })
-                .flatMap(l -> l.stream().flatMap(Stream::of));
+                .flatMap(Optional::stream);
         final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :
                 Stream.concat(Stream.of(injectedDebugListener), registered);
