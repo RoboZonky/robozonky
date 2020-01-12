@@ -71,12 +71,12 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     }
 
     @Override
-    public Optional<BigDecimal> getSellPrice() {
+    public Optional<BigDecimal> getPrice() {
         return Optional.empty();
     }
 
     @Override
-    public Optional<BigDecimal> getSellDiscount() {
+    public Optional<BigDecimal> getDiscount() {
         return Optional.empty();
     }
 

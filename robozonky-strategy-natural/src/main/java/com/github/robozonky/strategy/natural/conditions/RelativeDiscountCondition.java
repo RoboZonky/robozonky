@@ -28,7 +28,7 @@ public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
     }
 
     private static BigDecimal getDiscount(final Wrapper<?> w) {
-        return w.getSellDiscount().orElseThrow();
+        return w.getDiscount().orElseThrow();
     }
 
     public static RelativeDiscountCondition lessThan(final Ratio threshold) {

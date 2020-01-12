@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,18 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.Optional;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellFee;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.entities.SellPriceInfo;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -27,6 +35,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
@@ -35,12 +44,10 @@ import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.Optional;
-
-import static com.github.robozonky.app.events.impl.EventFactory.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
@@ -91,11 +98,19 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
                 .setRemainingInvestment(1_000)
                 .build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final SellFee sf = mock(SellFee.class);
+        when(sf.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)));
+        final SellPriceInfo spi = mock(SellPriceInfo.class);
+        when(spi.getFee()).thenReturn(sf);
+        final SellInfo si = mock(SellInfo.class);
+        when(si.getPriceInfo()).thenReturn(spi);
+        when(z.getSellInfo(anyLong())).thenReturn(si);
         doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(s).build()) {
             assertThat(tenant.getAvailability()).isNotNull();
             assertThat(tenant.getLoan(l.getId())).isSameAs(l);
+            assertThat(tenant.getSellInfo(1)).isSameAs(si);
             assertThat(tenant.getPortfolio()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
             assertThatThrownBy(tenant::getRestrictions).isInstanceOf(IllegalStateException.class);

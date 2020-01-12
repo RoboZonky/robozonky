@@ -82,8 +82,8 @@ class InvestmentWrapperTest {
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(INVESTMENT.getRemainingMonths());
             softly.assertThat(w.getHealth()).contains(LoanHealth.HEALTHY);
             softly.assertThat(w.getOriginalPurchasePrice()).contains(new BigDecimal("10.00"));
-            softly.assertThat(w.getSellDiscount()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getSellPrice()).contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getDiscount()).contains(BigDecimal.ZERO);
+            softly.assertThat(w.getPrice()).contains(new BigDecimal("1.00"));
             softly.assertThat(w.getSellFee()).contains(BigDecimal.ZERO);
             softly.assertThat(w.getReturns()).contains(BigDecimal.ZERO);
             softly.assertThat(w.toString()).isNotNull();
@@ -97,7 +97,7 @@ class InvestmentWrapperTest {
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThatThrownBy(w::getHealth).isInstanceOf(NoSuchElementException.class);
-            softly.assertThatThrownBy(w::getSellPrice).isInstanceOf(NoSuchElementException.class);
+            softly.assertThatThrownBy(w::getPrice).isInstanceOf(NoSuchElementException.class);
         });
     }
 
@@ -119,8 +119,8 @@ class InvestmentWrapperTest {
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w.getHealth()).contains(LoanHealth.HISTORICALLY_IN_DUE);
-            softly.assertThat(w.getSellDiscount()).contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getSellPrice()).contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getDiscount()).contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getPrice()).contains(new BigDecimal("10.00"));
             softly.assertThat(w.getSellFee()).contains(new BigDecimal("2.00"));
         });
     }

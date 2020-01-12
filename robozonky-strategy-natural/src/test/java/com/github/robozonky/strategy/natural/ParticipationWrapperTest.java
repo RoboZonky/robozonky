@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.github.robozonky.api.Money;
@@ -55,6 +56,8 @@ class ParticipationWrapperTest {
         final Participation p = mock(Participation.class);
         when(p.getInterestRate()).thenReturn(Ratio.ONE);
         doReturn(Money.ZERO).when(p).getRemainingPrincipal();
+        doReturn(Money.ZERO).when(p).getDiscount();
+        doReturn(Money.ZERO).when(p).getPrice();
         doReturn(loan.getPurpose()).when(p).getPurpose();
         doReturn(loan.getRating()).when(p).getRating();
         doReturn(loan.getMainIncomeType()).when(p).getIncomeType();
@@ -80,8 +83,8 @@ class ParticipationWrapperTest {
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(PARTICIPATION.getRemainingInstalmentCount());
             softly.assertThat(w.getHealth()).isEmpty();
             softly.assertThat(w.getOriginalPurchasePrice()).isEmpty();
-            softly.assertThat(w.getSellDiscount()).isEmpty();
-            softly.assertThat(w.getSellPrice()).isEmpty();
+            softly.assertThat(w.getDiscount()).contains(BigDecimal.ZERO);
+            softly.assertThat(w.getPrice()).contains(BigDecimal.ZERO);
             softly.assertThat(w.getSellFee()).isEmpty();
             softly.assertThat(w.getReturns()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();

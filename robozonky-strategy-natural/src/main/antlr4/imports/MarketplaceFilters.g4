@@ -214,6 +214,7 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c13=remainingPrincipalCondition { $result = $c13.result; }
     | c14=annuityCondition { $result = $c14.result; }
     | c15=revenueRateCondition { $result = $c15.result; }
+    | c18=relativeSaleDiscountCondition { $result = $c18.result; }
 ;
 
 sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:

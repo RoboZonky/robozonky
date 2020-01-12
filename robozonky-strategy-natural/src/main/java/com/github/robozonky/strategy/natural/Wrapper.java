@@ -86,11 +86,11 @@ public interface Wrapper<T> {
 
     Optional<BigDecimal> getOriginalPurchasePrice();
 
-    Optional<BigDecimal> getSellPrice();
+    Optional<BigDecimal> getPrice();
 
     Optional<BigDecimal> getSellFee();
 
-    Optional<BigDecimal> getSellDiscount();
+    Optional<BigDecimal> getDiscount();
 
     T getOriginal();
 
