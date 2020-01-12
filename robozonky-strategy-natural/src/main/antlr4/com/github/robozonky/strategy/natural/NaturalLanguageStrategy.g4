@@ -22,7 +22,7 @@ primaryExpression returns [ParsedStrategy result] :
             final DefaultValues v = new DefaultValues($s.result);
             // enable primary and secondary marketplaces, disable selling, do not enable reservation system
             final FilterSupplier f = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet());
-            $result = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), f); })
+            $result = new ParsedStrategy(v, f); })
         | ( c=complexExpression { $result = $c.result; })
     ) {
         // only set version when the optional expression was actually present

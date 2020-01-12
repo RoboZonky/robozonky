@@ -59,8 +59,11 @@ class ParsedStrategy {
     }
 
     ParsedStrategy(final DefaultValues values, final Collection<MarketplaceFilter> filters) {
-        this(values, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
-             new FilterSupplier(values, filters));
+        this(values, new FilterSupplier(values, filters));
+    }
+
+    ParsedStrategy(final DefaultValues values, final FilterSupplier filters) {
+        this(values, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(), filters);
     }
 
     ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,

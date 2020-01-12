@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.StringUtil;
@@ -23,13 +29,7 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -40,6 +40,7 @@ class NaturalLanguageStrategyServiceTest {
     private static Stream<DynamicTest> forType(final Type type) {
         return Stream.of(
                 dynamicTest("simplest possible", () -> simplest(type)),
+                dynamicTest("complex with legacy sizes", () -> complexLegacy(type)),
                 dynamicTest("complex", () -> complex(type)),
                 dynamicTest("with disabled filters", () -> disabled(type)),
                 dynamicTest("with enabled filters", () -> enabled(type)),
@@ -99,6 +100,13 @@ class NaturalLanguageStrategyServiceTest {
 
     private static void complex(final Type strategy) {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex");
+        final String str = StringUtil.toString(s, Defaults.CHARSET);
+        final Optional<?> actualStrategy = getStrategy(strategy, str);
+        assertThat(actualStrategy).isPresent();
+    }
+
+    private static void complexLegacy(final Type strategy) {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex-legacy");
         final String str = StringUtil.toString(s, Defaults.CHARSET);
         final Optional<?> actualStrategy = getStrategy(strategy, str);
         assertThat(actualStrategy).isPresent();
