@@ -9,19 +9,25 @@ import Tokens;
 }
 
 defaultExpression returns [DefaultValues result]:
- r=portfolioExpression { $result = new DefaultValues($r.result); }
- (v=reservationExpression { $result.setReservationMode($v.result); })
- (e=exitDateExpression { $result.setExitProperties($e.result); })?
- (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
- (
     (
-        (d=legacyDefaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })
+        {
+            org.apache.logging.log4j.LogManager.getLogger(getClass())
+                .warn("Using a deprecated strategy format. Please upgrade.");
+        }
+        r1=portfolioExpression { $result = new DefaultValues($r1.result); }
+        (v1=reservationExpression { $result.setReservationMode($v1.result); })
+        (e1=exitDateExpression { $result.setExitProperties($e1.result); })?
+        (p1=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p1.result); })?
+        (d1=legacyDefaultInvestmentSizeExpression { $result.setInvestmentSize($d1.result); })?
+        (s1=defaultInvestmentShareExpression { $result.setInvestmentShare($s1.result); })?
     ) | (
-        i=defaultInvestmentSizeExpression { $result.setInvestmentSize($i.result); }
-        (b=defaultPurchaseSizeExpression { $result.setPurchaseSize($b.result); })?
+        r2=portfolioExpression { $result = new DefaultValues($r2.result); }
+        (v2=reservationExpression { $result.setReservationMode($v2.result); })
+        (i2=defaultInvestmentSizeExpression { $result.setInvestmentSize($i2.result); })?
+        (b2=defaultPurchaseSizeExpression { $result.setPurchaseSize($b2.result); })?
+        (p2=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p2.result); })?
+        (e2=exitDateExpression { $result.setExitProperties($e2.result); })?
     )
- )?
- (s=defaultInvestmentShareExpression { $result.setInvestmentShare($s.result); })?
 ;
 
 portfolioExpression returns [DefaultPortfolio result] :
@@ -51,11 +57,11 @@ legacyDefaultInvestmentSizeExpression returns [MoneyRange result] :
 ;
 
 defaultInvestmentSizeExpression returns [int result] :
-    'Investovat po ' amount=intExpr KC '.' { $result = $amount.result; }
+    'Robot má investovat do úvěrů po ' amount=intExpr KC '.' { $result = $amount.result; }
 ;
 
 defaultPurchaseSizeExpression returns [int result] :
-    'Nakupovat nejvýše za ' amount=intExpr KC '.' { $result = $amount.result; }
+    'Robot má nakupovat participace nejvýše za ' amount=intExpr KC '.' { $result = $amount.result; }
 ;
 
 defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :

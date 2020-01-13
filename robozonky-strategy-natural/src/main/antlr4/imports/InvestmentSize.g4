@@ -34,7 +34,7 @@ investmentSizeExpression returns [Map<Rating, MoneyRange> result]:
 ;
 
 investmentSizeInterestRateExpression returns [Rating rating, MoneyRange size] :
-    'S úročením ' r=interestRateBasedRatingExpression 'investovat po ' i=intExpr KC DOT {
+    'Do úvěrů s úročením ' r=interestRateBasedRatingExpression 'investovat po ' i=intExpr KC DOT {
         $rating = $r.result;
         $size = new MoneyRange($i.result, $i.result);
     }
@@ -50,8 +50,8 @@ purchaseSizeExpression returns [Map<Rating, MoneyRange> result]:
 ;
 
 purchaseSizeInterestRateExpression returns [Rating rating, MoneyRange size] :
-    'S úročením ' r=interestRateBasedRatingExpression 'nakupovat nejvýše za ' i=intExpr KC DOT {
+    'Participace s úročením ' r=interestRateBasedRatingExpression 'nakupovat nejvýše za ' i=intExpr KC DOT {
         $rating = $r.result;
-        $size = new MoneyRange($i.result);
+        $size = new MoneyRange(1, $i.result);
     }
 ;
