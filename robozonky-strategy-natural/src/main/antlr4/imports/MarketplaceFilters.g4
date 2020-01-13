@@ -216,6 +216,7 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c15=revenueRateCondition { $result = $c15.result; }
     | c18=relativeSaleDiscountCondition { $result = $c18.result; }
     | c19=originalTermCondition { $result = $c19.result; }
+    | c20=healthCondition { $result = $c20.result; }
 ;
 
 sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
@@ -237,4 +238,5 @@ sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c17=relativeProfitCondition { $result = $c17.result; }
     | c18=relativeSaleDiscountCondition { $result = $c18.result; }
     | c19=originalTermCondition { $result = $c19.result; }
+    | c20=healthCondition { $result = $c20.result; }
 ;
