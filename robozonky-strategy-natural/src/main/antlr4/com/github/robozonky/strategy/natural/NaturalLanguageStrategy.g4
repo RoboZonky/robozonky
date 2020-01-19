@@ -66,12 +66,12 @@ complexExpression returns [ParsedStrategy result]
                 DELIM 'Výše investice'
                 i2=investmentSizeExpression
                 { investmentSizes = $i2.result; }
-            )
+            )?
             (
                 DELIM 'Výše nákupu'
                 i3=purchaseSizeExpression
                 { purchaseSizes = $i3.result; }
-            )?
+            )
 
         )
     )?
