@@ -107,9 +107,22 @@ purposeExpression returns [Purpose result] :
 ;
 
 healthExpression returns [LoanHealth result] :
-    HEALTH_NOT { $result = LoanHealth.CURRENTLY_IN_DUE; }
-    | HEALTH_NOW { $result = LoanHealth.HISTORICALLY_IN_DUE; }
-    | HEALTH_ALWAYS  { $result = LoanHealth.HEALTHY; }
+    r=HEALTH {
+        String text = $r.getText();
+        switch ($text) {
+            case "nikdy nebyla":
+                $result = LoanHealth.HEALTHY;
+                break;
+            case "nyní je":
+                $result = LoanHealth.CURRENTLY_IN_DUE;
+                break;
+            case "nyní není":
+                $result = LoanHealth.HISTORICALLY_IN_DUE;
+                break;
+            default:
+                throw new IllegalStateException("Unknown loan health: " + $text);
+        }
+    }
 ;
 
 dateExpr returns [LocalDate result] :
