@@ -63,16 +63,25 @@ complexExpression returns [ParsedStrategy result]
             { investmentSizes = $i1.result; }
         ) | (
             (
+                (
+                    DELIM 'Výše investice'
+                    i2=investmentSizeExpression
+                    { investmentSizes = $i2.result; }
+                )
+                (
+                    DELIM 'Výše nákupu'
+                    i3=purchaseSizeExpression
+                    { purchaseSizes = $i3.result; }
+                )
+            ) | (
                 DELIM 'Výše investice'
-                i2=investmentSizeExpression
-                { investmentSizes = $i2.result; }
-            )?
-            (
+                i4=investmentSizeExpression
+                { investmentSizes = $i4.result; }
+            ) | (
                 DELIM 'Výše nákupu'
-                i3=purchaseSizeExpression
-                { purchaseSizes = $i3.result; }
+                i5=purchaseSizeExpression
+                { purchaseSizes = $i5.result; }
             )
-
         )
     )?
 

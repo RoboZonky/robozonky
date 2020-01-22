@@ -1,0 +1,22 @@
+Tato strategie vyžaduje RoboZonky ve verzi 5.7.0 nebo pozdější.
+- Obecná nastavení
+Robot má udržovat progresivní portfolio.
+Robot má zcela ignorovat rezervační systém.
+Robot má investovat do půjček po 4600 Kč.
+Cílová zůstatková částka je 39494 Kč.
+
+- Výše investice
+Do půjček s úročením 2,99 % p.a. investovat po 200 Kč.
+Do půjček s úročením 3,99 % p.a. investovat po 4800 Kč.
+Do půjček s úročením 4,99 % p.a. investovat po 4200 Kč.
+Do půjček s úročením 6,99 % p.a. investovat po 200 Kč.
+Do půjček s úročením 8,49 % p.a. investovat po 4200 Kč.
+Do půjček s úročením 9,49 % p.a. investovat po 200 Kč.
+Do půjček s úročením 10,99 % p.a. investovat po 800 Kč.
+Do půjček s úročením 13,49 % p.a. investovat po 4200 Kč.
+Do půjček s úročením 15,49 % p.a. investovat po 2200 Kč.
+
+- Filtrování tržiště
+Investovat do všech půjček.
+Ignorovat všechny participace.
+Prodej participací zakázán.
