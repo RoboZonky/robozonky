@@ -57,7 +57,7 @@ legacyDefaultInvestmentSizeExpression returns [MoneyRange result] :
 ;
 
 defaultInvestmentSizeExpression returns [int result] :
-    'Robot má investovat do úvěrů po ' amount=intExpr KC '.' { $result = $amount.result; }
+    'Robot má investovat do půjček po ' amount=intExpr KC '.' { $result = $amount.result; }
 ;
 
 defaultPurchaseSizeExpression returns [int result] :

@@ -8,7 +8,7 @@ Tato strategie vyžaduje RoboZonky ve verzi 5.1.0 nebo pozdější.
 - Obecná nastavení
 Robot má udržovat uživatelem definované portfolio.
 Robot má převzít kontrolu nad rezervačním systémem a přijímat rezervace půjček odpovídajících této strategii.
-Robot má investovat do úvěrů po                                200 Kč.
+Robot má investovat do půjček po                               200 Kč.
 Robot má nakupovat participace nejvýše za                     1000 Kč.
 Cílová zůstatková částka je                                 100000 Kč.
 Opustit Zonky k 31.12.2021, výprodej zahájit 12. 3. 2020.
@@ -23,8 +23,8 @@ Prostředky úročené     19,99 % p.a. mají tvořit     1 až  2 % aktuální 
 # Volitelná sekce.
 # Neuvedené ratingy budou investovány ve výchozí výši.
 - Výše investice
-Do úvěrů s úročením  3,99 % p.a. investovat po   600 Kč.
-Do úvěrů s úročením 15,49 % p.a. investovat po  1000 Kč.
+Do půjček s úročením  3,99 % p.a. investovat po   600 Kč.
+Do půjček s úročením 15,49 % p.a. investovat po  1000 Kč.
 
 # Volitelná sekce.
 # Neuvedené ratingy budou nakupovány ve výchozí výši.
