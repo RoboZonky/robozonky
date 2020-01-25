@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,14 +96,13 @@ final class Util {
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
         final Money totalPaid = getTotalPaid(i);
-        final Money originalPrincipal = i.getAmount();
+        final Money originalPrincipal = i.getPurchasePrice();
+        final Money partial = totalPaid.subtract(originalPrincipal);
         final Money balance = i.getSmpSoldFor()
                 .map(soldFor -> {
-                    final Money partial = totalPaid.subtract(originalPrincipal);
                     final Money saleFee = i.getSmpFee().orElse(soldFor.getZero());
                     return partial.add(soldFor).subtract(saleFee);
-                })
-                .orElseGet(() -> totalPaid.subtract(originalPrincipal));
+                }).orElse(partial);
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());

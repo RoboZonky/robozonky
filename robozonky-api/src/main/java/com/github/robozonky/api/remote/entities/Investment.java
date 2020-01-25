@@ -131,6 +131,7 @@ public class Investment extends BaseInvestment {
         this.interestRate = rating.getInterestRate();
         this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
         this.remainingPrincipal = amount.getValue().toPlainString();
+        this.purchasePrice = remainingPrincipal;
         this.remainingMonths = loan.getTermInMonths();
         this.loanTermInMonth = loan.getTermInMonths();
         this.insuranceActive = loan.isInsuranceActive();
@@ -151,7 +152,7 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    public Integer getLegalDpd() {
+    public int getLegalDpd() {
         return legalDpd;
     }
 
@@ -273,8 +274,9 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlTransient
-    public OffsetDateTime getActiveTo() {
-        return OffsetDateTimeAdapter.fromString(activeTo);
+    public Optional<OffsetDateTime> getActiveTo() {
+        return Optional.ofNullable(activeTo)
+                .map(OffsetDateTimeAdapter::fromString);
     }
 
     @XmlTransient

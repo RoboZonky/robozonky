@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package com.github.robozonky.app;
 
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.Random;
+
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
-import java.time.OffsetDateTime;
-import java.util.Random;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
@@ -39,7 +39,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
     private static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
         final MyInvestment m = mock(MyInvestment.class);
         when(m.getId()).thenReturn(RANDOM.nextLong());
-        when(m.getTimeCreated()).thenReturn(creationDate);
+        when(m.getTimeCreated()).thenReturn(Optional.of(creationDate));
         return m;
     }
 
