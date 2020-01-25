@@ -289,7 +289,8 @@
         "code": "java.class.removed",
         "old": "enum com.github.robozonky.api.remote.enums.LoanHealthInfo",
         "justification": "Rename class to not conflict with another similarly named element in Zonky API."
-      },{
+      },
+      {
         "code": "java.method.returnTypeChanged",
         "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Investment::getActiveTo()",
         "new": "method java.util.Optional<java.time.OffsetDateTime> com.github.robozonky.api.remote.entities.Investment::getActiveTo()",
