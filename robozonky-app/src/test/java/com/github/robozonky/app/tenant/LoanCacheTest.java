@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
@@ -40,7 +41,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         final int loanId = 1;
         final MyInvestment mi = mock(MyInvestment.class);
         final OffsetDateTime d = OffsetDateTime.now();
-        when(mi.getTimeCreated()).thenReturn(d);
+        when(mi.getTimeCreated()).thenReturn(Optional.of(d));
         final Loan loan = new MockLoanBuilder()
                 .setMyInvestment(mi)
                 .setRemainingInvestment(1_000)

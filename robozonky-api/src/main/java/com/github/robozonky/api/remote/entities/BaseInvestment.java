@@ -16,9 +16,9 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Currency;
+import java.util.Optional;
 import java.util.StringJoiner;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -39,11 +39,8 @@ abstract class BaseInvestment extends BaseEntity {
     private Currency currency = Defaults.CURRENCY;
     @XmlElement
     private String amount;
-    @XmlElement
-    private String additionalAmount;
-    @XmlElement
-    private String firstAmount;
     private InvestmentStatus status;
+    @XmlElement
     private OffsetDateTime timeCreated = DateUtil.offsetNow();
 
     BaseInvestment() {
@@ -54,14 +51,12 @@ abstract class BaseInvestment extends BaseEntity {
         this.currency = amount.getCurrency();
         this.loanId = loan.getId();
         this.amount = amount.getValue().toPlainString();
-        this.additionalAmount = BigDecimal.ZERO.toPlainString();
-        this.firstAmount = amount.getValue().toPlainString();
         this.status = InvestmentStatus.ACTIVE;
     }
 
-    @XmlElement
-    public OffsetDateTime getTimeCreated() {
-        return timeCreated;
+    @XmlTransient
+    public Optional<OffsetDateTime> getTimeCreated() {
+        return Optional.ofNullable(timeCreated);
     }
 
     @XmlElement
@@ -91,25 +86,13 @@ abstract class BaseInvestment extends BaseEntity {
         return Money.from(amount, currency);
     }
 
-    @XmlTransient
-    public Money getAdditionalAmount() {
-        return Money.from(additionalAmount, currency);
-    }
-
-    @XmlTransient
-    public Money getFirstAmount() {
-        return Money.from(firstAmount, currency);
-    }
-
     @Override
     public String toString() {
         return new StringJoiner(", ", BaseInvestment.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("loanId=" + loanId)
-                .add("additionalAmount='" + additionalAmount + "'")
                 .add("amount='" + amount + "'")
                 .add("currency=" + currency)
-                .add("firstAmount='" + firstAmount + "'")
                 .add("status=" + status)
                 .add("timeCreated=" + timeCreated)
                 .toString();

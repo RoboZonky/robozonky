@@ -151,7 +151,7 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    public Integer getLegalDpd() {
+    public int getLegalDpd() {
         return legalDpd;
     }
 
@@ -273,8 +273,9 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlTransient
-    public OffsetDateTime getActiveTo() {
-        return OffsetDateTimeAdapter.fromString(activeTo);
+    public Optional<OffsetDateTime> getActiveTo() {
+        return Optional.ofNullable(activeTo)
+                .map(OffsetDateTimeAdapter::fromString);
     }
 
     @XmlTransient
