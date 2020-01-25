@@ -131,6 +131,7 @@ public class Investment extends BaseInvestment {
         this.interestRate = rating.getInterestRate();
         this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
         this.remainingPrincipal = amount.getValue().toPlainString();
+        this.purchasePrice = remainingPrincipal;
         this.remainingMonths = loan.getTermInMonths();
         this.loanTermInMonth = loan.getTermInMonths();
         this.insuranceActive = loan.isInsuranceActive();
