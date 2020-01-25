@@ -53,6 +53,7 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
                 .setLoanAnnuity(loan.getAnnuity())
                 .setLoanAmount(loan.getAmount())
                 .setRemainingPrincipal(invested)
+                .setPurchasePrice(invested)
                 .setRating(loan.getRating())
                 .setPaidInterest(BigDecimal.ZERO)
                 .setPaidPenalty(BigDecimal.ZERO)
