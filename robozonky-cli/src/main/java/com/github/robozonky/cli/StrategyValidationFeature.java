@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.LongAdder;
 import com.github.robozonky.internal.extensions.StrategyLoader;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
-import io.vavr.control.Try;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "strategy-validator", description = StrategyValidationFeature.DESCRIPTION)
@@ -63,9 +62,11 @@ public final class StrategyValidationFeature extends AbstractFeature {
 
     @Override
     public void setup() throws SetupFailedException {
-        text = Try.withResources(() -> new BufferedInputStream(UrlUtil.open(location)))
-                .of(s -> StringUtil.toString(s))
-                .getOrElseThrow(SetupFailedException::new);
+        try (var inputStream = new BufferedInputStream(UrlUtil.open(location))) {
+            text = StringUtil.toString(inputStream);
+        } catch (Exception ex) {
+            throw new SetupFailedException(ex);
+        }
     }
 
     private void report(final LongAdder adder, final String type) {

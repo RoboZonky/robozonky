@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package com.github.robozonky.internal.async;
 
-import io.vavr.control.Either;
-import io.vavr.control.Try;
-
 import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,6 +23,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+
+import io.vavr.control.Either;
 
 final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
 
@@ -48,9 +47,13 @@ final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
             synchronized (this) {
                 if (needsReload()) {
                     logger.trace("Reloading {}.", this);
-                    return Try.ofSupplier(() -> getOperation().apply(value.get()))
-                            .peek(v -> processRetrievedValue(v, value::set))
-                            .toEither();
+                    try {
+                        var v = getOperation().apply(value.get());
+                        processRetrievedValue(v, value::set);
+                        return Either.right(v);
+                    } catch (Exception ex) {
+                        return Either.left(ex);
+                    }
                 }
                 // otherwise fall through to retrieve the value
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Duration;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.InvestmentMode;
 import com.github.robozonky.app.ReturnCode;
@@ -24,12 +26,8 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.async.Scheduler;
 import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.extensions.JobServiceLoader;
-import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.time.Duration;
-import java.util.function.Function;
 
 public class Daemon implements InvestmentMode {
 
@@ -101,7 +99,7 @@ public class Daemon implements InvestmentMode {
 
     @Override
     public ReturnCode get() {
-        return Try.of(() -> {
+        try {
             // schedule the tasks
             scheduleJobs();
             scheduleDaemons(Tasks.INSTANCE.scheduler());
@@ -110,7 +108,9 @@ public class Daemon implements InvestmentMode {
             LOGGER.trace("Request to stop received.");
             // signal the end of operation
             return (lifecycle.isFailed()) ? ReturnCode.ERROR_UNEXPECTED : ReturnCode.OK;
-        }).getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     @Override

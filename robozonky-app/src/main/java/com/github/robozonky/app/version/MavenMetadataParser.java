@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 import com.github.robozonky.internal.util.XmlUtil;
 import io.vavr.control.Either;
-import io.vavr.control.Try;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -51,7 +50,7 @@ import static java.util.stream.Collectors.toList;
  * This class is based on the assumption that the Maven Metadata always report versions in the increasing order of
  * recency.
  */
-final class MarvenMetadataParser implements Function<String, Either<Throwable, Response>> {
+final class MavenMetadataParser implements Function<String, Either<Throwable, Response>> {
 
     private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
@@ -61,17 +60,17 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
     private final String artifactId;
     private final String mavenCentralHostname;
 
-    MarvenMetadataParser(final String server) {
+    MavenMetadataParser(final String server) {
         this(server, "com.github.robozonky", "robozonky"); // RoboZonky's parent POM
     }
 
-    MarvenMetadataParser(final String server, final String groupId, final String artifactId) {
+    MavenMetadataParser(final String server, final String groupId, final String artifactId) {
         this.mavenCentralHostname = server;
         this.groupId = groupId;
         this.artifactId = artifactId;
     }
 
-    public MarvenMetadataParser() {
+    public MavenMetadataParser() {
         this("https://repo1.maven.org");
     }
 
@@ -86,7 +85,7 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
     private static InputStream getMavenCentralData(final String groupId, final String artifactId,
                                                    final String hostname) throws IOException {
         var rootUrlParts = Stream.of(hostname, "maven2");
-        var mavenGroupParts = Arrays.stream(MarvenMetadataParser.PATTERN_DOT.split(groupId));
+        var mavenGroupParts = Arrays.stream(MavenMetadataParser.PATTERN_DOT.split(groupId));
         var artifactParts = Stream.of(artifactId, "maven-metadata.xml");
         var url = Stream.concat(Stream.concat(rootUrlParts, mavenGroupParts), artifactParts)
                 .collect(joining(URL_SEPARATOR));
@@ -94,7 +93,7 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
     }
 
     private static boolean isStable(final String version) {
-        return MarvenMetadataParser.PATTERN_STABLE_VERSION.matcher(version).find();
+        return MavenMetadataParser.PATTERN_STABLE_VERSION.matcher(version).find();
     }
 
     static List<String> extractItems(final NodeList nodeList) {
@@ -112,13 +111,15 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
         var xPathFactory = XPathFactory.newInstance();
         var xpath = xPathFactory.newXPath();
         var expr = xpath.compile("/metadata/versioning/versions/version");
-        return MarvenMetadataParser.extractItems((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+        return MavenMetadataParser.extractItems((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
     }
 
     private static Either<Throwable, List<String>> mavenMetadataXmlToVersionStrings(final String source) {
-        return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)))
-                .of(MarvenMetadataParser::retrieveVersionStrings)
-                .toEither();
+        try (var inputStream = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
+            return Either.right(MavenMetadataParser.retrieveVersionStrings(inputStream));
+        } catch (Exception ex) {
+            return Either.left(ex);
+        }
     }
 
     private static List<String> subListAfter(final List<String> items, final String item) {
@@ -139,7 +140,7 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
             return Either.right(Response.noMoreRecentVersion());
         }
         return newerVersions.stream()
-                .filter(MarvenMetadataParser::isStable)
+                .filter(MavenMetadataParser::isStable)
                 .reduce((first, second) -> second) // last element in the stream of versions
                 .map(stable -> {
                     var evenNewerExperimentalVersions = subListAfter(newerVersions, stable);
@@ -154,15 +155,17 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
     }
 
     private Either<Throwable, String> getLatestSource() {
-        return Try.withResources(() -> MarvenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
-                                                                                this.mavenCentralHostname))
-                .of(StringUtil::toString)
-                .toEither();
+        try (var inputStream = MavenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
+                                                                       this.mavenCentralHostname)) {
+            return Either.right(StringUtil.toString(inputStream));
+        } catch (Exception ex) {
+            return Either.left(ex);
+        }
     }
 
     private Either<Throwable, List<String>> getAvailableVersions() {
         return getLatestSource()
-                .fold(Either::left, MarvenMetadataParser::mavenMetadataXmlToVersionStrings);
+                .fold(Either::left, MavenMetadataParser::mavenMetadataXmlToVersionStrings);
     }
 
     @Override

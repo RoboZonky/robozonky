@@ -21,7 +21,6 @@ import javax.management.ObjectName;
 
 import com.github.robozonky.internal.functional.Memoizer;
 import io.vavr.control.Either;
-import io.vavr.control.Try;
 
 public final class ManagementBean<T extends BaseMBean> {
 
@@ -36,11 +35,13 @@ public final class ManagementBean<T extends BaseMBean> {
     }
 
     private static Either<Throwable, ObjectName> assembleObjectName(final Class<?> clz) {
-        return Try.of(() -> {
+        try {
             final String packageName = clz.getPackage().getName();
             final String className = clz.getSimpleName();
-            return new ObjectName(DOMAIN + ":type=" + packageName + ",name=" + className);
-        }).toEither();
+            return Either.right(new ObjectName(DOMAIN + ":type=" + packageName + ",name=" + className));
+        } catch (Exception ex) {
+            return Either.left(ex);
+        }
     }
 
     public ObjectName getObjectName() {

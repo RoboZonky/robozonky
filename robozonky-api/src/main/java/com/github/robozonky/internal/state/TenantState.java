@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.Defaults;
-import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,11 +48,13 @@ public final class TenantState {
     }
 
     static String encode(final String secret) {
-        return Try.of(() -> {
+        try {
             final MessageDigest mdEnc = MessageDigest.getInstance("MD5");
             mdEnc.update(secret.getBytes(Defaults.CHARSET));
             return new BigInteger(1, mdEnc.digest()).toString(16);
-        }).getOrElse(secret);
+        } catch (Exception ex) {
+            return secret;
+        }
     }
 
     private static File getFile(final String username) {

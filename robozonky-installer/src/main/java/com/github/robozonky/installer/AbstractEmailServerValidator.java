@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import javax.mail.Session;
 
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import io.vavr.control.Try;
 
 abstract class AbstractEmailServerValidator extends AbstractValidator {
 
@@ -38,18 +37,17 @@ abstract class AbstractEmailServerValidator extends AbstractValidator {
         configure(installData);
         final Properties smtpProps = getSmtpProperties(installData);
         final Session session = Session.getInstance(smtpProps, null);
-        return Try.withResources(() -> session.getTransport("smtp"))
-                .of(transport -> {
-                    final String host = Variables.SMTP_HOSTNAME.getValue(installData);
-                    final int port = Integer.parseInt(Variables.SMTP_PORT.getValue(installData));
-                    logger.debug("Connecting to {}:{} with {}.", host, port, smtpProps);
-                    transport.connect(host, port, Variables.SMTP_USERNAME.getValue(installData),
+        try (var transport = session.getTransport("smtp")) {
+            final String host = Variables.SMTP_HOSTNAME.getValue(installData);
+            final int port = Integer.parseInt(Variables.SMTP_PORT.getValue(installData));
+            logger.debug("Connecting to {}:{} with {}.", host, port, smtpProps);
+            transport.connect(host, port, Variables.SMTP_USERNAME.getValue(installData),
                               Variables.SMTP_PASSWORD.getValue(installData));
-                    return DataValidator.Status.OK;
-                }).getOrElseGet(t -> {
-                    logger.warn("Failed authenticating with SMTP server.", t);
-                    return DataValidator.Status.WARNING;
-                });
+            return DataValidator.Status.OK;
+        } catch (Exception ex) {
+            logger.warn("Failed authenticating with SMTP server.", ex);
+            return DataValidator.Status.WARNING;
+        }
     }
 
     abstract void configure(final InstallData data);

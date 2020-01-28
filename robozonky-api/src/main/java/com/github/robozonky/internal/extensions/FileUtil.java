@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,14 +38,14 @@ final class FileUtil {
 
     public static Optional<File> findFolder(final String folderName) {
         final Path root = new File(System.getProperty("user.dir")).toPath();
-        return Try.withResources(() -> Files.find(root, 1, (path, attr) -> attr.isDirectory()))
-                .of(s -> s.map(Path::toFile)
-                        .filter(f -> Objects.equals(f.getName(), folderName))
-                        .findFirst())
-                .getOrElseGet(ex -> {
-                    LOGGER.warn("Exception while walking file tree.", ex);
-                    return Optional.empty();
-                });
+        try (var folders = Files.find(root, 1, (path, attr) -> attr.isDirectory())) {
+            return folders.map(Path::toFile)
+                    .filter(f -> Objects.equals(f.getName(), folderName))
+                    .findFirst();
+        } catch (Exception ex) {
+            LOGGER.warn("Exception while walking file tree.", ex);
+            return Optional.empty();
+        }
     }
 
     public static Stream<URL> filesToUrls(final File... jars) {
@@ -61,6 +60,7 @@ final class FileUtil {
                         LOGGER.debug("Skipping file: '{}'.", f, e);
                         return Optional.<URL>empty();
                     }
-                }).flatMap(Optional::stream);
+                })
+                .flatMap(Optional::stream);
     }
 }

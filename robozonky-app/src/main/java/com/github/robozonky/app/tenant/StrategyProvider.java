@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.extensions.StrategyLoader;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
-import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,13 +47,7 @@ class StrategyProvider implements ReloadListener<String> {
     private final Reloadable<String> reloadableStrategy;
 
     StrategyProvider(final String strategyLocation) {
-        this.reloadableStrategy = Reloadable.with(() ->
-                Try.withResources(() -> UrlUtil.open(UrlUtil.toURL(strategyLocation)))
-                        .of(StringUtil::toString)
-                        .getOrElseThrow(t -> {
-                            LOGGER.error("Failed reading strategy source.", t);
-                            throw new IllegalStateException("Failed reading strategy source.", t);
-                        }))
+        this.reloadableStrategy = Reloadable.with(() -> readStrategy(strategyLocation))
                 .addListener(this)
                 .reloadAfter(Duration.ofHours(1))
                 .async()
@@ -63,6 +56,15 @@ class StrategyProvider implements ReloadListener<String> {
 
     StrategyProvider() {
         this.reloadableStrategy = null;
+    }
+
+    private static String readStrategy(final String strategyLocation) {
+        try (var inputStream = UrlUtil.open(UrlUtil.toURL(strategyLocation))) {
+            return StringUtil.toString(inputStream);
+        } catch (Exception ex) {
+            LOGGER.error("Failed reading strategy source.", ex);
+            throw new IllegalStateException("Failed reading strategy source.", ex);
+        }
     }
 
     public static StrategyProvider createFor(final String strategyLocation) {
