@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package com.github.robozonky.internal.async;
 
-import io.vavr.control.Either;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.time.Duration;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static org.assertj.vavr.api.VavrAssertions.assertThat;
+import com.github.robozonky.internal.functional.Either;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class AsyncReloadableImplTest {
@@ -38,21 +38,21 @@ class AsyncReloadableImplTest {
                 .async()
                 .build();
         final Either<Throwable, String> result = r.get();
-        assertThat(result).containsRightInstanceOf(String.class);
+        assertThat(result.get()).isInstanceOf(String.class);
         verify(mock).accept(any());
         final String value = result.get();
-        assertThat(r.get()).containsOnRight(value); // new call, no change
+        assertThat(r.get().get()).isEqualTo(value); // new call, no change
         verify(mock, times(1)).accept(any()); // still called just once
         r.clear();
         final long nanoTime = System.nanoTime();
         while (r.get().get().equals(value)) {
             Thread.sleep(1);
             final long difference = System.nanoTime() - nanoTime;
-            Assertions.assertThat(difference)
+            assertThat(difference)
                     .as("Timed out while waiting for refresh.")
                     .isLessThan(5 * 1000 * 1000 * 1000); // wait five seconds
         }
-        assertThat(r.get()).isRight().containsRightInstanceOf(String.class); // not null
+        assertThat(r.get().get()).isInstanceOf(String.class); // not null
     }
 
     @Test
@@ -64,10 +64,10 @@ class AsyncReloadableImplTest {
                 .async()
                 .build();
         final Either<Throwable, String> result = r.get();
-        assertThat(result).containsRightInstanceOf(String.class);
+        assertThat(result.get()).isInstanceOf(String.class);
         verify(mock).accept(any());
         final String value = result.get();
-        assertThat(r.get()).containsOnRight(value); // new call, no change
+        assertThat(r.get().get()).isEqualTo(value); // new call, no change
         verify(mock, times(1)).accept(any()); // still called just once
     }
 
@@ -78,9 +78,9 @@ class AsyncReloadableImplTest {
                 .async()
                 .build();
         final Either<Throwable, String> result = r.get();
-        assertThat(result).containsRightInstanceOf(String.class);
+        assertThat(result.get()).isInstanceOf(String.class);
         final String value = result.get();
-        assertThat(r.get()).containsOnRight(value); // new call, no change
+        assertThat(r.get().get()).isEqualTo(value); // new call, no change
     }
 
     @Test
@@ -92,22 +92,21 @@ class AsyncReloadableImplTest {
                 .async()
                 .build();
         final Either<Throwable, String> result = r.get();
-        assertThat(result).isLeft(); // no value as the finisher failed
+        assertThatThrownBy(result::get).isInstanceOf(NoSuchElementException.class); // no value as the finisher failed
     }
 
     @Test
     void performAsyncTest() { // ugly white-box test as this code is nearly untestable from the outside
-        final AsyncReloadableImpl<String> r = (AsyncReloadableImpl<String>)Reloadable.with(() -> "")
+        final AsyncReloadableImpl<String> r = (AsyncReloadableImpl<String>) Reloadable.with(() -> "")
                 .async()
                 .build();
         final CompletableFuture<Void> first = r.refreshIfNotAlreadyRefreshing(null);
-        Assertions.assertThat(first).isNotNull();
+        assertThat(first).isNotNull();
         first.completeExceptionally(new IllegalStateException());
         final CompletableFuture<Void> second = r.refreshIfNotAlreadyRefreshing(first);
-        Assertions.assertThat(second).isNotNull().isNotSameAs(first);
+        assertThat(second).isNotNull().isNotSameAs(first);
         final CompletableFuture<Void> third = mock(CompletableFuture.class);
         when(third.isDone()).thenReturn(false);
-        Assertions.assertThat(r.refreshIfNotAlreadyRefreshing(third)).isSameAs(third);
+        assertThat(r.refreshIfNotAlreadyRefreshing(third)).isSameAs(third);
     }
-
 }

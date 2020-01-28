@@ -25,7 +25,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import io.vavr.control.Either;
+import com.github.robozonky.internal.functional.Either;
 
 final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
 

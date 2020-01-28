@@ -32,10 +32,10 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.functional.Either;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 import com.github.robozonky.internal.util.XmlUtil;
-import io.vavr.control.Either;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;

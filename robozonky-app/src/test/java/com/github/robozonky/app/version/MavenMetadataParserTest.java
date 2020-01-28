@@ -20,9 +20,8 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
+import com.github.robozonky.internal.functional.Either;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import io.vavr.control.Either;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +35,7 @@ import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import static org.assertj.vavr.api.VavrAssertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class MavenMetadataParserTest extends AbstractRoboZonkyTest {
@@ -64,14 +63,14 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
     void checkNullVersion() {
         final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
         final Either<Throwable, Response> result = parser.apply(null);
-        assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+        assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
     }
 
     @Test
     void checkEmptyVersion() {
         final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
         final Either<Throwable, Response> result = parser.apply("");
-        assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+        assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
     }
 
     @Test
@@ -80,7 +79,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                    "robozonky-nonexistent");
         final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
-        assertThat(result).containsLeftInstanceOf(FileNotFoundException.class);
+        assertThat(result.getLeft()).isInstanceOf(FileNotFoundException.class);
     }
 
     @Test
@@ -92,7 +91,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         when(l.getLength()).thenReturn(1);
         when(l.item(eq(0))).thenReturn(n);
         final List<String> actual = MavenMetadataParser.extractItems(l);
-        Assertions.assertThat(actual).containsExactly(version);
+        assertThat(actual).containsExactly(version);
     }
 
     @Test
@@ -107,7 +106,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         when(l.item(eq(0))).thenReturn(n1);
         when(l.item(eq(1))).thenReturn(n2);
         final List<String> actual = MavenMetadataParser.extractItems(l);
-        Assertions.assertThat(actual).containsExactly(version, version2);
+        assertThat(actual).containsExactly(version, version2);
     }
 
     @Nested
@@ -140,7 +139,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                        "robozonky");
             final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
-            assertThat(result).containsLeftInstanceOf(IllegalStateException.class);
+            assertThat(result.getLeft()).isInstanceOf(IllegalStateException.class);
         }
 
         @Test
@@ -148,7 +147,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                        "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.0");
-            assertThat(result).containsOnRight(Response.moreRecent("4.0.1", "4.0.2-cr-1"));
+            assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-1"));
         }
 
         @Test
@@ -156,7 +155,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                        "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.1");
-            assertThat(result).containsOnRight(Response.moreRecentExperimental("4.0.2-cr-1"));
+            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-1"));
         }
 
         @Test
@@ -164,7 +163,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                        "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.2-cr-1");
-            assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+            assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
         }
     }
 }

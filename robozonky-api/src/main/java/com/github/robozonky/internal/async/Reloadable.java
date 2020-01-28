@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.github.robozonky.internal.async;
 import java.time.Duration;
 import java.util.function.Supplier;
 
-import io.vavr.control.Either;
+import com.github.robozonky.internal.functional.Either;
 
 /**
  * Allows the user to have a variable which reloads from a remote source on-demand.

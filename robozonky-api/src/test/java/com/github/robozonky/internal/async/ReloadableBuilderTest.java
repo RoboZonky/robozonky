@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import io.vavr.control.Either;
-import org.assertj.core.api.Assertions;
-import org.assertj.vavr.api.VavrAssertions;
+import com.github.robozonky.internal.functional.Either;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ReloadableBuilderTest {
@@ -37,7 +36,7 @@ class ReloadableBuilderTest {
                 .reloadAfter(Duration.ofSeconds(5))
                 .async()
                 .build();
-        Assertions.assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
+        assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
     }
 
     @Test
@@ -49,7 +48,7 @@ class ReloadableBuilderTest {
                 .reloadAfter(Duration.ofSeconds(5))
                 .async()
                 .build();
-        Assertions.assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
+        assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
     }
 
     @Test
@@ -63,8 +62,8 @@ class ReloadableBuilderTest {
                 .finishWith(finisher)
                 .buildEager();
         verify(finisher).accept(eq(test)); // value was fetched
-        VavrAssertions.assertThat(s).isRight();
-        VavrAssertions.assertThat(s.get().get()).containsOnRight(test);
+        assertThat(s.get()).isNotNull();
+        assertThat(s.get().get().get()).isEqualTo(test);
         verify(finisher, times(1)).accept(eq(test)); // was not called again
     }
 }

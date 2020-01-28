@@ -69,19 +69,9 @@
       <artifactId>httpasyncclient</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.vavr</groupId>
-      <artifactId>vavr</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.ini4j</groupId>
       <artifactId>ini4j</artifactId>
       <version>0.5.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-vavr</artifactId>
-      <version>0.0.1</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>

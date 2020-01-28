@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.internal.async.Reloadable;
-import com.github.robozonky.internal.remote.Select;
-import com.github.robozonky.internal.state.InstanceState;
-import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +24,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Tenant;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class SoldParticipationCache {
 
@@ -103,7 +103,7 @@ final class SoldParticipationCache {
 
     public boolean wasOnceSold(final int loanId) {
         return listedSoldLocally.contains(loanId) ||
-                listedSoldRemotely.get().map(s -> s.contains(loanId)).getOrElseGet(ex -> {
+                listedSoldRemotely.get().mapRight(s -> s.contains(loanId)).getOrElseGet(ex -> {
                     LOGGER.info("Failed retrieving sold loans from Zonky.", ex);
                     return false;
                 });

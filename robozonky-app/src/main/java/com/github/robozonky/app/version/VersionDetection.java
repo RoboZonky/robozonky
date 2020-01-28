@@ -22,8 +22,8 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.functional.Either;
 import com.github.robozonky.internal.jobs.SimplePayload;
-import io.vavr.control.Either;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

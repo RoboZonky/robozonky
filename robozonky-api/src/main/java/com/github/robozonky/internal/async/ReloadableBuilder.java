@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package com.github.robozonky.internal.async;
 
-import io.vavr.control.Either;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -27,6 +23,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+
+import com.github.robozonky.internal.functional.Either;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Builds an instance of {@link Reloadable}.
@@ -127,7 +127,7 @@ public final class ReloadableBuilder<T> {
         final Reloadable<T> result = build();
         LOGGER.debug("Running before returning: {}.", result);
         final Either<Throwable, T> executed = result.get();
-        return executed.map(r -> result);
+        return executed.mapRight(r -> result);
     }
 
     /**

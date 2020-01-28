@@ -27,7 +27,6 @@ module com.github.robozonky.api {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.jaxrs.json; // Required transitively by RESTeasy, which is not modularized.
-    requires io.vavr;
     requires org.apache.logging.log4j;
     requires ini4j;
     requires paging.streams;

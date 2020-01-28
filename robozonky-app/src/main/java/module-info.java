@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ module com.github.robozonky.app {
     requires java.ws.rs;
     requires java.xml;
     requires info.picocli;
-    requires io.vavr;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
     requires resteasy.core;

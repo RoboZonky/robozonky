@@ -19,8 +19,8 @@ package com.github.robozonky.internal.management;
 import java.util.function.Supplier;
 import javax.management.ObjectName;
 
+import com.github.robozonky.internal.functional.Either;
 import com.github.robozonky.internal.functional.Memoizer;
-import io.vavr.control.Either;
 
 public final class ManagementBean<T extends BaseMBean> {
 
