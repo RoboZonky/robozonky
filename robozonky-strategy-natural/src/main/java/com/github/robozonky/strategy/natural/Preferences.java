@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package com.github.robozonky.strategy.natural;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.functional.Memoizer;
 
 final class Preferences {
 
@@ -33,18 +34,20 @@ final class Preferences {
 
     private final PortfolioOverview referencePortfolio;
     private final Set<Rating> ratingRanking;
-    private final Lazy<Comparator<Rating>> ratingComparator;
-    private final Lazy<Comparator<LoanDescriptor>> primaryMarketplaceComparator;
-    private final Lazy<Comparator<ReservationDescriptor>> reservationComparator;
-    private final Lazy<Comparator<ParticipationDescriptor>> secondaryMarketplaceComparator;
+    private final Supplier<Comparator<Rating>> ratingComparator;
+    private final Supplier<Comparator<LoanDescriptor>> primaryMarketplaceComparator;
+    private final Supplier<Comparator<ReservationDescriptor>> reservationComparator;
+    private final Supplier<Comparator<ParticipationDescriptor>> secondaryMarketplaceComparator;
 
     private Preferences(PortfolioOverview portfolio, Set<Rating> ratingRanking) {
         this.referencePortfolio = portfolio;
         this.ratingRanking = ratingRanking;
-        this.ratingComparator = Lazy.of(() -> Util.getRatingByDemandComparator(ratingRanking));
-        this.primaryMarketplaceComparator = Lazy.of(() -> new PrimaryMarketplaceComparator(ratingComparator.get()));
-        this.reservationComparator = Lazy.of(() -> new ReservationComparator(ratingComparator.get()));
-        this.secondaryMarketplaceComparator = Lazy.of(() -> new SecondaryMarketplaceComparator(ratingComparator.get()));
+        this.ratingComparator = Memoizer.memoize(() -> Util.getRatingByDemandComparator(ratingRanking));
+        this.primaryMarketplaceComparator =
+                Memoizer.memoize(() -> new PrimaryMarketplaceComparator(ratingComparator.get()));
+        this.reservationComparator = Memoizer.memoize(() -> new ReservationComparator(ratingComparator.get()));
+        this.secondaryMarketplaceComparator =
+                Memoizer.memoize(() -> new SecondaryMarketplaceComparator(ratingComparator.get()));
     }
 
     public static synchronized Preferences get(ParsedStrategy strategy, PortfolioOverview portfolio) {

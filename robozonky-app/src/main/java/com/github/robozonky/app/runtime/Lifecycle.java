@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package com.github.robozonky.app.runtime;
 
-import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.events.impl.EventFactory;
-import io.vavr.Lazy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.internal.functional.Memoizer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
@@ -39,7 +40,7 @@ public class Lifecycle {
     private static final Logger LOGGER = LogManager.getLogger(Lifecycle.class);
     private static final AtomicReference<Set<Thread>> HOOKS = new AtomicReference<>(initShutdownHooks());
     private final CountDownLatch circuitBreaker;
-    private final Lazy<DaemonShutdownHook> shutdownHook;
+    private final Supplier<DaemonShutdownHook> shutdownHook;
     private final AtomicBoolean failed = new AtomicBoolean(false);
 
     /**
@@ -56,7 +57,7 @@ public class Lifecycle {
     Lifecycle(final CountDownLatch circuitBreaker, final ShutdownHook hooks) {
         this.circuitBreaker = circuitBreaker;
         final ShutdownEnabler shutdownEnabler = new ShutdownEnabler();
-        this.shutdownHook = Lazy.of(() -> new DaemonShutdownHook(this, shutdownEnabler));
+        this.shutdownHook = Memoizer.memoize(() -> new DaemonShutdownHook(this, shutdownEnabler));
         hooks.register(shutdownEnabler);
     }
 

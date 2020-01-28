@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.github.robozonky.app.tenant;
 
-import io.vavr.Lazy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
+import com.github.robozonky.internal.functional.Memoizer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 final class DelayedFiring implements Runnable {
 
@@ -33,14 +34,15 @@ final class DelayedFiring implements Runnable {
 
     private final AtomicBoolean isOver = new AtomicBoolean(false);
     private final CyclicBarrier triggersEventFiring = new CyclicBarrier(2);
-    private final Lazy<CompletableFuture<Void>> blocksUntilAllUnblock = Lazy.of(() -> CompletableFuture.runAsync(() -> {
-        try {
-            triggersEventFiring.await();
-        } catch (final InterruptedException | BrokenBarrierException ex) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while waiting for transaction commit.");
-        }
-    }));
+    private final Supplier<CompletableFuture<Void>> blocksUntilAllUnblock =
+            Memoizer.memoize(() -> CompletableFuture.runAsync(() -> {
+                try {
+                    triggersEventFiring.await();
+                } catch (final InterruptedException | BrokenBarrierException ex) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Interrupted while waiting for transaction commit.");
+                }
+            }));
     private final Collection<CompletableFuture<Void>> all = new HashSet<>(0);
 
     private void ensureNotOver() {

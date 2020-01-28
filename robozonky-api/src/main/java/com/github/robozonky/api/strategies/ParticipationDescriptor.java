@@ -23,13 +23,13 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.functional.Memoizer;
 
 public final class ParticipationDescriptor
         implements Descriptor<RecommendedParticipation, ParticipationDescriptor, Participation> {
 
     private final Participation participation;
-    private final Lazy<Loan> related;
+    private final Supplier<Loan> related;
 
     /**
      *
@@ -39,7 +39,7 @@ public final class ParticipationDescriptor
      */
     public ParticipationDescriptor(final Participation participation, final Supplier<Loan> related) {
         this.participation = participation;
-        this.related = Lazy.of(related);
+        this.related = Memoizer.memoize(related);
     }
 
     @Override

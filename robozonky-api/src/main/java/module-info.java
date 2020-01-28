@@ -49,6 +49,7 @@ module com.github.robozonky.api {
      */
     exports com.github.robozonky.internal;
     exports com.github.robozonky.internal.async;
+    exports com.github.robozonky.internal.functional;
     exports com.github.robozonky.internal.jobs;
     exports com.github.robozonky.internal.management;
     exports com.github.robozonky.internal.remote;

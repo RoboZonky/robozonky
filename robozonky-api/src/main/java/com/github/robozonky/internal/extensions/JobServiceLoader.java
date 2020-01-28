@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ package com.github.robozonky.internal.extensions;
 import java.util.Collection;
 import java.util.ServiceLoader;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.internal.jobs.JobService;
 import com.github.robozonky.internal.jobs.SimpleJob;
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.internal.util.StreamUtil;
-import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class JobServiceLoader {
 
     private static final Logger LOGGER = LogManager.getLogger(JobServiceLoader.class);
-    private static final Lazy<ServiceLoader<JobService>> LOADER =
+    private static final Supplier<ServiceLoader<JobService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(JobService.class);
 
     private JobServiceLoader() {

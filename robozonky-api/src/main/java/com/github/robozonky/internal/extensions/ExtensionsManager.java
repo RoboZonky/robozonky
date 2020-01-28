@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
-import io.vavr.Lazy;
+import com.github.robozonky.internal.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -67,8 +68,8 @@ enum ExtensionsManager {
      * loader initialization throws an exception, the parent class will fail to load and we will get a
      * NoClassDefFoundError which gives us no information as to why it happened.
      */
-    public <T> Lazy<ServiceLoader<T>> getServiceLoader(final Class<T> serviceClass) {
-        return Lazy.of(() -> getServiceLoader(serviceClass, "extensions"));
+    public <T> Supplier<ServiceLoader<T>> getServiceLoader(final Class<T> serviceClass) {
+        return Memoizer.memoize(() -> getServiceLoader(serviceClass, "extensions"));
     }
 
     <T> ServiceLoader<T> getServiceLoader(final Class<T> serviceClass, final String folderName) {

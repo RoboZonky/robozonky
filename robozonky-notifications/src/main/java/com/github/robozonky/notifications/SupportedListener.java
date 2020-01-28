@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package com.github.robozonky.notifications;
 
+import java.util.function.Supplier;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.internal.functional.Memoizer;
 import com.github.robozonky.notifications.listeners.InvestmentMadeEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentPurchasedEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentSoldEventListener;
@@ -58,7 +61,6 @@ import com.github.robozonky.notifications.samples.MyRoboZonkyTestingEvent;
 import com.github.robozonky.notifications.samples.MyRoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.notifications.samples.MySaleOfferedEvent;
 import com.github.robozonky.notifications.samples.MyWeeklySummaryEvent;
-import io.vavr.Lazy;
 
 @SuppressWarnings("rawtypes")
 public enum SupportedListener {
@@ -346,7 +348,7 @@ public enum SupportedListener {
         }
     };
 
-    private final Lazy<? extends Event> sampleEvent = Lazy.of(this::createSampleEvent);
+    private final Supplier<? extends Event> sampleEvent = Memoizer.memoize(this::createSampleEvent);
 
     public abstract EventListener getListener(final AbstractTargetHandler targetHandler);
 

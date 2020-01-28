@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.github.robozonky.internal.util;
 
+import java.util.function.Supplier;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import io.vavr.Lazy;
+import com.github.robozonky.internal.functional.Memoizer;
 
 public final class XmlUtil {
 
     // one instance for the entire application
-    private static final Lazy<DocumentBuilderFactory> DOCUMENT_BUILDER_FACTORY = Lazy.of(() -> {
+    private static final Supplier<DocumentBuilderFactory> DOCUMENT_BUILDER_FACTORY = Memoizer.memoize(() -> {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

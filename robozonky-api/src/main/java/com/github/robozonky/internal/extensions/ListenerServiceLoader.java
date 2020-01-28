@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,28 @@
 
 package com.github.robozonky.internal.extensions;
 
+import java.net.URL;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.util.StreamUtil;
-import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.stream.Collectors;
 
 public final class ListenerServiceLoader {
 
     private static final String CONFIG_LOCATION_PROPERTY = "configLocation";
     private static final Logger LOGGER = LogManager.getLogger(ListenerServiceLoader.class);
-    private static final Lazy<ServiceLoader<ListenerService>> LOADER =
+    private static final Supplier<ServiceLoader<ListenerService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
 
     private ListenerServiceLoader() {

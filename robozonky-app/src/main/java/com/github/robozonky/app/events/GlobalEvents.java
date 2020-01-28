@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package com.github.robozonky.app.events;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.internal.functional.Memoizer;
 import com.github.robozonky.internal.tenant.LazyEvent;
-import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.concurrent.CompletableFuture;
 
 public final class GlobalEvents {
 
     private static final Logger LOGGER = LogManager.getLogger(GlobalEvents.class);
-    private static final Lazy<GlobalEvents> INSTANCE = Lazy.of(GlobalEvents::new);
+    private static final Supplier<GlobalEvents> INSTANCE = Memoizer.memoize(GlobalEvents::new);
 
     private GlobalEvents() {
         // no external instances

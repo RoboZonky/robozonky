@@ -24,7 +24,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.functional.Memoizer;
 
 /**
  * Carries metadata regarding an {@link Investment}.
@@ -32,8 +32,8 @@ import io.vavr.Lazy;
 public final class InvestmentDescriptor implements Descriptor<RecommendedInvestment, InvestmentDescriptor, Investment> {
 
     private final Investment investment;
-    private final Lazy<Loan> related;
-    private final Lazy<SellInfo> sellInfo;
+    private final Supplier<Loan> related;
+    private final Supplier<SellInfo> sellInfo;
 
     /**
      *
@@ -56,8 +56,8 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related,
                                 final Supplier<SellInfo> sellInfo) {
         this.investment = investment;
-        this.related = Lazy.of(related);
-        this.sellInfo = sellInfo == null ? null : Lazy.of(sellInfo);
+        this.related = Memoizer.memoize(related);
+        this.sellInfo = sellInfo == null ? null : Memoizer.memoize(sellInfo);
     }
 
     @Override
