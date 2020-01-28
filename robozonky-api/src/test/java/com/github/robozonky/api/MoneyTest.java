@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.github.robozonky.api;
 
-import com.github.robozonky.internal.Defaults;
-import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.robozonky.internal.Defaults;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class MoneyTest {
@@ -177,6 +178,13 @@ class MoneyTest {
                 .multiplyBy(BigDecimal.TEN)
                 .divideBy(BigDecimal.TEN);
         assertThat(result).isEqualTo(Money.from(BigDecimal.TEN));
+    }
+
+    @Test
+    void sum() {
+        Money a = Money.from(1);
+        Money b = Money.from(2);
+        assertThat(Money.sum(Arrays.asList(a, b))).isEqualTo(Money.from(3));
     }
 
 }

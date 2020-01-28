@@ -142,7 +142,7 @@ public class KeyStoreHandler {
      * @param value The value to be stored.
      * @return True if stored in the key store.
      */
-    public boolean set(final String alias, final char[] value) {
+    public boolean set(final String alias, final char... value) {
         try {
             var secret = this.keyFactory.generateSecret(new PBEKeySpec(value));
             var entry = new KeyStore.SecretKeyEntry(secret);

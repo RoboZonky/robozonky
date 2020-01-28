@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
      * @param value Will be stored.
      * @return True if success.
      */
-    private boolean set(final String alias, final char[] value) {
+    private boolean set(final String alias, final char... value) {
         try {
             final boolean result = this.ksh.set(alias, value);
             this.ksh.save();
@@ -96,13 +96,14 @@ final class KeyStoreSecretProvider implements SecretProvider {
 
     @Override
     public boolean setToken(ZonkyApiToken apiToken) {
-        if (apiToken == null) {
-            this.ksh.delete(ALIAS_TOKEN);
-            this.ksh.save();
-            return true;
-        }
         try {
-            return this.set(ALIAS_TOKEN, ZonkyApiToken.marshal(apiToken).toCharArray());
+            if (apiToken == null) {
+                this.ksh.delete(ALIAS_TOKEN);
+                this.ksh.save();
+                return true;
+            } else {
+                return this.set(ALIAS_TOKEN, ZonkyApiToken.marshal(apiToken).toCharArray());
+            }
         } catch (final Exception ex) {
             LOGGER.warn("Failed storing Zonky API token to the keystore.", ex);
             return false;

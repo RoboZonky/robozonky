@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package com.github.robozonky.api;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RatioTest {
@@ -69,6 +71,10 @@ class RatioTest {
             softly.assertThat(ratio).isNotEqualTo(ratio2);
             softly.assertThat(ratio).isEqualTo(ratio3);
         });
+        final Ratio ratio4 = Ratio.fromRaw(BigDecimal.ZERO);
+        Assertions.assertThat(ratio4).isSameAs(Ratio.ZERO);
+        final Ratio ratio5 = Ratio.fromRaw(BigDecimal.ONE);
+        Assertions.assertThat(ratio5).isSameAs(Ratio.ONE);
     }
 
     @Test

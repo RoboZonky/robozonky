@@ -49,12 +49,13 @@ final class ForkJoinPoolBasedScheduler implements Scheduler {
     private static final Logger LOGGER = LogManager.getLogger(ForkJoinPoolBasedScheduler.class);
 
     @Override
-    public void submit(final Runnable toSchedule, final Duration delayInBetween,
-                                     final Duration firstDelay, final Duration timeout) {
+    public TaskDescriptor submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
+                                 final Duration timeout) {
         final TaskDescriptor task = new TaskDescriptor(toSchedule, firstDelay, delayInBetween, timeout);
         LOGGER.debug("Scheduling {} every {} ns, starting in {} ns.", task, delayInBetween.toNanos(),
                      firstDelay.toNanos());
         task.schedule();
+        return task;
     }
 
 }

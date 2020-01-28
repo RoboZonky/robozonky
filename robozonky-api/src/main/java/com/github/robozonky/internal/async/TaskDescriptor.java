@@ -34,14 +34,15 @@ final class TaskDescriptor {
     private final Duration initialDelay;
     private final Duration delayInBetween;
     private final Duration timeout;
+    private boolean cancelled = false;
 
     private final LongAdder schedulingCount = new LongAdder();
     private final LongAdder successCount = new LongAdder();
     private final LongAdder failureCount = new LongAdder();
     private final LongAdder timeoutCount = new LongAdder();
 
-    public TaskDescriptor(final Runnable toSchedule, final Duration initialDelay, final Duration delayInBetween,
-                          final Duration timeout) {
+    TaskDescriptor(final Runnable toSchedule, final Duration initialDelay, final Duration delayInBetween,
+                   final Duration timeout) {
         this.toSchedule = () -> {
             LOGGER.trace("Running {} from within {}.", toSchedule, this);
             try {
@@ -55,7 +56,11 @@ final class TaskDescriptor {
         this.timeout = timeout;
     }
 
-    public void schedule() {
+    public void cancel() {
+        cancelled = true;
+    }
+
+    void schedule() {
         schedule(null);
     }
 
@@ -76,7 +81,7 @@ final class TaskDescriptor {
     }
 
     private void schedule(final Executor executor) {
-        if (ForkJoinPool.commonPool().isTerminating()) {
+        if (cancelled || ForkJoinPool.commonPool().isTerminating()) {
             LOGGER.debug("Not scheduling {} as the common pool is terminating.", this);
             return;
         }

@@ -18,19 +18,25 @@ package com.github.robozonky.internal.async;
 
 import java.time.Duration;
 
-public interface Scheduler {
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-    Scheduler INSTANCE = new ForkJoinPoolBasedScheduler();
+class SchedulerTest {
 
-    /**
-     *
-     * @param toSchedule
-     * @param delayInBetween
-     * @param firstDelay
-     * @param timeout Maximum run time for a single instance of the scheduled task. Only used when > 0.
-     * @return
-     */
-    TaskDescriptor submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
-                          final Duration timeout);
+    @Test
+    void simple() {
+        TaskDescriptor task = Scheduler.INSTANCE.submit(() -> {
+            // NOOP
+        }, Duration.ofMillis(1), Duration.ofMillis(2), Duration.ofMillis(10));
+        try {
+            Assertions.assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
+                while (task.getSuccessCount() < 1) {
+                    Thread.sleep(1);
+                }
+            }, "Timed out while waiting for operation to complete.");
+        } finally {
+            task.cancel();
+        }
+    }
 
 }
