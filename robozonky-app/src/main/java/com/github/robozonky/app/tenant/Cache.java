@@ -20,13 +20,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Either;
@@ -35,7 +36,7 @@ import com.github.robozonky.internal.util.functional.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-final class Cache<T> implements AutoCloseable {
+final class Cache<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(Cache.class);
 
@@ -109,14 +110,13 @@ final class Cache<T> implements AutoCloseable {
     private final Tenant tenant;
     private final Backend<T> backend;
     private final Map<Long, Tuple2<T, Instant>> storage = new ConcurrentHashMap<>(20);
-    private final ScheduledFuture<?> evictionTask;
+    private final Evictor evictor;
 
     private Cache(final Tenant tenant, final Backend<T> backend) {
         LOGGER.debug("Starting {} cache for {}.", backend.getItemClass(), tenant);
         this.tenant = tenant;
         this.backend = backend;
-        this.evictionTask = Tasks.INSTANCE.scheduler().submit(this::evict, backend.getEvictEvery(),
-                                                              backend.getEvictEvery());
+        this.evictor = new Evictor(backend.getEvictEvery());
     }
 
     public static Cache<Loan> forLoan(final Tenant tenant) {
@@ -182,16 +182,6 @@ final class Cache<T> implements AutoCloseable {
         });
     }
 
-    /**
-     * Will cancel the background operation that evicts stale items from the storage. After this method has been called,
-     * the instance in question must not be used anymore and should be left to be picked up by the GC.
-     */
-    @Override
-    public void close() {
-        evictionTask.cancel(true);
-        isClosed.set(true);
-    }
-
     private interface Backend<I> {
 
         Duration getEvictEvery();
@@ -203,5 +193,24 @@ final class Cache<T> implements AutoCloseable {
         Either<Exception, I> getItem(long id, Tenant tenant);
 
         boolean shouldCache(I item);
+    }
+
+    private final class Evictor implements Runnable {
+
+        private final Executor executor;
+
+        public Evictor(Duration period) {
+            this.executor = CompletableFuture.delayedExecutor(period.toNanos(), TimeUnit.NANOSECONDS);
+            run();
+        }
+
+        @Override
+        public void run() {
+            try {
+                evict();
+            } finally { // Schedule the next eviction with the same delay.
+                executor.execute(this);
+            }
+        }
     }
 }

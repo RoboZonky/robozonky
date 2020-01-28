@@ -18,7 +18,8 @@ package com.github.robozonky.internal.async;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.LongAdder;
@@ -29,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 final class TaskDescriptor {
 
     private static final Logger LOGGER = LogManager.getLogger(TaskDescriptor.class);
-    private final DelegatingScheduledFuture<?> future;
     private final Runnable toSchedule;
     private final Duration initialDelay;
     private final Duration delayInBetween;
@@ -42,19 +42,21 @@ final class TaskDescriptor {
 
     public TaskDescriptor(final Runnable toSchedule, final Duration initialDelay, final Duration delayInBetween,
                           final Duration timeout) {
-        this.future = new DelegatingScheduledFuture<>();
-        this.toSchedule = toSchedule;
+        this.toSchedule = () -> {
+            LOGGER.trace("Running {} from within {}.", toSchedule, this);
+            try {
+                toSchedule.run();
+            } finally {
+                LOGGER.trace("Finished {}.", toSchedule);
+            }
+        };
         this.initialDelay = initialDelay;
         this.delayInBetween = delayInBetween;
         this.timeout = timeout;
     }
 
-    public void schedule(final ForkJoinPoolBasedScheduler scheduler) {
-        schedule(scheduler, true);
-    }
-
-    public ScheduledFuture<?> getFuture() {
-        return future;
+    public void schedule() {
+        schedule(null);
     }
 
     long getSchedulingCount() {
@@ -73,56 +75,45 @@ final class TaskDescriptor {
         return timeoutCount.sum();
     }
 
-    private void schedule(final ForkJoinPoolBasedScheduler scheduler, final boolean firstCall) {
-        if (Tasks.INSTANCE.isShuttingDown()) {
-            LOGGER.debug("Not scheduling {} as {} shutdown.", toSchedule, scheduler);
+    private void schedule(final Executor executor) {
+        if (ForkJoinPool.commonPool().isTerminating()) {
+            LOGGER.debug("Not scheduling {} as the common pool is terminating.", this);
             return;
         }
-        final Runnable toSubmit = () -> submit(scheduler);
-        final Duration delay = firstCall ? initialDelay : delayInBetween;
+        final Duration delay = executor == null ? initialDelay : delayInBetween;
         final long totalNanos = delay.toNanos();
-        LOGGER.trace("Scheduling {} to happen after {} ns.", toSchedule, totalNanos);
-        final ScheduledFuture<?> f = Tasks.INSTANCE.schedulingExecutor().schedule(toSubmit, totalNanos, TimeUnit.NANOSECONDS);
+        LOGGER.trace("Scheduling {} to happen after {} ns.", this, totalNanos);
+        Executor delayedExecutor = executor == null ?
+                CompletableFuture.delayedExecutor(totalNanos, TimeUnit.NANOSECONDS) :
+                executor;
+        final Runnable toSubmit = () -> submit(delayedExecutor);
+        delayedExecutor.execute(toSubmit);
         schedulingCount.increment();
-        future.setCurrent(f);
     }
 
-    private void submit(final ForkJoinPoolBasedScheduler scheduler) {
-        final Runnable runnable = () -> {
-            LOGGER.trace("Running {}.", toSchedule);
-            toSchedule.run();
-        };
+    private void submit(final Executor executor) {
         final long totalNanos = timeout.toNanos();
-        LOGGER.debug("Submitting {} for actual execution.", toSchedule);
-        CompletableFuture<Void> cf = CompletableFuture.runAsync(runnable);
+        LOGGER.debug("Submitting {} for actual execution.", this);
+        CompletableFuture<Void> cf = CompletableFuture.runAsync(toSchedule);
         if (totalNanos > 0) {
             LOGGER.debug("Will be killed in {} ns.", totalNanos);
             cf = cf.orTimeout(totalNanos, TimeUnit.NANOSECONDS);
         }
-        cf.handleAsync((r, t) -> rescheduleOrFail(scheduler, r, t));
+        cf.whenCompleteAsync((r, t) -> rescheduleOrFail(executor, t));
     }
 
-    private Void rescheduleOrFail(final ForkJoinPoolBasedScheduler scheduler, final Void result,
-                                  final Throwable failure) {
+    private void rescheduleOrFail(final Executor executor, final Throwable failure) {
         if (failure == null) { // reschedule
-            LOGGER.trace("Completed {} successfully.", toSchedule);
-            schedule(scheduler, false);
+            LOGGER.trace("Completed {} successfully.", this);
+            schedule(executor);
             successCount.increment();
+        } else if (failure instanceof TimeoutException) {
+            LOGGER.debug("Failed executing task {}, rescheduling.", this, failure);
+            schedule(executor);
+            timeoutCount.increment();
         } else {
-            /*
-             * mimic behavior of ScheduledExecutorService and don't reschedule on failure; timeout is not
-             * considered a failure and will cause the task to be rescheduled.
-             */
-            if (failure instanceof TimeoutException) {
-                LOGGER.debug("Failed executing task {}, rescheduling.", toSchedule, failure);
-                schedule(scheduler, false);
-                timeoutCount.increment();
-            } else {
-                LOGGER.warn("No longer scheduling {}.", toSchedule, failure);
-                future.setCurrent(new FailedScheduledFuture<Void>(failure));
-                failureCount.increment();
-            }
+            LOGGER.warn("No longer scheduling {}.", this, failure);
+            failureCount.increment();
         }
-        return result;
     }
 }

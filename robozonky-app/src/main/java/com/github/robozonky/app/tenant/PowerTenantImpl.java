@@ -22,7 +22,6 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
@@ -153,14 +152,11 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public void close() {
-        Stream.<Supplier<? extends AutoCloseable>>of(() -> token, loanCache, sellInfoCache)
-                .forEach(supplier -> {
-                    try {
-                        supplier.get().close();
-                    } catch (final Exception ex) {
-                        LOGGER.debug("Failed closing {}.", supplier, ex);
-                    }
-                });
+        try {
+            token.close();
+        } catch (final Exception ex) {
+            LOGGER.debug("Failed closing tenant {}.", this, ex);
+        }
     }
 
     @Override

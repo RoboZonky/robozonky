@@ -24,7 +24,6 @@ import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.async.Scheduler;
-import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.extensions.JobServiceLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,12 +82,12 @@ public class Daemon implements InvestmentMode {
     private void scheduleJobs() {
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submitTenantless(Tasks.INSTANCE.scheduler(), j.payload(), j.getClass(), j.repeatEvery(),
+                .forEach(j -> submitTenantless(Scheduler.INSTANCE, j.payload(), j.getClass(), j.repeatEvery(),
                                                j.startIn(), j.killIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
-                .forEach(j -> submitWithTenant(Tasks.INSTANCE.scheduler(), () -> j.payload().accept(tenant),
-                                               j.getClass(), j.repeatEvery(), j.startIn(), j.killIn()));
+                .forEach(j -> submitWithTenant(Scheduler.INSTANCE, () -> j.payload().accept(tenant), j.getClass(),
+                                               j.repeatEvery(), j.startIn(), j.killIn()));
         LOGGER.debug("Job scheduling over.");
     }
 
@@ -102,7 +101,7 @@ public class Daemon implements InvestmentMode {
         try {
             // schedule the tasks
             scheduleJobs();
-            scheduleDaemons(Tasks.INSTANCE.scheduler());
+            scheduleDaemons(Scheduler.INSTANCE);
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");
