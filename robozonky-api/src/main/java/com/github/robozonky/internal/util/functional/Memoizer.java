@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.functional;
+package com.github.robozonky.internal.util.functional;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.functional;
+package com.github.robozonky.internal.util.functional;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class Either<L, R> {
@@ -27,12 +26,6 @@ public final class Either<L, R> {
     private final Optional<R> right;
 
     private Either(final Optional<L> l, final Optional<R> r) {
-        l.ifPresentOrElse(x -> { /* NOOP */ },
-                          () -> r.ifPresentOrElse(y -> { /* NOOP */ },
-                                                  () -> {
-                                                      throw new IllegalStateException("Both left and right are empty.");
-                                                  }
-                          ));
         left = l;
         right = r;
     }
@@ -45,10 +38,6 @@ public final class Either<L, R> {
         return new Either<>(Optional.empty(), Optional.of(value));
     }
 
-    public <T> T map(final Function<? super L, ? extends T> lFunc, final Function<? super R, ? extends T> rFunc) {
-        return left.<T>map(lFunc).orElseGet(() -> right.map(rFunc).get());
-    }
-
     public <T> Either<T, R> mapLeft(final Function<? super L, ? extends T> lFunc) {
         return new Either<>(left.map(lFunc), right);
     }
@@ -57,13 +46,8 @@ public final class Either<L, R> {
         return new Either<>(left, right.map(rFunc));
     }
 
-    public void apply(final Consumer<? super L> lFunc, final Consumer<? super R> rFunc) {
-        left.ifPresent(lFunc);
-        right.ifPresent(rFunc);
-    }
-
     public R get() {
-        return getOrElseThrow(left -> new NoSuchElementException());
+        return getRight();
     }
 
     public <X extends RuntimeException> R getOrElseThrow(Function<? super L, X> exceptionFunction) {
@@ -74,12 +58,13 @@ public final class Either<L, R> {
         return right.orElse(value);
     }
 
-    public R getOrElseGet(Function<L, R> value) {
-        return right.orElseGet(() -> left.map(value).orElseThrow());
+    public R getOrElseGet(Function<L, R> lFunc) {
+        return fold(lFunc, Function.identity());
     }
 
     public <U> U fold(final Function<? super L, ? extends U> lFunc, final Function<? super R, ? extends U> rFunc) {
-        return right.map(r -> (U) rFunc.apply(r)).orElse(left.map(lFunc).orElseThrow());
+        return right.map(r -> (U) rFunc.apply(r))
+                .orElseGet(() -> left.map(lFunc).orElseThrow());
     }
 
     public boolean isRight() {
@@ -95,6 +80,6 @@ public final class Either<L, R> {
     }
 
     public R getRight() {
-        return right.orElseThrow();
+        return getOrElseThrow(l -> new NoSuchElementException());
     }
 }

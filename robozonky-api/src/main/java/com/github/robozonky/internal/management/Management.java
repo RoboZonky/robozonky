@@ -26,7 +26,7 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
-import com.github.robozonky.internal.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

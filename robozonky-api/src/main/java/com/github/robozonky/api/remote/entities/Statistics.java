@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.internal.functional.Memoizer;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 public class Statistics extends BaseEntity {
 

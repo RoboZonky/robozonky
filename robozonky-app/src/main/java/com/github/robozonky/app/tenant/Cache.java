@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.internal.async.Tasks;
-import com.github.robozonky.internal.functional.Either;
-import com.github.robozonky.internal.functional.Tuple;
-import com.github.robozonky.internal.functional.Tuple2;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.functional.Either;
+import com.github.robozonky.internal.util.functional.Tuple;
+import com.github.robozonky.internal.util.functional.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

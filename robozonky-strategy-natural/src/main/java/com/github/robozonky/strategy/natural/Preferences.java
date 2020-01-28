@@ -26,7 +26,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.internal.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 final class Preferences {
 

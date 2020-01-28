@@ -20,7 +20,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
-import com.github.robozonky.internal.functional.Either;
+import com.github.robozonky.internal.util.functional.Either;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;

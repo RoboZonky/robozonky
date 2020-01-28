@@ -25,12 +25,12 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.functional.Tuple;
-import com.github.robozonky.internal.functional.Tuple2;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.functional.Tuple;
+import com.github.robozonky.internal.util.functional.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

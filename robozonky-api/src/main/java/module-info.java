@@ -48,7 +48,6 @@ module com.github.robozonky.api {
      */
     exports com.github.robozonky.internal;
     exports com.github.robozonky.internal.async;
-    exports com.github.robozonky.internal.functional;
     exports com.github.robozonky.internal.jobs;
     exports com.github.robozonky.internal.management;
     exports com.github.robozonky.internal.remote;
@@ -57,6 +56,7 @@ module com.github.robozonky.api {
     exports com.github.robozonky.internal.tenant;
     exports com.github.robozonky.internal.test;
     exports com.github.robozonky.internal.util;
+    exports com.github.robozonky.internal.util.functional;
     /*
      * Extensions are managed by app and cli modules. Notifications are added as there is a slightly hackish
      * implementation of config sharing that wouldn't otherwise be possible.

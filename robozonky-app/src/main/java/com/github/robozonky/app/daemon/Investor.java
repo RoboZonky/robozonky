@@ -19,10 +19,10 @@ package com.github.robozonky.app.daemon;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.internal.functional.Either;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.util.functional.Either;
 import org.apache.logging.log4j.Logger;
 
 abstract class Investor {

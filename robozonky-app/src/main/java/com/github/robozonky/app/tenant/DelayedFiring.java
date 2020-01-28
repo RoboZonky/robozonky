@@ -24,7 +24,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import com.github.robozonky.internal.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

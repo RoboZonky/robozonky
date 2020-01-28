@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.functional.Memoizer;
-import com.github.robozonky.internal.functional.Tuple;
+import com.github.robozonky.internal.util.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Tuple;
 
 public class ReservationPreferences extends BaseEntity {
 

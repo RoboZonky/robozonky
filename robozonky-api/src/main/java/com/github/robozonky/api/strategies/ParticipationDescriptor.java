@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.internal.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 public final class ParticipationDescriptor
         implements Descriptor<RecommendedParticipation, ParticipationDescriptor, Participation> {

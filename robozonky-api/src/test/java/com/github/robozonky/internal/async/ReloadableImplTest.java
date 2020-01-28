@@ -21,7 +21,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import com.github.robozonky.internal.functional.Either;
+import com.github.robozonky.internal.util.functional.Either;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

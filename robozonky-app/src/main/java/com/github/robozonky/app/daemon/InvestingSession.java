@@ -26,8 +26,8 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.functional.Either;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
+import com.github.robozonky.internal.util.functional.Either;
 
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.executionCompletedLazy;

@@ -22,38 +22,13 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import com.github.robozonky.internal.functional.Either;
+import com.github.robozonky.internal.util.functional.Either;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class AsyncReloadableImplTest {
-
-    @Test
-    void manually() throws InterruptedException {
-        final Consumer<String> mock = mock(Consumer.class);
-        final Reloadable<String> r = Reloadable.with(() -> UUID.randomUUID().toString())
-                .finishWith(mock)
-                .async()
-                .build();
-        final Either<Throwable, String> result = r.get();
-        assertThat(result.get()).isInstanceOf(String.class);
-        verify(mock).accept(any());
-        final String value = result.get();
-        assertThat(r.get().get()).isEqualTo(value); // new call, no change
-        verify(mock, times(1)).accept(any()); // still called just once
-        r.clear();
-        final long nanoTime = System.nanoTime();
-        while (r.get().get().equals(value)) {
-            Thread.sleep(1);
-            final long difference = System.nanoTime() - nanoTime;
-            assertThat(difference)
-                    .as("Timed out while waiting for refresh.")
-                    .isLessThan(5 * 1000 * 1000 * 1000); // wait five seconds
-        }
-        assertThat(r.get().get()).isInstanceOf(String.class); // not null
-    }
 
     @Test
     void timeBased() {

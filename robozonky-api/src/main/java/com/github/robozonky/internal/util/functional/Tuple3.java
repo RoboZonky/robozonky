@@ -14,20 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.functional;
+package com.github.robozonky.internal.util.functional;
 
 import java.util.Objects;
 
-public final class Tuple1<T1> {
+public final class Tuple3<T1, T2, T3> {
 
-    private final T1 _1;
+    public final T1 _1;
+    public final T2 _2;
+    public final T3 _3;
 
-    Tuple1(T1 t1) {
+    Tuple3(T1 t1, T2 t2,T3 t3) {
         _1 = t1;
+        _2 = t2;
+        _3 = t3;
     }
 
     public T1 _1() {
         return _1;
+    }
+
+    public T2 _2() {
+        return _2;
+    }
+
+    public T3 _3() {
+        return _3;
     }
 
     @Override
@@ -38,17 +50,19 @@ public final class Tuple1<T1> {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final Tuple1<?> tuple1 = (Tuple1<?>) o;
-        return Objects.equals(_1, tuple1._1);
+        final Tuple3<?, ?, ?> tuple3 = (Tuple3<?, ?, ?>) o;
+        return Objects.equals(_1, tuple3._1) &&
+                Objects.equals(_2, tuple3._2) &&
+                Objects.equals(_3, tuple3._3);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_1);
+        return Objects.hash(_1, _2, _3);
     }
 
     @Override
     public String toString() {
-        return "(" + _1 + ")";
+        return "(" + _1 + ", "+ _2 + ", "+ _3 + ")";
     }
 }

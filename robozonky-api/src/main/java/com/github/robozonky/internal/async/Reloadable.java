@@ -19,7 +19,7 @@ package com.github.robozonky.internal.async;
 import java.time.Duration;
 import java.util.function.Supplier;
 
-import com.github.robozonky.internal.functional.Either;
+import com.github.robozonky.internal.util.functional.Either;
 
 /**
  * Allows the user to have a variable which reloads from a remote source on-demand.

@@ -33,10 +33,10 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.functional.Tuple2;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import org.junit.jupiter.api.Test;
 

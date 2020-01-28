@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.internal.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import com.github.robozonky.notifications.listeners.InvestmentMadeEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentPurchasedEventListener;
 import com.github.robozonky.notifications.listeners.InvestmentSoldEventListener;

@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
-import com.github.robozonky.internal.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

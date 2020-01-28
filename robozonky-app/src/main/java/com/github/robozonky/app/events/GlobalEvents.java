@@ -22,8 +22,8 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
-import com.github.robozonky.internal.functional.Memoizer;
 import com.github.robozonky.internal.tenant.LazyEvent;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
