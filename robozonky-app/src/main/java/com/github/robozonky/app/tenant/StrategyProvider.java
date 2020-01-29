@@ -112,29 +112,26 @@ class StrategyProvider implements ReloadListener<String> {
         LOGGER.warn("There are no strategies, all operations are disabled.");
     }
 
-    private void possiblyReloadStrategy() {
+    private <T> T loadStrategy(Supplier<T> supplier) {
         if (reloadableStrategy != null) {
             reloadableStrategy.get();
         }
+        return supplier.get();
     }
 
     public Optional<InvestmentStrategy> getToInvest() {
-        possiblyReloadStrategy();
-        return Optional.ofNullable(toInvest.get());
+        return Optional.ofNullable(loadStrategy(toInvest::get));
     }
 
     public Optional<SellStrategy> getToSell() {
-        possiblyReloadStrategy();
-        return Optional.ofNullable(toSell.get());
+        return Optional.ofNullable(loadStrategy(toSell::get));
     }
 
     public Optional<PurchaseStrategy> getToPurchase() {
-        possiblyReloadStrategy();
-        return Optional.ofNullable(toPurchase.get());
+        return Optional.ofNullable(loadStrategy(toPurchase::get));
     }
 
     public Optional<ReservationStrategy> getForReservations() {
-        possiblyReloadStrategy();
-        return Optional.ofNullable(forReservations.get());
+        return Optional.ofNullable(loadStrategy(forReservations::get));
     }
 }

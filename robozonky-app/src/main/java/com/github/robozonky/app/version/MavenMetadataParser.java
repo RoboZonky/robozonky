@@ -23,12 +23,11 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import com.github.robozonky.internal.Defaults;
@@ -38,7 +37,6 @@ import com.github.robozonky.internal.util.XmlUtil;
 import com.github.robozonky.internal.util.functional.Either;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -83,13 +81,17 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
      * @throws IOException Network communications failure.
      */
     private static InputStream getMavenCentralData(final String groupId, final String artifactId,
-                                                   final String hostname) throws IOException {
-        var rootUrlParts = Stream.of(hostname, "maven2");
-        var mavenGroupParts = Arrays.stream(MavenMetadataParser.PATTERN_DOT.split(groupId));
-        var artifactParts = Stream.of(artifactId, "maven-metadata.xml");
-        var url = Stream.concat(Stream.concat(rootUrlParts, mavenGroupParts), artifactParts)
-                .collect(joining(URL_SEPARATOR));
-        return UrlUtil.open(new URL(url));
+                                                   final String hostname) {
+        try {
+            var rootUrlParts = Stream.of(hostname, "maven2");
+            var mavenGroupParts = Arrays.stream(MavenMetadataParser.PATTERN_DOT.split(groupId));
+            var artifactParts = Stream.of(artifactId, "maven-metadata.xml");
+            var url = Stream.concat(Stream.concat(rootUrlParts, mavenGroupParts), artifactParts)
+                    .collect(joining(URL_SEPARATOR));
+            return UrlUtil.open(new URL(url));
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     private static boolean isStable(final String version) {
@@ -103,23 +105,32 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
                 .collect(toList());
     }
 
-    private static List<String> retrieveVersionStrings(final InputStream xml) throws ParserConfigurationException,
-            IOException, SAXException, XPathExpressionException {
-        var docFactory = XmlUtil.getDocumentBuilderFactory();
-        var docBuilder = docFactory.newDocumentBuilder();
-        var doc = docBuilder.parse(xml);
-        var xPathFactory = XPathFactory.newInstance();
-        var xpath = xPathFactory.newXPath();
-        var expr = xpath.compile("/metadata/versioning/versions/version");
-        return MavenMetadataParser.extractItems((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+    private static List<String> retrieveVersionStrings(final InputStream xml) {
+        try {
+            var docFactory = XmlUtil.getDocumentBuilderFactory();
+            var docBuilder = docFactory.newDocumentBuilder();
+            var doc = docBuilder.parse(xml);
+            var xPathFactory = XPathFactory.newInstance();
+            var xpath = xPathFactory.newXPath();
+            var expr = xpath.compile("/metadata/versioning/versions/version");
+            return MavenMetadataParser.extractItems((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+        } catch (final Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
-    private static Either<Throwable, List<String>> mavenMetadataXmlToVersionStrings(final String source) {
-        try (var inputStream = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
-            return Either.right(MavenMetadataParser.retrieveVersionStrings(inputStream));
+    private static Either<Throwable, List<String>> read(Supplier<InputStream> inputStreamSupplier,
+                                                        Function<InputStream, List<String>> parser) {
+        try (var inputStream = inputStreamSupplier.get()) {
+            return Either.right(parser.apply(inputStream));
         } catch (Exception ex) {
             return Either.left(ex);
         }
+    }
+
+    private static Either<Throwable, List<String>> mavenMetadataXmlToVersionStrings(final String source) {
+        return read(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
+                    MavenMetadataParser::retrieveVersionStrings);
     }
 
     private static List<String> subListAfter(final List<String> items, final String item) {
@@ -155,12 +166,10 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
     }
 
     private Either<Throwable, String> getLatestSource() {
-        try (var inputStream = MavenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
-                                                                       this.mavenCentralHostname)) {
-            return Either.right(StringUtil.toString(inputStream));
-        } catch (Exception ex) {
-            return Either.left(ex);
-        }
+        return read(() -> MavenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
+                                                                  this.mavenCentralHostname),
+                    inputStream -> Arrays.asList(StringUtil.toString(inputStream)))
+                .mapRight(s -> String.join(System.lineSeparator(), s));
     }
 
     private Either<Throwable, List<String>> getAvailableVersions() {

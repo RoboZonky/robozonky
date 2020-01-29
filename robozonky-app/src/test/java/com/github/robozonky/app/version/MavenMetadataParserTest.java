@@ -79,7 +79,8 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                    "robozonky-nonexistent");
         final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
-        assertThat(result.getLeft()).isInstanceOf(FileNotFoundException.class);
+        assertThat(result.getLeft()).isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(FileNotFoundException.class);
     }
 
     @Test
