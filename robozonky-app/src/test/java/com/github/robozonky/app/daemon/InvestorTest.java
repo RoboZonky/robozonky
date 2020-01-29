@@ -72,7 +72,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         final Response failure = Response.status(400)
                 .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason().get())
                 .build();
-        when(zonky.invest(any())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
+        when(zonky.invest(notNull())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
         final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
         final Either<InvestmentFailureType, Money> result = i.invest(r);
