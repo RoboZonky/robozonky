@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import javax.ws.rs.NotAuthorizedException;
+
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.Defaults;
@@ -27,16 +35,8 @@ import com.github.robozonky.internal.test.DateUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
-import javax.ws.rs.NotAuthorizedException;
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import static com.github.robozonky.app.tenant.ZonkyApiTokenSupplier.reloadAfter;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -90,6 +90,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, SECRETS);
         t.close();
         assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
+        assertThat(t.isClosed()).isTrue();
     }
 
     @Test

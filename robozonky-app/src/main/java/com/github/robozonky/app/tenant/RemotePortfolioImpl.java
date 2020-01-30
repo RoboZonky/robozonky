@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
@@ -34,6 +33,8 @@ import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import static java.util.stream.Collectors.toMap;
 
 class RemotePortfolioImpl implements RemotePortfolio {
 
@@ -51,8 +52,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
                 .build();
     }
 
-    private static Money sumOutstanding(final RiskPortfolio portfolio) {
-        return portfolio.getDue().add(portfolio.getUnpaid());
+    private static void includeAmount(Map<Rating, Money> amounts, Rating rating, Money amount) {
+        amounts.compute(rating, (__, currentAmount) -> currentAmount == null ? amount : currentAmount.add(amount));
     }
 
     private void refresh(final RemoteData data) {
@@ -61,7 +62,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
                 .filter(e -> e.getValue().isValid(data))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
         portfolioOverview.set(null); // Force overview recalculation now that we have registered a change.
         LOGGER.debug("New synthetics: {}.", updatedSynthetics);
     }
@@ -92,24 +93,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
         final RemoteData data = getRemotePortfolio(); // use the same data for the entirety of this method
         LOGGER.debug("Remote data used: {}.", data);
         final Map<Rating, Money> amounts = data.getStatistics().getRiskPortfolio().stream()
-                .collect(Collectors.toMap(RiskPortfolio::getRating,
-                                          RemotePortfolioImpl::sumOutstanding,
-                                          Money::add, // should not be necessary
-                                          () -> new EnumMap<>(Rating.class)));
+                .collect(toMap(RiskPortfolio::getRating, portfolio -> portfolio.getDue().add(portfolio.getUnpaid()),
+                               Money::add, () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach((id, blocked) -> {
-            Rating r = blocked._1;
-            Money amount = blocked._2;
-            amounts.put(r, amounts.getOrDefault(r, amount.getZero()).add(amount));
-        });
+        data.getBlocked().forEach((id, blocked) -> includeAmount(amounts, blocked._1, blocked._2));
         LOGGER.debug("Plus remote blocked: {}.", amounts);
         syntheticByLoanId.get().values().stream()
-                .filter(syntheticBlocked -> syntheticBlocked.isValid(data))
-                .forEach(syntheticBlocked -> {
-                    final Rating r = syntheticBlocked.getRating();
-                    final Money zero = syntheticBlocked.getAmount().getZero();
-                    amounts.put(r, amounts.getOrDefault(r, zero).add(syntheticBlocked.getAmount()));
-                });
+                .filter(blocked -> blocked.isValid(data))
+                .forEach(blocked -> includeAmount(amounts, blocked.getRating(), blocked.getAmount()));
         LOGGER.debug("Grand total incl. synthetics: {}.", amounts);
         return Collections.unmodifiableMap(amounts);
     }
