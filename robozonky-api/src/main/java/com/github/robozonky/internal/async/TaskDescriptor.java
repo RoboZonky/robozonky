@@ -85,13 +85,14 @@ final class TaskDescriptor {
             LOGGER.debug("Not scheduling {} as the common pool is terminating.", this);
             return;
         }
-        final Duration delay = executor == null ? initialDelay : delayInBetween;
-        final long totalNanos = delay.toNanos();
-        LOGGER.trace("Scheduling {} to happen after {} ns.", this, totalNanos);
-        Executor delayedExecutor = executor == null ?
-                CompletableFuture.delayedExecutor(totalNanos, TimeUnit.NANOSECONDS) :
+        LOGGER.trace("Scheduling {} to happen after {}.", this, initialDelay);
+        Executor futureDelayedExecutor = executor == null ?
+                CompletableFuture.delayedExecutor(delayInBetween.toNanos(), TimeUnit.NANOSECONDS) :
                 executor;
-        final Runnable toSubmit = () -> submit(delayedExecutor);
+        final Runnable toSubmit = () -> submit(futureDelayedExecutor);
+        Executor delayedExecutor = executor == null ?
+                CompletableFuture.delayedExecutor(initialDelay.toNanos(), TimeUnit.NANOSECONDS) :
+                executor;
         delayedExecutor.execute(toSubmit);
         schedulingCount.increment();
     }
