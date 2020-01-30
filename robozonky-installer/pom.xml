@@ -29,6 +29,7 @@
   <name>RoboZonky: Custom panels for the installer (no JPMS)</name>
 
   <properties>
+    <pit.threshold>85</pit.threshold> <!-- This uses a 3rd party UI app (IZPack), hard to test fully. -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
