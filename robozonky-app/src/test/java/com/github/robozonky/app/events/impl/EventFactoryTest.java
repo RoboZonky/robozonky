@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,6 +167,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getPurchasedAmount()).isEqualTo(Money.from(200));
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
+            softly.assertThat(e.getParticipation()).isNotNull();
         });
     }
 
