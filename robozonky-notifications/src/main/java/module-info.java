@@ -2,7 +2,6 @@ module com.github.robozonky.notifications {
     requires jakarta.mail;
     requires commons.email;
     requires freemarker;
-    requires io.vavr;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
 

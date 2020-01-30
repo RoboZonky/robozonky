@@ -25,7 +25,7 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
-import io.vavr.Tuple2;
+import com.github.robozonky.internal.util.functional.Tuple2;
 
 import static com.github.robozonky.app.summaries.Util.getAmountsSellable;
 

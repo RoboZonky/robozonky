@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,14 @@
 
 package com.github.robozonky.internal.remote;
 
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,19 +31,26 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RequestCounterImplTest {
 
+    @BeforeEach
+    @AfterEach
+    void resetClock() {
+        DateUtil.resetSystemClock();
+    }
+
     @Test
-    void marking() throws InterruptedException {
+    void marking() {
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
         final RequestCounter counter = new RequestCounterImpl();
         assertThat(counter.count()).isEqualTo(0);
         assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
         assertThat(counter.mark()).isEqualTo(0);
-        Thread.sleep(1); // so that the two marks don't fall in the same nano
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONE_ID));
         assertThat(counter.mark()).isEqualTo(1);
         assertSoftly(softly -> {
             softly.assertThat(counter.current()).isEqualTo(1);
             softly.assertThat(counter.count()).isEqualTo(2);
             softly.assertThat(counter.count(Duration.ofMinutes(1))).isEqualTo(2);
-            softly.assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
+            softly.assertThat(counter.count(Duration.ZERO)).isEqualTo(1);
         });
         counter.keepOnly(Duration.ZERO); // clear everything
         assertSoftly(softly -> {

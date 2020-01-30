@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Duration;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.InvestmentMode;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.async.Scheduler;
-import com.github.robozonky.internal.async.Tasks;
 import com.github.robozonky.internal.extensions.JobServiceLoader;
-import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.time.Duration;
-import java.util.function.Function;
 
 public class Daemon implements InvestmentMode {
 
@@ -85,12 +82,12 @@ public class Daemon implements InvestmentMode {
     private void scheduleJobs() {
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submitTenantless(Tasks.INSTANCE.scheduler(), j.payload(), j.getClass(), j.repeatEvery(),
+                .forEach(j -> submitTenantless(Scheduler.INSTANCE, j.payload(), j.getClass(), j.repeatEvery(),
                                                j.startIn(), j.killIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
-                .forEach(j -> submitWithTenant(Tasks.INSTANCE.scheduler(), () -> j.payload().accept(tenant),
-                                               j.getClass(), j.repeatEvery(), j.startIn(), j.killIn()));
+                .forEach(j -> submitWithTenant(Scheduler.INSTANCE, () -> j.payload().accept(tenant), j.getClass(),
+                                               j.repeatEvery(), j.startIn(), j.killIn()));
         LOGGER.debug("Job scheduling over.");
     }
 
@@ -101,16 +98,18 @@ public class Daemon implements InvestmentMode {
 
     @Override
     public ReturnCode get() {
-        return Try.of(() -> {
+        try {
             // schedule the tasks
             scheduleJobs();
-            scheduleDaemons(Tasks.INSTANCE.scheduler());
+            scheduleDaemons(Scheduler.INSTANCE);
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");
             // signal the end of operation
             return (lifecycle.isFailed()) ? ReturnCode.ERROR_UNEXPECTED : ReturnCode.OK;
-        }).getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     @Override

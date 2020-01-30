@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package com.github.robozonky.internal.async;
 
-import io.vavr.control.Either;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.time.Duration;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import static org.assertj.vavr.api.VavrAssertions.assertThat;
+import com.github.robozonky.internal.util.functional.Either;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ReloadableImplTest {
@@ -37,15 +37,15 @@ class ReloadableImplTest {
                 .finishWith(mock)
                 .addListener(listener)
                 .build();
-        Assertions.assertThat(r.hasValue()).isFalse();
+        assertThat(r.hasValue()).isFalse();
         final Either<Throwable, String> result = r.get();
-        Assertions.assertThat(r.hasValue()).isTrue();
-        assertThat(result).containsRightInstanceOf(String.class);
+        assertThat(r.hasValue()).isTrue();
+        assertThat(result.get()).isInstanceOf(String.class);
         verify(mock).accept(any());
         verify(listener, times(1)).newValue(any());
         verify(listener, never()).valueUnset();
         final String value = result.get();
-        assertThat(r.get()).containsOnRight(value); // new call, no change
+        assertThat(r.get().get()).isEqualTo(value); // new call, no change
         verify(mock, times(1)).accept(any()); // still called just once
         verify(listener, times(1)).newValue(any());
         verify(listener, never()).valueUnset();
@@ -53,11 +53,11 @@ class ReloadableImplTest {
         verify(listener, times(1)).newValue(any());
         verify(listener, times(1)).valueUnset();
         final Either<Throwable, String> result2 = r.get();  // will reload now
-        assertThat(result2).containsRightInstanceOf(String.class);
+        assertThat(result2.get()).isInstanceOf(String.class);
         verify(mock, times(2)).accept(any()); // called for the second time now
         verify(listener, times(2)).newValue(any());
         verify(listener, times(1)).valueUnset();
-        Assertions.assertThat(result2.get()).isNotEqualTo(value);
+        assertThat(result2.get()).isNotEqualTo(value);
     }
 
     @Test
@@ -68,10 +68,10 @@ class ReloadableImplTest {
                 .finishWith(mock)
                 .build();
         final Either<Throwable, String> result = r.get();
-        assertThat(result).containsRightInstanceOf(String.class);
+        assertThat(result.get()).isInstanceOf(String.class);
         verify(mock).accept(any());
         final String value = result.get();
-        assertThat(r.get()).containsOnRight(value); // new call, no change
+        assertThat(r.get().get()).isEqualTo(value); // new call, no change
         verify(mock, times(1)).accept(any()); // still called just once
     }
 
@@ -81,9 +81,9 @@ class ReloadableImplTest {
                 .reloadAfter(Duration.ofSeconds(5))
                 .build();
         final Either<Throwable, String> result = r.get();
-        assertThat(result).containsRightInstanceOf(String.class);
+        assertThat(result.get()).isInstanceOf(String.class);
         final String value = result.get();
-        assertThat(r.get()).containsOnRight(value); // new call, no change
+        assertThat(r.get().get()).isEqualTo(value); // new call, no change
     }
 
     @Test
@@ -96,9 +96,8 @@ class ReloadableImplTest {
                 .addListener(listener)
                 .build();
         final Either<Throwable, String> result = r.get();
-        assertThat(result).isLeft(); // no value as the finisher failed
+        assertThatThrownBy(result::get).isInstanceOf(NoSuchElementException.class); // no value as the finisher failed
         verify(listener, never()).newValue(any());
         verify(listener, never()).valueUnset();
     }
-
 }

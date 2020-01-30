@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,12 +31,12 @@ final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
     private static final Logger LOGGER = LogManager.getLogger(LazyEventImpl.class);
 
     private final Class<T> eventType;
-    private final Lazy<T> supplier;
+    private final Supplier<T> supplier;
 
     public LazyEventImpl(final Class<T> eventType, final Supplier<T> eventSupplier) {
         this.eventType = eventType;
         final OffsetDateTime conceivedOn = DateUtil.offsetNow();
-        this.supplier = Lazy.of(() -> {
+        this.supplier = Memoizer.memoize(() -> {
             LOGGER.trace("Instantiating {}.", eventType);
             final T result = eventSupplier.get();
             ((AbstractEventImpl)result).setConceivedOn(conceivedOn); // make the event aware of when it was requested

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,6 @@
 
 package com.github.robozonky.notifications;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.EventListenerSupplier;
-import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.internal.async.Reloadable;
-import com.github.robozonky.internal.extensions.ListenerServiceLoader;
-import com.github.robozonky.internal.util.UrlUtil;
-import io.vavr.control.Try;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -40,6 +29,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
+import com.github.robozonky.api.notifications.ListenerService;
+import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.util.UrlUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import static com.github.robozonky.internal.Defaults.CHARSET;
 
 public final class NotificationListenerService implements ListenerService {
@@ -49,16 +48,20 @@ public final class NotificationListenerService implements ListenerService {
     private final Map<String, Reloadable<ConfigStorage>> configurations = new HashMap<>(0);
 
     private static ConfigStorage transform(final String source) {
-        return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(CHARSET)))
-                .of(ConfigStorage::create)
-                .getOrElseThrow(t -> new IllegalStateException("Failed parsing notification configuration.", t));
+        try (var inputStream = new ByteArrayInputStream(source.getBytes(CHARSET))) {
+            return ConfigStorage.create(inputStream);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed parsing notification configuration.", ex);
+        }
     }
 
     private static String retrieve(final URL source) {
         LOGGER.debug("Reading notification configuration from '{}'.", source);
-        return Try.withResources(() -> new BufferedReader(new InputStreamReader(UrlUtil.open(source), CHARSET)))
-                .of(r -> r.lines().collect(Collectors.joining(System.lineSeparator())))
-                .getOrElseThrow(t -> new IllegalStateException("Failed reading notification configuration from " + source, t));
+        try (var reader = new BufferedReader(new InputStreamReader(UrlUtil.open(source), CHARSET))) {
+            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed reading notification configuration from " + source, ex);
+        }
     }
 
     private Optional<Reloadable<ConfigStorage>> readConfig(final String configLocation) {

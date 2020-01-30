@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,32 +17,10 @@
 package com.github.robozonky.internal.async;
 
 import java.time.Duration;
-import java.util.concurrent.ScheduledFuture;
 
-@SuppressWarnings("rawtypes")
 public interface Scheduler {
 
-    /**
-     * Calls {@link #submit(Runnable, Duration, Duration)} with a zero firstDelay.
-     * @param toSchedule
-     * @param delayInBetween
-     * @return
-     */
-    default ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween) {
-        return submit(toSchedule, delayInBetween, Duration.ZERO);
-    }
-
-    /**
-     * Calls {@link #submit(Runnable, Duration, Duration, Duration)} with a zero timeout.
-     *
-     * @param toSchedule
-     * @param delayInBetween
-     * @param firstDelay
-     * @return
-     */
-    default ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay) {
-        return submit(toSchedule, delayInBetween, firstDelay, Duration.ZERO);
-    }
+    Scheduler INSTANCE = new ForkJoinPoolBasedScheduler();
 
     /**
      *
@@ -52,7 +30,7 @@ public interface Scheduler {
      * @param timeout Maximum run time for a single instance of the scheduled task. Only used when > 0.
      * @return
      */
-    ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
-                              final Duration timeout);
+    TaskDescriptor submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
+                          final Duration timeout);
 
 }

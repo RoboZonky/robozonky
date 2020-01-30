@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +19,29 @@ package com.github.robozonky.internal.management;
 import java.util.function.Supplier;
 import javax.management.ObjectName;
 
-import io.vavr.Lazy;
-import io.vavr.control.Either;
-import io.vavr.control.Try;
+import com.github.robozonky.internal.util.functional.Either;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 public final class ManagementBean<T extends BaseMBean> {
 
     static final String DOMAIN = "com.github.robozonky";
 
-    private final Lazy<ObjectName> name;
-    private final Lazy<T> instance;
+    private final Supplier<ObjectName> name;
+    private final Supplier<T> instance;
 
     public ManagementBean(final Class<T> type, final Supplier<T> constructor) {
-        this.name = Lazy.of(() -> assembleObjectName(type).get());
-        this.instance = Lazy.of(constructor);
+        this.name = Memoizer.memoize(() -> assembleObjectName(type).get());
+        this.instance = Memoizer.memoize(constructor);
     }
 
     private static Either<Throwable, ObjectName> assembleObjectName(final Class<?> clz) {
-        return Try.of(() -> {
+        try {
             final String packageName = clz.getPackage().getName();
             final String className = clz.getSimpleName();
-            return new ObjectName(DOMAIN + ":type=" + packageName + ",name=" + className);
-        }).toEither();
+            return Either.right(new ObjectName(DOMAIN + ":type=" + packageName + ",name=" + className));
+        } catch (Exception ex) {
+            return Either.left(ex);
+        }
     }
 
     public ObjectName getObjectName() {

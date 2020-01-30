@@ -132,16 +132,19 @@ public class Zonky {
         }
     }
 
-    public void sell(final Investment investment, final SellInfo sellInfo) {
-        SellRequest request = new SellRequest(investment.getId(), sellInfo);
+    private void sell(final Investment investment, final SellRequest request) {
         LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoanId(), request);
         controlApi.run(api -> api.offer(request));
     }
 
+    public void sell(final Investment investment, final SellInfo sellInfo) {
+        SellRequest request = new SellRequest(investment.getId(), sellInfo);
+        sell(investment, request);
+    }
+
     public void sell(final Investment investment) {
         SellRequest request = new SellRequest(investment);
-        LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoanId(), request);
-        controlApi.run(api -> api.offer(request));
+        sell(investment, request);
     }
 
     public SellInfo getSellInfo(final Investment investment) {

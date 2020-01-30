@@ -1,6 +1,5 @@
 module com.github.robozonky.cli {
     requires info.picocli;
-    requires io.vavr;
     requires org.apache.logging.log4j;
     requires com.github.robozonky.api;
 

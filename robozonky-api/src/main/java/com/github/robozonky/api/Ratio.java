@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,6 @@ public final class Ratio extends Number implements Comparable<Ratio> {
     private Ratio(final BigDecimal raw) {
         this.raw = raw;
         this.percentage = toScale(raw.scaleByPowerOfTen(2));
-    }
-
-    public static Ratio fromRaw(final Number rate) {
-        return fromRaw(new BigDecimal(rate.toString()));
     }
 
     public static Ratio fromRaw(final String rate) {

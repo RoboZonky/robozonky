@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package com.github.robozonky.app.tenant;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
-
-import java.util.function.Supplier;
 
 public final class TenantBuilder {
 
@@ -60,7 +58,7 @@ public final class TenantBuilder {
             throw new IllegalStateException("Secret provider must be provided.");
         }
         final ApiProvider apis = api == null ? new ApiProvider() : api;
-        final Supplier<ZonkyApiTokenSupplier> tokenSupplier = () -> new ZonkyApiTokenSupplier(apis, secrets);
+        final ZonkyApiTokenSupplier tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets);
         final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
         return new PowerTenantImpl(sessionInfo, apis, strategyProvider, tokenSupplier);
     }

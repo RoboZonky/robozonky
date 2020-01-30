@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,19 @@ class KeyStoreSecretProviderTest {
         assertThat(p.setToken(token)).isTrue();
         assertThat(p.getToken()).contains(token);
         assertThat(p.setToken(null)).isTrue();
+        assertThat(p.getToken()).isEmpty();
+    }
+
+    @Test
+    void setTokenIoFail() {
+        final KeyStoreHandler ksh = spy(getKeyStoreHandler());
+        doThrow(IllegalStateException.class).when(ksh).save();
+        doThrow(IllegalStateException.class).when(ksh).get(any());
+        final SecretProvider p = SecretProvider.keyStoreBased(ksh, UUID.randomUUID().toString());
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        assertThat(p.setToken(token)).isFalse();
+        assertThat(p.getToken()).isEmpty();
+        assertThat(p.setToken(null)).isFalse();
         assertThat(p.getToken()).isEmpty();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.util.StreamUtil;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -53,7 +53,7 @@ public class ApiProvider implements AutoCloseable {
      * Clients are heavyweight objects where both creation and destruction potentially takes a lot of time. They should
      * be reused as much as possible.
      */
-    private final Lazy<ResteasyClient> client;
+    private final Supplier<ResteasyClient> client;
     private final RequestCounter counter;
 
     public ApiProvider() {
@@ -61,7 +61,7 @@ public class ApiProvider implements AutoCloseable {
     }
 
     public ApiProvider(final RequestCounter requestCounter) {
-        this.client = Lazy.of(ProxyFactory::newResteasyClient);
+        this.client = Memoizer.memoize(ProxyFactory::newResteasyClient);
         this.counter= requestCounter;
     }
 

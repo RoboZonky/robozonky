@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2019 The RoboZonky Project
+  ~ Copyright 2020 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
   <name>RoboZonky: Custom panels for the installer (no JPMS)</name>
 
   <properties>
+    <pit.threshold>80</pit.threshold> <!-- This uses a 3rd party UI app (IZPack), hard to test fully. -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
@@ -48,10 +49,6 @@
     <dependency>
       <groupId>org.codehaus.izpack</groupId>
       <artifactId>izpack-panel</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vavr</groupId>
-      <artifactId>vavr</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

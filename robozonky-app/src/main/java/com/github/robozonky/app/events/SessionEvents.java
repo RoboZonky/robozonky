@@ -81,7 +81,7 @@ public final class SessionEvents {
                 .filter(i -> i.getSimpleName().endsWith("Event"))
                 .filter(i -> !Objects.equals(i.getSimpleName(), "Event"))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Not an event:" + original));
+                .orElseThrow();
     }
 
     /**

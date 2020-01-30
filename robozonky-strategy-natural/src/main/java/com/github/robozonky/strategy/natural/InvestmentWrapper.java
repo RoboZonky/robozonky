@@ -19,6 +19,7 @@ package com.github.robozonky.strategy.natural;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -30,17 +31,17 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
 
     private final Investment investment;
-    private final Lazy<Optional<SellInfo>> sellInfo;
+    private final Supplier<Optional<SellInfo>> sellInfo;
 
     public InvestmentWrapper(final InvestmentDescriptor original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
         this.investment = original.item();
-        this.sellInfo = Lazy.of(original::sellInfo);
+        this.sellInfo = Memoizer.memoize(original::sellInfo);
     }
 
     @Override

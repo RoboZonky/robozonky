@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
-import io.vavr.Lazy;
-import io.vavr.Tuple;
+import com.github.robozonky.internal.util.functional.Memoizer;
+import com.github.robozonky.internal.util.functional.Tuple;
 
 public class ReservationPreferences extends BaseEntity {
 
-    public static final Supplier<ReservationPreferences> TOTAL = Lazy.of(() -> {
+    public static final Supplier<ReservationPreferences> TOTAL = Memoizer.memoize(() -> {
         final ReservationPreference[] prefs = Arrays.stream(Rating.values())
                 .flatMap(r -> Arrays.stream(LoanTermInterval.values()).map(i -> Tuple.of(r, i)))
                 .map(t -> new ReservationPreference(t._2, t._1, false))

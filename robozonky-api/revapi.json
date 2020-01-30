@@ -375,6 +375,20 @@
         "new": "method java.util.Optional<java.time.OffsetDateTime> com.github.robozonky.api.remote.entities.BaseInvestment::getTimeCreated() @ com.github.robozonky.api.remote.entities.MyInvestment",
         "annotation": "@javax.xml.bind.annotation.XmlTransient",
         "justification": "API review following up on Loan/Investment API changes announced by Zonky."
+      },{
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.Money com.github.robozonky.api.Money::divideBy(double)",
+        "justification": "Remove unused methods."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.Money com.github.robozonky.api.Money::multiplyBy(double)",
+        "justification": "Remove unused methods."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method com.github.robozonky.api.Ratio com.github.robozonky.api.Ratio::fromRaw(java.lang.Number)",
+        "justification": "Remove unused methods."
       }
     ]
   }

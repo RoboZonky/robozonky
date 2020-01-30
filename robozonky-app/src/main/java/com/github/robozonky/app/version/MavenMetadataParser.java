@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,20 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 import com.github.robozonky.internal.util.XmlUtil;
-import io.vavr.control.Either;
-import io.vavr.control.Try;
+import com.github.robozonky.internal.util.functional.Either;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -51,7 +48,7 @@ import static java.util.stream.Collectors.toList;
  * This class is based on the assumption that the Maven Metadata always report versions in the increasing order of
  * recency.
  */
-final class MarvenMetadataParser implements Function<String, Either<Throwable, Response>> {
+final class MavenMetadataParser implements Function<String, Either<Throwable, Response>> {
 
     private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
@@ -61,17 +58,17 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
     private final String artifactId;
     private final String mavenCentralHostname;
 
-    MarvenMetadataParser(final String server) {
+    MavenMetadataParser(final String server) {
         this(server, "com.github.robozonky", "robozonky"); // RoboZonky's parent POM
     }
 
-    MarvenMetadataParser(final String server, final String groupId, final String artifactId) {
+    MavenMetadataParser(final String server, final String groupId, final String artifactId) {
         this.mavenCentralHostname = server;
         this.groupId = groupId;
         this.artifactId = artifactId;
     }
 
-    public MarvenMetadataParser() {
+    public MavenMetadataParser() {
         this("https://repo1.maven.org");
     }
 
@@ -84,17 +81,21 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
      * @throws IOException Network communications failure.
      */
     private static InputStream getMavenCentralData(final String groupId, final String artifactId,
-                                                   final String hostname) throws IOException {
-        var rootUrlParts = Stream.of(hostname, "maven2");
-        var mavenGroupParts = Arrays.stream(MarvenMetadataParser.PATTERN_DOT.split(groupId));
-        var artifactParts = Stream.of(artifactId, "maven-metadata.xml");
-        var url = Stream.concat(Stream.concat(rootUrlParts, mavenGroupParts), artifactParts)
-                .collect(joining(URL_SEPARATOR));
-        return UrlUtil.open(new URL(url));
+                                                   final String hostname) {
+        try {
+            var rootUrlParts = Stream.of(hostname, "maven2");
+            var mavenGroupParts = Arrays.stream(MavenMetadataParser.PATTERN_DOT.split(groupId));
+            var artifactParts = Stream.of(artifactId, "maven-metadata.xml");
+            var url = Stream.concat(Stream.concat(rootUrlParts, mavenGroupParts), artifactParts)
+                    .collect(joining(URL_SEPARATOR));
+            return UrlUtil.open(new URL(url));
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     private static boolean isStable(final String version) {
-        return MarvenMetadataParser.PATTERN_STABLE_VERSION.matcher(version).find();
+        return MavenMetadataParser.PATTERN_STABLE_VERSION.matcher(version).find();
     }
 
     static List<String> extractItems(final NodeList nodeList) {
@@ -104,21 +105,32 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
                 .collect(toList());
     }
 
-    private static List<String> retrieveVersionStrings(final InputStream xml) throws ParserConfigurationException,
-            IOException, SAXException, XPathExpressionException {
-        var docFactory = XmlUtil.getDocumentBuilderFactory();
-        var docBuilder = docFactory.newDocumentBuilder();
-        var doc = docBuilder.parse(xml);
-        var xPathFactory = XPathFactory.newInstance();
-        var xpath = xPathFactory.newXPath();
-        var expr = xpath.compile("/metadata/versioning/versions/version");
-        return MarvenMetadataParser.extractItems((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+    private static List<String> retrieveVersionStrings(final InputStream xml) {
+        try {
+            var docFactory = XmlUtil.getDocumentBuilderFactory();
+            var docBuilder = docFactory.newDocumentBuilder();
+            var doc = docBuilder.parse(xml);
+            var xPathFactory = XPathFactory.newInstance();
+            var xpath = xPathFactory.newXPath();
+            var expr = xpath.compile("/metadata/versioning/versions/version");
+            return MavenMetadataParser.extractItems((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+        } catch (final Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    private static Either<Throwable, List<String>> read(Supplier<InputStream> inputStreamSupplier,
+                                                        Function<InputStream, List<String>> parser) {
+        try (var inputStream = inputStreamSupplier.get()) {
+            return Either.right(parser.apply(inputStream));
+        } catch (Exception ex) {
+            return Either.left(ex);
+        }
     }
 
     private static Either<Throwable, List<String>> mavenMetadataXmlToVersionStrings(final String source) {
-        return Try.withResources(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)))
-                .of(MarvenMetadataParser::retrieveVersionStrings)
-                .toEither();
+        return read(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
+                    MavenMetadataParser::retrieveVersionStrings);
     }
 
     private static List<String> subListAfter(final List<String> items, final String item) {
@@ -139,7 +151,7 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
             return Either.right(Response.noMoreRecentVersion());
         }
         return newerVersions.stream()
-                .filter(MarvenMetadataParser::isStable)
+                .filter(MavenMetadataParser::isStable)
                 .reduce((first, second) -> second) // last element in the stream of versions
                 .map(stable -> {
                     var evenNewerExperimentalVersions = subListAfter(newerVersions, stable);
@@ -154,15 +166,15 @@ final class MarvenMetadataParser implements Function<String, Either<Throwable, R
     }
 
     private Either<Throwable, String> getLatestSource() {
-        return Try.withResources(() -> MarvenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
-                                                                                this.mavenCentralHostname))
-                .of(StringUtil::toString)
-                .toEither();
+        return read(() -> MavenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
+                                                                  this.mavenCentralHostname),
+                    inputStream -> Arrays.asList(StringUtil.toString(inputStream)))
+                .mapRight(s -> String.join(System.lineSeparator(), s));
     }
 
     private Either<Throwable, List<String>> getAvailableVersions() {
         return getLatestSource()
-                .fold(Either::left, MarvenMetadataParser::mavenMetadataXmlToVersionStrings);
+                .fold(Either::left, MavenMetadataParser::mavenMetadataXmlToVersionStrings);
     }
 
     @Override

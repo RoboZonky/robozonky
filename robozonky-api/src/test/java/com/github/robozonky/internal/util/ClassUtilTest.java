@@ -33,8 +33,8 @@ class ClassUtilTest {
     void getInterfacesTest() {
         Stream<Class<?>> foundInterfaces = ClassUtil.getAllInterfaces(ArrayList.class);
         assertThat(foundInterfaces)
-                .contains(Serializable.class, Cloneable.class, Iterable.class, Collection.class, List.class,
-                          RandomAccess.class);
+                .containsExactly(List.class, Collection.class, Iterable.class, RandomAccess.class, Cloneable.class,
+                                 Serializable.class);
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,21 @@
 
 package com.github.robozonky.api;
 
-import com.github.robozonky.internal.Defaults;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Currency;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.*;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.util.functional.Memoizer;
+
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static java.math.BigDecimal.valueOf;
 
 /**
@@ -36,7 +39,8 @@ import static java.math.BigDecimal.valueOf;
  */
 public final class Money implements Comparable<Money> {
 
-    private static final Map<Currency, Money> ZEROS = new ConcurrentHashMap<>(1);
+    private static final Function<Currency, Money> ZERO_PROVIDER =
+            Memoizer.memoize(currency -> new Money(BigDecimal.ZERO, currency));
     /**
      * Do not use this. Rather, get one with the proper currency using {@link #getZero()} or {@link #getZero(Currency)}.
      */
@@ -101,7 +105,7 @@ public final class Money implements Comparable<Money> {
     }
 
     public static Money getZero(final Currency currency) {
-        return ZEROS.computeIfAbsent(currency, key -> new Money(BigDecimal.ZERO, key));
+        return ZERO_PROVIDER.apply(currency);
     }
 
     public BigDecimal getValue() {
@@ -152,10 +156,6 @@ public final class Money implements Comparable<Money> {
         return multiplyBy(from(amount, currency));
     }
 
-    public Money multiplyBy(final double amount) {
-        return multiplyBy(from(amount, currency));
-    }
-
     public Money multiplyBy(final Money money) {
         return from(times(value, money.value), currency);
     }
@@ -165,10 +165,6 @@ public final class Money implements Comparable<Money> {
     }
 
     public Money divideBy(final long amount) {
-        return divideBy(from(amount, currency));
-    }
-
-    public Money divideBy(final double amount) {
         return divideBy(from(amount, currency));
     }
 

@@ -22,7 +22,6 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
@@ -43,7 +42,7 @@ import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,15 +56,15 @@ class PowerTenantImpl implements PowerTenant {
     private final Runnable quotaMonitor;
     private final RemotePortfolio portfolio;
     private final Reloadable<Restrictions> restrictions;
-    private final Lazy<ZonkyApiTokenSupplier> token;
+    private final ZonkyApiTokenSupplier token;
     private final StrategyProvider strategyProvider;
-    private final Lazy<Cache<Loan>> loanCache = Lazy.of(() -> Cache.forLoan(this));
-    private final Lazy<Cache<SellInfo>> sellInfoCache = Lazy.of(() -> Cache.forSellInfo(this));
+    private final Supplier<Cache<Loan>> loanCache = Memoizer.memoize(() -> Cache.forLoan(this));
+    private final Supplier<Cache<SellInfo>> sellInfoCache = Memoizer.memoize(() -> Cache.forSellInfo(this));
     private final StatefulBoundedBalance balance;
-    private final Lazy<Availability> availability;
+    private final Supplier<Availability> availability;
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
-                    final Supplier<ZonkyApiTokenSupplier> tokenSupplier) {
+                    final ZonkyApiTokenSupplier tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.quotaMonitor = apis.getRequestCounter()
@@ -74,8 +73,8 @@ class PowerTenantImpl implements PowerTenant {
                     // do nothing
                 });
         this.sessionInfo = sessionInfo;
-        this.token = Lazy.of(tokenSupplier);
-        this.availability = Lazy.of(() -> new AvailabilityImpl(token.get(), apis.getRequestCounter().orElse(null)));
+        this.token = tokenSupplier;
+        this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getRequestCounter().orElse(null)));
         this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
                 .reloadAfter(Duration.ofHours(1))
@@ -92,7 +91,7 @@ class PowerTenantImpl implements PowerTenant {
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
         try {
-            return apis.call(operation, token.get());
+            return apis.call(operation, token);
         } finally {
             final int randomBetweenZeroAndHundred = random.nextInt(100);
             if (randomBetweenZeroAndHundred == 0) { // check request situation in 1 % of cases
@@ -153,15 +152,11 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public void close() {
-        Stream.of(token, loanCache, sellInfoCache)
-                .filter(lazy -> !lazy.isEmpty())
-                .forEach(lazy -> {
-                    try {
-                        lazy.get().close();
-                    } catch (final Exception ex) {
-                        LOGGER.debug("Failed closing tenant.", ex);
-                    }
-                });
+        try {
+            token.close();
+        } catch (final Exception ex) {
+            LOGGER.debug("Failed closing tenant {}.", this, ex);
+        }
     }
 
     @Override

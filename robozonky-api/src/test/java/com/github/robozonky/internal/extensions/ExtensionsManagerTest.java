@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.io.File;
 import java.net.URLClassLoader;
 import java.util.ServiceLoader;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.notifications.ListenerService;
-import io.vavr.Lazy;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -39,7 +39,7 @@ class ExtensionsManagerTest {
 
     @Test
     void noExtensionsWithFolderPresent() {
-        final Lazy<ServiceLoader<ListenerService>> result =
+        final Supplier<ServiceLoader<ListenerService>> result =
                 ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
         assertThat(result.get()).isNotNull();
     }

@@ -27,7 +27,6 @@ module com.github.robozonky.api {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.jaxrs.json; // Required transitively by RESTeasy, which is not modularized.
-    requires io.vavr;
     requires org.apache.logging.log4j;
     requires ini4j;
     requires paging.streams;
@@ -57,6 +56,7 @@ module com.github.robozonky.api {
     exports com.github.robozonky.internal.tenant;
     exports com.github.robozonky.internal.test;
     exports com.github.robozonky.internal.util;
+    exports com.github.robozonky.internal.util.functional;
     /*
      * Extensions are managed by app and cli modules. Notifications are added as there is a slightly hackish
      * implementation of config sharing that wouldn't otherwise be possible.

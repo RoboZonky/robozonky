@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,23 @@
 
 package com.github.robozonky.internal.secrets;
 
-import io.vavr.control.Try;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Simple abstraction for dealing with the overly complicated {@link KeyStore} API. Always call {@link #save()} to
@@ -122,16 +125,15 @@ public class KeyStoreHandler {
         } else if (!keyStoreFile.exists()) {
             throw new FileNotFoundException(keyStoreFile.getAbsolutePath());
         }
-        final KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        var keystore = KeyStore.getInstance(KEYSTORE_TYPE);
         // get user password and file input stream
-        return Try.withResources(() -> new FileInputStream(keyStoreFile))
-                .of(fis -> {
-                    LOGGER.debug("Opening keystore {}.", keyStoreFile);
-                    ks.load(fis, password);
-                    return new KeyStoreHandler(ks, password, keyStoreFile, getSecretKeyFactory(),
-                                               false);
-                })
-                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
+        try (var inputStream = new FileInputStream(keyStoreFile)) {
+            LOGGER.debug("Opening keystore {}.", keyStoreFile);
+            keystore.load(inputStream, password);
+            return new KeyStoreHandler(keystore, password, keyStoreFile, getSecretKeyFactory(), false);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     /**
@@ -140,17 +142,17 @@ public class KeyStoreHandler {
      * @param value The value to be stored.
      * @return True if stored in the key store.
      */
-    public boolean set(final String alias, final char[] value) {
-        return Try.of(() -> {
-            final SecretKey secret = this.keyFactory.generateSecret(new PBEKeySpec(value));
-            final KeyStore.Entry skEntry = new KeyStore.SecretKeyEntry(secret);
-            this.keyStore.setEntry(alias, skEntry, this.protectionParameter);
+    public boolean set(final String alias, final char... value) {
+        try {
+            var secret = this.keyFactory.generateSecret(new PBEKeySpec(value));
+            var entry = new KeyStore.SecretKeyEntry(secret);
+            this.keyStore.setEntry(alias, entry, this.protectionParameter);
             this.dirty.set(true);
             return true;
-        }).getOrElseGet(t -> {
-            LOGGER.debug("Failed storing '{}'.", alias, t);
+        } catch (Exception ex) {
+            LOGGER.debug("Failed storing '{}'.", alias, ex);
             return false;
-        });
+        }
     }
 
     /**
@@ -159,19 +161,17 @@ public class KeyStoreHandler {
      * @return Present if the alias is present in the key store.
      */
     public Optional<char[]> get(final String alias) {
-        return Try.of(() -> {
-            final KeyStore.SecretKeyEntry skEntry =
-                    (KeyStore.SecretKeyEntry) this.keyStore.getEntry(alias, this.protectionParameter);
+        try {
+            var skEntry = (KeyStore.SecretKeyEntry) this.keyStore.getEntry(alias, this.protectionParameter);
             if (skEntry == null) {
-                return Optional.<char[]>empty();
+                return Optional.empty();
             }
-            final PBEKeySpec keySpec = (PBEKeySpec) this.keyFactory.getKeySpec(skEntry.getSecretKey(),
-                                                                               PBEKeySpec.class);
+            var keySpec = (PBEKeySpec) this.keyFactory.getKeySpec(skEntry.getSecretKey(), PBEKeySpec.class);
             return Optional.of(keySpec.getPassword());
-        }).getOrElseGet(t -> {
-            LOGGER.debug("Unrecoverable entry '{}'.", alias, t);
+        } catch (Exception ex) {
+            LOGGER.debug("Unrecoverable entry '{}'.", alias, ex);
             return Optional.empty();
-        });
+        }
     }
 
     /**
@@ -180,14 +180,14 @@ public class KeyStoreHandler {
      * @return True if there is now no entry with a given key.
      */
     public boolean delete(final String alias) {
-        return Try.of(() -> {
+        try {
             this.keyStore.deleteEntry(alias);
             this.dirty.set(true);
             return true;
-        }).getOrElseGet(t -> {
-            LOGGER.debug("Entry '{}' not deleted.", alias, t);
+        } catch (Exception ex) {
+            LOGGER.debug("Entry '{}' not deleted.", alias, ex);
             return false;
-        });
+        }
     }
 
     /**
@@ -213,12 +213,11 @@ public class KeyStoreHandler {
      */
     public void save(final char... secret) {
         this.password = secret.clone();
-        Try.withResources(() -> new BufferedOutputStream(new FileOutputStream(this.keyStoreFile)))
-                .of(os -> {
-                    this.keyStore.store(os, secret);
-                    this.dirty.set(false);
-                    return null;
-                })
-                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
+        try (var outputStream = new BufferedOutputStream(new FileOutputStream(this.keyStoreFile))) {
+            this.keyStore.store(outputStream, secret);
+            this.dirty.set(false);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 }

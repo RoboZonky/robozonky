@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.robozonky.internal.extensions;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -26,7 +27,6 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.util.StreamUtil;
-import io.vavr.Lazy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +36,7 @@ import org.apache.logging.log4j.Logger;
 public final class StrategyLoader {
 
     private static final Logger LOGGER = LogManager.getLogger(StrategyLoader.class);
-    private static final Lazy<ServiceLoader<StrategyService>> LOADER =
+    private static final Supplier<ServiceLoader<StrategyService>> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(StrategyService.class);
 
     private StrategyLoader() {

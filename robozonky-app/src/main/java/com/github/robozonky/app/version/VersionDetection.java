@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,19 @@
 package com.github.robozonky.app.version;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.jobs.SimplePayload;
-import io.vavr.control.Either;
+import com.github.robozonky.internal.util.functional.Either;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyExperimentalUpdateDetected;
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyUpdateDetected;
 
 final class VersionDetection implements SimplePayload {
 
@@ -39,11 +40,24 @@ final class VersionDetection implements SimplePayload {
     private final AtomicReference<String> lastKnownExperimentalVersion = new AtomicReference<>();
 
     public VersionDetection() {
-        this(() -> new MarvenMetadataParser().apply(Defaults.ROBOZONKY_VERSION));
+        this(() -> new MavenMetadataParser().apply(Defaults.ROBOZONKY_VERSION));
     }
 
     VersionDetection(final Supplier<Either<Throwable, Response>> metadata) {
         this.metadata = metadata;
+    }
+
+    private static void processVersion(Optional<String> version, AtomicReference<String> target, String unchanged,
+                                       String changed, Function<String, ? extends GlobalEvent> eventSupplier) {
+        version.ifPresentOrElse(newVersion -> {
+            var oldVersion = target.getAndSet(newVersion);
+            if (Objects.equals(newVersion, oldVersion)) {
+                LOGGER.debug(unchanged, newVersion);
+                return;
+            }
+            LOGGER.info(changed, newVersion);
+            Events.global().fire(eventSupplier.apply(newVersion));
+        }, () -> target.set(null));
     }
 
     @Override
@@ -54,25 +68,13 @@ final class VersionDetection implements SimplePayload {
             return;
         }
         final Response currentResponse = result.get();
-        currentResponse.getMoreRecentStableVersion()
-                .ifPresentOrElse(newVersion -> {
-                    final String oldVersion = lastKnownStableVersion.getAndSet(newVersion);
-                    if (Objects.equals(newVersion, oldVersion)) {
-                        LOGGER.debug("Latest stable version unchanged: {}.", newVersion);
-                        return;
-                    }
-                    LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to {}.", newVersion);
-                    Events.global().fire(roboZonkyUpdateDetected(newVersion));
-                }, () -> lastKnownStableVersion.set(null));
-        currentResponse.getMoreRecentExperimentalVersion()
-                .ifPresentOrElse(newVersion -> {
-                    final String oldVersion = lastKnownExperimentalVersion.getAndSet(newVersion);
-                    if (Objects.equals(newVersion, oldVersion)) {
-                        LOGGER.debug("Latest experimental version unchanged: {}.", newVersion);
-                        return;
-                    }
-                    LOGGER.info("Experimental version of RoboZonky is available. Try {} at your own risk.", newVersion);
-                    Events.global().fire(roboZonkyExperimentalUpdateDetected(newVersion));
-                }, () -> lastKnownExperimentalVersion.set(null));
+        processVersion(currentResponse.getMoreRecentStableVersion(), lastKnownStableVersion,
+                       "Latest stable version unchanged: {}.",
+                       "You are using an obsolete version of RoboZonky. Please upgrade to {}.",
+                       EventFactory::roboZonkyUpdateDetected);
+        processVersion(currentResponse.getMoreRecentExperimentalVersion(), lastKnownExperimentalVersion,
+                       "Latest experimental version unchanged: {}.",
+                       "Experimental version of RoboZonky is available. Try {} at your own risk.",
+                       EventFactory::roboZonkyExperimentalUpdateDetected);
     }
 }

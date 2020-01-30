@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
+import com.github.robozonky.internal.util.functional.Either;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import io.vavr.control.Either;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +35,7 @@ import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import static org.assertj.vavr.api.VavrAssertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class MavenMetadataParserTest extends AbstractRoboZonkyTest {
@@ -62,25 +61,26 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
 
     @Test
     void checkNullVersion() {
-        final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
+        final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
         final Either<Throwable, Response> result = parser.apply(null);
-        assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+        assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
     }
 
     @Test
     void checkEmptyVersion() {
-        final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
+        final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky", "robozonky");
         final Either<Throwable, Response> result = parser.apply("");
-        assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+        assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
     }
 
     @Test
     void checkNonExistentUrl() {
         server.when(HttpRequest.request()).respond(HttpResponse.notFoundResponse());
-        final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                     "robozonky-nonexistent");
+        final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                   "robozonky-nonexistent");
         final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
-        assertThat(result).containsLeftInstanceOf(FileNotFoundException.class);
+        assertThat(result.getLeft()).isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(FileNotFoundException.class);
     }
 
     @Test
@@ -91,8 +91,8 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         final NodeList l = mock(NodeList.class);
         when(l.getLength()).thenReturn(1);
         when(l.item(eq(0))).thenReturn(n);
-        final List<String> actual = MarvenMetadataParser.extractItems(l);
-        Assertions.assertThat(actual).containsExactly(version);
+        final List<String> actual = MavenMetadataParser.extractItems(l);
+        assertThat(actual).containsExactly(version);
     }
 
     @Test
@@ -106,8 +106,8 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         when(l.getLength()).thenReturn(2);
         when(l.item(eq(0))).thenReturn(n1);
         when(l.item(eq(1))).thenReturn(n2);
-        final List<String> actual = MarvenMetadataParser.extractItems(l);
-        Assertions.assertThat(actual).containsExactly(version, version2);
+        final List<String> actual = MavenMetadataParser.extractItems(l);
+        assertThat(actual).containsExactly(version, version2);
     }
 
     @Nested
@@ -137,34 +137,34 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
 
         @Test
         void checkUnknownVersion() {
-            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                         "robozonky");
+            final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                       "robozonky");
             final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
-            assertThat(result).containsLeftInstanceOf(IllegalStateException.class);
+            assertThat(result.getLeft()).isInstanceOf(IllegalStateException.class);
         }
 
         @Test
         void checkLatestVersionBothOutdated() {
-            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                         "robozonky");
+            final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                       "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.0");
-            assertThat(result).containsOnRight(Response.moreRecent("4.0.1", "4.0.2-cr-1"));
+            assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-1"));
         }
 
         @Test
         void checkLatestVersionExperimentalMoreRecent() {
-            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                         "robozonky");
+            final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                       "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.1");
-            assertThat(result).containsOnRight(Response.moreRecentExperimental("4.0.2-cr-1"));
+            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-1"));
         }
 
         @Test
         void checkLatestVersionNoneMoreRecent() {
-            final MarvenMetadataParser parser = new MarvenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                         "robozonky");
+            final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                       "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.2-cr-1");
-            assertThat(result).containsOnRight(Response.noMoreRecentVersion());
+            assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
         }
     }
 }

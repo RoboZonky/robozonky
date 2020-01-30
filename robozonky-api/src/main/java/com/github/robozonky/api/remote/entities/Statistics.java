@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.test.DateUtil;
-import io.vavr.Lazy;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 public class Statistics extends BaseEntity {
 
-    private static final Lazy<Statistics> EMPTY = Lazy.of(Statistics::emptyAndFresh);
+    private static final Supplier<Statistics> EMPTY = Memoizer.memoize(Statistics::emptyAndFresh);
 
     @XmlElement
     private Ratio profitability;

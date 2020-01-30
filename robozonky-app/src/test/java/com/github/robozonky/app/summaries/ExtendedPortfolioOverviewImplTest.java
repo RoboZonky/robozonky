@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.summaries;
 
+import java.util.Collections;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -24,11 +26,8 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
@@ -49,6 +48,7 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(tested.getOptimalAnnualProfitability()).isEqualTo(Ratio.ZERO);
             softly.assertThat(tested.getMonthlyProfit()).isEqualTo(Money.ZERO);
             softly.assertThat(tested.getAnnualProfitability()).isEqualTo(Ratio.fromPercentage("5"));
+            softly.assertThat(tested.getTimestamp()).isEqualTo(portfolioOverview.getTimestamp());
         });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package com.github.robozonky.internal;
 
-import io.vavr.control.Try;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -27,6 +23,9 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * These are RoboZonky settings read from a property file at system startup. The location of this file will be looked
@@ -51,13 +50,14 @@ public enum Settings {
         if (!propertyFile.exists()) {
             throw new IllegalStateException("Properties file does not exist: " + propertyFile.getAbsolutePath());
         }
-        return Try.withResources(() -> Files.newBufferedReader(propertyFile.toPath(), Defaults.CHARSET))
-                .of(r -> {
-                    var props = new Properties();
-                    props.load(r);
-                    LOGGER.debug("Loaded from '{}'.", propertyFile.getAbsolutePath());
-                    return props;
-                }).getOrElseThrow(t -> new IllegalStateException("Cannot read properties.", t));
+        try (var r = Files.newBufferedReader(propertyFile.toPath(), Defaults.CHARSET)) {
+            var props = new Properties();
+            props.load(r);
+            LOGGER.debug("Loaded from '{}'.", propertyFile.getAbsolutePath());
+            return props;
+        } catch (Exception ex) {
+            throw new IllegalStateException("Cannot read properties.", ex);
+        }
     }
 
     /**

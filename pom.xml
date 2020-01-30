@@ -314,12 +314,6 @@
         <artifactId>izpack-panel</artifactId>
         <version>${version.org.codehaus.izpack}</version>
       </dependency>
-      <!-- Misc. -->
-      <dependency>
-        <groupId>io.vavr</groupId>
-        <artifactId>vavr</artifactId>
-        <version>0.10.1</version>
-      </dependency>
       <dependency>
         <groupId>com.github.rutledgepaulv</groupId>
         <artifactId>paging-streams</artifactId>
@@ -392,17 +386,6 @@
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
         <version>3.14.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-vavr</artifactId>
-        <version>0.0.1</version>
-        <exclusions>
-          <exclusion>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>

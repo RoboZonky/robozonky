@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,26 @@
 package com.github.robozonky.internal.async;
 
 import java.time.Duration;
-import java.util.concurrent.ScheduledFuture;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class SchedulerTest {
 
     @Test
-    void schedule() {
-        Runnable toRun = mock(Runnable.class);
-        Scheduler s = new ForkJoinPoolBasedScheduler();
-        ScheduledFuture<?> f = s.submit(toRun, Duration.ofMillis(1));
-        assertThat(f.cancel(true)).isTrue();
+    void simple() {
+        TaskDescriptor task = Scheduler.INSTANCE.submit(() -> {
+            // NOOP
+        }, Duration.ofMillis(1), Duration.ofMillis(2), Duration.ofMillis(10));
+        try {
+            Assertions.assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
+                while (task.getSuccessCount() < 1) {
+                    Thread.sleep(1);
+                }
+            }, "Timed out while waiting for operation to complete.");
+        } finally {
+            task.cancel();
+        }
     }
 
 }

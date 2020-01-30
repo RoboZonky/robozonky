@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package com.github.robozonky.internal.async;
 
-import io.vavr.control.Either;
-import io.vavr.control.Try;
-
 import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -27,6 +24,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+
+import com.github.robozonky.internal.util.functional.Either;
 
 final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
 
@@ -45,14 +44,14 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
     }
 
     private synchronized void asyncReload() {
-            logger.trace("Starting async reload.");
-            Try.ofSupplier(() -> getOperation().apply(value.get()))
-                    .peek(v -> processRetrievedValue(v, value::set)) // set the value on success
-                    .getOrElseGet(t -> {
-                        logger.debug("Async reload failed, operating with stale value.", t);
-                        return null;
-                    });
-            logger.trace("Finished async reload.");
+        logger.trace("Starting async reload.");
+        try {
+            var v = getOperation().apply(value.get());
+            processRetrievedValue(v, value::set);
+        } catch (Exception ex) {
+            logger.debug("Async reload failed, operating with stale value.", ex);
+        }
+        logger.trace("Finished async reload.");
     }
 
     CompletableFuture<Void> refreshIfNotAlreadyRefreshing(final CompletableFuture<Void> old) {
@@ -70,9 +69,13 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
             synchronized (this) {
                 if (!hasValue()) { // double-checked locking to make sure the value is only ever loaded once
                     logger.debug("Fetching initial value synchronously on {}.", this);
-                    return Try.ofSupplier(() -> getOperation().apply(null))
-                            .peek(v -> processRetrievedValue(v, value::set))
-                            .toEither();
+                    try {
+                        var v = getOperation().apply(null);
+                        processRetrievedValue(v, value::set);
+                        return Either.right(v);
+                    } catch (Exception ex) {
+                        return Either.left(ex);
+                    }
                 }
                 // otherwise fall through to retrieve the current value
             }

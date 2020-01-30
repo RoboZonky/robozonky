@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.async;
-
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+package com.github.robozonky.app.daemon;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.*;
-
-class DelegatingScheduledFutureTest {
+class AuditTest {
 
     @Test
     void getters() {
-        final DelegatingScheduledFuture<?> f = new DelegatingScheduledFuture<>();
-        final ScheduledFuture<?> f2 = mock(ScheduledFuture.class);
-        f.setCurrent(f2);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(f.getDelay(TimeUnit.NANOSECONDS)).isEqualTo(0);
-            softly.assertThat(f.isCancelled()).isFalse();
-            softly.assertThat(f.isDone()).isFalse();
-            softly.assertThat(f.cancel(true)).isFalse();
-            softly.assertThat(f.compareTo(f2)).isEqualTo(0);
+            softly.assertThat(Audit.investing()).isNotNull();
+            softly.assertThat(Audit.purchasing()).isNotNull();
+            softly.assertThat(Audit.selling()).isNotNull();
+            softly.assertThat(Audit.reservations()).isNotNull();
         });
     }
+
 }

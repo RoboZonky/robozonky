@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.internal.Defaults;
 import com.izforge.izpack.api.data.InstallData;
-import io.vavr.control.Try;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,13 +51,12 @@ final class Util {
     }
 
     public static void writeOutProperties(final Properties properties, final File target) {
-        Try.withResources(() -> Files.newBufferedWriter(target.toPath(), Defaults.CHARSET))
-                .of(w -> {
-                    properties.store(w, Defaults.ROBOZONKY_USER_AGENT);
-                    LOGGER.debug("Written properties to {}.", target);
-                    return null;
-                })
-                .getOrElseThrow((Function<Throwable, IllegalStateException>) IllegalStateException::new);
+        try (var writer = Files.newBufferedWriter(target.toPath(), Defaults.CHARSET)) {
+            properties.store(writer, Defaults.ROBOZONKY_USER_AGENT);
+            LOGGER.debug("Written properties to {}.", target);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     public static Properties configureEmailNotifications(final InstallData data) {

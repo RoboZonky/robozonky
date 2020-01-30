@@ -36,8 +36,8 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
-import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

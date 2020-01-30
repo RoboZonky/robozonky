@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.internal.management;
 
 import java.lang.management.ManagementFactory;
 import java.util.Optional;
+import java.util.function.Supplier;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -25,14 +26,14 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
-import io.vavr.Lazy;
+import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class Management {
 
     private static final Logger LOGGER = LogManager.getLogger(Management.class);
-    private static final Lazy<MBeanServer> server = Lazy.of(ManagementFactory::getPlatformMBeanServer);
+    private static final Supplier<MBeanServer> server = Memoizer.memoize(ManagementFactory::getPlatformMBeanServer);
 
     private Management() {
         // no instances
