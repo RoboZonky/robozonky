@@ -27,7 +27,7 @@ public interface Scheduler {
      * @param toSchedule
      * @param delayInBetween
      * @param firstDelay
-     * @param timeout Maximum run time for a single instance of the scheduled task. Only used when > 0.
+     * @param timeout Maximum run time for a single instance of the scheduled task. Only used when greater than 0.
      * @return
      */
     TaskDescriptor submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
