@@ -123,7 +123,7 @@
       <!--
           JAX-RS.
           There is a massive set of exclusions of Java EE APIs that need to be later replaced by Jakarta EE.
-          This is done so that RoboZonky can be properly modularized according to JPMS.
+          This is done in order for the sake of dependency convergence and eliminating Java EE/Jakarta EE conflicts.
       -->
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
@@ -209,7 +209,7 @@
         <artifactId>httpasyncclient</artifactId>
         <version>4.1.4</version>
       </dependency>
-      <dependency> <!-- enfroce 4.4.12+ as it finally has module-info. -->
+      <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore-nio</artifactId>
         <version>4.4.12</version>
@@ -601,16 +601,6 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.1.1</version>
-        <configuration>
-          <!--
-            workaround for
-            https://stackoverflow.com/questions/51525069/multi-release-log4j-api-2-11-0-jar-on-the-the-module-path-in-javadoc-10-0-2
-
-            this likely means that, even though Javadocs will be published, they will be empty.
-            the fix for this workaround is to use Java 12+, where the Javadoc bug is actually fixed.
-          -->
-          <failOnError>false</failOnError>
-        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -679,7 +669,6 @@
         <version>${surefire.version}</version>
         <configuration>
           <rerunFailingTestsCount>1</rerunFailingTestsCount> <!-- Flaky tests are worked around. -->
-          <useModulePath>false</useModulePath> <!-- Modularity in tests brings pain and no obvious benefits. -->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <workingDirectory>${basedir}/target</workingDirectory>
         </configuration>

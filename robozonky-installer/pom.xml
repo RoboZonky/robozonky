@@ -25,8 +25,7 @@
 
   <artifactId>robozonky-installer</artifactId>
 
-  <!-- Installer will be packaged as an uber-jar with IZPack, therefore no need for modularization. -->
-  <name>RoboZonky: Custom panels for the installer (no JPMS)</name>
+  <name>RoboZonky: Custom panels for the installer</name>
 
   <properties>
     <pit.threshold>80</pit.threshold> <!-- This uses a 3rd party UI app (IZPack), hard to test fully. -->

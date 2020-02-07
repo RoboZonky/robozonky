@@ -103,7 +103,6 @@ public class Zonky {
     /**
      * @param investment
      * @return Success or one of known investment failures.
-     * @throws Exception Non-investment related failures, such as expired authentication.
      */
     public InvestmentResult invest(final Investment investment) {
         LOGGER.debug("Investing into loan #{}.", investment.getLoanId());

@@ -9,12 +9,3 @@
 * [Dokumentace](https://github.com/RoboZonky/robozonky/wiki).
 * [Uživatelská podpora](https://groups.google.com/forum/#!forum/robozonky-users) pro dotazy a diskusi.
 * [Hlášení chyb](https://github.com/RoboZonky/robozonky/issues) přímo na Githubu.
-
-## Nahodilé poznámky pro vývojáře
-
-* Všechny moduly kromě některých "koncových" (`installer`, `cli`) jsou modularizované podle JPMS. Změny, které nefungují
-s JPMS, nebudou akceptovány. `installer` a `cli` modularizovány nejsou, protože jsou komzumovány jako uberjar a tedy
-JPMS nedává smysl. 
-* Pokud v nějakém modulu implementujete Javovské SPI (`ServiceLoader`), nezapomeňte vaší implementaci přidat nejen do 
-`module-info.java` pod `provides` klauzuli (aby jí viděl `robozonky-app`), ale také postaru do `META-INF/services` 
-(aby jí viděl nemodularizovaný instalátor a CLI).
