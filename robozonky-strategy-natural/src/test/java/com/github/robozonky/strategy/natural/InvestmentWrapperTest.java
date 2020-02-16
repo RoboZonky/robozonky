@@ -103,11 +103,11 @@ class InvestmentWrapperTest {
 
     @Test
     void sellInfoValues() {
-        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 2_000).build();
+        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 200).build();
         final LoanHealthStats healthInfo = mock(LoanHealthStats.class);
         when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
         final SellPriceInfo priceInfo = mock(SellPriceInfo.class);
-        when(priceInfo.getDiscount()).thenReturn(Money.from(1));
+        when(priceInfo.getDiscount()).thenReturn(Ratio.fromPercentage(10));
         when(priceInfo.getSellPrice()).thenReturn(Money.from(10));
         final SellFee feeInfo = mock(SellFee.class);
         when(feeInfo.getValue()).thenReturn(Money.from(2));
@@ -119,7 +119,7 @@ class InvestmentWrapperTest {
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w.getHealth()).contains(LoanHealth.HISTORICALLY_IN_DUE);
-            softly.assertThat(w.getDiscount()).contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getDiscount()).contains(new BigDecimal("20.00"));
             softly.assertThat(w.getPrice()).contains(new BigDecimal("10.00"));
             softly.assertThat(w.getSellFee()).contains(new BigDecimal("2.00"));
         });
