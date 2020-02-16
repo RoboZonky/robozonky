@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 
 public class SellPriceInfo extends BaseEntity {
 
@@ -65,8 +66,8 @@ public class SellPriceInfo extends BaseEntity {
     }
 
     @XmlTransient
-    public Money getDiscount() {
-        return Money.from(discount);
+    public Ratio getDiscount() {
+        return Ratio.fromRaw(discount);
     }
 
     @Override

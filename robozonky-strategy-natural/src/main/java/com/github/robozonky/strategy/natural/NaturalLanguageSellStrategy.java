@@ -49,7 +49,7 @@ class NaturalLanguageSellStrategy implements SellStrategy {
         return descriptor.sellInfo()
                         .map(si -> si.getPriceInfo()
                                 .getDiscount()
-                                .isZero())
+                                .intValue() == 0)
                         .orElse(true);
     }
 

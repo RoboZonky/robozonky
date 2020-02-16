@@ -41,7 +41,7 @@ public class SellRequest extends BaseEntity {
                 .getValue();
         this.discount = sellInfo.getPriceInfo()
                 .getDiscount()
-                .getValue();
+                .bigDecimalValue();
         this.price = sellInfo.getPriceInfo()
                 .getSellPrice()
                 .getValue();
