@@ -9,25 +9,12 @@ import Tokens;
 }
 
 defaultExpression returns [DefaultValues result]:
-    (
-        {
-            org.apache.logging.log4j.LogManager.getLogger(getClass())
-                .warn("Using a deprecated strategy format. Please upgrade.");
-        }
-        r1=portfolioExpression { $result = new DefaultValues($r1.result); }
-        (v1=reservationExpression { $result.setReservationMode($v1.result); })
-        (e1=exitDateExpression { $result.setExitProperties($e1.result); })?
-        (p1=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p1.result); })?
-        (d1=legacyDefaultInvestmentSizeExpression { $result.setInvestmentSize($d1.result); })?
-        (s1=defaultInvestmentShareExpression { $result.setInvestmentShare($s1.result); })?
-    ) | (
-        r2=portfolioExpression { $result = new DefaultValues($r2.result); }
-        (v2=reservationExpression { $result.setReservationMode($v2.result); })
-        (i2=defaultInvestmentSizeExpression { $result.setInvestmentSize($i2.result); })?
-        (b2=defaultPurchaseSizeExpression { $result.setPurchaseSize($b2.result); })?
-        (p2=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p2.result); })?
-        (e2=exitDateExpression { $result.setExitProperties($e2.result); })?
-    )
+    r2=portfolioExpression { $result = new DefaultValues($r2.result); }
+    (v2=reservationExpression { $result.setReservationMode($v2.result); })
+    (i2=defaultInvestmentSizeExpression { $result.setInvestmentSize($i2.result); })?
+    (b2=defaultPurchaseSizeExpression { $result.setPurchaseSize($b2.result); })?
+    (p2=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p2.result); })?
+    (e2=exitDateExpression { $result.setExitProperties($e2.result); })?
 ;
 
 portfolioExpression returns [DefaultPortfolio result] :
@@ -48,12 +35,6 @@ exitDateExpression returns [ExitProperties result]:
             }
         )
     ) DOT
-;
-
-legacyDefaultInvestmentSizeExpression returns [MoneyRange result] :
-    'Běžná výše investice je ' i=investmentSizeRatingSubExpression {
-         $result = $i.result;
-    }
 ;
 
 defaultInvestmentSizeExpression returns [int result] :

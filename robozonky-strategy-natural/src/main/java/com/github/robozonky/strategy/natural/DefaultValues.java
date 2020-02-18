@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.time.Period;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.ReservationMode;
@@ -102,13 +103,6 @@ class DefaultValues {
         return investmentSize;
     }
 
-    public void setInvestmentSize(final MoneyRange investmentSize) {
-        if (investmentSize == null) {
-            throw new IllegalArgumentException("Default investment size must be provided.");
-        }
-        this.investmentSize = investmentSize;
-    }
-
     public void setInvestmentSize(final int investmentSize) {
         if (investmentSize % 200 != 0) {
             throw new IllegalArgumentException("Investment size must be divisible by 200: " + investmentSize);
@@ -119,19 +113,22 @@ class DefaultValues {
     public MoneyRange getPurchaseSize() {
         return purchaseSize;
     }
+
     public void setPurchaseSize(final int purchaseSize) {
-        this.purchaseSize = new MoneyRange(purchaseSize);
+        this.purchaseSize = new MoneyRange(1, purchaseSize);
     }
 
     @Override
     public String toString() {
-        return "DefaultValues{" +
-                "portfolio=" + portfolio +
-                ",reservationMode=" + reservationMode +
-                ", targetPortfolioSize=" + targetPortfolioSize +
-                ", investmentSize=" + investmentSize +
-                ", investmentShare=" + investmentShare +
-                ", exitProperties=" + exitProperties +
-                '}';
+        return new StringJoiner(", ", DefaultValues.class.getSimpleName() + "[", "]")
+                .add("portfolio=" + portfolio)
+                .add("investmentShare=" + investmentShare)
+                .add("investmentSize=" + investmentSize)
+                .add("purchaseSize=" + purchaseSize)
+                .add("reservationMode=" + reservationMode)
+                .add("sellingMode=" + sellingMode)
+                .add("targetPortfolioSize=" + targetPortfolioSize)
+                .add("exitProperties=" + exitProperties)
+                .toString();
     }
 }

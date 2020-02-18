@@ -77,17 +77,6 @@ interestRateBasedRatingExpression returns [Rating result] :
     r=floatExpr ' % p.a' DOT? { $result = Rating.findByCode($r.result.toString()); }
 ;
 
-investmentSizeRatingSubExpression returns [MoneyRange result] :
-    (
-        (amount=intExpr
-            { $result = new MoneyRange($amount.result, $amount.result); })
-        | ('až' max=intExpr
-            { $result = new MoneyRange($max.result); })
-        | (min=intExpr UP_TO max=intExpr
-            { $result = new MoneyRange($min.result, $max.result); })
-    ) KC DOT
-;
-
 regionExpression returns [Region result] :
     r=REGION {
         $result = Region.findByCode($r.getText());

@@ -40,15 +40,12 @@ class NaturalLanguageStrategyServiceTest {
     private static Stream<DynamicTest> forType(final Type type) {
         return Stream.of(
                 dynamicTest("simplest possible", () -> simplest(type)),
-                dynamicTest("complex with legacy sizes", () -> complexLegacy(type)),
                 dynamicTest("complex", () -> complex(type)),
                 dynamicTest("with disabled filters", () -> disabled(type)),
                 dynamicTest("with enabled filters", () -> enabled(type)),
                 dynamicTest("with some filters missing", () -> missingFilters1(type)),
                 dynamicTest("with headers missing", () -> missingHeaders(type)),
                 dynamicTest("all possible newlines", () -> newlines(type)),
-                dynamicTest("newlines saved on Windows", () -> windows1250WindowsNewlines(type)),
-                dynamicTest("newlines saved on Unix", () -> windows1250UnixNewlines(type)),
                 dynamicTest("pure whitespace", () -> test(type))
         );
     }
