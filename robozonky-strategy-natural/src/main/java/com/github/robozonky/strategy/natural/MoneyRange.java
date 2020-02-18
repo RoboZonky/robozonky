@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.Money;
 
 class MoneyRange {
@@ -46,9 +48,9 @@ class MoneyRange {
 
     @Override
     public String toString() {
-        return "DefaultInvestmentSize{" +
-                "minimumInvestment=" + minimumInvestment +
-                ", maximumInvestment=" + maximumInvestment +
-                '}';
+        return new StringJoiner(", ", MoneyRange.class.getSimpleName() + "[", "]")
+                .add("minimumInvestment=" + minimumInvestment)
+                .add("maximumInvestment=" + maximumInvestment)
+                .toString();
     }
 }

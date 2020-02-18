@@ -60,7 +60,10 @@ complexExpression returns [ParsedStrategy result]
         (
             DELIM 'Výše investice'
             i1=legacyInvestmentSizeExpression
-            { investmentSizes = $i1.result; }
+            {
+                investmentSizes = $i1.result;
+                purchaseSizes = $i1.result;
+            }
         ) | (
             (
                 (

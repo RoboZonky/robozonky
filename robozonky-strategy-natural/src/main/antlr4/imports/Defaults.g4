@@ -18,7 +18,10 @@ defaultExpression returns [DefaultValues result]:
         (v1=reservationExpression { $result.setReservationMode($v1.result); })
         (e1=exitDateExpression { $result.setExitProperties($e1.result); })?
         (p1=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p1.result); })?
-        (d1=legacyDefaultInvestmentSizeExpression { $result.setInvestmentSize($d1.result); })?
+        (d1=legacyDefaultInvestmentSizeExpression {
+            $result.setInvestmentSize($d1.result);
+            $result.setPurchaseSize($d1.result.getMaximumInvestment().getValue().intValue());
+         })?
         (s1=defaultInvestmentShareExpression { $result.setInvestmentShare($s1.result); })?
     ) | (
         r2=portfolioExpression { $result = new DefaultValues($r2.result); }
