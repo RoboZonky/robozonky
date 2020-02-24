@@ -29,14 +29,14 @@ class TenantTest {
     void delegatesRun() {
         Tenant my = spy(Tenant.class);
         my.run(zonky -> { /* NOOP */ });
-        verify(my).call(any());
+        verify(my).call(notNull());
     }
 
     @Test
     void delegatesSellInfo() {
         SellInfo result = mock(SellInfo.class);
         Tenant my = spy(Tenant.class);
-        when(my.call(any())).thenReturn(result);
+        when(my.call(notNull())).thenReturn(result);
         SellInfo actual = my.getSellInfo(1);
         assertThat(actual)
                 .isNotNull()
@@ -47,7 +47,7 @@ class TenantTest {
     void delegatesLoan() {
         Loan result = mock(Loan.class);
         Tenant my = spy(Tenant.class);
-        when(my.call(any())).thenReturn(result);
+        when(my.call(notNull())).thenReturn(result);
         Loan actual = my.getLoan(1);
         assertThat(actual)
                 .isNotNull()

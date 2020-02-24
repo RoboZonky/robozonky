@@ -62,7 +62,12 @@ class ParsedStrategyTest {
     void construct() {
         final DefaultPortfolio portfolio = DefaultPortfolio.PROGRESSIVE;
         final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
+        assertThat(strategy.getMinimumVersion()).isEmpty();
+        strategy.setMinimumVersion(new RoboZonkyVersion(1, 2, 3));
         assertSoftly(softly -> {
+            softly.assertThat(strategy.isInvestingEnabled()).isTrue();
+            softly.assertThat(strategy.isPurchasingEnabled()).isFalse();
+            softly.assertThat(strategy.getMinimumVersion()).isNotEmpty();
             softly.assertThat(strategy.getMaximumInvestmentSize()).isEqualTo(Money.from(Long.MAX_VALUE));
             softly.assertThat(strategy.getPermittedShare(Rating.B))
                     .isEqualTo(portfolio.getDefaultShare(Rating.B));
@@ -85,6 +90,8 @@ class ParsedStrategyTest {
         final Investment i = MockInvestmentBuilder.fresh(l, 200).build();
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> l);
         assertSoftly(softly -> {
+            softly.assertThat(strategy.isPurchasingEnabled()).isFalse();
+            softly.assertThat(strategy.isInvestingEnabled()).isTrue();
             softly.assertThat(strategy.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
             softly.assertThat(strategy.getApplicableParticipations(Stream.of(pd), FOLIO)).isEmpty();
             softly.assertThat(strategy.getMatchingSellFilters(Stream.of(id), FOLIO)).containsOnly(id);
@@ -116,6 +123,8 @@ class ParsedStrategyTest {
         final Investment iOver = MockInvestmentBuilder.fresh(loanOver, 200).build();
         final InvestmentDescriptor idOver = new InvestmentDescriptor(iOver, () -> loanOver);
         assertSoftly(softly -> {
+            softly.assertThat(strategy.isPurchasingEnabled()).isTrue();
+            softly.assertThat(strategy.isInvestingEnabled()).isTrue();
             softly.assertThat(strategy.getApplicableLoans(Stream.of(ldOver, ldUnder), FOLIO)).containsOnly(ldUnder);
             softly.assertThat(strategy.getApplicableParticipations(Stream.of(pdOver, pdUnder), FOLIO))
                     .containsOnly(pdUnder);

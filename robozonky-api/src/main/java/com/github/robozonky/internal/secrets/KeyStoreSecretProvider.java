@@ -17,6 +17,7 @@
 package com.github.robozonky.internal.secrets;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.apache.logging.log4j.LogManager;
@@ -44,24 +45,14 @@ final class KeyStoreSecretProvider implements SecretProvider {
     /**
      * Set a key in the key store.
      * @param alias Alias to store the key under.
-     * @param value Will be stored.
+     * @param value Value of this will be stored.
      * @return True if success.
      */
-    private boolean set(final String alias, final String value) {
-        return this.set(alias, value.toCharArray());
-    }
-
-    /**
-     * Set a key in the key store.
-     * @param alias Alias to store the key under.
-     * @param value Will be stored.
-     * @return True if success.
-     */
-    private boolean set(final String alias, final char... value) {
+    private boolean set(final String alias, final Supplier<char[]> value) {
         try {
-            final boolean result = this.ksh.set(alias, value);
+            var isSet = this.ksh.set(alias, value.get());
             this.ksh.save();
-            return result;
+            return isSet;
         } catch (final Exception ex) {
             LOGGER.warn("Failed saving keystore.", ex);
             return false;
@@ -102,7 +93,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
                 this.ksh.save();
                 return true;
             } else {
-                return this.set(ALIAS_TOKEN, ZonkyApiToken.marshal(apiToken).toCharArray());
+                return this.set(ALIAS_TOKEN, () -> ZonkyApiToken.marshal(apiToken).toCharArray());
             }
         } catch (final Exception ex) {
             LOGGER.warn("Failed storing Zonky API token to the keystore.", ex);
@@ -111,11 +102,11 @@ final class KeyStoreSecretProvider implements SecretProvider {
     }
 
     public boolean setPassword(final char[] password) {
-        return this.set(ALIAS_PASSWORD, password);
+        return this.set(ALIAS_PASSWORD, () -> password);
     }
 
     public boolean setUsername(final String username) {
-        return this.set(ALIAS_USERNAME, username);
+        return this.set(ALIAS_USERNAME, () -> username.toCharArray());
     }
 
     @Override

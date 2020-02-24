@@ -39,6 +39,7 @@ import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -61,6 +62,69 @@ class InvestmentWrapperTest {
             .setSellPrice(BigDecimal.ONE)
             .build();
     private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
+
+    @Test
+    void fromInvestment() {
+        final Loan loan = new MockLoanBuilder()
+                .setInsuranceActive(true)
+                .setAmount(100_000)
+                .setRating(Rating.D)
+                .setInterestRate(Ratio.ONE)
+                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
+                .setPurpose(Purpose.AUTO_MOTO)
+                .setRegion(Region.JIHOCESKY)
+                .setStory(UUID.randomUUID().toString())
+                .setTermInMonths(20)
+                .setAnnuity(BigDecimal.ONE)
+                .build();
+        final int invested = 200;
+        final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
+                .setLoanHealthInfo(LoanHealth.HEALTHY)
+                .setPurchasePrice(BigDecimal.TEN)
+                .setSellPrice(BigDecimal.ONE)
+                .setSmpFee(BigDecimal.ONE)
+                .build();
+        final InvestmentDescriptor id = new InvestmentDescriptor(investment, () -> loan);
+        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(id, FOLIO);
+        assertSoftly(softly -> {
+            softly.assertThat(w.getId()).isEqualTo(investment.getId());
+            softly.assertThat(w.isInsuranceActive()).isEqualTo(investment.isInsuranceActive());
+            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
+            softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
+            softly.assertThat(w.getRating()).isEqualTo(investment.getRating());
+            softly.assertThat(w.getMainIncomeType()).isEqualTo(loan.getMainIncomeType());
+            softly.assertThat(w.getPurpose()).isEqualTo(loan.getPurpose());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount().getValue().intValue());
+            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(investment.getRemainingPrincipal().get().getValue());
+            softly.assertThat(w.getOriginal()).isSameAs(id);
+            softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
+            softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(investment.getLoanTermInMonth());
+            softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
+            softly.assertThat(w.getHealth()).contains(LoanHealth.HEALTHY);
+            softly.assertThat(w.getOriginalPurchasePrice()).contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getDiscount()).contains(BigDecimal.ZERO);
+            softly.assertThat(w.getPrice()).contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getSellFee()).contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getReturns()).contains(BigDecimal.ZERO);
+            softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromRaw("0.1499"));
+            softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().getValue().intValue());
+            softly.assertThat(w.toString()).isNotNull();
+        });
+    }
+
+    @Test
+    void fromInvestmentWithoutRevenueRate() {
+        final Loan loan = new MockLoanBuilder()
+                .setRating(Rating.A)
+                .build();
+        final int invested = 200;
+        final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
+                .setSmpFee(BigDecimal.ONE)
+                .build();
+        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan), FOLIO);
+        when(FOLIO.getInvested()).thenReturn(Money.ZERO);
+        assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("7.99"));
+    }
 
     @Test
     void values() {

@@ -36,6 +36,10 @@ final class FileUtil {
         // no instances
     }
 
+    public static boolean isJarFile(final File f) {
+        return f.isFile() && f.getPath().toLowerCase().endsWith(".jar");
+    }
+
     public static Optional<File> findFolder(final String folderName) {
         final Path root = new File(System.getProperty("user.dir")).toPath();
         try (var folders = Files.find(root, 1, (path, attr) -> attr.isDirectory())) {

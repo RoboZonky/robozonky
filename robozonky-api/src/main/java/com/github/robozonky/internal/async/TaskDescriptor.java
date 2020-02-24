@@ -36,10 +36,7 @@ final class TaskDescriptor {
     private final Duration timeout;
     private boolean cancelled = false;
 
-    private final LongAdder schedulingCount = new LongAdder();
     private final LongAdder successCount = new LongAdder();
-    private final LongAdder failureCount = new LongAdder();
-    private final LongAdder timeoutCount = new LongAdder();
 
     TaskDescriptor(final Runnable toSchedule, final Duration initialDelay, final Duration delayInBetween,
                    final Duration timeout) {
@@ -64,20 +61,8 @@ final class TaskDescriptor {
         schedule(null);
     }
 
-    long getSchedulingCount() {
-        return schedulingCount.sum();
-    }
-
     long getSuccessCount() {
         return successCount.sum();
-    }
-
-    long getFailureCount() {
-        return failureCount.sum();
-    }
-
-    long getTimeoutCount() {
-        return timeoutCount.sum();
     }
 
     private void schedule(final Executor executor) {
@@ -86,21 +71,20 @@ final class TaskDescriptor {
             return;
         }
         LOGGER.trace("Scheduling {} to happen after {}.", this, initialDelay);
-        Executor futureDelayedExecutor = executor == null ?
+        var futureDelayedExecutor = executor == null ?
                 CompletableFuture.delayedExecutor(delayInBetween.toNanos(), TimeUnit.NANOSECONDS) :
                 executor;
         final Runnable toSubmit = () -> submit(futureDelayedExecutor);
-        Executor delayedExecutor = executor == null ?
+        var delayedExecutor = executor == null ?
                 CompletableFuture.delayedExecutor(initialDelay.toNanos(), TimeUnit.NANOSECONDS) :
                 executor;
         delayedExecutor.execute(toSubmit);
-        schedulingCount.increment();
     }
 
     private void submit(final Executor executor) {
-        final long totalNanos = timeout.toNanos();
+        var totalNanos = timeout.toNanos();
         LOGGER.debug("Submitting {} for actual execution.", this);
-        CompletableFuture<Void> cf = CompletableFuture.runAsync(toSchedule);
+        var cf = CompletableFuture.runAsync(toSchedule);
         if (totalNanos > 0) {
             LOGGER.debug("Will be killed in {} ns.", totalNanos);
             cf = cf.orTimeout(totalNanos, TimeUnit.NANOSECONDS);
@@ -116,10 +100,8 @@ final class TaskDescriptor {
         } else if (failure instanceof TimeoutException) {
             LOGGER.debug("Failed executing task {}, rescheduling.", this, failure);
             schedule(executor);
-            timeoutCount.increment();
         } else {
             LOGGER.warn("No longer scheduling {}.", this, failure);
-            failureCount.increment();
         }
     }
 }
