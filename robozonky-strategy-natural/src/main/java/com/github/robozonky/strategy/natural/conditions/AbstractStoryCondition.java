@@ -36,7 +36,7 @@ abstract class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
     @Override
     public boolean test(final Wrapper<?> loan) {
         final String story = loan.getStory();
-        final boolean isStoryProvided = (story == null);
-        return storyLength.test(isStoryProvided ? "" : loan.getStory().trim());
+        final boolean isStoryProvided = (story != null);
+        return storyLength.test(isStoryProvided ? loan.getStory().trim() : "");
     }
 }
