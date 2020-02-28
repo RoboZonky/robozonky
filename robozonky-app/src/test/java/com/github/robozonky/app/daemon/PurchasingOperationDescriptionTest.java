@@ -16,12 +16,10 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.stream.Stream;
-
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -47,11 +45,8 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void freshAccessorEveryTimeButTheyShareState() {
-        final Participation p = mock(Participation.class);
-        when(p.getId()).thenReturn(1l);
-        when(p.getLoanHealthInfo()).thenReturn(LoanHealth.HEALTHY);
         final Zonky z = harmlessZonky();
-        when(z.getAvailableParticipations(any())).thenAnswer(i -> Stream.of(p));
+        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedParticipation.class));
         final PowerTenant t = mockTenant(z);
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         final MarketplaceAccessor<ParticipationDescriptor> a1 = d.newMarketplaceAccessor(t);
