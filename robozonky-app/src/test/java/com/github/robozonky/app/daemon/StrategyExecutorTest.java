@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,25 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
+import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
+import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
+import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -34,17 +51,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ClientErrorException;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -321,7 +328,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked but the cache was
         verify(zonky, times(2)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
-        setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofSeconds(61)), Defaults.ZONE_ID));
         assertThat(e.get()).isEmpty(); // after 1 minute, marketplace was force-checked
         verify(zonky, times(3)).getLastPublishedLoanInfo();
         verify(zonky, times(2)).getAvailableLoans(any());
