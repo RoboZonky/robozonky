@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Collection;
-import java.util.Objects;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
 
@@ -60,7 +60,7 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
             LOGGER.trace("Current is {}, previous is {}.", current, previous);
             return !Objects.equals(previous, current);
         } catch (final Exception ex) {
-            LOGGER.debug("Zonky marketplace status endpoint failed, forcing live marketplace check.", ex);
+            LOGGER.debug("Zonky primary marketplace status endpoint failed, forcing live marketplace check.", ex);
             return true;
         }
     }

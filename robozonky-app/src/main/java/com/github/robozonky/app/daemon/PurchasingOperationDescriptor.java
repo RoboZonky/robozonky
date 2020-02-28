@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -24,13 +28,9 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy, Participation> {
 
-    private static final long[] NO_LONGS = new long[0];
-    private final AtomicReference<long[]> lastChecked = new AtomicReference<>(NO_LONGS);
+    private final AtomicReference<LastPublishedParticipation> lastChecked = new AtomicReference<>();
 
     @Override
     public boolean isEnabled(final Tenant tenant) {
@@ -44,7 +44,7 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
 
     @Override
     public MarketplaceAccessor<ParticipationDescriptor> newMarketplaceAccessor(final PowerTenant tenant) {
-        return new SecondaryMarketplaceAccessor(tenant, lastChecked::getAndSet, this::identify);
+        return new SecondaryMarketplaceAccessor(tenant, lastChecked::getAndSet);
     }
 
     @Override

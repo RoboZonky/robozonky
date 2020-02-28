@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -30,22 +31,9 @@ import com.github.robozonky.internal.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
-
-    @Test
-    void hasAdditions() {
-        final long[] original = new long[]{1};
-        final long[] updated = new long[]{1, 2};
-        assertSoftly(softly -> {
-            softly.assertThat(SecondaryMarketplaceAccessor.hasAdditions(new long[0], original)).isFalse();
-            softly.assertThat(SecondaryMarketplaceAccessor.hasAdditions(updated, original)).isTrue();
-            softly.assertThat(SecondaryMarketplaceAccessor.hasAdditions(updated, original)).isTrue();
-            softly.assertThat(SecondaryMarketplaceAccessor.hasAdditions(original, original)).isFalse();
-        });
-    }
 
     @Test
     void readsMarketplace() {
@@ -55,9 +43,8 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final PowerTenant tenant = mockTenant(zonky);
-        final MarketplaceAccessor<ParticipationDescriptor> d = new SecondaryMarketplaceAccessor(tenant,
-                                                                                                UnaryOperator.identity(),
-                                                                                                f -> f.item().getId());
+        final MarketplaceAccessor<ParticipationDescriptor> d =
+                new SecondaryMarketplaceAccessor(tenant, UnaryOperator.identity());
         final Collection<ParticipationDescriptor> ld = d.getMarketplace();
         assertThat(ld).hasSize(1)
                 .element(0)
@@ -66,18 +53,26 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void hasUpdatesWhenCurrentAndPreviousEmpty() {
-        final Participation p = mock(Participation.class);
-        when(p.getId()).thenReturn(1l);
-        when(p.getLoanHealthInfo()).thenReturn(LoanHealth.HEALTHY);
-        final Zonky zonky = harmlessZonky();
-        when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
-        final PowerTenant tenant = mockTenant(zonky);
-        final AtomicReference<long[]> state = new AtomicReference<>(new long[0]);
-        final MarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(tenant,
-                                                                                                state::getAndSet,
-                                                                                                f -> f.item().getId());
+    void detectsUpdates() {
+        final Zonky z = harmlessZonky();
+        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedParticipation.class));
+        final PowerTenant t = mockTenant(z);
+        final AtomicReference<LastPublishedParticipation> state = new AtomicReference<>(null);
+        final MarketplaceAccessor<ParticipationDescriptor> a =
+                new SecondaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue(); // detect update, store present state
-        assertThat(a.hasUpdates()).isFalse(); // state same as marketplace, no update
+        assertThat(a.hasUpdates()).isFalse(); // state stays the same, no update
+    }
+
+    @Test
+    void failsDetection() {
+        final Zonky z = harmlessZonky();
+        when(z.getLastPublishedParticipationInfo()).thenThrow(IllegalStateException.class);
+        final PowerTenant t = mockTenant(z);
+        final AtomicReference<LastPublishedParticipation> state = new AtomicReference<>(null);
+        final MarketplaceAccessor<ParticipationDescriptor> a =
+                new SecondaryMarketplaceAccessor(t, state::getAndSet);
+        assertThat(a.hasUpdates()).isTrue();
+        assertThat(a.hasUpdates()).isTrue();
     }
 }

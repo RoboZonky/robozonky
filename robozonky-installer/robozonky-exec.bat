@@ -1,0 +1,3 @@
+set "JAVA_HOME="
+set "JAVA_OPTS=%JAVA_OPTS% -Xmx64m -Drobozonky.properties.file=/home/triceo/IdeaProjects/robozonky/robozonky-installer/target/install/robozonky.properties -Dcom.sun.management.jmxremote=false -Djmx.remote.x.notification.buffer.size=10 -Dlog4j.configurationFile=/home/triceo/IdeaProjects/robozonky/robozonky-installer/target/install/log4j2.xml"
+/home/triceo/IdeaProjects/robozonky/robozonky-installer/target/install/Dist\robozonky.bat @/home/triceo/IdeaProjects/robozonky/robozonky-installer/target/install/robozonky.cli

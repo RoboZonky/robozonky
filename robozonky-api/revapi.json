@@ -12,10 +12,23 @@
     },
     "ignore": [
       {
-        "code": "java.method.returnTypeChanged",
-        "old": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.SellPriceInfo::getDiscount()",
-        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.SellPriceInfo::getDiscount()",
-        "justification": "Fix incorrect interpretation of the Zonky API."
+        "code": "java.annotation.added",
+        "old": "method java.util.List<com.github.robozonky.api.remote.entities.Participation> com.github.robozonky.api.remote.ParticipationApi::items()",
+        "new": "method java.util.List<com.github.robozonky.api.remote.entities.Participation> com.github.robozonky.api.remote.ParticipationApi::items()",
+        "annotation": "@javax.ws.rs.Path(\"\/smp\/investments\")",
+        "justification": "Added a brand new SMP endpoint."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.remote.entities.LastPublishedParticipation com.github.robozonky.api.remote.ParticipationApi::lastPublished()",
+        "justification": "Added a brand new SMP endpoint."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "interface com.github.robozonky.api.remote.ParticipationApi",
+        "new": "interface com.github.robozonky.api.remote.ParticipationApi",
+        "annotation": "@javax.ws.rs.Path(\"\/smp\/investments\")",
+        "justification": "Added a brand new SMP endpoint."
       }
     ]
   }
