@@ -23,22 +23,22 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.internal.test.DateUtil;
 
-public class LastPublishedLoan extends BaseEntity {
+public class LastPublishedParticipation extends BaseEntity {
 
     private int id;
     // Expensive to deserialize, do it on-demand.
     @XmlElement
     private String datePublished;
 
-    LastPublishedLoan() {
+    LastPublishedParticipation() {
         // for JAXB
     }
 
-    public LastPublishedLoan(final int loanId) {
+    public LastPublishedParticipation(final int loanId) {
         this(loanId, DateUtil.offsetNow());
     }
 
-    public LastPublishedLoan(final int loanId, final OffsetDateTime datePublished) {
+    public LastPublishedParticipation(final int loanId, final OffsetDateTime datePublished) {
         this.id = loanId;
         this.datePublished = datePublished.toString();
     }
@@ -61,7 +61,7 @@ public class LastPublishedLoan extends BaseEntity {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final LastPublishedLoan that = (LastPublishedLoan) o;
+        final LastPublishedParticipation that = (LastPublishedParticipation) o;
         return id == that.id;
     }
 
@@ -72,7 +72,7 @@ public class LastPublishedLoan extends BaseEntity {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", LastPublishedLoan.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", LastPublishedParticipation.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("datePublished=" + datePublished)
                 .toString();

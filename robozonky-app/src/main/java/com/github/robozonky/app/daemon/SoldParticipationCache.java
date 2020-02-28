@@ -54,6 +54,7 @@ final class SoldParticipationCache {
     private static Set<Integer> retrieveSoldParticipationIds(final Tenant tenant) {
         final Select s = new Select().equals("status", "SOLD");
         return tenant.call(zonky -> zonky.getInvestments(s))
+                .parallel() // Loading investments takes many seconds, even minutes. Attempt to parallelize.
                 .mapToInt(Investment::getLoanId)
                 .distinct()
                 .boxed()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,21 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 
-@Path(ApiConstants.SMP_INVESTMENTS)
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
 public interface ParticipationApi extends EntityCollectionApi<Participation> {
 
     @GET
+    @Path(ApiConstants.LOANS + "/smp-last-published")
+    LastPublishedParticipation lastPublished();
+
+    @GET
+    @Path(ApiConstants.SMP_INVESTMENTS)
     @Override
     List<Participation> items();
 }

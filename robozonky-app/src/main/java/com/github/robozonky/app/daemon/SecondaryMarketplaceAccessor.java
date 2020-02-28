@@ -17,16 +17,16 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.ToLongFunction;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.remote.Zonky;
 import org.apache.logging.log4j.Logger;
 
 final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
@@ -34,60 +34,23 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
     private static final Logger LOGGER = Audit.purchasing();
 
     private final PowerTenant tenant;
-    private final UnaryOperator<long[]> stateAccessor;
-    private final ToLongFunction<ParticipationDescriptor> identifier;
-    private final AtomicReference<Collection<ParticipationDescriptor>> marketplace = new AtomicReference<>();
+    private final UnaryOperator<LastPublishedParticipation> stateAccessor;
 
-    public SecondaryMarketplaceAccessor(final PowerTenant tenant, final UnaryOperator<long[]> stateAccessor,
-                                        final ToLongFunction<ParticipationDescriptor> identifier) {
+    public SecondaryMarketplaceAccessor(final PowerTenant tenant,
+                                        final UnaryOperator<LastPublishedParticipation> stateAccessor) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
-        this.identifier = identifier;
     }
 
-    private static boolean contains(final long toFind, final long... original) {
-        for (final long j : original) {
-            if (j == toFind) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static boolean hasAdditions(final long[] current, final long... original) {
-        if (current.length == 0) {
-            return false;
-        } else if (current.length > original.length) {
-            return true;
-        }
-        for (final long i : current) {
-            final boolean found = contains(i, original);
-            if (!found) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
-     * marketplace changed since the last time this method was called.
-     * @param marketplace Present contents of the marketplace.
-     * @return Returning true triggers evaluation of the strategy.
-     */
-    private boolean hasMarketplaceUpdates(final Collection<ParticipationDescriptor> marketplace) {
-        final long[] idsFromMarketplace = marketplace.stream().mapToLong(identifier).toArray();
-        final long[] presentWhenLastChecked = stateAccessor.apply(idsFromMarketplace);
-        return hasAdditions(idsFromMarketplace, presentWhenLastChecked);
-    }
-
-    private Stream<ParticipationDescriptor> readMarketplace() {
+    @Override
+    public Collection<ParticipationDescriptor> getMarketplace() {
         final Select s = new Select()
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
-                .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
+                .greaterThanOrEquals("remainingPrincipal",
+                                     2) // Sometimes there's near-0 participations; ignore clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
-        // TODO Enable selling delinquents when Zonky enables it.
+        // TODO Enable purchasing delinquents when Zonky enables it.
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
                 .filter(p -> p.getLoanHealthInfo() == LoanHealth.HEALTHY ||
                         p.getLoanHealthInfo() == LoanHealth.HISTORICALLY_IN_DUE)
@@ -100,21 +63,20 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
                         return true;
                     }
                 })
-                .map(p -> new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId())));
-    }
-
-    @Override
-    public Collection<ParticipationDescriptor> getMarketplace() {
-        return marketplace.updateAndGet(old -> {
-            if (old != null) {
-                return old;
-            }
-            return readMarketplace().collect(Collectors.toList());
-        });
+                .map(p -> new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId())))
+                .collect(Collectors.toList());
     }
 
     @Override
     public boolean hasUpdates() {
-        return hasMarketplaceUpdates(getMarketplace());
+        try {
+            final LastPublishedParticipation current = tenant.call(Zonky::getLastPublishedParticipationInfo);
+            final LastPublishedParticipation previous = stateAccessor.apply(current);
+            LOGGER.trace("Current is {}, previous is {}.", current, previous);
+            return !Objects.equals(previous, current);
+        } catch (final Exception ex) {
+            LOGGER.debug("Zonky secondary marketplace status endpoint failed, forcing live marketplace check.", ex);
+            return true;
+        }
     }
 }
