@@ -48,6 +48,7 @@ final class SoldParticipationCache {
         this.state = tenant.getState(SoldParticipationCache.class);
         this.listedSoldRemotely = Reloadable.with(() -> retrieveSoldParticipationIds(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
+                .async() // Don't block for this.
                 .build();
     }
 
