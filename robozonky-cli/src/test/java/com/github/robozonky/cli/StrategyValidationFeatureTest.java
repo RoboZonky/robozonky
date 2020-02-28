@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,20 +32,23 @@ class StrategyValidationFeatureTest {
             "Robot má udržovat konzervativní portfolio.\n" +
             "Robot má pravidelně kontrolovat rezervační systém " +
             "a přijímat rezervace půjček odpovídajících této strategii.\n" +
-            "Běžná výše investice je 200 Kč.\n" +
+            "Robot má investovat do půjček po 200 Kč.\n" +
+            "Robot má nakupovat participace nejvýše za 1000 Kč.\n" +
             "Investovat do všech půjček a participací.\n" +
             "Prodej participací zakázán.";
     private static final String STRATEGY_MISSING_EVERYTHING = "- Obecná nastavení\n" +
             "Robot má udržovat konzervativní portfolio.\n" +
             "Robot má zcela ignorovat rezervační systém.\n" +
-            "Běžná výše investice je 200 Kč.\n" +
+            "Robot má investovat do půjček po 200 Kč.\n" +
+            "Robot má nakupovat participace nejvýše za 1000 Kč.\n" +
             "Ignorovat všechny půjčky i participace.\n" +
             "Prodej participací zakázán.";
     private static final String STRATEGY_WITH_EVERYTHING = "- Obecná nastavení\n" +
             "Robot má udržovat konzervativní portfolio.\n" +
             "Robot má převzít kontrolu nad rezervačním systémem " +
             "a přijímat rezervace půjček odpovídajících této strategii.\n" +
-            "Běžná výše investice je 200 Kč.\n" +
+            "Robot má investovat do půjček po 200 Kč.\n" +
+            "Robot má nakupovat participace nejvýše za 1000 Kč.\n" +
             "\n" +
             "- Filtrování tržiště\n" +
             "Investovat do všech půjček.\n" +
