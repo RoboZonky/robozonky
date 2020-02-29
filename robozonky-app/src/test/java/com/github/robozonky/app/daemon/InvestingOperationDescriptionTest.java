@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.robozonky.app.daemon;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -26,9 +27,8 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
@@ -51,6 +51,15 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         assertThat(a1.hasUpdates()).isTrue();
         final MarketplaceAccessor<LoanDescriptor> a2 = d.newMarketplaceAccessor(t);
         assertThat(a2.hasUpdates()).isFalse();
+    }
+
+    @Test
+    void enabled() {
+        final Zonky z = harmlessZonky();
+        final PowerTenant t = mockTenant(z);
+        when(z.getRestrictions()).thenReturn(new Restrictions(false));
+        final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
+        assertThat(d.isEnabled(t)).isFalse();
     }
 
 }
