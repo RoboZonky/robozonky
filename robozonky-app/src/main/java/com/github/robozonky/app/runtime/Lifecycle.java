@@ -72,6 +72,10 @@ public class Lifecycle {
         return HOOKS.getAndSet(initShutdownHooks());
     }
 
+    static int countShutdownHooks() {
+        return HOOKS.get().size();
+    }
+
     /**
      * Suspend thread until either {@link #resumeToShutdown()} or {@link #resumeToFail(Throwable)} is called.
      */

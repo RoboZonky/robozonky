@@ -46,7 +46,7 @@ class LifecycleTest extends AbstractEventLeveragingTest {
         c.suspend();
         verify(cdl).countDown();
         assertSoftly(softly -> {
-            softly.assertThat(Lifecycle.getShutdownHooks()).isNotEmpty();
+            softly.assertThat(Lifecycle.countShutdownHooks()).isEqualTo(1);
             softly.assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNotNull();
             softly.assertThat(c.isFailed()).isTrue();
             softly.assertThat(getEventsRequested())

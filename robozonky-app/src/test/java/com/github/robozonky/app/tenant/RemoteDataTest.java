@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,26 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.stream.Stream;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.util.functional.Tuple;
+import com.github.robozonky.internal.util.functional.Tuple2;
+import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class RemoteDataTest extends AbstractZonkyLeveragingTest {
 
@@ -36,6 +49,19 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(data.getBlocked()).isEmpty();
             softly.assertThat(data.getRetrievedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
         });
+    }
+
+    @Test
+    void amountsBlocked() {
+        final Zonky zonky = harmlessZonky();
+        final Tenant tenant = mockTenant(zonky);
+        Investment i = MockInvestmentBuilder.fresh()
+                .setRating(Rating.D)
+                .setAmount(BigDecimal.TEN)
+                .build();
+        when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
+        Map<Integer, Tuple2<Rating, Money>> result = RemoteData.getAmountsBlocked(tenant);
+        Assertions.assertThat(result).containsOnly(Map.entry(i.getLoanId(), Tuple.of(Rating.D, Money.from(10))));
     }
 
 }

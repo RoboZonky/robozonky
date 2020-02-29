@@ -17,48 +17,34 @@
 package com.github.robozonky.app.version;
 
 import java.io.FileNotFoundException;
-import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.UUID;
 
 import com.github.robozonky.internal.util.functional.Either;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.HttpError;
+import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
-import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockServerExtension.class)
 class MavenMetadataParserTest extends AbstractRoboZonkyTest {
 
-    private static ClientAndServer server;
-    private static String serverUrl;
+    private final ClientAndServer server;
+    private final String serverUrl;
 
-    @BeforeAll
-    static void startServer() {
-        server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
-        serverUrl = "http://127.0.0.1:" + server.getLocalPort();
-    }
-
-    @AfterAll
-    static void stopServer() {
-        server.stop();
-    }
-
-    @AfterEach
-    void resetServer() {
-        server.reset();
+    public MavenMetadataParserTest(ClientAndServer server) {
+        this.server = server;
+        this.serverUrl = "http://127.0.0.1:" + server.getLocalPort();
     }
 
     @Test
@@ -193,7 +179,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         @BeforeEach
         void setupMetadata() {
             server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
-                    .error(HttpError.error());
+                    .respond(HttpResponse.notFoundResponse());
         }
 
         @Test
@@ -203,7 +189,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
             assertThat(result.getLeft())
                     .isInstanceOf(IllegalStateException.class)
-                    .hasCauseInstanceOf(SocketTimeoutException.class);
+                    .hasCauseInstanceOf(FileNotFoundException.class);
         }
 
     }
