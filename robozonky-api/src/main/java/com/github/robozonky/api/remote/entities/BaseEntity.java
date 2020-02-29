@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 abstract class BaseEntity {
 
     private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
-    protected final Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private boolean hasBeenCalledBefore(final String key) {
         final String id = this.getClass().getCanonicalName() + ":" + key;

@@ -30,6 +30,126 @@
         "code": "java.method.removed",
         "old": "method java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor> com.github.robozonky.api.notifications.SellingStartedEvent::getDescriptors()",
         "justification": "Too much information to publish inside of an event."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.BaseLoan",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Investment",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.LastPublishedLoan",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.LastPublishedParticipation",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Loan",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.LoanHealthStats",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.MyInvestment",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.MyReservation",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Participation",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.PurchaseRequest",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Reservation",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.ReservationPreference",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.ReservationPreferences",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Reservations",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.ResolutionRequest",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Resolutions",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Restrictions",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.RiskPortfolio",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.SellFee",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.SellInfo",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.SellPriceInfo",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.SellRequest",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.Statistics",
+        "justification": "Logger is no longer shared with subclasses."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.entities.BaseEntity.logger @ com.github.robozonky.api.remote.entities.ZonkyApiToken",
+        "justification": "Logger is no longer shared with subclasses."
       }
     ]
   }

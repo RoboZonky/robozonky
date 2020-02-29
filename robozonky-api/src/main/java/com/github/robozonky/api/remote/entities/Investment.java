@@ -31,8 +31,12 @@ import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Investment extends BaseInvestment {
+
+    private static final Logger LOGGER = LogManager.getLogger(Investment.class);
 
     @XmlElement
     private PaymentStatus paymentStatus;
@@ -247,7 +251,7 @@ public class Investment extends BaseInvestment {
                 .orElseGet(() -> {
                     final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
                     final OffsetDateTime d = DateUtil.offsetNow().minusMonths(monthsElapsed);
-                    logger.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
+                    LOGGER.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
                     return d;
                 });
     }
