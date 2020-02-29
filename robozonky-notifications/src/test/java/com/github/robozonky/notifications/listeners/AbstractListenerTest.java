@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     private static <T extends Event> void testFormal(final AbstractListener<T> listener, final T event,
                                                      final SupportedListener listenerType) {
         assertThat(event).isInstanceOf(listenerType.getSampleEvent().getClass());
+        assertThat(listener.getSubject(event)).isNotEmpty();
         assertThat(listener.getTemplateFileName())
                 .isNotNull()
                 .isNotEmpty();

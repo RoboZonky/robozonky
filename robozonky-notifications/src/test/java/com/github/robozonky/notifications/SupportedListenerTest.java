@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package com.github.robozonky.notifications;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -36,5 +38,15 @@ class SupportedListenerTest {
             assertThat(s.overrideGlobalGag()).isEqualTo(shouldOverride);
         });
     }
+
+    @Test
+    void nullity() {
+        SoftAssertions.assertSoftly(softly -> Stream.of(SupportedListener.values())
+                .forEach(l -> {
+                    softly.assertThat(l.createSampleEvent()).isNotNull();
+                    softly.assertThat(l.getListener(new EmailHandler(null))).isNotNull();
+                }));
+    }
+
 
 }
