@@ -74,10 +74,6 @@ public final class TenantState {
         TENANT_STATE_MAP.clear();
     }
 
-    StateStorage getStateStorage() {
-        return stateStorage;
-    }
-
     public <T> InstanceState<T> in(final Class<T> cls) {
         return new InstanceStateImpl<>(this, cls.getName(), stateStorage);
     }

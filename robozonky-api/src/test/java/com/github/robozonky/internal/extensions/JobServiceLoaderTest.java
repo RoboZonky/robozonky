@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ class JobServiceLoaderTest {
     @Test
     void defaultContents() {
         assertThat(JobServiceLoader.loadTenantJobs())
-                .hasSize(1); // state cleaner job service
+                .hasSize(0); // state cleaner job service
         assertThat(JobServiceLoader.loadSimpleJobs())
                 .isEmpty(); // no job service
     }

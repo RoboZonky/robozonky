@@ -83,7 +83,9 @@ class MoneyTest {
         assertSoftly(softly -> {
             softly.assertThat(first).isEqualTo(first);
             softly.assertThat(first).isEqualTo(second);
+            softly.assertThat(second).isEqualTo(first);
             softly.assertThat(first).isNotEqualTo(third);
+            softly.assertThat(third).isNotEqualTo(first);
             softly.assertThat(first).isNotEqualTo(null);
             softly.assertThat(first).isNotEqualTo(UUID.randomUUID().toString());
         });
@@ -136,6 +138,14 @@ class MoneyTest {
             softly.assertThat(smaller.min(larger)).isSameAs(smaller);
             softly.assertThat(smaller.min(smaller)).isSameAs(smaller);
             softly.assertThat(larger.min(smaller)).isSameAs(smaller);
+        });
+    }
+
+    @Test
+    void minMaxWhenZero() {
+        assertSoftly(softly -> {
+            softly.assertThat(Money.ZERO.min(Money.ZERO)).isSameAs(Money.ZERO);
+            softly.assertThat(Money.ZERO.max(Money.ZERO)).isSameAs(Money.ZERO);
         });
     }
 

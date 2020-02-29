@@ -563,8 +563,13 @@
             <param>com.github.robozonky.*</param>
           </targetClasses>
           <excludedMethods>
-            <param>hashCode</param>
             <param>toString</param>
+            <!--
+              assertThat(a).isEqualTo(a) produces untested code where equals() contains a == b.
+              This generates unwanted unkillable mutations.
+              -->
+            <param>equals</param>
+            <param>hashCode</param>
           </excludedMethods>
           <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
             <value>-Dfile.encoding=${project.build.sourceEncoding}</value>
