@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.version;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,9 +26,14 @@ class ResponseTest {
     @Test
     void equality() {
         final Response r = Response.noMoreRecentVersion();
-        assertThat(r).isNotEqualTo(null);
-        assertThat(r).isEqualTo(r);
-        assertThat(r).isEqualTo(Response.noMoreRecentVersion());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r).isNotEqualTo(null);
+            softly.assertThat(r).isEqualTo(r);
+            softly.assertThat(r).isEqualTo(Response.noMoreRecentVersion());
+        });
+        final Response r2 = Response.moreRecentStable("5.7.0");
+        final Response r3 = Response.moreRecentStable("5.8.0");
+        assertThat(r2).isNotEqualTo(r3);
     }
 
 }

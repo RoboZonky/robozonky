@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,6 @@
 
 package com.github.robozonky.app.events;
 
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.app.tenant.TestingPowerTenant;
-import com.github.robozonky.internal.management.Management;
-import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.tenant.LazyEvent;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -36,6 +23,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.app.tenant.TestingPowerTenant;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.LazyEvent;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
@@ -92,16 +91,16 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     }
 
     private void waitForEventProcessing() {
-        Set<Event> requested = new CopyOnWriteArraySet<>(listener.getEventsRequested());
+        Set<Event> ready = new CopyOnWriteArraySet<>(listener.getEventsReady());
         Instant start = Instant.now();
         do {
-            for (Event e : requested) {
+            for (Event e : ready) {
                 if (listener.getEventsFailed().contains(e) || listener.getEventsFired().contains(e)) {
                     logger.debug("Event {} registered.", e);
-                    requested.remove(e);
+                    ready.remove(e);
                 }
             }
-            if (requested.isEmpty()) {
+            if (ready.isEmpty()) {
                 return;
             }
             try {
@@ -110,14 +109,9 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
                 // don't do anything
             }
         } while (Duration.between(start, Instant.now()).abs().compareTo(Duration.ofSeconds(5)) < 0);
-        if (!requested.isEmpty()) {
-            throw new IllegalStateException("Not all events were processed: " + requested);
+        if (!ready.isEmpty()) {
+            throw new IllegalStateException("Not all events were processed: " + ready);
         }
-    }
-
-    @AfterEach
-    private void unregisterBeansCreatedByUs() {
-        Management.unregisterAll();
     }
 
     @AfterEach

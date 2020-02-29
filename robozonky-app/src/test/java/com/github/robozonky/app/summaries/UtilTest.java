@@ -90,9 +90,14 @@ class UtilTest extends AbstractZonkyLeveragingTest {
                 .setRemainingPrincipal(BigDecimal.ONE)
                 .setLoanHealthInfo(LoanHealth.HISTORICALLY_IN_DUE)
                 .build();
+        final Investment i3 = MockInvestmentBuilder.fresh()
+                .setRating(Rating.C)
+                .setRemainingPrincipal(BigDecimal.ZERO)
+                .setLoanHealthInfo(LoanHealth.HEALTHY)
+                .build();
         final Zonky zonky = harmlessZonky();
         mockSellInfo(zonky, BigDecimal.TEN, BigDecimal.ZERO);
-        when(zonky.getInvestments((Select)any())).thenReturn(Stream.of(i, i2));
+        when(zonky.getInvestments((Select)any())).thenReturn(Stream.of(i, i2, i3));
         final Tenant tenant = mockTenant(zonky);
         final Tuple2<Map<Rating, Money>, Map<Rating, Money>> result = Util.getAmountsSellable(tenant);
         assertThat(result._1).containsOnlyKeys(Rating.D, Rating.A);

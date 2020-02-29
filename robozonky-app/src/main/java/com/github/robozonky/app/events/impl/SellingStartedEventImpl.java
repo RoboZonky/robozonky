@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,17 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class SellingStartedEventImpl extends AbstractEventImpl implements SellingStartedEvent {
 
-    private final Collection<InvestmentDescriptor> descriptors;
     private final PortfolioOverview portfolioOverview;
 
-    public SellingStartedEventImpl(final Collection<InvestmentDescriptor> descriptors,
-                                   final PortfolioOverview portfolio) {
-        this.descriptors = Collections.unmodifiableCollection(descriptors);
+    public SellingStartedEventImpl(final PortfolioOverview portfolio) {
         this.portfolioOverview = portfolio;
-    }
-
-    @Override
-    public Collection<InvestmentDescriptor> getDescriptors() {
-        return descriptors;
     }
 
     @Override

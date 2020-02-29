@@ -110,13 +110,13 @@ final class Cache<T> {
     private final Tenant tenant;
     private final Backend<T> backend;
     private final Map<Long, Tuple2<T, Instant>> storage = new ConcurrentHashMap<>(20);
-    private final Evictor evictor;
+    private final Executor evictor;
 
     private Cache(final Tenant tenant, final Backend<T> backend) {
         LOGGER.debug("Starting {} cache for {}.", backend.getItemClass(), tenant);
         this.tenant = tenant;
         this.backend = backend;
-        this.evictor = new Evictor(backend.getEvictEvery());
+        this.evictor = backend.startEviction(this::evict);
     }
 
     public static Cache<Loan> forLoan(final Tenant tenant) {
@@ -182,6 +182,13 @@ final class Cache<T> {
         });
     }
 
+    /**
+     * For testing purposes only.
+     */
+    Executor getEvictor() {
+        return evictor;
+    }
+
     private interface Backend<I> {
 
         Duration getEvictEvery();
@@ -193,24 +200,18 @@ final class Cache<T> {
         Either<Exception, I> getItem(long id, Tenant tenant);
 
         boolean shouldCache(I item);
-    }
 
-    private final class Evictor implements Runnable {
-
-        private final Executor executor;
-
-        public Evictor(Duration period) {
-            this.executor = CompletableFuture.delayedExecutor(period.toNanos(), TimeUnit.NANOSECONDS);
-            run();
-        }
-
-        @Override
-        public void run() {
-            try {
-                evict();
-            } finally { // Schedule the next eviction with the same delay.
-                executor.execute(this);
-            }
+        default Executor startEviction(Runnable eviction) {
+            var executor = CompletableFuture.delayedExecutor(getEvictEvery().toNanos(), TimeUnit.NANOSECONDS);
+            executor.execute(() -> {
+                try {
+                    eviction.run();
+                } finally {
+                    executor.execute(eviction);
+                }
+            });
+            return executor;
         }
     }
+
 }

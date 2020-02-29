@@ -12,23 +12,24 @@
     },
     "ignore": [
       {
-        "code": "java.annotation.added",
-        "old": "method java.util.List<com.github.robozonky.api.remote.entities.Participation> com.github.robozonky.api.remote.ParticipationApi::items()",
-        "new": "method java.util.List<com.github.robozonky.api.remote.entities.Participation> com.github.robozonky.api.remote.ParticipationApi::items()",
-        "annotation": "@javax.ws.rs.Path(\"\/smp\/investments\")",
-        "justification": "Added a brand new SMP endpoint."
+        "code": "java.method.removed",
+        "old": "method java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor> com.github.robozonky.api.notifications.ExecutionStartedEvent::getLoanDescriptors()",
+        "justification": "Too much information to publish inside of an event."
       },
       {
-        "code": "java.method.addedToInterface",
-        "new": "method com.github.robozonky.api.remote.entities.LastPublishedParticipation com.github.robozonky.api.remote.ParticipationApi::lastPublished()",
-        "justification": "Added a brand new SMP endpoint."
+        "code": "java.method.removed",
+        "old": "method java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor> com.github.robozonky.api.notifications.PurchasingStartedEvent::getDescriptors()",
+        "justification": "Too much information to publish inside of an event."
       },
       {
-        "code": "java.annotation.removed",
-        "old": "interface com.github.robozonky.api.remote.ParticipationApi",
-        "new": "interface com.github.robozonky.api.remote.ParticipationApi",
-        "annotation": "@javax.ws.rs.Path(\"\/smp\/investments\")",
-        "justification": "Added a brand new SMP endpoint."
+        "code": "java.method.removed",
+        "old": "method java.util.Collection<com.github.robozonky.api.strategies.ReservationDescriptor> com.github.robozonky.api.notifications.ReservationCheckStartedEvent::getReservationDescriptors()",
+        "justification": "Too much information to publish inside of an event."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor> com.github.robozonky.api.notifications.SellingStartedEvent::getDescriptors()",
+        "justification": "Too much information to publish inside of an event."
       }
     ]
   }

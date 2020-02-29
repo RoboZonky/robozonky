@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package com.github.robozonky.app;
 
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.app.events.impl.EventFactory;
-import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.internal.management.Management;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
+
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.app.runtime.Lifecycle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * You are required to exit this app by calling {@link #exit(ReturnCode)}.
@@ -79,7 +78,6 @@ public class App implements Runnable {
         final InvestmentMode m = modeProvider.apply(new Lifecycle(shutdownHooks));
         Events.global().fire(EventFactory.roboZonkyStarting());
         shutdownHooks.register(() -> Optional.of(r -> LogManager.shutdown()));
-        shutdownHooks.register(() -> Optional.of(result -> Management.unregisterAll()));
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         final ReturnCode code = m.get();
         // trigger all shutdown hooks in reverse order, before the token is closed after exiting this method

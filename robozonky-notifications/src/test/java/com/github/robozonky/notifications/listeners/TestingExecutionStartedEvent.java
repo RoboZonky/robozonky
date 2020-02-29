@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 package com.github.robozonky.notifications.listeners;
 
 import java.time.OffsetDateTime;
-import java.util.Collection;
 
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class TestingExecutionStartedEvent implements ExecutionStartedEvent {
@@ -29,11 +27,6 @@ final class TestingExecutionStartedEvent implements ExecutionStartedEvent {
 
     public TestingExecutionStartedEvent(final PortfolioOverview p) {
         this.p = p;
-    }
-
-    @Override
-    public Collection<LoanDescriptor> getLoanDescriptors() {
-        return null;
     }
 
     @Override

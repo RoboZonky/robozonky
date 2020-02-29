@@ -133,11 +133,6 @@ public final class SessionEvents {
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream()
                 .map(Supplier::get)
-                .peek(o -> {
-                    if (o.isEmpty()) { // will not be fired, yet needs to be marked as complete
-                        debugListeners.forEach(l -> l.fired(event.get(), null));
-                    }
-                })
                 .flatMap(Optional::stream);
         final Stream<EventListener> withInjected = injectedDebugListener == null ?
                 registered :

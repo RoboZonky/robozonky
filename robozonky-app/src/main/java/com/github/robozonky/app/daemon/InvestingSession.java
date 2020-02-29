@@ -58,7 +58,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
                                           final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
-        s.tenant.fire(executionStartedLazy(() -> executionStarted(loans, portfolioOverview)));
+        s.tenant.fire(executionStartedLazy(() -> executionStarted(portfolioOverview)));
         if (!s.getAvailable().isEmpty()) {
             s.invest(strategy);
         }

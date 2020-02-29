@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import java.time.Duration;
+
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.internal.jobs.TenantPayload;
-
-import java.time.Duration;
 
 class DelinquencyNotificationJob implements TenantJob {
 
@@ -37,7 +37,7 @@ class DelinquencyNotificationJob implements TenantJob {
 
     @Override
     public Duration killIn() {
-        return Duration.ofMinutes(5); // possibly a lot of investments, and the endpoint itself is slow
+        return Duration.ofMinutes(10); // possibly a lot of investments, and the endpoint itself is slow
     }
 
 }

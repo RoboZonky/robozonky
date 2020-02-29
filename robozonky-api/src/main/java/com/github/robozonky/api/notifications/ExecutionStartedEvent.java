@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.util.Collection;
-
-import com.github.robozonky.api.strategies.LoanDescriptor;
-
 /**
  * Fired immediately before the loans are submitted to the investing algorithm. Will eventually be followed by
  * {@link ExecutionCompletedEvent}.
  */
 public interface ExecutionStartedEvent extends Financial {
-
-    /**
-     * @return Loans found on the marketplace that are available for robotic investment.
-     */
-    Collection<LoanDescriptor> getLoanDescriptors();
 
 }

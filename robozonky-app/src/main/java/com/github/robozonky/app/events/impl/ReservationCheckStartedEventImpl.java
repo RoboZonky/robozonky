@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,22 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
 
 final class ReservationCheckStartedEventImpl extends AbstractEventImpl implements ReservationCheckStartedEvent {
 
-    private final Collection<ReservationDescriptor> reservationDescriptors;
     private final PortfolioOverview portfolioOverview;
 
-    public ReservationCheckStartedEventImpl(final Collection<ReservationDescriptor> reservationDescriptors,
-                                            final PortfolioOverview portfolio) {
-        this.reservationDescriptors = Collections.unmodifiableCollection(reservationDescriptors);
+    public ReservationCheckStartedEventImpl(final PortfolioOverview portfolio) {
         this.portfolioOverview = portfolio;
     }
 
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
-    }
-
-    @Override
-    public Collection<ReservationDescriptor> getReservationDescriptors() {
-        return this.reservationDescriptors;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,17 @@
 
 package com.github.robozonky.app;
 
+import java.util.List;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import com.github.robozonky.internal.management.AbstractBaseMBean;
-import com.github.robozonky.internal.management.BaseMBean;
-import com.github.robozonky.internal.management.Management;
-import com.github.robozonky.internal.management.ManagementBean;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
@@ -113,22 +108,12 @@ class AppTest extends AbstractEventLeveragingTest {
 
         @Override
         public ReturnCode get() {
-            final ManagementBean<BaseMBean> mb = new ManagementBean<>(BaseMBean.class, Base::new);
-            Management.register(mb);
             return ReturnCode.OK;
         }
 
         @Override
         public void close() {
 
-        }
-    }
-
-    private static final class Base extends AbstractBaseMBean {
-
-        @Override
-        public OffsetDateTime getLastUpdated() {
-            return OffsetDateTime.now();
         }
     }
 

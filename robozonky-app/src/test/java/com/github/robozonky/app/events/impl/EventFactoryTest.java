@@ -19,10 +19,8 @@ package com.github.robozonky.app.events.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
@@ -34,11 +32,9 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
-import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
@@ -46,7 +42,6 @@ import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
-import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -71,6 +66,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
+import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
@@ -90,7 +86,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static RecommendedInvestment recommendedInvestment() {
         return new InvestmentDescriptor(MockInvestmentBuilder.fresh().setRemainingPrincipal(BigDecimal.TEN).build(),
-                MockLoanBuilder::fresh).recommend().orElse(null);
+                                        MockLoanBuilder::fresh).recommend().orElse(null);
     }
 
     private static RecommendedReservation recommendedReservation() {
@@ -126,10 +122,10 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void executionCompleted() {
-        final ExecutionCompletedEvent e = EventFactory.executionCompleted(Collections.emptyList(),
-                                                                          mockPortfolioOverview());
+        Loan loan = MockLoanBuilder.fresh();
+        var e = EventFactory.executionCompleted(singleton(loan), mockPortfolioOverview());
         assertSoftly(softly -> {
-            softly.assertThat(e.getLoansInvestedInto()).isEmpty();
+            softly.assertThat(e.getLoansInvestedInto()).containsExactly(loan);
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
             softly.assertThat(e.getCreatedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
             softly.assertThat(e.toString()).isNotEmpty();
@@ -138,17 +134,14 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void executionStarted() {
-        final ExecutionStartedEvent e = EventFactory.executionStarted(Collections.emptyList(), mockPortfolioOverview());
-        assertSoftly(softly -> {
-            softly.assertThat(e.getLoanDescriptors()).isEmpty();
-            softly.assertThat(e.getPortfolioOverview()).isNotNull();
-        });
+        final ExecutionStartedEvent e = EventFactory.executionStarted(mockPortfolioOverview());
+        assertThat(e.getPortfolioOverview()).isNotNull();
     }
 
     @Test
     void investmentMade() {
         final InvestmentMadeEvent e = EventFactory.investmentMade(MockLoanBuilder.fresh(), Money.from(200),
-                mockPortfolioOverview());
+                                                                  mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestedAmount()).isEqualTo(Money.from(200));
@@ -160,9 +153,9 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     void investmentPurchased() {
         final Loan loan = MockLoanBuilder.fresh();
         final Participation participation = new MutableParticipation(loan, Money.from(200),
-                loan.getTermInMonths() - 1);
+                                                                     loan.getTermInMonths() - 1);
         final InvestmentPurchasedEvent e = EventFactory.investmentPurchased(participation, loan, Money.from(200),
-                mockPortfolioOverview());
+                                                                            mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getPurchasedAmount()).isEqualTo(Money.from(200));
@@ -174,7 +167,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentSold() {
         final InvestmentSoldEvent e = EventFactory.investmentSold(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh(), mockPortfolioOverview());
+                                                                  MockLoanBuilder.fresh(), mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -185,7 +178,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanDefaulted() {
         final LoanDefaultedEvent e = EventFactory.loanDefaulted(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh(), LocalDate.now());
+                                                                MockLoanBuilder.fresh(), LocalDate.now());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -196,7 +189,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNoLongerDelinquent() {
         final LoanNoLongerDelinquentEvent e = EventFactory.loanNoLongerDelinquent(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh());
+                                                                                  MockLoanBuilder.fresh());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -206,7 +199,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNowDelinquent() {
         final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(MockInvestmentBuilder.fresh().build(),
-                MockLoanBuilder.fresh(), LocalDate.now());
+                                                                        MockLoanBuilder.fresh(), LocalDate.now());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -245,22 +238,18 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void purchasingCompleted() {
-        final PurchasingCompletedEvent e = EventFactory.purchasingCompleted(Collections.emptyList(),
-                                                                            mockPortfolioOverview());
+        var participation = mock(Participation.class);
+        var e = EventFactory.purchasingCompleted(singleton(participation), mockPortfolioOverview());
         assertSoftly(softly -> {
-            softly.assertThat(e.getParticipationsPurchased()).isEmpty();
+            softly.assertThat(e.getParticipationsPurchased()).containsExactly(participation);
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }
 
     @Test
     void purchasingStarted() {
-        final PurchasingStartedEvent e = EventFactory.purchasingStarted(Collections.emptyList(),
-                                                                        mockPortfolioOverview());
-        assertSoftly(softly -> {
-            softly.assertThat(e.getDescriptors()).isEmpty();
-            softly.assertThat(e.getPortfolioOverview()).isNotNull();
-        });
+        final PurchasingStartedEvent e = EventFactory.purchasingStarted(mockPortfolioOverview());
+        assertThat(e.getPortfolioOverview()).isNotNull();
     }
 
     @Test
@@ -273,7 +262,8 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void reservationAccepted() {
         final Loan l = MockLoanBuilder.fresh();
-        final ReservationAcceptedEvent e = EventFactory.reservationAccepted(l, Money.from(200), mockPortfolioOverview());
+        final ReservationAcceptedEvent e = EventFactory.reservationAccepted(l, Money.from(200),
+                                                                            mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestedAmount()).isEqualTo(Money.from(200));
@@ -283,22 +273,18 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void reservationCheckCompleted() {
-        final ReservationCheckCompletedEvent e = EventFactory.reservationCheckCompleted(Collections.emptyList(),
-                                                                                        mockPortfolioOverview());
+        var reservation = mock(Reservation.class);
+        var e = EventFactory.reservationCheckCompleted(singleton(reservation), mockPortfolioOverview());
         assertSoftly(softly -> {
-            softly.assertThat(e.getReservationsAccepted()).isEmpty();
+            softly.assertThat(e.getReservationsAccepted()).containsExactly(reservation);
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }
 
     @Test
     void reservationCheckStarted() {
-        final ReservationCheckStartedEvent e = EventFactory.reservationCheckStarted(Collections.emptyList(),
-                                                                                    mockPortfolioOverview());
-        assertSoftly(softly -> {
-            softly.assertThat(e.getReservationDescriptors()).isEmpty();
-            softly.assertThat(e.getPortfolioOverview()).isNotNull();
-        });
+        final ReservationCheckStartedEvent e = EventFactory.reservationCheckStarted(mockPortfolioOverview());
+        assertThat(e.getPortfolioOverview()).isNotNull();
     }
 
     @Test
@@ -309,7 +295,8 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void robozonkyDaemonResumed() {
-        final RoboZonkyDaemonResumedEvent e = EventFactory.roboZonkyDaemonResumed(OffsetDateTime.MIN, OffsetDateTime.MAX);
+        final RoboZonkyDaemonResumedEvent e = EventFactory.roboZonkyDaemonResumed(OffsetDateTime.MIN,
+                                                                                  OffsetDateTime.MAX);
         assertSoftly(softly -> {
             softly.assertThat(e.getUnavailableSince()).isEqualTo(OffsetDateTime.MIN);
             softly.assertThat(e.getUnavailableUntil()).isEqualTo(OffsetDateTime.MAX);
@@ -331,7 +318,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void robozonkyCrashed() {
         final RoboZonkyCrashedEvent e = EventFactory.roboZonkyCrashed(new OutOfMemoryError());
-        assertThat(e.getCause()).isNotNull();
+        assertThat(e.getCause()).isNotEmpty();
     }
 
     @Test
@@ -342,7 +329,8 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void saleOffered() {
-        final SaleOfferedEvent e = EventFactory.saleOffered(MockInvestmentBuilder.fresh().build(), MockLoanBuilder.fresh());
+        final SaleOfferedEvent e = EventFactory.saleOffered(MockInvestmentBuilder.fresh().build(),
+                                                            MockLoanBuilder.fresh());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan()).isNotNull();
             softly.assertThat(e.getInvestment()).isNotNull();
@@ -361,20 +349,18 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void sellingCompleted() {
-        final SellingCompletedEvent e = EventFactory.sellingCompleted(Collections.emptyList(), mockPortfolioOverview());
+        var investment = MockInvestmentBuilder.fresh().build();
+        var e = EventFactory.sellingCompleted(singleton(investment), mockPortfolioOverview());
         assertSoftly(softly -> {
-            softly.assertThat(e.getInvestments()).isEmpty();
+            softly.assertThat(e.getInvestments()).containsExactly(investment);
             softly.assertThat(e.getPortfolioOverview()).isNotNull();
         });
     }
 
     @Test
     void sellingStarted() {
-        final SellingStartedEvent e = EventFactory.sellingStarted(Collections.emptyList(), mockPortfolioOverview());
-        assertSoftly(softly -> {
-            softly.assertThat(e.getDescriptors()).isEmpty();
-            softly.assertThat(e.getPortfolioOverview()).isNotNull();
-        });
+        final SellingStartedEvent e = EventFactory.sellingStarted(mockPortfolioOverview());
+        assertThat(e.getPortfolioOverview()).isNotNull();
     }
 
     @Test

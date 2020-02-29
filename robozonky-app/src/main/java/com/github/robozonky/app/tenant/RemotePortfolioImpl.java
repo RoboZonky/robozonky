@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
@@ -39,14 +40,14 @@ import static java.util.stream.Collectors.toMap;
 class RemotePortfolioImpl implements RemotePortfolio {
 
     private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
-    private final Reloadable<RemoteData> portfolio;
+    private final Reloadable<RemoteData> remoteData;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId = new AtomicReference<>(new HashMap<>(0));
     private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
     private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
         this.isDryRun = tenant.getSessionInfo().isDryRun();
-        this.portfolio = Reloadable.with(() -> RemoteData.load(tenant))
+        this.remoteData = Reloadable.with(() -> RemoteData.load(tenant))
                 .reloadAfter(Duration.ofMinutes(5))
                 .finishWith(this::refresh)
                 .build();
@@ -57,20 +58,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     private void refresh(final RemoteData data) {
-        // remove synthetic charges that are replaced by actual remote blocked amounts
-        LOGGER.debug("New remote data: {}.", data);
-        LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
-        final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> old.entrySet().stream()
+        refreshSynthetics(old -> old.entrySet().stream()
                 .filter(e -> e.getValue().isValid(data))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        portfolioOverview.set(null); // Force overview recalculation now that we have registered a change.
-        LOGGER.debug("New synthetics: {}.", updatedSynthetics);
     }
 
     @Override
     public void simulateCharge(final int loanId, final Rating rating, final Money amount) {
-        LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
-        final Map<Integer, Blocked> updatedSynthetics = syntheticByLoanId.updateAndGet(old -> {
+        refreshSynthetics(old -> {
             final Map<Integer, Blocked> result = new LinkedHashMap<>(old);
             /*
              * synthetic blocked amounts are persistent only during dry runs; otherwise all synthetics will be removed
@@ -79,18 +74,23 @@ class RemotePortfolioImpl implements RemotePortfolio {
             result.put(loanId, new Blocked(loanId, amount, rating, isDryRun));
             return result;
         });
-        // Force re-fetch of portfolio data now that we have registered a change.
-        portfolioOverview.set(null);
-        LOGGER.debug("Synthetic added. New synthetics: {}", updatedSynthetics);
     }
 
-    RemoteData getRemotePortfolio() {
-        return portfolio.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
+    private void refreshSynthetics(UnaryOperator<Map<Integer, Blocked>> refresher) {
+        LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
+        var updatedSynthetics = syntheticByLoanId.updateAndGet(refresher);
+        // Force re-fetch of portfolio data now that we have registered a change.
+        portfolioOverview.set(null);
+        LOGGER.debug("New synthetics: {}", updatedSynthetics);
+    }
+
+    RemoteData getRemoteData() {
+        return remoteData.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
     }
 
     @Override
     public Map<Rating, Money> getTotal() {
-        final RemoteData data = getRemotePortfolio(); // use the same data for the entirety of this method
+        var data = getRemoteData(); // use the same data for the entirety of this method
         LOGGER.debug("Remote data used: {}.", data);
         final Map<Rating, Money> amounts = data.getStatistics().getRiskPortfolio().stream()
                 .collect(toMap(RiskPortfolio::getRating, portfolio -> portfolio.getDue().add(portfolio.getUnpaid()),

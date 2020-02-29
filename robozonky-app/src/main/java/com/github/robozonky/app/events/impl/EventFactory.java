@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,15 +63,11 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.api.strategies.RecommendedReservation;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.internal.tenant.LazyEvent;
 
 /**
@@ -89,9 +85,8 @@ public final class EventFactory {
         return new ExecutionCompletedEventImpl(investments, portfolioOverview);
     }
 
-    public static ExecutionStartedEvent executionStarted(final Collection<LoanDescriptor> loans,
-                                                         final PortfolioOverview portfolioOverview) {
-        return new ExecutionStartedEventImpl(loans, portfolioOverview);
+    public static ExecutionStartedEvent executionStarted(final PortfolioOverview portfolioOverview) {
+        return new ExecutionStartedEventImpl(portfolioOverview);
     }
 
     public static InvestmentMadeEvent investmentMade(final Loan loan, final Money investedAmount,
@@ -161,9 +156,8 @@ public final class EventFactory {
         return new PurchasingCompletedEventImpl(investment, portfolio);
     }
 
-    public static PurchasingStartedEvent purchasingStarted(final Collection<ParticipationDescriptor> descriptors,
-                                                           final PortfolioOverview portfolio) {
-        return new PurchasingStartedEventImpl(descriptors, portfolio);
+    public static PurchasingStartedEvent purchasingStarted(final PortfolioOverview portfolio) {
+        return new PurchasingStartedEventImpl(portfolio);
     }
 
     public static RoboZonkyCrashedEvent roboZonkyCrashed(final Throwable cause) {
@@ -219,15 +213,12 @@ public final class EventFactory {
         return new SellingCompletedEventImpl(investments, portfolio);
     }
 
-    public static SellingStartedEvent sellingStarted(final Collection<InvestmentDescriptor> investments,
-                                                     final PortfolioOverview portfolio) {
-        return new SellingStartedEventImpl(investments, portfolio);
+    public static SellingStartedEvent sellingStarted(final PortfolioOverview portfolio) {
+        return new SellingStartedEventImpl(portfolio);
     }
 
-    public static ReservationCheckStartedEvent reservationCheckStarted(
-            final Collection<ReservationDescriptor> reservations,
-            final PortfolioOverview portfolioOverview) {
-        return new ReservationCheckStartedEventImpl(reservations, portfolioOverview);
+    public static ReservationCheckStartedEvent reservationCheckStarted(final PortfolioOverview portfolioOverview) {
+        return new ReservationCheckStartedEventImpl(portfolioOverview);
     }
 
     public static ReservationCheckCompletedEvent reservationCheckCompleted(final Collection<Reservation> investments,

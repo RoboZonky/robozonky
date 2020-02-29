@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class LifecycleTest extends AbstractEventLeveragingTest {
@@ -44,11 +45,14 @@ class LifecycleTest extends AbstractEventLeveragingTest {
         assertThat(c.isFailed()).isFalse();
         c.suspend();
         verify(cdl).countDown();
-        assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNotNull();
-        assertThat(c.isFailed()).isTrue();
-        assertThat(getEventsRequested())
-                .hasSize(1)
-                .first()
-                .isInstanceOf(RoboZonkyCrashedEvent.class);
+        assertSoftly(softly -> {
+            softly.assertThat(Lifecycle.getShutdownHooks()).isNotEmpty();
+            softly.assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNotNull();
+            softly.assertThat(c.isFailed()).isTrue();
+            softly.assertThat(getEventsRequested())
+                    .hasSize(1)
+                    .first()
+                    .isInstanceOf(RoboZonkyCrashedEvent.class);
+        });
     }
 }
