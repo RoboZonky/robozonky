@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package com.github.robozonky.installer;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -49,5 +53,33 @@ class UtilTest {
         Util.processCommandLine(target, settings, part, part2, part3);
         assertThat(settings).containsOnly(Map.entry("robozonky.something", "somethingElse"));
         assertThat(target.getProperties()).containsOnly(Map.entry("something", "somethingCompletelyDifferent"));
+    }
+
+    @Test
+    void writeProperties() throws IOException {
+        Properties properties = new Properties();
+        properties.setProperty("a", "b");
+        File file = File.createTempFile("robozonky", "properties");
+        Util.writeOutProperties(properties, file);
+        try (var reader = Files.newBufferedReader(file.toPath())) {
+            var result = new Properties();
+            result.load(reader);
+            assertThat(result).containsOnly(Map.entry("a", "b"));
+        }
+    }
+
+    @Test
+    void writePropertiesFail() throws IOException {
+        Properties properties = new Properties();
+        properties.setProperty("a", "b");
+        File file = File.createTempFile("robozonky", "properties");
+        file.setWritable(false);
+        try {
+            assertThatThrownBy(() ->Util.writeOutProperties(properties, file))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasCauseInstanceOf(AccessDeniedException.class);
+        } finally {
+            file.setWritable(true);
+        }
     }
 }
