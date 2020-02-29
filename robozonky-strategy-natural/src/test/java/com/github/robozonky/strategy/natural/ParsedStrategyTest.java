@@ -152,7 +152,7 @@ class ParsedStrategyTest {
     void shares() {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
-        final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(50), Ratio.fromPercentage(100));
+        final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(100));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
                                                            Collections.emptyMap(), Collections.emptyMap());
         assertThat(strategy.getPermittedShare(Rating.D)).isEqualTo(Ratio.ONE);

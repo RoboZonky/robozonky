@@ -59,7 +59,8 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
                 .setPaidInterest(BigDecimal.ZERO)
                 .setPaidPenalty(BigDecimal.ZERO)
                 .setPaidPrincipal(BigDecimal.ZERO)
-                .setInvestmentDate(OffsetDateTime.now());
+                .setInvestmentDate(OffsetDateTime.now())
+                .setInsuranceActive(loan.isInsuranceActive());
     }
 
     public MockInvestmentBuilder() {
@@ -152,6 +153,11 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
         return this;
     }
 
+    public MockInvestmentBuilder setRemainingMonths(final int remainingMonths) {
+        when(mock.getRemainingMonths()).thenReturn(remainingMonths);
+        return this;
+    }
+
     public MockInvestmentBuilder setExpectedInterest(final BigDecimal expectedInterest) {
         when(mock.getExpectedInterest()).thenReturn(Money.from(expectedInterest));
         return this;
@@ -179,6 +185,11 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
 
     public MockInvestmentBuilder setInWithdrawal(final boolean isInWithdrawal) {
         when(mock.isInWithdrawal()).thenReturn(isInWithdrawal);
+        return this;
+    }
+
+    public MockInvestmentBuilder setInsuranceActive(final boolean isInsuranceActive) {
+        when(mock.isInsuranceActive()).thenReturn(isInsuranceActive);
         return this;
     }
 

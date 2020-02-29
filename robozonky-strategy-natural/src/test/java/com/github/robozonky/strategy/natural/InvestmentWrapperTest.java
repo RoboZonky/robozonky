@@ -79,6 +79,7 @@ class InvestmentWrapperTest {
                 .build();
         final int invested = 200;
         final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
+                .setRemainingMonths(10)
                 .setLoanHealthInfo(LoanHealth.HEALTHY)
                 .setPurchasePrice(BigDecimal.TEN)
                 .setSellPrice(BigDecimal.ONE)

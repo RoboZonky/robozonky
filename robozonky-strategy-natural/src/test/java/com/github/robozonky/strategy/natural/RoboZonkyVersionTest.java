@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,12 @@ class RoboZonkyVersionTest {
 
     @Test
     void snapshot() {
+        final RoboZonkyVersion current = new RoboZonkyVersion("5.7.0-SNAPSHOT");
+        assertThat(current).isEqualTo(new RoboZonkyVersion("5.7.0"));
+    }
+
+    @Test
+    void nullVersion() {
         final RoboZonkyVersion current = new RoboZonkyVersion((String) null);
         assertThat(current).isGreaterThan(new RoboZonkyVersion("999.999.999"));
     }

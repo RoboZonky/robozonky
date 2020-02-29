@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -28,9 +29,16 @@ class DefaultInvestmentShareTest {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new DefaultInvestmentShare(101))
                 .isInstanceOf(IllegalArgumentException.class);
-        final DefaultInvestmentShare s = new DefaultInvestmentShare(100);
-        assertThat(s.getMinimumShareInPercent()).isEqualTo(0);
-        assertThat(s.getMaximumShareInPercent()).isEqualTo(100);
+        final DefaultInvestmentShare s = new DefaultInvestmentShare(0);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(s.getMinimumShareInPercent()).isEqualTo(0);
+            softly.assertThat(s.getMaximumShareInPercent()).isEqualTo(0);
+        });
+        final DefaultInvestmentShare s2 = new DefaultInvestmentShare(100);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(s2.getMinimumShareInPercent()).isEqualTo(0);
+            softly.assertThat(s2.getMaximumShareInPercent()).isEqualTo(100);
+        });
     }
 
 }

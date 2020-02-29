@@ -15,18 +15,9 @@ portfolioStructureExpression returns [Collection<PortfolioShare> result]:
 
 portfolioStructureInterestRateExpression returns [PortfolioShare result] :
     'Prostředky úročené ' r=interestRateBasedRatingExpression 'mají tvořit' (
-        (
-            maximumInvestmentInCzk=floatExpr {
-                $result = new PortfolioShare($r.result,
-                                             Ratio.fromPercentage($maximumInvestmentInCzk.result.doubleValue()));
-            }
-        )
-        | (
-            minimumInvestmentInCzk=floatExpr UP_TO maximumInvestmentInCzk=floatExpr {
-                $result = new PortfolioShare($r.result,
-                                             Ratio.fromPercentage($minimumInvestmentInCzk.result.doubleValue()),
-                                             Ratio.fromPercentage($maximumInvestmentInCzk.result.doubleValue()));
-           }
-        )
+        maximumInvestmentInCzk=floatExpr {
+            $result = new PortfolioShare($r.result,
+                                         Ratio.fromPercentage($maximumInvestmentInCzk.result.doubleValue()));
+        }
     ) ' % aktuální zůstatkové částky' DOT
 ;

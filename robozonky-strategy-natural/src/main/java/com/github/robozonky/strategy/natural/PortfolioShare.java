@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,20 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.StringJoiner;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class PortfolioShare {
-
-    private static final Logger LOGGER = LogManager.getLogger(PortfolioShare.class);
 
     private final Ratio permitted;
     private final Rating rating;
 
-    public PortfolioShare(final Rating r, final Ratio min, final Ratio max) {
-        this.rating = r;
-        PortfolioShare.assertIsInRange(min);
-        PortfolioShare.assertIsInRange(max);
-        this.permitted = min.max(max);
-        if (min.compareTo(max) != 0) {
-            LOGGER.warn("Portfolio share for rating {} gives a range of <{}; {}>. " +
-                    "The minimum has been deprecated and will be ignored. Please update your strategy.", r, min, max);
-        }
-    }
-
-    public PortfolioShare(final Rating r, final Ratio max) {
-        this(r, max, max);
+    public PortfolioShare(final Rating rating, final Ratio ratio) {
+        this.rating = rating;
+        PortfolioShare.assertIsInRange(ratio);
+        this.permitted = ratio;
     }
 
     private static void assertIsInRange(final Ratio ratio) {
@@ -60,9 +49,9 @@ class PortfolioShare {
 
     @Override
     public String toString() {
-        return "PortfolioShare{" +
-                "maximum=" + permitted +
-                ", rating=" + rating +
-                '}';
+        return new StringJoiner(", ", PortfolioShare.class.getSimpleName() + "[", "]")
+                .add("permitted=" + permitted)
+                .add("rating=" + rating)
+                .toString();
     }
 }
