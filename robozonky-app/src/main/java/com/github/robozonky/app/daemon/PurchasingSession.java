@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -25,10 +28,13 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseResult;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import static com.github.robozonky.app.events.impl.EventFactory.*;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
+import static com.github.robozonky.app.events.impl.EventFactory.purchasingStartedLazy;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.
@@ -53,7 +59,7 @@ final class PurchasingSession extends
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(c, auth.getPortfolio().getOverview())));
+        s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(auth.getPortfolio().getOverview())));
         s.purchase(strategy);
         final Collection<Participation> result = s.getResult();
         s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio().getOverview())));

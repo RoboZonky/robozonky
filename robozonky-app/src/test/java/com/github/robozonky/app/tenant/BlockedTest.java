@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,19 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class BlockedTest extends AbstractRoboZonkyTest {
@@ -34,6 +41,18 @@ class BlockedTest extends AbstractRoboZonkyTest {
             softly.assertThat(b.getRating()).isEqualTo(Rating.D);
             softly.assertThat(b.getId()).isEqualTo(1);
         });
+    }
+
+    @Test
+    void nonPersistentExpiring() {
+        final Zonky zonky = harmlessZonky();
+        final Tenant tenant = mockTenant(zonky);
+        OffsetDateTime loadOn = zonky.getStatistics().getTimestamp()
+                .minusSeconds(1);
+        DateUtil.setSystemClock(Clock.fixed(loadOn.toInstant(), Defaults.ZONE_ID));
+        final Blocked b = new Blocked(0, Money.ZERO, Rating.D, false);
+        RemoteData r = RemoteData.load(tenant);
+        assertThat(b.isValid(r)).isFalse();
     }
 
     @Test

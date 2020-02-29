@@ -39,13 +39,9 @@ enum ExtensionsManager {
 
     private final Logger logger = LogManager.getLogger(ExtensionsManager.class);
 
-    private static boolean isJarFile(final File f) {
-        return f.isFile() && f.getPath().toLowerCase().endsWith(".jar");
-    }
-
     ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
         logger.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
-        final File[] jars = extensionsFolder.listFiles(ExtensionsManager::isJarFile);
+        final File[] jars = extensionsFolder.listFiles(FileUtil::isJarFile);
         final String jarString = Arrays.toString(jars);
         logger.debug("JARS found: '{}'.", jarString);
         final URL[] urls = FileUtil.filesToUrls(jars).toArray(URL[]::new);

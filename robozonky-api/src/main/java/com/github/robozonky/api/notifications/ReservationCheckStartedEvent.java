@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.util.Collection;
-
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-
 /**
  * Fired immediately before the loans are submitted to the reservation recommendation algorithm. Will eventually be
  * followed by {@link ReservationCheckCompletedEvent}.
  */
 public interface ReservationCheckStartedEvent extends Financial {
-
-    /**
-     * @return Loans found on the marketplace that are available for confirmation.
-     */
-    Collection<ReservationDescriptor> getReservationDescriptors();
 
 }

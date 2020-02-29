@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.entities.SellPriceInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -47,6 +50,13 @@ class NaturalLanguageSellStrategyTest {
         return new InvestmentDescriptor(investment, () -> l);
     }
 
+    private InvestmentDescriptor mockDescriptor(final Investment investment, final SellInfo sellInfo) {
+        final Loan l = new MockLoanBuilder()
+                .setAmount(100_000)
+                .build();
+        return new InvestmentDescriptor(investment, () -> l, () -> sellInfo);
+    }
+
     private static Investment mockInvestment() {
         return mockInvestment(BigDecimal.TEN);
     }
@@ -66,8 +76,7 @@ class NaturalLanguageSellStrategyTest {
         doReturn(Stream.empty()).when(p).getMatchingSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        final Stream<RecommendedInvestment> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
+        final Stream<RecommendedInvestment> result = s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
         assertThat(result).isEmpty();
     }
 
@@ -79,8 +88,7 @@ class NaturalLanguageSellStrategyTest {
         doAnswer(e -> e.getArgument(0)).when(p).getMatchingSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        final Stream<RecommendedInvestment> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
+        final Stream<RecommendedInvestment> result = s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
         assertThat(result).hasSize(1);
     }
 
@@ -94,8 +102,34 @@ class NaturalLanguageSellStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Investment i1 = mockInvestment();
         final Investment i2 = mockInvestment(BigDecimal.ZERO);
-        final Stream<RecommendedInvestment> result =
-                s.recommend(Arrays.asList(mockDescriptor(i1), mockDescriptor(i2)), portfolio);
+        final Stream<RecommendedInvestment> result = s.recommend(
+                Arrays.asList(mockDescriptor(i1), mockDescriptor(i2)),
+                portfolio);
         assertThat(result).extracting(d -> d.descriptor().item()).containsOnly(i2);
+    }
+
+    @Test
+    void discountedInvestmentsNotApplicableInSelloffStrategy() {
+        final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
+        v.setSellingMode(SellingMode.FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY);
+        final ParsedStrategy p = spy(new ParsedStrategy(v));
+        doAnswer(e -> e.getArgument(0)).when(p).getMatchingPrimaryMarketplaceFilters(any(), any());
+        final SellStrategy s = new NaturalLanguageSellStrategy(p);
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        final Investment withFee = mockInvestment();
+        final Investment withFee2 = mockInvestment();
+        final SellPriceInfo spi = mock(SellPriceInfo.class);
+        when(spi.getDiscount()).thenReturn(Ratio.ONE);
+        final SellInfo si = mock(SellInfo.class);
+        when(si.getPriceInfo()).thenReturn(spi);
+        final Investment withoutFee = mockInvestment(null);
+        final Investment withoutFee2 = mockInvestment(BigDecimal.ZERO);
+        final Investment withoutFee3 = mockInvestment(BigDecimal.ZERO);
+        final Stream<RecommendedInvestment> result = s.recommend(
+                Arrays.asList(mockDescriptor(withFee), mockDescriptor(withFee2, si),
+                              mockDescriptor(withoutFee), mockDescriptor(withoutFee2, si),
+                              mockDescriptor(withoutFee3, si)),
+                portfolio);
+        assertThat(result).extracting(d -> d.descriptor().item()).containsOnly(withoutFee);
     }
 }

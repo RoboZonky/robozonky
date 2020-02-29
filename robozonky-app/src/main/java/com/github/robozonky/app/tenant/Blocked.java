@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,7 @@ final class Blocked {
     }
 
     public boolean isValid(final RemoteData remoteData) {
-        return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp())
-                || !remoteData.getBlocked().containsKey(id);
+        return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp());
     }
 
     @Override

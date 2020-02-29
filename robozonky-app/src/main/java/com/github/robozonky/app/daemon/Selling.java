@@ -88,7 +88,7 @@ final class Selling implements TenantPayload {
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
-        tenant.fire(EventFactory.sellingStarted(eligible, overview));
+        tenant.fire(EventFactory.sellingStarted(overview));
         final Stream<RecommendedInvestment> recommended = strategy.recommend(eligible, overview)
                 .peek(r -> tenant.fire(EventFactory.saleRecommended(r)));
         final Stream<RecommendedInvestment> throttled = new SellingThrottle().apply(recommended, overview);

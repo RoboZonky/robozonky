@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -168,7 +169,7 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
     private Either<Throwable, String> getLatestSource() {
         return read(() -> MavenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
                                                                   this.mavenCentralHostname),
-                    inputStream -> Arrays.asList(StringUtil.toString(inputStream)))
+                    inputStream -> Collections.singletonList(StringUtil.toString(inputStream)))
                 .mapRight(s -> String.join(System.lineSeparator(), s));
     }
 

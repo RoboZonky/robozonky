@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,9 +131,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
     void getters() {
         final CommandLine cli = new CommandLine();
         assertThat(cli.getKeystore()).isEmpty();
-        assertThat(cli.getStrategyLocation()).isEmpty();
         assertThat(cli.getNotificationConfigLocation()).isEmpty();
         assertThat(cli.getName()).isEqualTo("Unnamed");
-        assertThat(cli.isDryRunEnabled()).isFalse();
     }
 }

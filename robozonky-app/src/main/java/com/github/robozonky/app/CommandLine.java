@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,18 +49,18 @@ public class CommandLine implements Callable<Optional<Function<Lifecycle, Invest
     @picocli.CommandLine.Option(names = {"-h", "--help"}, usageHelp = true, description = "Print usage end exit.")
     private boolean help;
     @picocli.CommandLine.Option(names = {"-i", "--inform"},
-            description = "Configure RoboZonky notifications from a given location.")
+            description = "Points to a resource holding the notification configuration.")
     private String notificationConfigLocation;
     @picocli.CommandLine.Option(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
     private String name = "Unnamed";
     @picocli.CommandLine.Option(names = {"-p", "--password"}, required = true, interactive = true,
-            arity = "0..1", description = "Enter Zonky account password or secure storage password.")
+            arity = "0..1", description = "Enter password for the secure storage file.")
     private char[] password = null;
     @picocli.CommandLine.Option(names = {"-d", "--dry"},
             description = "RoboZonky will simulate investments, but never actually spend money.")
     private boolean dryRunEnabled = false;
     @picocli.CommandLine.Option(names = {"-g", "--guarded"},
-            description = "Path to secure file that contains username, password etc.", required = true)
+            description = "Path to secure storage file that contains username, password etc.", required = true)
     private File keystore = null;
 
     public CommandLine() {
@@ -86,13 +86,13 @@ public class CommandLine implements Callable<Optional<Function<Lifecycle, Invest
 
     private static PowerTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
         final TenantBuilder b = new TenantBuilder();
-        if (cli.isDryRunEnabled()) {
+        if (cli.dryRunEnabled) {
             LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
             b.dryRun();
         }
         return b.withSecrets(secrets)
-                .withStrategy(cli.getStrategyLocation())
-                .named(cli.getName())
+                .withStrategy(cli.strategyLocation)
+                .named(cli.name)
                 .build();
     }
 
@@ -105,14 +105,6 @@ public class CommandLine implements Callable<Optional<Function<Lifecycle, Invest
         // create event handler for this session, otherwise session-less notifications will not be sent
         final SessionEvents e = Events.forSession(tenant);
         LOGGER.debug("Notification subsystem initialized: {}.", e);
-    }
-
-    boolean isDryRunEnabled() {
-        return dryRunEnabled;
-    }
-
-    String getStrategyLocation() {
-        return strategyLocation;
     }
 
     Optional<URL> getNotificationConfigLocation() {

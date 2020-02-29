@@ -22,41 +22,29 @@ import java.util.UUID;
 
 import com.github.robozonky.internal.util.functional.Either;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
-import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockServerExtension.class)
 class MavenMetadataParserTest extends AbstractRoboZonkyTest {
 
-    private static ClientAndServer server;
-    private static String serverUrl;
+    private final ClientAndServer server;
+    private final String serverUrl;
 
-    @BeforeAll
-    static void startServer() {
-        server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
-        serverUrl = "http://127.0.0.1:" + server.getLocalPort();
-    }
-
-    @AfterAll
-    static void stopServer() {
-        server.stop();
-    }
-
-    @AfterEach
-    void resetServer() {
-        server.reset();
+    public MavenMetadataParserTest(ClientAndServer server) {
+        this.server = server;
+        this.serverUrl = "http://127.0.0.1:" + server.getLocalPort();
     }
 
     @Test
@@ -111,7 +99,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
     }
 
     @Nested
-    class validMavenMetadata {
+    class ValidMetadata {
 
         @BeforeEach
         void setupMetadata() {
@@ -128,6 +116,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
                                                                       "      <version>4.0.0</version>\n" +
                                                                       "      <version>4.0.1</version>\n" +
                                                                       "      <version>4.0.2-cr-1</version>\n" +
+                                                                      "      <version>4.0.2-cr-2</version>\n" +
                                                                       "    </versions>\n" +
                                                                       "    <lastUpdated>20171015201449</lastUpdated" +
                                                                       ">\n" +
@@ -148,7 +137,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                        "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.0");
-            assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-1"));
+            assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-2"));
         }
 
         @Test
@@ -156,15 +145,52 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                        "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.1");
-            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-1"));
+            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-2"));
+        }
+
+        @Test
+        void checkLatestVersionExperimentalEvenMoreRecent() {
+            final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                       "robozonky");
+            final Either<Throwable, Response> result = parser.apply("4.0.0-cr-1");
+            assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-2"));
+        }
+
+        @Test
+        void checkLatestVersionExperimentalYetMoreRecent() {
+            final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                       "robozonky");
+            final Either<Throwable, Response> result = parser.apply("4.0.2-cr-1");
+            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-2"));
         }
 
         @Test
         void checkLatestVersionNoneMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                                                                        "robozonky");
-            final Either<Throwable, Response> result = parser.apply("4.0.2-cr-1");
+            final Either<Throwable, Response> result = parser.apply("4.0.2-cr-2");
             assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
         }
+    }
+
+    @Nested
+    class FailingMetadata {
+
+        @BeforeEach
+        void setupMetadata() {
+            server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
+                    .respond(HttpResponse.notFoundResponse());
+        }
+
+        @Test
+        void checkUnknownVersion() {
+            final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
+                                                                       "robozonky");
+            final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
+            assertThat(result.getLeft())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasCauseInstanceOf(FileNotFoundException.class);
+        }
+
     }
 }

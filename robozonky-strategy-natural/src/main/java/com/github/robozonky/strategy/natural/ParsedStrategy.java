@@ -36,7 +36,7 @@ import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 
-class ParsedStrategy {
+class   ParsedStrategy {
 
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioShare> portfolio;

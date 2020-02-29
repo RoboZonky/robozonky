@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,33 +20,22 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class PortfolioShareTest {
 
     @Test
-    void leftBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, Ratio.fromPercentage(-1), Ratio.ZERO))
-                    .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, Ratio.ZERO, Ratio.fromPercentage(-1)))
-                    .isInstanceOf(IllegalArgumentException.class);
-        });
-    }
-
-    @Test
     void rightBoundWrong() {
-        assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(101), Ratio.ZERO))
+        assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(101)))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.ZERO, Ratio.fromPercentage(101)))
-                    .isInstanceOf(IllegalArgumentException.class);
-        });
+        assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(-1)))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void correct() {
-        final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ZERO, Ratio.ONE);
+    void correct1() {
+        final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ONE);
         assertSoftly(softly -> {
             softly.assertThat(p.getPermitted()).isEqualTo(Ratio.ONE);
             softly.assertThat(p.getRating()).isEqualTo(Rating.C);
@@ -54,11 +43,12 @@ class PortfolioShareTest {
     }
 
     @Test
-    void reversed() {
-        final PortfolioShare p = new PortfolioShare(Rating.D, Ratio.fromPercentage(51), Ratio.fromPercentage(50));
+    void correct2() {
+        final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ZERO);
         assertSoftly(softly -> {
-            softly.assertThat(p.getPermitted()).isEqualTo(Ratio.fromPercentage(51));
-            softly.assertThat(p.getRating()).isEqualTo(Rating.D);
+            softly.assertThat(p.getPermitted()).isEqualTo(Ratio.ZERO);
+            softly.assertThat(p.getRating()).isEqualTo(Rating.C);
         });
     }
+
 }

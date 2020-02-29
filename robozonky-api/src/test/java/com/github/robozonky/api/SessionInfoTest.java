@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,32 @@
 
 package com.github.robozonky.api;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SessionInfoTest {
 
     @Test
-    void constructor() {
+    void constructorDryRun() {
         final SessionInfo s = new SessionInfo("someone@somewhere.cz");
         assertSoftly(softly -> {
             softly.assertThat(s.getUsername()).isEqualTo("someone@somewhere.cz");
             softly.assertThat(s.isDryRun()).isTrue();
             softly.assertThat(s.getName()).isEqualTo("RoboZonky");
+        });
+    }
+
+    @Test
+    void constructor() {
+        var id = UUID.randomUUID().toString();
+        var sessionInfo = new SessionInfo("someone@somewhere.cz", id, false);
+        assertSoftly(softly -> {
+            softly.assertThat(sessionInfo.getUsername()).isEqualTo("someone@somewhere.cz");
+            softly.assertThat(sessionInfo.isDryRun()).isFalse();
+            softly.assertThat(sessionInfo.getName()).isEqualTo("RoboZonky '" + id + "'");
         });
     }
 
@@ -54,7 +65,9 @@ class SessionInfoTest {
             softly.assertThat(s).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(s).isEqualTo(s);
             softly.assertThat(s).isNotEqualTo(s2);
+            softly.assertThat(s2).isNotEqualTo(s);
             softly.assertThat(s).isEqualTo(s3);
+            softly.assertThat(s3).isEqualTo(s);
         });
     }
 }

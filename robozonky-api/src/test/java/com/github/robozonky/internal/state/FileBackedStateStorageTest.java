@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,7 @@ class FileBackedStateStorageTest {
                 softly.assertThat(s.getKeys("section")).isEmpty();
                 softly.assertThat(s.getSections()).containsOnly("section");
             });
+            assertThat(s.store()).isTrue();
         }
 
         @Test

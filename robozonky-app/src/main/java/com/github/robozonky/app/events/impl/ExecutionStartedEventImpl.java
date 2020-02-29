@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,22 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class ExecutionStartedEventImpl extends AbstractEventImpl implements ExecutionStartedEvent {
 
-    private final Collection<LoanDescriptor> loanDescriptors;
     private final PortfolioOverview portfolioOverview;
 
-    public ExecutionStartedEventImpl(final Collection<LoanDescriptor> loanDescriptors, final PortfolioOverview portfolio) {
-        this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
+    public ExecutionStartedEventImpl(final PortfolioOverview portfolio) {
         this.portfolioOverview = portfolio;
     }
 
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
-    }
-
-    @Override
-    public Collection<LoanDescriptor> getLoanDescriptors() {
-        return this.loanDescriptors;
     }
 
     @Override

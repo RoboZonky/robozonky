@@ -52,8 +52,7 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         // TODO Enable purchasing delinquents when Zonky enables it.
         return tenant.call(zonky -> zonky.getAvailableParticipations(s))
-                .filter(p -> p.getLoanHealthInfo() == LoanHealth.HEALTHY ||
-                        p.getLoanHealthInfo() == LoanHealth.HISTORICALLY_IN_DUE)
+                .filter(p -> p.getLoanHealthInfo() != LoanHealth.CURRENTLY_IN_DUE)
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {

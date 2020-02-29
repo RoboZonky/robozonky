@@ -62,7 +62,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(a.refresh(eq(TOKEN))).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        final Tenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build();
+        final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build();
         try (tenant) {
             final Statistics s = tenant.call(Zonky::getStatistics);
             assertThat(s).isSameAs(Statistics.empty());

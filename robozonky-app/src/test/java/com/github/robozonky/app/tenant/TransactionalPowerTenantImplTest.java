@@ -80,24 +80,28 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void delegatesInvestmentStrategy() {
+        when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(mock(InvestmentStrategy.class)));
         final Optional<InvestmentStrategy> result = tenant.getInvestmentStrategy();
         assertThat(transactional.getInvestmentStrategy()).isEqualTo(result);
     }
 
     @Test
     void delegatesPurchaseStrategy() {
+        when(tenant.getPurchaseStrategy()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
         final Optional<PurchaseStrategy> result = tenant.getPurchaseStrategy();
         assertThat(transactional.getPurchaseStrategy()).isEqualTo(result);
     }
 
     @Test
     void delegatesSellStrategy() {
+        when(tenant.getSellStrategy()).thenReturn(Optional.of(mock(SellStrategy.class)));
         final Optional<SellStrategy> result = tenant.getSellStrategy();
         assertThat(transactional.getSellStrategy()).isEqualTo(result);
     }
 
     @Test
     void delegatesReservationStrategy() {
+        when(tenant.getReservationStrategy()).thenReturn(Optional.of(mock(ReservationStrategy.class)));
         final Optional<ReservationStrategy> result = tenant.getReservationStrategy();
         assertThat(transactional.getReservationStrategy()).isEqualTo(result);
     }

@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
 
 class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
 
-    public SellInfo mockSellInfo(final BigDecimal price, final BigDecimal fee) {
+    public static SellInfo mockSellInfo(final BigDecimal price, final BigDecimal fee) {
         SellFee sellFee = mock(SellFee.class);
         when(sellFee.getValue()).thenReturn(Money.from(fee));
         when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
@@ -51,7 +51,7 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void emptyGetLoan() {
+    void emptyGet() {
         final long id = 1;
         final SellInfo sellInfo = mockSellInfo(BigDecimal.TEN, BigDecimal.ONE);
         final Zonky z = harmlessZonky();
@@ -63,7 +63,7 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void loadLoan() {
+    void load() {
         final Instant now = Instant.now();
         final SellInfo sellInfo = mockSellInfo(BigDecimal.TEN, BigDecimal.ONE);
         final Instant instant = Instant.EPOCH;
@@ -80,6 +80,45 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
         // and now test eviction
         setClock(Clock.fixed(now.plus(Duration.ofHours(2)), Defaults.ZONE_ID));
         assertThat(c.getFromCache(id)).isEmpty();
+    }
+
+    @Test
+    void loadWithoutExpiration() {
+        final Instant now = Instant.now();
+        final SellInfo sellInfo = mockSellInfo(BigDecimal.TEN, BigDecimal.ONE);
+        final SellPriceInfo sellPriceInfo = sellInfo.getPriceInfo();
+        final SellFee sellFee = sellPriceInfo.getFee();
+        when(sellFee.getExpiresAt()).thenReturn(Optional.empty());
+        final Instant instant = Instant.EPOCH;
+        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        final long id = 2;
+        final Zonky z = harmlessZonky();
+        when(z.getSellInfo(eq(id))).thenReturn(sellInfo);
+        final Tenant t = mockTenant(z);
+        final Cache<SellInfo> c = Cache.forSellInfo(t);
+        assertThat(c.get(id)).isEqualTo(sellInfo); // return the freshly retrieved loan
+        verify(z).getSellInfo(eq(id));
+        assertThat(c.getFromCache(id)).contains(sellInfo);
+        verify(z, times(1)).getSellInfo(eq(id));
+        // and now test eviction
+        setClock(Clock.fixed(now.plus(Duration.ofHours(2)), Defaults.ZONE_ID));
+        assertThat(c.getFromCache(id)).isEmpty();
+    }
+
+    @Test
+    void loadUncached() {
+        final Instant now = Instant.now();
+        final SellInfo sellInfo = mockSellInfo(BigDecimal.TEN, BigDecimal.ONE);
+        final long id = 2;
+        final Zonky z = harmlessZonky();
+        when(z.getSellInfo(eq(id))).thenReturn(sellInfo);
+        final Tenant t = mockTenant(z);
+        final Cache<SellInfo> c = Cache.forSellInfo(t);
+        assertThat(c.get(id)).isEqualTo(sellInfo); // return the freshly retrieved loan
+        final Instant instant = Instant.EPOCH.plus(Duration.ofSeconds(1));
+        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        assertThat(c.get(id)).isEqualTo(sellInfo);
+        verify(z, times(2)).getSellInfo(eq(id));
     }
 
     @Test

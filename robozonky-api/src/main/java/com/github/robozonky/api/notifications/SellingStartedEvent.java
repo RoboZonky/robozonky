@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.util.Collection;
-
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-
 /**
  * Fired immediately before existing investments are submitted to the selling algorithm.
  * Will eventually be followed by {@link SellingCompletedEvent}.
  */
 public interface SellingStartedEvent extends Financial {
 
-    /**
-     * @return Participations on the secondary marketplace that are available for robotic investment.
-     */
-    Collection<InvestmentDescriptor> getDescriptors();
 }

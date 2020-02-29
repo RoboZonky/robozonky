@@ -85,6 +85,12 @@ class KeyStoreSecretProviderTest {
     }
 
     @Test
+    void setNullPassword() {
+        final KeyStoreSecretProvider p = newProvider(USR, PWD);
+        assertThat(p.setUsername(null)).isFalse();
+    }
+
+    @Test
     void setToken() {
         final SecretProvider p = newProvider(USR, PWD);
         // make sure original values were set

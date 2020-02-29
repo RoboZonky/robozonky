@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private final Map<Rating, Money> investedPerRating;
 
     PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
-        this(impl.getTotal(), impl.getRemotePortfolio().getStatistics().getProfitability().orElse(Ratio.ZERO));
+        this(impl.getTotal(), impl.getRemoteData().getStatistics().getProfitability().orElse(Ratio.ZERO));
     }
 
     PortfolioOverviewImpl(final Map<Rating, Money> investedPerRating, final Ratio profitability) {

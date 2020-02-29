@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package com.github.robozonky.internal;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,6 +25,9 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -55,6 +55,7 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(443);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).isEmpty();
+            softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled()).isFalse();
         });
     }
 
@@ -62,6 +63,7 @@ class SettingsTest {
     void setProperties() throws IOException {
         final Properties p = new Properties();
         Stream.of(Settings.Key.values()).forEach(v -> p.setProperty(v.getName(), "1000"));
+        p.setProperty(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING.getName(), "true");
         final File f = File.createTempFile("robozonky-", ".properties");
         p.store(new FileWriter(f), "Testing properties");
         System.setProperty(Settings.FILE_LOCATION_PROPERTY, f.getAbsolutePath());
@@ -69,7 +71,7 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.get("user.dir", "")).isNotEqualTo("");
             softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
                     .isEqualTo("");
-            softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled()).isFalse();
+            softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled()).isTrue();
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
                     .matches(new SettingsTest.TemporalPredicate(1000 * 60));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(1000);

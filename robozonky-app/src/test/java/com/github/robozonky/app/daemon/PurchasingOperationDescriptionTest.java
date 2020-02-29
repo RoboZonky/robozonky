@@ -20,6 +20,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -53,6 +54,15 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         assertThat(a1.hasUpdates()).isTrue();
         final MarketplaceAccessor<ParticipationDescriptor> a2 = d.newMarketplaceAccessor(t);
         assertThat(a2.hasUpdates()).isFalse();
+    }
+
+    @Test
+    void enabled() {
+        final Zonky z = harmlessZonky();
+        final PowerTenant t = mockTenant(z);
+        when(z.getRestrictions()).thenReturn(new Restrictions(false));
+        final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
+        assertThat(d.isEnabled(t)).isFalse();
     }
 
 }

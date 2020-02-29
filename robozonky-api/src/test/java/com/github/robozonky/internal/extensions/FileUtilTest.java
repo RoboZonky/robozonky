@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.Mockito.*;
 
 class FileUtilTest {
@@ -37,6 +40,26 @@ class FileUtilTest {
         if (SOME_DIR.exists()) {
             SOME_DIR.delete();
         }
+    }
+
+    @Test
+    void isJarFile() throws IOException {
+        Path path = Files.createTempFile("robozonky-", ".jar");
+        assumeThat(path).exists();
+        File file = path.toFile();
+        assertThat(FileUtil.isJarFile(file)).isTrue();
+        file.delete();
+        assumeThat(FileUtil.isJarFile(file)).isFalse();
+    }
+
+    @Test
+    void negativeIsJarFile() throws IOException {
+        Path path = Files.createTempFile("robozonky-", ".tmp");
+        assumeThat(path).exists();
+        File file = path.toFile();
+        assertThat(FileUtil.isJarFile(file)).isFalse();
+        file.delete();
+        assumeThat(FileUtil.isJarFile(file)).isFalse();
     }
 
     @Test

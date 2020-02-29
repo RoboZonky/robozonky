@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,23 +40,21 @@ class InstanceStateImplTest {
         TenantState.destroyAll();
     }
 
-    @BeforeEach
-    void prepareState() {
-        s.update(m -> m.put("key", Stream.of("value", "value2")).remove("key2"));
-    }
-
     @Test
     void startFresh() {
+        assertThat(s.isInitialized()).isFalse();
         s.reset();
         assertSoftly(softly -> {
             softly.assertThat(s.getKeys()).isEmpty();
             softly.assertThat(s.getValue("key")).isEmpty();
             softly.assertThat(s.getLastUpdated()).isNotEmpty();
+            softly.assertThat(s.isInitialized()).isTrue();
         });
     }
 
     @Test
     void startWithExisting() {
+        s.update(m -> m.put("key", Stream.of("value", "value2")).remove("key2"));
         assertThat(s.getValues("key")).isPresent();
         final Collection<String> values = s.getValues("key").get().collect(Collectors.toSet());
         assertThat(values).containsOnly("value", "value2");

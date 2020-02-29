@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 class LoanCacheTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    void emptyGetLoan() {
+    void emptyGet() {
         final int loanId = 1;
         final MyInvestment mi = mock(MyInvestment.class);
         final OffsetDateTime d = OffsetDateTime.now();
@@ -55,7 +55,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void loadLoan() {
+    void load() {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final Loan loan = new MockLoanBuilder()
@@ -73,6 +73,25 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         // and now test eviction
         setClock(Clock.fixed(instant.plus(Duration.ofHours(25)), Defaults.ZONE_ID));
         assertThat(c.getFromCache(loanId)).isEmpty();
+        assertThat(c.getEvictor()).isNotNull();
+    }
+
+    @Test
+    void loadUncached() {
+        final Instant instant = Instant.now();
+        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        final Loan loan = new MockLoanBuilder()
+                .setRemainingInvestment(1)
+                .build();
+        final int loanId = loan.getId();
+        final Zonky z = harmlessZonky();
+        when(z.getLoan(eq(loanId))).thenReturn(loan);
+        final Tenant t = mockTenant(z);
+        final Cache<Loan> c = Cache.forLoan(t);
+        assertThat(c.get(loanId)).isEqualTo(loan); // return the freshly retrieved loan
+        verify(z).getLoan(eq(loanId));
+        assertThat(c.get(loanId)).isEqualTo(loan); // retrieve it again as its remaining amount > 0
+        verify(z, times(2)).getLoan(eq(loanId));
     }
 
     @Test

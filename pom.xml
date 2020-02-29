@@ -48,8 +48,8 @@
     <version.org.junit5>6.0</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
-    <version.org.mockito>3.1.5</version.org.mockito>
-    <version.org.mock-server>5.7.1</version.org.mock-server>
+    <version.org.mockito>3.3.2</version.org.mockito>
+    <version.org.mock-server>5.9.0</version.org.mock-server>
     <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j> <!-- 2.13.0 has an annoying bug (LOG4J2-2739) -->
     <version.com.sun.mail>1.6.4</version.com.sun.mail>
     <!--
@@ -385,7 +385,7 @@
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.14.0</version>
+        <version>3.15.0</version>
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>
@@ -546,12 +546,12 @@
       <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
-        <version>1.4.10</version>
+        <version>1.5.0</version>
         <dependencies>
           <dependency>
             <groupId>org.pitest</groupId>
             <artifactId>pitest-junit5-plugin</artifactId>
-            <version>0.10</version>
+            <version>0.12</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -563,8 +563,13 @@
             <param>com.github.robozonky.*</param>
           </targetClasses>
           <excludedMethods>
-            <param>hashCode</param>
             <param>toString</param>
+            <!--
+              assertThat(a).isEqualTo(a) produces untested code where equals() contains a == b.
+              This generates unwanted unkillable mutations.
+              -->
+            <param>equals</param>
+            <param>hashCode</param>
           </excludedMethods>
           <jvmArgs> <!-- some tests may fail on non-UTF-8 machines -->
             <value>-Dfile.encoding=${project.build.sourceEncoding}</value>

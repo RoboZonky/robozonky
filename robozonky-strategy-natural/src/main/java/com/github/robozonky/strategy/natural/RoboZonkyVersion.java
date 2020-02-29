@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import java.util.regex.Pattern;
 
 class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
 
-    private static final Comparator<RoboZonkyVersion> COMPARATOR = Comparator.comparing(RoboZonkyVersion::getMajor)
-            .thenComparing(RoboZonkyVersion::getMinor)
-            .thenComparing(RoboZonkyVersion::getMicro);
+    private static final Comparator<RoboZonkyVersion> COMPARATOR = Comparator.comparingInt(RoboZonkyVersion::getMajor)
+            .thenComparingInt(RoboZonkyVersion::getMinor)
+            .thenComparingInt(RoboZonkyVersion::getMicro);
     private static final Pattern SINGLE_DOT_PATTERN = Pattern.compile("\\Q.\\E");
 
     private final int major, minor, micro;

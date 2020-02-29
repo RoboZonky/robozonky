@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,15 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class StrategyProviderTest extends AbstractRoboZonkyTest {
 
-    private static final String MINIMAL_STRATEGY = "Robot má udržovat konzervativní portfolio.";
+    private static final String MINIMAL_STRATEGY = "Tato strategie vyžaduje RoboZonky ve verzi 5.7.0 nebo pozdější.\n" +
+            "- Obecná nastavení\n" +
+            "Robot má udržovat konzervativní portfolio.\n" +
+            "Robot má pravidelně kontrolovat rezervační systém a přijímat rezervace půjček odpovídajících této " +
+            "strategii.\n" +
+            "Robot má investovat do půjček po 200 Kč.\n" +
+            "Robot má nakupovat participace nejvýše za 200 Kč.\n" +
+            "Investovat do všech půjček a participací.\n" +
+            "Prodávat všechny participace bez poplatku a slevy, které odpovídají filtrům tržiště.";
 
     private static File newStrategyFile() throws IOException {
         final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
@@ -43,9 +51,9 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
         r.newValue(MINIMAL_STRATEGY); // store correct strategy
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getToSell()).isPresent();
             softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getForReservations()).isPresent();
         });
         r.newValue(UUID.randomUUID().toString()); // store invalid strategy
         assertSoftly(softly -> {
@@ -62,9 +70,9 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
         r.newValue(MINIMAL_STRATEGY); // store correct strategy
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getToSell()).isPresent();
             softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getForReservations()).isPresent();
         });
         r.valueUnset();
         assertSoftly(softly -> {
@@ -80,9 +88,9 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
         final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getToSell()).isPresent();
             softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getForReservations()).isPresent();
         });
     }
 
@@ -99,14 +107,27 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     }
 
     @Test
+    void loadWrongStrategyAsNonExistentFile() throws IOException {
+        final File tmp = File.createTempFile("robozonky-", ".cfg");
+        tmp.delete();
+        final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
+        assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isEmpty();
+            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getToPurchase()).isEmpty();
+            softly.assertThat(r.getForReservations()).isEmpty();
+        });
+    }
+
+    @Test
     void loadStrategyAsUrl() throws IOException {
         final String url = newStrategyFile().toURI().toURL().toString();
         final StrategyProvider r = StrategyProvider.createFor(url);
         assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getToSell()).isPresent();
             softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getForReservations()).isPresent();
         });
     }
 

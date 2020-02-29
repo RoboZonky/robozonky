@@ -69,6 +69,8 @@ class RatioTest {
             softly.assertThat(ratio).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(ratio).isEqualTo(ratio);
             softly.assertThat(ratio).isNotEqualTo(ratio2);
+            softly.assertThat(ratio2).isNotEqualTo(ratio);
+            softly.assertThat(ratio3).isEqualTo(ratio);
             softly.assertThat(ratio).isEqualTo(ratio3);
         });
         final Ratio ratio4 = Ratio.fromRaw(BigDecimal.ZERO);
