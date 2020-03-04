@@ -116,6 +116,10 @@
       <spec txt="Vložte odkaz:" size="30" />
       <validator class="com.github.robozonky.installer.UrlValidator" txt="Vložte platné URL." />
     </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" txt="Lze využít soubor robozonky-notifications.cfg z předchozí instalace." />
   </panel>
 
   <panel id="simpleEmailUserInput" summaryKey="Zjednodušené nastavení e-mailového serveru">
