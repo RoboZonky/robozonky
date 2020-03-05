@@ -16,3 +16,5 @@ buildNumber.properties
 robozonky.cli
 robozonky-strategy.cfg
 robozonky-notifications.cfg
+robozonky-installer/robozonky-exec.sh
+robozonky-installer/robozonky-exec.bat
