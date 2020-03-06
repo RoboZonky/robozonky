@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,22 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServiceUnavailableException;
+import javax.ws.rs.core.Response;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.notifications.*;
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
+import com.github.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -29,15 +43,9 @@ import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServiceUnavailableException;
-import javax.ws.rs.core.Response;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
@@ -83,6 +91,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(newEvents.get(2)).isInstanceOf(InvestmentMadeEvent.class);
             softly.assertThat(newEvents.get(3)).isInstanceOf(ExecutionCompletedEvent.class);
         });
+        verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }
 
     @Test
@@ -94,6 +103,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         doThrow(thrown).when(z).invest(any());
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
         assertThatThrownBy(() -> t.accept(r)).isSameAs(thrown);
+        verify(auth, never()).setKnownBalanceUpperBound(any());
     }
 
     @Test
@@ -108,6 +118,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.invest(any())).thenReturn(InvestmentResult.failure(thrown));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
         assertThatThrownBy(() -> t.accept(r)).isInstanceOf(IllegalStateException.class);
+        verify(auth, never()).setKnownBalanceUpperBound(any());
     }
 
     @Test
@@ -145,5 +156,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
                 .hasSize(1)
                 .first()
                 .isInstanceOf(InvestmentMadeEvent.class);
+        verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }
+
 }
