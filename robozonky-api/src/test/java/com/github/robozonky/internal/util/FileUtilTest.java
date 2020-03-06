@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class FileUtilTest {
@@ -40,6 +41,30 @@ class FileUtilTest {
         if (SOME_DIR.exists()) {
             SOME_DIR.delete();
         }
+    }
+
+    @Test
+    void permissions() throws IOException {
+        Path path = Files.createTempFile("robozonky-", ".tmp");
+        File file = path.toFile();
+        boolean result = FileUtil.configurePermissions(file, true);
+        assertSoftly(softly -> {
+            softly.assertThat(path.toFile())
+                    .canRead()
+                    .canWrite();
+            softly.assertThat(path.toFile().canExecute())
+                    .isTrue();
+            softly.assertThat(result).isTrue();
+        });
+        boolean result2 = FileUtil.configurePermissions(file, false);
+        assertSoftly(softly -> {
+            softly.assertThat(path.toFile())
+                    .canRead()
+                    .canWrite();
+            softly.assertThat(path.toFile().canExecute())
+                    .isFalse();
+            softly.assertThat(result2).isTrue();
+        });
     }
 
     @Test

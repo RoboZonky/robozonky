@@ -37,9 +37,10 @@ public final class FileUtil {
     }
 
     public static boolean configurePermissions(final File f, final boolean executable) {
-        return f.setWritable(true, true) &&
-                f.setReadable(true, true) &&
-                f.setExecutable(executable, true);
+        var ownerOnly = true;
+        return f.setWritable(true, ownerOnly) &&
+                f.setReadable(true, ownerOnly) &&
+                f.setExecutable(executable, ownerOnly);
     }
 
     public static boolean isJarFile(final File f) {
