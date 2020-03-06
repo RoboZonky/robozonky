@@ -26,6 +26,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -43,6 +45,7 @@ class FileUtilTest {
         }
     }
 
+    @DisabledOnOs(OS.WINDOWS)
     @Test
     void permissions() throws IOException {
         Path path = Files.createTempFile("robozonky-", ".tmp");
