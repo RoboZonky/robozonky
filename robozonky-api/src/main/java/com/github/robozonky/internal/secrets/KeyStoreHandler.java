@@ -31,6 +31,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.github.robozonky.internal.util.FileUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -214,6 +215,7 @@ public class KeyStoreHandler {
     public void save(final char... secret) {
         this.password = secret.clone();
         try (var outputStream = new BufferedOutputStream(new FileOutputStream(this.keyStoreFile))) {
+            FileUtil.configurePermissions(this.keyStoreFile, false);
             this.keyStore.store(outputStream, secret);
             this.dirty.set(false);
         } catch (Exception ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,29 @@
 
 package com.github.robozonky.cli;
 
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.test.DateUtil;
-import picocli.CommandLine;
 
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
 
-@CommandLine.Command(name = "notification-tester", description = NotificationTestingFeature.DESCRIPTION)
+@Command(name = "notification-tester", description = NotificationTestingFeature.DESCRIPTION)
 public final class NotificationTestingFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Send a testing notification using the provided configuration.";
 
-    @CommandLine.Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
+    @Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
     private String username = null;
-    @CommandLine.Option(names = {"-l", "--location"}, description = "URL leading to the configuration.",
-            required = true)
+    @Option(names = {"-l", "--location"}, description = "URL leading to the configuration.", required = true)
     private URL location;
 
     public NotificationTestingFeature(final String username, final URL location) {

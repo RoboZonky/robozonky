@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.util.FileUtil;
 import com.izforge.izpack.api.data.InstallData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,6 +53,7 @@ final class Util {
 
     public static void writeOutProperties(final Properties properties, final File target) {
         try (var writer = Files.newBufferedWriter(target.toPath(), Defaults.CHARSET)) {
+            FileUtil.configurePermissions(target, false);
             properties.store(writer, Defaults.ROBOZONKY_USER_AGENT);
             LOGGER.debug("Written properties to {}.", target);
         } catch (Exception ex) {
@@ -96,6 +98,7 @@ final class Util {
         final Path t = to.getAbsoluteFile().toPath();
         LOGGER.debug("Copying {} to {}", f, t);
         Files.copy(f, t, StandardCopyOption.REPLACE_EXISTING);
+        FileUtil.configurePermissions(to, false);
     }
 
     public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.extensions;
+package com.github.robozonky.internal.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +26,12 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 class FileUtilTest {
@@ -40,6 +43,31 @@ class FileUtilTest {
         if (SOME_DIR.exists()) {
             SOME_DIR.delete();
         }
+    }
+
+    @DisabledOnOs(OS.WINDOWS)
+    @Test
+    void permissions() throws IOException {
+        Path path = Files.createTempFile("robozonky-", ".tmp");
+        File file = path.toFile();
+        boolean result = FileUtil.configurePermissions(file, true);
+        assertSoftly(softly -> {
+            softly.assertThat(path.toFile())
+                    .canRead()
+                    .canWrite();
+            softly.assertThat(path.toFile().canExecute())
+                    .isTrue();
+            softly.assertThat(result).isTrue();
+        });
+        boolean result2 = FileUtil.configurePermissions(file, false);
+        assertSoftly(softly -> {
+            softly.assertThat(path.toFile())
+                    .canRead()
+                    .canWrite();
+            softly.assertThat(path.toFile().canExecute())
+                    .isFalse();
+            softly.assertThat(result2).isTrue();
+        });
     }
 
     @Test

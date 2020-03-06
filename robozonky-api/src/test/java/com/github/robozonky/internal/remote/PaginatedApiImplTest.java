@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.github.robozonky.internal.remote;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -31,12 +32,12 @@ class PaginatedApiImplTest<S, T> {
 
     @Test
     void checkFilter() {
-        final Function<T, S> f = o -> null;
+        final Function<T, BigDecimal> f = o -> BigDecimal.ONE;
         final Select sel = mock(Select.class);
         final RoboZonkyFilter filter = new RoboZonkyFilter();
-        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, null));
-        doReturn(null).when(p).execute(eq(f), eq(filter), anyBoolean());
-        p.execute(f, sel, filter);
+        final PaginatedApi<BigDecimal, T> p = spy(new PaginatedApi<>(null, null, null, null));
+        doReturn(BigDecimal.ONE).when(p).execute(eq(f), eq(filter), anyBoolean());
+        assertThat(p.execute(f, sel, filter)).isEqualTo(BigDecimal.ONE);
         verify(sel).accept(filter);
         verify(p).execute(eq(f), any(RoboZonkyFilter.class), eq(true));
     }
