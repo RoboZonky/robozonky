@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.extensions;
+package com.github.robozonky.internal.util;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -28,12 +28,18 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-final class FileUtil {
+public final class FileUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(FileUtil.class);
 
     private FileUtil() {
         // no instances
+    }
+
+    public static boolean configurePermissions(final File f, final boolean executable) {
+        return f.setWritable(true, true) &&
+                f.setReadable(true, true) &&
+                f.setExecutable(executable, true);
     }
 
     public static boolean isJarFile(final File f) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,6 @@
 
 package com.github.robozonky.installer;
 
-import com.github.robozonky.installer.scripts.RunScriptGenerator;
-import com.github.robozonky.installer.scripts.ServiceGenerator;
-import com.github.robozonky.internal.Settings;
-import com.izforge.izpack.api.data.InstallData;
-import com.izforge.izpack.api.data.Pack;
-import com.izforge.izpack.api.event.AbstractInstallerListener;
-import com.izforge.izpack.api.event.ProgressListener;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +26,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
+
+import com.github.robozonky.installer.scripts.RunScriptGenerator;
+import com.github.robozonky.installer.scripts.ServiceGenerator;
+import com.github.robozonky.internal.Settings;
+import com.github.robozonky.internal.util.FileUtil;
+import com.izforge.izpack.api.data.InstallData;
+import com.izforge.izpack.api.data.Pack;
+import com.izforge.izpack.api.event.AbstractInstallerListener;
+import com.izforge.izpack.api.event.ProgressListener;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
@@ -145,6 +146,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
             try {
                 Util.copyFile(new File(content), strategyFile);
+                FileUtil.configurePermissions(strategyFile, false);
                 return new CommandLinePart().setOption("-s", strategyFile.getAbsolutePath());
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed copying strategy file.", ex);
@@ -246,6 +248,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         try {
             final InputStream log4j2config = RoboZonkyInstallerListener.class.getResourceAsStream("/log4j2.xml");
             FileUtils.copyInputStreamToFile(log4j2config, LOG4J2_CONFIG_FILE);
+            FileUtil.configurePermissions(LOG4J2_CONFIG_FILE, false);
             return new CommandLinePart()
                     .setProperty("log4j.configurationFile", LOG4J2_CONFIG_FILE.getAbsolutePath());
         } catch (final IOException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.installer.CommandLinePart;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.util.FileUtil;
 import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,6 +78,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
             ));
             final File target = this.getRunScript();
             Files.write(target.toPath(), finisher.apply(result).getBytes(Defaults.CHARSET));
+            FileUtil.configurePermissions(target, true);
             LOGGER.info("Generated run script: {}.", target.getAbsolutePath());
             return target;
         } catch (final IOException | TemplateException e) {

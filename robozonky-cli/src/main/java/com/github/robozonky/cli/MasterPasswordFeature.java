@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ package com.github.robozonky.cli;
 
 import java.io.File;
 
-import picocli.CommandLine;
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
 
-@CommandLine.Command(name = "master-password", description = MasterPasswordFeature.DESCRIPTION)
+@Command(name = "master-password", description = MasterPasswordFeature.DESCRIPTION)
 public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Change password of the master keystore.";
-    @CommandLine.Option(names = {"-n", "--new-secret"},
-            description = "Username to use to authenticate with Zonky servers.", required = true, interactive = true,
-            arity = "0..1")
+    @Option(names = {"-n", "--new-secret"}, description = "Username to use to authenticate with Zonky servers.",
+            required = true, interactive = true, arity = "0..1")
     private char[] newSecret = null;
 
     public MasterPasswordFeature(final File keystore, final char[] keystoreSecret, final char... newSecret) {

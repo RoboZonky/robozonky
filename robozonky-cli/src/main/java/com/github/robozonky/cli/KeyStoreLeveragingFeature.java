@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ package com.github.robozonky.cli;
 import java.io.File;
 
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
-import picocli.CommandLine;
+
+import static picocli.CommandLine.Option;
 
 abstract class KeyStoreLeveragingFeature extends AbstractFeature {
 
-    @CommandLine.Option(names = {"-k", "--keystore"}, description = "The keystore to hold the secrets.",
-            required = true)
+    @Option(names = {"-k", "--keystore"}, description = "The keystore to hold the secrets.", required = true)
     private File keystore = new File("robozonky.keystore");
-    @CommandLine.Option(names = {"-s", "--secret"}, description = "Secret to use to access the keystore.",
-            required = true, interactive = true, arity = "0..1")
+    @Option(names = {"-s", "--secret"}, description = "Secret to use to access the keystore.", required = true,
+            interactive = true, arity = "0..1")
     private char[] secret = null;
     private KeyStoreHandler storage;
 

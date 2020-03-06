@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,42 +16,40 @@
 
 package com.github.robozonky.cli;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.ApiProvider;
-import com.github.robozonky.internal.secrets.KeyStoreHandler;
-import com.github.robozonky.internal.secrets.SecretProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import picocli.CommandLine;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@CommandLine.Command(name = "zonky-credentials", description = ZonkyCredentialsFeature.DESCRIPTION)
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
+import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.util.FileUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+
+@Command(name = "zonky-credentials", description = ZonkyCredentialsFeature.DESCRIPTION)
 public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
 
     private static final Logger LOGGER = LogManager.getLogger(ZonkyCredentialsFeature.class);
 
     static final String DESCRIPTION = "Set credentials to access Zonky servers.";
     private final ApiProvider api;
-    @CommandLine.Option(names = {"-u", "--username"},
+    @Option(names = {"-u", "--username"},
             description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
-    @CommandLine.Option(names = {"-p", "--password"},
+    @Option(names = {"-p", "--password"},
             description = "Authorization code obtained from Zonky. If not provided, will check for existing token",
-            interactive = true, arity = "0..1")
+            required = true, interactive = true, arity = "0..1")
     private char[] password = null;
-    @CommandLine.Option(names = {"-t", "--token"},
+    @Option(names = {"-t", "--token"},
             description = "Raw XML of the Zonky API token will be stored in this file. Keep it secret, keep it safe.")
     private Path tokenTargetPath = null;
-
-    public ZonkyCredentialsFeature(final File keystore, final char[] keystoreSecret, final String username,
-                                   final char... password) {
-        this(new ApiProvider(), keystore, keystoreSecret, username, password);
-    }
 
     ZonkyCredentialsFeature(final ApiProvider apiProvider, final File keystore, final char[] keystoreSecret,
                             final String username, final char... password) {
@@ -61,8 +59,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
         this.password = password.clone();
     }
 
-    ZonkyCredentialsFeature() {
-        // for Picocli
+    ZonkyCredentialsFeature() { // for Picocli
         this.api = new ApiProvider();
     }
 
@@ -95,6 +92,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
         final ZonkyApiToken token = s.getToken()
                 .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
         Files.write(target, ZonkyApiToken.marshal(token).getBytes(Defaults.CHARSET));
+        FileUtil.configurePermissions(target.toFile(), false);
         LOGGER.info("Raw token XML written to {}.", target);
     }
 

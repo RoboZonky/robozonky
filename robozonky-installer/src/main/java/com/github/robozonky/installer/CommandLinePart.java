@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.util.FileUtil;
 
 public class CommandLinePart {
 
@@ -89,6 +90,7 @@ public class CommandLinePart {
 
     public void storeOptions(final File cliFile) throws IOException {
         Files.write(cliFile.toPath(), this.getOptionItems(), Defaults.CHARSET);
+        FileUtil.configurePermissions(cliFile, false);
     }
 
     public Map<String, Optional<String>> getJvmArguments() {

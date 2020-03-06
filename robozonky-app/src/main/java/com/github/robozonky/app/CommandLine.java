@@ -36,30 +36,33 @@ import com.github.robozonky.internal.util.UrlUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+
 /**
  * Converts command line into application configuration using {@link picocli.CommandLine}.
  */
-@picocli.CommandLine.Command(name = "robozonky(.sh|.bat)")
+@Command(name = "robozonky(.sh|.bat)")
 public class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMode>>> {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLine.class);
-    @picocli.CommandLine.Option(names = {"-s", "--strategy"}, required = true,
+    @Option(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")
     String strategyLocation = "";
-    @picocli.CommandLine.Option(names = {"-h", "--help"}, usageHelp = true, description = "Print usage end exit.")
+    @Option(names = {"-h", "--help"}, usageHelp = true, description = "Print usage end exit.")
     private boolean help;
-    @picocli.CommandLine.Option(names = {"-i", "--inform"},
+    @Option(names = {"-i", "--inform"},
             description = "Points to a resource holding the notification configuration.")
     private String notificationConfigLocation;
-    @picocli.CommandLine.Option(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
+    @Option(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
     private String name = "Unnamed";
-    @picocli.CommandLine.Option(names = {"-p", "--password"}, required = true, interactive = true,
-            arity = "0..1", description = "Enter password for the secure storage file.")
+    @Option(names = {"-p", "--password"}, required = true, interactive = true, arity = "0..1",
+            description = "Enter password for the secure storage file.")
     private char[] password = null;
-    @picocli.CommandLine.Option(names = {"-d", "--dry"},
+    @Option(names = {"-d", "--dry"},
             description = "RoboZonky will simulate investments, but never actually spend money.")
     private boolean dryRunEnabled = false;
-    @picocli.CommandLine.Option(names = {"-g", "--guarded"},
+    @Option(names = {"-g", "--guarded"},
             description = "Path to secure storage file that contains username, password etc.", required = true)
     private File keystore = null;
 

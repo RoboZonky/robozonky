@@ -25,14 +25,16 @@ import java.util.concurrent.atomic.LongAdder;
 import com.github.robozonky.internal.extensions.StrategyLoader;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
-import picocli.CommandLine;
 
-@CommandLine.Command(name = "strategy-validator", description = StrategyValidationFeature.DESCRIPTION)
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+
+@Command(name = "strategy-validator", description = StrategyValidationFeature.DESCRIPTION)
 public final class StrategyValidationFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Validate a strategy file.";
 
-    @CommandLine.Option(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
+    @Option(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
     private URL location;
     private String text;
     private LongAdder adder = new LongAdder();
@@ -50,8 +52,7 @@ public final class StrategyValidationFeature extends AbstractFeature {
         this.adder = adder;
     }
 
-    StrategyValidationFeature() {
-        // for Picocli
+    StrategyValidationFeature() { // for Picocli
         this.adder = new LongAdder();
     }
 
