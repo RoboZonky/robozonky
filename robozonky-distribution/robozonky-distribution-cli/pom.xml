@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2019 The RoboZonky Project
+  ~ Copyright 2020 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 
   <groupId>com.github.robozonky.distribution</groupId>
   <artifactId>robozonky-distribution-cli</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <name>RoboZonky Distribution: Command-line configuration and validation utility</name>
 
@@ -43,34 +43,36 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.2</version>
         <executions>
           <execution>
-            <!-- Prepare single JAR with dependencies to be used as the primary JAR. -->
-            <configuration>
-              <attach>true</attach>
-              <archive>
-                <manifest>
-                  <mainClass>${com.github.robozonky.cli.mainClass}</mainClass>
-                </manifest>
-              </archive>
-              <descriptors>
-                <!--
-                  By default, jar-with-dependencies will overwrite META-INF/services when there's more than 1 for each
-                  kind of service. This descriptor will merge them instead.
-                -->
-                <descriptor>src/main/assembly/cli.xml</descriptor>
-              </descriptors>
-            </configuration>
-            <id>jar-with-deps</id>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
+            <configuration>
+              <filters>
+                <filter> <!-- Disable modularity for all dependencies, in order to not confuse JLink later. -->
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>**/*module-info*</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>${com.github.robozonky.cli.mainClass}</Main-Class>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+            </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
-
 </project>
