@@ -744,6 +744,10 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>3.2.2</version>
+        </plugin>
+        <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.2.0</version>
         </plugin>

@@ -30,7 +30,7 @@
   <name>RoboZonky Distribution: Full binary archive</name>
 
   <properties>
-    <mainClass>com.github.robozonky.app.App</mainClass>
+    <com.github.robozonky.distribution.main>com.github.robozonky.app.App</com.github.robozonky.distribution.main>
   </properties>
 
   <dependencies>
@@ -45,31 +45,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.2</version>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
-            <configuration>
-              <filters>
-                <filter> <!-- Disable modularity for all dependencies, in order to not confuse JLink later. -->
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>**/*module-info*</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>${mainClass}</Main-Class>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
-            </configuration>
           </execution>
         </executions>
       </plugin>

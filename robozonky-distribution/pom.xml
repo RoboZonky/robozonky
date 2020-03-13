@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2019 The RoboZonky Project
+  ~ Copyright 2020 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@
 
   <name>RoboZonky Distribution: User-facing deliverables</name>
 
+  <properties>
+    <com.github.robozonky.distribution.main>override.this.in.child.poms</com.github.robozonky.distribution.main>
+  </properties>
+
   <modules> <!-- other components are only enabled conditionally -->
     <module>robozonky-distribution-full</module>
   </modules>
@@ -47,5 +51,34 @@
       </modules>
     </profile>
   </profiles>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin> <!-- Shade plugin configuration shared by all distribution modules. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <configuration>
+            <filters>
+              <filter> <!-- Disable modularity for all dependencies, in order to not confuse JLink later. -->
+                <artifact>*:*</artifact>
+                <excludes>
+                  <exclude>**/*module-info*</exclude>
+                </excludes>
+              </filter>
+            </filters>
+            <transformers>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <manifestEntries>
+                  <Main-Class>${com.github.robozonky.distribution.main}</Main-Class>
+                </manifestEntries>
+              </transformer>
+            </transformers>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>
