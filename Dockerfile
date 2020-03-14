@@ -35,7 +35,12 @@ ENV INSTALL_DIRECTORY=/opt/robozonky \
                  LANG='en_US.UTF-8' \
              LANGUAGE='en_US:en' \
                LC_ALL='en_US.UTF-8'
-# Copied from https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/13/jre/alpine/Dockerfile.hotspot.releases.full
+COPY --from=jlink /tmp/robozonky $INSTALL_DIRECTORY
+# Using different ENV as otherwise the ENV definitions above wouldn't be used.
+ENV JAVA_OPTS="$JAVA_OPTS \
+    -Drobozonky.properties.file=$CONFIG_DIRECTORY/robozonky.properties \
+    -Dlog4j.configurationFile=$CONFIG_DIRECTORY/log4j2.xml"
+# Copied from https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/13/jre/alpine/Dockerfile.hotspot.releases.full.
 RUN apk add --no-cache --virtual .build-deps curl binutils \
     && GLIBC_VER="2.30-r0" \
     && ALPINE_GLIBC_REPO="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" \
@@ -68,11 +73,8 @@ RUN apk add --no-cache --virtual .build-deps curl binutils \
     && apk del --purge .build-deps glibc-i18n \
     && rm -rf /tmp/*.apk /tmp/gcc /tmp/gcc-libs.tar.xz /tmp/libz /tmp/libz.tar.xz /var/cache/apk/* \
 # Except for this one, which is necessary to start the container with podman.
-    && mkdir $WORKING_DIRECTORY
-# using different ENV as otherwise the ENV definitions above wouldn't be used
-ENV JAVA_OPTS="$JAVA_OPTS \
-    -Drobozonky.properties.file=$CONFIG_DIRECTORY/robozonky.properties \
-    -Dlog4j.configurationFile=$CONFIG_DIRECTORY/log4j2.xml"
-COPY --from=jlink /tmp/robozonky $INSTALL_DIRECTORY
+    && mkdir $WORKING_DIRECTORY \
+# And this is just for debugging purposes.
+    && ls -l -R $INSTALL_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
 ENTRYPOINT $INSTALL_DIRECTORY/robozonky.sh @$CONFIG_DIRECTORY/robozonky.cli
