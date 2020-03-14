@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2018 The RoboZonky Project
+  ~ Copyright 2020 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -28,25 +28,18 @@
 
   <fileSets>
     <fileSet>
-      <directory>target/dependency</directory>
+      <directory>target/</directory>
       <includes>
-        <include>*.jar</include>
+        <include>robozonky-distribution-full-${project.version}.jar</include>
       </includes>
-      <outputDirectory>bin/</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>target</directory>
-      <includes>
-        <include>robozonky-app-${project.version}.jar</include>
-      </includes>
-      <outputDirectory>bin/</outputDirectory>
+      <outputDirectory />
     </fileSet>
     <fileSet><!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
-      <directory>../</directory>
+      <directory>../../</directory>
       <includes>
         <include>LICENSE</include>
       </includes>
-      <outputDirectory/>
+      <outputDirectory />
     </fileSet>
     <fileSet>
       <directory>src/main/assembly/filtered-resources</directory>
