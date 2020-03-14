@@ -21,8 +21,8 @@ DEPENDENCIES=$($JDEPS_CMD)
 echo "jdeps returned:"
 echo "$DEPENDENCIES"
 
-# Call JLink with these dependencies.
-JLINK_CMD="jlink --compress=2 --no-header-files --no-man-pages --strip-debug --add-modules $DEPENDENCIES --output $TARGET_DIR"
+# Call JLink with these dependencies; add JMX and JFR on top, as those are runtime monitoring dependencies.
+JLINK_CMD="jlink --compress=2 --no-header-files --no-man-pages --strip-debug --add-modules $DEPENDENCIES,jdk.management.jfr,jdk.management.agent --output $TARGET_DIR"
 echo "Calling jlink like so: "
 echo "  $JLINK_CMD"
 JLINK_RESULT=$($JLINK_CMD)
