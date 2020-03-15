@@ -1,0 +1,15 @@
+# Konfigurace strategie vytvořená 15. 3. 2020 nástrojem natural-strategy-setup verze 8968885
+Tato strategie vyžaduje RoboZonky ve verzi 5.7.0 nebo pozdější.
+- Obecná nastavení
+Robot má udržovat uživatelem definované portfolio.
+Robot má zcela ignorovat rezervační systém.
+
+- Úprava struktury portfolia
+Prostředky úročené 2,99 % p.a. mají tvořit 100 % aktuální zůstatkové částky.
+Ignorovat všechny půjčky i participace.
+
+- Prodej participací
+Prodat participaci, kde: sleva přesahuje 19 % zbývající jistiny; prodej není zpoplatněn.
+# ----------------------------------------------------------------------
+# Pro budoucí úpravy této strategie vložte následující URL do prohlížeče
+# https://robozonky.github.io/konfigurace-strategie/#Njt7ImkiOlsxMDAsMCwwLDAsMCwwLDAsMCwwLDAsMF0sImgiOnsiYSI6MywiYiI6WyIwIl0sImMiOlsxXSwiZCI6MjAwLCJkMSI6MjAwLCJnMSI6MX0sImoiOlsyMDAsMjAwLDIwMCwyMDAsMjAwLDIwMCwyMDAsMjAwLDIwMCwyMDAsMjAwXSwiajEiOlsyMDAsMjAwLDIwMCwyMDAsMjAwLDIwMCwyMDAsMjAwLDIwMCwyMDAsMjAwXSwiayI6eyJvIjoyfSwibCI6eyJtIjoxLCJuIjpbeyJzIjozLCJ0Ijp7IlQiOlszLDE5XSwiUCI6ZmFsc2V9LCJ1Ijp7fX1dfX0=
