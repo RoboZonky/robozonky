@@ -37,14 +37,12 @@ public abstract class BaseLoan extends BaseEntity {
     protected boolean topped;
     protected boolean covered;
     protected boolean published;
-    protected boolean questionsAllowed;
     protected boolean insuranceActive;
     protected boolean insuredInFuture;
     protected boolean additionallyInsured;
     protected int id;
     protected int termInMonths;
     protected int investmentsCount;
-    protected int questionsCount;
     protected int userId;
     protected int activeLoansCount;
     protected long publicIdentifier = 0;
@@ -203,16 +201,6 @@ public abstract class BaseLoan extends BaseEntity {
         return activeLoansCount;
     }
 
-    @XmlElement
-    public int getQuestionsCount() {
-        return questionsCount;
-    }
-
-    @XmlElement
-    public boolean isQuestionsAllowed() {
-        return questionsAllowed;
-    }
-
     /**
      * @return True if the loan is insured at this very moment. Uninsured loans will have both this and
      * {@link #isAdditionallyInsured()} return false.
@@ -334,8 +322,6 @@ public abstract class BaseLoan extends BaseEntity {
                 .add("publicIdentifier=" + publicIdentifier)
                 .add("published=" + published)
                 .add("purpose=" + purpose)
-                .add("questionsAllowed=" + questionsAllowed)
-                .add("questionsCount=" + questionsCount)
                 .add("rating=" + rating)
                 .add("region=" + region)
                 .add("remainingInvestment='" + remainingInvestment + "'")

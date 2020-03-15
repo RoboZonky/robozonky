@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,6 @@ public final class MutableLoan extends Loan {
         this.published = published;
     }
 
-    public void setQuestionsAllowed(final boolean questionsAllowed) {
-        this.questionsAllowed = questionsAllowed;
-    }
-
     public void setInsuranceActive(final boolean insuranceActive) {
         this.insuranceActive = insuranceActive;
     }
@@ -76,10 +72,6 @@ public final class MutableLoan extends Loan {
 
     public void setInvestmentsCount(final int investmentsCount) {
         this.investmentsCount = investmentsCount;
-    }
-
-    public void setQuestionsCount(final int questionsCount) {
-        this.questionsCount = questionsCount;
     }
 
     public void setUserId(final int userId) {
