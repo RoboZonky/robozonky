@@ -82,7 +82,7 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
         }
         if (needsReload()) { // trigger value retrieval on the background
             final CompletableFuture<Void> currentFuture = future.getAndUpdate(this::refreshIfNotAlreadyRefreshing);
-            logger.debug("Retrieved potentially stale value on {}, while {}.", this, currentFuture);
+            logger.trace("Retrieved potentially stale value on {}, while {}.", this, currentFuture);
         }
         // return the current value
         return Either.right(value.get());
