@@ -37,7 +37,8 @@ public class RelativeProfitCondition extends AbstractRelativeRangeCondition {
     }
 
     private static BigDecimal getOriginalPrice(final Wrapper<?> w) {
-        return w.getOriginalPurchasePrice().orElseThrow();
+        // Return original amount in case this is called during investing, when checking sell filters.
+        return w.getOriginalPurchasePrice().orElseGet(() -> BigDecimal.valueOf(w.getOriginalAmount()));
     }
 
     public static RelativeProfitCondition lessThan(final Ratio threshold) {
