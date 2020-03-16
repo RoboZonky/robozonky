@@ -65,7 +65,7 @@ class LoanWrapperTest {
             softly.assertThat(w.getMainIncomeType()).isEqualTo(loan.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(loan.getPurpose());
             softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount().getValue().intValue());
-            softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
+            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(w.getOriginalAmount()));
             softly.assertThat(w.getOriginal()).isSameAs(ld);
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(loan.getTermInMonths());
@@ -115,7 +115,7 @@ class LoanWrapperTest {
             softly.assertThat(w.getMainIncomeType()).isEqualTo(l.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(l.getPurpose());
             softly.assertThat(w.getOriginalAmount()).isEqualTo(l.getAmount().getValue().intValue());
-            softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
+            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(w.getOriginalAmount()));
             softly.assertThat(w.getOriginal()).isSameAs(original);
             softly.assertThat(w.getStory()).isEqualTo(l.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(l.getTermInMonths());

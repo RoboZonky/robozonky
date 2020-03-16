@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -28,10 +31,8 @@ import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 class ReservationWrapperTest {
 
@@ -60,7 +61,7 @@ class ReservationWrapperTest {
             softly.assertThat(w.getMainIncomeType()).isEqualTo(l.getMainIncomeType());
             softly.assertThat(w.getPurpose()).isEqualTo(l.getPurpose());
             softly.assertThat(w.getOriginalAmount()).isEqualTo(l.getAmount().getValue().intValue());
-            softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
+            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(w.getOriginalAmount()));
             softly.assertThat(w.getOriginal()).isSameAs(original);
             softly.assertThat(w.getStory()).isEqualTo(l.getStory());
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(l.getTermInMonths());
