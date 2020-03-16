@@ -69,6 +69,7 @@ final class Selling implements TenantPayload {
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE");
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
+        LOGGER.debug("Starting to query for sellable investments.");
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .parallel() // this list is potentially very long, and investment pages take long to load; speed this up
                 .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
