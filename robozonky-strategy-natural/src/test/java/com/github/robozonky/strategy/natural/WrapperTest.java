@@ -108,7 +108,6 @@ class WrapperTest {
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(reservation.getAnnuity().getValue().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(reservation.getTermInMonths());
-            softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
             softly.assertThat(w.getSellFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
@@ -143,7 +142,6 @@ class WrapperTest {
             softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().getValue().intValue());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(loan.getTermInMonths());
-            softly.assertThatThrownBy(w::getRemainingPrincipal).isInstanceOf(UnsupportedOperationException.class);
             softly.assertThat(w.getSellFee()).isEmpty();
             softly.assertThat(w.toString()).isNotNull();
         });
