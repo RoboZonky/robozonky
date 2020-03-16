@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ final class SellingJob implements TenantJob {
 
     @Override
     public Duration killIn() {
-        return Duration.ofMinutes(10);
+        return Duration.ofMinutes(30);
     }
 
     @Override
