@@ -18,7 +18,7 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
     && chmod +x $BINARY_DIRECTORY/robozonky.sh
 
 # ... then build a minimalistic JRE using jlink ...
-FROM adoptopenjdk/openjdk13:alpine AS jlink
+FROM adoptopenjdk/openjdk14:alpine AS jlink
 ENV WORKING_DIRECTORY=/tmp/robozonky
 COPY --from=scratch /tmp/robozonky $WORKING_DIRECTORY
 COPY . .
