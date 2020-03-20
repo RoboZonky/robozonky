@@ -95,20 +95,21 @@ final class Util {
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
-        final Money totalPaid = getTotalPaid(i);
+        final Money returned = getReturned(i);
         final Money originalPrincipal = i.getPurchasePrice();
-        final Money partial = totalPaid.subtract(originalPrincipal);
         final Money balance = i.getSmpSoldFor()
                 .map(soldFor -> {
-                    final Money saleFee = i.getSmpFee().orElse(soldFor.getZero());
-                    return partial.add(soldFor).subtract(saleFee);
-                }).orElse(partial);
+                    final Money in = soldFor.add(returned);
+                    final Money fee = i.getSmpFee().orElse(soldFor.getZero());
+                    final Money out = originalPrincipal.add(fee);
+                    return in.subtract(out);
+                }).orElseGet(() -> returned.subtract(originalPrincipal));
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal().orElse(Money.ZERO).getValue());
         loanData.put("amountHeld", originalPrincipal.getValue());
-        loanData.put("amountPaid", totalPaid.getValue());
+        loanData.put("amountPaid", returned.getValue());
         loanData.put("balance", balance.getValue());
         loanData.put("interestExpected", i.getExpectedInterest().getValue());
         loanData.put("interestPaid", i.getPaidInterest().getValue());
@@ -174,7 +175,7 @@ final class Util {
         }
     }
 
-    private static Money getTotalPaid(final Investment i) {
+    private static Money getReturned(final Investment i) {
         return i.getPaidInterest()
                 .add(i.getPaidPrincipal())
                 .add(i.getPaidPenalty());
