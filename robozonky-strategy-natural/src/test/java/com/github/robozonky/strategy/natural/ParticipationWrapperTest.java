@@ -86,6 +86,7 @@ class ParticipationWrapperTest {
         doReturn(Money.ZERO).when(participation).getRemainingPrincipal();
         doReturn(Money.ZERO).when(participation).getDiscount();
         doReturn(Money.ZERO).when(participation).getPrice();
+        doReturn(20).when(participation).getOriginalInstalmentCount();
         doReturn(loan.getPurpose()).when(participation).getPurpose();
         doReturn(loan.getRating()).when(participation).getRating();
         doReturn(loan.getMainIncomeType()).when(participation).getIncomeType();

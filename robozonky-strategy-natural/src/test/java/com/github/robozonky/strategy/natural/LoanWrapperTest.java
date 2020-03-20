@@ -99,6 +99,7 @@ class LoanWrapperTest {
                 .setAmount(100_000)
                 .setRating(Rating.D)
                 .setInterestRate(Ratio.ONE)
+                .setRevenueRate(null)
                 .setMainIncomeType(MainIncomeType.EMPLOYMENT)
                 .setPurpose(Purpose.AUTO_MOTO)
                 .setRegion(Region.JIHOCESKY)
@@ -106,7 +107,9 @@ class LoanWrapperTest {
                 .setTermInMonths(20)
                 .build();
         final LoanDescriptor original = new LoanDescriptor(l);
-        final Wrapper<LoanDescriptor> w = Wrapper.wrap(original, FOLIO);
+        final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
+        when(portfolioOverview.getInvested()).thenReturn(Money.from(100_000));
+        final Wrapper<LoanDescriptor> w = Wrapper.wrap(original, portfolioOverview);
         assertSoftly(softly -> {
             softly.assertThat(w.isInsuranceActive()).isEqualTo(l.isInsuranceActive());
             softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
@@ -121,6 +124,7 @@ class LoanWrapperTest {
             softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(l.getTermInMonths());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(l.getTermInMonths());
             softly.assertThat(w.getHealth()).isEmpty();
+            softly.assertThat(w.getRevenueRate()).isGreaterThan(Ratio.ZERO);
             softly.assertThat(w.getOriginalPurchasePrice()).isEmpty();
             softly.assertThat(w.getDiscount()).isEmpty();
             softly.assertThat(w.getPrice()).isEmpty();
