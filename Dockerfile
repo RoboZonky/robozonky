@@ -32,9 +32,9 @@ LABEL maintainer="The RoboZonky Project (www.robozonky.cz)"
 ENV INSTALL_DIRECTORY=/opt/robozonky \
      CONFIG_DIRECTORY=/etc/robozonky \
     WORKING_DIRECTORY=/var/robozonky \
-                 LANG='en_US.UTF-8' \
-             LANGUAGE='en_US:en' \
-               LC_ALL='en_US.UTF-8'
+                 LANG='cs_CZ.UTF-8' \
+             LANGUAGE='cs_CZ:cs' \
+               LC_ALL='cs_CZ.UTF-8'
 COPY --from=jlink /tmp/robozonky $INSTALL_DIRECTORY
 # Using different ENV as otherwise the ENV definitions above wouldn't be used.
 ENV JAVA_OPTS="$JAVA_OPTS \
