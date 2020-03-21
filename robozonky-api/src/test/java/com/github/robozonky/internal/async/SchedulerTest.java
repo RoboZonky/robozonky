@@ -21,11 +21,15 @@ import java.time.Duration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
+
 class SchedulerTest {
 
     @Test
     void simple() throws Exception {
-        try (Scheduler scheduler = Scheduler.create()) {
+        Scheduler scheduler = Scheduler.create();
+        assertThat(scheduler.isClosed()).isFalse();
+        try (scheduler) {
             TaskDescriptor task = scheduler.submit(() -> {
                 // NOOP
             }, Duration.ofMillis(1), Duration.ofMillis(2), Duration.ofMillis(10));
@@ -35,6 +39,7 @@ class SchedulerTest {
                 }
             }, "Timed out while waiting for operation to complete.");
         }
+        assertThat(scheduler.isClosed()).isTrue();
     }
 
 }

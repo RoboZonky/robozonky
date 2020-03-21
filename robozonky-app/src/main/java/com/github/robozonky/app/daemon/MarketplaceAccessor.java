@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,16 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.test.DateUtil;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The purpose of implementations of this interface is that marketplace checks are coupled to information about latest
@@ -24,9 +33,35 @@ import java.util.Collection;
  * {@link #hasUpdates()} and only ever return that in {@link #getMarketplace()}.
  * @param <T> Type of the entity coming from the marketplace.
  */
-interface MarketplaceAccessor<T> {
+abstract class MarketplaceAccessor<T> {
 
-    Collection<T> getMarketplace();
+    private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 
-    boolean hasUpdates();
+    protected Select getIncrementalFilter() {
+        Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
+        Instant now = DateUtil.now();
+        if (lastFullMarketplaceCheck.plus(getForcedMarketplaceCheckInterval()).isBefore(now)) {
+            lastFullMarketplaceCheckReference.set(now);
+            getLogger().debug("Running full marketplace check with timestamp of {}, previous was {}.", now,
+                              lastFullMarketplaceCheck);
+            return getBaseFilter();
+        } else {
+            var filter = getBaseFilter()
+                    .greaterThanOrEquals("datePublished",
+                                         OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
+            getLogger().debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
+            return filter;
+        }
+    }
+
+    protected abstract Select getBaseFilter();
+
+    public abstract Duration getForcedMarketplaceCheckInterval();
+
+    public abstract Collection<T> getMarketplace();
+
+    public abstract boolean hasUpdates();
+
+    protected abstract Logger getLogger();
+
 }

@@ -16,18 +16,25 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -37,19 +44,26 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void readsMarketplace() {
+        final Loan l = new MockLoanBuilder().build();
+        int loanId = l.getId();
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
+        when(p.getLoanId()).thenReturn(loanId);
         when(p.getLoanHealthInfo()).thenReturn(LoanHealth.HEALTHY);
         final Zonky zonky = harmlessZonky();
+        when(zonky.getLoan(eq(loanId))).thenReturn(l);
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final PowerTenant tenant = mockTenant(zonky);
         final MarketplaceAccessor<ParticipationDescriptor> d =
                 new SecondaryMarketplaceAccessor(tenant, UnaryOperator.identity());
-        final Collection<ParticipationDescriptor> ld = d.getMarketplace();
-        assertThat(ld).hasSize(1)
+        final Collection<ParticipationDescriptor> pd = d.getMarketplace();
+        assertThat(pd).hasSize(1)
                 .element(0)
-                .extracting(ParticipationDescriptor::item)
-                .isSameAs(p);
+                .extracting(ParticipationDescriptor::item).isSameAs(p);
+        assertThat(pd)
+                .element(0)
+                .extracting(ParticipationDescriptor::related)
+                .isSameAs(l);
     }
 
     @Test
@@ -74,5 +88,26 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
                 new SecondaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue();
         assertThat(a.hasUpdates()).isTrue();
+    }
+
+    @Test
+    void incrementality() {
+        final Zonky z = harmlessZonky();
+        when(z.getLastPublishedLoanInfo()).thenThrow(IllegalStateException.class);
+        final PowerTenant t = mockTenant(z);
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
+        final MarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(t, null);
+        Select initial = a.getIncrementalFilter();
+        assertThat(initial).isNotNull();
+        DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));
+        Select anotherFull = a.getIncrementalFilter();
+        assertThat(anotherFull)
+                .isNotNull()
+                .isNotEqualTo(initial);
+        DateUtil.setSystemClock(Clock.fixed(Instant.now().plusSeconds(1), Defaults.ZONE_ID));
+        Select incremental = a.getIncrementalFilter();
+        assertThat(incremental)
+                .isNotNull()
+                .isNotEqualTo(initial);
     }
 }

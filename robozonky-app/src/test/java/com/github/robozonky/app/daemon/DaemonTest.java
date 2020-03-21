@@ -26,6 +26,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.async.Scheduler;
 import com.github.robozonky.internal.jobs.SimplePayload;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,8 @@ class DaemonTest extends AbstractZonkyLeveragingTest {
     void get() throws Exception {
         final PowerTenant a = mockTenant(harmlessZonky(), true);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try (final Daemon d = spy(new Daemon(a, lifecycle))) {
+        final Scheduler s = Scheduler.create();
+        try (final Daemon d = spy(new Daemon(a, lifecycle, s))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
             doNothing().when(d).submitWithTenant(any(), any(), any(), any(), any(), any());
             doNothing().when(d).submitTenantless(any(), any(), any(), any(), any(), any());
@@ -55,5 +57,6 @@ class DaemonTest extends AbstractZonkyLeveragingTest {
             e.shutdownNow();
         }
         verify(a).close();
+        assertThat(s.isClosed()).isTrue();
     }
 }
