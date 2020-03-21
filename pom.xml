@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.robozonky</groupId>
   <artifactId>robozonky</artifactId>
-  <version>5.8.0-cr-1</version>
+  <version>5.8.0-cr-2</version>
   <modules>
     <module>robozonky-api</module>
     <module>robozonky-app</module>
@@ -832,7 +832,7 @@
     <url>git@github.com:RoboZonky/robozonky.git</url>
     <connection>scm:git:git@github.com:RoboZonky/robozonky.git</connection>
     <developerConnection>scm:git:git@github.com:RoboZonky/robozonky.git</developerConnection>
-    <tag>robozonky-5.8.0-cr-1</tag>
+    <tag>robozonky-5.8.0-cr-2</tag>
   </scm>
   <issueManagement>
     <system>github</system>
