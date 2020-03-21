@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
@@ -28,8 +29,9 @@ import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import org.apache.logging.log4j.Logger;
 
-final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
+final class SecondaryMarketplaceAccessor extends MarketplaceAccessor<ParticipationDescriptor> {
 
+    private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(5);
     private static final Logger LOGGER = Audit.purchasing();
 
     private final PowerTenant tenant;
@@ -42,13 +44,22 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
     }
 
     @Override
-    public Collection<ParticipationDescriptor> getMarketplace() {
-        final Select s = new Select()
+    protected Select getBaseFilter() {
+        return new Select()
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
-                .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
+                .greaterThanOrEquals("remainingPrincipal", 2) // Ignore near-0 participation clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
-        final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
-        return tenant.call(zonky -> zonky.getAvailableParticipations(s))
+    }
+
+    @Override
+    public Duration getForcedMarketplaceCheckInterval() {
+        return FULL_CHECK_INTERVAL;
+    }
+
+    @Override
+    public Collection<ParticipationDescriptor> getMarketplace() {
+        var cache = SoldParticipationCache.forTenant(tenant);
+        return tenant.call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {
@@ -73,5 +84,10 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
             LOGGER.debug("Zonky secondary marketplace status endpoint failed, forcing live marketplace check.", ex);
             return true;
         }
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

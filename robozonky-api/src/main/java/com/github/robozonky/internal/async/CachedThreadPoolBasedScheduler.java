@@ -62,6 +62,11 @@ final class CachedThreadPoolBasedScheduler implements Scheduler {
     }
 
     @Override
+    public boolean isClosed() {
+        return executorService.isShutdown();
+    }
+
+    @Override
     public void close() throws Exception {
         executorService.shutdownNow();
         LOGGER.debug("Shutting down {}.", executorService);

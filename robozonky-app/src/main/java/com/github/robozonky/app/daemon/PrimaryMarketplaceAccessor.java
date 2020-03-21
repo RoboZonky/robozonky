@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
@@ -28,13 +29,10 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
-final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
+final class PrimaryMarketplaceAccessor extends MarketplaceAccessor<LoanDescriptor> {
 
+    private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(1);
     private static final Logger LOGGER = Audit.investing();
-    /**
-     * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
-     */
-    private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
     private final Tenant tenant;
     private final UnaryOperator<LastPublishedLoan> stateAccessor;
 
@@ -44,8 +42,20 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
     }
 
     @Override
+    protected Select getBaseFilter() {
+        // Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
+        return new Select()
+                .greaterThan("nonReservedRemainingInvestment", 0);
+    }
+
+    @Override
+    public Duration getForcedMarketplaceCheckInterval() {
+        return FULL_CHECK_INTERVAL;
+    }
+
+    @Override
     public Collection<LoanDescriptor> getMarketplace() {
-        return tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
+        return tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
                 .parallel()
                 .filter(l -> l.getMyInvestment().isEmpty()) // re-investing would fail
                 .map(LoanDescriptor::new)
@@ -63,5 +73,10 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
             LOGGER.debug("Zonky primary marketplace status endpoint failed, forcing live marketplace check.", ex);
             return true;
         }
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,28 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
@@ -80,4 +85,23 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         assertThat(a.hasUpdates()).isTrue();
         assertThat(a.hasUpdates()).isTrue();
     }
+
+    @Test
+    void incrementality() {
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
+        final MarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(null, null);
+        Select initial = a.getIncrementalFilter();
+        assertThat(initial).isNotNull();
+        DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));
+        Select anotherFull = a.getIncrementalFilter();
+        assertThat(anotherFull)
+                .isNotNull()
+                .isNotEqualTo(initial);
+        DateUtil.setSystemClock(Clock.fixed(Instant.now().plusSeconds(1), Defaults.ZONE_ID));
+        Select incremental = a.getIncrementalFilter();
+        assertThat(incremental)
+                .isNotNull()
+                .isNotEqualTo(initial);
+    }
+
 }

@@ -33,11 +33,16 @@ public class Daemon implements InvestmentMode {
     private static final Logger LOGGER = LogManager.getLogger(Daemon.class);
     private final PowerTenant tenant;
     private final Lifecycle lifecycle;
-    private final Scheduler scheduler = Scheduler.create();
+    private final Scheduler scheduler;
 
     public Daemon(final PowerTenant tenant, final Lifecycle lifecycle) {
+        this(tenant, lifecycle, Scheduler.create());
+    }
+
+    Daemon(final PowerTenant tenant, final Lifecycle lifecycle, Scheduler scheduler) {
         this.tenant = tenant;
         this.lifecycle = lifecycle;
+        this.scheduler = scheduler;
     }
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
