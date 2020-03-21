@@ -24,6 +24,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -33,6 +34,7 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,19 +44,26 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void readsMarketplace() {
+        final Loan l = new MockLoanBuilder().build();
+        int loanId = l.getId();
         final Participation p = mock(Participation.class);
         when(p.getId()).thenReturn(1l);
+        when(p.getLoanId()).thenReturn(loanId);
         when(p.getLoanHealthInfo()).thenReturn(LoanHealth.HEALTHY);
         final Zonky zonky = harmlessZonky();
+        when(zonky.getLoan(eq(loanId))).thenReturn(l);
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final PowerTenant tenant = mockTenant(zonky);
         final MarketplaceAccessor<ParticipationDescriptor> d =
                 new SecondaryMarketplaceAccessor(tenant, UnaryOperator.identity());
-        final Collection<ParticipationDescriptor> ld = d.getMarketplace();
-        assertThat(ld).hasSize(1)
+        final Collection<ParticipationDescriptor> pd = d.getMarketplace();
+        assertThat(pd).hasSize(1)
                 .element(0)
-                .extracting(ParticipationDescriptor::item)
-                .isSameAs(p);
+                .extracting(ParticipationDescriptor::item).isSameAs(p);
+        assertThat(pd)
+                .element(0)
+                .extracting(ParticipationDescriptor::related)
+                .isSameAs(l);
     }
 
     @Test

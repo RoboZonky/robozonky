@@ -35,4 +35,6 @@ public interface Scheduler extends AutoCloseable {
     TaskDescriptor submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
                           final Duration timeout);
 
+    boolean isClosed();
+
 }
