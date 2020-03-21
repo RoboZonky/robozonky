@@ -27,6 +27,7 @@
   <name>RoboZonky: Main daemon</name>
 
   <properties>
+    <com.github.robozonky.distribution.main>com.github.robozonky.app.App</com.github.robozonky.distribution.main>
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
@@ -131,4 +132,13 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

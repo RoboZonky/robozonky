@@ -23,7 +23,8 @@ ENV WORKING_DIRECTORY=/tmp/robozonky
 COPY --from=scratch /tmp/robozonky $WORKING_DIRECTORY
 COPY . .
 RUN apk add binutils
-RUN ROBOZONKY_EXECUTABLE=$(find $WORKING_DIRECTORY -name "robozonky-distribution-full*jar") \
+RUN rm $(find $WORKING_DIRECTORY -name "robozonky-cli*jar")
+RUN ROBOZONKY_EXECUTABLE=$(find $WORKING_DIRECTORY -name "robozonky-app*jar") \
     && .github/workflows/jlink.sh $ROBOZONKY_EXECUTABLE $WORKING_DIRECTORY/jre
 
 # ... and finally restart from a minimal image and copy built binary from previous stage

@@ -1,5 +1,5 @@
 #!/bin/sh
-ROBOZONKY_EXECUTABLE="robozonky-distribution-full-${project.version}.jar"
+ROBOZONKY_EXECUTABLE="robozonky-app-${project.version}-full.jar"
 
 # Find the correct installation directory, regardless of whether it's from the ZIP or from the installer.
 SCRIPT=$(realpath $0)

@@ -25,32 +25,42 @@
 
   <groupId>com.github.robozonky.distribution</groupId>
   <artifactId>robozonky-distribution-full</artifactId>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>RoboZonky Distribution: Full binary archive</name>
 
   <properties>
-    <com.github.robozonky.distribution.main>com.github.robozonky.app.App</com.github.robozonky.distribution.main>
+    <com.github.robozonky.distribution>true</com.github.robozonky.distribution>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-app</artifactId>
+      <classifier>full</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-cli</artifactId>
+      <classifier>full</classifier>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <phase>package</phase>
+            <id>copy-shaded-jars</id>
             <goals>
-              <goal>shade</goal>
+              <goal>copy-dependencies</goal>
             </goals>
+            <phase>package</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/shaded</outputDirectory>
+              <excludeTransitive>true</excludeTransitive>
+            </configuration>
           </execution>
         </executions>
       </plugin>

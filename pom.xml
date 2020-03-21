@@ -23,8 +23,8 @@
   <modules>
     <module>robozonky-api</module>
     <module>robozonky-app</module>
+    <module>robozonky-cli</module>
     <module>robozonky-notifications</module>
-    <module>robozonky-extensions</module>
     <module>robozonky-strategy-natural</module>
     <module>robozonky-test</module>
     <module>robozonky-distribution</module>
@@ -101,8 +101,20 @@
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>
+        <artifactId>robozonky-app</artifactId>
+        <version>${project.version}</version>
+        <classifier>full</classifier>
+      </dependency>
+      <dependency>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-cli</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.robozonky</groupId>
+        <artifactId>robozonky-cli</artifactId>
+        <version>${project.version}</version>
+        <classifier>full</classifier>
       </dependency>
       <dependency>
         <groupId>com.github.robozonky.distribution</groupId>
@@ -113,11 +125,6 @@
       <dependency>
         <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-installer</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-extensions</artifactId>
         <version>${project.version}</version>
       </dependency>
       <!--
@@ -612,6 +619,9 @@
             <goals>
               <goal>jar</goal>
             </goals>
+            <configuration>
+              <skip>${com.github.robozonky.distribution}</skip>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -696,6 +706,9 @@
             <goals>
               <goal>test-jar</goal>
             </goals>
+            <configuration>
+                <skip>${com.github.robozonky.distribution}</skip>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -744,10 +757,6 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.2</version>
-        </plugin>
-        <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.2.0</version>
         </plugin>
@@ -768,6 +777,39 @@
           <artifactId>antlr4-maven-plugin</artifactId>
           <version>${version.org.antlr}</version>
         </plugin>
+        <plugin> <!-- Shade plugin configuration shared by all distribution modules. -->
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>3.2.2</version>
+          <executions>
+            <execution>
+              <id>shade</id>
+              <phase>package</phase>
+              <goals>
+                <goal>shade</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <shadedArtifactAttached>true</shadedArtifactAttached>
+            <shadedClassifierName>full</shadedClassifierName>
+            <filters>
+              <filter> <!-- Disable modularity for all dependencies, in order to not confuse JLink later. -->
+                <artifact>*:*</artifact>
+                <excludes>
+                  <exclude>**/*module-info*</exclude>
+                </excludes>
+              </filter>
+            </filters>
+            <transformers>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <manifestEntries>
+                  <Main-Class>${com.github.robozonky.distribution.main}</Main-Class>
+                </manifestEntries>
+              </transformer>
+            </transformers>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -781,7 +823,6 @@
         </property>
       </activation>
       <modules>
-        <module>robozonky-cli</module>
         <module>robozonky-installer</module>
       </modules>
     </profile>
@@ -791,7 +832,7 @@
     <url>git@github.com:RoboZonky/robozonky.git</url>
     <connection>scm:git:git@github.com:RoboZonky/robozonky.git</connection>
     <developerConnection>scm:git:git@github.com:RoboZonky/robozonky.git</developerConnection>
-    <tag>robozonky-5.7.0-beta-1</tag>
+    <tag>robozonky-5.8.0-cr-1</tag>
   </scm>
   <issueManagement>
     <system>github</system>

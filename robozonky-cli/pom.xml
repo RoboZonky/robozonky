@@ -28,6 +28,7 @@
   <name>RoboZonky: Command-line configuration and validation utility</name>
 
   <properties>
+    <com.github.robozonky.distribution.main>com.github.robozonky.cli.Main</com.github.robozonky.distribution.main>
     <pit.threshold>70</pit.threshold> <!-- This is a command-line utility, therefore near impossible to test fully. -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
@@ -102,5 +103,14 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
