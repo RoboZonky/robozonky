@@ -33,6 +33,7 @@ public class Daemon implements InvestmentMode {
     private static final Logger LOGGER = LogManager.getLogger(Daemon.class);
     private final PowerTenant tenant;
     private final Lifecycle lifecycle;
+    private final Scheduler scheduler = Scheduler.create();
 
     public Daemon(final PowerTenant tenant, final Lifecycle lifecycle) {
         this.tenant = tenant;
@@ -82,11 +83,11 @@ public class Daemon implements InvestmentMode {
     private void scheduleJobs() {
         LOGGER.debug("Scheduling simple batch jobs.");
         JobServiceLoader.loadSimpleJobs()
-                .forEach(j -> submitTenantless(Scheduler.INSTANCE, j.payload(), j.getClass(), j.repeatEvery(),
+                .forEach(j -> submitTenantless(scheduler, j.payload(), j.getClass(), j.repeatEvery(),
                                                j.startIn(), j.killIn()));
         LOGGER.debug("Scheduling tenant-based batch jobs.");
         JobServiceLoader.loadTenantJobs()
-                .forEach(j -> submitWithTenant(Scheduler.INSTANCE, () -> j.payload().accept(tenant), j.getClass(),
+                .forEach(j -> submitWithTenant(scheduler, () -> j.payload().accept(tenant), j.getClass(),
                                                j.repeatEvery(), j.startIn(), j.killIn()));
         LOGGER.debug("Job scheduling over.");
     }
@@ -101,7 +102,7 @@ public class Daemon implements InvestmentMode {
         try {
             // schedule the tasks
             scheduleJobs();
-            scheduleDaemons(Scheduler.INSTANCE);
+            scheduleDaemons(scheduler);
             // block until request to stop the app is received
             lifecycle.suspend();
             LOGGER.trace("Request to stop received.");
@@ -114,6 +115,7 @@ public class Daemon implements InvestmentMode {
 
     @Override
     public void close() throws Exception {
+        scheduler.close();
         tenant.close();
     }
 }

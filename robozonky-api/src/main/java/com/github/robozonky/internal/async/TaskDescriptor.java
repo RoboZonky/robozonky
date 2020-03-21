@@ -19,7 +19,7 @@ package com.github.robozonky.internal.async;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.LongAdder;
@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 final class TaskDescriptor {
 
     private static final Logger LOGGER = LogManager.getLogger(TaskDescriptor.class);
+    private final ExecutorService executorService;
     private final Runnable toSchedule;
     private final Duration initialDelay;
     private final Duration delayInBetween;
@@ -38,8 +39,9 @@ final class TaskDescriptor {
 
     private final LongAdder successCount = new LongAdder();
 
-    TaskDescriptor(final Runnable toSchedule, final Duration initialDelay, final Duration delayInBetween,
-                   final Duration timeout) {
+    TaskDescriptor(final ExecutorService executorService, final Runnable toSchedule, final Duration initialDelay,
+                   final Duration delayInBetween, final Duration timeout) {
+        this.executorService = executorService;
         this.toSchedule = () -> {
             LOGGER.trace("Running {} from within {}.", toSchedule, this);
             try {
@@ -66,40 +68,40 @@ final class TaskDescriptor {
     }
 
     private void schedule(final Executor executor) {
-        if (cancelled || ForkJoinPool.commonPool().isTerminating()) {
+        if (cancelled || executorService.isShutdown()) {
             LOGGER.debug("Not scheduling {} as the common pool is terminating.", this);
             return;
         }
         LOGGER.trace("Scheduling {} to happen after {}.", this, initialDelay);
         var futureDelayedExecutor = executor == null ?
-                CompletableFuture.delayedExecutor(delayInBetween.toNanos(), TimeUnit.NANOSECONDS) :
+                CompletableFuture.delayedExecutor(delayInBetween.toNanos(), TimeUnit.NANOSECONDS, executorService) :
                 executor;
         final Runnable toSubmit = () -> submit(futureDelayedExecutor);
         var delayedExecutor = executor == null ?
-                CompletableFuture.delayedExecutor(initialDelay.toNanos(), TimeUnit.NANOSECONDS) :
+                CompletableFuture.delayedExecutor(initialDelay.toNanos(), TimeUnit.NANOSECONDS, executorService) :
                 executor;
         delayedExecutor.execute(toSubmit);
     }
 
-    private void submit(final Executor executor) {
+    private void submit(final Executor delayedExecutor) {
         var totalNanos = timeout.toNanos();
         LOGGER.debug("Submitting {} for actual execution.", this);
-        var cf = CompletableFuture.runAsync(toSchedule);
+        var cf = CompletableFuture.runAsync(toSchedule, executorService); // Run the task immediately.
         if (totalNanos > 0) {
             LOGGER.debug("Will be killed in {} ns.", totalNanos);
             cf = cf.orTimeout(totalNanos, TimeUnit.NANOSECONDS);
         }
-        cf.whenCompleteAsync((r, t) -> rescheduleOrFail(executor, t));
+        cf.whenCompleteAsync((r, t) -> rescheduleOrFail(delayedExecutor, t));
     }
 
-    private void rescheduleOrFail(final Executor executor, final Throwable failure) {
+    private void rescheduleOrFail(final Executor delayedExecutor, final Throwable failure) {
         if (failure == null) { // reschedule
             LOGGER.trace("Completed {} successfully.", this);
-            schedule(executor);
+            schedule(delayedExecutor);
             successCount.increment();
         } else if (failure instanceof TimeoutException) {
             LOGGER.debug("Failed executing task {}, rescheduling.", this, failure);
-            schedule(executor);
+            schedule(delayedExecutor);
         } else {
             LOGGER.warn("No longer scheduling {}.", this, failure);
         }

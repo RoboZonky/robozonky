@@ -18,9 +18,11 @@ package com.github.robozonky.internal.async;
 
 import java.time.Duration;
 
-public interface Scheduler {
+public interface Scheduler extends AutoCloseable {
 
-    Scheduler INSTANCE = new ForkJoinPoolBasedScheduler();
+    static Scheduler create() {
+        return new CachedThreadPoolBasedScheduler();
+    }
 
     /**
      *

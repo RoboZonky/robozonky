@@ -24,18 +24,16 @@ import org.junit.jupiter.api.Test;
 class SchedulerTest {
 
     @Test
-    void simple() {
-        TaskDescriptor task = Scheduler.INSTANCE.submit(() -> {
-            // NOOP
-        }, Duration.ofMillis(1), Duration.ofMillis(2), Duration.ofMillis(10));
-        try {
+    void simple() throws Exception {
+        try (Scheduler scheduler = Scheduler.create()) {
+            TaskDescriptor task = scheduler.submit(() -> {
+                // NOOP
+            }, Duration.ofMillis(1), Duration.ofMillis(2), Duration.ofMillis(10));
             Assertions.assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
                 while (task.getSuccessCount() < 1) {
                     Thread.sleep(1);
                 }
             }, "Timed out while waiting for operation to complete.");
-        } finally {
-            task.cancel();
         }
     }
 
