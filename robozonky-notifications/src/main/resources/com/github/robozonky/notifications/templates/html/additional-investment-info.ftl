@@ -6,8 +6,8 @@
       <td><strong>${data.balance?string.currency} po ${data.monthsElapsed} m.</strong></td>
     </tr>
     <tr>
-      <th style="width: 20%; text-align: right;">Nesplacená jistina:</th>
-      <td>${data.amountRemaining?string.currency} z původních ${data.amountHeld?string.currency}</td>
+      <th style="width: 20%; text-align: right;">Zaplacená jistina:</th>
+      <td>${data.principalPaid?string.currency} z původních ${data.amountHeld?string.currency}</td>
     </tr>
     <tr>
       <th style="width: 20%; text-align: right;">Zaplacené úroky:</th>

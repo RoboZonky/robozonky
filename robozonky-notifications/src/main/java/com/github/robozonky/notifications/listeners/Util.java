@@ -112,6 +112,7 @@ final class Util {
         loanData.put("amountPaid", returned.getValue());
         loanData.put("balance", balance.getValue());
         loanData.put("interestExpected", i.getExpectedInterest().getValue());
+        loanData.put("principalPaid", i.getPaidPrincipal().getValue());
         loanData.put("interestPaid", i.getPaidInterest().getValue());
         loanData.put("penaltiesPaid", i.getPaidPenalty().getValue());
         loanData.put("monthsElapsed", getMonthsElapsed(i));
