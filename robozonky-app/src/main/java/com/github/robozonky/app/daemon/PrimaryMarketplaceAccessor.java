@@ -17,8 +17,10 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -29,16 +31,13 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
 
-final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
+final class PrimaryMarketplaceAccessor extends MarketplaceAccessor<LoanDescriptor> {
 
     private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(1);
     private static final Logger LOGGER = Audit.investing();
-    /**
-     * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
-     */
-    private static final Select SELECT = new Select().greaterThan("nonReservedRemainingInvestment", 0);
     private final Tenant tenant;
     private final UnaryOperator<LastPublishedLoan> stateAccessor;
+    private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 
     public PrimaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<LastPublishedLoan> stateAccessor) {
         this.tenant = tenant;
@@ -50,9 +49,16 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
         return FULL_CHECK_INTERVAL;
     }
 
+    private Select getMarketplaceFilter() {
+        // Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
+        var filter = new Select().greaterThan("nonReservedRemainingInvestment", 0);
+        return makeIncremental(filter, lastFullMarketplaceCheckReference);
+    }
+
     @Override
     public Collection<LoanDescriptor> getMarketplace() {
-        return tenant.call(zonky -> zonky.getAvailableLoans(SELECT))
+        var filter = getMarketplaceFilter();
+        return tenant.call(zonky -> zonky.getAvailableLoans(filter))
                 .parallel()
                 .filter(l -> l.getMyInvestment().isEmpty()) // re-investing would fail
                 .map(LoanDescriptor::new)
@@ -70,5 +76,10 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
             LOGGER.debug("Zonky primary marketplace status endpoint failed, forcing live marketplace check.", ex);
             return true;
         }
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

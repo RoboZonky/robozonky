@@ -18,7 +18,6 @@ package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,13 +27,11 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.Logger;
 
-final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
+final class SecondaryMarketplaceAccessor extends MarketplaceAccessor<ParticipationDescriptor> {
 
     private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(5);
     private static final Logger LOGGER = Audit.purchasing();
@@ -50,21 +47,11 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
     }
 
     private Select getMarketplaceFilter() {
-        var select = new Select()
+        var filter = new Select()
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
                 .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
-        Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
-        Instant now = DateUtil.now();
-        if (lastFullMarketplaceCheck.plus(FULL_CHECK_INTERVAL).isBefore(now)) {
-            lastFullMarketplaceCheckReference.set(now);
-            LOGGER.debug("Running full marketplace check with timestamp of {}, previous was {}.", now, lastFullMarketplaceCheck);
-        } else {
-            select = select.greaterThanOrEquals("datePublished",
-                                                OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
-            LOGGER.debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
-        }
-        return select;
+        return makeIncremental(filter, lastFullMarketplaceCheckReference);
     }
 
     @Override
@@ -101,5 +88,10 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
             LOGGER.debug("Zonky secondary marketplace status endpoint failed, forcing live marketplace check.", ex);
             return true;
         }
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

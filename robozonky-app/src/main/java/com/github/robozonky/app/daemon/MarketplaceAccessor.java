@@ -17,7 +17,15 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.test.DateUtil;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The purpose of implementations of this interface is that marketplace checks are coupled to information about latest
@@ -25,11 +33,31 @@ import java.util.Collection;
  * {@link #hasUpdates()} and only ever return that in {@link #getMarketplace()}.
  * @param <T> Type of the entity coming from the marketplace.
  */
-interface MarketplaceAccessor<T> {
+abstract class MarketplaceAccessor<T> {
 
-    Duration getForcedMarketplaceCheckInterval();
+    protected Select makeIncremental(final Select originalFilter,
+                                     final AtomicReference<Instant> lastFullMarketplaceCheckReference) {
+        Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
+        Instant now = DateUtil.now();
+        if (lastFullMarketplaceCheck.plus(getForcedMarketplaceCheckInterval()).isBefore(now)) {
+            lastFullMarketplaceCheckReference.set(now);
+            getLogger().debug("Running full marketplace check with timestamp of {}, previous was {}.", now,
+                              lastFullMarketplaceCheck);
+            return originalFilter;
+        } else {
+            var filter = originalFilter.greaterThanOrEquals("datePublished",
+                                                OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
+            getLogger().debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
+            return filter;
+        }
+    }
 
-    Collection<T> getMarketplace();
+    public abstract Duration getForcedMarketplaceCheckInterval();
 
-    boolean hasUpdates();
+    public abstract Collection<T> getMarketplace();
+
+    public abstract boolean hasUpdates();
+
+    protected abstract Logger getLogger();
+
 }
