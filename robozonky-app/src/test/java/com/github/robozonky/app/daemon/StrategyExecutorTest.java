@@ -302,7 +302,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(d.isEnabled(any())).thenReturn(false);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy, Loan> e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();
-        verify(d, never()).newMarketplaceAccessor(any());
         final List<Event> evt = getEventsRequested();
         assertThat(evt).isEmpty();
     }
