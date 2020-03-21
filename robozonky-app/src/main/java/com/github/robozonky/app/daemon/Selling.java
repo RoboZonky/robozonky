@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -74,20 +73,15 @@ final class Selling implements TenantPayload {
                 .parallel() // this list is potentially very long, and investment pages take long to load; speed this up
                 .filter(i -> sold.getOffered().noneMatch(id -> id == i.getLoanId())) // to enable dry run
                 .filter(i -> !sold.wasOnceSold(i.getLoanId()))
-                .map(i -> {
-                    Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoanId());
-                    LoanHealth healthInfo = i.getLoanHealthInfo().orElse(LoanHealth.UNKNOWN);
-                    switch (healthInfo) {
-                        case HEALTHY:
-                            return new InvestmentDescriptor(i, loanSupplier);
-                        case HISTORICALLY_IN_DUE: // Additional sell info is available for possible future use.
-                            return new InvestmentDescriptor(i, loanSupplier, () -> tenant.getSellInfo(i.getId()));
-                        case CURRENTLY_IN_DUE: // TODO Enable selling delinquents when Zonky enables it.
-                            return null;
-                        default:
-                            throw new IllegalStateException("Unsupported loan status: " + healthInfo);
-                    }
-                }).filter(Objects::nonNull)
+                .map(i -> i.getLoanHealthInfo()
+                        .map(healthInfo -> {
+                            Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoanId());
+                            if (healthInfo == LoanHealth.HEALTHY) {
+                                return new InvestmentDescriptor(i, loanSupplier);
+                            } else {
+                                return new InvestmentDescriptor(i, loanSupplier, () -> tenant.getSellInfo(i.getId()));
+                            }
+                        }).orElseThrow())
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio().getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
