@@ -37,21 +37,24 @@ abstract class MarketplaceAccessor<T> {
 
     private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 
-    protected Select makeIncremental(final Select originalFilter) {
+    protected Select getIncrementalFilter() {
         Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
         Instant now = DateUtil.now();
         if (lastFullMarketplaceCheck.plus(getForcedMarketplaceCheckInterval()).isBefore(now)) {
             lastFullMarketplaceCheckReference.set(now);
             getLogger().debug("Running full marketplace check with timestamp of {}, previous was {}.", now,
                               lastFullMarketplaceCheck);
-            return originalFilter;
+            return getBaseFilter();
         } else {
-            var filter = originalFilter.greaterThanOrEquals("datePublished",
-                                                OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
+            var filter = getBaseFilter()
+                    .greaterThanOrEquals("datePublished",
+                                         OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
             getLogger().debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
             return filter;
         }
     }
+
+    protected abstract Select getBaseFilter();
 
     public abstract Duration getForcedMarketplaceCheckInterval();
 

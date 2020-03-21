@@ -42,20 +42,20 @@ final class PrimaryMarketplaceAccessor extends MarketplaceAccessor<LoanDescripto
     }
 
     @Override
+    protected Select getBaseFilter() {
+        // Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
+        return new Select()
+                .greaterThan("nonReservedRemainingInvestment", 0);
+    }
+
+    @Override
     public Duration getForcedMarketplaceCheckInterval() {
         return FULL_CHECK_INTERVAL;
     }
 
-    private Select getMarketplaceFilter() {
-        // Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
-        var filter = new Select().greaterThan("nonReservedRemainingInvestment", 0);
-        return makeIncremental(filter);
-    }
-
     @Override
     public Collection<LoanDescriptor> getMarketplace() {
-        var filter = getMarketplaceFilter();
-        return tenant.call(zonky -> zonky.getAvailableLoans(filter))
+        return tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
                 .parallel()
                 .filter(l -> l.getMyInvestment().isEmpty()) // re-investing would fail
                 .map(LoanDescriptor::new)

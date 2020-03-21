@@ -43,12 +43,12 @@ final class SecondaryMarketplaceAccessor extends MarketplaceAccessor<Participati
         this.stateAccessor = stateAccessor;
     }
 
-    private Select getMarketplaceFilter() {
-        var filter = new Select()
+    @Override
+    protected Select getBaseFilter() {
+        return new Select()
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
-                .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
+                .greaterThanOrEquals("remainingPrincipal", 2) // Ignore near-0 participation clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
-        return makeIncremental(filter);
     }
 
     @Override
@@ -59,8 +59,7 @@ final class SecondaryMarketplaceAccessor extends MarketplaceAccessor<Participati
     @Override
     public Collection<ParticipationDescriptor> getMarketplace() {
         var cache = SoldParticipationCache.forTenant(tenant);
-        var filter = getMarketplaceFilter();
-        return tenant.call(zonky -> zonky.getAvailableParticipations(filter))
+        return tenant.call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {
