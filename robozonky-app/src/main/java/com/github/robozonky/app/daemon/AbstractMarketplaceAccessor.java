@@ -19,6 +19,7 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,8 +42,9 @@ abstract class AbstractMarketplaceAccessor<T> {
         Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
         Instant now = DateUtil.now();
         if (lastFullMarketplaceCheck.plus(getForcedMarketplaceCheckInterval()).isBefore(now)) {
-            lastFullMarketplaceCheckReference.set(now);
-            getLogger().debug("Running full marketplace check with timestamp of {}, previous was {}.", now,
+            Instant newTimestamp = now.truncatedTo(ChronoUnit.SECONDS); // Go a couple millis back.
+            lastFullMarketplaceCheckReference.set(newTimestamp);
+            getLogger().debug("Running full marketplace check with timestamp of {}, previous was {}.", newTimestamp,
                               lastFullMarketplaceCheck);
             return getBaseFilter();
         } else {
