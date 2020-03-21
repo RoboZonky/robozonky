@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
@@ -30,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 
 final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescriptor> {
 
+    private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(1);
     private static final Logger LOGGER = Audit.investing();
     /**
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
@@ -41,6 +43,11 @@ final class PrimaryMarketplaceAccessor implements MarketplaceAccessor<LoanDescri
     public PrimaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<LastPublishedLoan> stateAccessor) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
+    }
+
+    @Override
+    public Duration getForcedMarketplaceCheckInterval() {
+        return FULL_CHECK_INTERVAL;
     }
 
     @Override

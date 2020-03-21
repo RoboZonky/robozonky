@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,15 +35,16 @@ import org.apache.logging.log4j.Logger;
 
 class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
 
-    private static final Duration FORCED_MARKETPLACE_CHECK_PERIOD = Duration.ofSeconds(60);
     private final Logger logger;
     private final PowerTenant tenant;
     private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
     private final OperationDescriptor<T, S, R> operationDescriptor;
+    private final MarketplaceAccessor<T> marketplaceAccessor;
 
     StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S, R> operationDescriptor) {
         this.tenant = tenant;
         this.operationDescriptor = operationDescriptor;
+        this.marketplaceAccessor =  operationDescriptor.newMarketplaceAccessor(tenant);
         this.logger = operationDescriptor.getLogger();
     }
 
@@ -68,7 +68,7 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
         } else if (marketplace.hasUpdates()) {
             logger.debug("Waking up due to a change in marketplace.");
             return false;
-        } else if (needsToForceMarketplaceCheck()) {
+        } else if (needsToForceMarketplaceCheck(marketplace)) {
             logger.debug("Forcing a periodic marketplace check.");
             return false;
         } else {
@@ -77,14 +77,13 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
         }
     }
 
-    private boolean needsToForceMarketplaceCheck() {
+    private boolean needsToForceMarketplaceCheck(final MarketplaceAccessor<T> marketplace) {
         return lastSuccessfulMarketplaceCheck.get()
-                .plus(FORCED_MARKETPLACE_CHECK_PERIOD)
+                .plus(marketplace.getForcedMarketplaceCheckInterval())
                 .isBefore(DateUtil.now());
     }
 
     private Collection<R> invest(final S strategy) {
-        final MarketplaceAccessor<T> marketplaceAccessor = operationDescriptor.newMarketplaceAccessor(tenant);
         if (skipStrategyEvaluation(marketplaceAccessor)) {
             return Collections.emptyList();
         }

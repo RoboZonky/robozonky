@@ -16,24 +16,32 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.Logger;
 
 final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<ParticipationDescriptor> {
 
+    private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(5);
     private static final Logger LOGGER = Audit.purchasing();
 
     private final PowerTenant tenant;
     private final UnaryOperator<LastPublishedParticipation> stateAccessor;
+    private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 
     public SecondaryMarketplaceAccessor(final PowerTenant tenant,
                                         final UnaryOperator<LastPublishedParticipation> stateAccessor) {
@@ -41,14 +49,34 @@ final class SecondaryMarketplaceAccessor implements MarketplaceAccessor<Particip
         this.stateAccessor = stateAccessor;
     }
 
-    @Override
-    public Collection<ParticipationDescriptor> getMarketplace() {
-        final Select s = new Select()
+    private Select getMarketplaceFilter() {
+        var select = new Select()
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
                 .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
-        final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
-        return tenant.call(zonky -> zonky.getAvailableParticipations(s))
+        Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
+        Instant now = DateUtil.now();
+        if (lastFullMarketplaceCheck.plus(FULL_CHECK_INTERVAL).isBefore(now)) {
+            lastFullMarketplaceCheckReference.set(now);
+            LOGGER.debug("Running full marketplace check with timestamp of {}, previous was {}.", now, lastFullMarketplaceCheck);
+        } else {
+            select = select.greaterThanOrEquals("datePublished",
+                                                OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
+            LOGGER.debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
+        }
+        return select;
+    }
+
+    @Override
+    public Duration getForcedMarketplaceCheckInterval() {
+        return FULL_CHECK_INTERVAL;
+    }
+
+    @Override
+    public Collection<ParticipationDescriptor> getMarketplace() {
+        var cache = SoldParticipationCache.forTenant(tenant);
+        var filter = getMarketplaceFilter();
+        return tenant.call(zonky -> zonky.getAvailableParticipations(filter))
                 .filter(p -> { // never re-purchase what was once sold
                     final int loanId = p.getLoanId();
                     if (cache.wasOnceSold(loanId)) {
