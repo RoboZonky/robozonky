@@ -19,7 +19,7 @@
   <parent>
     <artifactId>robozonky</artifactId>
     <groupId>com.github.robozonky</groupId>
-    <version>5.8.0-SNAPSHOT</version>
+    <version>5.8.0-cr-1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
