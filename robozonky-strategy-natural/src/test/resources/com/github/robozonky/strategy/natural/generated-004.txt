@@ -1,0 +1,27 @@
+- Obecná nastavení
+Robot má udržovat uživatelem definované portfolio.
+Robot má pravidelně kontrolovat rezervační systém a přijímat rezervace půjček odpovídajících této strategii.
+Robot má investovat do půjček po          600 Kč.
+Robot má nakupovat participace nejvýše za 600 Kč.
+Cílová zůstatková částka je 510000 Kč.
+
+- Úprava struktury portfolia
+Prostředky úročené  4,99 % p.a. mají tvořit  5 % aktuální zůstatkové částky.
+Prostředky úročené  5,99 % p.a. mají tvořit 10 % aktuální zůstatkové částky.
+Prostředky úročené  6,99 % p.a. mají tvořit 15 % aktuální zůstatkové částky.
+Prostředky úročené  8,49 % p.a. mají tvořit 20 % aktuální zůstatkové částky.
+Prostředky úročené  9,49 % p.a. mají tvořit 25 % aktuální zůstatkové částky.
+Prostředky úročené 10,99 % p.a. mají tvořit 25 % aktuální zůstatkové částky.
+
+- Filtrování tržiště
+Ignorovat úvěr, kde: úrok přesahuje 9,49 % p.a.; kraj klienta je Plzeňský, Karlovarský nebo Jihočeský.
+Ignorovat úvěr, kde: úrok přesahuje 9,49 % p.a.; klient je student, bez zaměstnání, svobodné povolání nebo na rodičovské dovolené.
+Ignorovat úvěr, kde: úrok přesahuje 9,49 % p.a.; výše nedosahuje 150001 Kč.
+Ignorovat úvěr, kde: úrok přesahuje 9,49 % p.a.; délka nedosahuje 31 měsíců.
+Ignorovat participaci, kde: uhrazeno méně než 18 splátek.
+Ignorovat participaci, kde: délka nedosahuje 6 měsíců.
+
+- Prodej participací
+Prodat participaci, kde: prodej není zpoplatněn; bez slevy; délka nedosahuje 4 měsíců. (Ale ne když: původní délka nedosahuje 12 měsíců.)
+Prodat participaci, kde: úrok je           3,99 % p.a.
+Prodat participaci, kde: úrok je 13,49 až 19,99 % p.a.
