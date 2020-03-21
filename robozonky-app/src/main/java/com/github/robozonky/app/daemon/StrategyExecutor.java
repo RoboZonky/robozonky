@@ -39,7 +39,7 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
     private final PowerTenant tenant;
     private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
     private final OperationDescriptor<T, S, R> operationDescriptor;
-    private final MarketplaceAccessor<T> marketplaceAccessor;
+    private final AbstractMarketplaceAccessor<T> marketplaceAccessor;
 
     StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S, R> operationDescriptor) {
         this.tenant = tenant;
@@ -56,7 +56,7 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
         return new StrategyExecutor<>(tenant, new PurchasingOperationDescriptor());
     }
 
-    private boolean skipStrategyEvaluation(final MarketplaceAccessor<T> marketplace) {
+    private boolean skipStrategyEvaluation(final AbstractMarketplaceAccessor<T> marketplace) {
         if (!tenant.getAvailability().isAvailable()) {
             /*
              * If we are in a forced pause due to some remote server error, we need to make sure we've tried as many
@@ -77,7 +77,7 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
         }
     }
 
-    private boolean needsToForceMarketplaceCheck(final MarketplaceAccessor<T> marketplace) {
+    private boolean needsToForceMarketplaceCheck(final AbstractMarketplaceAccessor<T> marketplace) {
         return lastSuccessfulMarketplaceCheck.get()
                 .plus(marketplace.getForcedMarketplaceCheckInterval())
                 .isBefore(DateUtil.now());

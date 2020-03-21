@@ -29,7 +29,7 @@ import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import org.apache.logging.log4j.Logger;
 
-final class SecondaryMarketplaceAccessor extends MarketplaceAccessor<ParticipationDescriptor> {
+final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<ParticipationDescriptor> {
 
     private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(5);
     private static final Logger LOGGER = Audit.purchasing();

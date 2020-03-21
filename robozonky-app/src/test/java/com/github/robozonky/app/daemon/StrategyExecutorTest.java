@@ -68,7 +68,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
             final ParticipationDescriptor... pd) {
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         final PurchasingOperationDescriptor spied = spy(d);
-        final MarketplaceAccessor<ParticipationDescriptor> marketplace = mock(MarketplaceAccessor.class);
+        final AbstractMarketplaceAccessor<ParticipationDescriptor> marketplace = mock(AbstractMarketplaceAccessor.class);
         when(marketplace.getMarketplace()).thenReturn(pd.length == 0 ? Collections.emptyList() : Arrays.asList(pd));
         when(marketplace.hasUpdates()).thenReturn(true);
         doReturn(marketplace).when(spied).newMarketplaceAccessor(any());
@@ -78,7 +78,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     private static InvestingOperationDescriptor mockInvestingOperationDescriptor(final LoanDescriptor... ld) {
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
         final InvestingOperationDescriptor spied = spy(d);
-        final MarketplaceAccessor<LoanDescriptor> marketplace = mock(MarketplaceAccessor.class);
+        final AbstractMarketplaceAccessor<LoanDescriptor> marketplace = mock(AbstractMarketplaceAccessor.class);
         when(marketplace.getMarketplace()).thenReturn(ld.length == 0 ? Collections.emptyList() : Arrays.asList(ld));
         when(marketplace.hasUpdates()).thenReturn(true);
         doReturn(marketplace).when(spied).newMarketplaceAccessor(any());

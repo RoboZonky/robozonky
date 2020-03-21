@@ -54,7 +54,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(loanId))).thenReturn(l);
         when(zonky.getAvailableParticipations(any())).thenReturn(Stream.of(p));
         final PowerTenant tenant = mockTenant(zonky);
-        final MarketplaceAccessor<ParticipationDescriptor> d =
+        final AbstractMarketplaceAccessor<ParticipationDescriptor> d =
                 new SecondaryMarketplaceAccessor(tenant, UnaryOperator.identity());
         final Collection<ParticipationDescriptor> pd = d.getMarketplace();
         assertThat(pd).hasSize(1)
@@ -72,7 +72,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedParticipation.class));
         final PowerTenant t = mockTenant(z);
         final AtomicReference<LastPublishedParticipation> state = new AtomicReference<>(null);
-        final MarketplaceAccessor<ParticipationDescriptor> a =
+        final AbstractMarketplaceAccessor<ParticipationDescriptor> a =
                 new SecondaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue(); // detect update, store present state
         assertThat(a.hasUpdates()).isFalse(); // state stays the same, no update
@@ -84,7 +84,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(z.getLastPublishedParticipationInfo()).thenThrow(IllegalStateException.class);
         final PowerTenant t = mockTenant(z);
         final AtomicReference<LastPublishedParticipation> state = new AtomicReference<>(null);
-        final MarketplaceAccessor<ParticipationDescriptor> a =
+        final AbstractMarketplaceAccessor<ParticipationDescriptor> a =
                 new SecondaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue();
         assertThat(a.hasUpdates()).isTrue();
@@ -96,7 +96,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(z.getLastPublishedLoanInfo()).thenThrow(IllegalStateException.class);
         final PowerTenant t = mockTenant(z);
         DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
-        final MarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(t, null);
+        final AbstractMarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(t, null);
         Select initial = a.getIncrementalFilter();
         assertThat(initial).isNotNull();
         DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));

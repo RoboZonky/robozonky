@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -24,9 +27,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy, Loan> {
 
@@ -43,7 +43,7 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
     }
 
     @Override
-    public MarketplaceAccessor<LoanDescriptor> newMarketplaceAccessor(final PowerTenant tenant) {
+    public AbstractMarketplaceAccessor<LoanDescriptor> newMarketplaceAccessor(final PowerTenant tenant) {
         return new PrimaryMarketplaceAccessor(tenant, lastChecked::getAndSet);
     }
 

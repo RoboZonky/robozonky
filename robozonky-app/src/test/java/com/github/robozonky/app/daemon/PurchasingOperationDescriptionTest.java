@@ -50,9 +50,9 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedParticipation.class));
         final PowerTenant t = mockTenant(z);
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
-        final MarketplaceAccessor<ParticipationDescriptor> a1 = d.newMarketplaceAccessor(t);
+        final AbstractMarketplaceAccessor<ParticipationDescriptor> a1 = d.newMarketplaceAccessor(t);
         assertThat(a1.hasUpdates()).isTrue();
-        final MarketplaceAccessor<ParticipationDescriptor> a2 = d.newMarketplaceAccessor(t);
+        final AbstractMarketplaceAccessor<ParticipationDescriptor> a2 = d.newMarketplaceAccessor(t);
         assertThat(a2.hasUpdates()).isFalse();
     }
 

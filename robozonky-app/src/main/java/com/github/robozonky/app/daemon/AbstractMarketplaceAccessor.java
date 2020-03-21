@@ -28,12 +28,12 @@ import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.Logger;
 
 /**
- * The purpose of implementations of this interface is that marketplace checks are coupled to information about latest
- * updates to those marketplaces. Each instance of an implementing class may decide to cache the marketplace during
+ * The purpose of this is that marketplace checks are coupled to information about latest updates to those marketplaces.
+ * Each instance of an implementing class may decide to cache or otherwise alter the marketplace during
  * {@link #hasUpdates()} and only ever return that in {@link #getMarketplace()}.
  * @param <T> Type of the entity coming from the marketplace.
  */
-abstract class MarketplaceAccessor<T> {
+abstract class AbstractMarketplaceAccessor<T> {
 
     private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 

@@ -56,7 +56,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableLoans(any())).thenReturn(Stream.of(alreadyInvested, normal));
         final Tenant tenant = mockTenant(zonky);
-        final MarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant, UnaryOperator.identity());
+        final AbstractMarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant, UnaryOperator.identity());
         final Collection<LoanDescriptor> ld = d.getMarketplace();
         assertThat(ld).hasSize(1)
                 .element(0)
@@ -70,7 +70,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
         final Tenant t = mockTenant(z);
         final AtomicReference<LastPublishedLoan> state = new AtomicReference<>(null);
-        final MarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(t, state::getAndSet);
+        final AbstractMarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue(); // detect update, store present state
         assertThat(a.hasUpdates()).isFalse(); // state stays the same, no update
     }
@@ -81,7 +81,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         when(z.getLastPublishedLoanInfo()).thenThrow(IllegalStateException.class);
         final Tenant t = mockTenant(z);
         final AtomicReference<LastPublishedLoan> state = new AtomicReference<>(null);
-        final MarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(t, state::getAndSet);
+        final AbstractMarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue();
         assertThat(a.hasUpdates()).isTrue();
     }
@@ -89,7 +89,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void incrementality() {
         DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
-        final MarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(null, null);
+        final AbstractMarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(null, null);
         Select initial = a.getIncrementalFilter();
         assertThat(initial).isNotNull();
         DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));

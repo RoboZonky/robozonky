@@ -47,9 +47,9 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
         when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
         final PowerTenant t = mockTenant(z);
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
-        final MarketplaceAccessor<LoanDescriptor> a1 = d.newMarketplaceAccessor(t);
+        final AbstractMarketplaceAccessor<LoanDescriptor> a1 = d.newMarketplaceAccessor(t);
         assertThat(a1.hasUpdates()).isTrue();
-        final MarketplaceAccessor<LoanDescriptor> a2 = d.newMarketplaceAccessor(t);
+        final AbstractMarketplaceAccessor<LoanDescriptor> a2 = d.newMarketplaceAccessor(t);
         assertThat(a2.hasUpdates()).isFalse();
     }
 
