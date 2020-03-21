@@ -17,10 +17,8 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -37,7 +35,6 @@ final class PrimaryMarketplaceAccessor extends MarketplaceAccessor<LoanDescripto
     private static final Logger LOGGER = Audit.investing();
     private final Tenant tenant;
     private final UnaryOperator<LastPublishedLoan> stateAccessor;
-    private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 
     public PrimaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<LastPublishedLoan> stateAccessor) {
         this.tenant = tenant;
@@ -52,7 +49,7 @@ final class PrimaryMarketplaceAccessor extends MarketplaceAccessor<LoanDescripto
     private Select getMarketplaceFilter() {
         // Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
         var filter = new Select().greaterThan("nonReservedRemainingInvestment", 0);
-        return makeIncremental(filter, lastFullMarketplaceCheckReference);
+        return makeIncremental(filter);
     }
 
     @Override

@@ -35,8 +35,9 @@ import org.apache.logging.log4j.Logger;
  */
 abstract class MarketplaceAccessor<T> {
 
-    protected Select makeIncremental(final Select originalFilter,
-                                     final AtomicReference<Instant> lastFullMarketplaceCheckReference) {
+    private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
+
+    protected Select makeIncremental(final Select originalFilter) {
         Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
         Instant now = DateUtil.now();
         if (lastFullMarketplaceCheck.plus(getForcedMarketplaceCheckInterval()).isBefore(now)) {

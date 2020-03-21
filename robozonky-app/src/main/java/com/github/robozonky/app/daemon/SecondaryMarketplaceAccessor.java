@@ -17,10 +17,8 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -38,7 +36,6 @@ final class SecondaryMarketplaceAccessor extends MarketplaceAccessor<Participati
 
     private final PowerTenant tenant;
     private final UnaryOperator<LastPublishedParticipation> stateAccessor;
-    private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 
     public SecondaryMarketplaceAccessor(final PowerTenant tenant,
                                         final UnaryOperator<LastPublishedParticipation> stateAccessor) {
@@ -51,7 +48,7 @@ final class SecondaryMarketplaceAccessor extends MarketplaceAccessor<Participati
                 .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
                 .greaterThanOrEquals("remainingPrincipal", 2) // Sometimes there's near-0 participations; ignore clutter.
                 .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound().getValue().longValue());
-        return makeIncremental(filter, lastFullMarketplaceCheckReference);
+        return makeIncremental(filter);
     }
 
     @Override
