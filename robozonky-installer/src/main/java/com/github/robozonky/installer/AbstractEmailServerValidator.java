@@ -17,6 +17,7 @@
 package com.github.robozonky.installer;
 
 import java.util.Properties;
+
 import javax.mail.Session;
 
 import com.izforge.izpack.api.data.InstallData;
@@ -42,7 +43,7 @@ abstract class AbstractEmailServerValidator extends AbstractValidator {
             final int port = Integer.parseInt(Variables.SMTP_PORT.getValue(installData));
             logger.debug("Connecting to {}:{} with {}.", host, port, smtpProps);
             transport.connect(host, port, Variables.SMTP_USERNAME.getValue(installData),
-                              Variables.SMTP_PASSWORD.getValue(installData));
+                    Variables.SMTP_PASSWORD.getValue(installData));
             return DataValidator.Status.OK;
         } catch (Exception ex) {
             logger.warn("Failed authenticating with SMTP server.", ex);

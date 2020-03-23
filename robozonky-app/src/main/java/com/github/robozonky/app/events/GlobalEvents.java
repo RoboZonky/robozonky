@@ -19,13 +19,14 @@ package com.github.robozonky.app.events;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.GlobalEvent;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.util.functional.Memoizer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class GlobalEvents {
 
@@ -40,21 +41,23 @@ public final class GlobalEvents {
         return INSTANCE.get();
     }
 
-    static CompletableFuture merge(final CompletableFuture... runnables){
+    static CompletableFuture merge(final CompletableFuture... runnables) {
         return CompletableFuture.allOf(runnables);
     }
 
     @SuppressWarnings("rawtypes")
     public CompletableFuture fire(final LazyEvent<? extends GlobalEvent> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
-        final CompletableFuture[] futures = SessionEvents.all().stream()
-                .map(s -> s.fireAny(event))
-                .toArray(CompletableFuture[]::new);
+        final CompletableFuture[] futures = SessionEvents.all()
+            .stream()
+            .map(s -> s.fireAny(event))
+            .toArray(CompletableFuture[]::new);
         return merge(futures);
     }
 
     /**
      * Transforms given {@link Event} into {@link LazyEvent} and delegates to {@link #fire(LazyEvent)}.
+     * 
      * @param event
      * @return
      */

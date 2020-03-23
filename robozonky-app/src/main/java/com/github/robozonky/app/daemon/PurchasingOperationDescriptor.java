@@ -19,6 +19,8 @@ package com.github.robozonky.app.daemon;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -26,15 +28,16 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.Logger;
 
-class PurchasingOperationDescriptor implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy, Participation> {
+class PurchasingOperationDescriptor
+        implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy, Participation> {
 
     private final AtomicReference<LastPublishedParticipation> lastChecked = new AtomicReference<>();
 
     @Override
     public boolean isEnabled(final Tenant tenant) {
-        return !tenant.getRestrictions().isCannotAccessSmp();
+        return !tenant.getRestrictions()
+            .isCannotAccessSmp();
     }
 
     @Override
@@ -49,7 +52,8 @@ class PurchasingOperationDescriptor implements OperationDescriptor<Participation
 
     @Override
     public long identify(final ParticipationDescriptor descriptor) {
-        return descriptor.item().getId();
+        return descriptor.item()
+            .getId();
     }
 
     @Override

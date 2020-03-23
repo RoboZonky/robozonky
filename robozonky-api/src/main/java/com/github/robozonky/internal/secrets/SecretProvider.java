@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public interface SecretProvider {
 
     /**
      * Create a @{@link KeyStore}-based provider based on a given key store.
+     * 
      * @param ksh Initialized KeyStore for the provider to work with.
      * @return The provider.
      */
@@ -40,8 +41,9 @@ public interface SecretProvider {
 
     /**
      * Create a @{@link KeyStore}-based provider based on a given key store, filled with initial username and password.
-     * @param ksh Initialized KeyStore for the provider to work with.
-     * @param user Zonky username to store in the key store.
+     * 
+     * @param ksh      Initialized KeyStore for the provider to work with.
+     * @param user     Zonky username to store in the key store.
      * @param password Zonky password to store in the key store.
      * @return The provider.
      */
@@ -54,6 +56,7 @@ public interface SecretProvider {
 
     /**
      * Very useful for testing, as it has no extra dependencies such as keystore files etc.
+     * 
      * @param username Zonky username.
      * @param password Zonky password.
      * @return The provider.
@@ -64,12 +67,14 @@ public interface SecretProvider {
 
     /**
      * Retrieve password used to connect to Zonky API.
+     * 
      * @return The password.
      */
     char[] getPassword();
 
     /**
      * Retrieve username used to connect to Zonky API.
+     * 
      * @return The username.
      */
     String getUsername();
@@ -87,6 +92,7 @@ public interface SecretProvider {
 
     /**
      * Whether or not this provider will store all data in such a way that it survives JVM restart.
+     * 
      * @return True if the storage is persistent.
      */
     boolean isPersistent();

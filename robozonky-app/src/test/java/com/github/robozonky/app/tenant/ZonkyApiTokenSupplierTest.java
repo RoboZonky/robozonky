@@ -16,14 +16,23 @@
 
 package com.github.robozonky.app.tenant;
 
+import static com.github.robozonky.app.tenant.ZonkyApiTokenSupplier.reloadAfter;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -33,21 +42,18 @@ import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.test.DateUtil;
-import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
-
-import static com.github.robozonky.app.tenant.ZonkyApiTokenSupplier.reloadAfter;
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.*;
 
 class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
 
     private final SecretProvider secrets = SecretProvider.inMemory("someone", "password".toCharArray());
 
     private static ZonkyApiToken getTokenExpiringIn(final Duration duration) {
-        return new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                                 OffsetDateTime.ofInstant(DateUtil.now().plus(duration), Defaults.ZONE_ID));
+        return new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                OffsetDateTime.ofInstant(DateUtil.now()
+                    .plus(duration), Defaults.ZONE_ID));
     }
 
     private static ApiProvider mockApi(final OAuth oAuth, final Zonky zonky) {
@@ -66,7 +72,8 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
             final Consumer<Zonky> f = invocation.getArgument(0);
             f.accept(zonky);
             return null;
-        }).when(api).run(any(), any());
+        }).when(api)
+            .run(any(), any());
         return api;
     }
 
@@ -74,22 +81,32 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
     void failsOnLogin() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
-        doThrow(IllegalStateException.class).when(oAuth).refresh(any());
+        doThrow(IllegalStateException.class).when(oAuth)
+            .refresh(any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
-        secrets.setToken(new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 199));
+        secrets.setToken(new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                199));
         assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class)
-                .hasCauseInstanceOf(IllegalStateException.class);
+            .hasCauseInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void failsOnLogin2() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
-        doThrow(NotAuthorizedException.class).when(oAuth).refresh(any());
+        doThrow(NotAuthorizedException.class).when(oAuth)
+            .refresh(any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
-        secrets.setToken(new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 199));
+        secrets.setToken(new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                199));
         assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
     }
 
@@ -97,10 +114,15 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
     void failsOnLogin3() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
-        doThrow(BadRequestException.class).when(oAuth).refresh(any());
+        doThrow(BadRequestException.class).when(oAuth)
+            .refresh(any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
-        secrets.setToken(new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 199));
+        secrets.setToken(new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                199));
         assertThatThrownBy(t::get).isInstanceOf(BadRequestException.class);
     }
 
@@ -108,7 +130,8 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
     void failsOnRefresh() {
         final Zonky zonky = mock(Zonky.class);
         final OAuth oAuth = mock(OAuth.class);
-        doThrow(IllegalStateException.class).when(oAuth).refresh(any());
+        doThrow(IllegalStateException.class).when(oAuth)
+            .refresh(any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
         assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);

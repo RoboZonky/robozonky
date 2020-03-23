@@ -16,16 +16,17 @@
 
 package com.github.robozonky.api.remote.enums;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 class SerializationTest {
 
@@ -44,7 +45,8 @@ class SerializationTest {
     }
 
     private static String deserializeTestName(final Enum<?> instance) {
-        return instance.getClass().getSimpleName() + '.' + instance;
+        return instance.getClass()
+            .getSimpleName() + '.' + instance;
     }
 
     @TestFactory

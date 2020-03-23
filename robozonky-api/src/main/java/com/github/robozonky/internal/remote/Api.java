@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.internal.remote;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.ws.rs.ProcessingException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import javax.ws.rs.ProcessingException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class Api<T> {
 
@@ -60,7 +61,7 @@ class Api<T> {
     }
 
     private static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter,
-                                 final int attemptNo) {
+            final int attemptNo) {
         LOGGER.trace("Executing...");
         try {
             return function.apply(proxy);

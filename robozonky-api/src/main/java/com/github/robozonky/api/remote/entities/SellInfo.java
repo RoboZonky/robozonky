@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 /*
@@ -46,8 +47,8 @@ public class SellInfo extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", SellInfo.class.getSimpleName() + "[", "]")
-                .add("loanHealthStats=" + loanHealthStats)
-                .add("priceInfo=" + priceInfo)
-                .toString();
+            .add("loanHealthStats=" + loanHealthStats)
+            .add("priceInfo=" + priceInfo)
+            .toString();
     }
 }

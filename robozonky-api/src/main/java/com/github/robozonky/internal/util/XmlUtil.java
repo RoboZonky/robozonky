@@ -17,6 +17,7 @@
 package com.github.robozonky.internal.util;
 
 import java.util.function.Supplier;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,7 +48,9 @@ public final class XmlUtil {
     }
 
     /**
-     * Adapted from https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.md#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j.
+     * Adapted from
+     * https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.md#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j.
+     * 
      * @return
      */
     public static DocumentBuilderFactory getDocumentBuilderFactory() {

@@ -16,12 +16,19 @@
 
 package com.github.robozonky.internal.remote;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.ControlApi;
@@ -39,11 +46,6 @@ import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.Defaults;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class ZonkyTest {
 
@@ -53,8 +55,10 @@ class ZonkyTest {
 
     private static Investment mockInvestment(final Loan loan, final int amount) {
         final Investment i = mock(Investment.class);
-        doReturn(loan.getId()).when(i).getLoanId();
-        doReturn(loan.getCurrency()).when(i).getCurrency();
+        doReturn(loan.getId()).when(i)
+            .getLoanId();
+        doReturn(loan.getCurrency()).when(i)
+            .getCurrency();
         when(i.getAmount()).thenReturn(Money.from(amount));
         return i;
     }
@@ -73,18 +77,19 @@ class ZonkyTest {
 
     private static Zonky mockZonkyControl(final Api<ControlApi> ca) {
         final ApiProvider apiProvider = mockApiProvider();
-        doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
+        doReturn(ca).when(apiProvider)
+            .obtainNormal(eq(ControlApi.class), any());
         return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
-                                                                            final Class<T> blueprint,
-                                                                            final PaginatedApi<S, T> api) {
+            final Class<T> blueprint,
+            final PaginatedApi<S, T> api) {
         when(apiProvider.obtainPaginated(eq(blueprint), any(), any())).thenReturn(api);
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
-                                                                            final Class<T> blueprint) {
+            final Class<T> blueprint) {
         mockPaginated(apiProvider, blueprint, mockApi());
     }
 
@@ -93,7 +98,8 @@ class ZonkyTest {
         final ControlApi camock = mock(ControlApi.class);
         when(camock.restrictions()).thenReturn(new Restrictions());
         final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(camock, null);
-        doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
+        doReturn(ca).when(apiProvider)
+            .obtainNormal(eq(ControlApi.class), any());
         mockPaginated(apiProvider, LoanApi.class);
         mockPaginated(apiProvider, PortfolioApi.class);
         mockPaginated(apiProvider, ParticipationApi.class);
@@ -102,7 +108,8 @@ class ZonkyTest {
 
     private static Zonky mockZonky(final Api<ControlApi> ca, final PaginatedApi<Loan, LoanApi> la) {
         final ApiProvider apiProvider = mockApiProvider();
-        doReturn(ca).when(apiProvider).obtainNormal(eq(ControlApi.class), any());
+        doReturn(ca).when(apiProvider)
+            .obtainNormal(eq(ControlApi.class), any());
         mockPaginated(apiProvider, LoanApi.class, la);
         return new Zonky(apiProvider, () -> mock(ZonkyApiToken.class));
     }
@@ -128,7 +135,8 @@ class ZonkyTest {
         final ApiProvider p = spy(new ApiProvider());
         when(p.marketplace(any())).thenReturn(la);
         final Zonky z = new Zonky(p, () -> mock(ZonkyApiToken.class));
-        assertThat(z.getLoan(loanId).getId()).isEqualTo(loanId);
+        assertThat(z.getLoan(loanId)
+            .getId()).isEqualTo(loanId);
     }
 
     @Test
@@ -148,7 +156,7 @@ class ZonkyTest {
         final Zonky z = mockZonky(provider);
         // start test
         assertThat(z.getInvestmentByLoanId(i1.getLoanId()))
-                .hasValueSatisfying(i -> assertThat(i.getLoanId()).isEqualTo(i1.getLoanId()));
+            .hasValueSatisfying(i -> assertThat(i.getLoanId()).isEqualTo(i1.getLoanId()));
 
     }
 
@@ -156,12 +164,18 @@ class ZonkyTest {
     void getters() {
         final Zonky z = mockZonky();
         assertSoftly(softly -> {
-            softly.assertThat(z.getAvailableLoans(Select.unrestricted())).isEmpty();
-            softly.assertThat(z.getInvestments(Select.unrestricted())).isEmpty();
-            softly.assertThat(z.getInvestment(1)).isEmpty();
-            softly.assertThat(z.getDelinquentInvestments()).isEmpty();
-            softly.assertThat(z.getAvailableParticipations(Select.unrestricted())).isEmpty();
-            softly.assertThat(z.getRestrictions()).isNotNull();
+            softly.assertThat(z.getAvailableLoans(Select.unrestricted()))
+                .isEmpty();
+            softly.assertThat(z.getInvestments(Select.unrestricted()))
+                .isEmpty();
+            softly.assertThat(z.getInvestment(1))
+                .isEmpty();
+            softly.assertThat(z.getDelinquentInvestments())
+                .isEmpty();
+            softly.assertThat(z.getAvailableParticipations(Select.unrestricted()))
+                .isEmpty();
+            softly.assertThat(z.getRestrictions())
+                .isNotNull();
         });
     }
 
@@ -185,7 +199,8 @@ class ZonkyTest {
     @Test
     void investFailure() {
         final ControlApi control = mock(ControlApi.class);
-        doThrow(new ClientErrorException(Response.Status.FORBIDDEN)).when(control).invest(any());
+        doThrow(new ClientErrorException(Response.Status.FORBIDDEN)).when(control)
+            .invest(any());
         final Api<ControlApi> ca = mockApi(control);
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final int loanId = 1;
@@ -197,7 +212,8 @@ class ZonkyTest {
         final Zonky z = mockZonky(ca, la);
         final Loan l = z.getLoan(loanId);
         final Investment i = mockInvestment(l, 200);
-        assertThat(z.invest(i).getFailureType()).contains(InvestmentFailureType.UNKNOWN);
+        assertThat(z.invest(i)
+            .getFailureType()).contains(InvestmentFailureType.UNKNOWN);
     }
 
     @Test
@@ -215,12 +231,14 @@ class ZonkyTest {
     void purchaseFailure() {
         final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
-        doThrow(new ClientErrorException(Response.Status.FORBIDDEN)).when(control).purchase(anyLong(), any());
+        doThrow(new ClientErrorException(Response.Status.FORBIDDEN)).when(control)
+            .purchase(anyLong(), any());
         final Zonky z = mockZonkyControl(ca);
         final Participation p = mock(Participation.class);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
         when(p.getId()).thenReturn(1L);
-        assertThat(z.purchase(p).getFailureType()).contains(PurchaseFailureType.UNKNOWN);
+        assertThat(z.purchase(p)
+            .getFailureType()).contains(PurchaseFailureType.UNKNOWN);
     }
 
     @Test
@@ -272,7 +290,10 @@ class ZonkyTest {
         z.accept(r);
         verify(control).accept(argThat(rs -> {
             final List<ResolutionRequest> rr = rs.getResolutions();
-            return rr.size() == 1 && Objects.equals(rr.get(0).getReservationId(), r.getMyReservation().getId());
+            return rr.size() == 1 && Objects.equals(rr.get(0)
+                .getReservationId(),
+                    r.getMyReservation()
+                        .getId());
         }));
     }
 

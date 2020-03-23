@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.time.ZonedDateTime;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
 
 class ExtendedPortfolioOverviewTest {
 
@@ -86,12 +86,18 @@ class ExtendedPortfolioOverviewTest {
     @Test
     void values() {
         assertSoftly(softly -> {
-            softly.assertThat(OVERVIEW.getShareAtRisk()).isEqualTo(Ratio.fromRaw("0.10"));
-            softly.assertThat(OVERVIEW.getAtRiskShareOnInvestment(Rating.A)).isEqualTo(Ratio.fromRaw("0.1"));
-            softly.assertThat(OVERVIEW.getShareSellable()).isEqualTo(Ratio.fromRaw("0.5"));
-            softly.assertThat(OVERVIEW.getShareSellable(Rating.A)).isEqualTo(Ratio.fromRaw("0.5"));
-            softly.assertThat(OVERVIEW.getShareSellableFeeless()).isEqualTo(Ratio.fromRaw("0.3"));
-            softly.assertThat(OVERVIEW.getShareSellableFeeless(Rating.A)).isEqualTo(Ratio.fromRaw("0.3"));
+            softly.assertThat(OVERVIEW.getShareAtRisk())
+                .isEqualTo(Ratio.fromRaw("0.10"));
+            softly.assertThat(OVERVIEW.getAtRiskShareOnInvestment(Rating.A))
+                .isEqualTo(Ratio.fromRaw("0.1"));
+            softly.assertThat(OVERVIEW.getShareSellable())
+                .isEqualTo(Ratio.fromRaw("0.5"));
+            softly.assertThat(OVERVIEW.getShareSellable(Rating.A))
+                .isEqualTo(Ratio.fromRaw("0.5"));
+            softly.assertThat(OVERVIEW.getShareSellableFeeless())
+                .isEqualTo(Ratio.fromRaw("0.3"));
+            softly.assertThat(OVERVIEW.getShareSellableFeeless(Rating.A))
+                .isEqualTo(Ratio.fromRaw("0.3"));
         });
     }
 
@@ -107,14 +113,19 @@ class ExtendedPortfolioOverviewTest {
         when(portfolioOverview.getShareSellableFeeless(any())).thenCallRealMethod();
         when(portfolioOverview.getShareSellableFeeless()).thenCallRealMethod();
         assertSoftly(softly -> {
-            softly.assertThat(portfolioOverview.getShareAtRisk()).isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getAtRiskShareOnInvestment(Rating.A)).isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getShareSellable()).isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getShareSellable(Rating.A)).isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getShareSellableFeeless()).isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getShareSellableFeeless(Rating.A)).isEqualTo(Ratio.ZERO);
+            softly.assertThat(portfolioOverview.getShareAtRisk())
+                .isEqualTo(Ratio.ZERO);
+            softly.assertThat(portfolioOverview.getAtRiskShareOnInvestment(Rating.A))
+                .isEqualTo(Ratio.ZERO);
+            softly.assertThat(portfolioOverview.getShareSellable())
+                .isEqualTo(Ratio.ZERO);
+            softly.assertThat(portfolioOverview.getShareSellable(Rating.A))
+                .isEqualTo(Ratio.ZERO);
+            softly.assertThat(portfolioOverview.getShareSellableFeeless())
+                .isEqualTo(Ratio.ZERO);
+            softly.assertThat(portfolioOverview.getShareSellableFeeless(Rating.A))
+                .isEqualTo(Ratio.ZERO);
         });
     }
-
 
 }

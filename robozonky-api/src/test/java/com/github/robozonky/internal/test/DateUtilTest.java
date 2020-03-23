@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.github.robozonky.internal.test;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
-import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import com.github.robozonky.internal.Defaults;
 
 class DateUtilTest {
 
@@ -42,10 +43,14 @@ class DateUtilTest {
     void replacesWithSynthetic() {
         DateUtil.setSystemClock(Clock.fixed(INSTANT, Defaults.ZONE_ID)); // all dates will be based on this instant
         assertSoftly(softly -> {
-            softly.assertThat(DateUtil.now()).isEqualTo(INSTANT);
-            softly.assertThat(DateUtil.localNow()).isEqualTo(LocalDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
-            softly.assertThat(DateUtil.offsetNow()).isEqualTo(OffsetDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
-            softly.assertThat(DateUtil.zonedNow()).isEqualTo(ZonedDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
+            softly.assertThat(DateUtil.now())
+                .isEqualTo(INSTANT);
+            softly.assertThat(DateUtil.localNow())
+                .isEqualTo(LocalDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
+            softly.assertThat(DateUtil.offsetNow())
+                .isEqualTo(OffsetDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
+            softly.assertThat(DateUtil.zonedNow())
+                .isEqualTo(ZonedDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
         });
         DateUtil.resetSystemClock();
         assertThat(DateUtil.now()).isAfter(INSTANT);

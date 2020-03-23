@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+
 import java.math.BigDecimal;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
-
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
 final class RangeCondition<T extends Number & Comparable<T>> implements Predicate<Wrapper<?>> {
 
@@ -32,15 +32,15 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
     private final String toString;
 
     private RangeCondition(final Function<Wrapper<?>, T> accessor, final Predicate<T> acceptor,
-                           final String toString) {
+            final String toString) {
         this.accessor = accessor;
         this.acceptor = acceptor;
         this.toString = toString;
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<X> lessThan(final Function<Wrapper<?>, X> value,
-                                                                         final Domain<X> allowedValues,
-                                                                         final X threshold) {
+            final Domain<X> allowedValues,
+            final X threshold) {
         if (!allowedValues.test(threshold)) {
             throw new IllegalArgumentException("Threshold " + threshold + " does not fit " + allowedValues);
         }
@@ -48,8 +48,8 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<X> moreThan(final Function<Wrapper<?>, X> value,
-                                                                         final Domain<X> allowedValues,
-                                                                         final X threshold) {
+            final Domain<X> allowedValues,
+            final X threshold) {
         if (!allowedValues.test(threshold)) {
             throw new IllegalArgumentException("Threshold " + threshold + " does not fit " + allowedValues);
         }
@@ -64,14 +64,14 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
     }
 
     private static <X extends Number & Comparable<X>> Ratio getValueAccessor(final Wrapper<?> w,
-                                                                             final Function<Wrapper<?>, X> part,
-                                                                             final Function<Wrapper<?>, X> sum) {
+            final Function<Wrapper<?>, X> part,
+            final Function<Wrapper<?>, X> sum) {
         return getActualValue(part.apply(w), sum.apply(w));
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<X> exact(final Function<Wrapper<?>, X> value,
-                                                                      final Domain<X> allowedValues, final X minimum,
-                                                                      final X maximum) {
+            final Domain<X> allowedValues, final X minimum,
+            final X maximum) {
         if (!allowedValues.test(minimum)) {
             throw new IllegalArgumentException("Minimum " + minimum + " does not fit " + allowedValues);
         } else if (!allowedValues.test(maximum)) {
@@ -80,37 +80,37 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
             throw new IllegalArgumentException("Minimum " + minimum + " is over maximum " + maximum);
         }
         return new RangeCondition<>(value, v -> v.compareTo(minimum) >= 0 && v.compareTo(maximum) <= 0,
-                                    "Range: <" + minimum + "; " + maximum + ">");
+                "Range: <" + minimum + "; " + maximum + ">");
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<Ratio> relativeLessThan(final Function<Wrapper<?>, X> part,
-                                                                                     final Function<Wrapper<?>, X> sum,
-                                                                                     final Ratio threshold) {
+            final Function<Wrapper<?>, X> sum,
+            final Ratio threshold) {
         final Domain<Ratio> allowedValues = AbstractRelativeRangeCondition.RELATIVE_DOMAIN;
         if (!allowedValues.test(threshold)) {
             throw new IllegalArgumentException("Threshold " + threshold + " does not fit " + allowedValues);
         }
         final Function<Wrapper<?>, Ratio> value = w -> getValueAccessor(w, part, sum);
         return new RangeCondition<>(value, v -> v.compareTo(threshold) < 0,
-                                    "Relative range: (-inf.; " + threshold + ")");
+                "Relative range: (-inf.; " + threshold + ")");
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<Ratio> relativeMoreThan(final Function<Wrapper<?>, X> part,
-                                                                                     final Function<Wrapper<?>, X> sum,
-                                                                                     final Ratio threshold) {
+            final Function<Wrapper<?>, X> sum,
+            final Ratio threshold) {
         final Domain<Ratio> allowedValues = AbstractRelativeRangeCondition.RELATIVE_DOMAIN;
         if (!allowedValues.test(threshold)) {
             throw new IllegalArgumentException("Threshold " + threshold + " does not fit " + allowedValues);
         }
         final Function<Wrapper<?>, Ratio> value = w -> getValueAccessor(w, part, sum);
         return new RangeCondition<>(value, v -> v.compareTo(threshold) > 0,
-                                    "Relative range: (" + threshold + "; +inf.)");
+                "Relative range: (" + threshold + "; +inf.)");
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<Ratio> relativeExact(final Function<Wrapper<?>, X> part,
-                                                                                  final Function<Wrapper<?>, X> sum,
-                                                                                  final Ratio minimum,
-                                                                                  final Ratio maximum) {
+            final Function<Wrapper<?>, X> sum,
+            final Ratio minimum,
+            final Ratio maximum) {
         final Domain<Ratio> allowedValues = AbstractRelativeRangeCondition.RELATIVE_DOMAIN;
         if (!allowedValues.test(minimum)) {
             throw new IllegalArgumentException("Minimum " + minimum + " does not fit " + allowedValues);
@@ -121,7 +121,7 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
         }
         final Function<Wrapper<?>, Ratio> value = w -> getValueAccessor(w, part, sum);
         return new RangeCondition<>(value, v -> v.compareTo(minimum) >= 0 && v.compareTo(maximum) <= 0,
-                                    "Relative range: <" + minimum + "; " + maximum + ">");
+                "Relative range: <" + minimum + "; " + maximum + ">");
     }
 
     @Override

@@ -16,6 +16,9 @@
 
 package com.github.robozonky.cli;
 
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -28,17 +31,14 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.test.DateUtil;
 
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Option;
-
 @Command(name = "notification-tester", description = NotificationTestingFeature.DESCRIPTION)
 public final class NotificationTestingFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Send a testing notification using the provided configuration.";
 
-    @Option(names = {"-u", "--username"}, description = "Zonky username.", required = true)
+    @Option(names = { "-u", "--username" }, description = "Zonky username.", required = true)
     private String username = null;
-    @Option(names = {"-l", "--location"}, description = "URL leading to the configuration.", required = true)
+    @Option(names = { "-l", "--location" }, description = "URL leading to the configuration.", required = true)
     private URL location;
 
     public NotificationTestingFeature(final String username, final URL location) {
@@ -56,10 +56,11 @@ public final class NotificationTestingFeature extends AbstractFeature {
     }
 
     static boolean notifications(final SessionInfo sessionInfo,
-                                 final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
+            final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
-                .flatMap(r -> r.get().stream())
-                .collect(Collectors.toSet());
+            .flatMap(r -> r.get()
+                .stream())
+            .collect(Collectors.toSet());
         if (listeners.isEmpty()) {
             return false;
         } else {

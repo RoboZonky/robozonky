@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.internal.secrets;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,8 +26,6 @@ import java.security.KeyStoreException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class KeyStoreHandlerTest {
 
@@ -46,20 +46,20 @@ class KeyStoreHandlerTest {
     @Test
     void nullFileOnCreate() {
         assertThatThrownBy(() -> KeyStoreHandler.create(null))
-                .isInstanceOf(FileNotFoundException.class);
+            .isInstanceOf(FileNotFoundException.class);
     }
 
     @Test
     void nullFileOnOpen() {
         assertThatThrownBy(() -> KeyStoreHandler.open(null))
-                .isInstanceOf(FileNotFoundException.class);
+            .isInstanceOf(FileNotFoundException.class);
     }
 
     @Test
     void preexistingFileOnCreate() throws IOException {
         File f = File.createTempFile("robozonky-", ".keystore");
         assertThatThrownBy(() -> KeyStoreHandler.create(f))
-                .isInstanceOf(FileAlreadyExistsException.class);
+            .isInstanceOf(FileAlreadyExistsException.class);
     }
 
     @Test

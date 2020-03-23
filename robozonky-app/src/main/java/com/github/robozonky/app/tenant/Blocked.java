@@ -37,7 +37,8 @@ final class Blocked {
 
     public Blocked(final int id, final Money amount, final Rating rating, final boolean persistent) {
         this.id = id;
-        this.amount = Money.from(amount.getValue().abs());
+        this.amount = Money.from(amount.getValue()
+            .abs());
         this.rating = rating;
         this.persistent = persistent;
     }
@@ -55,7 +56,8 @@ final class Blocked {
     }
 
     public boolean isValid(final RemoteData remoteData) {
-        return persistent || storedOn.isAfter(remoteData.getStatistics().getTimestamp());
+        return persistent || storedOn.isAfter(remoteData.getStatistics()
+            .getTimestamp());
     }
 
     @Override

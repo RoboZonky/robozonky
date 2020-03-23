@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -49,8 +50,8 @@ public class SellFee extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", SellFee.class.getSimpleName() + "[", "]")
-                .add("value='" + value + "'")
-                .add("expiresAt=" + expiresAt)
-                .toString();
+            .add("value='" + value + "'")
+            .add("expiresAt=" + expiresAt)
+            .toString();
     }
 }

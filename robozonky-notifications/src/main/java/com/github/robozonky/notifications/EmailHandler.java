@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package com.github.robozonky.notifications;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.Defaults;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.internal.Defaults;
 
 final class EmailHandler extends AbstractTargetHandler {
 
@@ -88,14 +89,14 @@ final class EmailHandler extends AbstractTargetHandler {
 
     @Override
     public void send(final SessionInfo sessionInfo, final String subject,
-                     final String message, final String fallbackMessage) throws Exception {
+            final String message, final String fallbackMessage) throws Exception {
         final HtmlEmail email = createNewEmail(sessionInfo);
         email.setSubject(subject);
         email.setHtmlMsg(message);
         email.setTextMsg(fallbackMessage);
         LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.", email.getSubject(),
-                     email.getFromAddress(), email.getToAddresses(), email.getHostName(), email.getSmtpPort(),
-                     getSmtpUsername());
+                email.getFromAddress(), email.getToAddresses(), email.getHostName(), email.getSmtpPort(),
+                getSmtpUsername());
         email.send();
     }
 }

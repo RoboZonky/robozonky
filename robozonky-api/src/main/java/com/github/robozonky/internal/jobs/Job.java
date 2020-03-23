@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ public interface Job {
 
     /**
      * How long to wait from when this method is called before first running the payload.
+     * 
      * @return By default, this returns a random duration of less than 1000 seconds.
      */
     default Duration startIn() {
@@ -33,12 +34,14 @@ public interface Job {
 
     /**
      * How much time to leave between one task ending and the other starting.
+     * 
      * @return
      */
     Duration repeatEvery();
 
     /**
      * Longest possible time duration that the task will be allowed to run for.
+     * 
      * @return
      */
     default Duration killIn() {

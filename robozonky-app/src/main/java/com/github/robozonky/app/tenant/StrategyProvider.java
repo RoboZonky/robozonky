@@ -23,6 +23,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -32,8 +35,6 @@ import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.extensions.StrategyLoader;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class StrategyProvider implements ReloadListener<String> {
 
@@ -48,10 +49,10 @@ class StrategyProvider implements ReloadListener<String> {
 
     StrategyProvider(final String strategyLocation) {
         this.reloadableStrategy = Reloadable.with(() -> readStrategy(strategyLocation))
-                .addListener(this)
-                .reloadAfter(Duration.ofHours(1))
-                .async()
-                .build();
+            .addListener(this)
+            .reloadAfter(Duration.ofHours(1))
+            .async()
+            .build();
     }
 
     StrategyProvider() {
@@ -76,7 +77,8 @@ class StrategyProvider implements ReloadListener<String> {
     }
 
     private static <T> T set(final AtomicReference<T> ref, final Supplier<Optional<T>> provider, final String desc) {
-        final T value = ref.updateAndGet(old -> provider.get().orElse(null));
+        final T value = ref.updateAndGet(old -> provider.get()
+            .orElse(null));
         if (Objects.isNull(value)) {
             LOGGER.info("{} strategy inactive or missing, disabling all such operations.", desc);
         } else {
@@ -98,7 +100,7 @@ class StrategyProvider implements ReloadListener<String> {
         var sellingStrategy = set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
         var reserveStrategy = set(forReservations, () -> StrategyLoader.forReservations(newValue), "Reservations");
         var allStrategiesMissing = Stream.of(investStrategy, purchaseStrategy, sellingStrategy, reserveStrategy)
-                .allMatch(Objects::isNull);
+            .allMatch(Objects::isNull);
         if (allStrategiesMissing) {
             LOGGER.warn("No strategies are available, all operations are disabled. Check log for parser errors.");
         }
@@ -108,7 +110,8 @@ class StrategyProvider implements ReloadListener<String> {
     @Override
     public void valueUnset() {
         lastLoadedStrategy.set(null);
-        Stream.of(toInvest, toSell, toPurchase, forReservations).forEach(ref -> ref.set(null));
+        Stream.of(toInvest, toSell, toPurchase, forReservations)
+            .forEach(ref -> ref.set(null));
         LOGGER.warn("There are no strategies, all operations are disabled.");
     }
 

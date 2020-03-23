@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,15 +65,18 @@ class FileBackedStateStorage implements StateStorage {
     }
 
     private boolean containskey(final String section, final String key) {
-        final boolean hasSection = getState().keySet().contains(section);
-        return hasSection && getState().get(section).containsKey(key);
+        final boolean hasSection = getState().keySet()
+            .contains(section);
+        return hasSection && getState().get(section)
+            .containsKey(key);
     }
 
     @Override
     public Optional<String> getValue(final String section, final String key) {
         if (this.containskey(section, key)) {
             final String value = getState().get(section, key, String.class);
-            if (value.trim().length() == 0) {
+            if (value.trim()
+                .length() == 0) {
                 return Optional.empty();
             }
             return Optional.of(value);
@@ -86,7 +89,9 @@ class FileBackedStateStorage implements StateStorage {
     public Stream<String> getKeys(final String section) {
         final Ini internalState = getState();
         if (internalState.containsKey(section)) {
-            return internalState.get(section).keySet().stream();
+            return internalState.get(section)
+                .keySet()
+                .stream();
         } else {
             return Stream.empty();
         }
@@ -94,7 +99,8 @@ class FileBackedStateStorage implements StateStorage {
 
     @Override
     public Stream<String> getSections() {
-        return getState().keySet().stream();
+        return getState().keySet()
+            .stream();
     }
 
     @Override
@@ -107,7 +113,8 @@ class FileBackedStateStorage implements StateStorage {
     public void unsetValue(final String section, final String key) {
         if (this.containskey(section, key)) {
             LOGGER.trace("Unsetting '{}' in '{}'.", key, section);
-            getState().get(section).remove(key);
+            getState().get(section)
+                .remove(key);
         } else {
             LOGGER.trace("Unsetting non-existent '{}' in '{}'.", key, section);
         }
@@ -122,7 +129,8 @@ class FileBackedStateStorage implements StateStorage {
     @Override
     public synchronized boolean store() {
         try {
-            this.getState().store(stateLocation);
+            this.getState()
+                .store(stateLocation);
             LOGGER.debug("Stored state: '{}'.", stateLocation);
             return true;
         } catch (final IOException e) {

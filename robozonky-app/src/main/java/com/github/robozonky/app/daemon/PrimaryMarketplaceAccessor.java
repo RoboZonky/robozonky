@@ -22,12 +22,13 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.Logger;
 
 final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanDescriptor> {
 
@@ -45,7 +46,7 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     protected Select getBaseFilter() {
         // Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
         return new Select()
-                .greaterThan("nonReservedRemainingInvestment", 0);
+            .greaterThan("nonReservedRemainingInvestment", 0);
     }
 
     @Override
@@ -56,10 +57,11 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     @Override
     public Collection<LoanDescriptor> getMarketplace() {
         return tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
-                .parallel()
-                .filter(l -> l.getMyInvestment().isEmpty()) // re-investing would fail
-                .map(LoanDescriptor::new)
-                .collect(Collectors.toList());
+            .parallel()
+            .filter(l -> l.getMyInvestment()
+                .isEmpty()) // re-investing would fail
+            .map(LoanDescriptor::new)
+            .collect(Collectors.toList());
     }
 
     @Override

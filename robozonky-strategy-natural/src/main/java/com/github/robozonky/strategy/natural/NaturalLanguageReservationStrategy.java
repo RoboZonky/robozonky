@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static com.github.robozonky.strategy.natural.Audit.LOGGER;
+
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -26,8 +28,6 @@ import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
-
-import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
 class NaturalLanguageReservationStrategy implements ReservationStrategy {
 
@@ -40,31 +40,37 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
     @Override
     public ReservationMode getMode() {
         return strategy.getReservationMode()
-                .orElseThrow(() -> new IllegalStateException("Reservations are not enabled, yet strategy exists."));
+            .orElseThrow(() -> new IllegalStateException("Reservations are not enabled, yet strategy exists."));
     }
 
     @Override
     public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
-                                                    final PortfolioOverview portfolio,
-                                                    final Restrictions restrictions) {
+            final PortfolioOverview portfolio,
+            final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
         var preferences = Preferences.get(strategy, portfolio);
         var withoutUndesirable = available.parallelStream()
-                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
-                .filter(d -> { // skip loans in ratings which are not required by the strategy
-                    boolean isAcceptable = preferences.getDesirableRatings().contains(d.item().getRating());
-                    if (!isAcceptable) {
-                        LOGGER.debug("Reservation #{} skipped due to an undesirable rating.", d.item().getId());
-                    }
-                    return isAcceptable;
-                });
+            .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+            .filter(d -> { // skip loans in ratings which are not required by the strategy
+                boolean isAcceptable = preferences.getDesirableRatings()
+                    .contains(d.item()
+                        .getRating());
+                if (!isAcceptable) {
+                    LOGGER.debug("Reservation #{} skipped due to an undesirable rating.", d.item()
+                        .getId());
+                }
+                return isAcceptable;
+            });
         return strategy.getApplicableReservations(withoutUndesirable, portfolio)
-                .sorted(preferences.getReservationComparator())
-                .flatMap(d -> { // recommend amount to invest per strategy
-                    final Money amount = d.item().getMyReservation().getReservedAmount();
-                    return d.recommend(amount).stream();
-                });
+            .sorted(preferences.getReservationComparator())
+            .flatMap(d -> { // recommend amount to invest per strategy
+                final Money amount = d.item()
+                    .getMyReservation()
+                    .getReservedAmount();
+                return d.recommend(amount)
+                    .stream();
+            });
     }
 }

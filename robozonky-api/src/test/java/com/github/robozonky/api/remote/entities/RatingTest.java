@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,26 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
-import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
 
 class RatingTest {
 
     @Test
     void noRatingCodeTwice() {
-        final Set<String> codes = Stream.of(Rating.values()).map(Rating::getCode).collect(Collectors.toSet());
+        final Set<String> codes = Stream.of(Rating.values())
+            .map(Rating::getCode)
+            .collect(Collectors.toSet());
         assertThat(codes).hasSize(Rating.values().length);
     }
 

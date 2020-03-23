@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.remote.entities.Restrictions;
-
 import java.util.Collection;
 import java.util.stream.Stream;
+
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.Restrictions;
 
 /**
  * Determines which {@link Reservation}s will be invested into out of those coming through the reservation system,
@@ -35,12 +35,13 @@ public interface ReservationStrategy {
      * Retrieve reservations that are acceptable by the strategy, in the order in which they are to be evaluated. After
      * an investment has been made into any single one of these reservations, the strategy should be called again to
      * re-evaluate the resulting situation.
-     * @param available Reservations to be evaluated for acceptability.
-     * @param portfolio Aggregation of information as to the user's current portfolio.
+     * 
+     * @param available    Reservations to be evaluated for acceptability.
+     * @param portfolio    Aggregation of information as to the user's current portfolio.
      * @param restrictions Restrictions imposed by Zonky on the current user.
      * @return Acceptable reservations, in the order of their decreasing priority, mapped to the recommended investment
-     * amounts.
+     *         amounts.
      */
     Stream<RecommendedReservation> recommend(Collection<ReservationDescriptor> available, PortfolioOverview portfolio,
-                                             Restrictions restrictions);
+            Restrictions restrictions);
 }

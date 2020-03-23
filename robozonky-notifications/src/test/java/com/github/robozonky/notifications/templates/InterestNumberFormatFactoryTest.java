@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,24 @@
 
 package com.github.robozonky.notifications.templates;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.math.BigDecimal;
 import java.util.Locale;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
+
 import com.github.robozonky.internal.Defaults;
+
 import freemarker.core.Environment;
 import freemarker.core.InvalidFormatParametersException;
 import freemarker.core.TemplateNumberFormat;
 import freemarker.core.TemplateValueFormatException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 /**
  * Portions of this test are disabled on Java 8, as the percentage formatting for CZ locale changed in Java 9 and the
@@ -45,7 +47,7 @@ class InterestNumberFormatFactoryTest {
     void formattingCzech() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0001");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Defaults.LOCALE,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
         assertThat(result.trim()).isEqualTo("0,01" + (char) 160 + "%");
@@ -56,7 +58,7 @@ class InterestNumberFormatFactoryTest {
     void formattingCzech2() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0000");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Defaults.LOCALE,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
         assertThat(result.trim()).isEqualTo("0,00" + (char) 160 + "%");
@@ -67,7 +69,7 @@ class InterestNumberFormatFactoryTest {
     void formattingCzech3() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.001");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Defaults.LOCALE,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
         assertThat(result.trim()).isEqualTo("0,10" + (char) 160 + "%");
@@ -77,7 +79,7 @@ class InterestNumberFormatFactoryTest {
     void formattingEnglish() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0001");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final Object result = f.formatToPlainText(m);
         assertThat(result).isEqualTo("0.01%");
@@ -86,7 +88,7 @@ class InterestNumberFormatFactoryTest {
     @Test
     void formattingEnglishZero() throws TemplateValueFormatException, TemplateModelException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> BigDecimal.ZERO;
         final Object result = f.formatToPlainText(m);
         assertThat(result).isEqualTo("0.00%");
@@ -95,7 +97,7 @@ class InterestNumberFormatFactoryTest {
     @Test
     void formattingEnglishLongZero() throws TemplateValueFormatException, TemplateModelException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> new BigDecimal("0.000000000000000000");
         final Object result = f.formatToPlainText(m);
         assertThat(result).isEqualTo("0.00%");
@@ -104,7 +106,7 @@ class InterestNumberFormatFactoryTest {
     @Test
     void formattingEnglishRoundingUp() throws TemplateValueFormatException, TemplateModelException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> new BigDecimal("0.00049");
         final Object result = f.formatToPlainText(m);
         assertThat(result).isEqualTo("0.05%");
@@ -113,7 +115,7 @@ class InterestNumberFormatFactoryTest {
     @Test
     void formattingEnglishRoundingEvenUp() throws TemplateValueFormatException, TemplateModelException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> new BigDecimal("0.00055");
         final Object result = f.formatToPlainText(m);
         assertThat(result).isEqualTo("0.06%");
@@ -122,7 +124,7 @@ class InterestNumberFormatFactoryTest {
     @Test
     void formattingEnglishRoundingEvenDown() throws TemplateValueFormatException, TemplateModelException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> new BigDecimal("0.00025");
         final Object result = f.formatToPlainText(m);
         assertThat(result).isEqualTo("0.02%");
@@ -131,7 +133,7 @@ class InterestNumberFormatFactoryTest {
     @Test
     void formattingEnglishRoundingDown() throws TemplateValueFormatException, TemplateModelException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> new BigDecimal("0.00051");
         final Object result = f.formatToPlainText(m);
         assertThat(result).isEqualTo("0.05%");
@@ -140,16 +142,17 @@ class InterestNumberFormatFactoryTest {
     @Test
     void formal() throws TemplateValueFormatException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
-                                                                                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment());
         assertSoftly(softly -> {
-            softly.assertThat(f.isLocaleBound()).isTrue();
+            softly.assertThat(f.isLocaleBound())
+                .isTrue();
             softly.assertThat(f.getDescription())
-                    .isNotNull()
-                    .isNotEmpty();
+                .isNotNull()
+                .isNotEmpty();
             softly.assertThatThrownBy(() -> InterestNumberFormatFactory.INSTANCE.get("someparam", Locale.ENGLISH,
-                                                                                     Environment
-                                                                                             .getCurrentEnvironment()))
-                    .isInstanceOf(InvalidFormatParametersException.class);
+                    Environment
+                        .getCurrentEnvironment()))
+                .isInstanceOf(InvalidFormatParametersException.class);
         });
     }
 }

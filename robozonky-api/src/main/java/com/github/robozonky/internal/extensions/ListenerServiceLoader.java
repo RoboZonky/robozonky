@@ -24,21 +24,22 @@ import java.util.ServiceLoader;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.util.StreamUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class ListenerServiceLoader {
 
     private static final String CONFIG_LOCATION_PROPERTY = "configLocation";
     private static final Logger LOGGER = LogManager.getLogger(ListenerServiceLoader.class);
-    private static final Supplier<ServiceLoader<ListenerService>> LOADER =
-            ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
+    private static final Supplier<ServiceLoader<ListenerService>> LOADER = ExtensionsManager.INSTANCE
+        .getServiceLoader(ListenerService.class);
 
     private ListenerServiceLoader() {
         // no instances
@@ -47,19 +48,21 @@ public final class ListenerServiceLoader {
     /**
      * Retrieve the location configuration previously stored through
      * {@link #registerConfiguration(SessionInfo, URL)}.
+     * 
      * @param session The tenant for which the information should be retrieved.
      * @return Empty if not registered.
      */
     public static Optional<String> getNotificationConfiguration(final SessionInfo session) {
         return TenantState.of(session)
-                .in(ListenerService.class)
-                .getValue(CONFIG_LOCATION_PROPERTY);
+            .in(ListenerService.class)
+            .getValue(CONFIG_LOCATION_PROPERTY);
     }
 
     /**
      * Make sure the location for notifications configuration is stored for a given tenant. This is to work around the
      * fact that there is no way how to pass properties to robozonky-notifications, due to them being service-loaded.
-     * @param session Tenant in question.
+     * 
+     * @param session               Tenant in question.
      * @param configurationLocation Location of notification configuration.
      */
     public static void registerConfiguration(final SessionInfo session, final URL configurationLocation) {
@@ -69,41 +72,43 @@ public final class ListenerServiceLoader {
     /**
      * Make sure the location for notifications configuration is stored for a given tenant. This is to work around the
      * fact that there is no way how to pass properties to robozonky-notifications, due to them being service-loaded.
-     * @param session Tenant in question.
+     * 
+     * @param session               Tenant in question.
      * @param configurationLocation Location of notification configuration.
      */
     public static void registerConfiguration(final SessionInfo session,
-                                             final String configurationLocation) {
+            final String configurationLocation) {
         LOGGER.debug("Tenant '{}' notification configuration: '{}'.", session.getUsername(), configurationLocation);
         TenantState.of(session)
-                .in(ListenerService.class)
-                .update(state -> state.put(CONFIG_LOCATION_PROPERTY, configurationLocation));
+            .in(ListenerService.class)
+            .update(state -> state.put(CONFIG_LOCATION_PROPERTY, configurationLocation));
     }
 
     /**
      * Make sure the location for notifications configuration is not stored for a given tenant.
+     * 
      * @param session Tenant in question.
      */
     public static void unregisterConfiguration(final SessionInfo session) {
         TenantState.of(session)
-                .in(ListenerService.class)
-                .update(state -> state.remove(CONFIG_LOCATION_PROPERTY));
+            .in(ListenerService.class)
+            .update(state -> state.remove(CONFIG_LOCATION_PROPERTY));
         LOGGER.debug("Tenant '{}' notification configuration deleted.", session.getUsername());
     }
 
     static <T extends Event> List<EventListenerSupplier<T>> load(final SessionInfo sessionInfo,
-                                                                 final Class<T> eventType,
-                                                                 final Iterable<ListenerService> loader) {
+            final Class<T> eventType,
+            final Iterable<ListenerService> loader) {
         LOGGER.debug("Loading listeners for {}.", eventType);
         return StreamUtil.toStream(loader)
-                .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
-                .flatMap(s -> s.findListeners(sessionInfo, eventType))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
+            .flatMap(s -> s.findListeners(sessionInfo, eventType))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     public static <T extends Event> List<EventListenerSupplier<T>> load(final SessionInfo sessionInfo,
-                                                                        final Class<T> eventType) {
+            final Class<T> eventType) {
         return ListenerServiceLoader.load(sessionInfo, eventType, ListenerServiceLoader.LOADER.get());
     }
 }

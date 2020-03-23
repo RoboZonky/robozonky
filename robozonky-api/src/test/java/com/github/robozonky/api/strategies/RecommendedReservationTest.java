@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Reservation;
-import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Reservation;
 
 class RecommendedReservationTest {
 
@@ -47,8 +46,10 @@ class RecommendedReservationTest {
         final int amount = 200;
         final RecommendedReservation r = new RecommendedReservation(ld, Money.from(amount));
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(r.descriptor()).isSameAs(ld);
-            softly.assertThat(r.amount()).isEqualTo(Money.from(amount));
+            softly.assertThat(r.descriptor())
+                .isSameAs(ld);
+            softly.assertThat(r.amount())
+                .isEqualTo(Money.from(amount));
         });
     }
 
@@ -56,7 +57,7 @@ class RecommendedReservationTest {
     void constructorNoLoanDescriptor() {
         final int amount = 200;
         assertThatThrownBy(() -> new RecommendedReservation(null, Money.from(amount)))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

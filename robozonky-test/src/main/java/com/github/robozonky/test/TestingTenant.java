@@ -16,6 +16,8 @@
 
 package com.github.robozonky.test;
 
+import static org.mockito.Mockito.*;
+
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,8 +34,6 @@ import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
-
-import static org.mockito.Mockito.*;
 
 public class TestingTenant implements Tenant {
 
@@ -95,7 +95,8 @@ public class TestingTenant implements Tenant {
 
     @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
-        return TenantState.of(getSessionInfo()).in(clz);
+        return TenantState.of(getSessionInfo())
+            .in(clz);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,24 +28,24 @@ public final class RemainingPrincipalCondition extends AbstractRangeCondition<Bi
 
     public static RemainingPrincipalCondition lessThan(final int threshold) {
         final RangeCondition<BigDecimal> c = RangeCondition.lessThan(Wrapper::getRemainingPrincipal,
-                                                                     PRINCIPAL_DOMAIN,
-                                                                     BigDecimal.valueOf(threshold));
+                PRINCIPAL_DOMAIN,
+                BigDecimal.valueOf(threshold));
         return new RemainingPrincipalCondition(c);
     }
 
     public static RemainingPrincipalCondition moreThan(final int threshold) {
         final RangeCondition<BigDecimal> c = RangeCondition.moreThan(Wrapper::getRemainingPrincipal,
-                                                                     PRINCIPAL_DOMAIN,
-                                                                     BigDecimal.valueOf(threshold));
+                PRINCIPAL_DOMAIN,
+                BigDecimal.valueOf(threshold));
         return new RemainingPrincipalCondition(c);
     }
 
     public static RemainingPrincipalCondition exact(final int minimumThreshold,
-                                                    final int maximumThreshold) {
+            final int maximumThreshold) {
         final RangeCondition<BigDecimal> c = RangeCondition.exact(Wrapper::getRemainingPrincipal,
-                                                                  PRINCIPAL_DOMAIN,
-                                                                  BigDecimal.valueOf(minimumThreshold),
-                                                                  BigDecimal.valueOf(maximumThreshold));
+                PRINCIPAL_DOMAIN,
+                BigDecimal.valueOf(minimumThreshold),
+                BigDecimal.valueOf(maximumThreshold));
         return new RemainingPrincipalCondition(c);
     }
 }

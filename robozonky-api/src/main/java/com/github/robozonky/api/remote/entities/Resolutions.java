@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 public class Resolutions extends BaseEntity {
@@ -43,7 +44,7 @@ public class Resolutions extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", Resolutions.class.getSimpleName() + "[", "]")
-                .add("resolutions=" + resolutions)
-                .toString();
+            .add("resolutions=" + resolutions)
+            .toString();
     }
 }

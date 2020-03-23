@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ReservationAcceptedEventListener extends AbstractListener<ReservationAcceptedEvent> {
 
@@ -31,14 +31,17 @@ public class ReservationAcceptedEventListener extends AbstractListener<Reservati
 
     @Override
     public String getSubject(final ReservationAcceptedEvent event) {
-        return "Rezervace potvrzena - " + event.getInvestedAmount().getValue().intValue() + ",- Kč, půjčka " +
+        return "Rezervace potvrzena - " + event.getInvestedAmount()
+            .getValue()
+            .intValue() + ",- Kč, půjčka " +
                 Util.identifyLoan(event);
     }
 
     @Override
     protected Map<String, Object> getData(ReservationAcceptedEvent event) {
         final Map<String, Object> result = new HashMap<>(super.getData(event));
-        result.put("amountHeld", event.getInvestedAmount().getValue());
+        result.put("amountHeld", event.getInvestedAmount()
+            .getValue());
         return result;
     }
 

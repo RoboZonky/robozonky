@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -31,7 +33,6 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.Logger;
 
 class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
 
@@ -44,7 +45,7 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
     StrategyExecutor(final PowerTenant tenant, final OperationDescriptor<T, S, R> operationDescriptor) {
         this.tenant = tenant;
         this.operationDescriptor = operationDescriptor;
-        this.marketplaceAccessor =  operationDescriptor.newMarketplaceAccessor(tenant);
+        this.marketplaceAccessor = operationDescriptor.newMarketplaceAccessor(tenant);
         this.logger = operationDescriptor.getLogger();
     }
 
@@ -52,12 +53,14 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
         return new StrategyExecutor<>(tenant, new InvestingOperationDescriptor());
     }
 
-    public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy, Participation> forPurchasing(final PowerTenant tenant) {
+    public static StrategyExecutor<ParticipationDescriptor, PurchaseStrategy, Participation> forPurchasing(
+            final PowerTenant tenant) {
         return new StrategyExecutor<>(tenant, new PurchasingOperationDescriptor());
     }
 
     private boolean skipStrategyEvaluation(final AbstractMarketplaceAccessor<T> marketplace) {
-        if (!tenant.getAvailability().isAvailable()) {
+        if (!tenant.getAvailability()
+            .isAvailable()) {
             /*
              * If we are in a forced pause due to some remote server error, we need to make sure we've tried as many
              * remote operations before resuming from such forced pause. In such cases, we will force a marketplace
@@ -79,8 +82,8 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
 
     private boolean needsToForceMarketplaceCheck(final AbstractMarketplaceAccessor<T> marketplace) {
         return lastSuccessfulMarketplaceCheck.get()
-                .plus(marketplace.getForcedMarketplaceCheckInterval())
-                .isBefore(DateUtil.now());
+            .plus(marketplace.getForcedMarketplaceCheckInterval())
+            .isBefore(DateUtil.now());
     }
 
     private Collection<R> invest(final S strategy) {
@@ -93,7 +96,8 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
             return Collections.emptyList();
         }
         logger.trace("Processing {} items from the marketplace.", marketplace.size());
-        final Collection<R> result = operationDescriptor.getOperation().apply(tenant, marketplace, strategy);
+        final Collection<R> result = operationDescriptor.getOperation()
+            .apply(tenant, marketplace, strategy);
         lastSuccessfulMarketplaceCheck.set(DateUtil.now());
         logger.trace("Marketplace processing complete.");
         return result;
@@ -112,10 +116,10 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
             return Collections.emptyList();
         }
         return operationDescriptor.getStrategy(tenant)
-                .map(this::invest)
-                .orElseGet(() -> {
-                    logger.debug("Asleep as there is no strategy.");
-                    return Collections.emptyList();
-                });
+            .map(this::invest)
+            .orElseGet(() -> {
+                logger.debug("Asleep as there is no strategy.");
+                return Collections.emptyList();
+            });
     }
 }

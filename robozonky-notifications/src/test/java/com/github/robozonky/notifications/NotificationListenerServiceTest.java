@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
 
 package com.github.robozonky.notifications;
 
-import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.internal.extensions.ListenerServiceLoader;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +25,12 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.notifications.ListenerService;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class NotificationListenerServiceTest extends AbstractRoboZonkyTest {
 
@@ -37,9 +38,9 @@ class NotificationListenerServiceTest extends AbstractRoboZonkyTest {
     void noConfigs() {
         final ListenerService s = new NotificationListenerService();
         assertThat(s.findListeners(SESSION, RoboZonkyTestingEvent.class))
-                .hasSize(1)
-                .first()
-                .returns(Optional.empty(), Supplier::get);
+            .hasSize(1)
+            .first()
+            .returns(Optional.empty(), Supplier::get);
     }
 
     @Test
@@ -47,9 +48,9 @@ class NotificationListenerServiceTest extends AbstractRoboZonkyTest {
         ListenerServiceLoader.registerConfiguration(SESSION, "invalid-url");
         final ListenerService s = new NotificationListenerService();
         assertThat(s.findListeners(SESSION, RoboZonkyTestingEvent.class))
-                .hasSize(1)
-                .first()
-                .returns(Optional.empty(), Supplier::get);
+            .hasSize(1)
+            .first()
+            .returns(Optional.empty(), Supplier::get);
     }
 
     @Test
@@ -58,14 +59,15 @@ class NotificationListenerServiceTest extends AbstractRoboZonkyTest {
         try (InputStream s = getClass().getResourceAsStream("listeners/notifications-enabled.cfg")) {
             Files.write(path, s.readAllBytes());
         }
-        ListenerServiceLoader.registerConfiguration(SESSION, path.toUri().toURL());
+        ListenerServiceLoader.registerConfiguration(SESSION, path.toUri()
+            .toURL());
         final ListenerService s = new NotificationListenerService();
         assertThat(s.findListeners(SESSION, RoboZonkyTestingEvent.class))
-                .hasSize(1)
-                .first()
-                .extracting(Supplier::get)
-                .extracting(Optional::isPresent)
-                .isEqualTo(true);
+            .hasSize(1)
+            .first()
+            .extracting(Supplier::get)
+            .extracting(Optional::isPresent)
+            .isEqualTo(true);
     }
 
 }

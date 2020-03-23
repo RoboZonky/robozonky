@@ -16,15 +16,16 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.strategy.natural.Wrapper;
 
 class RelativeProfitTermConditionTest {
 
@@ -53,7 +54,7 @@ class RelativeProfitTermConditionTest {
     @Test
     void exact() {
         final MarketplaceFilterCondition condition = RelativeProfitCondition.exact(Ratio.fromPercentage(0),
-                                                                                   Ratio.fromPercentage(10));
+                Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getOriginalPurchasePrice()).thenReturn(Optional.of(BigDecimal.ONE));
         when(w.getReturns()).thenReturn(Optional.of(BigDecimal.ONE));
@@ -62,4 +63,3 @@ class RelativeProfitTermConditionTest {
         assertThat(condition).rejects(w);
     }
 }
-

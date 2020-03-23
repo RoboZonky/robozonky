@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public final class SessionInfo {
     /**
      * Whether or not the robot is doing a dry run. Dry run means that no portfolio-altering operations will be
      * performed, even though the robot would still continue doing everything else.
+     * 
      * @return True if the robot is doing a dry run.
      */
     public boolean isDryRun() {
@@ -61,7 +62,9 @@ public final class SessionInfo {
      * @return Name of the robot session currently running.
      */
     public String getName() {
-        return Optional.ofNullable(name).map(n -> "RoboZonky '" + n + '\'').orElse("RoboZonky");
+        return Optional.ofNullable(name)
+            .map(n -> "RoboZonky '" + n + '\'')
+            .orElse("RoboZonky");
     }
 
     @Override
@@ -75,6 +78,7 @@ public final class SessionInfo {
 
     /**
      * Within the context of a single app run, sessions with the same username represent the same session.
+     * 
      * @param o
      * @return
      */

@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
 
     private static final Comparator<RoboZonkyVersion> COMPARATOR = Comparator.comparingInt(RoboZonkyVersion::getMajor)
-            .thenComparingInt(RoboZonkyVersion::getMinor)
-            .thenComparingInt(RoboZonkyVersion::getMicro);
+        .thenComparingInt(RoboZonkyVersion::getMinor)
+        .thenComparingInt(RoboZonkyVersion::getMicro);
     private static final Pattern SINGLE_DOT_PATTERN = Pattern.compile("\\Q.\\E");
 
     private final int major, minor, micro;
@@ -41,14 +41,15 @@ class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
     }
 
     private static int[] digits(final String version) {
-        if (version == null || Objects.equals(version, "unknown")) { // this means we're on a SNAPSHOT, which is assumed to be the latest version
-            return new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
+        if (version == null || Objects.equals(version, "unknown")) { // this means we're on a SNAPSHOT, which is assumed
+                                                                     // to be the latest version
+            return new int[] { Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE };
         }
         final int dashIndex = version.indexOf('-');
         final String regular = dashIndex > 0 ? version.substring(0, dashIndex) : version;
         return Arrays.stream(SINGLE_DOT_PATTERN.split(regular))
-                .mapToInt(Integer::parseInt)
-                .toArray();
+            .mapToInt(Integer::parseInt)
+            .toArray();
     }
 
     public int getMajor() {

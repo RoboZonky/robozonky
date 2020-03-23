@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package com.github.robozonky.app;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.robozonky.app.events.Events;
-import com.github.robozonky.internal.Defaults;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyEnding;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyInitialized;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyEnding;
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyInitialized;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.internal.Defaults;
 
 /**
  * Will send {@link RoboZonkyInitializedEvent} immediately and {@link RoboZonkyEndingEvent} when it's time to shut down
@@ -48,9 +49,11 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     @Override
     public Optional<Consumer<ReturnCode>> get() {
         LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
-        Events.global().fire(roboZonkyInitialized());
+        Events.global()
+            .fire(roboZonkyInitialized());
         return Optional.of(result -> {
-            final CompletableFuture<?> waitUntilFired = Events.global().fire(roboZonkyEnding());
+            final CompletableFuture<?> waitUntilFired = Events.global()
+                .fire(roboZonkyEnding());
             try {
                 LOGGER.debug("Waiting for events to be processed.");
                 waitUntilFired.join();

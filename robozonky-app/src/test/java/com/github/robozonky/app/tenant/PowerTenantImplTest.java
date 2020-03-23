@@ -16,10 +16,19 @@
 
 package com.github.robozonky.app.tenant;
 
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.*;
+
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
@@ -42,19 +51,12 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
-import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.*;
 
 class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     private static final SecretProvider SECRETS = mockSecretProvider();
-    private static final ZonkyApiToken TOKEN = SECRETS.getToken().get();
+    private static final ZonkyApiToken TOKEN = SECRETS.getToken()
+        .get();
 
     @Test
     void closesWithTokens() {
@@ -62,7 +64,9 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(a.refresh(eq(TOKEN))).thenReturn(TOKEN);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS).withApi(api).build();
+        final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS)
+            .withApi(api)
+            .build();
         try (tenant) {
             final Statistics s = tenant.call(Zonky::getStatistics);
             assertThat(s).isSameAs(Statistics.empty());
@@ -90,13 +94,14 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void getters() throws Exception {
         final SecretProvider s = mockSecretProvider();
-        final ZonkyApiToken token = s.getToken().get();
+        final ZonkyApiToken token = s.getToken()
+            .get();
         final OAuth a = mock(OAuth.class);
         when(a.refresh(eq(token))).thenReturn(token);
         final Zonky z = harmlessZonky();
         final Loan l = new MockLoanBuilder()
-                .setRemainingInvestment(1_000)
-                .build();
+            .setRemainingInvestment(1_000)
+            .build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final SellFee sf = mock(SellFee.class);
         when(sf.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)));
@@ -105,9 +110,12 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final SellInfo si = mock(SellInfo.class);
         when(si.getPriceInfo()).thenReturn(spi);
         when(z.getSellInfo(anyLong())).thenReturn(si);
-        doThrow(IllegalStateException.class).when(z).getRestrictions(); // will result in full restrictions
+        doThrow(IllegalStateException.class).when(z)
+            .getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
-        try (final Tenant tenant = new TenantBuilder().withApi(api).withSecrets(s).build()) {
+        try (final Tenant tenant = new TenantBuilder().withApi(api)
+            .withSecrets(s)
+            .build()) {
             assertThat(tenant.getAvailability()).isNotNull();
             assertThat(tenant.getLoan(l.getId())).isSameAs(l);
             assertThat(tenant.getSellInfo(1)).isSameAs(si);
@@ -119,7 +127,8 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void keepsBalance() throws Exception {
-        try (final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS).build()) {
+        try (final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS)
+            .build()) {
             assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(StatefulBoundedBalance.MAXIMUM);
             tenant.setKnownBalanceUpperBound(Money.from(100));
             assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(100));
@@ -131,12 +140,16 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
-            tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException())).join();
+        try (final PowerTenant tenant = new TenantBuilder().withApi(api)
+            .withSecrets(SECRETS)
+            .build()) {
+            tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException()))
+                .join();
         }
         assertThat(this.getEventsRequested())
-                .hasSize(1)
-                .first().isInstanceOf(RoboZonkyDaemonSuspendedEvent.class);
+            .hasSize(1)
+            .first()
+            .isInstanceOf(RoboZonkyDaemonSuspendedEvent.class);
     }
 
     @Test
@@ -144,13 +157,16 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        try (final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build()) {
+        try (final PowerTenant tenant = new TenantBuilder().withApi(api)
+            .withSecrets(SECRETS)
+            .build()) {
             tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
-                                                                    mockPortfolioOverview())))
-                    .join();
+                    mockPortfolioOverview())))
+                .join();
         }
         assertThat(this.getEventsRequested())
-                .hasSize(1)
-                .first().isInstanceOf(SellingCompletedEvent.class);
+            .hasSize(1)
+            .first()
+            .isInstanceOf(SellingCompletedEvent.class);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.github.robozonky.api.strategies;
 
+import java.util.Objects;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
-
-import java.util.Objects;
 
 public final class RecommendedInvestment
         implements Recommended<RecommendedInvestment, InvestmentDescriptor, Investment> {
@@ -66,4 +66,3 @@ public final class RecommendedInvestment
                 '}';
     }
 }
-

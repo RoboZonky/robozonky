@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,29 @@
 
 package com.github.robozonky.internal.remote;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.github.rutledgepaulv.pagingstreams.PageSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.rutledgepaulv.pagingstreams.PageSource;
 
 @ExtendWith(MockitoExtension.class)
 class EntityCollectionPageSourceTest {
 
     private static final Select SELECT = new Select();
     private static final Function<Object, List<Integer>> FUNCTION = o -> IntStream.range(0, 1000)
-            .boxed()
-            .collect(Collectors.toList());
+        .boxed()
+        .collect(Collectors.toList());
     private static final int PAGE_SIZE = 100;
 
     @Mock
@@ -48,7 +49,7 @@ class EntityCollectionPageSourceTest {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(0, PAGE_SIZE);
         when(api.execute(eq(FUNCTION), eq(SELECT), eq(0), eq(PAGE_SIZE)))
-                .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
+            .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
         final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);
         final LongConsumer consumer = mock(LongConsumer.class);
         final List<Integer> result = source.fetch(0, 1, consumer);
@@ -61,7 +62,7 @@ class EntityCollectionPageSourceTest {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(0, PAGE_SIZE);
         when(api.execute(eq(FUNCTION), eq(SELECT), eq(0), eq(PAGE_SIZE)))
-                .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
+            .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
         final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);
         final LongConsumer consumer = mock(LongConsumer.class);
         final List<Integer> result = source.fetch(-1, 1, consumer);
@@ -74,7 +75,7 @@ class EntityCollectionPageSourceTest {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(PAGE_SIZE, 2 * PAGE_SIZE);
         when(api.execute(eq(FUNCTION), eq(SELECT), eq(1), eq(PAGE_SIZE)))
-                .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
+            .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
         final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);
         final LongConsumer consumer = mock(LongConsumer.class);
         final List<Integer> result = source.fetch(PAGE_SIZE, 1, consumer);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import static java.util.Map.entry;
+
+import java.util.Map;
+
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-
-import java.util.Map;
-
-import static java.util.Map.entry;
 
 public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEvent> {
 
@@ -45,7 +45,6 @@ public class WeeklySummaryEventListener extends AbstractListener<WeeklySummaryEv
     protected Map<String, Object> getData(final WeeklySummaryEvent event) {
         final ExtendedPortfolioOverview summary = event.getPortfolioOverview();
         return Map.ofEntries(
-                entry("portfolio", Util.summarizePortfolioStructure(summary))
-        );
+                entry("portfolio", Util.summarizePortfolioStructure(summary)));
     }
 }

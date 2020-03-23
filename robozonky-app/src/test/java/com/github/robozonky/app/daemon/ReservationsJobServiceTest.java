@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.internal.jobs.JobService;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
+import static org.assertj.core.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.internal.jobs.JobService;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class ReservationsJobServiceTest extends AbstractRoboZonkyTest {
 
@@ -28,8 +29,8 @@ class ReservationsJobServiceTest extends AbstractRoboZonkyTest {
     void getters() {
         final JobService s = new ReservationsJobService();
         assertThat(s.getSimpleJobs()).isEmpty();
-        assertThat(s.getTenantJobs()).extracting(t -> (Class)t.getClass())
-                .containsExactly(ReservationsPreferencesJob.class, ReservationsProcessingJob.class);
+        assertThat(s.getTenantJobs()).extracting(t -> (Class) t.getClass())
+            .containsExactly(ReservationsPreferencesJob.class, ReservationsProcessingJob.class);
     }
 
 }

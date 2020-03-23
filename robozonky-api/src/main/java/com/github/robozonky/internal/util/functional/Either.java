@@ -64,7 +64,8 @@ public final class Either<L, R> {
 
     public <U> U fold(final Function<? super L, ? extends U> lFunc, final Function<? super R, ? extends U> rFunc) {
         return right.map(r -> (U) rFunc.apply(r))
-                .orElseGet(() -> left.map(lFunc).orElse(null));
+            .orElseGet(() -> left.map(lFunc)
+                .orElse(null));
     }
 
     public boolean isRight() {

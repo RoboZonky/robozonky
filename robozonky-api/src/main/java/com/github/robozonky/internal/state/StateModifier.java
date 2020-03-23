@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ public interface StateModifier<T> {
 
     /**
      * Associate a value with a key in the underlying {@link StateStorage}.
-     * @param key Key to look up the value with.
+     * 
+     * @param key   Key to look up the value with.
      * @param value Value to associate with the key, overwriting anything previously set there.
      * @return This.
      */
@@ -32,7 +33,8 @@ public interface StateModifier<T> {
     /**
      * Associate a value with a key in the underlying {@link StateStorage}, first joining all the strings to one using
      * a single ";" character. Such values can then be read back with {@link StateReader#getValues(String)}.
-     * @param key Key to look up the value with.
+     * 
+     * @param key    Key to look up the value with.
      * @param values Values to associate with the key, overwriting anything previously set there.
      * @return This.
      */
@@ -43,8 +45,9 @@ public interface StateModifier<T> {
     /**
      * Associate a value with a key in the underlying {@link StateStorage}, first joining all the strings to one using
      * a given delimiter. Such values can then be read with {@link StateReader#getValues(String, String)}.
-     * @param key Key to look up the value with.
-     * @param values Values to associate with the key, overwriting anything previously set there.
+     * 
+     * @param key       Key to look up the value with.
+     * @param values    Values to associate with the key, overwriting anything previously set there.
      * @param separator Used to merge the values into one string that will be associated with the key.
      * @return This.
      */
@@ -54,6 +57,7 @@ public interface StateModifier<T> {
 
     /**
      * Remove value associated with the key from underlying {@link StateStorage}.
+     * 
      * @param key Key to look up the value with.
      * @return This.
      */

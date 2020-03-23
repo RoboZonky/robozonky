@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     @Override
     public File apply(final CommandLinePart commandLine) {
-        return process(commandLine, EXEC_NAME + ".ftl", s -> UNIX_NEWLINES.matcher(s).replaceAll("\r\n"));
+        return process(commandLine, EXEC_NAME + ".ftl", s -> UNIX_NEWLINES.matcher(s)
+            .replaceAll("\r\n"));
     }
 
     @Override
@@ -45,4 +46,3 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
         return new File(distributionDirectory, "robozonky.bat");
     }
 }
-

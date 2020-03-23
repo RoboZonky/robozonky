@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 package com.github.robozonky.internal.remote;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import com.github.robozonky.internal.Defaults;
 
 class SelectTest {
 
@@ -137,7 +136,9 @@ class SelectTest {
         final String fieldName = "field";
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
-        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final OffsetDateTime value = LocalDateTime.of(date, time)
+            .atZone(Defaults.ZONE_ID)
+            .toOffsetDateTime();
         final Select select = new Select().greaterThanOrNull(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
@@ -209,7 +210,9 @@ class SelectTest {
         final String fieldName = "field";
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
-        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final OffsetDateTime value = LocalDateTime.of(date, time)
+            .atZone(Defaults.ZONE_ID)
+            .toOffsetDateTime();
         final Select select = new Select().lessThan(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
@@ -221,7 +224,9 @@ class SelectTest {
         final String fieldName = "field";
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
-        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final OffsetDateTime value = LocalDateTime.of(date, time)
+            .atZone(Defaults.ZONE_ID)
+            .toOffsetDateTime();
         final Select select = new Select().lessThanOrEquals(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
@@ -233,7 +238,9 @@ class SelectTest {
         final String fieldName = "field";
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
-        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final OffsetDateTime value = LocalDateTime.of(date, time)
+            .atZone(Defaults.ZONE_ID)
+            .toOffsetDateTime();
         final Select select = new Select().greaterThan(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
@@ -245,7 +252,9 @@ class SelectTest {
         final String fieldName = "field";
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
-        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final OffsetDateTime value = LocalDateTime.of(date, time)
+            .atZone(Defaults.ZONE_ID)
+            .toOffsetDateTime();
         final Select select = new Select().greaterThanOrEquals(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
@@ -277,7 +286,9 @@ class SelectTest {
         final String fieldName = "field";
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
-        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final OffsetDateTime value = LocalDateTime.of(date, time)
+            .atZone(Defaults.ZONE_ID)
+            .toOffsetDateTime();
         final Select select = new Select().lessThanOrNull(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
@@ -349,13 +360,16 @@ class SelectTest {
         final Select select = Select.unrestricted();
         assertThat(select).isEqualTo(select);
         assertThat(select).isNotEqualTo(null);
-        final Select select2 = Select.unrestricted().greaterThan("a", 1);
+        final Select select2 = Select.unrestricted()
+            .greaterThan("a", 1);
         assertThat(select2).isNotEqualTo(select);
         assertThat(select).isNotEqualTo(select2);
-        final Select select3 = Select.unrestricted().greaterThan("a", 1);
+        final Select select3 = Select.unrestricted()
+            .greaterThan("a", 1);
         assertThat(select2).isEqualTo(select3);
         assertThat(select3).isEqualTo(select2);
-        final Select select4 = Select.unrestricted().greaterThan("a", 2);
+        final Select select4 = Select.unrestricted()
+            .greaterThan("a", 2);
         assertThat(select4).isNotEqualTo(select3);
         assertThat(select3).isNotEqualTo(select4);
     }
@@ -372,9 +386,11 @@ class SelectTest {
 
     @Test
     void equalsPlain() {
-        final String fieldName = UUID.randomUUID().toString();
+        final String fieldName = UUID.randomUUID()
+            .toString();
         final String value = "value";
-        final Select select = Select.unrestricted().equalsPlain(fieldName, value);
+        final Select select = Select.unrestricted()
+            .equalsPlain(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
         verify(filter).setQueryParam(eq(fieldName), eq(value));

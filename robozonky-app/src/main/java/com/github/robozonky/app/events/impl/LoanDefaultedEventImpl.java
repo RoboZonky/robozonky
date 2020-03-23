@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,9 @@ final class LoanDefaultedEventImpl extends AbstractEventImpl implements LoanDefa
     @Override
     public String toString() {
         return new StringJoiner(", ", LoanDefaultedEventImpl.class.getSimpleName() + "[", "]")
-                .add("loan=" + loan)
-                .add("investment=" + investment)
-                .add("delinquentSince=" + delinquentSince)
-                .toString();
+            .add("loan=" + loan)
+            .add("investment=" + investment)
+            .add("delinquentSince=" + delinquentSince)
+            .toString();
     }
 }

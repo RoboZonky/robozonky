@@ -21,7 +21,8 @@ import com.github.robozonky.api.remote.enums.LoanHealth;
 public class HealthCondition extends AbstractEnumeratedCondition<LoanHealth> {
 
     public HealthCondition() {
-        super(w -> w.getHealth().orElse(LoanHealth.UNKNOWN), true);
+        super(w -> w.getHealth()
+            .orElse(LoanHealth.UNKNOWN), true);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import com.github.robozonky.internal.state.InstanceState;
-import com.github.robozonky.internal.state.StateModifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.state.StateModifier;
 
 /**
  * Delegates to default {@link InstanceState} implementation, except for {@link #update(Consumer)} and
  * {@link #reset(Consumer)}, which are stored for later.
+ * 
  * @param <T>
  */
 final class TransactionalInstanceState<T> implements InstanceState<T> {

@@ -20,8 +20,12 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -31,8 +35,6 @@ import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class Investment extends BaseInvestment {
 
@@ -134,7 +136,8 @@ public class Investment extends BaseInvestment {
         this.rating = loan.getRating();
         this.interestRate = rating.getInterestRate();
         this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
-        this.remainingPrincipal = amount.getValue().toPlainString();
+        this.remainingPrincipal = amount.getValue()
+            .toPlainString();
         this.purchasePrice = remainingPrincipal;
         this.remainingMonths = loan.getTermInMonths();
         this.loanTermInMonth = loan.getTermInMonths();
@@ -167,6 +170,7 @@ public class Investment extends BaseInvestment {
 
     /**
      * The original term.
+     * 
      * @return
      */
     @XmlElement
@@ -177,6 +181,7 @@ public class Investment extends BaseInvestment {
     /**
      * How many monthly payments were remaining to be made from {@link #getLoanTermInMonth()}.
      * May be less than {@link #getRemainingMonths()} in case of early payments.
+     * 
      * @return
      */
     @XmlElement
@@ -201,6 +206,7 @@ public class Investment extends BaseInvestment {
 
     /**
      * The client terminated the loan contract. The investment can therefore not be sold on secondary marketplace.
+     * 
      * @return
      */
     @XmlElement
@@ -210,6 +216,7 @@ public class Investment extends BaseInvestment {
 
     /**
      * How many monthly payments are now remaining. Also see {@link #getCurrentTerm()}.
+     * 
      * @return
      */
     @XmlElement
@@ -247,46 +254,48 @@ public class Investment extends BaseInvestment {
     @XmlTransient
     public OffsetDateTime getInvestmentDate() {
         return Optional.ofNullable(investmentDate)
-                .map(OffsetDateTimeAdapter::fromString)
-                .orElseGet(() -> {
-                    final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
-                    final OffsetDateTime d = DateUtil.offsetNow().minusMonths(monthsElapsed);
-                    LOGGER.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
-                    return d;
-                });
+            .map(OffsetDateTimeAdapter::fromString)
+            .orElseGet(() -> {
+                final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
+                final OffsetDateTime d = DateUtil.offsetNow()
+                    .minusMonths(monthsElapsed);
+                LOGGER.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
+                return d;
+            });
     }
 
     /**
      * In case of a presently delinquent loan, this always shows the date of the least recent instalment that is
      * delinquent.
+     * 
      * @return Empty for loans where no payments are expected anymore.
      */
     @XmlTransient
     public Optional<OffsetDateTime> getNextPaymentDate() {
         return Optional.ofNullable(nextPaymentDate)
-                .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTimeAdapter::fromString);
     }
 
     /**
      * @return If bought on SMP, then the timestamp of purchase. If invested from primary marketplace, then timestamp of
-     * settlement (= empty when not yet settled).
+     *         settlement (= empty when not yet settled).
      */
     @XmlTransient
     public Optional<OffsetDateTime> getActiveFrom() {
         return Optional.ofNullable(activeFrom)
-                .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTimeAdapter::fromString);
     }
 
     @XmlTransient
     public Optional<OffsetDateTime> getActiveTo() {
         return Optional.ofNullable(activeTo)
-                .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTimeAdapter::fromString);
     }
 
     @XmlTransient
     public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
         return Optional.ofNullable(smpFeeExpirationDate)
-                .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTimeAdapter::fromString);
     }
 
     @XmlElement
@@ -306,6 +315,7 @@ public class Investment extends BaseInvestment {
 
     /**
      * Semantics is identical to {@link BaseLoan#isInsuranceActive()} ()}.
+     * 
      * @return
      */
     @XmlElement
@@ -315,6 +325,7 @@ public class Investment extends BaseInvestment {
 
     /**
      * Semantics is identical to {@link BaseLoan#isAdditionallyInsured()}.
+     * 
      * @return
      */
     @XmlElement
@@ -400,13 +411,13 @@ public class Investment extends BaseInvestment {
     @XmlTransient
     public Optional<Money> getRemainingPrincipal() {
         return Optional.ofNullable(remainingPrincipal)
-                .map(Money::from);
+            .map(Money::from);
     }
 
     @XmlTransient
     public Optional<Money> getSmpSoldFor() {
         return Optional.ofNullable(smpSoldFor)
-                .map(Money::from);
+            .map(Money::from);
     }
 
     @XmlTransient
@@ -417,7 +428,7 @@ public class Investment extends BaseInvestment {
     @XmlTransient
     public Optional<Money> getSmpFee() {
         return Optional.ofNullable(smpFee)
-                .map(Money::from);
+            .map(Money::from);
     }
 
     /**
@@ -426,58 +437,58 @@ public class Investment extends BaseInvestment {
     @XmlTransient
     public Optional<Money> getSmpPrice() {
         return Optional.ofNullable(smpPrice)
-                .map(Money::from);
+            .map(Money::from);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", Investment.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("activeFrom='" + activeFrom + "'")
-                .add("activeTo='" + activeTo + "'")
-                .add("additionallyInsured=" + additionallyInsured)
-                .add("amountDue='" + amountDue + "'")
-                .add("borrowerNo=" + borrowerNo)
-                .add("canBeOffered=" + canBeOffered)
-                .add("currentTerm=" + currentTerm)
-                .add("dueInterest='" + dueInterest + "'")
-                .add("duePrincipal='" + duePrincipal + "'")
-                .add("expectedInterest='" + expectedInterest + "'")
-                .add("hasCollectionHistory=" + hasCollectionHistory)
-                .add("instalmentPostponement=" + instalmentPostponement)
-                .add("insuranceActive=" + insuranceActive)
-                .add("insuranceStatus=" + insuranceStatus)
-                .add("interestRate=" + interestRate)
-                .add("investmentDate='" + investmentDate + "'")
-                .add("investmentType=" + investmentType)
-                .add("inWithdrawal=" + inWithdrawal)
-                .add("legalDpd=" + legalDpd)
-                .add("loanAmount='" + loanAmount + "'")
-                .add("loanAnnuity='" + loanAnnuity + "'")
-                .add("loanHealthInfo=" + loanHealthInfo)
-                .add("loanInvestmentsCount=" + loanInvestmentsCount)
-                .add("loanName='" + loanName + "'")
-                .add("loanPublicIdentifier='" + loanPublicIdentifier + "'")
-                .add("loanTermInMonth=" + loanTermInMonth)
-                .add("nextPaymentDate='" + nextPaymentDate + "'")
-                .add("nickname='" + nickname + "'")
-                .add("onSmp=" + onSmp)
-                .add("paid='" + paid + "'")
-                .add("paidInterest='" + paidInterest + "'")
-                .add("paidPenalty='" + paidPenalty + "'")
-                .add("paidPrincipal='" + paidPrincipal + "'")
-                .add("paymentStatus=" + paymentStatus)
-                .add("purchasePrice='" + purchasePrice + "'")
-                .add("rating=" + rating)
-                .add("remainingMonths=" + remainingMonths)
-                .add("remainingPrincipal='" + remainingPrincipal + "'")
-                .add("revenueRate=" + revenueRate)
-                .add("smpFee='" + smpFee + "'")
-                .add("smpFeeExpirationDate='" + smpFeeExpirationDate + "'")
-                .add("smpPrice='" + smpPrice + "'")
-                .add("smpRelated=" + smpRelated)
-                .add("smpSoldFor='" + smpSoldFor + "'")
-                .add("toPay='" + toPay + "'")
-                .toString();
+            .add("super=" + super.toString())
+            .add("activeFrom='" + activeFrom + "'")
+            .add("activeTo='" + activeTo + "'")
+            .add("additionallyInsured=" + additionallyInsured)
+            .add("amountDue='" + amountDue + "'")
+            .add("borrowerNo=" + borrowerNo)
+            .add("canBeOffered=" + canBeOffered)
+            .add("currentTerm=" + currentTerm)
+            .add("dueInterest='" + dueInterest + "'")
+            .add("duePrincipal='" + duePrincipal + "'")
+            .add("expectedInterest='" + expectedInterest + "'")
+            .add("hasCollectionHistory=" + hasCollectionHistory)
+            .add("instalmentPostponement=" + instalmentPostponement)
+            .add("insuranceActive=" + insuranceActive)
+            .add("insuranceStatus=" + insuranceStatus)
+            .add("interestRate=" + interestRate)
+            .add("investmentDate='" + investmentDate + "'")
+            .add("investmentType=" + investmentType)
+            .add("inWithdrawal=" + inWithdrawal)
+            .add("legalDpd=" + legalDpd)
+            .add("loanAmount='" + loanAmount + "'")
+            .add("loanAnnuity='" + loanAnnuity + "'")
+            .add("loanHealthInfo=" + loanHealthInfo)
+            .add("loanInvestmentsCount=" + loanInvestmentsCount)
+            .add("loanName='" + loanName + "'")
+            .add("loanPublicIdentifier='" + loanPublicIdentifier + "'")
+            .add("loanTermInMonth=" + loanTermInMonth)
+            .add("nextPaymentDate='" + nextPaymentDate + "'")
+            .add("nickname='" + nickname + "'")
+            .add("onSmp=" + onSmp)
+            .add("paid='" + paid + "'")
+            .add("paidInterest='" + paidInterest + "'")
+            .add("paidPenalty='" + paidPenalty + "'")
+            .add("paidPrincipal='" + paidPrincipal + "'")
+            .add("paymentStatus=" + paymentStatus)
+            .add("purchasePrice='" + purchasePrice + "'")
+            .add("rating=" + rating)
+            .add("remainingMonths=" + remainingMonths)
+            .add("remainingPrincipal='" + remainingPrincipal + "'")
+            .add("revenueRate=" + revenueRate)
+            .add("smpFee='" + smpFee + "'")
+            .add("smpFeeExpirationDate='" + smpFeeExpirationDate + "'")
+            .add("smpPrice='" + smpPrice + "'")
+            .add("smpRelated=" + smpRelated)
+            .add("smpSoldFor='" + smpSoldFor + "'")
+            .add("toPay='" + toPay + "'")
+            .toString();
     }
 }

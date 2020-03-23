@@ -16,6 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static com.github.robozonky.api.Ratio.fromPercentage;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,26 +31,24 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
-import static com.github.robozonky.api.Ratio.fromPercentage;
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class UtilTest extends AbstractRoboZonkyTest {
 
     private static PortfolioOverview preparePortfolio(final Number ratingA, final Number ratingB,
-                                                      final Number ratingC) {
+            final Number ratingC) {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        doReturn(fromPercentage(ratingA)).when(portfolioOverview).getShareOnInvestment(eq(Rating.A));
-        doReturn(fromPercentage(ratingB)).when(portfolioOverview).getShareOnInvestment(eq(Rating.B));
-        doReturn(fromPercentage(ratingC)).when(portfolioOverview).getShareOnInvestment(eq(Rating.C));
+        doReturn(fromPercentage(ratingA)).when(portfolioOverview)
+            .getShareOnInvestment(eq(Rating.A));
+        doReturn(fromPercentage(ratingB)).when(portfolioOverview)
+            .getShareOnInvestment(eq(Rating.B));
+        doReturn(fromPercentage(ratingC)).when(portfolioOverview)
+            .getShareOnInvestment(eq(Rating.C));
         return portfolioOverview;
     }
 
@@ -56,8 +60,10 @@ class UtilTest extends AbstractRoboZonkyTest {
         final Rating first = result.get(0);
         final Rating last = result.get(ratingsOrderedDown.length - 1);
         assertSoftly(softly -> {
-            softly.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
-            softly.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
+            softly.assertThat(first)
+                .isEqualTo(ratingsOrderedDown[0]);
+            softly.assertThat(last)
+                .isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
         });
     }
 
@@ -70,11 +76,12 @@ class UtilTest extends AbstractRoboZonkyTest {
     @Test
     void comparator() {
         Comparator<Rating> comparator = Util.getRatingByDemandComparator(inOrder(Rating.A, Rating.D, Rating.AAAAA));
-        assertSoftly(softly -> softly.assertThat(Rating.D).usingComparator(comparator)
-                .isGreaterThan(Rating.A)
-                .isLessThan(Rating.AAAAA)
-                .isLessThan(Rating.AAAAAA) // Not included == greatest.
-        .isLessThan(Rating.C));
+        assertSoftly(softly -> softly.assertThat(Rating.D)
+            .usingComparator(comparator)
+            .isGreaterThan(Rating.A)
+            .isLessThan(Rating.AAAAA)
+            .isLessThan(Rating.AAAAAA) // Not included == greatest.
+            .isLessThan(Rating.C));
     }
 
     @Test
@@ -86,8 +93,8 @@ class UtilTest extends AbstractRoboZonkyTest {
                 asList(
                         new PortfolioShare(Rating.A, fromPercentage(targetShareA)),
                         new PortfolioShare(Rating.B, fromPercentage(targetShareB)),
-                        new PortfolioShare(Rating.C, fromPercentage(targetShareC))
-                ), Collections.emptyMap(), Collections.emptyMap());
+                        new PortfolioShare(Rating.C, fromPercentage(targetShareC))),
+                Collections.emptyMap(), Collections.emptyMap());
         // all ratings have zero share; C > B > A
         final Set<Rating> ratings = EnumSet.of(Rating.A, Rating.B, Rating.C);
         PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);

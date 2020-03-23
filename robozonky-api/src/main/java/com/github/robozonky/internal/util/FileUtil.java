@@ -44,15 +44,17 @@ public final class FileUtil {
     }
 
     public static boolean isJarFile(final File f) {
-        return f.isFile() && f.getPath().toLowerCase().endsWith(".jar");
+        return f.isFile() && f.getPath()
+            .toLowerCase()
+            .endsWith(".jar");
     }
 
     public static Optional<File> findFolder(final String folderName) {
         final Path root = new File(System.getProperty("user.dir")).toPath();
         try (var folders = Files.find(root, 1, (path, attr) -> attr.isDirectory())) {
             return folders.map(Path::toFile)
-                    .filter(f -> Objects.equals(f.getName(), folderName))
-                    .findFirst();
+                .filter(f -> Objects.equals(f.getName(), folderName))
+                .findFirst();
         } catch (Exception ex) {
             LOGGER.warn("Exception while walking file tree.", ex);
             return Optional.empty();
@@ -64,14 +66,15 @@ public final class FileUtil {
             throw new IllegalArgumentException("Null");
         }
         return Stream.of(jars)
-                .map(f -> {
-                    try {
-                        return Optional.of(f.toURI().toURL());
-                    } catch (final MalformedURLException e) {
-                        LOGGER.debug("Skipping file: '{}'.", f, e);
-                        return Optional.<URL>empty();
-                    }
-                })
-                .flatMap(Optional::stream);
+            .map(f -> {
+                try {
+                    return Optional.of(f.toURI()
+                        .toURL());
+                } catch (final MalformedURLException e) {
+                    LOGGER.debug("Skipping file: '{}'.", f, e);
+                    return Optional.<URL>empty();
+                }
+            })
+            .flatMap(Optional::stream);
     }
 }

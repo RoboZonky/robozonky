@@ -43,11 +43,11 @@ final class Preferences {
         this.referencePortfolio = portfolio;
         this.ratingRanking = ratingRanking;
         this.ratingComparator = Memoizer.memoize(() -> Util.getRatingByDemandComparator(ratingRanking));
-        this.primaryMarketplaceComparator =
-                Memoizer.memoize(() -> new PrimaryMarketplaceComparator(ratingComparator.get()));
+        this.primaryMarketplaceComparator = Memoizer
+            .memoize(() -> new PrimaryMarketplaceComparator(ratingComparator.get()));
         this.reservationComparator = Memoizer.memoize(() -> new ReservationComparator(ratingComparator.get()));
-        this.secondaryMarketplaceComparator =
-                Memoizer.memoize(() -> new SecondaryMarketplaceComparator(ratingComparator.get()));
+        this.secondaryMarketplaceComparator = Memoizer
+            .memoize(() -> new SecondaryMarketplaceComparator(ratingComparator.get()));
     }
 
     public static synchronized Preferences get(ParsedStrategy strategy, PortfolioOverview portfolio) {

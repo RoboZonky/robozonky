@@ -67,7 +67,9 @@ class DefaultValues {
         if (exitProperties == null) {
             return false;
         } else {
-            return exitProperties.getSelloffStart().isBefore(DateUtil.localNow().toLocalDate());
+            return exitProperties.getSelloffStart()
+                .isBefore(DateUtil.localNow()
+                    .toLocalDate());
         }
     }
 
@@ -75,8 +77,10 @@ class DefaultValues {
         if (exitProperties == null) {
             return -1;
         } else {
-            return Math.max(0, Period.between(DateUtil.localNow().toLocalDate(),
-                                              exitProperties.getAccountTermination()).toTotalMonths());
+            return Math.max(0, Period.between(DateUtil.localNow()
+                .toLocalDate(),
+                    exitProperties.getAccountTermination())
+                .toTotalMonths());
         }
     }
 
@@ -121,14 +125,14 @@ class DefaultValues {
     @Override
     public String toString() {
         return new StringJoiner(", ", DefaultValues.class.getSimpleName() + "[", "]")
-                .add("portfolio=" + portfolio)
-                .add("investmentShare=" + investmentShare)
-                .add("investmentSize=" + investmentSize)
-                .add("purchaseSize=" + purchaseSize)
-                .add("reservationMode=" + reservationMode)
-                .add("sellingMode=" + sellingMode)
-                .add("targetPortfolioSize=" + targetPortfolioSize)
-                .add("exitProperties=" + exitProperties)
-                .toString();
+            .add("portfolio=" + portfolio)
+            .add("investmentShare=" + investmentShare)
+            .add("investmentSize=" + investmentSize)
+            .add("purchaseSize=" + purchaseSize)
+            .add("reservationMode=" + reservationMode)
+            .add("sellingMode=" + sellingMode)
+            .add("targetPortfolioSize=" + targetPortfolioSize)
+            .add("exitProperties=" + exitProperties)
+            .toString();
     }
 }

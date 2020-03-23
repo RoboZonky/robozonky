@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,21 @@
 
 package com.github.robozonky.app.tenant;
 
-import com.github.robozonky.internal.remote.RequestCounter;
-import com.github.robozonky.internal.tenant.Availability;
-import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.ws.rs.ClientErrorException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
+
+import javax.ws.rs.ClientErrorException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.remote.RequestCounter;
+import com.github.robozonky.internal.tenant.Availability;
+import com.github.robozonky.internal.test.DateUtil;
 
 final class AvailabilityImpl implements Availability {
 
@@ -67,9 +69,10 @@ final class AvailabilityImpl implements Availability {
         // add 5 seconds of initial delay to give time to recover from HTTP 429 or whatever other problem there was
         final boolean unavailableDueToQuota = paused.isQuotaLimited();
         final long initialMandatoryDelayInSeconds = unavailableDueToQuota ? 60 : MANDATORY_DELAY_IN_SECONDS;
-        final long secondsFromPauseToNextCheck =
-                initialMandatoryDelayInSeconds + (long) Math.pow(2, paused.getFailedRetries());
-        return paused.getExceptionRegisteredOn().plus(Duration.ofSeconds(secondsFromPauseToNextCheck));
+        final long secondsFromPauseToNextCheck = initialMandatoryDelayInSeconds
+                + (long) Math.pow(2, paused.getFailedRetries());
+        return paused.getExceptionRegisteredOn()
+            .plus(Duration.ofSeconds(secondsFromPauseToNextCheck));
     }
 
     @Override
@@ -88,7 +91,8 @@ final class AvailabilityImpl implements Availability {
             LOGGER.info("Resumed after a forced pause.");
             return Optional.of(paused.getExceptionRegisteredOn());
         } else { // make sure we have actually performed a metered operation, safeguarding against HTTP 429
-            LOGGER.info("Not resuming after a forced pause, request counter ({}) did not change.", paused.getLastRequestId());
+            LOGGER.info("Not resuming after a forced pause, request counter ({}) did not change.",
+                    paused.getLastRequestId());
             return Optional.empty();
         }
     }
@@ -97,14 +101,14 @@ final class AvailabilityImpl implements Availability {
         if (throwable == null) {
             return false;
         } else if (throwable instanceof ClientErrorException) {
-            final int code = ((ClientErrorException)throwable).getResponse().getStatus();
+            final int code = ((ClientErrorException) throwable).getResponse()
+                .getStatus();
             if (code == 429) {
                 return true;
             }
         }
         return isQuotaLimitHit(throwable.getCause());
     }
-
 
     @Override
     public boolean registerException(final Exception ex) {
@@ -130,7 +134,7 @@ final class AvailabilityImpl implements Availability {
         private final boolean isQuotaLimited;
 
         public Status(final Instant exceptionRegisteredOn, final int failedRetries, final long currentRequestId,
-                      final boolean isQuotaLimited) {
+                final boolean isQuotaLimited) {
             this.exceptionRegisteredOn = exceptionRegisteredOn;
             this.failedRetries = failedRetries;
             this.lastRequestId = currentRequestId;

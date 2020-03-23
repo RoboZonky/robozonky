@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,21 +23,24 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.test.DateUtil;
 
 final class RequestCounterImpl implements RequestCounter {
 
     private static final Logger LOGGER = LogManager.getLogger(RequestCounterImpl.class);
 
     private final AtomicLong counter = new AtomicLong();
-    private final AtomicReference<SortedMap<Instant, Long>> requests = new AtomicReference<>(new ConcurrentSkipListMap<>());
+    private final AtomicReference<SortedMap<Instant, Long>> requests = new AtomicReference<>(
+            new ConcurrentSkipListMap<>());
 
     @Override
     public long mark() {
         final long id = counter.getAndIncrement();
-        requests.get().put(DateUtil.now(), id);
+        requests.get()
+            .put(DateUtil.now(), id);
         return id;
     }
 
@@ -49,28 +52,35 @@ final class RequestCounterImpl implements RequestCounter {
 
     @Override
     public int count() {
-        return requests.get().size();
+        return requests.get()
+            .size();
     }
 
     @Override
     public int count(final Duration interval) {
-        final Instant threshold = DateUtil.now().minus(interval);
-        return requests.get().tailMap(threshold).size();
+        final Instant threshold = DateUtil.now()
+            .minus(interval);
+        return requests.get()
+            .tailMap(threshold)
+            .size();
     }
 
     @Override
     public void cut(final int count) {
         final SortedMap<Instant, Long> actualRequests = requests.get();
-        actualRequests.keySet().stream()
-                .limit(count)
-                .forEach(actualRequests::remove);
+        actualRequests.keySet()
+            .stream()
+            .limit(count)
+            .forEach(actualRequests::remove);
         LOGGER.trace("Removed {} request(s), new total is {}.", count, count());
     }
 
     @Override
     public void keepOnly(final Duration interval) {
         LOGGER.trace("Resetting within the last interval: {}.", interval);
-        final Instant threshold = DateUtil.now().minus(interval);
-        requests.set(requests.get().tailMap(threshold));
+        final Instant threshold = DateUtil.now()
+            .minus(interval);
+        requests.set(requests.get()
+            .tailMap(threshold));
     }
 }

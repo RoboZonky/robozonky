@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class Counter {
 
@@ -55,33 +56,38 @@ final class Counter {
             LOGGER.debug("Loaded timestamps: {}.", result);
             return result;
         })
-                .reloadAfter(period)
-                .build();
+            .reloadAfter(period)
+            .build();
     }
 
     private static Set<OffsetDateTime> load(final SessionInfo sessionInfo, final String id) {
-        return TenantState.of(sessionInfo).in(Counter.class).getValues(id)
-                .map(value -> value
-                        .map(String::trim)
-                        .map(OffsetDateTime::parse)
-                        .collect(Collectors.toSet()))
-                .orElse(new HashSet<>(0));
+        return TenantState.of(sessionInfo)
+            .in(Counter.class)
+            .getValues(id)
+            .map(value -> value
+                .map(String::trim)
+                .map(OffsetDateTime::parse)
+                .collect(Collectors.toSet()))
+            .orElse(new HashSet<>(0));
     }
 
     private void store(final SessionInfo sessionInfo, final String id, final Set<OffsetDateTime> timestamps) {
         LOGGER.trace("Storing timestamps: {}.", timestamps);
         TenantState.of(sessionInfo)
-                .in(Counter.class)
-                .reset(b -> b.put(id, filterValidTimestamps(timestamps).map(OffsetDateTime::toString)));
+            .in(Counter.class)
+            .reset(b -> b.put(id, filterValidTimestamps(timestamps).map(OffsetDateTime::toString)));
     }
 
     private Set<OffsetDateTime> getTimestamps() {
-        return timestamps.get().getOrElse(Collections.emptySet());
+        return timestamps.get()
+            .getOrElse(Collections.emptySet());
     }
 
     private Stream<OffsetDateTime> filterValidTimestamps(final Set<OffsetDateTime> timestamps) {
         final OffsetDateTime now = DateUtil.offsetNow();
-        return timestamps.stream().filter(timestamp -> timestamp.plus(period).isAfter(now));
+        return timestamps.stream()
+            .filter(timestamp -> timestamp.plus(period)
+                .isAfter(now));
     }
 
     public void increase() {

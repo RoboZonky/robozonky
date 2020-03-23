@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.LongConsumer;
 
-import com.github.rutledgepaulv.pagingstreams.PageSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.rutledgepaulv.pagingstreams.PageSource;
 
 class EntityCollectionPageSource<T, S> implements PageSource<T> {
 
@@ -34,7 +35,7 @@ class EntityCollectionPageSource<T, S> implements PageSource<T> {
     private final int pageSize;
 
     public EntityCollectionPageSource(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                      final Select select, final int pageSize) {
+            final Select select, final int pageSize) {
         this.api = api;
         this.function = function;
         this.select = select;

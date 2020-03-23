@@ -20,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.Optional;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -203,7 +204,7 @@ public abstract class BaseLoan extends BaseEntity {
 
     /**
      * @return True if the loan is insured at this very moment. Uninsured loans will have both this and
-     * {@link #isAdditionallyInsured()} return false.
+     *         {@link #isAdditionallyInsured()} return false.
      */
     @XmlElement
     public boolean isInsuranceActive() {
@@ -212,7 +213,7 @@ public abstract class BaseLoan extends BaseEntity {
 
     /**
      * @return True if the loan will become insured at some later point in time. False when {@link #isInsuranceActive()}
-     * is true.
+     *         is true.
      */
     @XmlElement
     public boolean isInsuredInFuture() {
@@ -221,7 +222,7 @@ public abstract class BaseLoan extends BaseEntity {
 
     /**
      * @return If the loan is insured, but did not start this way. Uninsured loans will have both this and
-     * {@link #isInsuranceActive()} return false.
+     *         {@link #isInsuranceActive()} return false.
      */
     @XmlElement
     public boolean isAdditionallyInsured() {
@@ -298,39 +299,39 @@ public abstract class BaseLoan extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", BaseLoan.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("activeLoansCount=" + activeLoansCount)
-                .add("additionallyInsured=" + additionallyInsured)
-                .add("amount='" + amount + "'")
-                .add("annuity='" + annuity + "'")
-                .add("annuityWithInsurance='" + annuityWithInsurance + "'")
-                .add("borrowerNo=" + borrowerNo)
-                .add("countryOfOrigin=" + countryOfOrigin)
-                .add("covered=" + covered)
-                .add("currency=" + currency)
-                .add("datePublished='" + datePublished + "'")
-                .add("deadline='" + deadline + "'")
-                .add("insuranceActive=" + insuranceActive)
-                .add("insuredInFuture=" + insuredInFuture)
-                .add("interestRate=" + interestRate)
-                .add("investmentRate=" + investmentRate)
-                .add("investmentsCount=" + investmentsCount)
-                .add("mainIncomeType=" + mainIncomeType)
-                .add("name='" + name + "'")
-                .add("nickName='" + nickName + "'")
-                .add("premium='" + premium + "'")
-                .add("publicIdentifier=" + publicIdentifier)
-                .add("published=" + published)
-                .add("purpose=" + purpose)
-                .add("rating=" + rating)
-                .add("region=" + region)
-                .add("remainingInvestment='" + remainingInvestment + "'")
-                .add("reservedAmount='" + reservedAmount + "'")
-                .add("revenueRate=" + revenueRate)
-                .add("termInMonths=" + termInMonths)
-                .add("topped=" + topped)
-                .add("userId=" + userId)
-                .add("zonkyPlusAmount='" + zonkyPlusAmount + "'")
-                .toString();
+            .add("id=" + id)
+            .add("activeLoansCount=" + activeLoansCount)
+            .add("additionallyInsured=" + additionallyInsured)
+            .add("amount='" + amount + "'")
+            .add("annuity='" + annuity + "'")
+            .add("annuityWithInsurance='" + annuityWithInsurance + "'")
+            .add("borrowerNo=" + borrowerNo)
+            .add("countryOfOrigin=" + countryOfOrigin)
+            .add("covered=" + covered)
+            .add("currency=" + currency)
+            .add("datePublished='" + datePublished + "'")
+            .add("deadline='" + deadline + "'")
+            .add("insuranceActive=" + insuranceActive)
+            .add("insuredInFuture=" + insuredInFuture)
+            .add("interestRate=" + interestRate)
+            .add("investmentRate=" + investmentRate)
+            .add("investmentsCount=" + investmentsCount)
+            .add("mainIncomeType=" + mainIncomeType)
+            .add("name='" + name + "'")
+            .add("nickName='" + nickName + "'")
+            .add("premium='" + premium + "'")
+            .add("publicIdentifier=" + publicIdentifier)
+            .add("published=" + published)
+            .add("purpose=" + purpose)
+            .add("rating=" + rating)
+            .add("region=" + region)
+            .add("remainingInvestment='" + remainingInvestment + "'")
+            .add("reservedAmount='" + reservedAmount + "'")
+            .add("revenueRate=" + revenueRate)
+            .add("termInMonths=" + termInMonths)
+            .add("topped=" + topped)
+            .add("userId=" + userId)
+            .add("zonkyPlusAmount='" + zonkyPlusAmount + "'")
+            .toString();
     }
 }

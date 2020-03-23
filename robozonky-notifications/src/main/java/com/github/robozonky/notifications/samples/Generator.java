@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.listeners.AbstractListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class Generator {
 
@@ -48,7 +49,8 @@ public final class Generator {
         }
     };
 
-    private static final SessionInfo SESSION_INFO = new SessionInfo("info@robozonky.cz", UUID.randomUUID().toString());
+    private static final SessionInfo SESSION_INFO = new SessionInfo("info@robozonky.cz", UUID.randomUUID()
+        .toString());
 
     private static <T extends Event> void generateFor(SupportedListener type) {
         final T event = (T) type.getSampleEvent();
@@ -70,7 +72,8 @@ public final class Generator {
         if (!TARGET.exists()) {
             Files.createDirectory(TARGET.toPath());
         }
-        Stream.of(SupportedListener.values()).forEach(Generator::generateFor);
+        Stream.of(SupportedListener.values())
+            .forEach(Generator::generateFor);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,23 @@
 
 package com.github.robozonky.installer;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.UUID;
 
-import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetup;
-import com.icegreen.greenmail.util.ServerSetupTest;
-import com.izforge.izpack.api.data.InstallData;
-import com.izforge.izpack.api.installer.DataValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
+import com.izforge.izpack.api.data.InstallData;
+import com.izforge.izpack.api.installer.DataValidator;
 
 class EmailSettingsValidatorTest {
 
@@ -66,10 +67,14 @@ class EmailSettingsValidatorTest {
     void messages() {
         final DataValidator validator = new EmailSettingsValidator();
         assertSoftly(softly -> {
-            softly.assertThat(validator.getDefaultAnswer()).isFalse();
-            softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
+            softly.assertThat(validator.getDefaultAnswer())
+                .isFalse();
+            softly.assertThat(validator.getWarningMessageId())
+                .isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId())
+                .isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId())
+                .isNotEqualTo(validator.getWarningMessageId());
         });
     }
 
@@ -77,17 +82,20 @@ class EmailSettingsValidatorTest {
     void mailSent() {
         final InstallData data = mock(InstallData.class);
         when(data.getVariable(eq(Variables.ZONKY_USERNAME.getKey())))
-                .thenReturn("someone@somewhere.cz");
+            .thenReturn("someone@somewhere.cz");
         when(data.getVariable(eq(Variables.SMTP_PORT.getKey())))
-                .thenReturn(String.valueOf(EMAIL.getSmtp().getPort()));
+            .thenReturn(String.valueOf(EMAIL.getSmtp()
+                .getPort()));
         when(data.getVariable(eq(Variables.SMTP_HOSTNAME.getKey())))
-                .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
+            .thenReturn(String.valueOf(EMAIL.getSmtp()
+                .getBindTo()));
         when(data.getVariable(eq(Variables.SMTP_TO.getKey())))
-                .thenReturn("recipient@server.cz");
+            .thenReturn("recipient@server.cz");
         when(data.getVariable(eq(Variables.SMTP_USERNAME.getKey())))
-                .thenReturn("sender@server.cz");
+            .thenReturn("sender@server.cz");
         when(data.getVariable(eq(Variables.SMTP_PASSWORD.getKey())))
-                .thenReturn(UUID.randomUUID().toString());
+            .thenReturn(UUID.randomUUID()
+                .toString());
         final DataValidator validator = new EmailSettingsValidator();
         final DataValidator.Status result = validator.validateData(data);
         assertThat(result).isEqualTo(DataValidator.Status.OK);
@@ -98,13 +106,16 @@ class EmailSettingsValidatorTest {
     void mailFailed() {
         final InstallData data = mock(InstallData.class);
         when(data.getVariable(eq(Variables.SMTP_PORT.getKey())))
-                .thenReturn(String.valueOf(EMAIL.getSmtp().getPort()));
+            .thenReturn(String.valueOf(EMAIL.getSmtp()
+                .getPort()));
         when(data.getVariable(eq(Variables.SMTP_HOSTNAME.getKey())))
-                .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
+            .thenReturn(String.valueOf(EMAIL.getSmtp()
+                .getBindTo()));
         when(data.getVariable(eq(Variables.SMTP_USERNAME.getKey())))
-                .thenReturn("sender@server.cz");
+            .thenReturn("sender@server.cz");
         when(data.getVariable(eq(Variables.SMTP_PASSWORD.getKey())))
-                .thenReturn(UUID.randomUUID().toString());
+            .thenReturn(UUID.randomUUID()
+                .toString());
         final DataValidator validator = new EmailSettingsValidator();
         final DataValidator.Status result = validator.validateData(data);
         assertThat(result).isEqualTo(DataValidator.Status.WARNING);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,15 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
@@ -29,14 +38,6 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 class ReservationSessionTest extends AbstractZonkyLeveragingTest {
 
@@ -44,8 +45,8 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final MyReservation mr = mock(MyReservation.class);
         when(mr.getReservedAmount()).thenReturn(Money.from(200));
         return new MockReservationBuilder()
-                .setMyReservation(mr)
-                .build();
+            .setMyReservation(mr)
+            .build();
     }
 
     @Test
@@ -59,21 +60,21 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void properReal() {
         final Loan l = new MockLoanBuilder()
-                .setAmount(200)
-                .setRating(Rating.D)
-                .setNonReservedRemainingInvestment(200)
-                .setMyInvestment(mockMyInvestment())
-                .build();
+            .setAmount(200)
+            .setRating(Rating.D)
+            .setNonReservedRemainingInvestment(200)
+            .setMyInvestment(mockMyInvestment())
+            .build();
         final int loanId = l.getId();
         final Reservation p = mockReservation();
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
-                .thenAnswer(i -> {
-                    final Collection<ReservationDescriptor> reservations = i.getArgument(0);
-                    return reservations.stream()
-                            .map(r -> r.recommend(Money.from(200)))
-                            .flatMap(Optional::stream);
-                });
+            .thenAnswer(i -> {
+                final Collection<ReservationDescriptor> reservations = i.getArgument(0);
+                return reservations.stream()
+                    .map(r -> r.recommend(Money.from(200)))
+                    .flatMap(Optional::stream);
+            });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
@@ -90,21 +91,21 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void properDry() {
         final Loan l = new MockLoanBuilder()
-                .setAmount(200)
-                .setRating(Rating.D)
-                .setNonReservedRemainingInvestment(200)
-                .setMyInvestment(mockMyInvestment())
-                .build();
+            .setAmount(200)
+            .setRating(Rating.D)
+            .setNonReservedRemainingInvestment(200)
+            .setMyInvestment(mockMyInvestment())
+            .build();
         final int loanId = l.getId();
         final Reservation p = mockReservation();
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
-                .thenAnswer(i -> {
-                    final Collection<ReservationDescriptor> reservations = i.getArgument(0);
-                    return reservations.stream()
-                            .map(r -> r.recommend(Money.from(200)))
-                            .flatMap(Optional::stream);
-                });
+            .thenAnswer(i -> {
+                final Collection<ReservationDescriptor> reservations = i.getArgument(0);
+                return reservations.stream()
+                    .map(r -> r.recommend(Money.from(200)))
+                    .flatMap(Optional::stream);
+            });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z);
@@ -121,24 +122,25 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void properFail() {
         final Loan l = new MockLoanBuilder()
-                .setAmount(200)
-                .setRating(Rating.D)
-                .setNonReservedRemainingInvestment(200)
-                .setMyInvestment(mockMyInvestment())
-                .build();
+            .setAmount(200)
+            .setRating(Rating.D)
+            .setNonReservedRemainingInvestment(200)
+            .setMyInvestment(mockMyInvestment())
+            .build();
         final int loanId = l.getId();
         final Reservation p = mockReservation();
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
-                .thenAnswer(i -> {
-                    final Collection<ReservationDescriptor> reservations = i.getArgument(0);
-                    return reservations.stream()
-                            .map(r -> r.recommend(Money.from(200)))
-                            .flatMap(Optional::stream);
-                });
+            .thenAnswer(i -> {
+                final Collection<ReservationDescriptor> reservations = i.getArgument(0);
+                return reservations.stream()
+                    .map(r -> r.recommend(Money.from(200)))
+                    .flatMap(Optional::stream);
+            });
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
-        doThrow(IllegalStateException.class).when(z).accept(any());
+        doThrow(IllegalStateException.class).when(z)
+            .accept(any());
         final PowerTenant auth = mockTenant(z, false);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
         final Collection<Reservation> i = ReservationSession.process(auth, Collections.singleton(pd), s);

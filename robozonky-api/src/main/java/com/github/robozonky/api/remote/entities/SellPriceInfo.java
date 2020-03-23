@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -45,7 +46,6 @@ public class SellPriceInfo extends BaseEntity {
         // For JAXB.
     }
 
-
     public SellFee getFee() {
         return fee;
     }
@@ -73,11 +73,11 @@ public class SellPriceInfo extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", SellPriceInfo.class.getSimpleName() + "[", "]")
-                .add("boughtFor='" + boughtFor + "'")
-                .add("sellPrice='" + sellPrice + "'")
-                .add("discount='" + discount + "'")
-                .add("fee=" + fee)
-                .add("remainingPrincipal='" + remainingPrincipal + "'")
-                .toString();
+            .add("boughtFor='" + boughtFor + "'")
+            .add("sellPrice='" + sellPrice + "'")
+            .add("discount='" + discount + "'")
+            .add("fee=" + fee)
+            .add("remainingPrincipal='" + remainingPrincipal + "'")
+            .toString();
     }
 }

@@ -19,9 +19,10 @@ package com.github.robozonky.internal.secrets;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 /**
  * Every set*() operation must result in a {@link KeyStoreHandler#save()} call.
@@ -44,6 +45,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
 
     /**
      * Set a key in the key store.
+     * 
      * @param alias Alias to store the key under.
      * @param value Value of this will be stored.
      * @return True if success.
@@ -62,22 +64,22 @@ final class KeyStoreSecretProvider implements SecretProvider {
     @Override
     public char[] getPassword() {
         return this.ksh.get(ALIAS_PASSWORD)
-                .orElseThrow(() -> new IllegalStateException("Password not present in KeyStore."));
+            .orElseThrow(() -> new IllegalStateException("Password not present in KeyStore."));
     }
 
     @Override
     public String getUsername() {
         return new String(this.ksh.get(ALIAS_USERNAME)
-                                  .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore.")));
+            .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore.")));
     }
 
     @Override
     public Optional<ZonkyApiToken> getToken() {
         try {
             final ZonkyApiToken result = this.ksh.get(ALIAS_TOKEN)
-                    .map(String::new)
-                    .map(ZonkyApiToken::unmarshal)
-                    .orElse(null);
+                .map(String::new)
+                .map(ZonkyApiToken::unmarshal)
+                .orElse(null);
             return Optional.ofNullable(result);
         } catch (final Exception ex) {
             LOGGER.warn("Failed reading Zonky API token from the keystore.", ex);
@@ -93,7 +95,8 @@ final class KeyStoreSecretProvider implements SecretProvider {
                 this.ksh.save();
                 return true;
             } else {
-                return this.set(ALIAS_TOKEN, () -> ZonkyApiToken.marshal(apiToken).toCharArray());
+                return this.set(ALIAS_TOKEN, () -> ZonkyApiToken.marshal(apiToken)
+                    .toCharArray());
             }
         } catch (final Exception ex) {
             LOGGER.warn("Failed storing Zonky API token to the keystore.", ex);

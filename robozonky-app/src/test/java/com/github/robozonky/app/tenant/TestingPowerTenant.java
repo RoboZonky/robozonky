@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
@@ -23,8 +25,6 @@ import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.test.TestingTenant;
-
-import java.util.concurrent.CompletableFuture;
 
 public class TestingPowerTenant extends TestingTenant implements PowerTenant {
 
@@ -46,11 +46,13 @@ public class TestingPowerTenant extends TestingTenant implements PowerTenant {
 
     @Override
     public CompletableFuture<?> fire(final SessionEvent event) {
-        return Events.forSession(this).fire(event);
+        return Events.forSession(this)
+            .fire(event);
     }
 
     @Override
     public CompletableFuture<?> fire(final LazyEvent<? extends SessionEvent> event) {
-        return Events.forSession(this).fire(event);
+        return Events.forSession(this)
+            .fire(event);
     }
 }

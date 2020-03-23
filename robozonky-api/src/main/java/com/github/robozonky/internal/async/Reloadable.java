@@ -23,14 +23,16 @@ import com.github.robozonky.internal.util.functional.Either;
 
 /**
  * Allows the user to have a variable which reloads from a remote source on-demand.
+ * 
  * @param <T> Type of the variable.
  */
 public interface Reloadable<T> {
 
     /**
      * Start a builder chain with the supplier as the operation used to reload the variable.
+     * 
      * @param supplier Operation that loads the variable.
-     * @param <V> Type of the variable.
+     * @param <V>      Type of the variable.
      * @return The builder.
      */
     static <V> ReloadableBuilder<V> with(final Supplier<V> supplier) {
@@ -46,6 +48,7 @@ public interface Reloadable<T> {
      * Get the previous value of the operation (see {@link #with(Supplier)}, potentially executing it anew. The behavior
      * of this method is greatly influenced by {@link ReloadableBuilder}, most importantly its methods
      * {@link ReloadableBuilder#async()} and {@link ReloadableBuilder#reloadAfter(Duration)}.
+     * 
      * @return Result of the last call of the operation.
      */
     Either<Throwable, T> get();

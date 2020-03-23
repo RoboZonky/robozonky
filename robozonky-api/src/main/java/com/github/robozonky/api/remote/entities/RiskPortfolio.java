@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -43,11 +44,17 @@ public class RiskPortfolio extends BaseEntity {
 
     public RiskPortfolio(final Rating rating, final Money paid, final Money unpaid, final Money due) {
         this.interestRate = rating.getInterestRate();
-        this.paid = paid.getValue().toPlainString();
-        this.unpaid = unpaid.getValue().toPlainString();
-        this.due = due.getValue().toPlainString();
+        this.paid = paid.getValue()
+            .toPlainString();
+        this.unpaid = unpaid.getValue()
+            .toPlainString();
+        this.due = due.getValue()
+            .toPlainString();
         this.rating = rating;
-        this.totalAmount = paid.add(unpaid).add(due).getValue().toPlainString();
+        this.totalAmount = paid.add(unpaid)
+            .add(due)
+            .getValue()
+            .toPlainString();
     }
 
     @XmlElement
@@ -83,12 +90,12 @@ public class RiskPortfolio extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", RiskPortfolio.class.getSimpleName() + "[", "]")
-                .add("due='" + due + "'")
-                .add("interestRate=" + interestRate)
-                .add("paid='" + paid + "'")
-                .add("rating=" + rating)
-                .add("totalAmount='" + totalAmount + "'")
-                .add("unpaid='" + unpaid + "'")
-                .toString();
+            .add("due='" + due + "'")
+            .add("interestRate=" + interestRate)
+            .add("paid='" + paid + "'")
+            .add("rating=" + rating)
+            .add("totalAmount='" + totalAmount + "'")
+            .add("unpaid='" + unpaid + "'")
+            .toString();
     }
 }

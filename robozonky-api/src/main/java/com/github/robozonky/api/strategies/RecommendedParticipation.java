@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.github.robozonky.api.strategies;
 
+import java.util.Objects;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Participation;
-
-import java.util.Objects;
 
 public final class RecommendedParticipation
         implements Recommended<RecommendedParticipation, ParticipationDescriptor, Participation> {
@@ -37,7 +37,8 @@ public final class RecommendedParticipation
 
     @Override
     public Money amount() {
-        return participationDescriptor.item().getRemainingPrincipal();
+        return participationDescriptor.item()
+            .getRemainingPrincipal();
     }
 
     @Override
@@ -64,4 +65,3 @@ public final class RecommendedParticipation
                 '}';
     }
 }
-

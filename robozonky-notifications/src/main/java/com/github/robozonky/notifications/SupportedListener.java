@@ -358,7 +358,9 @@ public enum SupportedListener {
      * @return ID of the listener which will be used as namespace in the config file.
      */
     public String getLabel() {
-        final String interfaceName = this.getSampleEvent().getClass().getInterfaces()[0].getSimpleName();
+        final String interfaceName = this.getSampleEvent()
+            .getClass()
+            .getInterfaces()[0].getSimpleName();
         final String decapitalized = uncapitalize(interfaceName);
         // this works because Event subclasses must be named (Something)Event; check Event().
         return decapitalized.substring(0, decapitalized.length() - "Event".length());
@@ -391,4 +393,3 @@ public enum SupportedListener {
     }
 
 }
-

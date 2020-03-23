@@ -24,12 +24,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import com.github.robozonky.internal.util.functional.Either;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.internal.util.functional.Either;
+
 /**
  * Builds an instance of {@link Reloadable}.
+ * 
  * @param <T> The type that the {@link Reloadable} should hold.
  */
 public final class ReloadableBuilder<T> {
@@ -55,6 +57,7 @@ public final class ReloadableBuilder<T> {
      * the operation will be executed again. If the operation throws an exception, the reload will fail and there would
      * be no value. If not specified, the {@link Reloadable} will never reload, unless {@link Reloadable#clear()} is
      * called.
+     * 
      * @param duration
      * @return This.
      */
@@ -65,6 +68,7 @@ public final class ReloadableBuilder<T> {
     /**
      * The same semantics as {@link #reloadAfter(Function)}, only the actual duration would be inferred from the value
      * of the {@link Reloadable} every time its new value is fetched.
+     * 
      * @param durationSupplier
      * @return This.
      */
@@ -76,8 +80,9 @@ public final class ReloadableBuilder<T> {
     /**
      * While the first instance will be loaded using the supplier provided in {@link #ReloadableBuilder(Supplier)},
      * every other instance will be retrieved using the function provided here.
+     * 
      * @param reloader Previous instance retrieved by previous invocation of the supplier above or the function
-     * provided here.
+     *                 provided here.
      * @return This.
      */
     public ReloadableBuilder<T> reloadWith(final UnaryOperator<T> reloader) {
@@ -87,6 +92,7 @@ public final class ReloadableBuilder<T> {
 
     /**
      * Add a listener to run every time a value changes.
+     * 
      * @param changeListener
      * @return This.
      */
@@ -98,6 +104,7 @@ public final class ReloadableBuilder<T> {
     /**
      * When the operation is successfully executed without errors, the given finisher has to be executed as well. If it
      * throws an exception, the operation itself is considered failed.
+     * 
      * @param consumer
      * @return This.
      */
@@ -111,6 +118,7 @@ public final class ReloadableBuilder<T> {
      * (now stale) value stored previously. If the background operation fails, the stale value will continue to be
      * returned. On the first {@link Reloadable#get()} call, the operation will be performed synchronously, as there
      * would otherwise be no stale value to return.
+     * 
      * @return This.
      */
     public ReloadableBuilder<T> async() {
@@ -121,6 +129,7 @@ public final class ReloadableBuilder<T> {
     /**
      * Build an initialized instance. Will call {@link #build()}, immediately following it up with a call to
      * {@link Reloadable#get()}.
+     * 
      * @return New initialized instance.
      */
     public Either<Throwable, Reloadable<T>> buildEager() {
@@ -133,19 +142,18 @@ public final class ReloadableBuilder<T> {
     /**
      * Build an empty instance. It will be initialized, executing the remote operation, whenever
      * {@link Reloadable#get()} is first called.
+     * 
      * @return New instance.
      */
     public Reloadable<T> build() {
         final Consumer<T> finish = finisher == null ? (Consumer<T>) NOOP_CONSUMER : finisher;
         final UnaryOperator<T> reload = reloader == null ? t -> supplier.get() : reloader;
         if (reloadAfter == null) {
-            return async ?
-                    new AsyncReloadableImpl<>(supplier, reload, finish, listeners) :
-                    new ReloadableImpl<>(supplier, reload, finish, listeners);
+            return async ? new AsyncReloadableImpl<>(supplier, reload, finish, listeners)
+                    : new ReloadableImpl<>(supplier, reload, finish, listeners);
         } else {
-            return async ?
-                    new AsyncReloadableImpl<>(supplier, reload, finish, listeners, reloadAfter) :
-                    new ReloadableImpl<>(supplier, reload, finish, listeners, reloadAfter);
+            return async ? new AsyncReloadableImpl<>(supplier, reload, finish, listeners, reloadAfter)
+                    : new ReloadableImpl<>(supplier, reload, finish, listeners, reloadAfter);
         }
     }
 }

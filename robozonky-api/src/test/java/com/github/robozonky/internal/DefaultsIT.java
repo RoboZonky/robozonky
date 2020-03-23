@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package com.github.robozonky.internal;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class DefaultsIT {
 
@@ -26,8 +26,8 @@ class DefaultsIT {
     void version() { // may fail in IDE as that will not generate the filtered resource in Maven
         final String version = Defaults.ROBOZONKY_VERSION;
         assertThat(version).isNotNull()
-                .isNotEqualTo("unknown")
-                .isNotEqualTo("missing");
+            .isNotEqualTo("unknown")
+            .isNotEqualTo("missing");
     }
 
 }

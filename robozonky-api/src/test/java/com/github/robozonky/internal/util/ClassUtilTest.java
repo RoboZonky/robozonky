@@ -16,6 +16,8 @@
 
 package com.github.robozonky.internal.util;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,16 +27,14 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-
 class ClassUtilTest {
 
     @Test
     void getInterfacesTest() {
         Stream<Class<?>> foundInterfaces = ClassUtil.getAllInterfaces(ArrayList.class);
         assertThat(foundInterfaces)
-                .containsExactly(List.class, Collection.class, Iterable.class, RandomAccess.class, Cloneable.class,
-                                 Serializable.class);
+            .containsExactly(List.class, Collection.class, Iterable.class, RandomAccess.class, Cloneable.class,
+                    Serializable.class);
     }
 
     @Test

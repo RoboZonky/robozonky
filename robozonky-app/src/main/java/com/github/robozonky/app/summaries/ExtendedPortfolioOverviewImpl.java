@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package com.github.robozonky.app.summaries;
 
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.Map;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Map;
 
 final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
 
@@ -37,29 +37,32 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     private final Map<Rating, Money> sellableFeelessPerRating;
 
     ExtendedPortfolioOverviewImpl(final PortfolioOverview parent,
-                                  final Map<Rating, Money> atRiskPerRating,
-                                  final Map<Rating, Money> sellablePerRating,
-                                  final Map<Rating, Money> sellableFeelessPerRating) {
+            final Map<Rating, Money> atRiskPerRating,
+            final Map<Rating, Money> sellablePerRating,
+            final Map<Rating, Money> sellableFeelessPerRating) {
         this.parent = parent;
         this.sellable = Money.sum(sellablePerRating.values());
         this.sellableFeeless = Money.sum(sellableFeelessPerRating.values());
-        if (parent.getInvested().isZero()) {
+        if (parent.getInvested()
+            .isZero()) {
             this.atRiskPerRating = Collections.emptyMap();
             this.sellablePerRating = Collections.emptyMap();
             this.sellableFeelessPerRating = Collections.emptyMap();
-            this.atRisk = parent.getInvested().getZero();
+            this.atRisk = parent.getInvested()
+                .getZero();
         } else {
             this.atRisk = Money.sum(atRiskPerRating.values());
             this.atRiskPerRating = atRisk.isZero() ? Collections.emptyMap() : atRiskPerRating;
             this.sellablePerRating = sellable.isZero() ? Collections.emptyMap() : sellablePerRating;
-            this.sellableFeelessPerRating = sellableFeeless.isZero() ? Collections.emptyMap() : sellableFeelessPerRating;
+            this.sellableFeelessPerRating = sellableFeeless.isZero() ? Collections.emptyMap()
+                    : sellableFeelessPerRating;
         }
     }
 
     public static ExtendedPortfolioOverview extend(final PortfolioOverview parent,
-                                                   final Map<Rating, Money> atRiskPerRating,
-                                                   final Map<Rating, Money> sellablePerRating,
-                                                   final Map<Rating, Money> sellableFeelessPerRating) {
+            final Map<Rating, Money> atRiskPerRating,
+            final Map<Rating, Money> sellablePerRating,
+            final Map<Rating, Money> sellableFeelessPerRating) {
         return new ExtendedPortfolioOverviewImpl(parent, atRiskPerRating, sellablePerRating,
                 sellableFeelessPerRating);
     }

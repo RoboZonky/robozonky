@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.*;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.notifications.AbstractTargetHandler;
-import com.github.robozonky.notifications.Submission;
-import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.templates.TemplateProcessor;
-import freemarker.template.TemplateException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static java.util.Map.entry;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -36,7 +25,27 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Map.entry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.DelinquencyBased;
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.Financial;
+import com.github.robozonky.api.notifications.InvestmentBased;
+import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.LoanLostEvent;
+import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.notifications.AbstractTargetHandler;
+import com.github.robozonky.notifications.Submission;
+import com.github.robozonky.notifications.SupportedListener;
+import com.github.robozonky.notifications.templates.TemplateProcessor;
+
+import freemarker.template.TemplateException;
 
 public abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
@@ -54,6 +63,7 @@ public abstract class AbstractListener<T extends Event> implements EventListener
     /**
      * Override to run custom code after {@link #handle(Event, SessionInfo)} has finished processing. Always call
      * {@link AbstractListener#finish(Event, SessionInfo)} in your override.
+     * 
      * @param event
      * @param sessionInfo
      */
@@ -98,12 +108,12 @@ public abstract class AbstractListener<T extends Event> implements EventListener
     public final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
         final Map<String, Object> result = new HashMap<>(this.getData(event));
         // ratings here need to have a stable iteration order, as they will be used to list them in notifications
-        result.put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
+        result.put("ratings", Stream.of(Rating.values())
+            .collect(Collectors.toList()));
         result.put("session", Map.ofEntries(
                 entry("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername())),
                 entry("userAgent", Defaults.ROBOZONKY_USER_AGENT),
-                entry("isDryRun", sessionInfo.isDryRun())
-        ));
+                entry("isDryRun", sessionInfo.isDryRun())));
         result.put("conception", Util.toDate(event.getConceivedOn()));
         result.put("creation", Util.toDate(event.getCreatedOn()));
         return Collections.unmodifiableMap(result);

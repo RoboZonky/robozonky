@@ -16,10 +16,16 @@
 
 package com.github.robozonky.cli;
 
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.Defaults;
@@ -27,11 +33,6 @@ import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.util.FileUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Option;
 
 @Command(name = "zonky-credentials", description = ZonkyCredentialsFeature.DESCRIPTION)
 public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
@@ -40,19 +41,18 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Set credentials to access Zonky servers.";
     private final ApiProvider api;
-    @Option(names = {"-u", "--username"},
-            description = "Username to use to authenticate with Zonky servers.", required = true)
+    @Option(names = { "-u",
+            "--username" }, description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
-    @Option(names = {"-p", "--password"},
-            description = "Authorization code obtained from Zonky. If not provided, will check for existing token",
-            required = true, interactive = true, arity = "0..1")
+    @Option(names = { "-p",
+            "--password" }, description = "Authorization code obtained from Zonky. If not provided, will check for existing token", required = true, interactive = true, arity = "0..1")
     private char[] password = null;
-    @Option(names = {"-t", "--token"},
-            description = "Raw XML of the Zonky API token will be stored in this file. Keep it secret, keep it safe.")
+    @Option(names = { "-t",
+            "--token" }, description = "Raw XML of the Zonky API token will be stored in this file. Keep it secret, keep it safe.")
     private Path tokenTargetPath = null;
 
     ZonkyCredentialsFeature(final ApiProvider apiProvider, final File keystore, final char[] keystoreSecret,
-                            final String username, final char... password) {
+            final String username, final char... password) {
         super(keystore, keystoreSecret);
         this.api = apiProvider;
         this.username = username;
@@ -64,10 +64,12 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
     }
 
     public static void attemptLoginAndStore(final KeyStoreHandler keyStoreHandler, final ApiProvider api,
-                                            final String username, final char... authorizationCode) {
-        final SecretProvider secretProvider = SecretProvider.keyStoreBased(keyStoreHandler, username, authorizationCode);
+            final String username, final char... authorizationCode) {
+        final SecretProvider secretProvider = SecretProvider.keyStoreBased(keyStoreHandler, username,
+                authorizationCode);
         if (authorizationCode == null) {
-            if (secretProvider.getToken().isEmpty()) {
+            if (secretProvider.getToken()
+                .isEmpty()) {
                 throw new IllegalStateException("No authorization code provided, yet no token available.");
             }
         } else {
@@ -81,8 +83,8 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
     public static void refreshToken(final KeyStoreHandler keyStoreHandler, final ApiProvider api) {
         final SecretProvider s = SecretProvider.keyStoreBased(keyStoreHandler);
         final ZonkyApiToken newToken = s.getToken()
-                .map(token -> api.oauth(oAuth -> oAuth.refresh(token)))
-                .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
+            .map(token -> api.oauth(oAuth -> oAuth.refresh(token)))
+            .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
         s.setToken(newToken);
         LOGGER.info("Access token for '{}' will expire on {}.", s.getUsername(), newToken.getExpiresOn());
     }
@@ -90,8 +92,9 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
     public static void outputToken(final KeyStoreHandler keyStoreHandler, final Path target) throws IOException {
         final SecretProvider s = SecretProvider.keyStoreBased(keyStoreHandler);
         final ZonkyApiToken token = s.getToken()
-                .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
-        Files.write(target, ZonkyApiToken.marshal(token).getBytes(Defaults.CHARSET));
+            .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
+        Files.write(target, ZonkyApiToken.marshal(token)
+            .getBytes(Defaults.CHARSET));
         FileUtil.configurePermissions(target.toFile(), false);
         LOGGER.info("Raw token XML written to {}.", target);
     }

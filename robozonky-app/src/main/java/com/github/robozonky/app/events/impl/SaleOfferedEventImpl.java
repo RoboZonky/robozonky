@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ final class SaleOfferedEventImpl extends AbstractEventImpl implements SaleOffere
     @Override
     public String toString() {
         return new StringJoiner(", ", SaleOfferedEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("investment=" + investment)
-                .add("loan=" + loan)
-                .toString();
+            .add("super=" + super.toString())
+            .add("investment=" + investment)
+            .add("loan=" + loan)
+            .toString();
     }
 }

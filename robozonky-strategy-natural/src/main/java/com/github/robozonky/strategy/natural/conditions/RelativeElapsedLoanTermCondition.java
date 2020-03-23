@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,23 +30,25 @@ public class RelativeElapsedLoanTermCondition extends AbstractRelativeRangeCondi
     }
 
     public static RelativeElapsedLoanTermCondition lessThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeElapsedLoanTermCondition::getElapsedTerm,
-                                                                        Wrapper::getOriginalTermInMonths,
-                                                                        threshold);
+        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(
+                RelativeElapsedLoanTermCondition::getElapsedTerm,
+                Wrapper::getOriginalTermInMonths,
+                threshold);
         return new RelativeElapsedLoanTermCondition(c);
     }
 
     public static RelativeElapsedLoanTermCondition moreThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeElapsedLoanTermCondition::getElapsedTerm,
-                                                                        Wrapper::getOriginalTermInMonths,
-                                                                        threshold);
+        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(
+                RelativeElapsedLoanTermCondition::getElapsedTerm,
+                Wrapper::getOriginalTermInMonths,
+                threshold);
         return new RelativeElapsedLoanTermCondition(c);
     }
 
     public static RelativeElapsedLoanTermCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
         final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeElapsedLoanTermCondition::getElapsedTerm,
-                                                                     Wrapper::getOriginalTermInMonths,
-                                                                     minimumThreshold, maximumThreshold);
+                Wrapper::getOriginalTermInMonths,
+                minimumThreshold, maximumThreshold);
         return new RelativeElapsedLoanTermCondition(c);
     }
 }

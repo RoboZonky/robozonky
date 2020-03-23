@@ -63,5 +63,3 @@ public final class TenantBuilder {
         return new PowerTenantImpl(sessionInfo, apis, strategyProvider, tokenSupplier);
     }
 }
-
-

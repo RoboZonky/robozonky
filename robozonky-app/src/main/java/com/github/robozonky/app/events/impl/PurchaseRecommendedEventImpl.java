@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
-final class PurchaseRecommendedEventImpl extends AbstractRecommendationBasedEventImpl<RecommendedParticipation,
-        ParticipationDescriptor, Participation> implements PurchaseRecommendedEvent {
+final class PurchaseRecommendedEventImpl
+        extends AbstractRecommendationBasedEventImpl<RecommendedParticipation, ParticipationDescriptor, Participation>
+        implements PurchaseRecommendedEvent {
 
     public PurchaseRecommendedEventImpl(final RecommendedParticipation recommendation) {
         super(recommendation);

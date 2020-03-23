@@ -37,8 +37,8 @@ final class SellingStartedEventImpl extends AbstractEventImpl implements Selling
     @Override
     public String toString() {
         return new StringJoiner(", ", SellingStartedEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("portfolioOverview=" + portfolioOverview)
-                .toString();
+            .add("super=" + super.toString())
+            .add("portfolioOverview=" + portfolioOverview)
+            .toString();
     }
 }

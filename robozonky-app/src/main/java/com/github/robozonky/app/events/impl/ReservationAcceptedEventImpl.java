@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ final class ReservationAcceptedEventImpl extends AbstractEventImpl implements Re
     private final PortfolioOverview portfolioOverview;
 
     public ReservationAcceptedEventImpl(final Loan loan, final Money amount,
-                                        final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         this.loan = loan;
         this.investedAmount = amount;
         this.portfolioOverview = portfolioOverview;
@@ -54,10 +54,10 @@ final class ReservationAcceptedEventImpl extends AbstractEventImpl implements Re
     @Override
     public String toString() {
         return new StringJoiner(", ", ReservationAcceptedEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("loan=" + loan)
-                .add("investedAmount=" + investedAmount)
-                .add("portfolioOverview=" + portfolioOverview)
-                .toString();
+            .add("super=" + super.toString())
+            .add("loan=" + loan)
+            .add("investedAmount=" + investedAmount)
+            .add("portfolioOverview=" + portfolioOverview)
+            .toString();
     }
 }

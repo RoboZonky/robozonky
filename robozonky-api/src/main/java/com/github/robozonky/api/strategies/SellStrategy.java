@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ public interface SellStrategy {
     /**
      * Retrieve investments that are acceptable by the strategy, in the order in which they are to be sold. After
      * selling any of these investments, the strategy should be called again to re-evaluate the resulting situation.
+     * 
      * @param available Investments to be evaluated for acceptability.
      * @param portfolio Aggregation of information as to the user's current portfolio.
      * @return Acceptable investments, in the order of their decreasing priority, mapped to the recommended sell price.

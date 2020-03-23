@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.tenant.TransactionalTenant;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This add the semantics of {@link TransactionalTenant} to firing {@link Event}s as well. Unless {@link #commit()} is
@@ -36,11 +36,12 @@ import java.util.concurrent.CompletableFuture;
  * fire events. All user-facing code should see just the plain {@link TransactionalTenant}.
  */
 public interface TransactionalPowerTenant extends TransactionalTenant,
-                                                  PowerTenant {
+        PowerTenant {
 
     /**
      * Do not block on the return value of this method, unless some other thread is still able to call
      * {@link #commit()}. Otherwise this is a self-inflicted. deadlock.
+     * 
      * @param event
      * @return
      */
@@ -50,6 +51,7 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
     /**
      * Do not block on the return value of this method, unless some other thread is still able to call
      * {@link #commit()}. Otherwise this is a self-inflicted. deadlock.
+     * 
      * @param event
      * @return
      */

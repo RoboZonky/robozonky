@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,6 @@ import com.github.robozonky.api.strategies.SellStrategy;
  * Fired immediately after {@link SellStrategy} has recommended a particular investment.
  */
 public interface SaleRecommendedEvent extends InvestmentBased,
-                                              Recommending {
+        Recommending {
 
 }

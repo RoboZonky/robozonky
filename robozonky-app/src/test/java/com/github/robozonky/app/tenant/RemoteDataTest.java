@@ -16,10 +16,17 @@
 
 package com.github.robozonky.app.tenant;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -30,12 +37,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.Test;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 class RemoteDataTest extends AbstractZonkyLeveragingTest {
 
@@ -45,9 +46,12 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final RemoteData data = RemoteData.load(tenant);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(data.getStatistics()).isNotNull();
-            softly.assertThat(data.getBlocked()).isEmpty();
-            softly.assertThat(data.getRetrievedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
+            softly.assertThat(data.getStatistics())
+                .isNotNull();
+            softly.assertThat(data.getBlocked())
+                .isEmpty();
+            softly.assertThat(data.getRetrievedOn())
+                .isBeforeOrEqualTo(OffsetDateTime.now());
         });
     }
 
@@ -56,12 +60,13 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         Investment i = MockInvestmentBuilder.fresh()
-                .setRating(Rating.D)
-                .setAmount(BigDecimal.TEN)
-                .build();
+            .setRating(Rating.D)
+            .setAmount(BigDecimal.TEN)
+            .build();
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         Map<Integer, Tuple2<Rating, Money>> result = RemoteData.getAmountsBlocked(tenant);
-        Assertions.assertThat(result).containsOnly(Map.entry(i.getLoanId(), Tuple.of(Rating.D, Money.from(10))));
+        Assertions.assertThat(result)
+            .containsOnly(Map.entry(i.getLoanId(), Tuple.of(Rating.D, Money.from(10))));
     }
 
 }

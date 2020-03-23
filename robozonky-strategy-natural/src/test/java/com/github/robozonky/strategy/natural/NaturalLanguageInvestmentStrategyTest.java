@@ -16,12 +16,18 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -35,33 +41,29 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class NaturalLanguageInvestmentStrategyTest {
 
     private static Loan mockLoan(final int amount) {
         return new MockLoanBuilder()
-                .setAmount(amount)
-                .setDatePublished(OffsetDateTime.now())
-                .setNonReservedRemainingInvestment(amount)
-                .setRating(Rating.A)
-                .build();
+            .setAmount(amount)
+            .setDatePublished(OffsetDateTime.now())
+            .setNonReservedRemainingInvestment(amount)
+            .setRating(Rating.A)
+            .build();
     }
 
     @Test
     void unacceptablePortfolioDueToOverInvestment() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
-        final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+        final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
+                Collections.emptyMap());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
-                                                           portfolio, new Restrictions());
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -72,9 +74,10 @@ class NaturalLanguageInvestmentStrategyTest {
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
-                                                           portfolio, new Restrictions());
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -84,12 +87,13 @@ class NaturalLanguageInvestmentStrategyTest {
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
         final Loan l = mockLoan(1000);
         final Rating r = l.getRating();
         when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(l)),
-                                                           portfolio, new Restrictions());
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -98,19 +102,22 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Loan l = mockLoan(100_000);
         final Loan l2 = mockLoan(100);
         final LoanDescriptor ld = new LoanDescriptor(l);
-        final List<RecommendedLoan> result =
-                s.recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio, new Restrictions())
-                        .collect(Collectors.toList());
+        final List<RecommendedLoan> result = s
+            .recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio, new Restrictions())
+            .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedLoan r = result.get(0);
         assertSoftly(softly -> {
-            softly.assertThat(r.descriptor()).isEqualTo(ld);
-            softly.assertThat(r.amount()).isEqualTo(Money.from(20_000)); // maximum allowed investment
+            softly.assertThat(r.descriptor())
+                .isEqualTo(ld);
+            softly.assertThat(r.amount())
+                .isEqualTo(Money.from(20_000)); // maximum allowed investment
         });
     }
 }

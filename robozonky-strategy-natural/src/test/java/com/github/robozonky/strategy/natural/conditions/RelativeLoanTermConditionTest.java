@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.strategy.natural.Wrapper;
 
 class RelativeLoanTermConditionTest {
 
@@ -50,7 +51,7 @@ class RelativeLoanTermConditionTest {
     @Test
     void exact() {
         final MarketplaceFilterCondition condition = RelativeLoanTermCondition.exact(Ratio.fromPercentage(0),
-                                                                                     Ratio.fromPercentage(10));
+                Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getOriginalTermInMonths()).thenReturn(10);
         when(w.getRemainingTermInMonths()).thenReturn(0);
@@ -62,4 +63,3 @@ class RelativeLoanTermConditionTest {
     }
 
 }
-

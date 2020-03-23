@@ -16,6 +16,9 @@
 
 package com.github.robozonky.internal.state;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.io.File;
 import java.util.UUID;
 
@@ -27,14 +30,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
 class FileBackedStateStorageTest {
 
     private static final Logger LOGGER = LogManager.getLogger(FileBackedStateStorageTest.class);
 
-    private final File f = new File(UUID.randomUUID().toString());
+    private final File f = new File(UUID.randomUUID()
+        .toString());
     private final FileBackedStateStorage s = new FileBackedStateStorage(f);
 
     @Test
@@ -53,25 +54,33 @@ class FileBackedStateStorageTest {
     @Test
     @DisplayName("Random section has no keys.")
     void keysDoNotThrow() {
-        assertThat(s.getKeys(UUID.randomUUID().toString())).isEmpty();
+        assertThat(s.getKeys(UUID.randomUUID()
+            .toString())).isEmpty();
     }
 
     @Test
     @DisplayName("Random section can be unset without throwing.")
     void sectionUnset() {
-        s.unsetValues(UUID.randomUUID().toString());
+        s.unsetValues(UUID.randomUUID()
+            .toString());
     }
 
     @Test
     @DisplayName("Random value can be unset without throwing.")
     void valueUnset() {
-        s.unsetValue(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        s.unsetValue(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString());
     }
 
     @Test
     @DisplayName("Random key has no value.")
     void valuesDoNotThrow() {
-        assertThat(s.getValue(UUID.randomUUID().toString(), UUID.randomUUID().toString())).isEmpty();
+        assertThat(s.getValue(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString())).isEmpty();
     }
 
     @AfterEach
@@ -94,9 +103,12 @@ class FileBackedStateStorageTest {
         @DisplayName("is properly persisted without storing.")
         void persistence() { // strings are not reused to ensure that this typical use case works
             assertSoftly(softly -> {
-                softly.assertThat(s.getValue("section", "key")).contains("value");
-                softly.assertThat(s.getKeys("section")).containsOnly("key");
-                softly.assertThat(s.getSections()).containsOnly("section");
+                softly.assertThat(s.getValue("section", "key"))
+                    .contains("value");
+                softly.assertThat(s.getKeys("section"))
+                    .containsOnly("key");
+                softly.assertThat(s.getSections())
+                    .containsOnly("section");
             });
         }
 
@@ -105,9 +117,12 @@ class FileBackedStateStorageTest {
         void unsetValue() {
             s.unsetValue("section", "key");
             assertSoftly(softly -> {
-                softly.assertThat(s.getValue("section", "key")).isEmpty();
-                softly.assertThat(s.getKeys("section")).isEmpty();
-                softly.assertThat(s.getSections()).containsOnly("section");
+                softly.assertThat(s.getValue("section", "key"))
+                    .isEmpty();
+                softly.assertThat(s.getKeys("section"))
+                    .isEmpty();
+                softly.assertThat(s.getSections())
+                    .containsOnly("section");
             });
             assertThat(s.store()).isTrue();
         }
@@ -117,9 +132,12 @@ class FileBackedStateStorageTest {
         void unsetSection() {
             s.unsetValues("section");
             assertSoftly(softly -> {
-                softly.assertThat(s.getValue("section", "key")).isEmpty();
-                softly.assertThat(s.getKeys("section")).isEmpty();
-                softly.assertThat(s.getSections()).isEmpty();
+                softly.assertThat(s.getValue("section", "key"))
+                    .isEmpty();
+                softly.assertThat(s.getKeys("section"))
+                    .isEmpty();
+                softly.assertThat(s.getSections())
+                    .isEmpty();
             });
         }
 
@@ -128,11 +146,16 @@ class FileBackedStateStorageTest {
         void nonInterference() { // strings are not reused to ensure that this typical use case works
             s.setValue("section2", "key", "value2");
             assertSoftly(softly -> {
-                softly.assertThat(s.getValue("section", "key")).contains("value");
-                softly.assertThat(s.getValue("section2", "key")).contains("value2");
-                softly.assertThat(s.getKeys("section")).containsOnly("key");
-                softly.assertThat(s.getKeys("section2")).containsOnly("key");
-                softly.assertThat(s.getSections()).containsOnly("section", "section2");
+                softly.assertThat(s.getValue("section", "key"))
+                    .contains("value");
+                softly.assertThat(s.getValue("section2", "key"))
+                    .contains("value2");
+                softly.assertThat(s.getKeys("section"))
+                    .containsOnly("key");
+                softly.assertThat(s.getKeys("section2"))
+                    .containsOnly("key");
+                softly.assertThat(s.getSections())
+                    .containsOnly("section", "section2");
             });
         }
 
@@ -150,9 +173,12 @@ class FileBackedStateStorageTest {
             void survival() { // strings are not reused to ensure that this typical use case works
                 final FileBackedStateStorage s2 = new FileBackedStateStorage(f);
                 assertSoftly(softly -> {
-                    softly.assertThat(s2.getValue("section", "key")).contains("value");
-                    softly.assertThat(s2.getKeys("section")).containsOnly("key");
-                    softly.assertThat(s2.getSections()).containsOnly("section");
+                    softly.assertThat(s2.getValue("section", "key"))
+                        .contains("value");
+                    softly.assertThat(s2.getKeys("section"))
+                        .containsOnly("key");
+                    softly.assertThat(s2.getSections())
+                        .containsOnly("section");
                 });
             }
 
@@ -162,9 +188,12 @@ class FileBackedStateStorageTest {
                 s.setValue("section", "key2", "value2"); // store() not called
                 final FileBackedStateStorage s2 = new FileBackedStateStorage(f);
                 assertSoftly(softly -> { // only the stored values are available
-                    softly.assertThat(s2.getValue("section", "key")).contains("value");
-                    softly.assertThat(s2.getKeys("section")).containsOnly("key");
-                    softly.assertThat(s2.getSections()).containsOnly("section");
+                    softly.assertThat(s2.getValue("section", "key"))
+                        .contains("value");
+                    softly.assertThat(s2.getKeys("section"))
+                        .containsOnly("key");
+                    softly.assertThat(s2.getSections())
+                        .containsOnly("section");
                 });
             }
         }

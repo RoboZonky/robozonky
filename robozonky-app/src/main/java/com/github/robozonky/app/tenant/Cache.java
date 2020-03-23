@@ -26,6 +26,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -33,8 +36,6 @@ import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Either;
 import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.internal.util.functional.Tuple2;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class Cache<T> {
 
@@ -67,7 +68,8 @@ final class Cache<T> {
 
         @Override
         public boolean shouldCache(final Loan item) {
-            return item.getRemainingInvestment().isZero();
+            return item.getRemainingInvestment()
+                .isZero();
         }
     };
 
@@ -99,10 +101,10 @@ final class Cache<T> {
         @Override
         public boolean shouldCache(final SellInfo item) {
             return item.getPriceInfo()
-                    .getFee()
-                    .getExpiresAt()
-                    .map(expiration -> expiration.isAfter(DateUtil.offsetNow()))
-                    .orElse(true);
+                .getFee()
+                .getExpiresAt()
+                .map(expiration -> expiration.isAfter(DateUtil.offsetNow()))
+                .orElse(true);
         }
     };
 
@@ -133,16 +135,18 @@ final class Cache<T> {
 
     private boolean isExpired(final Tuple2<T, Instant> p) {
         final Instant now = DateUtil.now();
-        final Instant expiration = p._2().plus(backend.getEvictAfter());
+        final Instant expiration = p._2()
+            .plus(backend.getEvictAfter());
         return expiration.isBefore(now);
     }
 
     private void evict() {
         LOGGER.trace("Evicting {}, total: {}.", backend.getItemClass(), storage.size());
-        final long evictedCount = storage.entrySet().stream()
-                .filter(e -> isExpired(e.getValue()))
-                .peek(e -> storage.remove(e.getKey()))
-                .count();
+        final long evictedCount = storage.entrySet()
+            .stream()
+            .filter(e -> isExpired(e.getValue()))
+            .peek(e -> storage.remove(e.getKey()))
+            .count();
         LOGGER.trace("Evicted {} items.", evictedCount);
     }
 
@@ -171,7 +175,7 @@ final class Cache<T> {
         }
         return getFromCache(id).orElseGet(() -> {
             final T item = backend.getItem(id, tenant)
-                    .getOrElseThrow(e -> new IllegalStateException("Can not read " + identify(id) + " from Zonky.", e));
+                .getOrElseThrow(e -> new IllegalStateException("Can not read " + identify(id) + " from Zonky.", e));
             if (backend.shouldCache(item)) {
                 add(id, item);
             } else {

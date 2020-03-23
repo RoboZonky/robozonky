@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.time.LocalDate;
-
-import com.github.robozonky.strategy.natural.ExitProperties;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.strategy.natural.ExitProperties;
 
 class ExitPropertiesTest {
 
@@ -31,19 +32,24 @@ class ExitPropertiesTest {
         final LocalDate now = LocalDate.now();
         final ExitProperties e = new ExitProperties(now);
         assertSoftly(softly -> {
-            e.getAccountTermination().isEqual(now);
-            e.getSelloffStart().isEqual(now.minusMonths(3));
+            e.getAccountTermination()
+                .isEqual(now);
+            e.getSelloffStart()
+                .isEqual(now.minusMonths(3));
         });
     }
 
     @Test
     void customSelloff() {
         final LocalDate now = LocalDate.now();
-        final LocalDate selloff = LocalDate.now().minusDays(1);
+        final LocalDate selloff = LocalDate.now()
+            .minusDays(1);
         final ExitProperties e = new ExitProperties(now, selloff);
         assertSoftly(softly -> {
-            e.getAccountTermination().isEqual(now);
-            e.getSelloffStart().isEqual(selloff);
+            e.getAccountTermination()
+                .isEqual(now);
+            e.getSelloffStart()
+                .isEqual(selloff);
         });
     }
 
@@ -51,6 +57,6 @@ class ExitPropertiesTest {
     void invalidSelloff() {
         final LocalDate now = LocalDate.now();
         assertThatThrownBy(() -> new ExitProperties(now, now))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 }

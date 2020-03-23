@@ -16,19 +16,21 @@
 
 package com.github.robozonky.internal.tenant;
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
 
 class TenantTest {
 
     @Test
     void delegatesRun() {
         Tenant my = spy(Tenant.class);
-        my.run(zonky -> { /* NOOP */ });
+        my.run(zonky -> {
+            /* NOOP */ });
         verify(my).call(notNull());
     }
 
@@ -39,8 +41,8 @@ class TenantTest {
         when(my.call(notNull())).thenReturn(result);
         SellInfo actual = my.getSellInfo(1);
         assertThat(actual)
-                .isNotNull()
-                .isSameAs(result);
+            .isNotNull()
+            .isSameAs(result);
     }
 
     @Test
@@ -50,7 +52,7 @@ class TenantTest {
         when(my.call(notNull())).thenReturn(result);
         Loan actual = my.getLoan(1);
         assertThat(actual)
-                .isNotNull()
-                .isSameAs(result);
+            .isNotNull()
+            .isSameAs(result);
     }
 }

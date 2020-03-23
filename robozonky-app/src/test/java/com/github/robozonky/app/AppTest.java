@@ -16,7 +16,13 @@
 
 package com.github.robozonky.app;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
@@ -24,18 +30,14 @@ import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class AppTest extends AbstractEventLeveragingTest {
 
     @Test
     void notWellFormedCli() {
         final App main = spy(new App());
-        doNothing().when(main).actuallyExit(anyInt());
+        doNothing().when(main)
+            .actuallyExit(anyInt());
         main.run();
         verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
@@ -43,7 +45,8 @@ class AppTest extends AbstractEventLeveragingTest {
     @Test
     void help() {
         final App main = spy(new App("-h"));
-        doNothing().when(main).actuallyExit(anyInt());
+        doNothing().when(main)
+            .actuallyExit(anyInt());
         main.run();
         verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
@@ -51,7 +54,8 @@ class AppTest extends AbstractEventLeveragingTest {
     @Test
     void wellFormedCliWithNonexistentKeystore() {
         final App main = spy(new App("-p", "a", "-g", "b", "-d", "-s", "a"));
-        doNothing().when(main).actuallyExit(anyInt());
+        doNothing().when(main)
+            .actuallyExit(anyInt());
         main.run();
         verify(main).actuallyExit(eq(ReturnCode.ERROR_SETUP.getCode()));
     }
@@ -62,7 +66,8 @@ class AppTest extends AbstractEventLeveragingTest {
     @Test
     void triggersEvents() {
         final App main = spy(new App());
-        doNothing().when(main).actuallyExit(anyInt());
+        doNothing().when(main)
+            .actuallyExit(anyInt());
         try {
             assertThat(main.execute(l -> new MyInvestmentMode())).isEqualTo(ReturnCode.OK);
         } finally { // clean up, shutting down executors etc.
@@ -72,9 +77,12 @@ class AppTest extends AbstractEventLeveragingTest {
         final List<Event> events = getEventsRequested();
         assertThat(events).hasSize(3);
         assertSoftly(softly -> {
-            softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
-            softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
-            softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
+            softly.assertThat(events.get(0))
+                .isInstanceOf(RoboZonkyStartingEvent.class);
+            softly.assertThat(events.get(1))
+                .isInstanceOf(RoboZonkyInitializedEvent.class);
+            softly.assertThat(events.get(2))
+                .isInstanceOf(RoboZonkyEndingEvent.class);
         });
     }
 
@@ -84,7 +92,8 @@ class AppTest extends AbstractEventLeveragingTest {
     @Test
     void failsCorrectly() {
         final App main = spy(new App());
-        doNothing().when(main).actuallyExit(anyInt());
+        doNothing().when(main)
+            .actuallyExit(anyInt());
         try {
             final ReturnCode result = main.execute(l -> new MyFailingInvestmentMode());
             assertThat(result).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
@@ -92,9 +101,12 @@ class AppTest extends AbstractEventLeveragingTest {
             final List<Event> events = getEventsRequested();
             assertThat(events).hasSize(3);
             assertSoftly(softly -> {
-                softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
-                softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
-                softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
+                softly.assertThat(events.get(0))
+                    .isInstanceOf(RoboZonkyStartingEvent.class);
+                softly.assertThat(events.get(1))
+                    .isInstanceOf(RoboZonkyInitializedEvent.class);
+                softly.assertThat(events.get(2))
+                    .isInstanceOf(RoboZonkyEndingEvent.class);
             });
         }
     }
@@ -135,5 +147,3 @@ class AppTest extends AbstractEventLeveragingTest {
         }
     }
 }
-
-

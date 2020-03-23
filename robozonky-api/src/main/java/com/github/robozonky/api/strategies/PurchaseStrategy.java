@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,13 @@ public interface PurchaseStrategy {
      * Retrieve participations that are acceptable by the strategy, in the order in which they are to be evaluated.
      * After purchasing any one of these participations, the strategy should be called again to re-evaluate the
      * resulting situation.
-     * @param available Participations to be evaluated for acceptability.
-     * @param portfolio Aggregation of information as to the user's current portfolio.
+     * 
+     * @param available    Participations to be evaluated for acceptability.
+     * @param portfolio    Aggregation of information as to the user's current portfolio.
      * @param restrictions Restrictions imposed by Zonky on the current user.
      * @return Acceptable participations, in the order of their decreasing priority, mapped to the recommended
-     * purchase value.
+     *         purchase value.
      */
     Stream<RecommendedParticipation> recommend(Collection<ParticipationDescriptor> available,
-                                               PortfolioOverview portfolio, Restrictions restrictions);
+            PortfolioOverview portfolio, Restrictions restrictions);
 }

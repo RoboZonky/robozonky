@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * The set of filters prescribed by the strategy changes based on whether or not the user has chosen to gradually exit
@@ -48,14 +49,14 @@ class FilterSupplier {
     private volatile boolean wasCheckedOnce = false, lastCheckedSellOffStarted = false;
 
     /**
-     * @param defaults Never null.
-     * @param primaryMarketplaceFilters If null, {@link #isPrimaryMarketplaceEnabled()} will return false.
+     * @param defaults                    Never null.
+     * @param primaryMarketplaceFilters   If null, {@link #isPrimaryMarketplaceEnabled()} will return false.
      * @param secondaryMarketplaceFilters If null, {@link #isSecondaryMarketplaceEnabled()} will return false.
-     * @param sellFilters Never null.
+     * @param sellFilters                 Never null.
      */
     public FilterSupplier(final DefaultValues defaults, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
-                          final Collection<MarketplaceFilter> secondaryMarketplaceFilters,
-                          final Collection<MarketplaceFilter> sellFilters) {
+            final Collection<MarketplaceFilter> secondaryMarketplaceFilters,
+            final Collection<MarketplaceFilter> sellFilters) {
         this.defaults = defaults;
         this.primaryMarketplaceEnabled = primaryMarketplaceFilters != null;
         this.secondaryMarketplaceEnabled = secondaryMarketplaceFilters != null;
@@ -67,7 +68,7 @@ class FilterSupplier {
     }
 
     FilterSupplier(final DefaultValues defaults, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
-                   final Collection<MarketplaceFilter> secondaryMarketplaceFilters) {
+            final Collection<MarketplaceFilter> secondaryMarketplaceFilters) {
         this(defaults, primaryMarketplaceFilters, secondaryMarketplaceFilters, Collections.emptySet());
     }
 
@@ -83,19 +84,19 @@ class FilterSupplier {
      *
      * @param marketplaceFilters
      * @return Collection of filters with a stable iteration order, where the filters that do not require HTTP requests
-     * come first.
+     *         come first.
      */
     private static Set<MarketplaceFilter> reorderFilters(final Collection<MarketplaceFilter> marketplaceFilters) {
         if (marketplaceFilters == null) {
             return Collections.emptySet();
         }
         return marketplaceFilters.stream()
-                .sorted()
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            .sorted()
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private static Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> unlessSelloff,
-                                                            final boolean isSelloff) {
+            final boolean isSelloff) {
         if (isSelloff) { // accept every sale, reject every investment and participation
             return Collections.singleton(MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting()));
         } else {
@@ -104,7 +105,7 @@ class FilterSupplier {
     }
 
     private static Collection<MarketplaceFilter> supplyFilters(final Collection<MarketplaceFilter> filters,
-                                                               final long monthsBeforeExit) {
+            final long monthsBeforeExit) {
         if (monthsBeforeExit > -1) { // ignore marketplace items that go over the exit date
             final int filteredTerms = (int) Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
             final MarketplaceFilterCondition c = LoanTermCondition.moreThan(filteredTerms);
@@ -129,7 +130,7 @@ class FilterSupplier {
     private Collection<MarketplaceFilter> refreshPrimaryMarketplaceFilters() {
         if (primaryMarketplaceEnabled) {
             return getFilters(() -> supplyFilters(primaryMarketplaceFilters, defaults.getMonthsBeforeExit()),
-                              defaults.isSelloffStarted());
+                    defaults.isSelloffStarted());
         } else {
             return Collections.emptyList();
         }
@@ -138,7 +139,7 @@ class FilterSupplier {
     private Collection<MarketplaceFilter> refreshSecondaryMarketplaceFilters() {
         if (secondaryMarketplaceEnabled) {
             return getFilters(() -> supplyFilters(secondaryMarketplaceFilters, defaults.getMonthsBeforeExit()),
-                              defaults.isSelloffStarted());
+                    defaults.isSelloffStarted());
         } else {
             return Collections.emptyList();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.api.remote.LoanApi;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import javax.ws.rs.ProcessingException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.UUID;
@@ -27,9 +26,11 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import javax.ws.rs.ProcessingException;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.remote.LoanApi;
 
 class ApiTest {
 
@@ -39,7 +40,8 @@ class ApiTest {
     void executeFunction() {
         final LoanApi mock = mock(LoanApi.class);
         final Api<LoanApi> api = new Api<>(mock, counter);
-        final String expected = UUID.randomUUID().toString();
+        final String expected = UUID.randomUUID()
+            .toString();
         final Function<LoanApi, String> function = (a) -> expected;
         final String result = api.call(function);
         assertThat(result).isSameAs(expected);
@@ -65,8 +67,8 @@ class ApiTest {
             throw new ProcessingException(new IllegalStateException());
         };
         assertThatThrownBy(() -> api.call(function))
-                .isInstanceOf(ProcessingException.class)
-                .hasCauseInstanceOf(ProcessingException.class);
+            .isInstanceOf(ProcessingException.class)
+            .hasCauseInstanceOf(ProcessingException.class);
         assertThat(counter.count()).isEqualTo(1);
     }
 
@@ -74,7 +76,8 @@ class ApiTest {
     void retriesAfterTimeout() {
         final LoanApi mock = mock(LoanApi.class);
         final Api<LoanApi> api = new Api<>(mock);
-        final String expected = UUID.randomUUID().toString();
+        final String expected = UUID.randomUUID()
+            .toString();
         final LongAdder adder = new LongAdder();
         final Function<LoanApi, String> function = (a) -> {
             adder.add(1);

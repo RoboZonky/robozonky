@@ -56,6 +56,6 @@ public final class Tuple2<T1, T2> {
 
     @Override
     public String toString() {
-        return "(" + _1 + ", "+ _2 + ")";
+        return "(" + _1 + ", " + _2 + ")";
     }
 }

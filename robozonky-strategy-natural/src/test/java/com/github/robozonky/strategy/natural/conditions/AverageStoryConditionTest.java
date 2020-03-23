@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.function.Predicate;
 
-import com.github.robozonky.strategy.natural.Wrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.strategy.natural.Wrapper;
 
 class AverageStoryConditionTest {
 
@@ -63,7 +64,8 @@ class AverageStoryConditionTest {
     void basicProperties() {
         final AbstractStoryCondition condition = new AverageStoryCondition();
         assertThat(condition.mayRequireRemoteRequests()).isTrue();
-        assertThat((Predicate<Wrapper<?>>) condition).hasToString(AverageStoryCondition.class.getSimpleName() + " (N/A.)");
+        assertThat((Predicate<Wrapper<?>>) condition)
+            .hasToString(AverageStoryCondition.class.getSimpleName() + " (N/A.)");
     }
 
 }

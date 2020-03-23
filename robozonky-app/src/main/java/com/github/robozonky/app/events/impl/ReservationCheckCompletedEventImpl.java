@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ final class ReservationCheckCompletedEventImpl extends AbstractEventImpl impleme
     private final PortfolioOverview portfolioOverview;
 
     public ReservationCheckCompletedEventImpl(final Collection<Reservation> reservations,
-                                              final PortfolioOverview portfolio) {
+            final PortfolioOverview portfolio) {
         this.investments = Collections.unmodifiableCollection(reservations);
         this.portfolioOverview = portfolio;
     }
@@ -48,8 +48,8 @@ final class ReservationCheckCompletedEventImpl extends AbstractEventImpl impleme
     @Override
     public String toString() {
         return new StringJoiner(", ", ReservationCheckCompletedEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("portfolioOverview=" + portfolioOverview)
-                .toString();
+            .add("super=" + super.toString())
+            .add("portfolioOverview=" + portfolioOverview)
+            .toString();
     }
 }

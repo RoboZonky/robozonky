@@ -31,13 +31,13 @@ final class ReloadableImpl<T> extends AbstractReloadableImpl<T> {
     private final AtomicReference<T> value = new AtomicReference<>();
 
     public ReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                          final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
+            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
         super(supplier, reloader, runWhenReloaded, listeners);
     }
 
     public ReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                          final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
-                          final Function<T, Duration> reloadAfter) {
+            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
+            final Function<T, Duration> reloadAfter) {
         super(supplier, reloader, runWhenReloaded, listeners, reloadAfter);
     }
 

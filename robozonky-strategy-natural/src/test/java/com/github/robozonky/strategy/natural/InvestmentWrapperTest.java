@@ -16,9 +16,15 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -37,15 +43,31 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class InvestmentWrapperTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
+        .setInsuranceActive(true)
+        .setAmount(100_000)
+        .setRating(Rating.D)
+        .setInterestRate(Ratio.ONE)
+        .setMainIncomeType(MainIncomeType.EMPLOYMENT)
+        .setPurpose(Purpose.AUTO_MOTO)
+        .setRegion(Region.JIHOCESKY)
+        .setStory(UUID.randomUUID()
+            .toString())
+        .setTermInMonths(20)
+        .build();
+    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000)
+        .setLoanHealthInfo(LoanHealth.HEALTHY)
+        .setPurchasePrice(BigDecimal.TEN)
+        .setSellPrice(BigDecimal.ONE)
+        .build();
+    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
+
+    @Test
+    void fromInvestment() {
+        final Loan loan = new MockLoanBuilder()
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)
@@ -53,75 +75,84 @@ class InvestmentWrapperTest {
             .setMainIncomeType(MainIncomeType.EMPLOYMENT)
             .setPurpose(Purpose.AUTO_MOTO)
             .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID().toString())
+            .setStory(UUID.randomUUID()
+                .toString())
             .setTermInMonths(20)
+            .setAnnuity(BigDecimal.ONE)
             .build();
-    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000)
+        final int invested = 200;
+        final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
+            .setRemainingMonths(10)
             .setLoanHealthInfo(LoanHealth.HEALTHY)
             .setPurchasePrice(BigDecimal.TEN)
             .setSellPrice(BigDecimal.ONE)
+            .setSmpFee(BigDecimal.ONE)
             .build();
-    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
-
-    @Test
-    void fromInvestment() {
-        final Loan loan = new MockLoanBuilder()
-                .setInsuranceActive(true)
-                .setAmount(100_000)
-                .setRating(Rating.D)
-                .setInterestRate(Ratio.ONE)
-                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-                .setPurpose(Purpose.AUTO_MOTO)
-                .setRegion(Region.JIHOCESKY)
-                .setStory(UUID.randomUUID().toString())
-                .setTermInMonths(20)
-                .setAnnuity(BigDecimal.ONE)
-                .build();
-        final int invested = 200;
-        final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
-                .setRemainingMonths(10)
-                .setLoanHealthInfo(LoanHealth.HEALTHY)
-                .setPurchasePrice(BigDecimal.TEN)
-                .setSellPrice(BigDecimal.ONE)
-                .setSmpFee(BigDecimal.ONE)
-                .build();
         final InvestmentDescriptor id = new InvestmentDescriptor(investment, () -> loan);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(id, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.getId()).isEqualTo(investment.getId());
-            softly.assertThat(w.isInsuranceActive()).isEqualTo(investment.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
-            softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
-            softly.assertThat(w.getRating()).isEqualTo(investment.getRating());
-            softly.assertThat(w.getMainIncomeType()).isEqualTo(loan.getMainIncomeType());
-            softly.assertThat(w.getPurpose()).isEqualTo(loan.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount().getValue().intValue());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(investment.getRemainingPrincipal().get().getValue());
-            softly.assertThat(w.getOriginal()).isSameAs(id);
-            softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
-            softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(investment.getLoanTermInMonth());
-            softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
-            softly.assertThat(w.getHealth()).contains(LoanHealth.HEALTHY);
-            softly.assertThat(w.getOriginalPurchasePrice()).contains(new BigDecimal("10.00"));
-            softly.assertThat(w.getDiscount()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getPrice()).contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getSellFee()).contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getReturns()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromRaw("0.1499"));
-            softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().getValue().intValue());
-            softly.assertThat(w.toString()).isNotNull();
+            softly.assertThat(w.getId())
+                .isEqualTo(investment.getId());
+            softly.assertThat(w.isInsuranceActive())
+                .isEqualTo(investment.isInsuranceActive());
+            softly.assertThat(w.getInterestRate())
+                .isEqualTo(Ratio.ONE);
+            softly.assertThat(w.getRegion())
+                .isEqualTo(loan.getRegion());
+            softly.assertThat(w.getRating())
+                .isEqualTo(investment.getRating());
+            softly.assertThat(w.getMainIncomeType())
+                .isEqualTo(loan.getMainIncomeType());
+            softly.assertThat(w.getPurpose())
+                .isEqualTo(loan.getPurpose());
+            softly.assertThat(w.getOriginalAmount())
+                .isEqualTo(loan.getAmount()
+                    .getValue()
+                    .intValue());
+            softly.assertThat(w.getRemainingPrincipal())
+                .isEqualTo(investment.getRemainingPrincipal()
+                    .get()
+                    .getValue());
+            softly.assertThat(w.getOriginal())
+                .isSameAs(id);
+            softly.assertThat(w.getStory())
+                .isEqualTo(loan.getStory());
+            softly.assertThat(w.getOriginalTermInMonths())
+                .isEqualTo(investment.getLoanTermInMonth());
+            softly.assertThat(w.getRemainingTermInMonths())
+                .isEqualTo(investment.getRemainingMonths());
+            softly.assertThat(w.getHealth())
+                .contains(LoanHealth.HEALTHY);
+            softly.assertThat(w.getOriginalPurchasePrice())
+                .contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getDiscount())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getPrice())
+                .contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getSellFee())
+                .contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getReturns())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getRevenueRate())
+                .isEqualTo(Ratio.fromRaw("0.1499"));
+            softly.assertThat(w.getOriginalAnnuity())
+                .isEqualTo(loan.getAnnuity()
+                    .getValue()
+                    .intValue());
+            softly.assertThat(w.toString())
+                .isNotNull();
         });
     }
 
     @Test
     void fromInvestmentWithoutRevenueRate() {
         final Loan loan = new MockLoanBuilder()
-                .setRating(Rating.A)
-                .build();
+            .setRating(Rating.A)
+            .build();
         final int invested = 200;
         final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
-                .setSmpFee(BigDecimal.ONE)
-                .build();
+            .setSmpFee(BigDecimal.ONE)
+            .build();
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
         assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("7.99"));
@@ -132,43 +163,71 @@ class InvestmentWrapperTest {
         final InvestmentDescriptor original = new InvestmentDescriptor(INVESTMENT, () -> LOAN);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.getId()).isEqualTo(INVESTMENT.getId());
-            softly.assertThat(w.isInsuranceActive()).isEqualTo(INVESTMENT.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
-            softly.assertThat(w.getRegion()).isEqualTo(LOAN.getRegion());
-            softly.assertThat(w.getRating()).isEqualTo(INVESTMENT.getRating());
-            softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());
-            softly.assertThat(w.getPurpose()).isEqualTo(LOAN.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(LOAN.getAmount().getValue().intValue());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(INVESTMENT.getRemainingPrincipal().get().getValue());
-            softly.assertThat(w.getOriginal()).isSameAs(original);
-            softly.assertThat(w.getStory()).isEqualTo(LOAN.getStory());
-            softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(INVESTMENT.getLoanTermInMonth());
-            softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(INVESTMENT.getRemainingMonths());
-            softly.assertThat(w.getHealth()).contains(LoanHealth.HEALTHY);
-            softly.assertThat(w.getOriginalPurchasePrice()).contains(new BigDecimal("10.00"));
-            softly.assertThat(w.getDiscount()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getPrice()).contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getSellFee()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getReturns()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.toString()).isNotNull();
+            softly.assertThat(w.getId())
+                .isEqualTo(INVESTMENT.getId());
+            softly.assertThat(w.isInsuranceActive())
+                .isEqualTo(INVESTMENT.isInsuranceActive());
+            softly.assertThat(w.getInterestRate())
+                .isEqualTo(Ratio.ONE);
+            softly.assertThat(w.getRegion())
+                .isEqualTo(LOAN.getRegion());
+            softly.assertThat(w.getRating())
+                .isEqualTo(INVESTMENT.getRating());
+            softly.assertThat(w.getMainIncomeType())
+                .isEqualTo(LOAN.getMainIncomeType());
+            softly.assertThat(w.getPurpose())
+                .isEqualTo(LOAN.getPurpose());
+            softly.assertThat(w.getOriginalAmount())
+                .isEqualTo(LOAN.getAmount()
+                    .getValue()
+                    .intValue());
+            softly.assertThat(w.getRemainingPrincipal())
+                .isEqualTo(INVESTMENT.getRemainingPrincipal()
+                    .get()
+                    .getValue());
+            softly.assertThat(w.getOriginal())
+                .isSameAs(original);
+            softly.assertThat(w.getStory())
+                .isEqualTo(LOAN.getStory());
+            softly.assertThat(w.getOriginalTermInMonths())
+                .isEqualTo(INVESTMENT.getLoanTermInMonth());
+            softly.assertThat(w.getRemainingTermInMonths())
+                .isEqualTo(INVESTMENT.getRemainingMonths());
+            softly.assertThat(w.getHealth())
+                .contains(LoanHealth.HEALTHY);
+            softly.assertThat(w.getOriginalPurchasePrice())
+                .contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getDiscount())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getPrice())
+                .contains(new BigDecimal("1.00"));
+            softly.assertThat(w.getSellFee())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getReturns())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.toString())
+                .isNotNull();
         });
     }
 
     @Test
     void failsOnNoSellInfo() {
-        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 2_000).build();
+        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 2_000)
+            .build();
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(w::getHealth).isInstanceOf(NoSuchElementException.class);
-            softly.assertThatThrownBy(w::getPrice).isInstanceOf(NoSuchElementException.class);
+            softly.assertThatThrownBy(w::getHealth)
+                .isInstanceOf(NoSuchElementException.class);
+            softly.assertThatThrownBy(w::getPrice)
+                .isInstanceOf(NoSuchElementException.class);
         });
     }
 
     @Test
     void sellInfoValues() {
-        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 200).build();
+        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 200)
+            .build();
         final LoanHealthStats healthInfo = mock(LoanHealthStats.class);
         when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
         final SellPriceInfo priceInfo = mock(SellPriceInfo.class);
@@ -183,10 +242,14 @@ class InvestmentWrapperTest {
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN, () -> sellInfo);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.getHealth()).contains(LoanHealth.HISTORICALLY_IN_DUE);
-            softly.assertThat(w.getDiscount()).contains(new BigDecimal("20.00"));
-            softly.assertThat(w.getPrice()).contains(new BigDecimal("10.00"));
-            softly.assertThat(w.getSellFee()).contains(new BigDecimal("2.00"));
+            softly.assertThat(w.getHealth())
+                .contains(LoanHealth.HISTORICALLY_IN_DUE);
+            softly.assertThat(w.getDiscount())
+                .contains(new BigDecimal("20.00"));
+            softly.assertThat(w.getPrice())
+                .contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getSellFee())
+                .contains(new BigDecimal("2.00"));
         });
     }
 
@@ -195,10 +258,14 @@ class InvestmentWrapperTest {
         final InvestmentDescriptor original = new InvestmentDescriptor(INVESTMENT, () -> LOAN);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w).isEqualTo(w);
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(original, FOLIO));
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(new InvestmentDescriptor(INVESTMENT, () -> LOAN), FOLIO));
-            softly.assertThat(w).isNotEqualTo(null);
+            softly.assertThat(w)
+                .isEqualTo(w);
+            softly.assertThat(w)
+                .isEqualTo(Wrapper.wrap(original, FOLIO));
+            softly.assertThat(w)
+                .isEqualTo(Wrapper.wrap(new InvestmentDescriptor(INVESTMENT, () -> LOAN), FOLIO));
+            softly.assertThat(w)
+                .isNotEqualTo(null);
         });
     }
 }

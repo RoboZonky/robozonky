@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,29 @@
 
 package com.github.robozonky.installer;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import com.github.robozonky.internal.Defaults;
-import com.izforge.izpack.api.data.InstallData;
-import com.izforge.izpack.api.installer.DataValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.internal.Defaults;
+import com.izforge.izpack.api.data.InstallData;
+import com.izforge.izpack.api.installer.DataValidator;
 
 class StrategySettingsValidatorTest {
 
     private static InstallData mockInstallData() {
         final InstallData data = mock(InstallData.class);
         when(data.getVariable(eq(Variables.INSTALL_PATH.getKey())))
-                .thenReturn(new File("target/").getAbsolutePath());
+            .thenReturn(new File("target/").getAbsolutePath());
         return data;
     }
 
@@ -45,7 +46,7 @@ class StrategySettingsValidatorTest {
         final InstallData data = StrategySettingsValidatorTest.mockInstallData();
         when(data.getVariable(eq(Variables.STRATEGY_TYPE.getKey()))).thenReturn("file");
         when(data.getVariable(eq(Variables.STRATEGY_SOURCE.getKey())))
-                .thenReturn(f.getAbsolutePath());
+            .thenReturn(f.getAbsolutePath());
         return data;
     }
 
@@ -53,7 +54,7 @@ class StrategySettingsValidatorTest {
         final InstallData data = StrategySettingsValidatorTest.mockInstallData();
         when(data.getVariable(eq(Variables.STRATEGY_TYPE.getKey()))).thenReturn("url");
         when(data.getVariable(eq(Variables.STRATEGY_SOURCE.getKey())))
-                .thenReturn(u.toExternalForm());
+            .thenReturn(u.toExternalForm());
         return data;
     }
 
@@ -66,10 +67,14 @@ class StrategySettingsValidatorTest {
     void messages() {
         final DataValidator validator = new StrategySettingsValidator();
         assertSoftly(softly -> {
-            softly.assertThat(validator.getDefaultAnswer()).isFalse();
-            softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
+            softly.assertThat(validator.getDefaultAnswer())
+                .isFalse();
+            softly.assertThat(validator.getWarningMessageId())
+                .isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId())
+                .isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId())
+                .isNotEqualTo(validator.getWarningMessageId());
         });
     }
 
@@ -77,7 +82,7 @@ class StrategySettingsValidatorTest {
     void wrongData() {
         final DataValidator validator = new StrategySettingsValidator();
         assertThat(validator.validateData(StrategySettingsValidatorTest.mockInstallData()))
-                .isEqualTo(DataValidator.Status.WARNING);
+            .isEqualTo(DataValidator.Status.WARNING);
     }
 
     @Test
@@ -108,7 +113,8 @@ class StrategySettingsValidatorTest {
     void urlOk() throws IOException {
         final File f = File.createTempFile("robozonky-", ".cfg");
         Files.write(f.toPath(), "Robot má udržovat konzervativní portfolio.".getBytes(Defaults.CHARSET));
-        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI().toURL());
+        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI()
+            .toURL());
         // execute sut
         final DataValidator validator = new StrategySettingsValidator();
         final DataValidator.Status result = validator.validateData(d);
@@ -119,7 +125,8 @@ class StrategySettingsValidatorTest {
     @Test
     void urlNoContent() throws IOException {
         final File f = File.createTempFile("robozonky-", ".cfg");
-        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI().toURL());
+        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI()
+            .toURL());
         // execute sut
         final DataValidator validator = new StrategySettingsValidator();
         final DataValidator.Status result = validator.validateData(d);
@@ -131,7 +138,8 @@ class StrategySettingsValidatorTest {
     void urlWrong() throws IOException {
         final File f = File.createTempFile("robozonky-", ".cfg");
         Assumptions.assumeTrue(f.delete());
-        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI().toURL());
+        final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI()
+            .toURL());
         // execute sut
         final DataValidator validator = new StrategySettingsValidator();
         final DataValidator.Status result = validator.validateData(d);

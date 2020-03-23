@@ -16,15 +16,16 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.strategy.natural.Wrapper;
 
 class RelativeDiscountConditionTest {
 
@@ -53,7 +54,7 @@ class RelativeDiscountConditionTest {
     @Test
     void exact() {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.exact(Ratio.fromPercentage(8),
-                                                                                     Ratio.fromPercentage(10));
+                Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
@@ -70,4 +71,3 @@ class RelativeDiscountConditionTest {
         assertThat(condition.getDescription()).isNotEmpty();
     }
 }
-

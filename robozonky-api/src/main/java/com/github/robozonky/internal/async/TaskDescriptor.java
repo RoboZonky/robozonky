@@ -40,7 +40,7 @@ final class TaskDescriptor {
     private final LongAdder successCount = new LongAdder();
 
     TaskDescriptor(final ExecutorService executorService, final Runnable toSchedule, final Duration initialDelay,
-                   final Duration delayInBetween, final Duration timeout) {
+            final Duration delayInBetween, final Duration timeout) {
         this.executorService = executorService;
         this.toSchedule = () -> {
             LOGGER.trace("Running {} from within {}.", toSchedule, this);
@@ -73,13 +73,13 @@ final class TaskDescriptor {
             return;
         }
         LOGGER.trace("Scheduling {} to happen after {}.", this, initialDelay);
-        var futureDelayedExecutor = executor == null ?
-                CompletableFuture.delayedExecutor(delayInBetween.toNanos(), TimeUnit.NANOSECONDS, executorService) :
-                executor;
+        var futureDelayedExecutor = executor == null
+                ? CompletableFuture.delayedExecutor(delayInBetween.toNanos(), TimeUnit.NANOSECONDS, executorService)
+                : executor;
         final Runnable toSubmit = () -> submit(futureDelayedExecutor);
-        var delayedExecutor = executor == null ?
-                CompletableFuture.delayedExecutor(initialDelay.toNanos(), TimeUnit.NANOSECONDS, executorService) :
-                executor;
+        var delayedExecutor = executor == null
+                ? CompletableFuture.delayedExecutor(initialDelay.toNanos(), TimeUnit.NANOSECONDS, executorService)
+                : executor;
         delayedExecutor.execute(toSubmit);
     }
 

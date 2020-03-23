@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.strategy.natural.conditions.VeryShortStoryCondition;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class FilterSupplierTest {
 
@@ -40,12 +41,14 @@ class FilterSupplierTest {
         MarketplaceFilter fastFilter = new MarketplaceFilter();
         fastFilter.when(List.of(doesNotRequireRequests));
         FilterSupplier filters = new FilterSupplier(new DefaultValues(DefaultPortfolio.PROGRESSIVE),
-                                                    Arrays.asList(slowFilter, fastFilter),
-                                                    Arrays.asList(slowFilter, fastFilter),
-                                                    Collections.emptyList());
+                Arrays.asList(slowFilter, fastFilter),
+                Arrays.asList(slowFilter, fastFilter),
+                Collections.emptyList());
         assertSoftly(softly -> {
-            softly.assertThat(filters.getPrimaryMarketplaceFilters()).containsExactly(fastFilter, slowFilter);
-            softly.assertThat(filters.getSecondaryMarketplaceFilters()).containsExactly(fastFilter, slowFilter);
+            softly.assertThat(filters.getPrimaryMarketplaceFilters())
+                .containsExactly(fastFilter, slowFilter);
+            softly.assertThat(filters.getSecondaryMarketplaceFilters())
+                .containsExactly(fastFilter, slowFilter);
         });
     }
 
@@ -54,22 +57,28 @@ class FilterSupplierTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         v.setExitProperties(new ExitProperties(LocalDate.MAX));
         final FilterSupplier s = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet(),
-                                                    Collections.emptySet());
+                Collections.emptySet());
         assertSoftly(softly -> {
-            softly.assertThat(s.getPrimaryMarketplaceFilters()).isNotEmpty();
-            softly.assertThat(s.getSecondaryMarketplaceFilters()).isNotEmpty();
-            softly.assertThat(s.getSellFilters()).isEmpty();
+            softly.assertThat(s.getPrimaryMarketplaceFilters())
+                .isNotEmpty();
+            softly.assertThat(s.getSecondaryMarketplaceFilters())
+                .isNotEmpty();
+            softly.assertThat(s.getSellFilters())
+                .isEmpty();
         });
     }
 
     @Test
     void nullHandling() {
         final FilterSupplier f = new FilterSupplier(new DefaultValues(DefaultPortfolio.PROGRESSIVE), null, null,
-                                                    Collections.emptyList());
+                Collections.emptyList());
         assertSoftly(softly -> {
-            softly.assertThat(f.getPrimaryMarketplaceFilters()).isEmpty();
-            softly.assertThat(f.getSecondaryMarketplaceFilters()).isEmpty();
-            softly.assertThat(f.getSellFilters()).isEmpty();
+            softly.assertThat(f.getPrimaryMarketplaceFilters())
+                .isEmpty();
+            softly.assertThat(f.getSecondaryMarketplaceFilters())
+                .isEmpty();
+            softly.assertThat(f.getSellFilters())
+                .isEmpty();
         });
     }
 }

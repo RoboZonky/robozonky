@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 
 class RecommendedInvestmentTest {
 
@@ -47,18 +47,24 @@ class RecommendedInvestmentTest {
         final InvestmentDescriptor d = new InvestmentDescriptor(i, () -> LOAN);
         final RecommendedInvestment r = new RecommendedInvestment(d, Money.from(remainingPrincipal));
         assertSoftly(softly -> {
-            softly.assertThat(r).isNotEqualTo(null);
-            softly.assertThat(r).isNotEqualTo(UUID.randomUUID().toString());
-            softly.assertThat(r).isEqualTo(r);
+            softly.assertThat(r)
+                .isNotEqualTo(null);
+            softly.assertThat(r)
+                .isNotEqualTo(UUID.randomUUID()
+                    .toString());
+            softly.assertThat(r)
+                .isEqualTo(r);
         });
         final RecommendedInvestment r2 = new RecommendedInvestment(d, Money.from(remainingPrincipal));
         assertSoftly(softly -> {
-            softly.assertThat(r).isEqualTo(r2);
-            softly.assertThat(r2).isEqualTo(r);
+            softly.assertThat(r)
+                .isEqualTo(r2);
+            softly.assertThat(r2)
+                .isEqualTo(r);
         });
-        final RecommendedInvestment r3 =
-                new RecommendedInvestment(new InvestmentDescriptor(mockInvestment(remainingPrincipal), () -> LOAN),
-                        Money.from(remainingPrincipal));
+        final RecommendedInvestment r3 = new RecommendedInvestment(
+                new InvestmentDescriptor(mockInvestment(remainingPrincipal), () -> LOAN),
+                Money.from(remainingPrincipal));
         assertThat(r).isNotEqualTo(r3);
     }
 }

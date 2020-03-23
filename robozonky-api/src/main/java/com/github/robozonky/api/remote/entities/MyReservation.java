@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -55,8 +56,8 @@ public class MyReservation extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", MyReservation.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("reservedAmount='" + reservedAmount + "'")
-                .toString();
+            .add("id=" + id)
+            .add("reservedAmount='" + reservedAmount + "'")
+            .toString();
     }
 }

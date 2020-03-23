@@ -16,11 +16,17 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -35,11 +41,6 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.mock.MockReservationBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class NaturalLanguageReservationStrategyTest {
 
@@ -47,12 +48,12 @@ class NaturalLanguageReservationStrategyTest {
         final MyReservation r = mock(MyReservation.class);
         when(r.getReservedAmount()).thenReturn(Money.from(amount));
         return new MockReservationBuilder()
-                .setAmount(amount)
-                .setDatePublished(OffsetDateTime.now())
-                .setNonReservedRemainingInvestment(amount)
-                .setMyReservation(r)
-                .setRating(Rating.A)
-                .build();
+            .setAmount(amount)
+            .setDatePublished(OffsetDateTime.now())
+            .setNonReservedRemainingInvestment(amount)
+            .setMyReservation(r)
+            .setRating(Rating.A)
+            .build();
     }
 
     @Test
@@ -60,13 +61,13 @@ class NaturalLanguageReservationStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
-                                                    Collections.emptyMap());
+                Collections.emptyMap());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
-        final Stream<RecommendedReservation> result =
-                s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
-                            portfolio, new Restrictions());
+        final Stream<RecommendedReservation> result = s.recommend(
+                Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -77,10 +78,11 @@ class NaturalLanguageReservationStrategyTest {
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
-        final Stream<RecommendedReservation> result =
-                s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
-                            portfolio, new Restrictions());
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
+        final Stream<RecommendedReservation> result = s.recommend(
+                Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -89,11 +91,12 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        final Stream<RecommendedReservation> result =
-                s.recommend(Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
-                            portfolio, new Restrictions());
+        final Stream<RecommendedReservation> result = s.recommend(
+                Collections.singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
         assertThatThrownBy(s::getMode).isInstanceOf(IllegalStateException.class);
     }
@@ -103,17 +106,21 @@ class NaturalLanguageReservationStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final ReservationStrategy s = new NaturalLanguageReservationStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Reservation l = mockReservation(200);
         final ReservationDescriptor ld = new ReservationDescriptor(l, () -> null);
-        final List<RecommendedReservation> result =
-                s.recommend(Collections.singleton(ld), portfolio, new Restrictions()).collect(Collectors.toList());
+        final List<RecommendedReservation> result = s
+            .recommend(Collections.singleton(ld), portfolio, new Restrictions())
+            .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedReservation r = result.get(0);
         assertSoftly(softly -> {
-            softly.assertThat(r.descriptor()).isEqualTo(ld);
-            softly.assertThat(r.amount()).isEqualTo(Money.from(200));
+            softly.assertThat(r.descriptor())
+                .isEqualTo(ld);
+            softly.assertThat(r.amount())
+                .isEqualTo(Money.from(200));
         });
     }
 }

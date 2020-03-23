@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 /**
- * Used to represent a participation in the authenticated bit of the API. Even 
+ * Used to represent a participation in the authenticated bit of the API. Even
  * though the confusing name, this participation is also used to represent
  * participations of other users for a given loan.
  *
@@ -55,9 +56,9 @@ public class MyInvestment extends BaseInvestment {
     @Override
     public String toString() {
         return new StringJoiner(", ", MyInvestment.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("investorId=" + investorId)
-                .add("investorNickname='" + investorNickname + "'")
-                .toString();
+            .add("super=" + super.toString())
+            .add("investorId=" + investorId)
+            .add("investorNickname='" + investorNickname + "'")
+            .toString();
     }
 }

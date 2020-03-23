@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,22 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.function.Consumer;
-
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import java.util.function.Consumer;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 
 class SimpleSkippableTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void fails() {
         final Runnable r = mock(Runnable.class);
-        doThrow(IllegalStateException.class).when(r).run();
+        doThrow(IllegalStateException.class).when(r)
+            .run();
         final Runnable s = new SimpleSkippable(r);
         s.run();
         assertThat(this.getEventsRequested()).isEmpty();
@@ -38,7 +40,8 @@ class SimpleSkippableTest extends AbstractZonkyLeveragingTest {
     @Test
     void dies() {
         final Runnable r = mock(Runnable.class);
-        doThrow(OutOfMemoryError.class).when(r).run();
+        doThrow(OutOfMemoryError.class).when(r)
+            .run();
         final Consumer<Throwable> c = mock(Consumer.class);
         final Runnable s = new SimpleSkippable(r, c);
         assertThatThrownBy(s::run).isInstanceOf(OutOfMemoryError.class);
@@ -46,4 +49,3 @@ class SimpleSkippableTest extends AbstractZonkyLeveragingTest {
     }
 
 }
-

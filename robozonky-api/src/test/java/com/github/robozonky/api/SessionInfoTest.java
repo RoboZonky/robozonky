@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SessionInfoTest {
 
@@ -28,20 +28,27 @@ class SessionInfoTest {
     void constructorDryRun() {
         final SessionInfo s = new SessionInfo("someone@somewhere.cz");
         assertSoftly(softly -> {
-            softly.assertThat(s.getUsername()).isEqualTo("someone@somewhere.cz");
-            softly.assertThat(s.isDryRun()).isTrue();
-            softly.assertThat(s.getName()).isEqualTo("RoboZonky");
+            softly.assertThat(s.getUsername())
+                .isEqualTo("someone@somewhere.cz");
+            softly.assertThat(s.isDryRun())
+                .isTrue();
+            softly.assertThat(s.getName())
+                .isEqualTo("RoboZonky");
         });
     }
 
     @Test
     void constructor() {
-        var id = UUID.randomUUID().toString();
+        var id = UUID.randomUUID()
+            .toString();
         var sessionInfo = new SessionInfo("someone@somewhere.cz", id, false);
         assertSoftly(softly -> {
-            softly.assertThat(sessionInfo.getUsername()).isEqualTo("someone@somewhere.cz");
-            softly.assertThat(sessionInfo.isDryRun()).isFalse();
-            softly.assertThat(sessionInfo.getName()).isEqualTo("RoboZonky '" + id + "'");
+            softly.assertThat(sessionInfo.getUsername())
+                .isEqualTo("someone@somewhere.cz");
+            softly.assertThat(sessionInfo.isDryRun())
+                .isFalse();
+            softly.assertThat(sessionInfo.getName())
+                .isEqualTo("RoboZonky '" + id + "'");
         });
     }
 
@@ -49,25 +56,37 @@ class SessionInfoTest {
     void constructorNamed() {
         final SessionInfo s = new SessionInfo("someone@somewhere.cz", "Test");
         assertSoftly(softly -> {
-            softly.assertThat(s.getUsername()).isEqualTo("someone@somewhere.cz");
-            softly.assertThat(s.isDryRun()).isTrue();
-            softly.assertThat(s.getName()).isEqualTo("RoboZonky 'Test'");
+            softly.assertThat(s.getUsername())
+                .isEqualTo("someone@somewhere.cz");
+            softly.assertThat(s.isDryRun())
+                .isTrue();
+            softly.assertThat(s.getName())
+                .isEqualTo("RoboZonky 'Test'");
         });
     }
 
     @Test
     void equals() {
         final SessionInfo s = new SessionInfo("someone@somewhere.cz");
-        final SessionInfo s2 = new SessionInfo(UUID.randomUUID().toString());
+        final SessionInfo s2 = new SessionInfo(UUID.randomUUID()
+            .toString());
         final SessionInfo s3 = new SessionInfo("someone@somewhere.cz");
         assertSoftly(softly -> {
-            softly.assertThat(s).isNotEqualTo(null);
-            softly.assertThat(s).isNotEqualTo(UUID.randomUUID().toString());
-            softly.assertThat(s).isEqualTo(s);
-            softly.assertThat(s).isNotEqualTo(s2);
-            softly.assertThat(s2).isNotEqualTo(s);
-            softly.assertThat(s).isEqualTo(s3);
-            softly.assertThat(s3).isEqualTo(s);
+            softly.assertThat(s)
+                .isNotEqualTo(null);
+            softly.assertThat(s)
+                .isNotEqualTo(UUID.randomUUID()
+                    .toString());
+            softly.assertThat(s)
+                .isEqualTo(s);
+            softly.assertThat(s)
+                .isNotEqualTo(s2);
+            softly.assertThat(s2)
+                .isNotEqualTo(s);
+            softly.assertThat(s)
+                .isEqualTo(s3);
+            softly.assertThat(s3)
+                .isEqualTo(s);
         });
     }
 }

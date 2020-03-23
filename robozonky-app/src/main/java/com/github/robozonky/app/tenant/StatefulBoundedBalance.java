@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package com.github.robozonky.app.tenant;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.internal.state.InstanceState;
-import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * On Zonky, we do not know the user's current account balance. However, in order for the robot to be able to function
@@ -58,9 +59,13 @@ final class StatefulBoundedBalance {
     }
 
     private synchronized void reloadFromState() {
-        final Instant lastModified = state.getLastUpdated().map(OffsetDateTime::toInstant).orElse(Instant.EPOCH);
+        final Instant lastModified = state.getLastUpdated()
+            .map(OffsetDateTime::toInstant)
+            .orElse(Instant.EPOCH);
         lastModificationDate.set(lastModified);
-        final Money lastKnownValue = state.getValue(VALUE_KEY).map(Money::from).orElse(MAXIMUM);
+        final Money lastKnownValue = state.getValue(VALUE_KEY)
+            .map(Money::from)
+            .orElse(MAXIMUM);
         currentValue.set(lastKnownValue);
         LOGGER.trace("Loaded {} from {}", lastKnownValue, lastModified);
     }
@@ -69,12 +74,14 @@ final class StatefulBoundedBalance {
         final Money newValue = value.max(Money.from(1));
         currentValue.set(newValue);
         lastModificationDate.set(DateUtil.now());
-        state.update(m -> m.put(VALUE_KEY, newValue.getValue().toPlainString()));
+        state.update(m -> m.put(VALUE_KEY, newValue.getValue()
+            .toPlainString()));
     }
 
     private Duration getTimeBetweenLastBalanceCheckAndNow() {
         final Instant lastModified = lastModificationDate.get();
-        return Duration.between(DateUtil.now(), lastModified).abs();
+        return Duration.between(DateUtil.now(), lastModified)
+            .abs();
     }
 
     public synchronized Money get() {

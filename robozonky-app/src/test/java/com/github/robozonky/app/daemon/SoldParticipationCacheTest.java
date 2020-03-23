@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,15 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.TenantBuilder;
@@ -23,15 +32,6 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.notNull;
-import static org.mockito.Mockito.when;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -43,7 +43,8 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     @Test
     void persistent() {
         final SecretProvider sp = SecretProvider.inMemory("someone@somewhere.cz");
-        final Tenant tenant = new TenantBuilder().withSecrets(sp).build();
+        final Tenant tenant = new TenantBuilder().withSecrets(sp)
+            .build();
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         final SoldParticipationCache instance2 = SoldParticipationCache.forTenant(tenant);
         assertThat(instance2).isSameAs(instance);
@@ -52,9 +53,11 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     @Test
     void tenantSpecific() {
         final SecretProvider sp = SecretProvider.inMemory("someone@somewhere.cz");
-        final Tenant tenant = new TenantBuilder().withSecrets(sp).build();
+        final Tenant tenant = new TenantBuilder().withSecrets(sp)
+            .build();
         final SecretProvider sp2 = SecretProvider.inMemory("someoneElse@somewhere.cz");
-        final Tenant tenant2 = new TenantBuilder().withSecrets(sp2).build();
+        final Tenant tenant2 = new TenantBuilder().withSecrets(sp2)
+            .build();
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         final SoldParticipationCache instance2 = SoldParticipationCache.forTenant(tenant2);
         assertThat(instance2).isNotSameAs(instance);
@@ -64,7 +67,9 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void retrievesSold() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        final Investment i1 = MockInvestmentBuilder.fresh().setLoanId(2).build();
+        final Investment i1 = MockInvestmentBuilder.fresh()
+            .setLoanId(2)
+            .build();
         when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.wasOnceSold(2)).isTrue();
@@ -78,7 +83,9 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void retrievesOffered() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        final Investment i1 = MockInvestmentBuilder.fresh().setLoanId(1).build();
+        final Investment i1 = MockInvestmentBuilder.fresh()
+            .setLoanId(1)
+            .build();
         when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.getOffered()).isEmpty();
@@ -87,9 +94,12 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         assertThat(instance.getOffered()).containsOnly(1, 2);
         instance.markAsSold(1);
         assertSoftly(softly -> {
-            softly.assertThat(instance.getOffered()).containsOnly(2);
-            softly.assertThat(instance.wasOnceSold(1)).isTrue();
-            softly.assertThat(instance.wasOnceSold(2)).isFalse();
+            softly.assertThat(instance.getOffered())
+                .containsOnly(2);
+            softly.assertThat(instance.wasOnceSold(1))
+                .isTrue();
+            softly.assertThat(instance.wasOnceSold(2))
+                .isFalse();
         });
     }
 }

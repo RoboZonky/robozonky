@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.daemon;
 
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -23,7 +25,6 @@ import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Either;
-import org.apache.logging.log4j.Logger;
 
 abstract class Investor {
 
@@ -34,11 +35,13 @@ abstract class Investor {
     }
 
     static Investment convertToInvestment(final RecommendedLoan r) {
-        return new Investment(r.descriptor().item(), r.amount());
+        return new Investment(r.descriptor()
+            .item(), r.amount());
     }
 
     public static Investor build(final Tenant auth) {
-        if (auth.getSessionInfo().isDryRun()) {
+        if (auth.getSessionInfo()
+            .isDryRun()) {
             return new Investor() {
                 @Override
                 public Either<InvestmentFailureType, Money> invest(final RecommendedLoan r) {
@@ -57,14 +60,16 @@ abstract class Investor {
         }
     }
 
-    private static Either<InvestmentFailureType, Money> invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
+    private static Either<InvestmentFailureType, Money> invest(final Tenant auth,
+            final RecommendedLoan recommendedLoan) {
         LOGGER.debug("Executing investment: {}.", recommendedLoan);
         final Investment i = convertToInvestment(recommendedLoan);
         final InvestmentResult r = auth.call(zonky -> zonky.invest(i));
         if (r.isSuccess()) {
             return Either.right(recommendedLoan.amount());
         } else {
-            return Either.left(r.getFailureType().get()); // get() while !isSuccess() guaranteed by Result contract
+            return Either.left(r.getFailureType()
+                .get()); // get() while !isSuccess() guaranteed by Result contract
         }
     }
 

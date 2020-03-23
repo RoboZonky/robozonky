@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,16 +41,17 @@ final class FailureTypeUtil {
     }
 
     public static boolean matches(final Class<? extends ClientErrorException> expectedException,
-                                  final ClientErrorException actualException,
-                                  final String reason) {
-        if (!actualException.getClass().isAssignableFrom(expectedException)) {
+            final ClientErrorException actualException,
+            final String reason) {
+        if (!actualException.getClass()
+            .isAssignableFrom(expectedException)) {
             return false;
         } else if (reason == null) {
             return true;
         } else {
-            return FailureTypeUtil.getResponseEntity(actualException.getResponse()).contains(reason);
+            return FailureTypeUtil.getResponseEntity(actualException.getResponse())
+                .contains(reason);
         }
     }
-
 
 }

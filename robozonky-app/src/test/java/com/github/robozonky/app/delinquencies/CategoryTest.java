@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,19 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import static com.github.robozonky.app.delinquencies.Category.CRITICAL;
+import static com.github.robozonky.app.delinquencies.Category.DEFAULTED;
+import static com.github.robozonky.app.delinquencies.Category.HOPELESS;
+import static com.github.robozonky.app.delinquencies.Category.MILD;
+import static com.github.robozonky.app.delinquencies.Category.NEW;
+import static com.github.robozonky.app.delinquencies.Category.SEVERE;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
@@ -30,45 +43,45 @@ import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static com.github.robozonky.app.delinquencies.Category.CRITICAL;
-import static com.github.robozonky.app.delinquencies.Category.DEFAULTED;
-import static com.github.robozonky.app.delinquencies.Category.HOPELESS;
-import static com.github.robozonky.app.delinquencies.Category.MILD;
-import static com.github.robozonky.app.delinquencies.Category.NEW;
-import static com.github.robozonky.app.delinquencies.Category.SEVERE;
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class CategoryTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky();
     private final Loan loan = MockLoanBuilder.fresh();
-    private final Investment investment = MockInvestmentBuilder.fresh(loan, 200).build();
+    private final Investment investment = MockInvestmentBuilder.fresh(loan, 200)
+        .build();
 
     @Test
     void thresholds() {
         assertSoftly(softly -> {
-            softly.assertThat(NEW.getThresholdInDays()).isEqualTo(0);
-            softly.assertThat(MILD.getThresholdInDays()).isEqualTo(10);
-            softly.assertThat(SEVERE.getThresholdInDays()).isEqualTo(30);
-            softly.assertThat(CRITICAL.getThresholdInDays()).isEqualTo(60);
-            softly.assertThat(HOPELESS.getThresholdInDays()).isEqualTo(90);
+            softly.assertThat(NEW.getThresholdInDays())
+                .isEqualTo(0);
+            softly.assertThat(MILD.getThresholdInDays())
+                .isEqualTo(10);
+            softly.assertThat(SEVERE.getThresholdInDays())
+                .isEqualTo(30);
+            softly.assertThat(CRITICAL.getThresholdInDays())
+                .isEqualTo(60);
+            softly.assertThat(HOPELESS.getThresholdInDays())
+                .isEqualTo(90);
         });
     }
 
     @Test
     void lessers() {
         assertSoftly(softly -> {
-            softly.assertThat(NEW.getLesser()).isEmpty();
-            softly.assertThat(MILD.getLesser()).containsOnly(NEW);
-            softly.assertThat(SEVERE.getLesser()).containsExactly(NEW, MILD);
-            softly.assertThat(CRITICAL.getLesser()).containsExactly(NEW, MILD, SEVERE);
-            softly.assertThat(HOPELESS.getLesser()).containsExactly(NEW, MILD, SEVERE, CRITICAL);
-            softly.assertThat(DEFAULTED.getLesser()).isEmpty();
+            softly.assertThat(NEW.getLesser())
+                .isEmpty();
+            softly.assertThat(MILD.getLesser())
+                .containsOnly(NEW);
+            softly.assertThat(SEVERE.getLesser())
+                .containsExactly(NEW, MILD);
+            softly.assertThat(CRITICAL.getLesser())
+                .containsExactly(NEW, MILD, SEVERE);
+            softly.assertThat(HOPELESS.getLesser())
+                .containsExactly(NEW, MILD, SEVERE, CRITICAL);
+            softly.assertThat(DEFAULTED.getLesser())
+                .isEmpty();
         });
     }
 
@@ -83,7 +96,8 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         NEW.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
-                .first().isInstanceOf(LoanNowDelinquentEvent.class);
+            .first()
+            .isInstanceOf(LoanNowDelinquentEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
     }
 
@@ -93,7 +107,8 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         MILD.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
-                .first().isInstanceOf(LoanDelinquent10DaysOrMoreEvent.class);
+            .first()
+            .isInstanceOf(LoanDelinquent10DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
     }
 
@@ -103,7 +118,8 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         SEVERE.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
-                .first().isInstanceOf(LoanDelinquent30DaysOrMoreEvent.class);
+            .first()
+            .isInstanceOf(LoanDelinquent30DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
     }
 
@@ -113,7 +129,8 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         CRITICAL.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
-                .first().isInstanceOf(LoanDelinquent60DaysOrMoreEvent.class);
+            .first()
+            .isInstanceOf(LoanDelinquent60DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
     }
 
@@ -123,7 +140,8 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         HOPELESS.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
-                .first().isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
+            .first()
+            .isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
     }
 
@@ -133,7 +151,8 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
         DEFAULTED.process(transactional, investment);
         transactional.commit();
         assertThat(getEventsRequested()).hasSize(1)
-                .first().isInstanceOf(LoanDefaultedEvent.class);
+            .first()
+            .isInstanceOf(LoanDefaultedEvent.class);
         verify(zonky).getLoan(eq(loan.getId()));
     }
 }

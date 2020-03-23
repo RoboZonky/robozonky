@@ -16,8 +16,13 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Reservation;
@@ -29,10 +34,6 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockReservationBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class ReservationWrapperTest {
 
@@ -41,58 +42,79 @@ class ReservationWrapperTest {
     @Test
     void values() {
         final Reservation l = new MockReservationBuilder()
-                .setInsuranceActive(true)
-                .setAmount(100_000)
-                .setRating(Rating.D)
-                .setInterestRate(Ratio.ONE)
-                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-                .setPurpose(Purpose.AUTO_MOTO)
-                .setRegion(Region.JIHOCESKY)
-                .setStory(UUID.randomUUID().toString())
-                .setTermInMonths(20)
-                .build();
+            .setInsuranceActive(true)
+            .setAmount(100_000)
+            .setRating(Rating.D)
+            .setInterestRate(Ratio.ONE)
+            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
+            .setPurpose(Purpose.AUTO_MOTO)
+            .setRegion(Region.JIHOCESKY)
+            .setStory(UUID.randomUUID()
+                .toString())
+            .setTermInMonths(20)
+            .build();
         final ReservationDescriptor original = new ReservationDescriptor(l, () -> null);
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.isInsuranceActive()).isEqualTo(l.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(l.getInterestRate());
-            softly.assertThat(w.getRegion()).isEqualTo(l.getRegion());
-            softly.assertThat(w.getRating()).isEqualTo(l.getRating());
-            softly.assertThat(w.getMainIncomeType()).isEqualTo(l.getMainIncomeType());
-            softly.assertThat(w.getPurpose()).isEqualTo(l.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(l.getAmount().getValue().intValue());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(BigDecimal.valueOf(w.getOriginalAmount()));
-            softly.assertThat(w.getOriginal()).isSameAs(original);
-            softly.assertThat(w.getStory()).isEqualTo(l.getStory());
-            softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(l.getTermInMonths());
-            softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(l.getTermInMonths());
-            softly.assertThat(w.toString()).isNotNull();
+            softly.assertThat(w.isInsuranceActive())
+                .isEqualTo(l.isInsuranceActive());
+            softly.assertThat(w.getInterestRate())
+                .isEqualTo(l.getInterestRate());
+            softly.assertThat(w.getRegion())
+                .isEqualTo(l.getRegion());
+            softly.assertThat(w.getRating())
+                .isEqualTo(l.getRating());
+            softly.assertThat(w.getMainIncomeType())
+                .isEqualTo(l.getMainIncomeType());
+            softly.assertThat(w.getPurpose())
+                .isEqualTo(l.getPurpose());
+            softly.assertThat(w.getOriginalAmount())
+                .isEqualTo(l.getAmount()
+                    .getValue()
+                    .intValue());
+            softly.assertThat(w.getRemainingPrincipal())
+                .isEqualTo(BigDecimal.valueOf(w.getOriginalAmount()));
+            softly.assertThat(w.getOriginal())
+                .isSameAs(original);
+            softly.assertThat(w.getStory())
+                .isEqualTo(l.getStory());
+            softly.assertThat(w.getOriginalTermInMonths())
+                .isEqualTo(l.getTermInMonths());
+            softly.assertThat(w.getRemainingTermInMonths())
+                .isEqualTo(l.getTermInMonths());
+            softly.assertThat(w.toString())
+                .isNotNull();
         });
     }
 
     @Test
     void equality() {
         final Reservation l = new MockReservationBuilder()
-                .setInsuranceActive(true)
-                .setAmount(100_000)
-                .setRating(Rating.D)
-                .setInterestRate(Ratio.ONE)
-                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-                .setPurpose(Purpose.AUTO_MOTO)
-                .setRegion(Region.JIHOCESKY)
-                .setStory(UUID.randomUUID().toString())
-                .setTermInMonths(20)
-                .build();
+            .setInsuranceActive(true)
+            .setAmount(100_000)
+            .setRating(Rating.D)
+            .setInterestRate(Ratio.ONE)
+            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
+            .setPurpose(Purpose.AUTO_MOTO)
+            .setRegion(Region.JIHOCESKY)
+            .setStory(UUID.randomUUID()
+                .toString())
+            .setTermInMonths(20)
+            .build();
         final ReservationDescriptor original = new ReservationDescriptor(l, () -> null);
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w).isEqualTo(w);
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(original, FOLIO));
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(new ReservationDescriptor(l, () -> null), FOLIO));
             softly.assertThat(w)
-                    .isNotEqualTo(
-                            Wrapper.wrap(new ReservationDescriptor(MockReservationBuilder.fresh(), () -> null), FOLIO));
-            softly.assertThat(w).isNotEqualTo(null);
+                .isEqualTo(w);
+            softly.assertThat(w)
+                .isEqualTo(Wrapper.wrap(original, FOLIO));
+            softly.assertThat(w)
+                .isEqualTo(Wrapper.wrap(new ReservationDescriptor(l, () -> null), FOLIO));
+            softly.assertThat(w)
+                .isNotEqualTo(
+                        Wrapper.wrap(new ReservationDescriptor(MockReservationBuilder.fresh(), () -> null), FOLIO));
+            softly.assertThat(w)
+                .isNotEqualTo(null);
         });
     }
 }

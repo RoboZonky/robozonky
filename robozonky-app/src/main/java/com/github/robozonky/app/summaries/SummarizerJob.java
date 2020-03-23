@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ final class SummarizerJob implements TenantJob {
          * likely to bring some strange inconsistent values.
          */
         final LocalDateTime date = DateUtil.localNow()
-                .withHour(6)
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0)
-                .with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY));
+            .withHour(6)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
+            .with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY));
         final Duration d = Duration.between(DateUtil.localNow(), date);
         return d.isNegative() ? d.plusDays(7) : d;
     }

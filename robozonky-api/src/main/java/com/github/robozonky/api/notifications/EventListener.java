@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,15 @@ import com.github.robozonky.api.SessionInfo;
  * by different threads and concurrently. If multiple listeners are somehow interconnected, synchronization between
  * them must be maintained by the listeners themselves. Users should not expect the listeners to be called immediately
  * after the event is triggered, as the listeners may be executed on low-priority background threads.
+ * 
  * @param <E> Event type to handle.
  */
 public interface EventListener<E extends Event> {
 
     /**
      * Implementation must be thread-safe.
-     * @param event Event that is being listened to.
+     * 
+     * @param event       Event that is being listened to.
      * @param sessionInfo Information about the user firing the event.
      */
     void handle(E event, SessionInfo sessionInfo);

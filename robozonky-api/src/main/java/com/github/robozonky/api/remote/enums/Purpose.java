@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ public enum Purpose implements BaseEnum {
 
     private static Optional<Purpose> maybeFindByCode(final String code) {
         return Stream.of(Purpose.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst();
+            .filter(r -> Objects.equals(r.code, code))
+            .findFirst();
     }
 
     public static Purpose findByCode(final String code) {

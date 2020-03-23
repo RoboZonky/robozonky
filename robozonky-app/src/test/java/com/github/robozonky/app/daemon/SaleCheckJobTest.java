@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Duration;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class SaleCheckJobTest extends AbstractRoboZonkyTest {
 
@@ -30,7 +31,7 @@ class SaleCheckJobTest extends AbstractRoboZonkyTest {
     void getters() {
         final TenantJob t = new SaleCheckJob();
         assertThat(t.payload()).isNotNull()
-                .isInstanceOf(SaleCheck.class);
+            .isInstanceOf(SaleCheck.class);
         assertThat(t.repeatEvery()).isEqualTo(Duration.ofHours(1));
     }
 

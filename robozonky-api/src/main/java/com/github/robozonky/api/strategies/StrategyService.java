@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public interface StrategyService {
 
     /**
      * Prepare investing strategy for being used by the app.
+     * 
      * @param strategy Investment strategy in question.
      * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */
@@ -33,6 +34,7 @@ public interface StrategyService {
 
     /**
      * Prepare selling strategy for being used by the app.
+     * 
      * @param strategy Investment strategy in question.
      * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */
@@ -40,6 +42,7 @@ public interface StrategyService {
 
     /**
      * Prepare purchasing strategy for being used by the app.
+     * 
      * @param strategy Investment strategy in question.
      * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */
@@ -48,6 +51,7 @@ public interface StrategyService {
     /**
      * Prepare investing strategy for being used by the app. The investments in this case will be coming from the
      * reservations susystem.
+     * 
      * @param strategy Investment strategy in question.
      * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */

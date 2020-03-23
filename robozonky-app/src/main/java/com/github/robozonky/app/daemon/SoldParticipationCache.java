@@ -25,14 +25,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class SoldParticipationCache {
 
@@ -47,18 +48,18 @@ final class SoldParticipationCache {
     private SoldParticipationCache(final Tenant tenant) {
         this.state = tenant.getState(SoldParticipationCache.class);
         this.listedSoldRemotely = Reloadable.with(() -> retrieveSoldParticipationIds(tenant))
-                .reloadAfter(Duration.ofMinutes(5))
-                .async() // Don't block for this.
-                .build();
+            .reloadAfter(Duration.ofMinutes(5))
+            .async() // Don't block for this.
+            .build();
     }
 
     private static Set<Integer> retrieveSoldParticipationIds(final Tenant tenant) {
         final Select s = new Select().equals("status", "SOLD");
         return tenant.call(zonky -> zonky.getInvestments(s))
-                .mapToInt(Investment::getLoanId)
-                .distinct()
-                .boxed()
-                .collect(Collectors.toSet());
+            .mapToInt(Investment::getLoanId)
+            .distinct()
+            .boxed()
+            .collect(Collectors.toSet());
     }
 
     private static SoldParticipationCache newCache(final Tenant tenant) {
@@ -78,8 +79,8 @@ final class SoldParticipationCache {
 
     public synchronized IntStream getOffered() {
         return state.getValues(KEY)
-                .orElse(Stream.empty())
-                .mapToInt(Integer::parseInt);
+            .orElse(Stream.empty())
+            .mapToInt(Integer::parseInt);
     }
 
     private synchronized void setOffered(final IntStream values) {
@@ -93,7 +94,7 @@ final class SoldParticipationCache {
     public void markAsOffered(final int loanId) {
         final IntStream existingValue = getOffered();
         final IntStream newValues = IntStream.concat(existingValue, IntStream.of(loanId))
-                .distinct();
+            .distinct();
         setOffered(newValues);
     }
 
@@ -104,9 +105,11 @@ final class SoldParticipationCache {
 
     public boolean wasOnceSold(final int loanId) {
         return listedSoldLocally.contains(loanId) ||
-                listedSoldRemotely.get().mapRight(s -> s.contains(loanId)).getOrElseGet(ex -> {
-                    LOGGER.info("Failed retrieving sold loans from Zonky.", ex);
-                    return false;
-                });
+                listedSoldRemotely.get()
+                    .mapRight(s -> s.contains(loanId))
+                    .getOrElseGet(ex -> {
+                        LOGGER.info("Failed retrieving sold loans from Zonky.", ex);
+                        return false;
+                    });
     }
 }

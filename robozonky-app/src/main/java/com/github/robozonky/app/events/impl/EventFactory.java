@@ -81,7 +81,7 @@ public final class EventFactory {
     }
 
     public static ExecutionCompletedEvent executionCompleted(final Collection<Loan> investments,
-                                                             final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new ExecutionCompletedEventImpl(investments, portfolioOverview);
     }
 
@@ -90,48 +90,48 @@ public final class EventFactory {
     }
 
     public static InvestmentMadeEvent investmentMade(final Loan loan, final Money investedAmount,
-                                                     final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new InvestmentMadeEventImpl(loan, investedAmount, portfolioOverview);
     }
 
     public static InvestmentPurchasedEvent investmentPurchased(final Participation participation, final Loan loan,
-                                                               final Money purchasedAmount,
-                                                               final PortfolioOverview portfolioOverview) {
+            final Money purchasedAmount,
+            final PortfolioOverview portfolioOverview) {
         return new InvestmentPurchasedEventImpl(participation, loan, purchasedAmount, portfolioOverview);
     }
 
     public static InvestmentSoldEvent investmentSold(final Investment investment, final Loan loan,
-                                                     final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new InvestmentSoldEventImpl(investment, loan, portfolioOverview);
     }
 
     public static LoanDefaultedEvent loanDefaulted(final Investment investment, final Loan loan,
-                                                   final LocalDate since) {
+            final LocalDate since) {
         return new LoanDefaultedEventImpl(investment, loan, since);
     }
 
     public static LoanNowDelinquentEvent loanNowDelinquent(final Investment investment, final Loan loan,
-                                                           final LocalDate since) {
+            final LocalDate since) {
         return new LoanNowDelinquentEventImpl(investment, loan, since);
     }
 
     public static LoanDelinquent10DaysOrMoreEvent loanDelinquent10plus(final Investment investment, final Loan loan,
-                                                                       final LocalDate since) {
+            final LocalDate since) {
         return new LoanDelinquent10DaysOrMoreEventImpl(investment, loan, since);
     }
 
     public static LoanDelinquent30DaysOrMoreEvent loanDelinquent30plus(final Investment investment, final Loan loan,
-                                                                       final LocalDate since) {
+            final LocalDate since) {
         return new LoanDelinquent30DaysOrMoreEventImpl(investment, loan, since);
     }
 
     public static LoanDelinquent60DaysOrMoreEvent loanDelinquent60plus(final Investment investment, final Loan loan,
-                                                                       final LocalDate since) {
+            final LocalDate since) {
         return new LoanDelinquent60DaysOrMoreEventImpl(investment, loan, since);
     }
 
     public static LoanDelinquent90DaysOrMoreEvent loanDelinquent90plus(final Investment investment, final Loan loan,
-                                                                       final LocalDate since) {
+            final LocalDate since) {
         return new LoanDelinquent90DaysOrMoreEventImpl(investment, loan, since);
     }
 
@@ -152,7 +152,7 @@ public final class EventFactory {
     }
 
     public static PurchasingCompletedEvent purchasingCompleted(final Collection<Participation> investment,
-                                                               final PortfolioOverview portfolio) {
+            final PortfolioOverview portfolio) {
         return new PurchasingCompletedEventImpl(investment, portfolio);
     }
 
@@ -168,7 +168,8 @@ public final class EventFactory {
         return new RoboZonkyDaemonSuspendedEventImpl(cause);
     }
 
-    public static RoboZonkyDaemonResumedEvent roboZonkyDaemonResumed(final OffsetDateTime since, final OffsetDateTime until) {
+    public static RoboZonkyDaemonResumedEvent roboZonkyDaemonResumed(final OffsetDateTime since,
+            final OffsetDateTime until) {
         return new RoboZonkyDaemonResumedEventImpl(since, until);
     }
 
@@ -209,7 +210,7 @@ public final class EventFactory {
     }
 
     public static SellingCompletedEvent sellingCompleted(final Collection<Investment> investments,
-                                                         final PortfolioOverview portfolio) {
+            final PortfolioOverview portfolio) {
         return new SellingCompletedEventImpl(investments, portfolio);
     }
 
@@ -222,7 +223,7 @@ public final class EventFactory {
     }
 
     public static ReservationCheckCompletedEvent reservationCheckCompleted(final Collection<Reservation> investments,
-                                                                           final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new ReservationCheckCompletedEventImpl(investments, portfolioOverview);
     }
 
@@ -232,7 +233,7 @@ public final class EventFactory {
     }
 
     public static ReservationAcceptedEvent reservationAccepted(final Loan loan, final Money investedAmount,
-                                                               final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new ReservationAcceptedEventImpl(loan, investedAmount, portfolioOverview);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * The use of this API signifies that the resource in question supports pagination as defined by the Zonky API.
+ * 
  * @param <T> The type of resource.
  */
 public interface EntityCollectionApi<T> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package com.github.robozonky.internal.remote;
 
-import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.Test;
+import static com.github.robozonky.internal.remote.PurchaseFailureType.INSUFFICIENT_BALANCE;
+import static com.github.robozonky.internal.remote.PurchaseFailureType.UNKNOWN;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
-import static com.github.robozonky.internal.remote.PurchaseFailureType.INSUFFICIENT_BALANCE;
-import static com.github.robozonky.internal.remote.PurchaseFailureType.UNKNOWN;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Test;
 
 class PurchaseResultTest {
 
@@ -34,9 +34,12 @@ class PurchaseResultTest {
     void success() {
         final PurchaseResult result = PurchaseResult.success();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.isSuccess()).isTrue();
-            softly.assertThat(result.getFailureType()).isEmpty();
-            softly.assertThat(result).isSameAs(PurchaseResult.success());
+            softly.assertThat(result.isSuccess())
+                .isTrue();
+            softly.assertThat(result.getFailureType())
+                .isEmpty();
+            softly.assertThat(result)
+                .isSameAs(PurchaseResult.success());
         });
     }
 
@@ -44,10 +47,14 @@ class PurchaseResultTest {
     void equality() {
         final PurchaseResult result = PurchaseResult.success();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result).isEqualTo(result);
-            softly.assertThat(result).isNotEqualTo(null);
-            softly.assertThat(result).isNotEqualTo(PurchaseResult.failure(mock(ClientErrorException.class)));
-            softly.assertThat(result).isNotEqualTo(InvestmentResult.success());
+            softly.assertThat(result)
+                .isEqualTo(result);
+            softly.assertThat(result)
+                .isNotEqualTo(null);
+            softly.assertThat(result)
+                .isNotEqualTo(PurchaseResult.failure(mock(ClientErrorException.class)));
+            softly.assertThat(result)
+                .isNotEqualTo(InvestmentResult.success());
         });
     }
 
@@ -60,34 +67,48 @@ class PurchaseResultTest {
     @Test
     void nullException() {
         assertThat(PurchaseResult.failure(null))
-                .matches(r -> !r.isSuccess())
-                .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == UNKNOWN);
+            .matches(r -> !r.isSuccess())
+            .matches(r -> r.getFailureType()
+                .isPresent() &&
+                    r.getFailureType()
+                        .get() == UNKNOWN);
     }
 
     @Test
     void unknownException() {
         assertThat(PurchaseResult.failure(new ClientErrorException(410)))
-                .matches(r -> !r.isSuccess())
-                .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == UNKNOWN);
+            .matches(r -> !r.isSuccess())
+            .matches(r -> r.getFailureType()
+                .isPresent() &&
+                    r.getFailureType()
+                        .get() == UNKNOWN);
     }
 
     @Test
     void noReason() {
-        final Response response = Response.status(400).build();
+        final Response response = Response.status(400)
+            .build();
         final ClientErrorException ex = new BadRequestException(response);
         assertThat(PurchaseResult.failure(ex))
-                .matches(r -> !r.isSuccess())
-                .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == UNKNOWN);
+            .matches(r -> !r.isSuccess())
+            .matches(r -> r.getFailureType()
+                .isPresent() &&
+                    r.getFailureType()
+                        .get() == UNKNOWN);
     }
 
     @Test
     void insufficientBalance() {
         final Response response = Response.status(400)
-                .entity(INSUFFICIENT_BALANCE.getReason().get())
-                .build();
+            .entity(INSUFFICIENT_BALANCE.getReason()
+                .get())
+            .build();
         final ClientErrorException ex = new BadRequestException(response);
         assertThat(PurchaseResult.failure(ex))
-                .matches(r -> !r.isSuccess())
-                .matches(r -> r.getFailureType().isPresent() && r.getFailureType().get() == INSUFFICIENT_BALANCE);
+            .matches(r -> !r.isSuccess())
+            .matches(r -> r.getFailureType()
+                .isPresent() &&
+                    r.getFailureType()
+                        .get() == INSUFFICIENT_BALANCE);
     }
 }

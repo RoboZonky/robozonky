@@ -34,8 +34,9 @@ public final class ParticipationDescriptor
     /**
      *
      * @param participation
-     * @param related Provided as a Supplier in order to allow the calling code to retrieve the (likely remote) entity
-     * on-demand.
+     * @param related       Provided as a Supplier in order to allow the calling code to retrieve the (likely remote)
+     *                      entity
+     *                      on-demand.
      */
     public ParticipationDescriptor(final Participation participation, final Supplier<Loan> related) {
         this.participation = participation;

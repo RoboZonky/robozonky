@@ -16,11 +16,16 @@
 
 package com.github.robozonky.app.tenant;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
@@ -29,10 +34,6 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class LoanCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -43,9 +44,9 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         final OffsetDateTime d = OffsetDateTime.now();
         when(mi.getTimeCreated()).thenReturn(Optional.of(d));
         final Loan loan = new MockLoanBuilder()
-                .setMyInvestment(mi)
-                .setRemainingInvestment(1_000)
-                .build();
+            .setMyInvestment(mi)
+            .setRemainingInvestment(1_000)
+            .build();
         final Zonky z = harmlessZonky();
         final Tenant t = mockTenant(z);
         final Cache<Loan> c = Cache.forLoan(t);
@@ -59,8 +60,8 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final Loan loan = new MockLoanBuilder()
-                .setRemainingInvestment(0)
-                .build();
+            .setRemainingInvestment(0)
+            .build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(loan);
@@ -81,8 +82,8 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         final Instant instant = Instant.now();
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final Loan loan = new MockLoanBuilder()
-                .setRemainingInvestment(1)
-                .build();
+            .setRemainingInvestment(1)
+            .build();
         final int loanId = loan.getId();
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(loan);
@@ -100,12 +101,13 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final int loanId = 3;
         final Zonky z = harmlessZonky();
-        doThrow(IllegalStateException.class).when(z).getLoan(eq(loanId));
+        doThrow(IllegalStateException.class).when(z)
+            .getLoan(eq(loanId));
         final Tenant t = mockTenant(z);
         final Cache<Loan> c = Cache.forLoan(t);
         assertThatThrownBy(() -> c.get(loanId))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Loan")
-                .hasMessageContaining(String.valueOf(loanId));
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Loan")
+            .hasMessageContaining(String.valueOf(loanId));
     }
 }

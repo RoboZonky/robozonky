@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.github.robozonky.app.runtime;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,13 +27,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTimeout;
+import com.github.robozonky.app.ReturnCode;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class ShutdownEnablerTest extends AbstractRoboZonkyTest {
 
@@ -40,9 +41,9 @@ class ShutdownEnablerTest extends AbstractRoboZonkyTest {
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final Future<?> f = e.submit(se::waitUntilTriggered);
         assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
-                .isInstanceOf(TimeoutException.class); // the thread is blocked
+            .isInstanceOf(TimeoutException.class); // the thread is blocked
         final Consumer<ReturnCode> c = se.get()
-                .orElseThrow(() -> new IllegalStateException("Should have returned."));
+            .orElseThrow(() -> new IllegalStateException("Should have returned."));
         c.accept(ReturnCode.OK); // this unblocks the thread
         // this should return
         assertTimeout(Duration.ofSeconds(5), (Executable) f::get);

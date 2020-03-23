@@ -16,17 +16,17 @@
 
 package com.github.robozonky.internal.extensions;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class JobServiceLoaderTest {
 
     @Test
     void defaultContents() {
         assertThat(JobServiceLoader.loadTenantJobs())
-                .hasSize(0); // state cleaner job service
+            .hasSize(0); // state cleaner job service
         assertThat(JobServiceLoader.loadSimpleJobs())
-                .isEmpty(); // no job service
+            .isEmpty(); // no job service
     }
 }

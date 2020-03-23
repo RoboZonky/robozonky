@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.app.summaries;
 
+import static org.assertj.core.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class SummarizerTest extends AbstractZonkyLeveragingTest {
 
@@ -35,9 +36,10 @@ class SummarizerTest extends AbstractZonkyLeveragingTest {
         final Summarizer summarizer = new Summarizer();
         summarizer.accept(tenant);
         assertThat(this.getEventsRequested())
-                .first()
-                .isInstanceOf(WeeklySummaryEvent.class);
-        final WeeklySummaryEvent evt = (WeeklySummaryEvent)this.getEventsRequested().get(0);
+            .first()
+            .isInstanceOf(WeeklySummaryEvent.class);
+        final WeeklySummaryEvent evt = (WeeklySummaryEvent) this.getEventsRequested()
+            .get(0);
         final ExtendedPortfolioOverview summary = evt.getPortfolioOverview();
         assertThat(summary).isNotNull();
     }

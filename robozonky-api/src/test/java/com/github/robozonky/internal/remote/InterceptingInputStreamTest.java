@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.internal.remote;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,16 +25,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.github.robozonky.internal.util.StringUtil;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.internal.util.StringUtil;
 
 class InterceptingInputStreamTest {
 
     @Test
     void standard() throws IOException {
-        final String contents = UUID.randomUUID().toString();
+        final String contents = UUID.randomUUID()
+            .toString();
         final InputStream s = new ByteArrayInputStream(contents.getBytes());
         try (final InterceptingInputStream s2 = new InterceptingInputStream(s)) {
             // first check content has been intercepted
@@ -45,14 +47,16 @@ class InterceptingInputStreamTest {
     @Test
     void tooLong() throws IOException {
         final int maxLength = 1024;
-        final int uuidLength = UUID.randomUUID().toString().length();
+        final int uuidLength = UUID.randomUUID()
+            .toString()
+            .length();
         final String contents = IntStream.range(0, (maxLength / uuidLength) + 2)
-                .mapToObj(i -> UUID.randomUUID().toString())
-                .collect(Collectors.joining());
+            .mapToObj(i -> UUID.randomUUID()
+                .toString())
+            .collect(Collectors.joining());
         final InputStream s = new ByteArrayInputStream(contents.getBytes());
         try (final InterceptingInputStream s2 = new InterceptingInputStream(s)) {
             assertThat(s2.getContents()).endsWith("...more...");
         }
     }
 }
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.github.robozonky.app.summaries;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.jobs.TenantJob;
-import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.jobs.TenantJob;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 
 class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
 
@@ -36,17 +37,20 @@ class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
     @Test
     void basics() {
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(summarizer.payload()).isInstanceOf(Summarizer.class);
-            softly.assertThat(summarizer.killIn()).isGreaterThanOrEqualTo(Duration.ofHours(1));
-            softly.assertThat(summarizer.repeatEvery()).isEqualTo(Duration.ofDays(7));
+            softly.assertThat(summarizer.payload())
+                .isInstanceOf(Summarizer.class);
+            softly.assertThat(summarizer.killIn())
+                .isGreaterThanOrEqualTo(Duration.ofHours(1));
+            softly.assertThat(summarizer.repeatEvery())
+                .isEqualTo(Duration.ofDays(7));
         });
     }
 
     @Test
     void beforeTuesday6am() {
         final Instant tuesdayEarlyMorning = LocalDateTime.of(2019, 1, 1, 5, 0)
-                .atZone(Defaults.ZONE_ID)
-                .toInstant();
+            .atZone(Defaults.ZONE_ID)
+            .toInstant();
         setClock(Clock.fixed(tuesdayEarlyMorning, Defaults.ZONE_ID));
         final Duration untilTuesday6am = summarizer.startIn();
         assertThat(untilTuesday6am).isEqualTo(Duration.ofHours(1));
@@ -55,10 +59,11 @@ class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
     @Test
     void afterTuesday6am() {
         final Instant tuesdayLaterMorning = LocalDateTime.of(2019, 1, 1, 7, 0)
-                .atZone(Defaults.ZONE_ID)
-                .toInstant();
+            .atZone(Defaults.ZONE_ID)
+            .toInstant();
         setClock(Clock.fixed(tuesdayLaterMorning, Defaults.ZONE_ID));
         final Duration untilNextTuesday6am = summarizer.startIn();
-        assertThat(untilNextTuesday6am).isEqualTo(Duration.ofDays(7).minusHours(1));
+        assertThat(untilNextTuesday6am).isEqualTo(Duration.ofDays(7)
+            .minusHours(1));
     }
 }

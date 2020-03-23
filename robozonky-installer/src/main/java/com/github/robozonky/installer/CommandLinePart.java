@@ -76,12 +76,16 @@ public class CommandLinePart {
     }
 
     private Collection<String> getOptionItems() {
-        return options.entrySet().stream()
-                .flatMap(e -> {
-                    final Stream<String> key = Stream.of(e.getKey());
-                    final Stream<String> values = e.getValue().stream().map(v -> "\"" + v + "\"");
-                    return Stream.concat(key, values);
-                }).collect(Collectors.toList());
+        return options.entrySet()
+            .stream()
+            .flatMap(e -> {
+                final Stream<String> key = Stream.of(e.getKey());
+                final Stream<String> values = e.getValue()
+                    .stream()
+                    .map(v -> "\"" + v + "\"");
+                return Stream.concat(key, values);
+            })
+            .collect(Collectors.toList());
     }
 
     public String convertOptions() {

@@ -16,16 +16,17 @@
 
 package com.github.robozonky.app.tenant;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
 
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class StrategyProviderTest extends AbstractRoboZonkyTest {
 
@@ -50,17 +51,26 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
         final StrategyProvider r = new StrategyProvider();
         r.newValue(MINIMAL_STRATEGY); // store correct strategy
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
-            softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isPresent();
+            softly.assertThat(r.getToInvest())
+                .isPresent();
+            softly.assertThat(r.getToSell())
+                .isPresent();
+            softly.assertThat(r.getToPurchase())
+                .isPresent();
+            softly.assertThat(r.getForReservations())
+                .isPresent();
         });
-        r.newValue(UUID.randomUUID().toString()); // store invalid strategy
+        r.newValue(UUID.randomUUID()
+            .toString()); // store invalid strategy
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isEmpty();
-            softly.assertThat(r.getToSell()).isEmpty();
-            softly.assertThat(r.getToPurchase()).isEmpty();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getToInvest())
+                .isEmpty();
+            softly.assertThat(r.getToSell())
+                .isEmpty();
+            softly.assertThat(r.getToPurchase())
+                .isEmpty();
+            softly.assertThat(r.getForReservations())
+                .isEmpty();
         });
     }
 
@@ -69,17 +79,25 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
         final StrategyProvider r = new StrategyProvider();
         r.newValue(MINIMAL_STRATEGY); // store correct strategy
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
-            softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isPresent();
+            softly.assertThat(r.getToInvest())
+                .isPresent();
+            softly.assertThat(r.getToSell())
+                .isPresent();
+            softly.assertThat(r.getToPurchase())
+                .isPresent();
+            softly.assertThat(r.getForReservations())
+                .isPresent();
         });
         r.valueUnset();
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isEmpty();
-            softly.assertThat(r.getToSell()).isEmpty();
-            softly.assertThat(r.getToPurchase()).isEmpty();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getToInvest())
+                .isEmpty();
+            softly.assertThat(r.getToSell())
+                .isEmpty();
+            softly.assertThat(r.getToPurchase())
+                .isEmpty();
+            softly.assertThat(r.getForReservations())
+                .isEmpty();
         });
     }
 
@@ -87,10 +105,14 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     void loadStrategyAsFile() throws IOException {
         final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
-            softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isPresent();
+            softly.assertThat(r.getToInvest())
+                .isPresent();
+            softly.assertThat(r.getToSell())
+                .isPresent();
+            softly.assertThat(r.getToPurchase())
+                .isPresent();
+            softly.assertThat(r.getForReservations())
+                .isPresent();
         });
     }
 
@@ -99,10 +121,14 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
         final File tmp = File.createTempFile("robozonky-", ".cfg");
         final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isEmpty();
-            softly.assertThat(r.getToSell()).isEmpty();
-            softly.assertThat(r.getToPurchase()).isEmpty();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getToInvest())
+                .isEmpty();
+            softly.assertThat(r.getToSell())
+                .isEmpty();
+            softly.assertThat(r.getToPurchase())
+                .isEmpty();
+            softly.assertThat(r.getForReservations())
+                .isEmpty();
         });
     }
 
@@ -112,22 +138,32 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
         tmp.delete();
         final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isEmpty();
-            softly.assertThat(r.getToSell()).isEmpty();
-            softly.assertThat(r.getToPurchase()).isEmpty();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getToInvest())
+                .isEmpty();
+            softly.assertThat(r.getToSell())
+                .isEmpty();
+            softly.assertThat(r.getToPurchase())
+                .isEmpty();
+            softly.assertThat(r.getForReservations())
+                .isEmpty();
         });
     }
 
     @Test
     void loadStrategyAsUrl() throws IOException {
-        final String url = newStrategyFile().toURI().toURL().toString();
+        final String url = newStrategyFile().toURI()
+            .toURL()
+            .toString();
         final StrategyProvider r = StrategyProvider.createFor(url);
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
-            softly.assertThat(r.getToPurchase()).isPresent();
-            softly.assertThat(r.getForReservations()).isPresent();
+            softly.assertThat(r.getToInvest())
+                .isPresent();
+            softly.assertThat(r.getToSell())
+                .isPresent();
+            softly.assertThat(r.getToPurchase())
+                .isPresent();
+            softly.assertThat(r.getForReservations())
+                .isPresent();
         });
     }
 
@@ -135,10 +171,14 @@ class StrategyProviderTest extends AbstractRoboZonkyTest {
     void empty() {
         final StrategyProvider r = StrategyProvider.empty();
         assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isEmpty();
-            softly.assertThat(r.getToPurchase()).isEmpty();
-            softly.assertThat(r.getToSell()).isEmpty();
-            softly.assertThat(r.getForReservations()).isEmpty();
+            softly.assertThat(r.getToInvest())
+                .isEmpty();
+            softly.assertThat(r.getToPurchase())
+                .isEmpty();
+            softly.assertThat(r.getToSell())
+                .isEmpty();
+            softly.assertThat(r.getForReservations())
+                .isEmpty();
         });
     }
 }

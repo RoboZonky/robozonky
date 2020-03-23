@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package com.github.robozonky.strategy.natural.conditions;
  * Note: this class has a natural ordering that is inconsistent with equals.
  */
 abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondition,
-                                                         Comparable<MarketplaceFilterConditionImpl> {
+        Comparable<MarketplaceFilterConditionImpl> {
 
     private final boolean mayRequireRemoteRequests;
 
@@ -40,7 +40,8 @@ abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondit
     @Override
     public String toString() {
         final String description = getDescription().orElse("N/A.");
-        return this.getClass().getSimpleName() + " (" + description + ")";
+        return this.getClass()
+            .getSimpleName() + " (" + description + ")";
     }
 
     @Override

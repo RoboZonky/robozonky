@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ class RatioAdapter extends XmlAdapter<String, Ratio> {
 
     @Override
     public String marshal(final Ratio rate) {
-        return rate.bigDecimalValue().toPlainString();
+        return rate.bigDecimalValue()
+            .toPlainString();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package com.github.robozonky.test.mock;
 
+import static org.mockito.Mockito.*;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
@@ -24,13 +30,8 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Optional;
-
-import static org.mockito.Mockito.when;
-
-abstract class BaseLoanMockBuilder<T extends BaseLoan, S extends BaseLoanMockBuilder<T, S>> extends BaseMockBuilder<T, S> {
+abstract class BaseLoanMockBuilder<T extends BaseLoan, S extends BaseLoanMockBuilder<T, S>>
+        extends BaseMockBuilder<T, S> {
 
     protected BaseLoanMockBuilder(Class<T> clz) {
         super(clz);

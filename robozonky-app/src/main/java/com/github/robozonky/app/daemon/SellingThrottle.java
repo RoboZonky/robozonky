@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,22 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
-import org.apache.logging.log4j.Logger;
-
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The goal of this class is to only sell investments in small amounts, so that the entire {@link PortfolioOverview} is
@@ -49,20 +54,26 @@ final class SellingThrottle
     private static final Ratio MAX_SELLOFF_SHARE_PER_RATING = Ratio.fromPercentage(0.5);
 
     private static Stream<RecommendedInvestment> determineSelloffByRating(final Set<RecommendedInvestment> eligible,
-                                                                          final Money maxSelloffSize) {
+            final Money maxSelloffSize) {
         if (eligible.isEmpty()) {
             LOGGER.debug("No investments eligible.");
             return Stream.empty();
         }
         Money czkIncluded = maxSelloffSize.getZero();
         final List<RecommendedInvestment> byAmountIncreasing = eligible.stream()
-                .sorted(Comparator.comparing(d -> d.descriptor().item().getRemainingPrincipal().orElseThrow()))
-                .collect(Collectors.toList());
+            .sorted(Comparator.comparing(d -> d.descriptor()
+                .item()
+                .getRemainingPrincipal()
+                .orElseThrow()))
+            .collect(Collectors.toList());
         LOGGER.trace("Eligible investments: {}.", byAmountIncreasing);
         final Set<RecommendedInvestment> included = new HashSet<>();
         // find all the investments that can be sold without reaching over the limit, start with the smallest first
         for (final RecommendedInvestment evaluating : byAmountIncreasing) {
-            final Money value = evaluating.descriptor().item().getRemainingPrincipal().orElseThrow();
+            final Money value = evaluating.descriptor()
+                .item()
+                .getRemainingPrincipal()
+                .orElseThrow();
             final Money ifIncluded = czkIncluded.add(value);
             if (ifIncluded.compareTo(maxSelloffSize) > 0) {
                 continue;
@@ -91,15 +102,18 @@ final class SellingThrottle
 
     @Override
     public Stream<RecommendedInvestment> apply(final Stream<RecommendedInvestment> investmentDescriptors,
-                                               final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         final Map<Rating, Set<RecommendedInvestment>> eligible = investmentDescriptors
-                .collect(Collectors.groupingBy(t -> t.descriptor().item().getRating(), Collectors.toSet()));
+            .collect(Collectors.groupingBy(t -> t.descriptor()
+                .item()
+                .getRating(), Collectors.toSet()));
         final Money maxSeloffValue = getMaxSelloffValue(portfolioOverview);
-        return eligible.entrySet().stream()
-                .flatMap(e -> {
-                    final Rating r = e.getKey();
-                    LOGGER.debug("Processing {} investments.", r);
-                    return determineSelloffByRating(e.getValue(), maxSeloffValue);
-                });
+        return eligible.entrySet()
+            .stream()
+            .flatMap(e -> {
+                final Rating r = e.getKey();
+                LOGGER.debug("Processing {} investments.", r);
+                return determineSelloffByRating(e.getValue(), maxSeloffValue);
+            });
     }
 }

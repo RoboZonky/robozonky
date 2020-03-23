@@ -33,13 +33,13 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
     private final AtomicReference<CompletableFuture<Void>> future = new AtomicReference<>();
 
     public AsyncReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                               final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
+            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
         super(supplier, reloader, runWhenReloaded, listeners);
     }
 
     public AsyncReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                               final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
-                               final Function<T, Duration> reloadAfter) {
+            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
+            final Function<T, Duration> reloadAfter) {
         super(supplier, reloader, runWhenReloaded, listeners, reloadAfter);
     }
 

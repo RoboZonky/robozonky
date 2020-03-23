@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.app;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class ShutdownHookTest extends AbstractRoboZonkyTest {
 
@@ -43,14 +44,15 @@ class ShutdownHookTest extends AbstractRoboZonkyTest {
     @Test
     void exceptionHandlingOnRegistration() {
         final ShutdownHook.Handler h = mock(ShutdownHook.Handler.class);
-        doThrow(new IllegalStateException("Testing exception")).when(h).get();
+        doThrow(new IllegalStateException("Testing exception")).when(h)
+            .get();
         assertThat(new ShutdownHook().register(h)).isFalse();
     }
 
     @Test
     void nullHandler() {
         assertThatThrownBy(() -> new ShutdownHook().register(null))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

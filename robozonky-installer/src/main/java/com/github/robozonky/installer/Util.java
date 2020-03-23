@@ -26,11 +26,12 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.FileUtil;
 import com.izforge.izpack.api.data.InstallData;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class Util {
 
@@ -41,7 +42,8 @@ final class Util {
     }
 
     private static String toBoolean(final String string) {
-        return Boolean.valueOf(string).toString();
+        return Boolean.valueOf(string)
+            .toString();
     }
 
     private static String toInt(final String string) {
@@ -94,47 +96,52 @@ final class Util {
     }
 
     public static void copyFile(final File from, final File to) throws IOException {
-        final Path f = from.getAbsoluteFile().toPath();
-        final Path t = to.getAbsoluteFile().toPath();
+        final Path f = from.getAbsoluteFile()
+            .toPath();
+        final Path t = to.getAbsoluteFile()
+            .toPath();
         LOGGER.debug("Copying {} to {}", f, t);
         Files.copy(f, t, StandardCopyOption.REPLACE_EXISTING);
         FileUtil.configurePermissions(to, false);
     }
 
     public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
-        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[0])));
+        source.getOptions()
+            .forEach((k, v) -> target.setOption(k, v.toArray(new String[0])));
     }
 
     static void processCommandLine(final CommandLinePart commandLine, final Properties settings,
-                                   final CommandLinePart... parts) {
+            final CommandLinePart... parts) {
         Stream.of(parts)
-                .map(CommandLinePart::getProperties)
-                .flatMap(p -> p.entrySet().stream())
-                .peek(e -> LOGGER.trace("Processing property {}.", e))
-                .filter(e -> Objects.nonNull(e.getValue())) // prevent NPEs coming from evil code
-                .forEach(e -> {
-                    final String key = e.getKey();
-                    final String value = e.getValue();
-                    if (key.startsWith("robozonky")) { // RoboZonky settings to be written to a separate file
-                        LOGGER.debug("Storing property {}.", e);
-                        settings.setProperty(key, value);
-                    } else { // general Java system property to end up on the command line
-                        LOGGER.debug("Setting property {}.", e);
-                        commandLine.setProperty(key, value);
-                    }
-                });
+            .map(CommandLinePart::getProperties)
+            .flatMap(p -> p.entrySet()
+                .stream())
+            .peek(e -> LOGGER.trace("Processing property {}.", e))
+            .filter(e -> Objects.nonNull(e.getValue())) // prevent NPEs coming from evil code
+            .forEach(e -> {
+                final String key = e.getKey();
+                final String value = e.getValue();
+                if (key.startsWith("robozonky")) { // RoboZonky settings to be written to a separate file
+                    LOGGER.debug("Storing property {}.", e);
+                    settings.setProperty(key, value);
+                } else { // general Java system property to end up on the command line
+                    LOGGER.debug("Setting property {}.", e);
+                    commandLine.setProperty(key, value);
+                }
+            });
         Stream.of(parts)
-                .map(CommandLinePart::getJvmArguments)
-                .flatMap(p -> p.entrySet().stream())
-                .peek(e -> LOGGER.trace("Processing JVM argument {}.", e))
-                .forEach(e -> {
-                    final String key = e.getKey();
-                    final Optional<String> value = e.getValue();
-                    if (value.isPresent()) {
-                        commandLine.setJvmArgument(key, value.get());
-                    } else {
-                        commandLine.setJvmArgument(key);
-                    }
-                });
+            .map(CommandLinePart::getJvmArguments)
+            .flatMap(p -> p.entrySet()
+                .stream())
+            .peek(e -> LOGGER.trace("Processing JVM argument {}.", e))
+            .forEach(e -> {
+                final String key = e.getKey();
+                final Optional<String> value = e.getValue();
+                if (value.isPresent()) {
+                    commandLine.setJvmArgument(key, value.get());
+                } else {
+                    commandLine.setJvmArgument(key);
+                }
+            });
     }
 }

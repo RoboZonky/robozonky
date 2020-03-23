@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,38 @@
 
 package com.github.robozonky.app.tenant;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class QuotaMonitorTest extends AbstractRoboZonkyTest {
 
     private final ApiProvider api = new ApiProvider();
-    private final RequestCounter counter = api.getRequestCounter().orElseThrow();
+    private final RequestCounter counter = api.getRequestCounter()
+        .orElseThrow();
     private final QuotaMonitor monitor = new QuotaMonitor(counter);
 
     @Test
     void emptyAtStart() {
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold75PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold90PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
     }
 
@@ -49,10 +55,14 @@ class QuotaMonitorTest extends AbstractRoboZonkyTest {
     void runsWhenEmpty() {
         add(0);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold75PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold90PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
     }
 
@@ -76,17 +86,25 @@ class QuotaMonitorTest extends AbstractRoboZonkyTest {
     void reaches50() {
         add(1500);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold75PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold90PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
         add(-1);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold75PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold90PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
     }
 
@@ -94,17 +112,25 @@ class QuotaMonitorTest extends AbstractRoboZonkyTest {
     void reaches75() {
         add(2250);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold75PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold90PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
         add(-1);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold75PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold90PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
     }
 
@@ -112,17 +138,25 @@ class QuotaMonitorTest extends AbstractRoboZonkyTest {
     void reaches90() {
         add(2700);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold75PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold90PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
         add(-1);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold75PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold90PercentReached()).isFalse();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isFalse();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
     }
 
@@ -130,24 +164,33 @@ class QuotaMonitorTest extends AbstractRoboZonkyTest {
     void reaches99() {
         add(2970);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold75PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold90PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold99PercentReached()).isTrue();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isTrue();
         });
         add(-1);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(monitor.threshold50PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold75PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold90PercentReached()).isTrue();
-            softly.assertThat(monitor.threshold99PercentReached()).isFalse();
+            softly.assertThat(monitor.threshold50PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold75PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold90PercentReached())
+                .isTrue();
+            softly.assertThat(monitor.threshold99PercentReached())
+                .isFalse();
         });
     }
 
     @Test
     void preventMemoryLeaks() {
         add(10);
-        setClock(Clock.fixed(Instant.now().plus(Duration.ofDays(1)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(Instant.now()
+            .plus(Duration.ofDays(1)), Defaults.ZONE_ID));
         add(1);
         assertThat(counter.count()).isEqualTo(1);
     }

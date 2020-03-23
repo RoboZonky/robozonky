@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Ratio;
@@ -82,6 +83,7 @@ public class Statistics extends BaseEntity {
 
     /**
      * Zonky only recalculates the information within this class every N hours.
+     * 
      * @return This method returns the timestamp of the last recalculation.
      */
     @XmlElement
@@ -92,9 +94,9 @@ public class Statistics extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", Statistics.class.getSimpleName() + "[", "]")
-                .add("profitability=" + profitability)
-                .add("riskPortfolio=" + riskPortfolio)
-                .add("timestamp=" + timestamp)
-                .toString();
+            .add("profitability=" + profitability)
+            .add("riskPortfolio=" + riskPortfolio)
+            .add("timestamp=" + timestamp)
+            .toString();
     }
 }

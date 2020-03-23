@@ -16,6 +16,9 @@
 
 package com.github.robozonky.api;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Currency;
@@ -23,11 +26,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import com.github.robozonky.internal.Defaults;
 
 class MoneyTest {
 
@@ -35,10 +36,14 @@ class MoneyTest {
     void fromStringRoundedDownToZero() {
         Money money = Money.from("0.001");
         assertSoftly(softly -> {
-            softly.assertThat(money.getCurrency()).isEqualTo(Defaults.CURRENCY);
-            softly.assertThat(money.getValue()).isEqualTo(BigDecimal.ZERO);
-            softly.assertThat(money.isZero()).isTrue();
-            softly.assertThat(money.getZero()).isSameAs(money);
+            softly.assertThat(money.getCurrency())
+                .isEqualTo(Defaults.CURRENCY);
+            softly.assertThat(money.getValue())
+                .isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(money.isZero())
+                .isTrue();
+            softly.assertThat(money.getZero())
+                .isSameAs(money);
         });
     }
 
@@ -46,10 +51,14 @@ class MoneyTest {
     void fromString() {
         Money money = Money.from("0.005");
         assertSoftly(softly -> {
-            softly.assertThat(money.getValue()).isEqualTo(new BigDecimal("0.01"));
-            softly.assertThat(money.getCurrency()).isEqualTo(Defaults.CURRENCY);
-            softly.assertThat(money.isZero()).isFalse();
-            softly.assertThat(money.getZero()).isNotEqualTo(money);
+            softly.assertThat(money.getValue())
+                .isEqualTo(new BigDecimal("0.01"));
+            softly.assertThat(money.getCurrency())
+                .isEqualTo(Defaults.CURRENCY);
+            softly.assertThat(money.isZero())
+                .isFalse();
+            softly.assertThat(money.getZero())
+                .isNotEqualTo(money);
         });
     }
 
@@ -57,10 +66,14 @@ class MoneyTest {
     void fromDouble() {
         Money money = Money.from(0.005);
         assertSoftly(softly -> {
-            softly.assertThat(money.getValue()).isEqualTo(new BigDecimal("0.01"));
-            softly.assertThat(money.getCurrency()).isEqualTo(Defaults.CURRENCY);
-            softly.assertThat(money.isZero()).isFalse();
-            softly.assertThat(money.getZero()).isNotEqualTo(money);
+            softly.assertThat(money.getValue())
+                .isEqualTo(new BigDecimal("0.01"));
+            softly.assertThat(money.getCurrency())
+                .isEqualTo(Defaults.CURRENCY);
+            softly.assertThat(money.isZero())
+                .isFalse();
+            softly.assertThat(money.getZero())
+                .isNotEqualTo(money);
         });
     }
 
@@ -70,8 +83,10 @@ class MoneyTest {
         Money defaultZero2 = defaultZero.getZero();
         Money defaultZero3 = Money.getZero(Defaults.CURRENCY);
         assertSoftly(softly -> {
-            softly.assertThat(defaultZero2).isSameAs(defaultZero);
-            softly.assertThat(defaultZero3).isSameAs(defaultZero);
+            softly.assertThat(defaultZero2)
+                .isSameAs(defaultZero);
+            softly.assertThat(defaultZero3)
+                .isSameAs(defaultZero);
         });
     }
 
@@ -81,13 +96,21 @@ class MoneyTest {
         Money second = Money.from(1, Defaults.CURRENCY);
         Money third = Money.from(2, Defaults.CURRENCY);
         assertSoftly(softly -> {
-            softly.assertThat(first).isEqualTo(first);
-            softly.assertThat(first).isEqualTo(second);
-            softly.assertThat(second).isEqualTo(first);
-            softly.assertThat(first).isNotEqualTo(third);
-            softly.assertThat(third).isNotEqualTo(first);
-            softly.assertThat(first).isNotEqualTo(null);
-            softly.assertThat(first).isNotEqualTo(UUID.randomUUID().toString());
+            softly.assertThat(first)
+                .isEqualTo(first);
+            softly.assertThat(first)
+                .isEqualTo(second);
+            softly.assertThat(second)
+                .isEqualTo(first);
+            softly.assertThat(first)
+                .isNotEqualTo(third);
+            softly.assertThat(third)
+                .isNotEqualTo(first);
+            softly.assertThat(first)
+                .isNotEqualTo(null);
+            softly.assertThat(first)
+                .isNotEqualTo(UUID.randomUUID()
+                    .toString());
         });
     }
 
@@ -97,8 +120,10 @@ class MoneyTest {
         Money second = Money.from(1, Currency.getInstance("USD"));
         Money third = Money.from(0, Currency.getInstance("USD"));
         assertSoftly(softly -> {
-            softly.assertThat(first).isNotEqualTo(second);
-            softly.assertThat(first).isEqualTo(third);
+            softly.assertThat(first)
+                .isNotEqualTo(second);
+            softly.assertThat(first)
+                .isEqualTo(third);
         });
     }
 
@@ -113,9 +138,14 @@ class MoneyTest {
         money.add(second);
         money.add(first);
         assertSoftly(softly -> {
-            softly.assertThat(money).hasSize(3);
-            softly.assertThat(money).first().isSameAs(first);
-            softly.assertThat(money).last().isSameAs(third);
+            softly.assertThat(money)
+                .hasSize(3);
+            softly.assertThat(money)
+                .first()
+                .isSameAs(first);
+            softly.assertThat(money)
+                .last()
+                .isSameAs(third);
         });
     }
 
@@ -125,8 +155,10 @@ class MoneyTest {
         Money second = Money.from(0, Currency.getInstance("USD"));
         Money third = Money.from(1, Currency.getInstance("USD"));
         assertSoftly(softly -> {
-            softly.assertThat(first).isEqualByComparingTo(second);
-            softly.assertThatThrownBy(() -> first.compareTo(third)).isInstanceOf(IllegalArgumentException.class);
+            softly.assertThat(first)
+                .isEqualByComparingTo(second);
+            softly.assertThatThrownBy(() -> first.compareTo(third))
+                .isInstanceOf(IllegalArgumentException.class);
         });
     }
 
@@ -135,17 +167,22 @@ class MoneyTest {
         Money smaller = Money.from(0);
         Money larger = Money.from(1);
         assertSoftly(softly -> {
-            softly.assertThat(smaller.min(larger)).isSameAs(smaller);
-            softly.assertThat(smaller.min(smaller)).isSameAs(smaller);
-            softly.assertThat(larger.min(smaller)).isSameAs(smaller);
+            softly.assertThat(smaller.min(larger))
+                .isSameAs(smaller);
+            softly.assertThat(smaller.min(smaller))
+                .isSameAs(smaller);
+            softly.assertThat(larger.min(smaller))
+                .isSameAs(smaller);
         });
     }
 
     @Test
     void minMaxWhenZero() {
         assertSoftly(softly -> {
-            softly.assertThat(Money.ZERO.min(Money.ZERO)).isSameAs(Money.ZERO);
-            softly.assertThat(Money.ZERO.max(Money.ZERO)).isSameAs(Money.ZERO);
+            softly.assertThat(Money.ZERO.min(Money.ZERO))
+                .isSameAs(Money.ZERO);
+            softly.assertThat(Money.ZERO.max(Money.ZERO))
+                .isSameAs(Money.ZERO);
         });
     }
 
@@ -154,39 +191,42 @@ class MoneyTest {
         Money smaller = Money.from(0);
         Money larger = Money.from(1);
         assertSoftly(softly -> {
-            softly.assertThat(smaller.max(larger)).isSameAs(larger);
-            softly.assertThat(smaller.max(smaller)).isSameAs(smaller);
-            softly.assertThat(larger.max(smaller)).isSameAs(larger);
+            softly.assertThat(smaller.max(larger))
+                .isSameAs(larger);
+            softly.assertThat(smaller.max(smaller))
+                .isSameAs(smaller);
+            softly.assertThat(larger.max(smaller))
+                .isSameAs(larger);
         });
     }
 
     @Test
     void mathLong() {
         Money result = Money.from(0)
-                .add(2)
-                .subtract(1)
-                .multiplyBy(10)
-                .divideBy(3);
+            .add(2)
+            .subtract(1)
+            .multiplyBy(10)
+            .divideBy(3);
         assertThat(result).isEqualTo(Money.from(3.33));
     }
 
     @Test
     void mathDouble() {
         Money result = Money.from(1.4)
-                .add(2.6)
-                .subtract(1.5)
-                .multiplyBy(2)
-                .divideBy(4);
+            .add(2.6)
+            .subtract(1.5)
+            .multiplyBy(2)
+            .divideBy(4);
         assertThat(result).isEqualTo(Money.from(1.25));
     }
 
     @Test
     void mathBigDecimal() {
         Money result = Money.from(BigDecimal.ONE)
-                .add(BigDecimal.TEN)
-                .subtract(BigDecimal.ONE)
-                .multiplyBy(BigDecimal.TEN)
-                .divideBy(BigDecimal.TEN);
+            .add(BigDecimal.TEN)
+            .subtract(BigDecimal.ONE)
+            .multiplyBy(BigDecimal.TEN)
+            .divideBy(BigDecimal.TEN);
         assertThat(result).isEqualTo(Money.from(BigDecimal.TEN));
     }
 

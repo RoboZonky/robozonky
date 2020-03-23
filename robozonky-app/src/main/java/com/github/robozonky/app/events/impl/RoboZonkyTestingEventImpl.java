@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ final class RoboZonkyTestingEventImpl extends AbstractEventImpl implements RoboZ
     @Override
     public String toString() {
         return new StringJoiner(", ", RoboZonkyTestingEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .toString();
+            .add("super=" + super.toString())
+            .toString();
     }
 }

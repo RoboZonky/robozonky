@@ -16,12 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -35,33 +40,30 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void eliminatesUselessLoans() {
         final Loan alreadyInvested = new MockLoanBuilder()
-                .setRating(Rating.B)
-                .setNonReservedRemainingInvestment(1)
-                .setMyInvestment(mock(MyInvestment.class))
-                .build();
+            .setRating(Rating.B)
+            .setNonReservedRemainingInvestment(1)
+            .setMyInvestment(mock(MyInvestment.class))
+            .build();
         final Loan normal = new MockLoanBuilder()
-                .setRating(Rating.A)
-                .setNonReservedRemainingInvestment(1)
-                .build();
+            .setRating(Rating.A)
+            .setNonReservedRemainingInvestment(1)
+            .build();
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableLoans(any())).thenReturn(Stream.of(alreadyInvested, normal));
         final Tenant tenant = mockTenant(zonky);
-        final AbstractMarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant, UnaryOperator.identity());
+        final AbstractMarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant,
+                UnaryOperator.identity());
         final Collection<LoanDescriptor> ld = d.getMarketplace();
         assertThat(ld).hasSize(1)
-                .element(0)
-                .extracting(LoanDescriptor::item)
-                .isSameAs(normal);
+            .element(0)
+            .extracting(LoanDescriptor::item)
+            .isSameAs(normal);
     }
 
     @Test
@@ -95,13 +97,14 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));
         Select anotherFull = a.getIncrementalFilter();
         assertThat(anotherFull)
-                .isNotNull()
-                .isNotEqualTo(initial);
-        DateUtil.setSystemClock(Clock.fixed(Instant.now().plusSeconds(1), Defaults.ZONE_ID));
+            .isNotNull()
+            .isNotEqualTo(initial);
+        DateUtil.setSystemClock(Clock.fixed(Instant.now()
+            .plusSeconds(1), Defaults.ZONE_ID));
         Select incremental = a.getIncrementalFilter();
         assertThat(incremental)
-                .isNotNull()
-                .isNotEqualTo(initial);
+            .isNotNull()
+            .isNotEqualTo(initial);
     }
 
 }

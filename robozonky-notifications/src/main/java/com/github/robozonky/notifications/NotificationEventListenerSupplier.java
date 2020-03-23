@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,20 @@
 
 package com.github.robozonky.notifications;
 
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.EventListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListener;
 
 final class NotificationEventListenerSupplier<T extends Event> implements Function<Target, EventListener<T>> {
 
@@ -48,7 +53,8 @@ final class NotificationEventListenerSupplier<T extends Event> implements Functi
     }
 
     public EventListener<T> apply(final Target target) {
-        return value.get().get(target);
+        return value.get()
+            .get(target);
     }
 
     public void configure(final ConfigStorage newConfig) {
@@ -74,13 +80,14 @@ final class NotificationEventListenerSupplier<T extends Event> implements Functi
     private Optional<EventListener<T>> findListener(final AbstractTargetHandler handler) {
         LOGGER.trace("Processing {}.", handler);
         final EventListener<T> result = Stream.of(SupportedListener.values())
-                .filter(l -> eventType.isAssignableFrom(l.getSampleEvent().getClass()))
-                .peek(l -> LOGGER.trace("Found listener: {}.", l))
-                .filter(handler::isEnabled)
-                .peek(l -> LOGGER.debug("{} notification enabled for '{}'.", l, handler.getTarget()))
-                .findFirst()
-                .map(l -> (EventListener<T>) l.getListener(handler))
-                .orElse(null);
+            .filter(l -> eventType.isAssignableFrom(l.getSampleEvent()
+                .getClass()))
+            .peek(l -> LOGGER.trace("Found listener: {}.", l))
+            .filter(handler::isEnabled)
+            .peek(l -> LOGGER.debug("{} notification enabled for '{}'.", l, handler.getTarget()))
+            .findFirst()
+            .map(l -> (EventListener<T>) l.getListener(handler))
+            .orElse(null);
         return Optional.ofNullable(result);
     }
 

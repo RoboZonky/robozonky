@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 /**
  * Allows to filter Zonky API requests based on the values of individual fields.
+ * 
  * @see <a href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Zonky API docs.</a>
  */
 public class Select implements Consumer<RoboZonkyFilter> {
@@ -44,8 +45,9 @@ public class Select implements Consumer<RoboZonkyFilter> {
     private void addObjects(final String field, final String operation, final Object... value) {
         final String key = field + "__" + operation;
         conditions.compute(key, (k, v) -> {
-            final String val = Stream.of(value).map(Object::toString)
-                    .collect(Collectors.joining("\",\"", "[\"", "\"]"));
+            final String val = Stream.of(value)
+                .map(Object::toString)
+                .collect(Collectors.joining("\",\"", "[\"", "\"]"));
             final List<Object> result = (v == null) ? new ArrayList<>(1) : v;
             result.add(val);
             return result;
@@ -55,8 +57,9 @@ public class Select implements Consumer<RoboZonkyFilter> {
     private void addLongs(final String field, final String operation, final long... value) {
         final String key = operation == null ? field : field + "__" + operation;
         conditions.compute(key, (k, v) -> {
-            final String val = LongStream.of(value).mapToObj(String::valueOf)
-                    .collect(Collectors.joining("\",\"", "[\"", "\"]"));
+            final String val = LongStream.of(value)
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining("\",\"", "[\"", "\"]"));
             final List<Object> result = (v == null) ? new ArrayList<>(1) : v;
             result.add(val);
             return result;
@@ -243,7 +246,6 @@ public class Select implements Consumer<RoboZonkyFilter> {
         addOffsetDateTime(field, "lteornull", value);
         return this;
     }
-
 
     public Select lessThanOrNull(final String field, final long value) {
         addLong(field, "lteornull", value);

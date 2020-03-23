@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package com.github.robozonky.internal.remote;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.UUID;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
-import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class FailureTypeUtilTest {
 
@@ -44,10 +45,11 @@ class FailureTypeUtilTest {
 
     @Test
     void expectedReasonMatches() {
-        final String reason = UUID.randomUUID().toString();
+        final String reason = UUID.randomUUID()
+            .toString();
         final Response response = Response.status(400)
-                .entity(reason)
-                .build();
+            .entity(reason)
+            .build();
         final ClientErrorException actual = new BadRequestException(response);
         final Class<? extends ClientErrorException> expected = actual.getClass();
         assertThat(FailureTypeUtil.matches(expected, actual, reason)).isTrue();
@@ -55,13 +57,15 @@ class FailureTypeUtilTest {
 
     @Test
     void expectedReasonDoesNotMatch() {
-        final String reason = UUID.randomUUID().toString();
+        final String reason = UUID.randomUUID()
+            .toString();
         final Response response = Response.status(400)
-                .entity(reason)
-                .build();
+            .entity(reason)
+            .build();
         final ClientErrorException actual = new BadRequestException(response);
         final Class<? extends ClientErrorException> expected = actual.getClass();
-        assertThat(FailureTypeUtil.matches(expected, actual, UUID.randomUUID().toString())).isFalse();
+        assertThat(FailureTypeUtil.matches(expected, actual, UUID.randomUUID()
+            .toString())).isFalse();
     }
 
 }

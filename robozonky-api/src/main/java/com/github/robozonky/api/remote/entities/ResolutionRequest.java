@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.Resolution;
@@ -48,8 +49,8 @@ public class ResolutionRequest extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", ResolutionRequest.class.getSimpleName() + "[", "]")
-                .add("reservationId=" + reservationId)
-                .add("resolution=" + resolution)
-                .toString();
+            .add("reservationId=" + reservationId)
+            .add("resolution=" + resolution)
+            .toString();
     }
 }

@@ -27,13 +27,15 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import com.github.robozonky.internal.util.FileUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.util.FileUtil;
 
 /**
  * Simple abstraction for dealing with the overly complicated {@link KeyStore} API. Always call {@link #save()} to
@@ -53,18 +55,19 @@ public class KeyStoreHandler {
 
     /**
      * Create a new instance, where {@link #isDirty()} will be false.
-     * @param keyStore KeyStore to use as the backend.
-     * @param password Password to protect the keys.
+     * 
+     * @param keyStore     KeyStore to use as the backend.
+     * @param password     Password to protect the keys.
      * @param keyStoreFile File that will represent the keystore.
-     * @param keyFactory Factory to create the keys.
+     * @param keyFactory   Factory to create the keys.
      */
     private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
-                            final SecretKeyFactory keyFactory) {
+            final SecretKeyFactory keyFactory) {
         this(keyStore, password, keyStoreFile, keyFactory, true);
     }
 
     private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
-                            final SecretKeyFactory keyFactory, final boolean isDirty) {
+            final SecretKeyFactory keyFactory, final boolean isDirty) {
         this.keyStore = keyStore;
         this.password = password.clone();
         this.protectionParameter = new KeyStore.PasswordProtection("NO_PASSWORD".toCharArray()); // FIXME is this safe?
@@ -83,10 +86,11 @@ public class KeyStoreHandler {
 
     /**
      * Create brand new key store protected by a given password, and store it in a file.
+     * 
      * @param keyStoreFile The file where the key store should be.
-     * @param password Password to protect the key store.
+     * @param password     Password to protect the key store.
      * @return Freshly instantiated key store, in a newly created file.
-     * @throws IOException If file already exists or there is a problem writing the file.
+     * @throws IOException       If file already exists or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
     public static KeyStoreHandler create(final File keyStoreFile, final char... password)
@@ -113,14 +117,15 @@ public class KeyStoreHandler {
 
     /**
      * Open an existing key store, protected by a given password.
+     * 
      * @param keyStoreFile The file where the key store is.
-     * @param password Password that protects the key store.
+     * @param password     Password that protects the key store.
      * @return Key store that previously existed.
-     * @throws IOException If file does not exist or there is a problem writing the file.
+     * @throws IOException       If file does not exist or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
     public static KeyStoreHandler open(final File keyStoreFile,
-                                       final char... password) throws IOException, KeyStoreException {
+            final char... password) throws IOException, KeyStoreException {
         if (keyStoreFile == null) {
             throw new FileNotFoundException(null);
         } else if (!keyStoreFile.exists()) {
@@ -139,6 +144,7 @@ public class KeyStoreHandler {
 
     /**
      * Set a key in the key store. Uses {@link SecretKey} as the implementation. Overwrites previous contents, if any.
+     * 
      * @param alias Alias to store the key under.
      * @param value The value to be stored.
      * @return True if stored in the key store.
@@ -158,6 +164,7 @@ public class KeyStoreHandler {
 
     /**
      * Retrieve a previously stored key.
+     * 
      * @param alias The alias under which the key will be looked up.
      * @return Present if the alias is present in the key store.
      */
@@ -177,6 +184,7 @@ public class KeyStoreHandler {
 
     /**
      * Remove an entry from the key store.
+     * 
      * @param alias The alias to locate the entry.
      * @return True if there is now no entry with a given key.
      */
@@ -193,6 +201,7 @@ public class KeyStoreHandler {
 
     /**
      * Whether or not there are unsaved changes.
+     * 
      * @return Whether a {@link #set(String, char[])} occurred after last {@link #save()}.
      */
     public boolean isDirty() {
@@ -210,6 +219,7 @@ public class KeyStoreHandler {
     /**
      * Persist whatever operations that have been made using this API. Unless this method is called, no other methods
      * have effect.
+     * 
      * @param secret Password to persist the changes with.
      */
     public void save(final char... secret) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public interface Event {
     /**
      *
      * @return When the event instance was requested to be created. Unless the event was instantiated lazily, will be
-     * the same as {@link #getCreatedOn()}.
+     *         the same as {@link #getCreatedOn()}.
      */
     default OffsetDateTime getConceivedOn() {
         return getCreatedOn();

@@ -23,10 +23,11 @@ import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
-import com.github.robozonky.internal.util.FileUtil;
-import com.github.robozonky.internal.util.functional.Memoizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.util.FileUtil;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 /**
  * Ensures that all extensions, available in the current working directory's "extensions/" subdirectory, will be on
@@ -45,25 +46,26 @@ enum ExtensionsManager {
         final File[] jars = extensionsFolder.listFiles(FileUtil::isJarFile);
         final String jarString = Arrays.toString(jars);
         logger.debug("JARS found: '{}'.", jarString);
-        final URL[] urls = FileUtil.filesToUrls(jars).toArray(URL[]::new);
+        final URL[] urls = FileUtil.filesToUrls(jars)
+            .toArray(URL[]::new);
         return new URLClassLoader(urls);
     }
 
     ClassLoader retrieveExtensionClassLoader(final String folderName) {
         return FileUtil.findFolder(folderName)
-                .map(this::retrieveExtensionClassLoader)
-                .orElseGet(() -> {
-                    logger.debug("Extensions folder not found.");
-                    return ExtensionsManager.class.getClassLoader();
-                });
+            .map(this::retrieveExtensionClassLoader)
+            .orElseGet(() -> {
+                logger.debug("Extensions folder not found.");
+                return ExtensionsManager.class.getClassLoader();
+            });
     }
 
     /**
      * @param serviceClass
      * @param <T>
      * @return This is lazy initialized, since if we place the result in a static final variable, and the service
-     * loader initialization throws an exception, the parent class will fail to load and we will get a
-     * NoClassDefFoundError which gives us no information as to why it happened.
+     *         loader initialization throws an exception, the parent class will fail to load and we will get a
+     *         NoClassDefFoundError which gives us no information as to why it happened.
      */
     public <T> Supplier<ServiceLoader<T>> getServiceLoader(final Class<T> serviceClass) {
         return Memoizer.memoize(() -> getServiceLoader(serviceClass, "extensions"));

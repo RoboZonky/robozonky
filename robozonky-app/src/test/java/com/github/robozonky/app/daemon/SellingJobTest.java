@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Duration;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class SellingJobTest extends AbstractRoboZonkyTest {
 
@@ -30,7 +31,7 @@ class SellingJobTest extends AbstractRoboZonkyTest {
     void getters() {
         final TenantJob t = new SellingJob();
         assertThat(t.payload()).isNotNull()
-                .isInstanceOf(Selling.class);
+            .isInstanceOf(Selling.class);
         assertThat(t.killIn()).isEqualTo(Duration.ofMinutes(30));
         assertThat(t.repeatEvery()).isEqualTo(Duration.ofHours(2));
     }

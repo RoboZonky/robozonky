@@ -16,14 +16,14 @@
 
 package com.github.robozonky.internal.util.functional;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class EitherTest {
 
@@ -31,12 +31,18 @@ class EitherTest {
     void gettersWhenRight() {
         Either<Exception, Integer> either = Either.right(100);
         assertSoftly(softly -> {
-            softly.assertThat(either.isRight()).isTrue();
-            softly.assertThat(either.get()).isEqualTo(100);
-            softly.assertThat(either.getOrElse(10)).isEqualTo(100);
-            softly.assertThat(either.isLeft()).isFalse();
-            softly.assertThatThrownBy(either::getLeft).isInstanceOf(NoSuchElementException.class);
-            softly.assertThat(either.getOrElseGet(x -> 10)).isEqualTo(100);
+            softly.assertThat(either.isRight())
+                .isTrue();
+            softly.assertThat(either.get())
+                .isEqualTo(100);
+            softly.assertThat(either.getOrElse(10))
+                .isEqualTo(100);
+            softly.assertThat(either.isLeft())
+                .isFalse();
+            softly.assertThatThrownBy(either::getLeft)
+                .isInstanceOf(NoSuchElementException.class);
+            softly.assertThat(either.getOrElseGet(x -> 10))
+                .isEqualTo(100);
         });
     }
 
@@ -44,12 +50,18 @@ class EitherTest {
     void gettersWhenLeft() {
         Either<Exception, Integer> either = Either.left(new IllegalStateException());
         assertSoftly(softly -> {
-            softly.assertThat(either.isRight()).isFalse();
-            softly.assertThatThrownBy(either::get).isInstanceOf(NoSuchElementException.class);
-            softly.assertThat(either.getOrElse(10)).isEqualTo(10);
-            softly.assertThat(either.isLeft()).isTrue();
-            softly.assertThat(either.getLeft()).isInstanceOf(IllegalStateException.class);
-            softly.assertThat(either.getOrElseGet(x -> 10)).isEqualTo(10);
+            softly.assertThat(either.isRight())
+                .isFalse();
+            softly.assertThatThrownBy(either::get)
+                .isInstanceOf(NoSuchElementException.class);
+            softly.assertThat(either.getOrElse(10))
+                .isEqualTo(10);
+            softly.assertThat(either.isLeft())
+                .isTrue();
+            softly.assertThat(either.getLeft())
+                .isInstanceOf(IllegalStateException.class);
+            softly.assertThat(either.getOrElseGet(x -> 10))
+                .isEqualTo(10);
         });
     }
 
@@ -58,14 +70,16 @@ class EitherTest {
         Either<Exception, Integer> either = Either.left(new IllegalStateException());
         Either<Exception, Integer> mapped = either.mapLeft(IllegalArgumentException::new);
         assertSoftly(softly -> {
-            softly.assertThat(mapped.getLeft()).isInstanceOf(IllegalArgumentException.class)
-                    .hasCauseInstanceOf(IllegalStateException.class);
-            softly.assertThatThrownBy(mapped::getRight).isInstanceOf(NoSuchElementException.class);
+            softly.assertThat(mapped.getLeft())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasCauseInstanceOf(IllegalStateException.class);
+            softly.assertThatThrownBy(mapped::getRight)
+                .isInstanceOf(NoSuchElementException.class);
         });
         Function<Integer, Exception> mapper = mock(Function.class);
         Exception remapped = either.fold(IllegalArgumentException::new, mapper);
         assertThat(remapped).isInstanceOf(IllegalArgumentException.class)
-                .hasCauseInstanceOf(IllegalStateException.class);
+            .hasCauseInstanceOf(IllegalStateException.class);
         verify(mapper, never()).apply(anyInt());
     }
 
@@ -74,8 +88,10 @@ class EitherTest {
         Either<Exception, Integer> either = Either.right(100);
         Either<Exception, Integer> mapped = either.mapRight(a -> a * 2);
         assertSoftly(softly -> {
-            softly.assertThat(mapped.getRight()).isEqualTo(200);
-            softly.assertThatThrownBy(mapped::getLeft).isInstanceOf(NoSuchElementException.class);
+            softly.assertThat(mapped.getRight())
+                .isEqualTo(200);
+            softly.assertThatThrownBy(mapped::getLeft)
+                .isInstanceOf(NoSuchElementException.class);
         });
         Function<Exception, Exception> leftMapper = mock(Function.class);
         Function<Integer, Exception> rightMapper = i -> new IllegalStateException();

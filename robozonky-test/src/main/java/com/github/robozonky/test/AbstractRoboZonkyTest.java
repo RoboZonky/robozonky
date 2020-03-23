@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.test;
 
+import static org.mockito.Mockito.*;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
@@ -25,6 +27,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.mockito.stubbing.Answer;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -42,11 +48,6 @@ import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.mockito.stubbing.Answer;
-
-import static org.mockito.Mockito.*;
 
 /**
  * This is a suggested parent class for all RoboZonky tests using this module. It will make sure to clear shared state
@@ -65,7 +66,11 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     protected static SecretProvider mockSecretProvider() {
-        return mockSecretProvider(new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299));
+        return mockSecretProvider(new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                299));
     }
 
     protected static Zonky harmlessZonky() {
@@ -85,7 +90,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
             final Money amount = i.getArgument(2);
             change.updateAndGet(old -> old.add(amount));
             return null;
-        }).when(p).simulateCharge(anyInt(), any(), any());
+        }).when(p)
+            .simulateCharge(anyInt(), any(), any());
         when(p.getOverview()).thenAnswer(i -> mockPortfolioOverview());
         return p;
     }
@@ -119,7 +125,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
             final Consumer<Zonky> f = invocation.getArgument(0);
             f.accept(z);
             return null;
-        }).when(api).run(any(), any());
+        }).when(api)
+            .run(any(), any());
         return api;
     }
 
@@ -163,7 +170,8 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     @AfterEach
     protected void awaitTerminationOfParallelTasks() {
         logger.debug("Awaiting common ForkJoinPool quiescence.");
-        final boolean success = ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.SECONDS);
+        final boolean success = ForkJoinPool.commonPool()
+            .awaitQuiescence(1, TimeUnit.SECONDS);
         if (success) {
             logger.debug("All executors shut down.");
         } else {

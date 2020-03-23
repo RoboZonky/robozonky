@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,7 @@
 
 package com.github.robozonky.notifications.templates;
 
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.notifications.templates.html.HtmlTemplate;
-import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
-import freemarker.core.TemplateNumberFormatFactory;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import static java.util.Map.entry;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -31,7 +24,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
-import static java.util.Map.entry;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.notifications.templates.html.HtmlTemplate;
+import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
+
+import freemarker.core.TemplateNumberFormatFactory;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 public enum TemplateProcessor {
 
@@ -42,8 +43,8 @@ public enum TemplateProcessor {
 
     public static Configuration getFreemarkerConfiguration() {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
-        final Map<String, TemplateNumberFormatFactory> customNumberFormats =
-                Collections.singletonMap("interest", InterestNumberFormatFactory.INSTANCE);
+        final Map<String, TemplateNumberFormatFactory> customNumberFormats = Collections.singletonMap("interest",
+                InterestNumberFormatFactory.INSTANCE);
         cfg.setCustomNumberFormats(customNumberFormats);
         cfg.setLogTemplateExceptions(false);
         /*
@@ -65,7 +66,7 @@ public enum TemplateProcessor {
     }
 
     private static String process(final Configuration configuration, final String embeddedTemplate,
-                                  final Map<String, Object> embeddedData)
+            final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
         final Map<String, Object> data = Map.ofEntries(
                 entry("timestamp", Date.from(DateUtil.now())),
@@ -75,7 +76,8 @@ public enum TemplateProcessor {
         final Template template = configuration.getTemplate("core.ftl");
         final StringWriter sw = new StringWriter();
         template.process(data, sw);
-        return sw.toString().trim();
+        return sw.toString()
+            .trim();
     }
 
     public String processPlainText(final String embeddedTemplate, final Map<String, Object> embeddedData)

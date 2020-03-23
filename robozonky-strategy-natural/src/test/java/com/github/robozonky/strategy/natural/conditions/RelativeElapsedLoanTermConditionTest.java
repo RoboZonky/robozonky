@@ -16,18 +16,20 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.strategy.natural.Wrapper;
 
 class RelativeElapsedLoanTermConditionTest {
 
     @Test
     void lessThan() {
-        final MarketplaceFilterCondition condition = RelativeElapsedLoanTermCondition.lessThan(Ratio.fromPercentage(10));
+        final MarketplaceFilterCondition condition = RelativeElapsedLoanTermCondition
+            .lessThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getOriginalTermInMonths()).thenReturn(10);
         when(w.getRemainingTermInMonths()).thenReturn(10);
@@ -50,7 +52,7 @@ class RelativeElapsedLoanTermConditionTest {
     @Test
     void exact() {
         final MarketplaceFilterCondition condition = RelativeElapsedLoanTermCondition.exact(Ratio.fromPercentage(0),
-                                                                                            Ratio.fromPercentage(10));
+                Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getOriginalTermInMonths()).thenReturn(10);
         when(w.getRemainingTermInMonths()).thenReturn(10);
@@ -67,4 +69,3 @@ class RelativeElapsedLoanTermConditionTest {
         assertThat(condition.getDescription()).isNotEmpty();
     }
 }
-

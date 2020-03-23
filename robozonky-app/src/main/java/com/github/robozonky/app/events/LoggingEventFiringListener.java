@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package com.github.robozonky.app.events;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.internal.tenant.LazyEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class LoggingEventFiringListener implements EventFiringListener {
 
@@ -50,7 +51,7 @@ class LoggingEventFiringListener implements EventFiringListener {
 
     @Override
     public <T extends Event> void failed(final LazyEvent<? extends Event> event,
-                                         final Class<? extends EventListener<T>> listener, final Exception ex) {
+            final Class<? extends EventListener<T>> listener, final Exception ex) {
         LOGGER.warn("Listener {} failed for {}.", listener, event, ex);
     }
 

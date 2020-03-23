@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.LoanBased;
@@ -28,9 +32,6 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class UtilTest {
 
@@ -81,7 +82,9 @@ class UtilTest {
 
             @Override
             public Loan getLoan() {
-                return new MockLoanBuilder().setRating(Rating.D).setInterestRate(Ratio.ONE).build();
+                return new MockLoanBuilder().setRating(Rating.D)
+                    .setInterestRate(Ratio.ONE)
+                    .build();
             }
 
             @Override

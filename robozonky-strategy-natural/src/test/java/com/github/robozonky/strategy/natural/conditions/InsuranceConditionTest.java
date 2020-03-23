@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
 
 class InsuranceConditionTest {
 
@@ -36,13 +37,16 @@ class InsuranceConditionTest {
     @Test
     void basic() {
         final Loan loan = new MockLoanBuilder()
-                .setInsuranceActive(true)
-                .build();
+            .setInsuranceActive(true)
+            .build();
         final Wrapper<?> wrap = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(InsuranceCondition.ACTIVE).accepts(wrap);
-            softly.assertThat(InsuranceCondition.ACTIVE.getDescription()).contains("With insurance.");
-            softly.assertThat(InsuranceCondition.INACTIVE).rejects(wrap);
+            softly.assertThat(InsuranceCondition.ACTIVE)
+                .accepts(wrap);
+            softly.assertThat(InsuranceCondition.ACTIVE.getDescription())
+                .contains("With insurance.");
+            softly.assertThat(InsuranceCondition.INACTIVE)
+                .rejects(wrap);
         });
     }
 

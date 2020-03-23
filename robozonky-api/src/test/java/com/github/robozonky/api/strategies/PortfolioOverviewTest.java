@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.time.ZonedDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
 
 class PortfolioOverviewTest {
 
@@ -56,13 +56,20 @@ class PortfolioOverviewTest {
     @Test
     void values() {
         assertSoftly(softly -> {
-            softly.assertThat(portfolioOverview.getMinimalAnnualProfitability()).isEqualTo(Ratio.fromRaw("0.04692727"));
-            softly.assertThat(portfolioOverview.getAnnualProfitability()).isEqualTo(Ratio.fromRaw("0.05"));
-            softly.assertThat(portfolioOverview.getOptimalAnnualProfitability()).isEqualTo(Ratio.fromRaw("0.07208182"));
-            softly.assertThat(portfolioOverview.getMinimalMonthlyProfit()).isEqualTo(Money.from("391.06"));
-            softly.assertThat(portfolioOverview.getMonthlyProfit()).isEqualTo(Money.from("416.67"));
-            softly.assertThat(portfolioOverview.getOptimalMonthlyProfit()).isEqualTo(Money.from("600.68"));
-            softly.assertThat(portfolioOverview.getShareOnInvestment(Rating.A)).isEqualTo(Ratio.fromRaw("0.09090910"));
+            softly.assertThat(portfolioOverview.getMinimalAnnualProfitability())
+                .isEqualTo(Ratio.fromRaw("0.04692727"));
+            softly.assertThat(portfolioOverview.getAnnualProfitability())
+                .isEqualTo(Ratio.fromRaw("0.05"));
+            softly.assertThat(portfolioOverview.getOptimalAnnualProfitability())
+                .isEqualTo(Ratio.fromRaw("0.07208182"));
+            softly.assertThat(portfolioOverview.getMinimalMonthlyProfit())
+                .isEqualTo(Money.from("391.06"));
+            softly.assertThat(portfolioOverview.getMonthlyProfit())
+                .isEqualTo(Money.from("416.67"));
+            softly.assertThat(portfolioOverview.getOptimalMonthlyProfit())
+                .isEqualTo(Money.from("600.68"));
+            softly.assertThat(portfolioOverview.getShareOnInvestment(Rating.A))
+                .isEqualTo(Ratio.fromRaw("0.09090910"));
         });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package com.github.robozonky.internal.async;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +25,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
 
     protected final Logger logger = LogManager.getLogger(getClass());
@@ -36,26 +36,26 @@ abstract class AbstractReloadableImpl<T> implements Reloadable<T> {
     private final List<ReloadListener<T>> listeners;
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                                  final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
+            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new ManualReload<>();
         this.listeners = new ArrayList<>(listeners);
     }
 
     public AbstractReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-                                  final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
-                                  final Function<T, Duration> reloadAfter) {
+            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
+            final Function<T, Duration> reloadAfter) {
         this.operation = getOperation(supplier, reloader, runWhenReloaded);
         this.needsReload = new TimeBasedReload<>(reloadAfter);
         this.listeners = new ArrayList<>(listeners);
     }
 
     private <X> UnaryOperator<X> getOperation(final Supplier<X> supplier, final UnaryOperator<X> reloader,
-                                              final Consumer<X> runWhenReloaded) {
+            final Consumer<X> runWhenReloaded) {
         return original -> {
             logger.trace("Running operation on {}, previous value given: {}.", this, original);
             final X value = original == null ? supplier.get() : reloader.apply(original);
-            runWhenReloaded.accept(value);  // first run finisher before setting the value, in case finisher fails
+            runWhenReloaded.accept(value); // first run finisher before setting the value, in case finisher fails
             logger.trace("Operation finished on {}.", this);
             return value;
         };

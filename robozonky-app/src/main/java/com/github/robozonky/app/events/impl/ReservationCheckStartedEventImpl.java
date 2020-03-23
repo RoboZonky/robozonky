@@ -37,7 +37,7 @@ final class ReservationCheckStartedEventImpl extends AbstractEventImpl implement
     @Override
     public String toString() {
         return new StringJoiner(", ", ReservationCheckStartedEventImpl.class.getSimpleName() + "[", "]")
-                .add("portfolioOverview=" + portfolioOverview)
-                .toString();
+            .add("portfolioOverview=" + portfolioOverview)
+            .toString();
     }
 }

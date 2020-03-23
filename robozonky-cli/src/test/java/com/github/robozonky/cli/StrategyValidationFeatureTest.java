@@ -16,15 +16,16 @@
 
 package com.github.robozonky.cli;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.atomic.LongAdder;
 
-import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.internal.Defaults;
 
 class StrategyValidationFeatureTest {
 
@@ -91,7 +92,8 @@ class StrategyValidationFeatureTest {
         final Feature feature = new StrategyValidationFeature(f, adder);
         feature.setup();
         feature.test();
-        assertThat(adder.sum()).as("Strategy count with sell missing.").isEqualTo(3);
+        assertThat(adder.sum()).as("Strategy count with sell missing.")
+            .isEqualTo(3);
     }
 
     @Test
@@ -103,7 +105,8 @@ class StrategyValidationFeatureTest {
         feature.setup();
         feature.test();
         feature.test();
-        assertThat(adder.sum()).as("Strategy count with sell missing.").isEqualTo(3);
+        assertThat(adder.sum()).as("Strategy count with sell missing.")
+            .isEqualTo(3);
     }
 
     @Test
@@ -114,6 +117,7 @@ class StrategyValidationFeatureTest {
         final Feature feature = new StrategyValidationFeature(f, adder);
         feature.setup();
         feature.test();
-        assertThat(adder.sum()).as("Strategy count has everything.").isEqualTo(4);
+        assertThat(adder.sum()).as("Strategy count has everything.")
+            .isEqualTo(4);
     }
 }

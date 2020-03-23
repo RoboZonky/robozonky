@@ -16,17 +16,17 @@
 
 package com.github.robozonky.cli;
 
-import java.io.File;
-
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
+
+import java.io.File;
 
 @Command(name = "master-password", description = MasterPasswordFeature.DESCRIPTION)
 public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
 
     static final String DESCRIPTION = "Change password of the master keystore.";
-    @Option(names = {"-n", "--new-secret"}, description = "Username to use to authenticate with Zonky servers.",
-            required = true, interactive = true, arity = "0..1")
+    @Option(names = { "-n",
+            "--new-secret" }, description = "Username to use to authenticate with Zonky servers.", required = true, interactive = true, arity = "0..1")
     private char[] newSecret = null;
 
     public MasterPasswordFeature(final File keystore, final char[] keystoreSecret, final char... newSecret) {
@@ -47,7 +47,8 @@ public final class MasterPasswordFeature extends KeyStoreLeveragingFeature {
     public void setup() throws SetupFailedException {
         super.setup();
         try {
-            this.getStorage().save(newSecret);
+            this.getStorage()
+                .save(newSecret);
         } catch (final Exception ex) {
             throw new SetupFailedException(ex);
         }

@@ -22,6 +22,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
@@ -38,8 +41,6 @@ import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
@@ -47,7 +48,7 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
 
     private final PowerTenant parent;
     private final Reloadable<DelayedFiring> delayedFiring = Reloadable.with(DelayedFiring::new)
-            .build();
+        .build();
     private final Queue<Runnable> stateUpdates = new ConcurrentLinkedQueue<>();
 
     public TransactionalPowerTenantImpl(final PowerTenant parent) {
@@ -55,7 +56,8 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     private DelayedFiring getDelayedFiring() {
-        return delayedFiring.get().get();
+        return delayedFiring.get()
+            .get();
     }
 
     @Override
@@ -84,7 +86,8 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     public void commit() {
         LOGGER.debug("Replaying transaction.");
         while (!stateUpdates.isEmpty()) {
-            stateUpdates.poll().run();
+            stateUpdates.poll()
+                .run();
         }
         getDelayedFiring().run();
         LOGGER.debug("Done.");

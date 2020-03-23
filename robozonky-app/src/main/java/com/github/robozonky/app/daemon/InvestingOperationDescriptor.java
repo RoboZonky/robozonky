@@ -19,6 +19,8 @@ package com.github.robozonky.app.daemon;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -26,7 +28,6 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.Logger;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy, Loan> {
 
@@ -34,7 +35,8 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     @Override
     public boolean isEnabled(final Tenant tenant) {
-        return !tenant.getRestrictions().isCannotInvest();
+        return !tenant.getRestrictions()
+            .isCannotInvest();
     }
 
     @Override
@@ -49,7 +51,8 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     @Override
     public long identify(final LoanDescriptor descriptor) {
-        return descriptor.item().getId();
+        return descriptor.item()
+            .getId();
     }
 
     @Override
@@ -59,7 +62,8 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     @Override
     public Money getMinimumBalance(final PowerTenant tenant) {
-        return tenant.getRestrictions().getMinimumInvestmentAmount();
+        return tenant.getRestrictions()
+            .getMinimumInvestmentAmount();
     }
 
     @Override

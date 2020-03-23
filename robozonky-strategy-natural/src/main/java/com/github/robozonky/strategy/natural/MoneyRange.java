@@ -49,8 +49,8 @@ class MoneyRange {
     @Override
     public String toString() {
         return new StringJoiner(", ", MoneyRange.class.getSimpleName() + "[", "]")
-                .add("minimumInvestment=" + minimumInvestment)
-                .add("maximumInvestment=" + maximumInvestment)
-                .toString();
+            .add("minimumInvestment=" + minimumInvestment)
+            .add("maximumInvestment=" + maximumInvestment)
+            .toString();
     }
 }

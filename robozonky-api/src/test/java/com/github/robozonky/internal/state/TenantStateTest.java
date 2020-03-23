@@ -16,14 +16,15 @@
 
 package com.github.robozonky.internal.state;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.UUID;
 
-import com.github.robozonky.api.SessionInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.api.SessionInfo;
 
 class TenantStateTest {
 
@@ -41,7 +42,8 @@ class TenantStateTest {
         assertThat(TenantState.getKnownTenants()).containsOnly(SESSION);
         final TenantState ts2 = TenantState.of(SESSION);
         assertThat(ts2).isSameAs(ts);
-        final TenantState ts3 = TenantState.of(new SessionInfo(UUID.randomUUID().toString()));
+        final TenantState ts3 = TenantState.of(new SessionInfo(UUID.randomUUID()
+            .toString()));
         assertThat(ts3).isNotSameAs(ts);
     }
 

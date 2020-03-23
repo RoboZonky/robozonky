@@ -16,11 +16,16 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ReturnCode;
@@ -28,10 +33,6 @@ import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.async.Scheduler;
 import com.github.robozonky.internal.jobs.SimplePayload;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class DaemonTest extends AbstractZonkyLeveragingTest {
 
@@ -44,8 +45,10 @@ class DaemonTest extends AbstractZonkyLeveragingTest {
         final Scheduler s = Scheduler.create();
         try (final Daemon d = spy(new Daemon(a, lifecycle, s))) {
             assertThat(d.getSessionInfo()).isSameAs(a.getSessionInfo());
-            doNothing().when(d).submitWithTenant(any(), any(), any(), any(), any(), any());
-            doNothing().when(d).submitTenantless(any(), any(), any(), any(), any(), any());
+            doNothing().when(d)
+                .submitWithTenant(any(), any(), any(), any(), any(), any());
+            doNothing().when(d)
+                .submitTenantless(any(), any(), any(), any(), any(), any());
             final Future<ReturnCode> f = e.submit(d::get); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock

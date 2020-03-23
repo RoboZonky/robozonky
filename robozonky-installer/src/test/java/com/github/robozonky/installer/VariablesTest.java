@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,25 @@
 
 package com.github.robozonky.installer;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.izforge.izpack.api.data.InstallData;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.izforge.izpack.api.data.InstallData;
 
 class VariablesTest {
 
     @Test
     void unique() {
         final Set<String> values = Stream.of(Variables.values())
-                .map(Variables::getKey)
-                .collect(Collectors.toSet());
+            .map(Variables::getKey)
+            .collect(Collectors.toSet());
         assertThat(values).hasSameSizeAs(Variables.values());
     }
 
@@ -41,7 +42,8 @@ class VariablesTest {
     void readValue() {
         for (final Variables variable : Variables.values()) {
             final String key = variable.getKey();
-            final String value = UUID.randomUUID().toString();
+            final String value = UUID.randomUUID()
+                .toString();
             final InstallData data = mock(InstallData.class);
             when(data.getVariable(key)).thenReturn(value);
             assertThat(variable.getValue(data)).isSameAs(value);
@@ -52,7 +54,8 @@ class VariablesTest {
     void storeValue() {
         for (final Variables variable : Variables.values()) {
             final String key = variable.getKey();
-            final String value = UUID.randomUUID().toString();
+            final String value = UUID.randomUUID()
+                .toString();
             final InstallData data = mock(InstallData.class);
             variable.setValue(data, value);
             verify(data).setVariable(key, value);

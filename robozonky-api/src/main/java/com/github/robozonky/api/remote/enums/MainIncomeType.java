@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ public enum MainIncomeType implements BaseEnum {
 
     public static MainIncomeType findByCode(final String code) {
         return Stream.of(MainIncomeType.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown main income type: " + code));
+            .filter(r -> Objects.equals(r.code, code))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown main income type: " + code));
     }
 
     @Override

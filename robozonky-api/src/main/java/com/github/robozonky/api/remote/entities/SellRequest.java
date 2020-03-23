@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Money;
@@ -33,32 +34,32 @@ public class SellRequest extends BaseEntity {
     public SellRequest(final long investmentId, final SellInfo sellInfo) {
         this.investmentId = investmentId;
         this.remainingPrincipal = sellInfo.getPriceInfo()
-                .getRemainingPrincipal()
-                .getValue();
+            .getRemainingPrincipal()
+            .getValue();
         this.feeAmount = sellInfo.getPriceInfo()
-                .getFee()
-                .getValue()
-                .getValue();
+            .getFee()
+            .getValue()
+            .getValue();
         this.discount = sellInfo.getPriceInfo()
-                .getDiscount()
-                .bigDecimalValue();
+            .getDiscount()
+            .bigDecimalValue();
         this.price = sellInfo.getPriceInfo()
-                .getSellPrice()
-                .getValue();
+            .getSellPrice()
+            .getValue();
     }
 
     public SellRequest(final Investment investment) {
         this.investmentId = investment.getId();
         this.remainingPrincipal = investment.getRemainingPrincipal()
-                .orElseThrow()
-                .getValue();
+            .orElseThrow()
+            .getValue();
         this.feeAmount = investment.getSmpFee()
-                .orElse(Money.ZERO)
-                .getValue();
+            .orElse(Money.ZERO)
+            .getValue();
         this.discount = BigDecimal.ZERO;
         this.price = investment.getSmpPrice()
-                .map(Money::getValue)
-                .orElse(remainingPrincipal);
+            .map(Money::getValue)
+            .orElse(remainingPrincipal);
     }
 
     @XmlElement
@@ -89,11 +90,11 @@ public class SellRequest extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", SellRequest.class.getSimpleName() + "[", "]")
-                .add("discount=" + discount)
-                .add("feeAmount=" + feeAmount)
-                .add("investmentId=" + investmentId)
-                .add("price=" + price)
-                .add("remainingPrincipal=" + remainingPrincipal)
-                .toString();
+            .add("discount=" + discount)
+            .add("feeAmount=" + feeAmount)
+            .add("investmentId=" + investmentId)
+            .add("price=" + price)
+            .add("remainingPrincipal=" + remainingPrincipal)
+            .toString();
     }
 }

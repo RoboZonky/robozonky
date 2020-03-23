@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.mockito.Mockito.*;
+
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-
-import static org.mockito.Mockito.mock;
 
 class BorrowerIncomeConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<MainIncomeType> {
 
@@ -36,7 +36,8 @@ class BorrowerIncomeConditionSpec implements AbstractEnumeratedConditionTest.Con
 
     @Override
     public Wrapper<?> getMocked() {
-        final Loan loan = new MockLoanBuilder().setMainIncomeType(this.getTriggerItem()).build();
+        final Loan loan = new MockLoanBuilder().setMainIncomeType(this.getTriggerItem())
+            .build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }
 
