@@ -522,6 +522,9 @@
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
         <version>2.11.0</version>
+        <configuration>
+          <configFile>${maven.multiModuleProjectDirectory}/ide-configuration/eclipse-format.xml</configFile>
+        </configuration>
         <executions>
           <execution>
             <goals>
