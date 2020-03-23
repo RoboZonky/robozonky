@@ -31,7 +31,7 @@ jobs:
       fail-fast: false # Always see all results on all platforms.
       matrix:
           os: [ubuntu-latest, windows-latest, macos-latest]
-          jvm: [11, 13]
+          jvm: [11, 14]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout from Github
