@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.github.robozonky.installer;
 
-import com.github.robozonky.internal.Settings;
-import com.izforge.izpack.api.data.InstallData;
-import com.izforge.izpack.api.installer.DataValidator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.Settings;
+import com.izforge.izpack.api.data.InstallData;
+import com.izforge.izpack.api.installer.DataValidator;
 
 abstract class AbstractValidator implements DataValidator {
 
@@ -37,7 +38,8 @@ abstract class AbstractValidator implements DataValidator {
     private static Duration getTimeout() {
         Duration connection = Settings.INSTANCE.getConnectionTimeout();
         Duration socket = Settings.INSTANCE.getSocketTimeout();
-        return connection.plus(socket).plusSeconds(10);
+        return connection.plus(socket)
+            .plusSeconds(10);
     }
 
     @Override
@@ -53,7 +55,7 @@ abstract class AbstractValidator implements DataValidator {
                 }
             };
             return CompletableFuture.supplyAsync(c)
-                    .get(timeoutInSeconds, TimeUnit.SECONDS);
+                .get(timeoutInSeconds, TimeUnit.SECONDS);
         } catch (final Exception ex) { // the installer must never ever throw an exception (= neverending spinner)
             logger.error("Uncaught exception.", ex);
             return DataValidator.Status.ERROR;

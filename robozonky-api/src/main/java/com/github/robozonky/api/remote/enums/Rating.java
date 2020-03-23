@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.test.DateUtil;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
+import static java.util.Map.entry;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,9 +29,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
-import static java.util.Map.entry;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.test.DateUtil;
 
 public enum Rating implements BaseEnum {
 
@@ -49,10 +49,12 @@ public enum Rating implements BaseEnum {
     C("15.49", "5.23", "4.0"),
     D("19.99", "8.15", "5.0");
 
-    static final Instant MIDNIGHT_2017_09_01 =
-            LocalDate.of(2017, 9, 1).atStartOfDay(Defaults.ZONE_ID).toInstant();
-    static final Instant MIDNIGHT_2019_03_18 =
-            LocalDate.of(2019, 3, 18).atStartOfDay(Defaults.ZONE_ID).toInstant();
+    static final Instant MIDNIGHT_2017_09_01 = LocalDate.of(2017, 9, 1)
+        .atStartOfDay(Defaults.ZONE_ID)
+        .toInstant();
+    static final Instant MIDNIGHT_2019_03_18 = LocalDate.of(2019, 3, 18)
+        .atStartOfDay(Defaults.ZONE_ID)
+        .toInstant();
     private static final Ratio ONE_PERCENT = Ratio.fromPercentage(1);
     private static final SortedMap<Integer, Ratio> FEE_DISCOUNTS = new TreeMap<>(Map.ofEntries(
             entry(150_000, Ratio.fromPercentage(5)),
@@ -84,13 +86,13 @@ public enum Rating implements BaseEnum {
      * @see "https://zonky.cz/zonky-vyhody/"
      */
     private static Ratio feeDiscount(final Money totalInvested) {
-        /* For the institutional investor ("zonky"), total will cause int overflow. Cap the value be max integer value,
+        /*
+         * For the institutional investor ("zonky"), total will cause int overflow. Cap the value be max integer value,
          * since the only place where it will be used in this method doesn't use more than the order of millions.
          */
-        final long value = totalInvested.getValue().longValue();
-        final int totalCapped = (value > Integer.MAX_VALUE) ?
-                Integer.MAX_VALUE :
-                (int) value + 1;
+        final long value = totalInvested.getValue()
+            .longValue();
+        final int totalCapped = (value > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) value + 1;
         final SortedMap<Integer, Ratio> applicableDiscounts = FEE_DISCOUNTS.headMap(totalCapped);
         if (applicableDiscounts.isEmpty()) {
             return Ratio.ZERO;
@@ -101,9 +103,9 @@ public enum Rating implements BaseEnum {
 
     public static Rating findByCode(final String code) {
         return Stream.of(Rating.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
+            .filter(r -> Objects.equals(r.code, code))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
     }
 
     private static boolean isBeforeLatestFeeChange(final Instant dateForFees) {

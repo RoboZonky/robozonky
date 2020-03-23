@@ -16,6 +16,12 @@
 
 package com.github.robozonky.api;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
+import static java.math.BigDecimal.valueOf;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
@@ -27,20 +33,14 @@ import java.util.stream.Stream;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
-import static java.math.BigDecimal.valueOf;
-
 /**
  * Represents a monetary amount of any size, in any currency. Rounds to 2 decimal points. Two instances equal if their
  * {@link #getCurrency()} and {@link #getValue()} equal, or when {@link #isZero()} regardless of currency.
  */
 public final class Money implements Comparable<Money> {
 
-    private static final Function<Currency, Money> ZERO_PROVIDER =
-            Memoizer.memoize(currency -> new Money(BigDecimal.ZERO, currency));
+    private static final Function<Currency, Money> ZERO_PROVIDER = Memoizer
+        .memoize(currency -> new Money(BigDecimal.ZERO, currency));
     /**
      * Do not use this. Rather, get one with the proper currency using {@link #getZero()} or {@link #getZero(Currency)}.
      */
@@ -195,7 +195,8 @@ public final class Money implements Comparable<Money> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
+        if (this == o)
+            return true;
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }

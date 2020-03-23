@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ public enum ReservationMode {
      */
     ACCEPT_MATCHING,
     /**
-     * On top of {@link #ACCEPT_MATCHING}, this will also have the power to reconfigure the reservation system in any way
+     * On top of {@link #ACCEPT_MATCHING}, this will also have the power to reconfigure the reservation system in any
+     * way
      * that the robot sees fit.
      */
     FULL_OWNERSHIP

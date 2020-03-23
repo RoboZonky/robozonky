@@ -21,6 +21,9 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -31,8 +34,6 @@ import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.internal.util.functional.Tuple2;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class RemoteData {
 
@@ -57,10 +58,11 @@ final class RemoteData {
 
     static Map<Integer, Tuple2<Rating, Money>> getAmountsBlocked(final Tenant tenant) {
         final Select select = new Select()
-                .lessThanOrNull("activeFrom", Instant.EPOCH.atZone(Defaults.ZONE_ID).toOffsetDateTime());
+            .lessThanOrNull("activeFrom", Instant.EPOCH.atZone(Defaults.ZONE_ID)
+                .toOffsetDateTime());
         return tenant.call(zonky -> zonky.getInvestments(select))
-                .peek(investment -> LOGGER.debug("Found: {}.", investment))
-                .collect(Collectors.toMap(i -> i.getLoanId(), i -> Tuple.of(i.getRating(), i.getAmount())));
+            .peek(investment -> LOGGER.debug("Found: {}.", investment))
+            .collect(Collectors.toMap(i -> i.getLoanId(), i -> Tuple.of(i.getRating(), i.getAmount())));
     }
 
     public OffsetDateTime getRetrievedOn() {

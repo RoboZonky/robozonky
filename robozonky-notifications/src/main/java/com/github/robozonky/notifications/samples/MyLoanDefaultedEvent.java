@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ public final class MyLoanDefaultedEvent extends AbstractInvestmentBasedEvent imp
 
     @Override
     public LocalDate getDelinquentSince() {
-        return Instant.EPOCH.atZone(Defaults.ZONE_ID).toLocalDate();
+        return Instant.EPOCH.atZone(Defaults.ZONE_ID)
+            .toLocalDate();
     }
 
 }

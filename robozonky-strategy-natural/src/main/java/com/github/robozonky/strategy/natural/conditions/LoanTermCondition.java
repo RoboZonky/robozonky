@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,20 @@ public class LoanTermCondition extends AbstractRangeCondition<Integer> {
 
     public static LoanTermCondition lessThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.lessThan(Wrapper::getRemainingTermInMonths,
-                                                                  LOAN_TERM_DOMAIN, threshold);
+                LOAN_TERM_DOMAIN, threshold);
         return new LoanTermCondition(c);
     }
 
     public static LoanTermCondition moreThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.moreThan(Wrapper::getRemainingTermInMonths,
-                                                                  LOAN_TERM_DOMAIN, threshold);
+                LOAN_TERM_DOMAIN, threshold);
         return new LoanTermCondition(c);
     }
 
     public static LoanTermCondition exact(final int minimumThreshold, final int maximumThreshold) {
         final RangeCondition<Integer> c = RangeCondition.exact(Wrapper::getRemainingTermInMonths,
-                                                               LOAN_TERM_DOMAIN, minimumThreshold,
-                                                               maximumThreshold);
+                LOAN_TERM_DOMAIN, minimumThreshold,
+                maximumThreshold);
         return new LoanTermCondition(c);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package com.github.robozonky.installer;
 
-import com.github.robozonky.cli.ZonkyCredentialsFeature;
-import com.github.robozonky.internal.remote.ApiProvider;
-import com.github.robozonky.internal.secrets.KeyStoreHandler;
-import com.izforge.izpack.api.data.InstallData;
-import com.izforge.izpack.api.installer.DataValidator;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,6 +23,12 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import com.github.robozonky.cli.ZonkyCredentialsFeature;
+import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
+import com.izforge.izpack.api.data.InstallData;
+import com.izforge.izpack.api.installer.DataValidator;
 
 public class ZonkySettingsValidator extends AbstractValidator {
 
@@ -43,6 +43,7 @@ public class ZonkySettingsValidator extends AbstractValidator {
 
     /**
      * This constructor exists for testing purposes.
+     * 
      * @param apiSupplier Will provide the APIs for this class.
      */
     ZonkySettingsValidator(final Supplier<ApiProvider> apiSupplier) {
@@ -50,7 +51,8 @@ public class ZonkySettingsValidator extends AbstractValidator {
     }
 
     @Override
-    public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) throws IOException {
+    public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData)
+            throws IOException {
         final File f = File.createTempFile("robozonky", "keystore");
         logger.debug("Created temporary keystore file {}.", f.getAbsolutePath());
         Files.delete(f.toPath()); // or else the next step fails
@@ -58,7 +60,8 @@ public class ZonkySettingsValidator extends AbstractValidator {
         if (Objects.equals(keystoreType, "file")) { // use existing token
             final String keystorePath = Variables.KEYSTORE_PATH.getValue(installData);
             logger.info("Will use existing keystore {}.", keystorePath);
-            final char[] password = Variables.KEYSTORE_PASSWORD.getValue(installData).toCharArray();
+            final char[] password = Variables.KEYSTORE_PASSWORD.getValue(installData)
+                .toCharArray();
             try {
                 Files.copy(Path.of(keystorePath), f.toPath());
                 final KeyStoreHandler k = KeyStoreHandler.open(f, password);
@@ -71,12 +74,14 @@ public class ZonkySettingsValidator extends AbstractValidator {
                 logger.warn("Failed obtaining Zonky API token.", t);
                 return Status.WARNING;
             }
-        } else {  // fresh login
+        } else { // fresh login
             final String username = Variables.ZONKY_USERNAME.getValue(installData);
             logger.info("Will use new authorization code for '{}'.", username);
             final String password = Variables.ZONKY_PASSWORD.getValue(installData);
             try {
-                final char[] p = UUID.randomUUID().toString().toCharArray();
+                final char[] p = UUID.randomUUID()
+                    .toString()
+                    .toCharArray();
                 final KeyStoreHandler k = KeyStoreHandler.create(f, p);
                 logger.debug("Keystore created, attempting login.");
                 ZonkyCredentialsFeature.attemptLoginAndStore(k, apiSupplier.get(), username, password.toCharArray());

@@ -22,29 +22,31 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.internal.jobs.JobService;
 import com.github.robozonky.internal.jobs.SimpleJob;
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.internal.util.StreamUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class JobServiceLoader {
 
     private static final Logger LOGGER = LogManager.getLogger(JobServiceLoader.class);
-    private static final Supplier<ServiceLoader<JobService>> LOADER =
-            ExtensionsManager.INSTANCE.getServiceLoader(JobService.class);
+    private static final Supplier<ServiceLoader<JobService>> LOADER = ExtensionsManager.INSTANCE
+        .getServiceLoader(JobService.class);
 
     private JobServiceLoader() {
         // no instances
     }
 
     static <T> Stream<T> load(final Iterable<JobService> loader,
-                              final Function<JobService, Collection<T>> jobProvider) {
+            final Function<JobService, Collection<T>> jobProvider) {
         LOGGER.debug("Looking up batch jobs.");
         return StreamUtil.toStream(loader)
-                .peek(cp -> LOGGER.trace("Evaluating job service '{}'.", cp.getClass()))
-                .flatMap(cp -> jobProvider.apply(cp).stream());
+            .peek(cp -> LOGGER.trace("Evaluating job service '{}'.", cp.getClass()))
+            .flatMap(cp -> jobProvider.apply(cp)
+                .stream());
     }
 
     public static Stream<SimpleJob> loadSimpleJobs() {
@@ -55,4 +57,3 @@ public final class JobServiceLoader {
         return load(LOADER.get(), JobService::getTenantJobs);
     }
 }
-

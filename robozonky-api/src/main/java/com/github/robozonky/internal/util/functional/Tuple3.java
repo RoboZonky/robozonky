@@ -24,7 +24,7 @@ public final class Tuple3<T1, T2, T3> {
     public final T2 _2;
     public final T3 _3;
 
-    Tuple3(T1 t1, T2 t2,T3 t3) {
+    Tuple3(T1 t1, T2 t2, T3 t3) {
         _1 = t1;
         _2 = t2;
         _3 = t3;
@@ -63,6 +63,6 @@ public final class Tuple3<T1, T2, T3> {
 
     @Override
     public String toString() {
-        return "(" + _1 + ", "+ _2 + ", "+ _3 + ")";
+        return "(" + _1 + ", " + _2 + ", " + _3 + ")";
     }
 }

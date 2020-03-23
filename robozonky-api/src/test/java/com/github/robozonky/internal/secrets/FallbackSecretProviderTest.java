@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package com.github.robozonky.internal.secrets;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.UUID;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 class FallbackSecretProviderTest {
 
@@ -31,7 +32,7 @@ class FallbackSecretProviderTest {
     @Test
     void setUsernameAndPassword() {
         final SecretProvider p = SecretProvider.inMemory(FallbackSecretProviderTest.USR,
-                                                         FallbackSecretProviderTest.PWD.toCharArray());
+                FallbackSecretProviderTest.PWD.toCharArray());
         // make sure original values were set
         assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
         assertThat(p.getPassword()).isEqualTo(FallbackSecretProviderTest.PWD.toCharArray());
@@ -41,13 +42,16 @@ class FallbackSecretProviderTest {
     @Test
     void setToken() {
         final SecretProvider p = SecretProvider.inMemory(FallbackSecretProviderTest.USR,
-                                                         FallbackSecretProviderTest.PWD.toCharArray());
+                FallbackSecretProviderTest.PWD.toCharArray());
         // make sure original values were set
         assertThat(p.getToken()).isEmpty();
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                299);
         assertThat(p.setToken(token)).isTrue();
         assertThat(p.getToken()).contains(token);
     }
 
 }
-

@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
@@ -33,9 +34,10 @@ public class ReservationPreferences extends BaseEntity {
 
     public static final Supplier<ReservationPreferences> TOTAL = Memoizer.memoize(() -> {
         final ReservationPreference[] prefs = Arrays.stream(Rating.values())
-                .flatMap(r -> Arrays.stream(LoanTermInterval.values()).map(i -> Tuple.of(r, i)))
-                .map(t -> new ReservationPreference(t._2, t._1, false))
-                .toArray(ReservationPreference[]::new);
+            .flatMap(r -> Arrays.stream(LoanTermInterval.values())
+                .map(i -> Tuple.of(r, i)))
+            .map(t -> new ReservationPreference(t._2, t._1, false))
+            .toArray(ReservationPreference[]::new);
         return new ReservationPreferences(prefs);
     });
 
@@ -48,12 +50,14 @@ public class ReservationPreferences extends BaseEntity {
 
     public ReservationPreferences(final ReservationPreference... reservationPreferences) {
         this.reservationsEnabled = reservationPreferences.length != 0;
-        this.reservationPreferences = Arrays.stream(reservationPreferences).collect(Collectors.toSet());
+        this.reservationPreferences = Arrays.stream(reservationPreferences)
+            .collect(Collectors.toSet());
     }
 
     public static boolean isEnabled(final ReservationPreferences reservationPreferences) {
         return reservationPreferences.isReservationsEnabled() &&
-                !reservationPreferences.getReservationPreferences().isEmpty();
+                !reservationPreferences.getReservationPreferences()
+                    .isEmpty();
     }
 
     @XmlElement
@@ -87,8 +91,8 @@ public class ReservationPreferences extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", ReservationPreferences.class.getSimpleName() + "[", "]")
-                .add("reservationPreferences=" + reservationPreferences)
-                .add("reservationsEnabled=" + reservationsEnabled)
-                .toString();
+            .add("reservationPreferences=" + reservationPreferences)
+            .add("reservationsEnabled=" + reservationsEnabled)
+            .toString();
     }
 }

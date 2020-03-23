@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -80,12 +81,12 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
-                         final OffsetDateTime obtainedOn) {
+            final OffsetDateTime obtainedOn) {
         this(accessToken, refreshToken, expiresIn, obtainedOn, REFRESH_TOKEN_STRING);
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
-                         final OffsetDateTime obtainedOn, final String type) {
+            final OffsetDateTime obtainedOn, final String type) {
         this.accessToken = accessToken.toCharArray();
         this.refreshToken = refreshToken.toCharArray();
         this.expiresIn = expiresIn;
@@ -137,6 +138,7 @@ public class ZonkyApiToken extends BaseEntity {
 
     /**
      * Interval in seconds in which the token will expire.
+     * 
      * @return Time left before token expiration, in seconds, at the time token was retrieved.
      */
     public int getExpiresIn() {
@@ -160,7 +162,8 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public boolean willExpireIn(final TemporalAmount temporalAmount) {
-        final OffsetDateTime maxExpirationDate = DateUtil.offsetNow().plus(temporalAmount);
+        final OffsetDateTime maxExpirationDate = DateUtil.offsetNow()
+            .plus(temporalAmount);
         return getExpiresOn().isBefore(maxExpirationDate);
     }
 
@@ -187,11 +190,11 @@ public class ZonkyApiToken extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", ZonkyApiToken.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("type='" + type + "'")
-                .add("expiresIn=" + expiresIn)
-                .add("obtainedOn=" + obtainedOn)
-                .add("scope='" + scope + "'")
-                .toString();
+            .add("id=" + id)
+            .add("type='" + type + "'")
+            .add("expiresIn=" + expiresIn)
+            .add("obtainedOn=" + obtainedOn)
+            .add("scope='" + scope + "'")
+            .toString();
     }
 }

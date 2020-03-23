@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -85,7 +86,8 @@ public class Participation extends BaseEntity {
         this.userId = loan.getUserId();
         this.additionallyInsured = loan.isAdditionallyInsured();
         this.insuranceActive = loan.isInsuranceActive();
-        this.remainingPrincipal = remainingPrincipal.getValue().toPlainString();
+        this.remainingPrincipal = remainingPrincipal.getValue()
+            .toPlainString();
         this.remainingInstalmentCount = remainingInstalmentCount;
     }
 
@@ -156,6 +158,7 @@ public class Participation extends BaseEntity {
 
     /**
      * Semantics is identical to {@link BaseLoan#isInsuranceActive()} ()}.
+     * 
      * @return
      */
     @XmlElement
@@ -165,6 +168,7 @@ public class Participation extends BaseEntity {
 
     /**
      * Semantics is identical to {@link BaseLoan#isAdditionallyInsured()}.
+     * 
      * @return
      */
     @XmlElement
@@ -220,29 +224,29 @@ public class Participation extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", Participation.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("loanId=" + loanId)
-                .add("additionallyInsured=" + additionallyInsured)
-                .add("borrowerNo=" + borrowerNo)
-                .add("countryOfOrigin=" + countryOfOrigin)
-                .add("currency=" + currency)
-                .add("deadline='" + deadline + "'")
-                .add("discount='" + discount + "'")
-                .add("incomeType=" + incomeType)
-                .add("insuranceActive=" + insuranceActive)
-                .add("interestRate=" + interestRate)
-                .add("investmentId=" + investmentId)
-                .add("loanHealthInfo=" + loanHealthInfo)
-                .add("loanName='" + loanName + "'")
-                .add("nextPaymentDate='" + nextPaymentDate + "'")
-                .add("originalInstalmentCount=" + originalInstalmentCount)
-                .add("price='" + price + "'")
-                .add("purpose=" + purpose)
-                .add("rating=" + rating)
-                .add("remainingInstalmentCount=" + remainingInstalmentCount)
-                .add("remainingPrincipal='" + remainingPrincipal + "'")
-                .add("userId=" + userId)
-                .add("willExceedLoanInvestmentLimit=" + willExceedLoanInvestmentLimit)
-                .toString();
+            .add("id=" + id)
+            .add("loanId=" + loanId)
+            .add("additionallyInsured=" + additionallyInsured)
+            .add("borrowerNo=" + borrowerNo)
+            .add("countryOfOrigin=" + countryOfOrigin)
+            .add("currency=" + currency)
+            .add("deadline='" + deadline + "'")
+            .add("discount='" + discount + "'")
+            .add("incomeType=" + incomeType)
+            .add("insuranceActive=" + insuranceActive)
+            .add("interestRate=" + interestRate)
+            .add("investmentId=" + investmentId)
+            .add("loanHealthInfo=" + loanHealthInfo)
+            .add("loanName='" + loanName + "'")
+            .add("nextPaymentDate='" + nextPaymentDate + "'")
+            .add("originalInstalmentCount=" + originalInstalmentCount)
+            .add("price='" + price + "'")
+            .add("purpose=" + purpose)
+            .add("rating=" + rating)
+            .add("remainingInstalmentCount=" + remainingInstalmentCount)
+            .add("remainingPrincipal='" + remainingPrincipal + "'")
+            .add("userId=" + userId)
+            .add("willExceedLoanInvestmentLimit=" + willExceedLoanInvestmentLimit)
+            .toString();
     }
 }

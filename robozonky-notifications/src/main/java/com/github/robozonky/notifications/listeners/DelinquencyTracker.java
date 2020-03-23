@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,9 @@ class DelinquencyTracker {
             return;
         }
         TenantState.of(sessionInfo)
-                .in(DelinquencyTracker.class)
-                .update(b -> b.put(toId(investment), DateUtil.offsetNow().toString()));
+            .in(DelinquencyTracker.class)
+            .update(b -> b.put(toId(investment), DateUtil.offsetNow()
+                .toString()));
     }
 
     public void unsetDelinquent(final SessionInfo sessionInfo, final Investment investment) {
@@ -48,14 +49,14 @@ class DelinquencyTracker {
             return;
         }
         TenantState.of(sessionInfo)
-                .in(DelinquencyTracker.class)
-                .update(b -> b.remove(toId(investment)));
+            .in(DelinquencyTracker.class)
+            .update(b -> b.remove(toId(investment)));
     }
 
     public boolean isDelinquent(final SessionInfo sessionInfo, final Investment investment) {
         return TenantState.of(sessionInfo)
-                .in(DelinquencyTracker.class)
-                .getValue(toId(investment))
-                .isPresent();
+            .in(DelinquencyTracker.class)
+            .getValue(toId(investment))
+            .isPresent();
     }
 }

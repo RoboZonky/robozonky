@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.app.runtime;
 
+import static org.mockito.Mockito.*;
+
 import java.time.Duration;
 
-import com.github.robozonky.app.ReturnCode;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.*;
+import com.github.robozonky.app.ReturnCode;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class DaemonShutdownHookTest extends AbstractRoboZonkyTest {
 
@@ -33,7 +34,8 @@ class DaemonShutdownHookTest extends AbstractRoboZonkyTest {
         final ShutdownEnabler se = mock(ShutdownEnabler.class);
         final DaemonShutdownHook hook = new DaemonShutdownHook(lifecycle, se);
         hook.start();
-        se.get().ifPresent(c -> c.accept(ReturnCode.OK));
+        se.get()
+            .ifPresent(c -> c.accept(ReturnCode.OK));
         Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
             while (hook.isAlive()) { // wait until the hook to terminate
                 Thread.sleep(1);

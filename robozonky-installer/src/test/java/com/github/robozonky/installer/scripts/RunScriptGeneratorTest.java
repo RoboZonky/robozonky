@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.github.robozonky.installer.scripts;
 
-import com.github.robozonky.installer.CommandLinePart;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+
+import com.github.robozonky.installer.CommandLinePart;
 
 class RunScriptGeneratorTest {
 
@@ -53,18 +54,26 @@ class RunScriptGeneratorTest {
 
     private static void common(final CommandLinePart cli, final String result) {
         // assert all jvm arguments present
-        assertSoftly(softly -> cli.getJvmArguments().forEach((var, value) -> {
-            if (value.isPresent()) {
-                softly.assertThat(result).as("Missing JVM arg.").contains("-" + var + " " + value.get());
-            } else {
-                softly.assertThat(result).as("Missing JVM arg.").contains("-" + var);
-            }
-        }));
+        assertSoftly(softly -> cli.getJvmArguments()
+            .forEach((var, value) -> {
+                if (value.isPresent()) {
+                    softly.assertThat(result)
+                        .as("Missing JVM arg.")
+                        .contains("-" + var + " " + value.get());
+                } else {
+                    softly.assertThat(result)
+                        .as("Missing JVM arg.")
+                        .contains("-" + var);
+                }
+            }));
         // assert all system properties present
-        assertSoftly(softly -> cli.getProperties().forEach((var, value) -> {
-            final String arg = "-D" + var + "=" + value;
-            softly.assertThat(result).as("Missing system property.").contains(arg);
-        }));
+        assertSoftly(softly -> cli.getProperties()
+            .forEach((var, value) -> {
+                final String arg = "-D" + var + "=" + value;
+                softly.assertThat(result)
+                    .as("Missing system property.")
+                    .contains(arg);
+            }));
     }
 
     @Test
@@ -72,18 +81,21 @@ class RunScriptGeneratorTest {
         final File optionsFile = getTempFile().getAbsoluteFile();
         final File root = optionsFile.getParentFile();
         final CommandLinePart cli = getCommandLine();
-        final Function<CommandLinePart, File> generator =
-                RunScriptGenerator.forWindows(root, optionsFile);
-        final String result = new String(Files.readAllBytes(generator.apply(cli).toPath()));
+        final Function<CommandLinePart, File> generator = RunScriptGenerator.forWindows(root, optionsFile);
+        final String result = new String(Files.readAllBytes(generator.apply(cli)
+            .toPath()));
         common(cli, result);
         assertThat(result)
-                .as("Missing executable file call.")
-                .contains(root + "\\robozonky.bat @" + optionsFile.getAbsolutePath());
+            .as("Missing executable file call.")
+            .contains(root + "\\robozonky.bat @" + optionsFile.getAbsolutePath());
         // assert all environment variables present
-        assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
-            final String arg = var + "=" + value;
-            softly.assertThat(result).as("Missing env var.").contains(arg);
-        }));
+        assertSoftly(softly -> cli.getEnvironmentVariables()
+            .forEach((var, value) -> {
+                final String arg = var + "=" + value;
+                softly.assertThat(result)
+                    .as("Missing env var.")
+                    .contains(arg);
+            }));
         assertThat(result).contains("\r\n");
     }
 
@@ -93,18 +105,21 @@ class RunScriptGeneratorTest {
         final File optionsFile = getTempFile().getAbsoluteFile();
         final File root = optionsFile.getParentFile();
         final CommandLinePart cli = getCommandLine();
-        final Function<CommandLinePart, File> generator =
-                RunScriptGenerator.forUnix(root, optionsFile);
-        final String result = new String(Files.readAllBytes(generator.apply(cli).toPath()));
+        final Function<CommandLinePart, File> generator = RunScriptGenerator.forUnix(root, optionsFile);
+        final String result = new String(Files.readAllBytes(generator.apply(cli)
+            .toPath()));
         common(cli, result);
         assertThat(result)
-                .as("Missing executable file call.")
-                .contains(root + "/robozonky.sh @" + optionsFile.getAbsolutePath());
+            .as("Missing executable file call.")
+            .contains(root + "/robozonky.sh @" + optionsFile.getAbsolutePath());
         // assert all environment variables present
-        assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
-            final String arg = var + "=\"" + value + "\"";
-            softly.assertThat(result).as("Missing env var.").contains(arg);
-        }));
+        assertSoftly(softly -> cli.getEnvironmentVariables()
+            .forEach((var, value) -> {
+                final String arg = var + "=\"" + value + "\"";
+                softly.assertThat(result)
+                    .as("Missing env var.")
+                    .contains(arg);
+            }));
         assertThat(result).doesNotContain("\r\n");
     }
 }

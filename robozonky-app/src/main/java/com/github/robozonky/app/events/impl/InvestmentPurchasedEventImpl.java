@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ final class InvestmentPurchasedEventImpl extends AbstractEventImpl implements In
     private final PortfolioOverview portfolioOverview;
 
     public InvestmentPurchasedEventImpl(final Participation participation, final Loan loan, final Money amount,
-                                        final PortfolioOverview portfolio) {
+            final PortfolioOverview portfolio) {
         this.participation = participation;
         this.loan = loan;
         this.purchasedAmount = amount;
@@ -62,11 +62,11 @@ final class InvestmentPurchasedEventImpl extends AbstractEventImpl implements In
     @Override
     public String toString() {
         return new StringJoiner(", ", InvestmentPurchasedEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("participation=" + participation)
-                .add("loan=" + loan)
-                .add("purchasedAmount=" + purchasedAmount)
-                .add("portfolioOverview=" + portfolioOverview)
-                .toString();
+            .add("super=" + super.toString())
+            .add("participation=" + participation)
+            .add("loan=" + loan)
+            .add("purchasedAmount=" + purchasedAmount)
+            .add("portfolioOverview=" + portfolioOverview)
+            .toString();
     }
 }

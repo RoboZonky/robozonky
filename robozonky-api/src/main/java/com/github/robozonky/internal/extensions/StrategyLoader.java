@@ -21,14 +21,15 @@ import java.util.ServiceLoader;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.util.StreamUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Implements Java's {@link ServiceLoader} to provide suitable strategy implementations.
@@ -36,15 +37,15 @@ import org.apache.logging.log4j.Logger;
 public final class StrategyLoader {
 
     private static final Logger LOGGER = LogManager.getLogger(StrategyLoader.class);
-    private static final Supplier<ServiceLoader<StrategyService>> LOADER =
-            ExtensionsManager.INSTANCE.getServiceLoader(StrategyService.class);
+    private static final Supplier<ServiceLoader<StrategyService>> LOADER = ExtensionsManager.INSTANCE
+        .getServiceLoader(StrategyService.class);
 
     private StrategyLoader() {
         // no instances
     }
 
     static <T> Optional<T> processStrategyService(final StrategyService service, final String strategy,
-                                                  final BiFunction<StrategyService, String, Optional<T>> getter) {
+            final BiFunction<StrategyService, String, Optional<T>> getter) {
         try {
             return getter.apply(service, strategy);
         } catch (final Exception ex) {
@@ -54,11 +55,11 @@ public final class StrategyLoader {
     }
 
     static <T> Optional<T> load(final String strategy, final Iterable<StrategyService> loader,
-                                final BiFunction<StrategyService, String, Optional<T>> provider) {
+            final BiFunction<StrategyService, String, Optional<T>> provider) {
         return StreamUtil.toStream(loader)
-                .map(iss -> processStrategyService(iss, strategy, provider))
-                .flatMap(Optional::stream)
-                .findFirst();
+            .map(iss -> processStrategyService(iss, strategy, provider))
+            .flatMap(Optional::stream)
+            .findFirst();
     }
 
     public static Optional<InvestmentStrategy> toInvest(final String strategy) {
@@ -81,4 +82,3 @@ public final class StrategyLoader {
         return load(strategy, LOADER.get(), StrategyService::forReservations);
     }
 }
-

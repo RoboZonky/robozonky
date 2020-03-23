@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ final class Storage {
         this.state = tenant.getState(Storage.class);
         this.key = key;
         this.originalContents = state.getValues(key)
-                .orElse(Stream.empty())
-                .map(Long::parseLong)
-                .collect(Collectors.toSet());
+            .orElse(Stream.empty())
+            .map(Long::parseLong)
+            .collect(Collectors.toSet());
     }
 
     public synchronized boolean isKnown(final long investmentId) {
@@ -71,15 +71,15 @@ final class Storage {
         originalContents.addAll(toAdd);
         originalContents.removeAll(toRemove);
         final Stream<String> result = originalContents.stream()
-                .distinct()
-                .sorted()
-                .map(String::valueOf);
+            .distinct()
+            .sorted()
+            .map(String::valueOf);
         state.update(m -> m.put(key, result));
     }
 
     public synchronized LongStream complement(final Set<Long> investmentIds) {
         return originalContents.stream()
-                .filter(i -> !investmentIds.contains(i))
-                .mapToLong(i -> i);
+            .filter(i -> !investmentIds.contains(i))
+            .mapToLong(i -> i);
     }
 }

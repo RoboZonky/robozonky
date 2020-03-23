@@ -16,11 +16,17 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -35,11 +41,6 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class NaturalLanguagePurchaseStrategyTest {
 
@@ -49,8 +50,8 @@ class NaturalLanguagePurchaseStrategyTest {
 
     private static ParticipationDescriptor mockDescriptor(final Participation participation) {
         final Loan l = new MockLoanBuilder()
-                .setAmount(100_000)
-                .build();
+            .setAmount(100_000)
+            .build();
         return new ParticipationDescriptor(participation, () -> l);
     }
 
@@ -66,8 +67,8 @@ class NaturalLanguagePurchaseStrategyTest {
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
-        final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
+        final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor()),
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -77,13 +78,14 @@ class NaturalLanguagePurchaseStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         final FilterSupplier w = new FilterSupplier(v, Collections.emptySet(), Collections.singleton(filter));
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(),
-                                                    Collections.emptyMap(), w);
+                Collections.emptyMap(), w);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
-        final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
+        final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor()),
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -92,12 +94,14 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation l = mockParticipation();
-        doReturn(Rating.A).when(l).getRating();
-        final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor(l)), portfolio, new Restrictions());
+        doReturn(Rating.A).when(l)
+            .getRating();
+        final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor(l)),
+                portfolio, new Restrictions());
         assertThat(result).isEmpty();
     }
 
@@ -105,28 +109,36 @@ class NaturalLanguagePurchaseStrategyTest {
     void recommendationIsMade() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
-                                                    Collections.emptyMap(),
-                                                    new FilterSupplier(v, null, Collections.emptySet()));
+                Collections.emptyMap(),
+                new FilterSupplier(v, null, Collections.emptySet()));
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize().subtract(1));
+        when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
+            .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation participation = mockParticipation();
-        doReturn(Money.from(100_000)).when(participation).getRemainingPrincipal(); // not recommended for balance
-        doReturn(Rating.A).when(participation).getRating();
+        doReturn(Money.from(100_000)).when(participation)
+            .getRemainingPrincipal(); // not recommended for balance
+        doReturn(Rating.A).when(participation)
+            .getRating();
         final Participation p2 = mockParticipation();
         final int amount = 199; // check amounts under Zonky investment minimum
-        doReturn(Money.from(amount)).when(p2).getRemainingPrincipal();
-        doReturn(Rating.A).when(p2).getRating();
+        doReturn(Money.from(amount)).when(p2)
+            .getRemainingPrincipal();
+        doReturn(Rating.A).when(p2)
+            .getRating();
         final ParticipationDescriptor pd = mockDescriptor(p2);
-        final List<RecommendedParticipation> result =
-                s.recommend(Arrays.asList(mockDescriptor(participation), pd), portfolio, new Restrictions())
-                        .collect(Collectors.toList());
+        final List<RecommendedParticipation> result = s
+            .recommend(Arrays.asList(mockDescriptor(participation), pd), portfolio, new Restrictions())
+            .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedParticipation r = result.get(0);
         assertSoftly(softly -> {
-            softly.assertThat(r.descriptor()).isEqualTo(pd);
-            softly.assertThat(r.amount()).isEqualTo(pd.item().getRemainingPrincipal());
+            softly.assertThat(r.descriptor())
+                .isEqualTo(pd);
+            softly.assertThat(r.amount())
+                .isEqualTo(pd.item()
+                    .getRemainingPrincipal());
         });
     }
 }

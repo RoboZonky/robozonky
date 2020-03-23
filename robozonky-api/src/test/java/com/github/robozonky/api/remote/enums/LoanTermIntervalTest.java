@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class LoanTermIntervalTest {
 
@@ -29,7 +29,8 @@ class LoanTermIntervalTest {
             final LoanTermInterval current = LoanTermInterval.values()[i];
             final int currentEnd = current.getMinInclusive();
             final int previousEnd = LoanTermInterval.values()[i - 1].getMaxInclusive();
-            assertThat(currentEnd).isEqualTo(previousEnd + 1).as(current + " does not start where previous ends.");
+            assertThat(currentEnd).isEqualTo(previousEnd + 1)
+                .as(current + " does not start where previous ends.");
         }
         assertThat(LoanTermInterval.values()[LoanTermInterval.values().length - 1].getMaxInclusive()).isEqualTo(84);
     }

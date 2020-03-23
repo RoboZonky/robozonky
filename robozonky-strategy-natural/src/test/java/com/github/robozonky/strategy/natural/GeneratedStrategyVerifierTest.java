@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -31,8 +33,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import static org.assertj.core.api.Assertions.*;
-
 class GeneratedStrategyVerifierTest {
 
     private static final class StrategySourceProvider implements ArgumentsProvider {
@@ -46,17 +46,19 @@ class GeneratedStrategyVerifierTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
             return Stream.of(getResourceFolderFiles())
-                    .filter(f -> f.getName().startsWith("generated-"))
-                    .sorted(Comparator.comparing(File::getName))
-                    .map(f -> Arguments.of(f.toPath().toAbsolutePath()));
+                .filter(f -> f.getName()
+                    .startsWith("generated-"))
+                .sorted(Comparator.comparing(File::getName))
+                .map(f -> Arguments.of(f.toPath()
+                    .toAbsolutePath()));
         }
     }
 
     private static String convertToString(final Path file) {
         try {
             return Files.readAllLines(file)
-                    .stream()
-                    .collect(Collectors.joining(System.lineSeparator()));
+                .stream()
+                .collect(Collectors.joining(System.lineSeparator()));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -68,8 +70,8 @@ class GeneratedStrategyVerifierTest {
         final String input = convertToString(id);
         final ParsedStrategy s = GeneratedStrategyVerifier.parseWithAntlr(input);
         assertThat(s)
-                .as("Failed parsing strategy {}.", id)
-                .isNotNull();
+            .as("Failed parsing strategy {}.", id)
+            .isNotNull();
     }
 
 }

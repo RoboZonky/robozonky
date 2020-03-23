@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public interface MarketplaceFilterCondition extends Predicate<Wrapper<?>> {
 
     /**
      * Describe the condition using eg. range boundaries.
+     * 
      * @return If present, is a whole sentence. (Starting with capital letter, ending with a full stop.)
      */
     default Optional<String> getDescription() {
@@ -46,7 +47,7 @@ public interface MarketplaceFilterCondition extends Predicate<Wrapper<?>> {
 
     /**
      * @return True if, during the evaluation of this condition, a slow remote request could be triggered. This may
-     * happen in situations where the {@link Wrapper} requires information it does not (yet) have.
+     *         happen in situations where the {@link Wrapper} requires information it does not (yet) have.
      */
     default boolean mayRequireRemoteRequests() {
         return false;

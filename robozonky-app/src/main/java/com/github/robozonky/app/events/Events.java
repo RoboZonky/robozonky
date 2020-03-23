@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ public interface Events {
 
     /**
      * Used to fire {@link GlobalEvent}s, will reach all {@link Tenant}s in the system.
+     * 
      * @return
      */
     static GlobalEvents global() {
@@ -34,6 +35,7 @@ public interface Events {
     /**
      * Used to request {@link SessionEvent}s, will reach only the given {@link Tenant}. You should use
      * {@link PowerTenant} to fire those.
+     * 
      * @param tenant The {@link Tenant} to reach. If you don't have the instance, you have no business firing the event.
      * @return
      */

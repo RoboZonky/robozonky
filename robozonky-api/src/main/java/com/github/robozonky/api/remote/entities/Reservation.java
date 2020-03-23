@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 public class Reservation extends BaseLoan {
@@ -35,8 +36,8 @@ public class Reservation extends BaseLoan {
     @Override
     public String toString() {
         return new StringJoiner(", ", Reservation.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("myReservation=" + myReservation)
-                .toString();
+            .add("super=" + super.toString())
+            .add("myReservation=" + myReservation)
+            .toString();
     }
 }

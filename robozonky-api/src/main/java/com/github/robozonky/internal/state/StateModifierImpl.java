@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class StateModifierImpl<T> implements StateModifier<T>,
-                                            Callable<Boolean> {
+        Callable<Boolean> {
 
     private final Collection<BiConsumer<StateStorage, String>> actions = new ArrayList<>(0);
     private final InstanceStateImpl<T> instanceState;
@@ -54,7 +54,8 @@ final class StateModifierImpl<T> implements StateModifier<T>,
         final String sectionName = instanceState.getSectionName();
         final StateStorage backend = instanceState.getStorage();
         actions.forEach(a -> a.accept(backend, sectionName));
-        backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), DateUtil.offsetNow().toString());
+        backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), DateUtil.offsetNow()
+            .toString());
         return backend.store();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ final class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
      * likely that we're processing them for the first time.
      */
     private static final Comparator<Loan> BASE = Comparator.comparing(Loan::getDatePublished, Comparator.reverseOrder())
-            .thenComparing(BaseLoan::getNonReservedRemainingInvestment, Comparator.reverseOrder());
+        .thenComparing(BaseLoan::getNonReservedRemainingInvestment, Comparator.reverseOrder());
     private final Comparator<Loan> comparator;
 
     public PrimaryMarketplaceComparator(Comparator<Rating> ratingByDemandComparator) {
         this.comparator = Comparator.comparing(Loan::getRating, ratingByDemandComparator)
-                .thenComparing(BASE);
+            .thenComparing(BASE);
     }
 
     @Override

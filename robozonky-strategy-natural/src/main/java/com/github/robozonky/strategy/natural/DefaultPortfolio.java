@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ enum DefaultPortfolio {
     private final EnumMap<Rating, Ratio> shares = new EnumMap<>(Rating.class);
 
     DefaultPortfolio(double aaaaaa, final double aaaaa, final double aaaa, final double aaa, final double aae,
-                     final double aa, final double ae, final double a, final double b, final double c, final double d) {
+            final double aa, final double ae, final double a, final double b, final double c, final double d) {
         shares.put(Rating.AAAAAA, Ratio.fromPercentage(aaaaaa));
         shares.put(Rating.AAAAA, Ratio.fromPercentage(aaaaa));
         shares.put(Rating.AAAA, Ratio.fromPercentage(aaaa));

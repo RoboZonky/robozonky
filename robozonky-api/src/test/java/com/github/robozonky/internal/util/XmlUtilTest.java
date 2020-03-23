@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@
 
 package com.github.robozonky.internal.util;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.github.robozonky.internal.Defaults;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.internal.Defaults;
 
 class XmlUtilTest {
 
@@ -34,8 +36,10 @@ class XmlUtilTest {
     void parsing() throws ParserConfigurationException, IOException, SAXException {
         final DocumentBuilderFactory f = XmlUtil.getDocumentBuilderFactory();
         final ByteArrayInputStream bais = new ByteArrayInputStream("<xml />".getBytes(Defaults.CHARSET));
-        final Document document = f.newDocumentBuilder().parse(bais);
-        assertThat(document.getDocumentElement().getNodeName()).isEqualTo("xml");
+        final Document document = f.newDocumentBuilder()
+            .parse(bais);
+        assertThat(document.getDocumentElement()
+            .getNodeName()).isEqualTo("xml");
     }
 
     @Test

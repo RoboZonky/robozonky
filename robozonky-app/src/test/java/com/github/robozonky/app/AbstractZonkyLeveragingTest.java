@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app;
 
+import static org.mockito.Mockito.*;
+
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Random;
@@ -25,8 +27,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-
-import static org.mockito.Mockito.*;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
@@ -45,9 +45,9 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     protected static LoanDescriptor mockLoanDescriptor() {
         final MockLoanBuilder b = new MockLoanBuilder()
-                .setNonReservedRemainingInvestment(Integer.MAX_VALUE)
-                .setDatePublished(OffsetDateTime.now())
-                .setRating(Rating.AAAAA);
+            .setNonReservedRemainingInvestment(Integer.MAX_VALUE)
+            .setDatePublished(OffsetDateTime.now())
+            .setRating(Rating.AAAAA);
         return new LoanDescriptor(b.build());
     }
 

@@ -16,19 +16,20 @@
 
 package com.github.robozonky.api.strategies;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class InvestmentDescriptorTest {
 
@@ -50,9 +51,16 @@ class InvestmentDescriptorTest {
         final Optional<RecommendedInvestment> r = id.recommend();
         assertThat(r).isPresent();
         assertSoftly(softly -> {
-            softly.assertThat(r.get().amount()).isEqualTo(Money.from(remainingPrincipal));
-            softly.assertThat(r.get().descriptor()).isEqualTo(id);
-            softly.assertThat(r.get().descriptor().related()).isSameAs(LOAN);
+            softly.assertThat(r.get()
+                .amount())
+                .isEqualTo(Money.from(remainingPrincipal));
+            softly.assertThat(r.get()
+                .descriptor())
+                .isEqualTo(id);
+            softly.assertThat(r.get()
+                .descriptor()
+                .related())
+                .isSameAs(LOAN);
         });
     }
 
@@ -71,14 +79,20 @@ class InvestmentDescriptorTest {
         final Investment i = mockInvestment(BigDecimal.TEN);
         final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
         assertSoftly(softly -> {
-            softly.assertThat(id).isNotEqualTo(null);
-            softly.assertThat(id).isNotEqualTo(UUID.randomUUID().toString());
-            softly.assertThat(id).isEqualTo(id);
+            softly.assertThat(id)
+                .isNotEqualTo(null);
+            softly.assertThat(id)
+                .isNotEqualTo(UUID.randomUUID()
+                    .toString());
+            softly.assertThat(id)
+                .isEqualTo(id);
         });
         final InvestmentDescriptor id2 = new InvestmentDescriptor(i, () -> LOAN);
         assertSoftly(softly -> {
-            softly.assertThat(id).isEqualTo(id2);
-            softly.assertThat(id2).isEqualTo(id);
+            softly.assertThat(id)
+                .isEqualTo(id2);
+            softly.assertThat(id2)
+                .isEqualTo(id);
         });
         final InvestmentDescriptor id3 = new InvestmentDescriptor(mockInvestment(BigDecimal.ONE), () -> LOAN);
         assertThat(id).isNotEqualTo(id3);

@@ -16,6 +16,9 @@
 
 package com.github.robozonky.internal.remote;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -25,9 +28,6 @@ import java.util.function.Function;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 class PaginatedApiImplTest<S, T> {
 
     @Test
@@ -36,7 +36,8 @@ class PaginatedApiImplTest<S, T> {
         final Select sel = mock(Select.class);
         final RoboZonkyFilter filter = new RoboZonkyFilter();
         final PaginatedApi<BigDecimal, T> p = spy(new PaginatedApi<>(null, null, null, null));
-        doReturn(BigDecimal.ONE).when(p).execute(eq(f), eq(filter), anyBoolean());
+        doReturn(BigDecimal.ONE).when(p)
+            .execute(eq(f), eq(filter), anyBoolean());
         assertThat(p.execute(f, sel, filter)).isEqualTo(BigDecimal.ONE);
         verify(sel).accept(filter);
         verify(p).execute(eq(f), any(RoboZonkyFilter.class), eq(true));
@@ -46,7 +47,8 @@ class PaginatedApiImplTest<S, T> {
     void checkSimple() {
         final Function<T, S> f = o -> null;
         final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, null));
-        doReturn(null).when(p).execute(eq(f), any(), anyBoolean());
+        doReturn(null).when(p)
+            .execute(eq(f), any(), anyBoolean());
         p.execute(f);
         verify(p).execute(eq(f), isNotNull(), eq(true));
     }
@@ -54,13 +56,14 @@ class PaginatedApiImplTest<S, T> {
     @Test
     void checkPagination() {
         final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, mock(ResteasyClient.class)));
-        doReturn(null).when(p).execute(any(), any(), any());
+        doReturn(null).when(p)
+            .execute(any(), any(), any());
         final Function<T, List<S>> f = o -> Collections.emptyList();
         final Select sel = mock(Select.class);
         final int total = 1000;
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         when(filter.getLastResponseHeader(eq("X-Total")))
-                .thenReturn(Optional.of("" + total));
+            .thenReturn(Optional.of("" + total));
         final PaginatedResult<S> result = p.execute(f, sel, 1, 10, filter);
         assertThat(result.getTotalResultCount()).isEqualTo(total);
         verify(filter).setRequestHeader(eq("X-Size"), eq("10"));

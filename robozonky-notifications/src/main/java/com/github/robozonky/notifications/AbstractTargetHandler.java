@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.github.robozonky.notifications;
 
-import com.github.robozonky.api.SessionInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.time.Duration;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.SessionInfo;
 
 public abstract class AbstractTargetHandler {
 
@@ -34,8 +35,8 @@ public abstract class AbstractTargetHandler {
     final ConfigStorage config;
     private final Logger logger = LogManager.getLogger(getClass());
     private final Map<SessionInfo, Counter> notifications = new HashMap<>(0);
-    private final Map<SupportedListener, Map<SessionInfo, Counter>> specificNotifications =
-            new EnumMap<>(SupportedListener.class);
+    private final Map<SupportedListener, Map<SessionInfo, Counter>> specificNotifications = new EnumMap<>(
+            SupportedListener.class);
 
     protected AbstractTargetHandler(final ConfigStorage config, final Target target) {
         this.config = config;
@@ -48,7 +49,7 @@ public abstract class AbstractTargetHandler {
 
     private synchronized Counter getCounter(final SessionInfo sessionInfo) {
         return notifications.computeIfAbsent(sessionInfo,
-                                             s -> new Counter(s, "global", getHourlyLimit(), Duration.ofHours(1)));
+                s -> new Counter(s, "global", getHourlyLimit(), Duration.ofHours(1)));
     }
 
     public Target getTarget() {
@@ -60,8 +61,9 @@ public abstract class AbstractTargetHandler {
     }
 
     public int getListenerSpecificIntProperty(final SupportedListener listener, final String property,
-                                              final int defaultValue) {
-        return this.getListenerSpecificIntProperty(listener, property).orElse(defaultValue);
+            final int defaultValue) {
+        return this.getListenerSpecificIntProperty(listener, property)
+            .orElse(defaultValue);
     }
 
     private OptionalInt getListenerSpecificIntProperty(final SupportedListener listener, final String property) {
@@ -85,8 +87,9 @@ public abstract class AbstractTargetHandler {
 
     private synchronized Counter getSpecificCounter(final SessionInfo sessionInfo, final SupportedListener listener) {
         return specificNotifications.computeIfAbsent(listener, key -> new HashMap<>(1))
-                .computeIfAbsent(sessionInfo, s -> new Counter(s, this.getClass().getSimpleName(),
-                                                               getHourlyLimit(listener)));
+            .computeIfAbsent(sessionInfo, s -> new Counter(s, this.getClass()
+                .getSimpleName(),
+                    getHourlyLimit(listener)));
     }
 
     boolean isEnabledInSettings() {
@@ -105,9 +108,9 @@ public abstract class AbstractTargetHandler {
          * any of the others is enabled as well. it can not be disabled.
          */
         return Stream.of(SupportedListener.LOAN_NOW_DELINQUENT, SupportedListener.LOAN_DELINQUENT_10_PLUS,
-                         SupportedListener.LOAN_DELINQUENT_30_PLUS, SupportedListener.LOAN_DELINQUENT_60_PLUS,
-                         SupportedListener.LOAN_DELINQUENT_90_PLUS)
-                .anyMatch(this::isEnabled);
+                SupportedListener.LOAN_DELINQUENT_30_PLUS, SupportedListener.LOAN_DELINQUENT_60_PLUS,
+                SupportedListener.LOAN_DELINQUENT_90_PLUS)
+            .anyMatch(this::isEnabled);
     }
 
     boolean isEnabled(final SupportedListener listener) {
@@ -143,5 +146,5 @@ public abstract class AbstractTargetHandler {
     }
 
     public abstract void send(final SessionInfo sessionInfo, final String subject,
-                              final String message, final String fallbackMessage) throws Exception;
+            final String message, final String fallbackMessage) throws Exception;
 }

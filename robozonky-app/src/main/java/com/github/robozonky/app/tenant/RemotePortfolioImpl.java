@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.time.Duration;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -25,6 +27,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -32,10 +37,6 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import static java.util.stream.Collectors.toMap;
 
 class RemotePortfolioImpl implements RemotePortfolio {
 
@@ -46,11 +47,12 @@ class RemotePortfolioImpl implements RemotePortfolio {
     private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
-        this.isDryRun = tenant.getSessionInfo().isDryRun();
+        this.isDryRun = tenant.getSessionInfo()
+            .isDryRun();
         this.remoteData = Reloadable.with(() -> RemoteData.load(tenant))
-                .reloadAfter(Duration.ofMinutes(5))
-                .finishWith(this::refresh)
-                .build();
+            .reloadAfter(Duration.ofMinutes(5))
+            .finishWith(this::refresh)
+            .build();
     }
 
     private static void includeAmount(Map<Rating, Money> amounts, Rating rating, Money amount) {
@@ -58,9 +60,11 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     private void refresh(final RemoteData data) {
-        refreshSynthetics(old -> old.entrySet().stream()
-                .filter(e -> e.getValue().isValid(data))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        refreshSynthetics(old -> old.entrySet()
+            .stream()
+            .filter(e -> e.getValue()
+                .isValid(data))
+            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     @Override
@@ -85,22 +89,29 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     RemoteData getRemoteData() {
-        return remoteData.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
+        return remoteData.get()
+            .getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
     }
 
     @Override
     public Map<Rating, Money> getTotal() {
         var data = getRemoteData(); // use the same data for the entirety of this method
         LOGGER.debug("Remote data used: {}.", data);
-        final Map<Rating, Money> amounts = data.getStatistics().getRiskPortfolio().stream()
-                .collect(toMap(RiskPortfolio::getRating, portfolio -> portfolio.getDue().add(portfolio.getUnpaid()),
-                               Money::add, () -> new EnumMap<>(Rating.class)));
+        final Map<Rating, Money> amounts = data.getStatistics()
+            .getRiskPortfolio()
+            .stream()
+            .collect(toMap(RiskPortfolio::getRating, portfolio -> portfolio.getDue()
+                .add(portfolio.getUnpaid()),
+                    Money::add, () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach((id, blocked) -> includeAmount(amounts, blocked._1, blocked._2));
+        data.getBlocked()
+            .forEach((id, blocked) -> includeAmount(amounts, blocked._1, blocked._2));
         LOGGER.debug("Plus remote blocked: {}.", amounts);
-        syntheticByLoanId.get().values().stream()
-                .filter(blocked -> blocked.isValid(data))
-                .forEach(blocked -> includeAmount(amounts, blocked.getRating(), blocked.getAmount()));
+        syntheticByLoanId.get()
+            .values()
+            .stream()
+            .filter(blocked -> blocked.isValid(data))
+            .forEach(blocked -> includeAmount(amounts, blocked.getRating(), blocked.getAmount()));
         LOGGER.debug("Grand total incl. synthetics: {}.", amounts);
         return Collections.unmodifiableMap(amounts);
     }

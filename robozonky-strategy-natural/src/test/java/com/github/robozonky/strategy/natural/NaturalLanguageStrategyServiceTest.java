@@ -16,22 +16,23 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.strategies.StrategyService;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.util.StringUtil;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import com.github.robozonky.api.strategies.StrategyService;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.util.StringUtil;
 
 class NaturalLanguageStrategyServiceTest {
 
@@ -46,12 +47,12 @@ class NaturalLanguageStrategyServiceTest {
                 dynamicTest("with some filters missing", () -> missingFilters1(type)),
                 dynamicTest("with headers missing", () -> missingHeaders(type)),
                 dynamicTest("all possible newlines", () -> newlines(type)),
-                dynamicTest("pure whitespace", () -> test(type))
-        );
+                dynamicTest("pure whitespace", () -> test(type)));
     }
 
     private static Optional<?> getStrategy(final Type strategy, final String str) {
-        return strategy.getStrategy().apply(str);
+        return strategy.getStrategy()
+            .apply(str);
     }
 
     private static void test(final Type strategy) {
@@ -164,7 +165,7 @@ class NaturalLanguageStrategyServiceTest {
     @TestFactory
     Stream<DynamicNode> strategyType() {
         return Stream.of(Type.values())
-                .map(type -> dynamicContainer(type.toString(), forType(type)));
+            .map(type -> dynamicContainer(type.toString(), forType(type)));
     }
 
     private enum Type {
@@ -197,4 +198,3 @@ class NaturalLanguageStrategyServiceTest {
         protected abstract Function<String, Optional<?>> getStrategy();
     }
 }
-

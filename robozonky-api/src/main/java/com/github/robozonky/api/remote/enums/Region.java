@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,9 @@ public enum Region implements BaseEnum {
 
     public static Region findByCode(final String code) {
         return Stream.of(Region.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown region: " + code));
+            .filter(r -> Objects.equals(r.code, code))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown region: " + code));
     }
 
     @Override
@@ -71,6 +71,7 @@ public enum Region implements BaseEnum {
 
     /**
      * Purely for display purposes. It may seem unused from Java code, but may still be used from Freemarker templates.
+     * 
      * @return
      */
     public String getRichCode() {

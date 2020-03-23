@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.internal.test.DateUtil;
@@ -73,8 +74,8 @@ public class LastPublishedParticipation extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", LastPublishedParticipation.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("datePublished=" + datePublished)
-                .toString();
+            .add("id=" + id)
+            .add("datePublished=" + datePublished)
+            .toString();
     }
 }

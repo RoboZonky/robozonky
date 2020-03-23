@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package com.github.robozonky.internal.test;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class RandomUtilTest {
 
@@ -41,9 +41,11 @@ class RandomUtilTest {
         when(random.nextInt(anyInt())).thenAnswer(i -> i.getArgument(0));
         RandomUtil.setRandom(random);
         assertSoftly(softly -> {
-            softly.assertThat(RandomUtil.getNextInt()).isEqualTo(first);
+            softly.assertThat(RandomUtil.getNextInt())
+                .isEqualTo(first);
             final int second = 234567;
-            softly.assertThat(RandomUtil.getNextInt(second)).isEqualTo(second);
+            softly.assertThat(RandomUtil.getNextInt(second))
+                .isEqualTo(second);
         });
         RandomUtil.resetRandom();
         assertThat(RandomUtil.getNextInt()).isNotEqualTo(first);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,20 @@
 
 package com.github.robozonky.api.strategies;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
-import org.junit.jupiter.api.Test;
-
-import java.time.OffsetDateTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class ReservationDescriptorTest {
 
@@ -64,8 +64,8 @@ class ReservationDescriptorTest {
         final Reservation mockedReservation = ReservationDescriptorTest.mockReservation();
         final ReservationDescriptor ld = new ReservationDescriptor(mockedReservation, () -> null);
         assertThat(ld)
-                .isNotEqualTo(null)
-                .isEqualTo(ld);
+            .isNotEqualTo(null)
+            .isEqualTo(ld);
         final ReservationDescriptor ld2 = new ReservationDescriptor(mockedReservation, () -> null);
         assertThat(ld).isEqualTo(ld2);
     }
@@ -78,8 +78,10 @@ class ReservationDescriptorTest {
         assertThat(r).isPresent();
         final RecommendedReservation recommendation = r.get();
         assertSoftly(softly -> {
-            softly.assertThat(recommendation.descriptor()).isSameAs(ld);
-            softly.assertThat(recommendation.amount()).isEqualTo(Money.from(1_000));
+            softly.assertThat(recommendation.descriptor())
+                .isSameAs(ld);
+            softly.assertThat(recommendation.amount())
+                .isEqualTo(Money.from(1_000));
         });
     }
 

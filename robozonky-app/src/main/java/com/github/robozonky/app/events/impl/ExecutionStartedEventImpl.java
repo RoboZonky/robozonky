@@ -37,8 +37,8 @@ final class ExecutionStartedEventImpl extends AbstractEventImpl implements Execu
     @Override
     public String toString() {
         return new StringJoiner(", ", ExecutionStartedEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("portfolioOverview=" + portfolioOverview)
-                .toString();
+            .add("super=" + super.toString())
+            .add("portfolioOverview=" + portfolioOverview)
+            .toString();
     }
 }

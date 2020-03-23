@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class CharArrayAdapterTest {
 
@@ -28,7 +28,8 @@ class CharArrayAdapterTest {
 
     @Test
     void marshalAndUnmarshal() {
-        final String s = UUID.randomUUID().toString();
+        final String s = UUID.randomUUID()
+            .toString();
         final char[] array = adapter.unmarshal(s);
         final String newS = adapter.marshal(array);
         assertThat(newS).isEqualTo(s);

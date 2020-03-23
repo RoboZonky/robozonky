@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class NegatingConditionTest {
 
@@ -32,7 +33,8 @@ class NegatingConditionTest {
     @Test
     void doubleNegation() {
         final MarketplaceFilterCondition c = item -> true;
-        assertThat(c.negate().negate()).isSameAs(c);
+        assertThat(c.negate()
+            .negate()).isSameAs(c);
         assertThat(c.mayRequireRemoteRequests()).isFalse();
     }
 

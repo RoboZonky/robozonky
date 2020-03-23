@@ -35,49 +35,50 @@ class NaturalLanguageSellStrategy implements SellStrategy {
     }
 
     private static boolean isFree(final InvestmentDescriptor descriptor) {
-        return descriptor.item().getSmpFee()
-                .map(Money::isZero)
-                .orElseGet(() -> descriptor.sellInfo()
-                        .map(si -> si.getPriceInfo()
-                                .getFee()
-                                .getValue()
-                                .isZero())
-                        .orElse(true));
+        return descriptor.item()
+            .getSmpFee()
+            .map(Money::isZero)
+            .orElseGet(() -> descriptor.sellInfo()
+                .map(si -> si.getPriceInfo()
+                    .getFee()
+                    .getValue()
+                    .isZero())
+                .orElse(true));
     }
 
     private static boolean isUndiscounted(final InvestmentDescriptor descriptor) {
         return descriptor.sellInfo()
-                        .map(si -> si.getPriceInfo()
-                                .getDiscount()
-                                .intValue() == 0)
-                        .orElse(true);
+            .map(si -> si.getPriceInfo()
+                .getDiscount()
+                .intValue() == 0)
+            .orElse(true);
     }
 
     private Stream<InvestmentDescriptor> getFreeAndOutsideStrategy(final Collection<InvestmentDescriptor> available,
-                                                                   final PortfolioOverview portfolio) {
+            final PortfolioOverview portfolio) {
         return strategy.getMatchingPrimaryMarketplaceFilters(available.stream(), portfolio)
-                .filter(NaturalLanguageSellStrategy::isFree);
+            .filter(NaturalLanguageSellStrategy::isFree);
     }
 
     @Override
     public Stream<RecommendedInvestment> recommend(final Collection<InvestmentDescriptor> available,
-                                                   final PortfolioOverview portfolio) {
+            final PortfolioOverview portfolio) {
         return strategy.getSellingMode()
-                .map(mode -> {
-                    switch (mode) {
-                        case SELL_FILTERS:
-                            return strategy.getMatchingSellFilters(available.stream(), portfolio);
-                        case FREE_AND_OUTSIDE_STRATEGY:
-                            return getFreeAndOutsideStrategy(available, portfolio);
-                        case FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY:
-                            return getFreeAndOutsideStrategy(available, portfolio)
-                                    .filter(NaturalLanguageSellStrategy::isUndiscounted);
-                        default:
-                            throw new IllegalStateException("Impossible.");
-                    }
-                })
-                .orElse(Stream.empty())
-                .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
-                .flatMap(Optional::stream);
+            .map(mode -> {
+                switch (mode) {
+                    case SELL_FILTERS:
+                        return strategy.getMatchingSellFilters(available.stream(), portfolio);
+                    case FREE_AND_OUTSIDE_STRATEGY:
+                        return getFreeAndOutsideStrategy(available, portfolio);
+                    case FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY:
+                        return getFreeAndOutsideStrategy(available, portfolio)
+                            .filter(NaturalLanguageSellStrategy::isUndiscounted);
+                    default:
+                        throw new IllegalStateException("Impossible.");
+                }
+            })
+            .orElse(Stream.empty())
+            .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
+            .flatMap(Optional::stream);
     }
 }

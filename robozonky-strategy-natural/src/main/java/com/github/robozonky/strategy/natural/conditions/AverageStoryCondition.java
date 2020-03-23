@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ public class AverageStoryCondition extends AbstractStoryCondition {
     public AverageStoryCondition() {
         super(story -> {
             final int length = story.length();
-            return length > SHORT_STORY_THRESHOLD
-                    && length <= LONG_STORY_THRESHOLD;
+            return length > SHORT_STORY_THRESHOLD && length <= LONG_STORY_THRESHOLD;
         });
     }
 }

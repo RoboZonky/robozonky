@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.app;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
 import java.util.Optional;
 
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class SecretProviderFactoryTest extends AbstractRoboZonkyTest {
 
@@ -56,6 +57,6 @@ class SecretProviderFactoryTest extends AbstractRoboZonkyTest {
         final char[] password = "pass".toCharArray();
         final CommandLine cli = SecretProviderFactoryTest.mockCli(null, password);
         assertThatThrownBy(() -> SecretProviderFactory.getSecretProvider(cli))
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 }

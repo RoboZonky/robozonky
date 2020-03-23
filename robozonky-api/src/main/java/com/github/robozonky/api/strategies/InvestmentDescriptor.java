@@ -38,8 +38,9 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
     /**
      *
      * @param investment
-     * @param related Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely remote)
-     * entity on-demand.
+     * @param related    Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
+     *                   remote)
+     *                   entity on-demand.
      */
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related) {
         this(investment, related, null);
@@ -48,13 +49,15 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
     /**
      *
      * @param investment
-     * @param related Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely remote)
-     * entity on-demand.
-     * @param sellInfo Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely remote)
-     * entity on-demand. Null means no such information exists.
+     * @param related    Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
+     *                   remote)
+     *                   entity on-demand.
+     * @param sellInfo   Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
+     *                   remote)
+     *                   entity on-demand. Null means no such information exists.
      */
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related,
-                                final Supplier<SellInfo> sellInfo) {
+            final Supplier<SellInfo> sellInfo) {
         this.investment = investment;
         this.related = Memoizer.memoize(related);
         this.sellInfo = sellInfo == null ? null : Memoizer.memoize(sellInfo);
@@ -75,7 +78,8 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
     }
 
     private Money getRemainingPrincipal() {
-        return investment.getRemainingPrincipal().orElseThrow();
+        return investment.getRemainingPrincipal()
+            .orElseThrow();
     }
 
     public Optional<RecommendedInvestment> recommend() {
@@ -115,4 +119,3 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
         return Objects.hash(investment);
     }
 }
-

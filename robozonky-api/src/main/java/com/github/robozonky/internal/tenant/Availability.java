@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,25 +23,28 @@ public interface Availability {
 
     /**
      * @return The next time when the app should check for availability. In the meantime, no operations should
-     * be attempted.
+     *         be attempted.
      */
     Instant nextAvailabilityCheck();
 
     /**
      * Whether or not the app is available.
+     * 
      * @return False if the app is considered in downtime.
      */
     boolean isAvailable();
 
     /**
      * Report that the app's operation has finished successfully.
+     * 
      * @return Empty if {@link #isAvailable()} is true, or when it is decided that the unavailability should continue.
-     * Otherwise {@link #isAvailable()} becomes true.
+     *         Otherwise {@link #isAvailable()} becomes true.
      */
     Optional<Instant> registerSuccess();
 
     /**
      * Report an error during the app's operation.
+     * 
      * @param ex The exception that caused the unavailability.
      * @return True if {@link #isAvailable()} changed its value as a result of this call.
      */

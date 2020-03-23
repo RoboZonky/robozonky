@@ -16,10 +16,10 @@
 
 package com.github.robozonky.strategy.natural;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import org.junit.jupiter.api.Test;
 
 class RoboZonkyVersionTest {
 
@@ -27,11 +27,16 @@ class RoboZonkyVersionTest {
     void comparator() {
         final RoboZonkyVersion current = new RoboZonkyVersion("4.1.0");
         assertSoftly(softly -> {
-            softly.assertThat(current).isGreaterThan(new RoboZonkyVersion("3.9.9"));
-            softly.assertThat(current).isEqualByComparingTo(current);
-            softly.assertThat(current).isLessThan(new RoboZonkyVersion("4.1.1"));
-            softly.assertThat(current).isLessThan(new RoboZonkyVersion("4.2.0"));
-            softly.assertThat(current).isLessThan(new RoboZonkyVersion("5.4.3"));
+            softly.assertThat(current)
+                .isGreaterThan(new RoboZonkyVersion("3.9.9"));
+            softly.assertThat(current)
+                .isEqualByComparingTo(current);
+            softly.assertThat(current)
+                .isLessThan(new RoboZonkyVersion("4.1.1"));
+            softly.assertThat(current)
+                .isLessThan(new RoboZonkyVersion("4.2.0"));
+            softly.assertThat(current)
+                .isLessThan(new RoboZonkyVersion("5.4.3"));
         });
     }
 
@@ -51,15 +56,24 @@ class RoboZonkyVersionTest {
     void equality() {
         final RoboZonkyVersion current = new RoboZonkyVersion("4.1.0");
         assertSoftly(softly -> {
-            softly.assertThat(current).isEqualTo(current);
-            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0"));
-            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-SNAPSHOT")); // SNAPSHOTs do not matter
-            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-alpha-1")); // alphas do not matter
-            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-beta-1")); // betas do not matter
-            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-cr-1")); // CRs do not matter
-            softly.assertThat(current).isNotEqualTo(null);
-            softly.assertThat(current).isNotEqualTo("something");
-            softly.assertThat(current).isNotEqualTo(new RoboZonkyVersion("4.1.1"));
+            softly.assertThat(current)
+                .isEqualTo(current);
+            softly.assertThat(current)
+                .isEqualTo(new RoboZonkyVersion("4.1.0"));
+            softly.assertThat(current)
+                .isEqualTo(new RoboZonkyVersion("4.1.0-SNAPSHOT")); // SNAPSHOTs do not matter
+            softly.assertThat(current)
+                .isEqualTo(new RoboZonkyVersion("4.1.0-alpha-1")); // alphas do not matter
+            softly.assertThat(current)
+                .isEqualTo(new RoboZonkyVersion("4.1.0-beta-1")); // betas do not matter
+            softly.assertThat(current)
+                .isEqualTo(new RoboZonkyVersion("4.1.0-cr-1")); // CRs do not matter
+            softly.assertThat(current)
+                .isNotEqualTo(null);
+            softly.assertThat(current)
+                .isNotEqualTo("something");
+            softly.assertThat(current)
+                .isNotEqualTo(new RoboZonkyVersion("4.1.1"));
         });
     }
 }

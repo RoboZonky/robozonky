@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,9 @@ import com.github.robozonky.strategy.natural.Wrapper;
  */
 public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable<MarketplaceFilter> {
 
-    private static final Comparator<MarketplaceFilter> COMPARATOR =
-            Comparator.comparing(MarketplaceFilter::mayRequireRemoteRequests)
-                    .thenComparing(f -> f.id);
+    private static final Comparator<MarketplaceFilter> COMPARATOR = Comparator
+        .comparing(MarketplaceFilter::mayRequireRemoteRequests)
+        .thenComparing(f -> f.id);
     private static AtomicInteger COUNTER = new AtomicInteger(0);
 
     private final int id = COUNTER.incrementAndGet();
@@ -64,24 +64,25 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
 
     private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
         return conditions.stream()
-                .map(MarketplaceFilterCondition::toString)
-                .collect(Collectors.joining(" and "));
+            .map(MarketplaceFilterCondition::toString)
+            .collect(Collectors.joining(" and "));
     }
 
     /**
      * @param conditions
      * @return Collection of conditions with a stable iteration order, where the conditions that do not require HTTP
-     * requests come first.
+     *         requests come first.
      */
     private static Set<MarketplaceFilterCondition> processConditions(
             final Collection<? extends MarketplaceFilterCondition> conditions) {
         return conditions.stream()
-                .sorted()
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            .sorted()
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
      * {@link #test(Wrapper)} will only return true if all of the conditions supplied here return true.
+     * 
      * @param conditions All must return true for filter to return true.
      */
     public void when(final Collection<? extends MarketplaceFilterCondition> conditions) {
@@ -91,6 +92,7 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
     /**
      * {@link #test(Wrapper)} will only return true if {@link #when(Collection)} and none of the conditions
      * supplied here return true.
+     * 
      * @param conditions All must return false for filter to return true.
      */
     public void butNotWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
@@ -100,7 +102,7 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
     @Override
     public boolean mayRequireRemoteRequests() {
         return Stream.concat(when.stream(), butNotWhen.stream())
-                .anyMatch(MarketplaceFilterCondition::mayRequireRemoteRequests);
+            .anyMatch(MarketplaceFilterCondition::mayRequireRemoteRequests);
     }
 
     @Override
@@ -110,13 +112,17 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
 
     /**
      * Whether or not the item matches the complex condition.
+     * 
      * @param item Item in question.
      * @return True when all {@link #when} true AND 1+ {@link #butNotWhen} false.
      */
     @Override
     public boolean test(final Wrapper<?> item) {
         final Predicate<MarketplaceFilterCondition> f = c -> c.test(item);
-        return when.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
+        return when.stream()
+            .allMatch(f) &&
+                (butNotWhen.isEmpty() || !butNotWhen.stream()
+                    .allMatch(f));
     }
 
     @Override
@@ -127,6 +133,7 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
     @Override
     public String toString() {
         final String description = getDescription().orElse("N/A.");
-        return this.getClass().getSimpleName() + " (" + description + ")";
+        return this.getClass()
+            .getSimpleName() + " (" + description + ")";
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.strategies.Descriptor;
-import com.github.robozonky.api.strategies.Recommended;
-import com.github.robozonky.app.tenant.PowerTenant;
-import org.apache.logging.log4j.Logger;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.remote.ControlApi;
+import com.github.robozonky.api.strategies.Descriptor;
+import com.github.robozonky.api.strategies.Recommended;
+import com.github.robozonky.app.tenant.PowerTenant;
 
 abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
 
@@ -36,7 +37,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
     private final Collection<S> stillAvailable;
 
     protected AbstractSession(final Collection<S> originallyAvailable, final PowerTenant tenant,
-                              final SessionState<S> state, final Logger logger) {
+            final SessionState<S> state, final Logger logger) {
         this.tenant = tenant;
         this.discarded = state;
         this.stillAvailable = new ArrayList<>(originallyAvailable);
@@ -46,6 +47,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
     /**
      * Get items that are available to be evaluated by the strategy. These are items that come from the marketplace,
      * minus items that are already {@link #discard(Descriptor)}ed.
+     * 
      * @return Items in the marketplace in which the user could still potentially invest. Unmodifiable.
      */
     Collection<S> getAvailable() {
@@ -59,19 +61,22 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
     }
 
     protected boolean isBalanceAcceptable(final T item) {
-        return item.amount().compareTo(tenant.getKnownBalanceUpperBound()) <= 0;
+        return item.amount()
+            .compareTo(tenant.getKnownBalanceUpperBound()) <= 0;
     }
 
     /**
      * Request {@link ControlApi} to invest in a given item.
+     * 
      * @param recommendation Item to invest into.
      * @return True if investment successful. The investment is reflected in {@link #getResult()} and removed from
-     * {@link #getAvailable()}.
+     *         {@link #getAvailable()}.
      */
     protected abstract boolean accept(final T recommendation);
 
     /**
      * Get investments made during this session.
+     * 
      * @return Investments made so far during this session. Unmodifiable.
      */
     List<X> getResult() {

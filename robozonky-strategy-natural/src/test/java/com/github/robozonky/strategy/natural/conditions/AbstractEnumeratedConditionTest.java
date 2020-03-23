@@ -16,17 +16,18 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import com.github.robozonky.strategy.natural.Wrapper;
 
 class AbstractEnumeratedConditionTest {
 
@@ -34,8 +35,7 @@ class AbstractEnumeratedConditionTest {
         return Stream.of(
                 dynamicTest("has description", () -> nonEmptyDescription(spec)),
                 dynamicTest("works with collection", () -> properAsCollection(spec)),
-                dynamicTest("works with single item", () -> properAsOne(spec))
-        );
+                dynamicTest("works with single item", () -> properAsOne(spec)));
     }
 
     private static <T> void properAsCollection(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
@@ -58,15 +58,18 @@ class AbstractEnumeratedConditionTest {
     }
 
     private static <T> void nonEmptyDescription(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
-        assertThat(spec.getImplementation().getDescription()).isPresent();
+        assertThat(spec.getImplementation()
+            .getDescription()).isPresent();
     }
 
     @TestFactory
     Stream<DynamicNode> conditions() {
         return Stream.of(new BorrowerIncomeConditionSpec(), new BorrowerRegionConditionSpec(),
-                         new LoanPurposeConditionSpec(), new LoanRatingEnumeratedConditionSpec(),
-                         new HealthConditionSpec())
-                .map(spec -> dynamicContainer(spec.getImplementation().getClass().getSimpleName(), forSpec(spec)));
+                new LoanPurposeConditionSpec(), new LoanRatingEnumeratedConditionSpec(),
+                new HealthConditionSpec())
+            .map(spec -> dynamicContainer(spec.getImplementation()
+                .getClass()
+                .getSimpleName(), forSpec(spec)));
     }
 
     public interface ConditionSpec<T> {

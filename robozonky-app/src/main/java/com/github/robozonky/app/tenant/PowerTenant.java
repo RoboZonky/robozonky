@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+import org.apache.logging.log4j.LogManager;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 /**
  * This is a {@link Tenant} extension which allows to easily fire {@link SessionEvent}s. Events are fired when requested
@@ -38,6 +39,7 @@ public interface PowerTenant extends Tenant {
     /**
      * Upgrade {@link Tenant} from the semantics of {@link PowerTenant} to the semantics of
      * {@link TransactionalPowerTenant}.
+     * 
      * @param tenant Tenant to convert.
      * @return If the instance already is a {@link TransactionalPowerTenant}, the same instance is returned.
      */
@@ -57,14 +59,16 @@ public interface PowerTenant extends Tenant {
             try {
                 transactional.abort();
             } catch (final Exception ex2) {
-                LogManager.getLogger(PowerTenant.class).debug("Failed aborting transaction.", ex2);
+                LogManager.getLogger(PowerTenant.class)
+                    .debug("Failed aborting transaction.", ex2);
             }
             throw ex;
         } finally {
             try {
                 transactional.close();
             } catch (final Exception ex) {
-                LogManager.getLogger(PowerTenant.class).debug("Failed closing transaction.", ex);
+                LogManager.getLogger(PowerTenant.class)
+                    .debug("Failed closing transaction.", ex);
             }
         }
     }
@@ -75,6 +79,7 @@ public interface PowerTenant extends Tenant {
 
     /**
      * See {@link SessionEvents#fire(SessionEvent)} for the semantics of this method.
+     * 
      * @param event
      * @return
      */
@@ -82,6 +87,7 @@ public interface PowerTenant extends Tenant {
 
     /**
      * See {@link SessionEvents#fire(LazyEvent)} for the semantics of this method.
+     * 
      * @param event
      * @return
      */

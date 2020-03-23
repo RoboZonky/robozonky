@@ -16,16 +16,17 @@
 
 package com.github.robozonky.internal.extensions;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.net.URLClassLoader;
 import java.util.ServiceLoader;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.notifications.ListenerService;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.api.notifications.ListenerService;
 
 class ExtensionsManagerTest {
 
@@ -39,15 +40,16 @@ class ExtensionsManagerTest {
 
     @Test
     void noExtensionsWithFolderPresent() {
-        final Supplier<ServiceLoader<ListenerService>> result =
-                ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
+        final Supplier<ServiceLoader<ListenerService>> result = ExtensionsManager.INSTANCE
+            .getServiceLoader(ListenerService.class);
         assertThat(result.get()).isNotNull();
     }
 
     @Test
     void noExtensionsWithFolderMissing() {
-        final ServiceLoader<ListenerService> result =
-                ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class, UUID.randomUUID().toString());
+        final ServiceLoader<ListenerService> result = ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class,
+                UUID.randomUUID()
+                    .toString());
         assertThat(result).isNotNull();
     }
 

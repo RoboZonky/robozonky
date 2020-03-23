@@ -16,6 +16,8 @@
 
 package com.github.robozonky.test.mock;
 
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Currency;
@@ -30,8 +32,6 @@ import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
-import static org.mockito.Mockito.*;
-
 public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInvestmentBuilder> {
 
     public static MockInvestmentBuilder fresh() {
@@ -44,23 +44,24 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
 
     public static MockInvestmentBuilder fresh(final Loan loan, final BigDecimal invested) {
         return fresh()
-                .setId(RANDOM.nextInt())
-                .setLoanId(loan.getId())
-                .setInterestRate(loan.getInterestRate())
-                .setRevenueRate(loan.getRevenueRate().orElse(null))
-                .setCurrency(loan.getCurrency())
-                .setAmount(invested)
-                .setLoanAnnuity(loan.getAnnuity())
-                .setLoanAmount(loan.getAmount())
-                .setLoanTermInMonth(loan.getTermInMonths())
-                .setRemainingPrincipal(invested)
-                .setPurchasePrice(invested)
-                .setRating(loan.getRating())
-                .setPaidInterest(BigDecimal.ZERO)
-                .setPaidPenalty(BigDecimal.ZERO)
-                .setPaidPrincipal(BigDecimal.ZERO)
-                .setInvestmentDate(OffsetDateTime.now())
-                .setInsuranceActive(loan.isInsuranceActive());
+            .setId(RANDOM.nextInt())
+            .setLoanId(loan.getId())
+            .setInterestRate(loan.getInterestRate())
+            .setRevenueRate(loan.getRevenueRate()
+                .orElse(null))
+            .setCurrency(loan.getCurrency())
+            .setAmount(invested)
+            .setLoanAnnuity(loan.getAnnuity())
+            .setLoanAmount(loan.getAmount())
+            .setLoanTermInMonth(loan.getTermInMonths())
+            .setRemainingPrincipal(invested)
+            .setPurchasePrice(invested)
+            .setRating(loan.getRating())
+            .setPaidInterest(BigDecimal.ZERO)
+            .setPaidPenalty(BigDecimal.ZERO)
+            .setPaidPrincipal(BigDecimal.ZERO)
+            .setInvestmentDate(OffsetDateTime.now())
+            .setInsuranceActive(loan.isInsuranceActive());
     }
 
     public MockInvestmentBuilder() {
@@ -136,7 +137,6 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
         when(mock.isOnSmp()).thenReturn(isOnSmp);
         return this;
     }
-
 
     public MockInvestmentBuilder setStatus(final InvestmentStatus status) {
         when(mock.getStatus()).thenReturn(status);

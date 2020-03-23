@@ -33,7 +33,8 @@ class PortfolioShare {
     }
 
     private static void assertIsInRange(final Ratio ratio) {
-        final double actual = ratio.asPercentage().doubleValue();
+        final double actual = ratio.asPercentage()
+            .doubleValue();
         if (actual < 0 || actual > 100) {
             throw new IllegalArgumentException("Portfolio share must be in range of <0; 100>.");
         }
@@ -50,8 +51,8 @@ class PortfolioShare {
     @Override
     public String toString() {
         return new StringJoiner(", ", PortfolioShare.class.getSimpleName() + "[", "]")
-                .add("permitted=" + permitted)
-                .add("rating=" + rating)
-                .toString();
+            .add("permitted=" + permitted)
+            .add("rating=" + rating)
+            .toString();
     }
 }

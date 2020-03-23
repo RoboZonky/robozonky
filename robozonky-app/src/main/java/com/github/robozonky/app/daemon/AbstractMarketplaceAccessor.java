@@ -23,15 +23,17 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.Logger;
 
 /**
  * The purpose of this is that marketplace checks are coupled to information about latest updates to those marketplaces.
  * Each instance of an implementing class may decide to cache or otherwise alter the marketplace during
  * {@link #hasUpdates()} and only ever return that in {@link #getMarketplace()}.
+ * 
  * @param <T> Type of the entity coming from the marketplace.
  */
 abstract class AbstractMarketplaceAccessor<T> {
@@ -41,16 +43,17 @@ abstract class AbstractMarketplaceAccessor<T> {
     protected Select getIncrementalFilter() {
         Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
         Instant now = DateUtil.now();
-        if (lastFullMarketplaceCheck.plus(getForcedMarketplaceCheckInterval()).isBefore(now)) {
+        if (lastFullMarketplaceCheck.plus(getForcedMarketplaceCheckInterval())
+            .isBefore(now)) {
             Instant newTimestamp = now.truncatedTo(ChronoUnit.SECONDS); // Go a couple millis back.
             lastFullMarketplaceCheckReference.set(newTimestamp);
             getLogger().debug("Running full marketplace check with timestamp of {}, previous was {}.", newTimestamp,
-                              lastFullMarketplaceCheck);
+                    lastFullMarketplaceCheck);
             return getBaseFilter();
         } else {
             var filter = getBaseFilter()
-                    .greaterThanOrEquals("datePublished",
-                                         OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
+                .greaterThanOrEquals("datePublished",
+                        OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
             getLogger().debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
             return filter;
         }

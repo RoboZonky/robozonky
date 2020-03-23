@@ -16,16 +16,17 @@
 
 package com.github.robozonky.app.runtime;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.concurrent.CountDownLatch;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class LifecycleTest extends AbstractEventLeveragingTest {
 
@@ -40,19 +41,23 @@ class LifecycleTest extends AbstractEventLeveragingTest {
     void suspendAndResumeToFail() throws InterruptedException {
         assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNull();
         final CountDownLatch cdl = mock(CountDownLatch.class);
-        doThrow(InterruptedException.class).when(cdl).await();
+        doThrow(InterruptedException.class).when(cdl)
+            .await();
         final Lifecycle c = new Lifecycle(cdl, new ShutdownHook());
         assertThat(c.isFailed()).isFalse();
         c.suspend();
         verify(cdl).countDown();
         assertSoftly(softly -> {
-            softly.assertThat(Lifecycle.countShutdownHooks()).isEqualTo(1);
-            softly.assertThat(Thread.getDefaultUncaughtExceptionHandler()).isNotNull();
-            softly.assertThat(c.isFailed()).isTrue();
+            softly.assertThat(Lifecycle.countShutdownHooks())
+                .isEqualTo(1);
+            softly.assertThat(Thread.getDefaultUncaughtExceptionHandler())
+                .isNotNull();
+            softly.assertThat(c.isFailed())
+                .isTrue();
             softly.assertThat(getEventsRequested())
-                    .hasSize(1)
-                    .first()
-                    .isInstanceOf(RoboZonkyCrashedEvent.class);
+                .hasSize(1)
+                .first()
+                .isInstanceOf(RoboZonkyCrashedEvent.class);
         });
     }
 }

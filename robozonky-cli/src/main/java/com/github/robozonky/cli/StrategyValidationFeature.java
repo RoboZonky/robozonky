@@ -16,6 +16,9 @@
 
 package com.github.robozonky.cli;
 
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -26,15 +29,12 @@ import com.github.robozonky.internal.extensions.StrategyLoader;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
 
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Option;
-
 @Command(name = "strategy-validator", description = StrategyValidationFeature.DESCRIPTION)
 public final class StrategyValidationFeature extends AbstractFeature {
 
     static final String DESCRIPTION = "Validate a strategy file.";
 
-    @Option(names = {"-l", "--location"}, description = "URL leading to the strategy.", required = true)
+    @Option(names = { "-l", "--location" }, description = "URL leading to the strategy.", required = true)
     private URL location;
     private String text;
     private LongAdder adder = new LongAdder();
@@ -44,7 +44,8 @@ public final class StrategyValidationFeature extends AbstractFeature {
     }
 
     public StrategyValidationFeature(final File location) throws MalformedURLException {
-        this(location.toURI().toURL());
+        this(location.toURI()
+            .toURL());
     }
 
     StrategyValidationFeature(final File location, final LongAdder adder) throws MalformedURLException {
@@ -78,10 +79,14 @@ public final class StrategyValidationFeature extends AbstractFeature {
     @Override
     public void test() throws TestFailedException {
         adder.reset();
-        StrategyLoader.toInvest(text).ifPresent(s -> report(adder, "Investing"));
-        StrategyLoader.toPurchase(text).ifPresent(s -> report(adder, "Purchasing"));
-        StrategyLoader.toSell(text).ifPresent(s -> report(adder, "Selling"));
-        StrategyLoader.forReservations(text).ifPresent(s -> report(adder, "Reservation system"));
+        StrategyLoader.toInvest(text)
+            .ifPresent(s -> report(adder, "Investing"));
+        StrategyLoader.toPurchase(text)
+            .ifPresent(s -> report(adder, "Purchasing"));
+        StrategyLoader.toSell(text)
+            .ifPresent(s -> report(adder, "Selling"));
+        StrategyLoader.forReservations(text)
+            .ifPresent(s -> report(adder, "Reservation system"));
         if (adder.sum() == 0) {
             throw new TestFailedException("No strategies found. Check log for possible parser errors.");
         }

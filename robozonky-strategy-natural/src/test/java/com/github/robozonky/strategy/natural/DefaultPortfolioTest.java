@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
 
 class DefaultPortfolioTest {
 
@@ -41,12 +42,12 @@ class DefaultPortfolioTest {
     private static Stream<DynamicTest> forRating(final Rating r) {
         return Stream.of(
                 dynamicTest("has value", () -> hasValue(DefaultPortfolio.EMPTY, r)),
-                dynamicTest("has unknown value", () -> unknownValue(DefaultPortfolio.EMPTY))
-        );
+                dynamicTest("has unknown value", () -> unknownValue(DefaultPortfolio.EMPTY)));
     }
 
     @TestFactory
     Stream<DynamicNode> ratings() {
-        return Stream.of(Rating.values()).map(r -> dynamicContainer(r.toString(), forRating(r)));
+        return Stream.of(Rating.values())
+            .map(r -> dynamicContainer(r.toString(), forRating(r)));
     }
 }

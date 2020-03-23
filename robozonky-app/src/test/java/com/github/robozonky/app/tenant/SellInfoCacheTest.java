@@ -16,12 +16,17 @@
 
 package com.github.robozonky.app.tenant;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.SellFee;
@@ -31,10 +36,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -127,12 +128,13 @@ class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(instant, Defaults.ZONE_ID));
         final long id = 3;
         final Zonky z = harmlessZonky();
-        doThrow(IllegalStateException.class).when(z).getSellInfo(eq(id));
+        doThrow(IllegalStateException.class).when(z)
+            .getSellInfo(eq(id));
         final Tenant t = mockTenant(z);
         final Cache<SellInfo> c = Cache.forSellInfo(t);
         assertThatThrownBy(() -> c.get(id))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("SellInfo")
-                .hasMessageContaining(String.valueOf(id));
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("SellInfo")
+            .hasMessageContaining(String.valueOf(id));
     }
 }

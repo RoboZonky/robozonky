@@ -16,10 +16,10 @@
 
 package com.github.robozonky.app.version;
 
+import static org.assertj.core.api.Assertions.*;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class ResponseTest {
 
@@ -27,9 +27,12 @@ class ResponseTest {
     void equality() {
         final Response r = Response.noMoreRecentVersion();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(r).isNotEqualTo(null);
-            softly.assertThat(r).isEqualTo(r);
-            softly.assertThat(r).isEqualTo(Response.noMoreRecentVersion());
+            softly.assertThat(r)
+                .isNotEqualTo(null);
+            softly.assertThat(r)
+                .isEqualTo(r);
+            softly.assertThat(r)
+                .isEqualTo(Response.noMoreRecentVersion());
         });
         final Response r2 = Response.moreRecentStable("5.7.0");
         final Response r3 = Response.moreRecentStable("5.8.0");

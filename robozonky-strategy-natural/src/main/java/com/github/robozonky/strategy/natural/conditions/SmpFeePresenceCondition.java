@@ -25,7 +25,9 @@ public final class SmpFeePresenceCondition extends AbstractBooleanCondition {
     public static final MarketplaceFilterCondition NOT_PRESENT = new SmpFeePresenceCondition(false);
 
     private SmpFeePresenceCondition(final boolean expectPresent) {
-        super(w -> w.getSellFee().orElse(BigDecimal.ZERO).signum() > 0, expectPresent);
+        super(w -> w.getSellFee()
+            .orElse(BigDecimal.ZERO)
+            .signum() > 0, expectPresent);
     }
 
     @Override

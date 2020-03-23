@@ -19,12 +19,13 @@ package com.github.robozonky.app.events.impl;
 import java.time.OffsetDateTime;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Memoizer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
 
@@ -39,7 +40,7 @@ final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
         this.supplier = Memoizer.memoize(() -> {
             LOGGER.trace("Instantiating {}.", eventType);
             final T result = eventSupplier.get();
-            ((AbstractEventImpl)result).setConceivedOn(conceivedOn); // make the event aware of when it was requested
+            ((AbstractEventImpl) result).setConceivedOn(conceivedOn); // make the event aware of when it was requested
             LOGGER.trace("Instantiated to {}.", result);
             return result;
         });

@@ -40,14 +40,16 @@ public interface Tenant extends AutoCloseable {
 
     /**
      * Execute an operation using on the Zonky server.
+     * 
      * @param operation Operation to execute. It is expected to be stateless and limited solely to the remote call.
-     * @param <T> Return type of the operation.
+     * @param <T>       Return type of the operation.
      * @return Whatever the operation returned.
      */
     <T> T call(final Function<Zonky, T> operation);
 
     /**
      * Execute an operation using the Zonky server.
+     * 
      * @param operation Operation to execute. It is expected to be stateless and limited solely to the remote call.
      */
     default void run(final Consumer<Zonky> operation) {
@@ -61,6 +63,7 @@ public interface Tenant extends AutoCloseable {
      * cached for a period of time, but it is very important that the data is all loaded at the same time - otherwise
      * the robot will have been operating over an inconsistent view of the data, where a sum of blocked amounts doesn't
      * fully match the available balance.
+     * 
      * @return
      */
     RemotePortfolio getPortfolio();
@@ -80,6 +83,7 @@ public interface Tenant extends AutoCloseable {
     /**
      * Retrieve a {@link Loan} from Zonky, possibly caching it in the process. If you don't wish to cache it,
      * simply use {@link #call(Function)} to get to {@link Zonky#getLoan(int)}.
+     * 
      * @param loanId
      * @return
      */
@@ -90,6 +94,7 @@ public interface Tenant extends AutoCloseable {
     /**
      * Retrieve a {@link SellInfo} from Zonky, possibly caching it in the process. If you don't wish to cache it,
      * simply use {@link #call(Function)} to get to {@link Zonky#getSellInfo(long)}.
+     * 
      * @param investmentId
      * @return
      */

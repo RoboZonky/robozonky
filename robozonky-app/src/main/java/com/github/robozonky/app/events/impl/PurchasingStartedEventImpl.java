@@ -37,8 +37,8 @@ final class PurchasingStartedEventImpl extends AbstractEventImpl implements Purc
     @Override
     public String toString() {
         return new StringJoiner(", ", PurchasingStartedEventImpl.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("portfolioOverview=" + portfolioOverview)
-                .toString();
+            .add("super=" + super.toString())
+            .add("portfolioOverview=" + portfolioOverview)
+            .toString();
     }
 }

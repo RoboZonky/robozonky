@@ -68,7 +68,8 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     @Override
     public Ratio getRevenueRate() {
-        return reservation.getRevenueRate().orElseGet(this::estimateRevenueRate);
+        return reservation.getRevenueRate()
+            .orElseGet(this::estimateRevenueRate);
     }
 
     @Override
@@ -93,12 +94,16 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     @Override
     public int getOriginalAmount() {
-        return reservation.getAmount().getValue().intValue();
+        return reservation.getAmount()
+            .getValue()
+            .intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return reservation.getAnnuity().getValue().intValue();
+        return reservation.getAnnuity()
+            .getValue()
+            .intValue();
     }
 
     @Override

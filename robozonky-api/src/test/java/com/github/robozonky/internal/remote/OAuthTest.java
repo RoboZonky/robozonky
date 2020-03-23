@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.api.remote.ZonkyOAuthApi;
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.remote.ZonkyOAuthApi;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 class OAuthTest {
 
@@ -39,14 +40,16 @@ class OAuthTest {
         final ZonkyApiToken token = oauth.login(PASSWORD.toCharArray());
         assertThat(token).isNotNull();
         verify(api, times(1))
-                .login(eq(PASSWORD), any(), eq("authorization_code"));
+            .login(eq(PASSWORD), any(), eq("authorization_code"));
     }
 
     @Test
     void refresh() {
-        final String originalTokenId = UUID.randomUUID().toString();
-        final ZonkyApiToken originToken = new ZonkyApiToken(UUID.randomUUID().toString(), originalTokenId,
-                                                            OffsetDateTime.now());
+        final String originalTokenId = UUID.randomUUID()
+            .toString();
+        final ZonkyApiToken originToken = new ZonkyApiToken(UUID.randomUUID()
+            .toString(), originalTokenId,
+                OffsetDateTime.now());
         final ZonkyApiToken resultToken = mock(ZonkyApiToken.class);
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
         when(api.refresh(eq(originalTokenId), anyString())).thenReturn(resultToken);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,31 @@
 
 package com.github.robozonky.notifications;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.io.IOException;
 
-import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
 
 class ConfigStorageTest {
 
     @Test
     void equality() throws IOException {
         final ConfigStorage cs = ConfigStorage.create(RoboZonkyTestingEventListener.class
-                                                              .getResourceAsStream("notifications-enabled.cfg"));
+            .getResourceAsStream("notifications-enabled.cfg"));
         assertThat(cs).isEqualTo(cs);
         assertThat(cs).isNotEqualTo(null);
         assertThat(cs).isNotEqualTo("");
         final ConfigStorage cs2 = ConfigStorage.create(RoboZonkyTestingEventListener.class
-                                                               .getResourceAsStream("notifications-enabled.cfg"));
+            .getResourceAsStream("notifications-enabled.cfg"));
         assertThat(cs).isEqualTo(cs2);
         assertThat(cs2).isEqualTo(cs);
         final ConfigStorage cs3 = ConfigStorage.create(RoboZonkyTestingEventListener.class
-                                                               .getResourceAsStream(
-                                                                       "notifications-enabled-spamless.cfg"));
+            .getResourceAsStream(
+                    "notifications-enabled-spamless.cfg"));
         assertThat(cs).isNotEqualTo(cs3);
         assertThat(cs3).isNotEqualTo(cs);
     }

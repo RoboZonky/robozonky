@@ -38,17 +38,17 @@ public interface Wrapper<T> {
     }
 
     static Wrapper<InvestmentDescriptor> wrap(final InvestmentDescriptor descriptor,
-                                              final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new InvestmentWrapper(descriptor, portfolioOverview);
     }
 
     static Wrapper<ParticipationDescriptor> wrap(final ParticipationDescriptor descriptor,
-                                                 final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new ParticipationWrapper(descriptor, portfolioOverview);
     }
 
     static Wrapper<ReservationDescriptor> wrap(final ReservationDescriptor descriptor,
-                                               final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         return new ReservationWrapper(descriptor, portfolioOverview);
     }
 

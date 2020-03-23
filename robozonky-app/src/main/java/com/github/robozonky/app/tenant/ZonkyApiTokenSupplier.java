@@ -19,17 +19,19 @@ package com.github.robozonky.app.tenant;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Will keep permanent user authentication running in the background.
@@ -49,15 +51,17 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         this.apis = apis;
         this.secrets = secrets;
         this.token = Reloadable.with(this::refreshOrFail)
-                .reloadAfter(ZonkyApiTokenSupplier::reloadAfter)
-                .finishWith(secrets::setToken)
-                .build();
+            .reloadAfter(ZonkyApiTokenSupplier::reloadAfter)
+            .finishWith(secrets::setToken)
+            .build();
     }
 
     static Duration reloadAfter(final ZonkyApiToken token) {
         var now = DateUtil.offsetNow();
         var expiresOn = token.getExpiresOn();
-        var halfLife = Duration.between(now, expiresOn).abs().dividedBy(2);
+        var halfLife = Duration.between(now, expiresOn)
+            .abs()
+            .dividedBy(2);
         if (halfLife.compareTo(ONE_HOUR) > 0) {
             return ONE_HOUR;
         } else {
@@ -67,7 +71,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     private static NotAuthorizedException createException(final String message) {
         var response = Response.status(401, message)
-                .build();
+            .build();
         return new NotAuthorizedException(response);
     }
 
@@ -81,8 +85,8 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
 
     private ZonkyApiToken refreshOrFail() {
         return secrets.getToken()
-                .map(this::refreshOrFail)
-                .orElseThrow(() -> createException("No token found."));
+            .map(this::refreshOrFail)
+            .orElseThrow(() -> createException("No token found."));
     }
 
     private ZonkyApiToken refreshOrFail(final ZonkyApiToken token) {
@@ -92,7 +96,8 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         }
         LOGGER.debug("Current token {} expiring on {}.", token, token.getExpiresOn());
         final ZonkyApiToken newToken = apis.oauth(oauth -> oauth.refresh(token));
-        LOGGER.info("Refreshed access token for '{}', will expire on {}.", secrets.getUsername(), newToken.getExpiresOn());
+        LOGGER.info("Refreshed access token for '{}', will expire on {}.", secrets.getUsername(),
+                newToken.getExpiresOn());
         secrets.setToken(newToken);
         return newToken;
     }
@@ -106,7 +111,8 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
         if (isClosed.get()) {
             throw createException("Token already closed.");
         }
-        return token.get().getOrElseThrow(ZonkyApiTokenSupplier::createException);
+        return token.get()
+            .getOrElseThrow(ZonkyApiTokenSupplier::createException);
     }
 
     @Override

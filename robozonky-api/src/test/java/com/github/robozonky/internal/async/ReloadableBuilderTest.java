@@ -16,54 +16,59 @@
 
 package com.github.robozonky.internal.async;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import com.github.robozonky.internal.util.functional.Either;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.internal.util.functional.Either;
 
 class ReloadableBuilderTest {
 
     @Test
     void asyncNoFinisher() {
         final Reloadable<String> s = Reloadable.with(() -> "")
-                .reloadAfter(Duration.ofSeconds(5))
-                .async()
-                .build();
+            .reloadAfter(Duration.ofSeconds(5))
+            .async()
+            .build();
         assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
     }
 
     @Test
     void asyncWithFinisher() {
         final Reloadable<String> s = Reloadable.with(() -> "")
-                .finishWith(x -> {
+            .finishWith(x -> {
 
-                })
-                .reloadAfter(Duration.ofSeconds(5))
-                .async()
-                .build();
+            })
+            .reloadAfter(Duration.ofSeconds(5))
+            .async()
+            .build();
         assertThat(s).isInstanceOf(AsyncReloadableImpl.class);
     }
 
     @Test
     void nonLazy() {
-        final String test = UUID.randomUUID().toString();
+        final String test = UUID.randomUUID()
+            .toString();
         final Supplier<String> supplier = () -> test;
-        final UnaryOperator<String> secondSupplier = old -> UUID.randomUUID().toString();
+        final UnaryOperator<String> secondSupplier = old -> UUID.randomUUID()
+            .toString();
         final Consumer<String> finisher = mock(Consumer.class);
         final Either<Throwable, Reloadable<String>> s = Reloadable.with(supplier)
-                .reloadWith(secondSupplier)
-                .finishWith(finisher)
-                .buildEager();
+            .reloadWith(secondSupplier)
+            .finishWith(finisher)
+            .buildEager();
         verify(finisher).accept(eq(test)); // value was fetched
         assertThat(s.get()).isNotNull();
-        assertThat(s.get().get().get()).isEqualTo(test);
+        assertThat(s.get()
+            .get()
+            .get()).isEqualTo(test);
         verify(finisher, times(1)).accept(eq(test)); // was not called again
     }
 }

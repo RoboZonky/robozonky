@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 
 /**
  * Represents state data specific to a given tenant and a given {@link Class}.
+ * 
  * @param <T> Class for which the state is kept.
  */
 public interface InstanceState<T> extends StateReader {
@@ -27,6 +28,7 @@ public interface InstanceState<T> extends StateReader {
     /**
      * Perform updates to state using a given modifier. Not guaranteed to happen immediately, {@link #getValue(String)}
      * may still reflect the state at instantiation.
+     * 
      * @param modifier Modifier to use.
      */
     void update(Consumer<StateModifier<T>> modifier);
@@ -34,6 +36,7 @@ public interface InstanceState<T> extends StateReader {
     /**
      * Perform updates to state using a given setter, deleting all pre-existing state information. Not guaranteed to
      * happen immediately, {@link #getValue(String)} may still reflect the state at instantiation.
+     * 
      * @param setter Modifier to use.
      */
     void reset(Consumer<StateModifier<T>> setter);

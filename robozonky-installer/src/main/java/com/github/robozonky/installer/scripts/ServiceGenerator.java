@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.installer.scripts;
 
+import static java.util.Map.entry;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,9 +25,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.github.robozonky.internal.Defaults;
-import freemarker.template.TemplateException;
 
-import static java.util.Map.entry;
+import freemarker.template.TemplateException;
 
 public enum ServiceGenerator implements Function<File, File> {
 
@@ -44,12 +45,11 @@ public enum ServiceGenerator implements Function<File, File> {
         try {
             final File root = execScript.getParentFile();
             final String result = TemplateProcessor.INSTANCE.process(filename + ".ftl",
-                                                                     Map.ofEntries(
-                                                                             entry("uid", ID),
-                                                                             entry("gid", ID),
-                                                                             entry("pwd", root.getAbsolutePath()),
-                                                                             entry("script", execScript)
-                                                                     ));
+                    Map.ofEntries(
+                            entry("uid", ID),
+                            entry("gid", ID),
+                            entry("pwd", root.getAbsolutePath()),
+                            entry("script", execScript)));
             final File target = new File(root, filename);
             Files.write(target.toPath(), result.getBytes(Defaults.CHARSET));
             return target.getAbsoluteFile();

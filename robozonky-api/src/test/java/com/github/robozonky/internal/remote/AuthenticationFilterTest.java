@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.internal.remote;
 
-import org.junit.jupiter.api.Test;
-
-import javax.ws.rs.client.ClientRequestContext;
-import java.net.URISyntaxException;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+
+import java.net.URISyntaxException;
+
+import javax.ws.rs.client.ClientRequestContext;
+
+import org.junit.jupiter.api.Test;
 
 class AuthenticationFilterTest extends AbstractCommonFilterTest {
 
@@ -35,7 +36,8 @@ class AuthenticationFilterTest extends AbstractCommonFilterTest {
     @Test
     void wasAuthorizationAdded() throws URISyntaxException {
         final ClientRequestContext crc = mockClientRequestContext();
-        this.getTestedFilter().filter(crc);
+        this.getTestedFilter()
+            .filter(crc);
         verify(crc.getHeaders()).putSingle(eq("Authorization"), any());
     }
 }

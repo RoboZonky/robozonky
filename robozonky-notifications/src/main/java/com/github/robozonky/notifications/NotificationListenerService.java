@@ -16,6 +16,8 @@
 
 package com.github.robozonky.notifications;
 
+import static com.github.robozonky.internal.Defaults.CHARSET;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -29,6 +31,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -36,10 +41,6 @@ import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.util.UrlUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import static com.github.robozonky.internal.Defaults.CHARSET;
 
 public final class NotificationListenerService implements ListenerService {
 
@@ -58,7 +59,8 @@ public final class NotificationListenerService implements ListenerService {
     private static String retrieve(final URL source) {
         LOGGER.debug("Reading notification configuration from '{}'.", source);
         try (var reader = new BufferedReader(new InputStreamReader(UrlUtil.open(source), CHARSET))) {
-            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            return reader.lines()
+                .collect(Collectors.joining(System.lineSeparator()));
         } catch (Exception ex) {
             throw new IllegalStateException("Failed reading notification configuration from " + source, ex);
         }
@@ -68,9 +70,9 @@ public final class NotificationListenerService implements ListenerService {
         try {
             var config = new URL(configLocation);
             var configStorage = Reloadable.with(() -> transform(retrieve(config)))
-                    .reloadAfter(Duration.ofHours(1))
-                    .async()
-                    .build();
+                .reloadAfter(Duration.ofHours(1))
+                .async()
+                .build();
             return Optional.of(configStorage);
         } catch (final MalformedURLException ex) {
             LOGGER.warn("Wrong notification configuration location.", ex);
@@ -87,30 +89,31 @@ public final class NotificationListenerService implements ListenerService {
                 return Optional.empty();
             }
             maybeConfig.flatMap(this::readConfig)
-                    .ifPresent(props -> {
-                        LOGGER.debug("Initializing notifications for '{}'.", username);
-                        configurations.put(username, props);
-                    });
+                .ifPresent(props -> {
+                    LOGGER.debug("Initializing notifications for '{}'.", username);
+                    configurations.put(username, props);
+                });
         }
         return Optional.ofNullable(configurations.get(username));
     }
 
     private <T extends Event> EventListenerSupplier<T> getEventListenerSupplier(final SessionInfo sessionInfo,
-                                                                                final Class<T> eventType,
-                                                                                final Target target) {
+            final Class<T> eventType,
+            final Target target) {
         var listenerSupplier = new NotificationEventListenerSupplier<>(eventType);
         return () -> {
             getTenantConfiguration(sessionInfo)
-                    .map(reloadable -> reloadable.get().fold(ex -> null, Function.identity()))
-                    .ifPresentOrElse(listenerSupplier::configure, listenerSupplier::disable);
+                .map(reloadable -> reloadable.get()
+                    .fold(ex -> null, Function.identity()))
+                .ifPresentOrElse(listenerSupplier::configure, listenerSupplier::disable);
             return Optional.ofNullable(listenerSupplier.apply(target));
         };
     }
 
     @Override
     public <T extends Event> Stream<EventListenerSupplier<T>> findListeners(final SessionInfo sessionInfo,
-                                                                            final Class<T> eventType) {
+            final Class<T> eventType) {
         return Stream.of(Target.values())
-                .map(target -> getEventListenerSupplier(sessionInfo, eventType, target));
+            .map(target -> getEventListenerSupplier(sessionInfo, eventType, target));
     }
 }

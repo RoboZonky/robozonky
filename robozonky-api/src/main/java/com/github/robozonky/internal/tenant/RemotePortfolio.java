@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package com.github.robozonky.internal.tenant;
 
+import java.util.Map;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-
-import java.util.Map;
 
 public interface RemotePortfolio {
 
     /**
      * Adjust {@link #getTotal()} temporarily to reflect an operation performed by the robot that was not yet retrieved
      * from the remote API.
+     * 
      * @param loanId
      * @param rating
      * @param amount
@@ -37,6 +38,7 @@ public interface RemotePortfolio {
 
     /**
      * Takes {@link #getTotal()} and summarizes it.
+     * 
      * @return
      */
     PortfolioOverview getOverview();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
 import javax.ws.rs.ClientErrorException;
 
 abstract class Result<T extends Predicate<ClientErrorException>> {
@@ -35,9 +36,9 @@ abstract class Result<T extends Predicate<ClientErrorException>> {
             this.failureType = getForUnknown();
         } else {
             this.failureType = getAll()
-                    .filter(f -> f.test(ex))
-                    .findFirst()
-                    .orElse(getForUnknown());
+                .filter(f -> f.test(ex))
+                .findFirst()
+                .orElse(getForUnknown());
         }
     }
 

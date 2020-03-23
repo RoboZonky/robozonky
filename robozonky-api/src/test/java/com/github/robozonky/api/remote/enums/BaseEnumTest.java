@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package com.github.robozonky.api.remote.enums;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class BaseEnumTest {
 
@@ -35,14 +35,17 @@ class BaseEnumTest {
     }
 
     private static <T extends BaseEnum> void wrong(final Function<String, T> converter) {
-        assertThatThrownBy(() -> converter.apply(UUID.randomUUID().toString()))
+        assertThatThrownBy(() -> converter.apply(UUID.randomUUID()
+            .toString()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     private static <T extends BaseEnum> Stream<DynamicTest> code(final Class<T> clz, final T[] instances,
-                                                                 final Function<String, T> converter) {
-        var test1 = Stream.of(instances).map(value -> dynamicTest("bidirectional " + value.getClass().getSimpleName() + '.' + value,
-                () -> bidirectionality(value, converter)));
+            final Function<String, T> converter) {
+        var test1 = Stream.of(instances)
+            .map(value -> dynamicTest("bidirectional " + value.getClass()
+                .getSimpleName() + '.' + value,
+                    () -> bidirectionality(value, converter)));
         var test2 = Stream.of(dynamicTest("wrong " + clz.getSimpleName(), () -> wrong(converter)));
         return Stream.concat(test1, test2);
     }
@@ -54,6 +57,7 @@ class BaseEnumTest {
         var rating = code(Rating.class, Rating.values(), Rating::findByCode);
         var region = code(Region.class, Region.values(), Region::findByCode);
         var country = code(Country.class, Country.values(), Country::findByCode);
-        return Stream.of(purpose, mainIncomeType, rating, region, country).flatMap(s -> s);
+        return Stream.of(purpose, mainIncomeType, rating, region, country)
+            .flatMap(s -> s);
     }
 }

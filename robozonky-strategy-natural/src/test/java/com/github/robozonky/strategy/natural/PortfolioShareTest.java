@@ -16,29 +16,32 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
 
 class PortfolioShareTest {
 
     @Test
     void rightBoundWrong() {
         assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(101)))
-                    .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(-1)))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void correct1() {
         final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ONE);
         assertSoftly(softly -> {
-            softly.assertThat(p.getPermitted()).isEqualTo(Ratio.ONE);
-            softly.assertThat(p.getRating()).isEqualTo(Rating.C);
+            softly.assertThat(p.getPermitted())
+                .isEqualTo(Ratio.ONE);
+            softly.assertThat(p.getRating())
+                .isEqualTo(Rating.C);
         });
     }
 
@@ -46,8 +49,10 @@ class PortfolioShareTest {
     void correct2() {
         final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ZERO);
         assertSoftly(softly -> {
-            softly.assertThat(p.getPermitted()).isEqualTo(Ratio.ZERO);
-            softly.assertThat(p.getRating()).isEqualTo(Rating.C);
+            softly.assertThat(p.getPermitted())
+                .isEqualTo(Ratio.ZERO);
+            softly.assertThat(p.getRating())
+                .isEqualTo(Rating.C);
         });
     }
 

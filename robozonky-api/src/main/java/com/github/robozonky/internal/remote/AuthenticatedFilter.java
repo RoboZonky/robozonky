@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import java.util.function.Supplier;
 
 import javax.ws.rs.client.ClientRequestContext;
-import java.util.function.Supplier;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 class AuthenticatedFilter extends RoboZonkyFilter {
 
@@ -32,7 +33,9 @@ class AuthenticatedFilter extends RoboZonkyFilter {
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) {
-        final char[] t = token == null ? AuthenticatedFilter.EMPTY_TOKEN  : token.get().getAccessToken();
+        final char[] t = token == null ? AuthenticatedFilter.EMPTY_TOKEN
+                : token.get()
+                    .getAccessToken();
         this.setRequestHeader("Authorization", "Bearer " + String.valueOf(t));
         super.filter(clientRequestContext);
     }

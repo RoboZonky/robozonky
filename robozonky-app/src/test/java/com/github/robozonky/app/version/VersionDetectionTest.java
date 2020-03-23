@@ -16,8 +16,15 @@
 
 package com.github.robozonky.app.version;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.List;
 import java.util.function.Supplier;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
@@ -25,12 +32,6 @@ import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.jobs.SimplePayload;
 import com.github.robozonky.internal.util.functional.Either;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class VersionDetectionTest extends AbstractEventLeveragingTest {
 
@@ -71,12 +72,12 @@ class VersionDetectionTest extends AbstractEventLeveragingTest {
             payload.run();
             final List<Event> events = getEventsRequested();
             assertThat(events)
-                    .hasSize(2)
-                    .first()
-                    .isInstanceOf(RoboZonkyUpdateDetectedEvent.class);
+                .hasSize(2)
+                .first()
+                .isInstanceOf(RoboZonkyUpdateDetectedEvent.class);
             assertThat(events)
-                    .last()
-                    .isInstanceOf(RoboZonkyExperimentalUpdateDetectedEvent.class);
+                .last()
+                .isInstanceOf(RoboZonkyExperimentalUpdateDetectedEvent.class);
         }
 
         @Nested
@@ -91,9 +92,9 @@ class VersionDetectionTest extends AbstractEventLeveragingTest {
             void triggerEvents() {
                 payload.run();
                 assertThat(getEventsRequested())
-                        .hasSize(1)
-                        .first()
-                        .isInstanceOf(RoboZonkyUpdateDetectedEvent.class);
+                    .hasSize(1)
+                    .first()
+                    .isInstanceOf(RoboZonkyUpdateDetectedEvent.class);
             }
 
         }
@@ -110,9 +111,9 @@ class VersionDetectionTest extends AbstractEventLeveragingTest {
             void triggerEvents() {
                 payload.run();
                 assertThat(getEventsRequested())
-                        .hasSize(1)
-                        .first()
-                        .isInstanceOf(RoboZonkyExperimentalUpdateDetectedEvent.class);
+                    .hasSize(1)
+                    .first()
+                    .isInstanceOf(RoboZonkyExperimentalUpdateDetectedEvent.class);
             }
 
         }

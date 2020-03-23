@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,26 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.test.mock.MockLoanBuilder;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.Collections;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 @DisplayName("Session state")
 class SessionStateTest extends AbstractZonkyLeveragingTest {
 
-    private static final String INITIAL_ID = UUID.randomUUID().toString();
+    private static final String INITIAL_ID = UUID.randomUUID()
+        .toString();
     private static final Loan INITIAL_LOAN = MockLoanBuilder.fresh();
     private static final Tenant TENANT = mockTenant();
     private SessionState<Loan> state;
@@ -58,7 +60,7 @@ class SessionStateTest extends AbstractZonkyLeveragingTest {
         @DisplayName("does not interfere with original.")
         void createDifferentAndMakeSureIsEmpty() {
             final SessionState<Loan> another = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN),
-                                                                  Loan::getId, INITIAL_ID.substring(1));
+                    Loan::getId, INITIAL_ID.substring(1));
             assertThat(another.contains(INITIAL_LOAN)).isFalse();
         }
     }
@@ -71,7 +73,7 @@ class SessionStateTest extends AbstractZonkyLeveragingTest {
         @DisplayName("reads what original stored.")
         void createSameAndMakeSureHasSame() {
             final SessionState<Loan> another = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN),
-                                                                  Loan::getId, INITIAL_ID);
+                    Loan::getId, INITIAL_ID);
             assertThat(another.contains(INITIAL_LOAN)).isTrue();
         }
     }

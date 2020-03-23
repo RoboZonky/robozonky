@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package com.github.robozonky.app;
 import java.util.Arrays;
 import java.util.Optional;
 
-import com.github.robozonky.internal.secrets.KeyStoreHandler;
-import com.github.robozonky.internal.secrets.SecretProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.secrets.KeyStoreHandler;
+import com.github.robozonky.internal.secrets.SecretProvider;
 
 final class SecretProviderFactory {
 
@@ -34,21 +35,24 @@ final class SecretProviderFactory {
 
     /**
      * Obtain keystore-based secret provider if possible.
+     * 
      * @param cli Command line interface coming from the application.
      * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
      */
     public static Optional<SecretProvider> getSecretProvider(final CommandLine cli) {
-        return cli.getKeystore().map(keystore -> {
-            final char[] password = cli.getPassword();
-            try {
-                final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
-                return Optional.of(SecretProvider.keyStoreBased(ksh));
-            } catch (final Exception ex) {
-                LOGGER.error("Failed opening guarded storage.", ex);
-                return Optional.<SecretProvider>empty();
-            } finally {
-                Arrays.fill(password, ' '); // clear the password from memory
-            }
-        }).orElseThrow(() -> new IllegalStateException("Could not find keystore."));
+        return cli.getKeystore()
+            .map(keystore -> {
+                final char[] password = cli.getPassword();
+                try {
+                    final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
+                    return Optional.of(SecretProvider.keyStoreBased(ksh));
+                } catch (final Exception ex) {
+                    LOGGER.error("Failed opening guarded storage.", ex);
+                    return Optional.<SecretProvider>empty();
+                } finally {
+                    Arrays.fill(password, ' '); // clear the password from memory
+                }
+            })
+            .orElseThrow(() -> new IllegalStateException("Could not find keystore."));
     }
 }

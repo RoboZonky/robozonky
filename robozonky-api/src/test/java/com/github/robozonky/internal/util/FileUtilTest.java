@@ -16,6 +16,11 @@
 
 package com.github.robozonky.internal.util;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -29,14 +34,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Assumptions.assumeThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
-
 class FileUtilTest {
 
-    private static final File SOME_DIR = new File(UUID.randomUUID().toString());
+    private static final File SOME_DIR = new File(UUID.randomUUID()
+        .toString());
 
     @AfterAll
     static void deleteDir() {
@@ -53,20 +54,24 @@ class FileUtilTest {
         boolean result = FileUtil.configurePermissions(file, true);
         assertSoftly(softly -> {
             softly.assertThat(path.toFile())
-                    .canRead()
-                    .canWrite();
-            softly.assertThat(path.toFile().canExecute())
-                    .isTrue();
-            softly.assertThat(result).isTrue();
+                .canRead()
+                .canWrite();
+            softly.assertThat(path.toFile()
+                .canExecute())
+                .isTrue();
+            softly.assertThat(result)
+                .isTrue();
         });
         boolean result2 = FileUtil.configurePermissions(file, false);
         assertSoftly(softly -> {
             softly.assertThat(path.toFile())
-                    .canRead()
-                    .canWrite();
-            softly.assertThat(path.toFile().canExecute())
-                    .isFalse();
-            softly.assertThat(result2).isTrue();
+                .canRead()
+                .canWrite();
+            softly.assertThat(path.toFile()
+                .canExecute())
+                .isFalse();
+            softly.assertThat(result2)
+                .isTrue();
         });
     }
 
@@ -105,14 +110,16 @@ class FileUtilTest {
 
     @Test
     void lookupNonExistentFolder() {
-        assertThat(FileUtil.findFolder(UUID.randomUUID().toString())).isEmpty();
+        assertThat(FileUtil.findFolder(UUID.randomUUID()
+            .toString())).isEmpty();
     }
 
     @Test
     void lookupExistingFolderIncludingNonWritableFolder() {
         SOME_DIR.mkdir();
         SOME_DIR.setReadable(false);
-        assertThat(FileUtil.findFolder(UUID.randomUUID().toString())).isEmpty();
+        assertThat(FileUtil.findFolder(UUID.randomUUID()
+            .toString())).isEmpty();
     }
 
     @Test
@@ -125,8 +132,10 @@ class FileUtilTest {
     @Test
     void lookupSomethingPureWrong() {
         final String old = System.getProperty("user.dir");
-        System.setProperty("user.dir", UUID.randomUUID().toString());
-        assertThat(FileUtil.findFolder(UUID.randomUUID().toString())).isEmpty();
+        System.setProperty("user.dir", UUID.randomUUID()
+            .toString());
+        assertThat(FileUtil.findFolder(UUID.randomUUID()
+            .toString())).isEmpty();
         System.setProperty("user.dir", old);
     }
 
@@ -138,13 +147,14 @@ class FileUtilTest {
     @Test
     void someUrls() throws IOException {
         File f = File.createTempFile("robozonky-", ".testing");
-        assertThat(FileUtil.filesToUrls(f)).contains(f.toURI().toURL());
+        assertThat(FileUtil.filesToUrls(f)).contains(f.toURI()
+            .toURL());
     }
 
     @Test
     void nullUrls() {
         assertThatThrownBy(() -> FileUtil.filesToUrls((File[]) null))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

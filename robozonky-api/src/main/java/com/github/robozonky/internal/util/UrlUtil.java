@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.github.robozonky.internal.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.Settings;
 
 public final class UrlUtil {
 
@@ -43,7 +44,9 @@ public final class UrlUtil {
             final File f = new File(string);
             try {
                 LOGGER.trace("Converting '{}' to URL as a file.", string);
-                return f.getAbsoluteFile().toURI().toURL();
+                return f.getAbsoluteFile()
+                    .toURI()
+                    .toURL();
             } catch (final MalformedURLException ex2) {
                 throw new IllegalArgumentException("Incorrect location configuration.", ex2);
             }
@@ -53,8 +56,10 @@ public final class UrlUtil {
     public static InputStream open(final URL url) throws IOException {
         LOGGER.trace("Opening {}.", url);
         final URLConnection con = url.openConnection();
-        con.setConnectTimeout((int) Settings.INSTANCE.getConnectionTimeout().toMillis());
-        con.setReadTimeout((int) Settings.INSTANCE.getSocketTimeout().toMillis());
+        con.setConnectTimeout((int) Settings.INSTANCE.getConnectionTimeout()
+            .toMillis());
+        con.setReadTimeout((int) Settings.INSTANCE.getSocketTimeout()
+            .toMillis());
         return con.getInputStream();
     }
 }

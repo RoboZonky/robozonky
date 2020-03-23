@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,28 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+import java.util.Collections;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 class RegistryTest extends AbstractRoboZonkyTest {
 
     private final Zonky zonky = harmlessZonky();
     private final Tenant tenant = mockTenant(zonky);
-    private final Investment i = MockInvestmentBuilder.fresh().build();
+    private final Investment i = MockInvestmentBuilder.fresh()
+        .build();
 
     @Test
     void persists() {
@@ -57,7 +59,7 @@ class RegistryTest extends AbstractRoboZonkyTest {
         r.addCategory(i, Category.HOPELESS);
         r.persist();
         assertThat(r.getCategories(i))
-                .containsExactly(Category.NEW, Category.MILD, Category.SEVERE, Category.CRITICAL, Category.HOPELESS);
+            .containsExactly(Category.NEW, Category.MILD, Category.SEVERE, Category.CRITICAL, Category.HOPELESS);
     }
 
     @Test
@@ -66,8 +68,8 @@ class RegistryTest extends AbstractRoboZonkyTest {
         r.addCategory(i, Category.DEFAULTED);
         r.persist();
         assertThat(r.getCategories(i))
-                .containsExactly(Category.NEW, Category.MILD, Category.SEVERE, Category.CRITICAL, Category.HOPELESS,
-                                 Category.DEFAULTED);
+            .containsExactly(Category.NEW, Category.MILD, Category.SEVERE, Category.CRITICAL, Category.HOPELESS,
+                    Category.DEFAULTED);
     }
 
     @Test
@@ -89,7 +91,8 @@ class RegistryTest extends AbstractRoboZonkyTest {
         r.addCategory(i, Category.DEFAULTED);
         r.persist();
         assertThat(r.complement(Collections.emptySet())).containsExactly(i);
-        assertThat(r.complement(Collections.singleton(MockInvestmentBuilder.fresh().build()))).containsExactly(i);
+        assertThat(r.complement(Collections.singleton(MockInvestmentBuilder.fresh()
+            .build()))).containsExactly(i);
         assertThat(r.complement(Collections.singleton(i))).isEmpty();
     }
 }

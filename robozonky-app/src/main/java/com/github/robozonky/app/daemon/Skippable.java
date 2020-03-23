@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.tenant.Availability;
-import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonResumed;
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonResumed;
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.tenant.Availability;
+import com.github.robozonky.internal.test.DateUtil;
 
 final class Skippable implements Runnable {
 
@@ -41,7 +42,7 @@ final class Skippable implements Runnable {
     private final Consumer<Throwable> shutdownCall;
 
     Skippable(final Runnable toRun, final Class<?> type, final PowerTenant tenant,
-              final Consumer<Throwable> shutdownCall) {
+            final Consumer<Throwable> shutdownCall) {
         this.toRun = toRun;
         this.type = type;
         this.tenant = tenant;
@@ -73,14 +74,15 @@ final class Skippable implements Runnable {
             toRun.run();
             final Optional<Instant> becameAvailable = availability.registerSuccess();
             becameAvailable.ifPresent(unavailableSince -> {
-                final OffsetDateTime since = unavailableSince.atZone(Defaults.ZONE_ID).toOffsetDateTime();
+                final OffsetDateTime since = unavailableSince.atZone(Defaults.ZONE_ID)
+                    .toOffsetDateTime();
                 LOGGER.debug("Unavailability over, lasted since {}.", since);
                 tenant.fire(roboZonkyDaemonResumed(since, now));
             });
             LOGGER.trace("Successfully finished {}.", this);
         } catch (final Throwable t) {
             if (SimpleSkippable.isRecoverable(t)) {
-                final Exception ex = (Exception)t; // errors are never recoverable
+                final Exception ex = (Exception) t; // errors are never recoverable
                 final boolean becameUnavailable = availability.registerException(ex);
                 if (becameUnavailable) {
                     LOGGER.debug("Unavailability starting.");

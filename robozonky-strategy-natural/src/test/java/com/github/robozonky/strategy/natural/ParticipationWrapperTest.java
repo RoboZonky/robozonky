@@ -16,8 +16,14 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -30,17 +36,46 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class ParticipationWrapperTest {
 
     private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
     private static final Loan LOAN = new MockLoanBuilder()
+        .setInsuranceActive(true)
+        .setAmount(100_000)
+        .setRating(Rating.D)
+        .setInterestRate(Ratio.ONE)
+        .setMainIncomeType(MainIncomeType.EMPLOYMENT)
+        .setPurpose(Purpose.AUTO_MOTO)
+        .setRegion(Region.JIHOCESKY)
+        .setStory(UUID.randomUUID()
+            .toString())
+        .setTermInMonths(20)
+        .build();
+    private static final Participation PARTICIPATION = mockParticipation(LOAN);
+
+    private static Participation mockParticipation(final Loan loan) {
+        final Participation p = mock(Participation.class);
+        when(p.getInterestRate()).thenReturn(Ratio.ONE);
+        doReturn(Money.ZERO).when(p)
+            .getRemainingPrincipal();
+        doReturn(Money.ZERO).when(p)
+            .getDiscount();
+        doReturn(Money.ZERO).when(p)
+            .getPrice();
+        doReturn(loan.getPurpose()).when(p)
+            .getPurpose();
+        doReturn(loan.getRating()).when(p)
+            .getRating();
+        doReturn(loan.getMainIncomeType()).when(p)
+            .getIncomeType();
+        return p;
+    }
+
+    @Test
+    void fromParticipation() {
+        final Loan loan = new MockLoanBuilder()
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)
@@ -48,84 +83,93 @@ class ParticipationWrapperTest {
             .setMainIncomeType(MainIncomeType.EMPLOYMENT)
             .setPurpose(Purpose.AUTO_MOTO)
             .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID().toString())
+            .setStory(UUID.randomUUID()
+                .toString())
             .setTermInMonths(20)
+            .setAnnuity(BigDecimal.ONE)
             .build();
-    private static final Participation PARTICIPATION = mockParticipation(LOAN);
-
-    private static Participation mockParticipation(final Loan loan) {
-        final Participation p = mock(Participation.class);
-        when(p.getInterestRate()).thenReturn(Ratio.ONE);
-        doReturn(Money.ZERO).when(p).getRemainingPrincipal();
-        doReturn(Money.ZERO).when(p).getDiscount();
-        doReturn(Money.ZERO).when(p).getPrice();
-        doReturn(loan.getPurpose()).when(p).getPurpose();
-        doReturn(loan.getRating()).when(p).getRating();
-        doReturn(loan.getMainIncomeType()).when(p).getIncomeType();
-        return p;
-    }
-
-    @Test
-    void fromParticipation() {
-        final Loan loan = new MockLoanBuilder()
-                .setInsuranceActive(true)
-                .setAmount(100_000)
-                .setRating(Rating.D)
-                .setInterestRate(Ratio.ONE)
-                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-                .setPurpose(Purpose.AUTO_MOTO)
-                .setRegion(Region.JIHOCESKY)
-                .setStory(UUID.randomUUID().toString())
-                .setTermInMonths(20)
-                .setAnnuity(BigDecimal.ONE)
-                .build();
         final int invested = 200;
         final Participation participation = mock(Participation.class);
         when(participation.getId()).thenReturn((long) (Math.random() * 1000));
         when(participation.getInterestRate()).thenReturn(Ratio.ONE);
-        doReturn(Money.ZERO).when(participation).getRemainingPrincipal();
-        doReturn(Money.ZERO).when(participation).getDiscount();
-        doReturn(Money.ZERO).when(participation).getPrice();
-        doReturn(20).when(participation).getOriginalInstalmentCount();
-        doReturn(loan.getPurpose()).when(participation).getPurpose();
-        doReturn(loan.getRating()).when(participation).getRating();
-        doReturn(loan.getMainIncomeType()).when(participation).getIncomeType();
+        doReturn(Money.ZERO).when(participation)
+            .getRemainingPrincipal();
+        doReturn(Money.ZERO).when(participation)
+            .getDiscount();
+        doReturn(Money.ZERO).when(participation)
+            .getPrice();
+        doReturn(20).when(participation)
+            .getOriginalInstalmentCount();
+        doReturn(loan.getPurpose()).when(participation)
+            .getPurpose();
+        doReturn(loan.getRating()).when(participation)
+            .getRating();
+        doReturn(loan.getMainIncomeType()).when(participation)
+            .getIncomeType();
         final ParticipationDescriptor pd = new ParticipationDescriptor(participation, () -> loan);
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.getId()).isNotEqualTo(0);
-            softly.assertThat(w.isInsuranceActive()).isEqualTo(participation.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
-            softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
-            softly.assertThat(w.getRating()).isEqualTo(participation.getRating());
-            softly.assertThat(w.getMainIncomeType()).isEqualTo(loan.getMainIncomeType());
-            softly.assertThat(w.getPurpose()).isEqualTo(loan.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount().getValue().intValue());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(participation.getRemainingPrincipal().getValue());
-            softly.assertThat(w.getOriginal()).isSameAs(pd);
-            softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
-            softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(participation.getOriginalInstalmentCount());
-            softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(participation.getRemainingInstalmentCount());
-            softly.assertThat(w.getHealth()).isEmpty();
-            softly.assertThat(w.getOriginalPurchasePrice()).isEmpty();
-            softly.assertThat(w.getDiscount()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getPrice()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getSellFee()).isEmpty();
-            softly.assertThat(w.getReturns()).isEmpty();
-            softly.assertThat(w.toString()).isNotNull();
-            softly.assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromRaw("0.1499"));
-            softly.assertThat(w.getOriginalAnnuity()).isEqualTo(loan.getAnnuity().getValue().intValue());
+            softly.assertThat(w.getId())
+                .isNotEqualTo(0);
+            softly.assertThat(w.isInsuranceActive())
+                .isEqualTo(participation.isInsuranceActive());
+            softly.assertThat(w.getInterestRate())
+                .isEqualTo(Ratio.ONE);
+            softly.assertThat(w.getRegion())
+                .isEqualTo(loan.getRegion());
+            softly.assertThat(w.getRating())
+                .isEqualTo(participation.getRating());
+            softly.assertThat(w.getMainIncomeType())
+                .isEqualTo(loan.getMainIncomeType());
+            softly.assertThat(w.getPurpose())
+                .isEqualTo(loan.getPurpose());
+            softly.assertThat(w.getOriginalAmount())
+                .isEqualTo(loan.getAmount()
+                    .getValue()
+                    .intValue());
+            softly.assertThat(w.getRemainingPrincipal())
+                .isEqualTo(participation.getRemainingPrincipal()
+                    .getValue());
+            softly.assertThat(w.getOriginal())
+                .isSameAs(pd);
+            softly.assertThat(w.getStory())
+                .isEqualTo(loan.getStory());
+            softly.assertThat(w.getOriginalTermInMonths())
+                .isEqualTo(participation.getOriginalInstalmentCount());
+            softly.assertThat(w.getRemainingTermInMonths())
+                .isEqualTo(participation.getRemainingInstalmentCount());
+            softly.assertThat(w.getHealth())
+                .isEmpty();
+            softly.assertThat(w.getOriginalPurchasePrice())
+                .isEmpty();
+            softly.assertThat(w.getDiscount())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getPrice())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getSellFee())
+                .isEmpty();
+            softly.assertThat(w.getReturns())
+                .isEmpty();
+            softly.assertThat(w.toString())
+                .isNotNull();
+            softly.assertThat(w.getRevenueRate())
+                .isEqualTo(Ratio.fromRaw("0.1499"));
+            softly.assertThat(w.getOriginalAnnuity())
+                .isEqualTo(loan.getAnnuity()
+                    .getValue()
+                    .intValue());
         });
     }
 
     @Test
     void fromParticipationWithoutRevenueRate() {
         final Loan loan = new MockLoanBuilder()
-                .setRating(Rating.C)
-                .build();
+            .setRating(Rating.C)
+            .build();
         final int invested = 200;
         final Participation p = mock(Participation.class);
-        doReturn(loan.getRating()).when(p).getRating();
+        doReturn(loan.getRating()).when(p)
+            .getRating();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(invested));
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(new ParticipationDescriptor(p, () -> loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
@@ -137,25 +181,47 @@ class ParticipationWrapperTest {
         final ParticipationDescriptor original = new ParticipationDescriptor(PARTICIPATION, () -> LOAN);
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.isInsuranceActive()).isEqualTo(PARTICIPATION.isInsuranceActive());
-            softly.assertThat(w.getInterestRate()).isEqualTo(Ratio.ONE);
-            softly.assertThat(w.getRegion()).isEqualTo(LOAN.getRegion());
-            softly.assertThat(w.getRating()).isEqualTo(PARTICIPATION.getRating());
-            softly.assertThat(w.getMainIncomeType()).isEqualTo(LOAN.getMainIncomeType());
-            softly.assertThat(w.getPurpose()).isEqualTo(LOAN.getPurpose());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(LOAN.getAmount().getValue().intValue());
-            softly.assertThat(w.getRemainingPrincipal()).isEqualTo(PARTICIPATION.getRemainingPrincipal().getValue());
-            softly.assertThat(w.getOriginal()).isSameAs(original);
-            softly.assertThat(w.getStory()).isEqualTo(LOAN.getStory());
-            softly.assertThat(w.getOriginalTermInMonths()).isEqualTo(PARTICIPATION.getOriginalInstalmentCount());
-            softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(PARTICIPATION.getRemainingInstalmentCount());
-            softly.assertThat(w.getHealth()).isEmpty();
-            softly.assertThat(w.getOriginalPurchasePrice()).isEmpty();
-            softly.assertThat(w.getDiscount()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getPrice()).contains(BigDecimal.ZERO);
-            softly.assertThat(w.getSellFee()).isEmpty();
-            softly.assertThat(w.getReturns()).isEmpty();
-            softly.assertThat(w.toString()).isNotNull();
+            softly.assertThat(w.isInsuranceActive())
+                .isEqualTo(PARTICIPATION.isInsuranceActive());
+            softly.assertThat(w.getInterestRate())
+                .isEqualTo(Ratio.ONE);
+            softly.assertThat(w.getRegion())
+                .isEqualTo(LOAN.getRegion());
+            softly.assertThat(w.getRating())
+                .isEqualTo(PARTICIPATION.getRating());
+            softly.assertThat(w.getMainIncomeType())
+                .isEqualTo(LOAN.getMainIncomeType());
+            softly.assertThat(w.getPurpose())
+                .isEqualTo(LOAN.getPurpose());
+            softly.assertThat(w.getOriginalAmount())
+                .isEqualTo(LOAN.getAmount()
+                    .getValue()
+                    .intValue());
+            softly.assertThat(w.getRemainingPrincipal())
+                .isEqualTo(PARTICIPATION.getRemainingPrincipal()
+                    .getValue());
+            softly.assertThat(w.getOriginal())
+                .isSameAs(original);
+            softly.assertThat(w.getStory())
+                .isEqualTo(LOAN.getStory());
+            softly.assertThat(w.getOriginalTermInMonths())
+                .isEqualTo(PARTICIPATION.getOriginalInstalmentCount());
+            softly.assertThat(w.getRemainingTermInMonths())
+                .isEqualTo(PARTICIPATION.getRemainingInstalmentCount());
+            softly.assertThat(w.getHealth())
+                .isEmpty();
+            softly.assertThat(w.getOriginalPurchasePrice())
+                .isEmpty();
+            softly.assertThat(w.getDiscount())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getPrice())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(w.getSellFee())
+                .isEmpty();
+            softly.assertThat(w.getReturns())
+                .isEmpty();
+            softly.assertThat(w.toString())
+                .isNotNull();
         });
     }
 
@@ -164,10 +230,14 @@ class ParticipationWrapperTest {
         final ParticipationDescriptor original = new ParticipationDescriptor(PARTICIPATION, () -> LOAN);
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w).isEqualTo(w);
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(original, FOLIO));
-            softly.assertThat(w).isEqualTo(Wrapper.wrap(new ParticipationDescriptor(PARTICIPATION, () -> LOAN), FOLIO));
-            softly.assertThat(w).isNotEqualTo(null);
+            softly.assertThat(w)
+                .isEqualTo(w);
+            softly.assertThat(w)
+                .isEqualTo(Wrapper.wrap(original, FOLIO));
+            softly.assertThat(w)
+                .isEqualTo(Wrapper.wrap(new ParticipationDescriptor(PARTICIPATION, () -> LOAN), FOLIO));
+            softly.assertThat(w)
+                .isNotEqualTo(null);
         });
     }
 

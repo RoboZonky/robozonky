@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,15 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -24,15 +33,6 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.when;
 
 class SelingThrottleTest extends AbstractZonkyLeveragingTest {
 
@@ -40,56 +40,62 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
     void picksSmallestOneIfAllOverThreshold() {
         final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
-                .setRating(rating)
-                .setRemainingPrincipal(BigDecimal.TEN)
-                .build();
+            .setRating(rating)
+            .setRemainingPrincipal(BigDecimal.TEN)
+            .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-                .setRating(rating)
-                .setRemainingPrincipal(BigDecimal.TEN.pow(2))
-                .build();
+            .setRating(rating)
+            .setRemainingPrincipal(BigDecimal.TEN.pow(2))
+            .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-                .setRating(rating)
-                .setRemainingPrincipal(BigDecimal.ONE)
-                .build();
+            .setRating(rating)
+            .setRemainingPrincipal(BigDecimal.ONE)
+            .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getInvested(eq(rating))).thenReturn(Money.from(10));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
-                .map(i -> new InvestmentDescriptor(i, () -> null))
-                .map(d -> d.recommend(d.item().getRemainingPrincipal().orElseThrow()))
-                .flatMap(Optional::stream);
+            .map(i -> new InvestmentDescriptor(i, () -> null))
+            .map(d -> d.recommend(d.item()
+                .getRemainingPrincipal()
+                .orElseThrow()))
+            .flatMap(Optional::stream);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);
         assertThat(throttled)
-                .extracting(r -> r.descriptor().item())
-                .containsOnly(i3);
+            .extracting(r -> r.descriptor()
+                .item())
+            .containsOnly(i3);
     }
 
     @Test
     void picksAllBelowThreshold() {
         final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
-                .setRating(rating)
-                .setRemainingPrincipal(BigDecimal.TEN)
-                .build();
+            .setRating(rating)
+            .setRemainingPrincipal(BigDecimal.TEN)
+            .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-                .setRating(rating)
-                .setRemainingPrincipal(BigDecimal.TEN.pow(2))
-                .build();
+            .setRating(rating)
+            .setRemainingPrincipal(BigDecimal.TEN.pow(2))
+            .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-                .setRating(rating)
-                .setRemainingPrincipal(BigDecimal.ONE)
-                .build();
+            .setRating(rating)
+            .setRemainingPrincipal(BigDecimal.ONE)
+            .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getInvested()).thenReturn(Money.from(2200));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
-                .map(i -> new InvestmentDescriptor(i, () -> null))
-                .map(d -> d.recommend(d.item().getRemainingPrincipal().orElseThrow()))
-                .flatMap(Optional::stream);
+            .map(i -> new InvestmentDescriptor(i, () -> null))
+            .map(d -> d.recommend(d.item()
+                .getRemainingPrincipal()
+                .orElseThrow()))
+            .flatMap(Optional::stream);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);
         assertThat(throttled)
-                .extracting(r -> r.descriptor().item())
-                .containsOnly(i1, i3);
+            .extracting(r -> r.descriptor()
+                .item())
+            .containsOnly(i1, i3);
     }
 
     @Test

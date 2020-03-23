@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import com.github.robozonky.internal.test.DateUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.test.DateUtil;
 
 final class TimeBasedReload<T> implements ReloadDetection<T> {
 
@@ -42,7 +43,8 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
     public boolean getAsBoolean() {
         final Instant lastReloadedInstant = lastReloaded.get();
         return lastReloadedInstant == null ||
-                lastReloadedInstant.plus(reloadAfter.get()).isBefore(DateUtil.now());
+                lastReloadedInstant.plus(reloadAfter.get())
+                    .isBefore(DateUtil.now());
     }
 
     Optional<Duration> getReloadAfter() {

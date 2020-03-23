@@ -16,17 +16,18 @@
 
 package com.github.robozonky.internal.secrets;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 class KeyStoreSecretProviderTest {
 
@@ -59,13 +60,13 @@ class KeyStoreSecretProviderTest {
     @Test
     void usernameNotSet() {
         assertThatThrownBy(() -> newMockProvider().getUsername())
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void passwordNotSet() {
         assertThatThrownBy(() -> newMockProvider().getPassword())
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -95,7 +96,11 @@ class KeyStoreSecretProviderTest {
         final SecretProvider p = newProvider(USR, PWD);
         // make sure original values were set
         assertThat(p.getToken()).isEmpty();
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                299);
         assertThat(p.setToken(token)).isTrue();
         assertThat(p.getToken()).contains(token);
         assertThat(p.setToken(null)).isTrue();
@@ -105,10 +110,17 @@ class KeyStoreSecretProviderTest {
     @Test
     void setTokenIoFail() {
         final KeyStoreHandler ksh = spy(getKeyStoreHandler());
-        doThrow(IllegalStateException.class).when(ksh).save();
-        doThrow(IllegalStateException.class).when(ksh).get(any());
-        final SecretProvider p = SecretProvider.keyStoreBased(ksh, UUID.randomUUID().toString());
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        doThrow(IllegalStateException.class).when(ksh)
+            .save();
+        doThrow(IllegalStateException.class).when(ksh)
+            .get(any());
+        final SecretProvider p = SecretProvider.keyStoreBased(ksh, UUID.randomUUID()
+            .toString());
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID()
+            .toString(),
+                UUID.randomUUID()
+                    .toString(),
+                299);
         assertThat(p.setToken(token)).isFalse();
         assertThat(p.getToken()).isEmpty();
         assertThat(p.setToken(null)).isFalse();
@@ -118,6 +130,6 @@ class KeyStoreSecretProviderTest {
     @Test
     void noKeyStoreHandlerProvided() {
         assertThatThrownBy(() -> new KeyStoreSecretProvider(null))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 }

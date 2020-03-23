@@ -16,6 +16,8 @@
 
 package com.github.robozonky.installer.scripts;
 
+import static java.util.Map.entry;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,14 +26,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.installer.CommandLinePart;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.util.FileUtil;
-import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static java.util.Map.entry;
+import com.github.robozonky.installer.CommandLinePart;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.util.FileUtil;
+
+import freemarker.template.TemplateException;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
@@ -52,11 +54,18 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
     }
 
     private static String assembleJavaOpts(final CommandLinePart commandLine) {
-        final Stream<String> properties = commandLine.getProperties().entrySet().stream()
-                .map(e -> "-D" + e.getKey() + '=' + e.getValue());
-        final Stream<String> jvmArgs = commandLine.getJvmArguments().entrySet().stream()
-                .map(e -> '-' + e.getValue().map(v -> e.getKey() + ' ' + v).orElse(e.getKey()));
-        return Stream.concat(jvmArgs, properties).collect(Collectors.joining(" "));
+        final Stream<String> properties = commandLine.getProperties()
+            .entrySet()
+            .stream()
+            .map(e -> "-D" + e.getKey() + '=' + e.getValue());
+        final Stream<String> jvmArgs = commandLine.getJvmArguments()
+            .entrySet()
+            .stream()
+            .map(e -> '-' + e.getValue()
+                .map(v -> e.getKey() + ' ' + v)
+                .orElse(e.getKey()));
+        return Stream.concat(jvmArgs, properties)
+            .collect(Collectors.joining(" "));
     }
 
     protected File getRootFolder() {
@@ -68,16 +77,16 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
     public abstract File getChildRunScript();
 
     protected File process(final CommandLinePart commandLine, final String templateName,
-                           final Function<String, String> finisher) {
+            final Function<String, String> finisher) {
         try {
             final String result = TemplateProcessor.INSTANCE.process(templateName, Map.ofEntries(
                     entry("root", distributionDirectory.getAbsolutePath()),
                     entry("options", configFile.getAbsolutePath()),
                     entry("javaOpts", assembleJavaOpts(commandLine)),
-                    entry("envVars", commandLine.getEnvironmentVariables())
-            ));
+                    entry("envVars", commandLine.getEnvironmentVariables())));
             final File target = this.getRunScript();
-            Files.write(target.toPath(), finisher.apply(result).getBytes(Defaults.CHARSET));
+            Files.write(target.toPath(), finisher.apply(result)
+                .getBytes(Defaults.CHARSET));
             FileUtil.configurePermissions(target, true);
             LOGGER.info("Generated run script: {}.", target.getAbsolutePath());
             return target;

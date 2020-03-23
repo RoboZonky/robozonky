@@ -16,6 +16,8 @@
 
 package com.github.robozonky.internal;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,8 +31,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
 class SettingsTest {
 
     @AfterEach
@@ -42,46 +42,61 @@ class SettingsTest {
     @Test
     void defaultProperties() {
         assertSoftly(softly -> {
-            softly.assertThat(Settings.INSTANCE.get("user.dir", "")).isNotEqualTo("");
-            softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
-                    .isEqualTo("");
+            softly.assertThat(Settings.INSTANCE.get("user.dir", ""))
+                .isNotEqualTo("");
+            softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID()
+                .toString(), ""))
+                .isEqualTo("");
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
-                    .matches(new SettingsTest.TemporalPredicate(5 * 60));
-            softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(-1);
+                .matches(new SettingsTest.TemporalPredicate(5 * 60));
+            softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum())
+                .isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(10));
+                .matches(new SettingsTest.TemporalPredicate(10));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(10));
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
-            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(443);
-            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).isEmpty();
-            softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled()).isFalse();
+                .matches(new SettingsTest.TemporalPredicate(10));
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize())
+                .isEqualTo(100);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort())
+                .isEqualTo(443);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname())
+                .isEmpty();
+            softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled())
+                .isFalse();
         });
     }
 
     @Test
     void setProperties() throws IOException {
         final Properties p = new Properties();
-        Stream.of(Settings.Key.values()).forEach(v -> p.setProperty(v.getName(), "1000"));
+        Stream.of(Settings.Key.values())
+            .forEach(v -> p.setProperty(v.getName(), "1000"));
         p.setProperty(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING.getName(), "true");
         final File f = File.createTempFile("robozonky-", ".properties");
         p.store(new FileWriter(f), "Testing properties");
         System.setProperty(Settings.FILE_LOCATION_PROPERTY, f.getAbsolutePath());
         assertSoftly(softly -> {
-            softly.assertThat(Settings.INSTANCE.get("user.dir", "")).isNotEqualTo("");
-            softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
-                    .isEqualTo("");
-            softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled()).isTrue();
+            softly.assertThat(Settings.INSTANCE.get("user.dir", ""))
+                .isNotEqualTo("");
+            softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID()
+                .toString(), ""))
+                .isEqualTo("");
+            softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled())
+                .isTrue();
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
-                    .matches(new SettingsTest.TemporalPredicate(1000 * 60));
-            softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(1000);
+                .matches(new SettingsTest.TemporalPredicate(1000 * 60));
+            softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum())
+                .isEqualTo(1000);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(1000));
+                .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(1000));
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(1000);
-            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort()).isEqualTo(1000);
-            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname()).contains("1000");
+                .matches(new SettingsTest.TemporalPredicate(1000));
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize())
+                .isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyPort())
+                .isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname())
+                .contains("1000");
         });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import static com.github.robozonky.internal.test.DateUtil.offsetNow;
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
-
-import static com.github.robozonky.internal.test.DateUtil.offsetNow;
-import static org.assertj.core.api.Assertions.*;
 
 class LastPublishedLoanTest {
 
@@ -29,9 +29,9 @@ class LastPublishedLoanTest {
     void equality() {
         final LastPublishedLoan l = new LastPublishedLoan(1);
         assertThat(l).isEqualTo(l)
-                .isNotEqualTo(null)
-                .isNotEqualTo("")
-                .isNotEqualTo(new LastPublishedLoan(l.getId() + 1));
+            .isNotEqualTo(null)
+            .isNotEqualTo("")
+            .isNotEqualTo(new LastPublishedLoan(l.getId() + 1));
         final LastPublishedLoan equal = new LastPublishedLoan(l.getId(), l.getDatePublished());
         assertThat(l).isEqualTo(equal);
         assertThat(equal).isEqualTo(l);

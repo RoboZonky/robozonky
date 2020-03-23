@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package com.github.robozonky.app.version;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.time.Duration;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.internal.jobs.SimpleJob;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class VersionDetectionJobTest extends AbstractRoboZonkyTest {
 
@@ -30,9 +31,12 @@ class VersionDetectionJobTest extends AbstractRoboZonkyTest {
     void test() {
         final SimpleJob job = new VersionDetectionJob();
         assertSoftly(softly -> {
-            softly.assertThat(job.startIn()).isEqualTo(Duration.ZERO);
-            softly.assertThat(job.repeatEvery()).isEqualTo(Duration.ofDays(1));
-            softly.assertThat(job.payload()).isInstanceOf(VersionDetection.class);
+            softly.assertThat(job.startIn())
+                .isEqualTo(Duration.ZERO);
+            softly.assertThat(job.repeatEvery())
+                .isEqualTo(Duration.ofDays(1));
+            softly.assertThat(job.payload())
+                .isInstanceOf(VersionDetection.class);
         });
     }
 

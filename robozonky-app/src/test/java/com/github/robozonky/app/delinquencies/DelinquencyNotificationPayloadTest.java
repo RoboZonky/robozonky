@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,24 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import com.github.robozonky.api.notifications.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanLostEvent;
+import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -25,16 +42,6 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.when;
 
 class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
 
@@ -45,40 +52,74 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void initializesWithoutTriggeringEvents() {
-        final Investment i0 = MockInvestmentBuilder.fresh().setLegalDpd(0).build();
-        final Investment i1 = MockInvestmentBuilder.fresh().setLegalDpd(1).build();
-        final Investment i10 = MockInvestmentBuilder.fresh().setLegalDpd(10).build();
-        final Investment i30 = MockInvestmentBuilder.fresh().setLegalDpd(30).build();
-        final Investment i60 = MockInvestmentBuilder.fresh().setLegalDpd(60).build();
-        final Investment i90 = MockInvestmentBuilder.fresh().setLegalDpd(90).build();
-        final Investment defaulted = MockInvestmentBuilder.fresh().setPaymentStatus(PaymentStatus.PAID_OFF).build();
+        final Investment i0 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(0)
+            .build();
+        final Investment i1 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .build();
+        final Investment i10 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(10)
+            .build();
+        final Investment i30 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(30)
+            .build();
+        final Investment i60 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(60)
+            .build();
+        final Investment i90 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(90)
+            .build();
+        final Investment defaulted = MockInvestmentBuilder.fresh()
+            .setPaymentStatus(PaymentStatus.PAID_OFF)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i0, i1, i10, i30, i60, i90, defaulted));
         // run test
         payload.accept(tenant);
         assertSoftly(softly -> {
-            softly.assertThat(r.getCategories(i0)).isEmpty();
-            softly.assertThat(r.getCategories(i1)).containsExactly(Category.NEW);
-            softly.assertThat(r.getCategories(i10)).containsExactly(Category.NEW, Category.MILD);
-            softly.assertThat(r.getCategories(i30)).containsExactly(Category.NEW, Category.MILD, Category.SEVERE);
-            softly.assertThat(r.getCategories(i60)).containsExactly(Category.NEW, Category.MILD, Category.SEVERE,
-                                                                    Category.CRITICAL);
-            softly.assertThat(r.getCategories(i90)).containsExactly(Category.NEW, Category.MILD, Category.SEVERE,
-                                                                    Category.CRITICAL, Category.HOPELESS);
-            softly.assertThat(r.getCategories(defaulted)).containsExactly(Category.NEW, Category.MILD, Category.SEVERE,
-                                                                          Category.CRITICAL, Category.HOPELESS,
-                                                                          Category.DEFAULTED);
-            softly.assertThat(getEventsRequested()).isEmpty();
+            softly.assertThat(r.getCategories(i0))
+                .isEmpty();
+            softly.assertThat(r.getCategories(i1))
+                .containsExactly(Category.NEW);
+            softly.assertThat(r.getCategories(i10))
+                .containsExactly(Category.NEW, Category.MILD);
+            softly.assertThat(r.getCategories(i30))
+                .containsExactly(Category.NEW, Category.MILD, Category.SEVERE);
+            softly.assertThat(r.getCategories(i60))
+                .containsExactly(Category.NEW, Category.MILD, Category.SEVERE,
+                        Category.CRITICAL);
+            softly.assertThat(r.getCategories(i90))
+                .containsExactly(Category.NEW, Category.MILD, Category.SEVERE,
+                        Category.CRITICAL, Category.HOPELESS);
+            softly.assertThat(r.getCategories(defaulted))
+                .containsExactly(Category.NEW, Category.MILD, Category.SEVERE,
+                        Category.CRITICAL, Category.HOPELESS,
+                        Category.DEFAULTED);
+            softly.assertThat(getEventsRequested())
+                .isEmpty();
         });
     }
 
     @Test
     void triggersEventsOnNewDelinquents() {
-        final Investment i1 = MockInvestmentBuilder.fresh().setLegalDpd(1).build();
-        final Investment i10 = MockInvestmentBuilder.fresh().setLegalDpd(10).build();
-        final Investment i30 = MockInvestmentBuilder.fresh().setLegalDpd(30).build();
-        final Investment i60 = MockInvestmentBuilder.fresh().setLegalDpd(60).build();
-        final Investment i90 = MockInvestmentBuilder.fresh().setLegalDpd(90).build();
-        final Investment defaulted = MockInvestmentBuilder.fresh().setPaymentStatus(PaymentStatus.PAID_OFF).build();
+        final Investment i1 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .build();
+        final Investment i10 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(10)
+            .build();
+        final Investment i30 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(30)
+            .build();
+        final Investment i60 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(60)
+            .build();
+        final Investment i90 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(90)
+            .build();
+        final Investment defaulted = MockInvestmentBuilder.fresh()
+            .setPaymentStatus(PaymentStatus.PAID_OFF)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
@@ -87,74 +128,93 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquencies will show up now
         assertThat(getEventsRequested())
-                .extracting(e -> (Object) e.getClass().getInterfaces()[0])
-                .containsOnly(LoanDefaultedEvent.class,
-                              LoanDelinquent10DaysOrMoreEvent.class, LoanDelinquent30DaysOrMoreEvent.class,
-                              LoanDelinquent60DaysOrMoreEvent.class, LoanDelinquent90DaysOrMoreEvent.class);
+            .extracting(e -> (Object) e.getClass()
+                .getInterfaces()[0])
+            .containsOnly(LoanDefaultedEvent.class,
+                    LoanDelinquent10DaysOrMoreEvent.class, LoanDelinquent30DaysOrMoreEvent.class,
+                    LoanDelinquent60DaysOrMoreEvent.class, LoanDelinquent90DaysOrMoreEvent.class);
     }
 
     @Test
     void handlesRegularHealing() {
-        final Investment i1 = MockInvestmentBuilder.fresh().setLegalDpd(1).build();
+        final Investment i1 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
-        final Investment i2 = MockInvestmentBuilder.fresh().setLegalDpd(1).setPaymentStatus(PaymentStatus.OK).build();
+        final Investment i2 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .setPaymentStatus(PaymentStatus.OK)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
         assertThat(getEventsRequested()).hasSize(1)
-                .extracting(e -> (Object) e.getClass().getInterfaces()[0])
-                .containsOnly(LoanNowDelinquentEvent.class);
+            .extracting(e -> (Object) e.getClass()
+                .getInterfaces()[0])
+            .containsOnly(LoanNowDelinquentEvent.class);
         readPreexistingEvents();
         // now the same delinquency is no longer available
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
         when(zonky.getInvestment(eq(i2.getId()))).thenReturn(Optional.of(i2));
         payload.accept(tenant); // the new delinquency will show up now
         assertThat(getEventsRequested()).hasSize(1)
-                .first()
-                .isInstanceOf(LoanNoLongerDelinquentEvent.class);
+            .first()
+            .isInstanceOf(LoanNoLongerDelinquentEvent.class);
     }
 
     @Test
     void handlesLoss() {
-        final Investment i1 = MockInvestmentBuilder.fresh().setLegalDpd(1).build();
+        final Investment i1 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
-        final Investment i2 = MockInvestmentBuilder.fresh().setLegalDpd(1).setPaymentStatus(PaymentStatus.WRITTEN_OFF).build();
+        final Investment i2 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .setPaymentStatus(PaymentStatus.WRITTEN_OFF)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
         assertThat(getEventsRequested()).hasSize(1)
-                .extracting(e -> (Object) e.getClass().getInterfaces()[0])
-                .containsOnly(LoanNowDelinquentEvent.class);
+            .extracting(e -> (Object) e.getClass()
+                .getInterfaces()[0])
+            .containsOnly(LoanNowDelinquentEvent.class);
         readPreexistingEvents();
         // now the same delinquency is no longer available
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
         when(zonky.getInvestment(eq(i2.getId()))).thenReturn(Optional.of(i2));
         payload.accept(tenant); // the lost loan will show up now
         assertThat(getEventsRequested()).hasSize(1)
-                .first()
-                .isInstanceOf(LoanLostEvent.class);
+            .first()
+            .isInstanceOf(LoanLostEvent.class);
     }
 
     @Test
     void handlesRepayment() {
-        final Investment i1 = MockInvestmentBuilder.fresh().setLegalDpd(1).build();
+        final Investment i1 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
-        final Investment i2 = MockInvestmentBuilder.fresh().setLegalDpd(1).setPaymentStatus(PaymentStatus.PAID).build();
+        final Investment i2 = MockInvestmentBuilder.fresh()
+            .setLegalDpd(1)
+            .setPaymentStatus(PaymentStatus.PAID)
+            .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
         assertThat(getEventsRequested()).hasSize(1)
-                .extracting(e -> (Object) e.getClass().getInterfaces()[0])
-                .containsOnly(LoanNowDelinquentEvent.class);
+            .extracting(e -> (Object) e.getClass()
+                .getInterfaces()[0])
+            .containsOnly(LoanNowDelinquentEvent.class);
         readPreexistingEvents();
         // now the same delinquency is no longer available
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());

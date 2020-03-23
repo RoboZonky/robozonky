@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package com.github.robozonky.test.mock;
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.MyInvestment;
+import static org.mockito.Mockito.*;
 
 import java.net.URL;
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyInvestment;
 
 public class MockLoanBuilder extends BaseLoanMockBuilder<Loan, MockLoanBuilder> {
 
@@ -43,7 +43,5 @@ public class MockLoanBuilder extends BaseLoanMockBuilder<Loan, MockLoanBuilder> 
         when(mock.getMyInvestment()).thenReturn(Optional.ofNullable(myInvestment));
         return this;
     }
-
-
 
 }

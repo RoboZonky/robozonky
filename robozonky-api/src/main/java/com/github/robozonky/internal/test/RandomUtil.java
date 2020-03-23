@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ public final class RandomUtil extends Random {
     }
 
     private static Random getRandom() {
-        return RANDOM.get().get();
+        return RANDOM.get()
+            .get();
     }
 
     public static void setRandom(final Random random) {
@@ -56,6 +57,7 @@ public final class RandomUtil extends Random {
 
     /**
      * Will call {@link Random#nextInt()} on the {@link Random} implementation currently used.
+     * 
      * @return Return of the call.
      */
     public static int getNextInt() {
@@ -64,6 +66,7 @@ public final class RandomUtil extends Random {
 
     /**
      * Will call {@link Random#nextInt(int)} on the {@link Random} implementation currently used.
+     * 
      * @return Return of the call.
      */
     public static int getNextInt(final int bound) {

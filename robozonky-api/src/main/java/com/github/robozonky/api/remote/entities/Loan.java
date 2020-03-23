@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.util.Optional;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -57,9 +58,9 @@ public class Loan extends BaseLoan {
     @Override
     public String toString() {
         return new StringJoiner(", ", Loan.class.getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("myInvestment=" + myInvestment)
-                .add("url='" + url + "'")
-                .toString();
+            .add("super=" + super.toString())
+            .add("myInvestment=" + myInvestment)
+            .add("url='" + url + "'")
+            .toString();
     }
 }

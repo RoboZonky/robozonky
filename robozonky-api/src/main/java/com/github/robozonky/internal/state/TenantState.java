@@ -23,10 +23,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.internal.Defaults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.internal.Defaults;
 
 public final class TenantState {
 
@@ -44,7 +45,8 @@ public final class TenantState {
     }
 
     public static Stream<SessionInfo> getKnownTenants() {
-        return TENANT_STATE_MAP.keySet().stream();
+        return TENANT_STATE_MAP.keySet()
+            .stream();
     }
 
     static String encode(final String secret) {
@@ -67,10 +69,11 @@ public final class TenantState {
      * For testing purposes only.
      */
     public static void destroyAll() {
-        getKnownTenants().map(TenantState::of).forEach(t -> {
-            LOGGER.debug("Destroying state for {}.", t);
-            t.stateStorage.destroy();
-        });
+        getKnownTenants().map(TenantState::of)
+            .forEach(t -> {
+                LOGGER.debug("Destroying state for {}.", t);
+                t.stateStorage.destroy();
+            });
         TENANT_STATE_MAP.clear();
     }
 

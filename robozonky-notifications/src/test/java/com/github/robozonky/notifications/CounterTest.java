@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.github.robozonky.notifications;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Duration;
 import java.util.UUID;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class CounterTest extends AbstractRoboZonkyTest {
 
@@ -32,7 +33,8 @@ class CounterTest extends AbstractRoboZonkyTest {
     @Test
     void testTiming() throws InterruptedException {
         final int seconds = 1;
-        final String id = UUID.randomUUID().toString();
+        final String id = UUID.randomUUID()
+            .toString();
         final Counter c = new Counter(SESSION, id, 1, Duration.ofSeconds(seconds));
         assertThat(c.allow()).isTrue();
         c.increase();

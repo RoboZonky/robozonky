@@ -35,7 +35,10 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private final Map<Rating, Money> investedPerRating;
 
     PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
-        this(impl.getTotal(), impl.getRemoteData().getStatistics().getProfitability().orElse(Ratio.ZERO));
+        this(impl.getTotal(), impl.getRemoteData()
+            .getStatistics()
+            .getProfitability()
+            .orElse(Ratio.ZERO));
     }
 
     PortfolioOverviewImpl(final Map<Rating, Money> investedPerRating, final Ratio profitability) {

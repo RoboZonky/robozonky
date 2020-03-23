@@ -39,7 +39,8 @@ final class Registry {
     public Registry(final Tenant tenant) {
         this.tenant = tenant;
         final Map<Category, Storage> tmp = new EnumMap<>(Category.class);
-        Arrays.stream(Category.values()).forEach(cat -> tmp.put(cat, new Storage(tenant, getId(cat))));
+        Arrays.stream(Category.values())
+            .forEach(cat -> tmp.put(cat, new Storage(tenant, getId(cat))));
         this.storages = Collections.unmodifiableMap(tmp);
     }
 
@@ -56,44 +57,53 @@ final class Registry {
     }
 
     public boolean isInitialized() {
-        return tenant.getState(Storage.class).isInitialized();
+        return tenant.getState(Storage.class)
+            .isInitialized();
     }
 
     public Collection<Investment> complement(final Collection<Investment> investments) {
-        final Set<Long> idsToComplement = investments.stream().map(Registry::getId).collect(Collectors.toSet());
-        return storages.get(Category.NEW).complement(idsToComplement)
-                .parallel()
-                .mapToObj(id -> tenant.call(z -> z.getInvestment(id)))
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList());
+        final Set<Long> idsToComplement = investments.stream()
+            .map(Registry::getId)
+            .collect(Collectors.toSet());
+        return storages.get(Category.NEW)
+            .complement(idsToComplement)
+            .parallel()
+            .mapToObj(id -> tenant.call(z -> z.getInvestment(id)))
+            .flatMap(Optional::stream)
+            .collect(Collectors.toList());
     }
 
     public EnumSet<Category> getCategories(final Investment investment) {
         final long id = getId(investment);
-        final Set<Category> result = storages.entrySet().stream()
-                .filter(e -> e.getValue().isKnown(id))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+        final Set<Category> result = storages.entrySet()
+            .stream()
+            .filter(e -> e.getValue()
+                .isKnown(id))
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
         return result.isEmpty() ? EnumSet.noneOf(Category.class) : EnumSet.copyOf(result);
     }
 
     private void addToCategory(final Category category, final long id) {
-        storages.get(category).add(id);
+        storages.get(category)
+            .add(id);
     }
 
     public void addCategory(final Investment investment, final Category category) {
         final long id = getId(investment);
-        final Set<Category> categories = category == Category.DEFAULTED ?
-                storages.keySet() :
-                EnumSet.of(category, category.getLesser().toArray(Category[]::new));
+        final Set<Category> categories = category == Category.DEFAULTED ? storages.keySet()
+                : EnumSet.of(category, category.getLesser()
+                    .toArray(Category[]::new));
         categories.forEach(cat -> addToCategory(cat, id));
     }
 
     public void remove(final Investment investment) {
-        storages.values().forEach(storage -> storage.remove(getId(investment)));
+        storages.values()
+            .forEach(storage -> storage.remove(getId(investment)));
     }
 
     public void persist() {
-        storages.values().forEach(Storage::persist);
+        storages.values()
+            .forEach(Storage::persist);
     }
 }

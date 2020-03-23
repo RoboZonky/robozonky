@@ -16,8 +16,13 @@
 
 package com.github.robozonky.app.tenant;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.time.Clock;
 import java.time.OffsetDateTime;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -26,10 +31,6 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class BlockedTest extends AbstractRoboZonkyTest {
 
@@ -37,9 +38,12 @@ class BlockedTest extends AbstractRoboZonkyTest {
     void fromBigDecimal() {
         final Blocked b = new Blocked(1, Money.from(10), Rating.D);
         assertSoftly(softly -> {
-            softly.assertThat(b.getAmount()).isEqualTo(Money.from(10));
-            softly.assertThat(b.getRating()).isEqualTo(Rating.D);
-            softly.assertThat(b.getId()).isEqualTo(1);
+            softly.assertThat(b.getAmount())
+                .isEqualTo(Money.from(10));
+            softly.assertThat(b.getRating())
+                .isEqualTo(Rating.D);
+            softly.assertThat(b.getId())
+                .isEqualTo(1);
         });
     }
 
@@ -47,8 +51,9 @@ class BlockedTest extends AbstractRoboZonkyTest {
     void nonPersistentExpiring() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        OffsetDateTime loadOn = zonky.getStatistics().getTimestamp()
-                .minusSeconds(1);
+        OffsetDateTime loadOn = zonky.getStatistics()
+            .getTimestamp()
+            .minusSeconds(1);
         DateUtil.setSystemClock(Clock.fixed(loadOn.toInstant(), Defaults.ZONE_ID));
         final Blocked b = new Blocked(0, Money.ZERO, Rating.D, false);
         RemoteData r = RemoteData.load(tenant);

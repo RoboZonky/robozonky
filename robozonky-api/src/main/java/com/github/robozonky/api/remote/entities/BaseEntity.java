@@ -19,10 +19,11 @@ package com.github.robozonky.api.remote.entities;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 
 /**
  * All JAX-RS entity classes in this package should extend this class in order to be able to gracefully handle
@@ -35,7 +36,8 @@ abstract class BaseEntity {
     private final Logger logger = LogManager.getLogger(getClass());
 
     private boolean hasBeenCalledBefore(final String key) {
-        final String id = this.getClass().getCanonicalName() + ":" + key;
+        final String id = this.getClass()
+            .getCanonicalName() + ":" + key;
         return !CHANGES_ALREADY_NOTIFIED.add(id);
     }
 
@@ -50,7 +52,7 @@ abstract class BaseEntity {
     void handleUnknownSetter(final String key, final Object value) {
         if (!hasBeenCalledBefore(key)) {
             logger.debug("Trying to set value '{}' to unknown property '{}'. Indicates unsupported API.",
-                        value, key);
+                    value, key);
         }
     }
 

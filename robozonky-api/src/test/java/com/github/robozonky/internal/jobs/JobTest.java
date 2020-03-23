@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package com.github.robozonky.internal.jobs;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class JobTest {
 
@@ -28,9 +28,12 @@ class JobTest {
     void defaults() {
         final Job j = new MyJob();
         assertSoftly(softly -> {
-            softly.assertThat(j.startIn()).isGreaterThanOrEqualTo(Duration.ZERO);
-            softly.assertThat(j.repeatEvery()).isEqualTo(Duration.ZERO);
-            softly.assertThat(j.killIn()).isGreaterThan(Duration.ZERO);
+            softly.assertThat(j.startIn())
+                .isGreaterThanOrEqualTo(Duration.ZERO);
+            softly.assertThat(j.repeatEvery())
+                .isEqualTo(Duration.ZERO);
+            softly.assertThat(j.killIn())
+                .isGreaterThan(Duration.ZERO);
         });
     }
 

@@ -20,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.Optional;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -50,7 +51,8 @@ abstract class BaseInvestment extends BaseEntity {
     BaseInvestment(final Loan loan, final Money amount) {
         this.currency = amount.getCurrency();
         this.loanId = loan.getId();
-        this.amount = amount.getValue().toPlainString();
+        this.amount = amount.getValue()
+            .toPlainString();
         this.status = InvestmentStatus.ACTIVE;
     }
 
@@ -89,12 +91,12 @@ abstract class BaseInvestment extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", BaseInvestment.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("loanId=" + loanId)
-                .add("amount='" + amount + "'")
-                .add("currency=" + currency)
-                .add("status=" + status)
-                .add("timeCreated=" + timeCreated)
-                .toString();
+            .add("id=" + id)
+            .add("loanId=" + loanId)
+            .add("amount='" + amount + "'")
+            .add("currency=" + currency)
+            .add("status=" + status)
+            .add("timeCreated=" + timeCreated)
+            .toString();
     }
 }

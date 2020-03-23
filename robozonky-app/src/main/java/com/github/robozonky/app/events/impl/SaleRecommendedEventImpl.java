@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 
-final class SaleRecommendedEventImpl extends AbstractRecommendationBasedEventImpl<RecommendedInvestment,
-        InvestmentDescriptor, Investment> implements SaleRecommendedEvent {
+final class SaleRecommendedEventImpl
+        extends AbstractRecommendationBasedEventImpl<RecommendedInvestment, InvestmentDescriptor, Investment>
+        implements SaleRecommendedEvent {
 
     public SaleRecommendedEventImpl(final RecommendedInvestment recommendation) {
         super(recommendation);

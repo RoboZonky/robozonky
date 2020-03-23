@@ -21,11 +21,12 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.runtime.Lifecycle;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * You are required to exit this app by calling {@link #exit(ReturnCode)}.
@@ -48,6 +49,7 @@ public class App implements Runnable {
 
     /**
      * Exists so that tests can mock the {@link System#exit(int)} away.
+     * 
      * @param code
      */
     void actuallyExit(final int code) {
@@ -57,6 +59,7 @@ public class App implements Runnable {
     /**
      * Will terminate the application. Call this on every exit of the app to ensure proper termination. Failure to do
      * so may result in unpredictable behavior of this instance of RoboZonky or future ones.
+     * 
      * @param result Will be passed to {@link System#exit(int)}.
      */
     void exit(final ReturnCode result) {
@@ -76,7 +79,8 @@ public class App implements Runnable {
 
     private ReturnCode executeSafe(final Function<Lifecycle, InvestmentMode> modeProvider) {
         final InvestmentMode m = modeProvider.apply(new Lifecycle(shutdownHooks));
-        Events.global().fire(EventFactory.roboZonkyStarting());
+        Events.global()
+            .fire(EventFactory.roboZonkyStarting());
         shutdownHooks.register(() -> Optional.of(r -> LogManager.shutdown()));
         shutdownHooks.register(new RoboZonkyStartupNotifier(m.getSessionInfo()));
         final ReturnCode code = m.get();
@@ -93,12 +97,14 @@ public class App implements Runnable {
     public void run() {
         LOGGER.debug("Current working directory is '{}'.", System.getProperty("user.dir"));
         LOGGER.debug("Running {} {} v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vm.vendor"),
-                     System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
-                     System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
-                     Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
+                System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
+                System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
+                Runtime.getRuntime()
+                    .availableProcessors(),
+                Locale.getDefault(), Charset.defaultCharset());
         final ReturnCode code = CommandLine.parse(this)
-                .map(this::execute)
-                .orElse(ReturnCode.ERROR_SETUP);
+            .map(this::execute)
+            .orElse(ReturnCode.ERROR_SETUP);
         exit(code); // call the core code
     }
 }

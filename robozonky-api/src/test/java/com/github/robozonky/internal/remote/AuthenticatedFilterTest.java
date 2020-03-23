@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,8 @@
 
 package com.github.robozonky.internal.remote;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.internal.Defaults;
-import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,12 +25,22 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.core.Response;
+
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.Defaults;
 
 class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
-    static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
-                                                         UUID.randomUUID().toString(), 300);
+    static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID()
+        .toString(),
+            UUID.randomUUID()
+                .toString(),
+            300);
 
     private static InputStream c(final ZonkyApiToken token) {
         final String error = "{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: "

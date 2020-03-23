@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,22 @@
 
 package com.github.robozonky.installer;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
+
+import org.junit.jupiter.api.Test;
 
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class InstallDirValidatorTest {
 
     private static InstallData mockBaseData(final String installPath) {
         final InstallData data = mock(InstallData.class);
         when(data.getVariable(Variables.INSTALL_PATH.getKey()))
-                .thenReturn(new File(installPath).getAbsolutePath());
+            .thenReturn(new File(installPath).getAbsolutePath());
         return data;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,11 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import com.github.robozonky.internal.state.InstanceState;
-import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.state.InstanceState;
+import com.github.robozonky.internal.tenant.Tenant;
 
 /**
  * The purpose of this class is to keep a certain number of elements, and to persist those across many repeated
@@ -35,6 +36,7 @@ import org.apache.logging.log4j.Logger;
  * For example, when selling participations, the sell commands don't actually make it to Zonky. (Dry run!) So, for the
  * robot to not attempt to sell the same participation over and over again, the participation will be stored here and
  * kept for eternity.
+ * 
  * @param <T> Type of elements to store.
  */
 @SuppressWarnings("rawtypes")
@@ -49,10 +51,11 @@ final class SessionState<T> {
 
     /**
      * Create an empty instance.
-     * @param tenant Session identifier.
+     * 
+     * @param tenant     Session identifier.
      * @param idSupplier Supplies ID of the element to be stored, which will be used as a traditional primary key.
-     * @param key Name of this collection elements. Different instances with the same value operate on the same
-     * underlying storage.
+     * @param key        Name of this collection elements. Different instances with the same value operate on the same
+     *                   underlying storage.
      */
     public SessionState(final Tenant tenant, final ToLongFunction<T> idSupplier, final String key) {
         this(tenant, Collections.emptyList(), idSupplier, key);
@@ -60,38 +63,48 @@ final class SessionState<T> {
 
     /**
      * Create an instance, potentially retaining some elements from the underlying storage.
-     * @param tenant Session identifier.
-     * @param retain Elements to retain.
+     * 
+     * @param tenant     Session identifier.
+     * @param retain     Elements to retain.
      * @param idSupplier Supplies ID of the element to be stored, which will be used as a traditional primary key.
-     * @param key Name of this collection elements. Different instances with the same value operate on the same
-     * underlying storage.
+     * @param key        Name of this collection elements. Different instances with the same value operate on the same
+     *                   underlying storage.
      */
     public SessionState(final Tenant tenant, final Collection<T> retain, final ToLongFunction<T> idSupplier,
-                        final String key) {
+            final String key) {
         this.state = tenant.getState(SessionState.class);
         this.key = key;
         this.idSupplier = idSupplier;
         this.items = read();
-        this.items.retainAll(retain.stream().mapToLong(idSupplier).boxed().collect(Collectors.toSet()));
+        this.items.retainAll(retain.stream()
+            .mapToLong(idSupplier)
+            .boxed()
+            .collect(Collectors.toSet()));
         LOGGER.debug("'{}' contains {}.", key, items);
     }
 
     private Set<Long> read() {
         final long[] result = state.getValues(key)
-                .map(s -> s.mapToLong(Long::parseLong).toArray())
-                .orElse(NO_LONGS);
+            .map(s -> s.mapToLong(Long::parseLong)
+                .toArray())
+            .orElse(NO_LONGS);
         LOGGER.trace("'{}' read {}.", key, result);
-        return LongStream.of(result).boxed().collect(Collectors.toSet());
+        return LongStream.of(result)
+            .boxed()
+            .collect(Collectors.toSet());
     }
 
     private void write(final Collection<Long> items) {
-        state.update(b -> b.put(key, items.stream().map(String::valueOf)));
-        final String value = state.getValue(key).orElse("nothing");
+        state.update(b -> b.put(key, items.stream()
+            .map(String::valueOf)));
+        final String value = state.getValue(key)
+            .orElse("nothing");
         LOGGER.trace("'{}' wrote '{}'.", key, value);
     }
 
     /**
      * Immediately writes the item to the underlying storage.
+     * 
      * @param item
      */
     public synchronized void put(final T item) {
@@ -101,6 +114,7 @@ final class SessionState<T> {
 
     /**
      * Whether or not an item is contained in the underlying storage.
+     * 
      * @param item
      */
     public synchronized boolean contains(final T item) {

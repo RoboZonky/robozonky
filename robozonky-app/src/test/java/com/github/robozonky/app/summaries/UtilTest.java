@@ -16,12 +16,17 @@
 
 package com.github.robozonky.app.summaries;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -38,23 +43,20 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class UtilTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void atRisk() {
         final Investment i = MockInvestmentBuilder.fresh()
-                .setRating(Rating.D)
-                .setRemainingPrincipal(BigDecimal.TEN)
-                .setPaidInterest(BigDecimal.ZERO)
-                .setPaidPenalty(BigDecimal.ZERO)
-                .build();
+            .setRating(Rating.D)
+            .setRemainingPrincipal(BigDecimal.TEN)
+            .setPaidInterest(BigDecimal.ZERO)
+            .setPaidPenalty(BigDecimal.ZERO)
+            .build();
         final Statistics stats = mock(Statistics.class);
-        final RiskPortfolio r = new RiskPortfolio(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal().orElseThrow());
+        final RiskPortfolio r = new RiskPortfolio(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal()
+            .orElseThrow());
         when(stats.getRiskPortfolio()).thenReturn(Collections.singletonList(r));
         final Zonky zonky = harmlessZonky();
         when(zonky.getStatistics()).thenReturn(stats);
@@ -80,24 +82,24 @@ class UtilTest extends AbstractZonkyLeveragingTest {
     @Test
     void sellable() {
         final Investment i = MockInvestmentBuilder.fresh()
-                .setRating(Rating.D)
-                .setRemainingPrincipal(BigDecimal.TEN)
-                .setLoanHealthInfo(LoanHealth.HEALTHY)
-                .setSmpFee(BigDecimal.ONE)
-                .build();
+            .setRating(Rating.D)
+            .setRemainingPrincipal(BigDecimal.TEN)
+            .setLoanHealthInfo(LoanHealth.HEALTHY)
+            .setSmpFee(BigDecimal.ONE)
+            .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-                .setRating(Rating.A)
-                .setRemainingPrincipal(BigDecimal.ONE)
-                .setLoanHealthInfo(LoanHealth.HISTORICALLY_IN_DUE)
-                .build();
+            .setRating(Rating.A)
+            .setRemainingPrincipal(BigDecimal.ONE)
+            .setLoanHealthInfo(LoanHealth.HISTORICALLY_IN_DUE)
+            .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-                .setRating(Rating.C)
-                .setRemainingPrincipal(BigDecimal.ZERO)
-                .setLoanHealthInfo(LoanHealth.HEALTHY)
-                .build();
+            .setRating(Rating.C)
+            .setRemainingPrincipal(BigDecimal.ZERO)
+            .setLoanHealthInfo(LoanHealth.HEALTHY)
+            .build();
         final Zonky zonky = harmlessZonky();
         mockSellInfo(zonky, BigDecimal.TEN, BigDecimal.ZERO);
-        when(zonky.getInvestments((Select)any())).thenReturn(Stream.of(i, i2, i3));
+        when(zonky.getInvestments((Select) any())).thenReturn(Stream.of(i, i2, i3));
         final Tenant tenant = mockTenant(zonky);
         final Tuple2<Map<Rating, Money>, Map<Rating, Money>> result = Util.getAmountsSellable(tenant);
         assertThat(result._1).containsOnlyKeys(Rating.D, Rating.A);

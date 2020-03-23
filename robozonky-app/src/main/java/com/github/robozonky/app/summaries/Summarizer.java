@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.summaries;
 
+import static com.github.robozonky.app.summaries.Util.getAmountsSellable;
+
 import java.util.Map;
 
 import com.github.robozonky.api.Money;
@@ -27,13 +29,12 @@ import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple2;
 
-import static com.github.robozonky.app.summaries.Util.getAmountsSellable;
-
 final class Summarizer implements TenantPayload {
 
     private static ExtendedPortfolioOverview extend(final Tenant tenant) {
         final Tuple2<Map<Rating, Money>, Map<Rating, Money>> amountsSellable = getAmountsSellable(tenant);
-        return ExtendedPortfolioOverviewImpl.extend(tenant.getPortfolio().getOverview(),
+        return ExtendedPortfolioOverviewImpl.extend(tenant.getPortfolio()
+            .getOverview(),
                 Util.getAmountsAtRisk(tenant), amountsSellable._1(), amountsSellable._2());
     }
 

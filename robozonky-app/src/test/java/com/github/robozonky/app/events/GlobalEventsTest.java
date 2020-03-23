@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,21 @@
 
 package com.github.robozonky.app.events;
 
-import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.events.impl.EventFactory;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.events.impl.EventFactory;
 
 class GlobalEventsTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void fireReturnsFuture() {
-        final CompletableFuture<?> result = GlobalEvents.get().fire(EventFactory.roboZonkyEnding());
+        final CompletableFuture<?> result = GlobalEvents.get()
+            .fire(EventFactory.roboZonkyEnding());
         result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }

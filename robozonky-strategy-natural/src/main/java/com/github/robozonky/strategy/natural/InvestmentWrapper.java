@@ -66,7 +66,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Ratio getRevenueRate() {
-        return investment.getRevenueRate().orElseGet(() -> estimateRevenueRate(investment.getInvestmentDate()));
+        return investment.getRevenueRate()
+            .orElseGet(() -> estimateRevenueRate(investment.getInvestmentDate()));
     }
 
     @Override
@@ -91,17 +92,23 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalAmount() {
-        return investment.getLoanAmount().getValue().intValue();
+        return investment.getLoanAmount()
+            .getValue()
+            .intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return investment.getLoanAnnuity().getValue().intValue();
+        return investment.getLoanAnnuity()
+            .getValue()
+            .intValue();
     }
 
     @Override
     public BigDecimal getRemainingPrincipal() {
-        return investment.getRemainingPrincipal().orElseThrow().getValue();
+        return investment.getRemainingPrincipal()
+            .orElseThrow()
+            .getValue();
     }
 
     @Override
@@ -109,49 +116,57 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
         var interest = investment.getPaidInterest();
         var principal = investment.getPaidPrincipal();
         var penalties = investment.getPaidPenalty();
-        return Optional.of(interest.add(principal).add(penalties).getValue());
+        return Optional.of(interest.add(principal)
+            .add(penalties)
+            .getValue());
     }
 
     @Override
     public Optional<BigDecimal> getSellFee() {
         var fee = investment.getSmpFee()
-                .orElseGet(() -> sellInfo.get()
-                        .map(si -> si.getPriceInfo().getFee().getValue())
-                        .orElse(Money.ZERO))
-                .getValue();
+            .orElseGet(() -> sellInfo.get()
+                .map(si -> si.getPriceInfo()
+                    .getFee()
+                    .getValue())
+                .orElse(Money.ZERO))
+            .getValue();
         return Optional.of(fee);
     }
 
     private <T> T extractOrFail(final Function<SellInfo, T> extractor) {
         return sellInfo.get()
-                .map(extractor)
-                .orElseThrow();
+            .map(extractor)
+            .orElseThrow();
     }
 
     @Override
     public Optional<LoanHealth> getHealth() {
         var healthInfo = investment.getLoanHealthInfo()
-                .orElseGet(() -> extractOrFail(si -> si.getLoanHealthStats().getLoanHealthInfo()));
+            .orElseGet(() -> extractOrFail(si -> si.getLoanHealthStats()
+                .getLoanHealthInfo()));
         return Optional.of(healthInfo);
     }
 
     @Override
     public Optional<BigDecimal> getOriginalPurchasePrice() {
-        return Optional.of(investment.getPurchasePrice().getValue());
+        return Optional.of(investment.getPurchasePrice()
+            .getValue());
     }
 
     @Override
     public Optional<BigDecimal> getPrice() {
         var price = investment.getSmpPrice()
-                .orElseGet(() -> extractOrFail(si -> si.getPriceInfo().getSellPrice()));
+            .orElseGet(() -> extractOrFail(si -> si.getPriceInfo()
+                .getSellPrice()));
         return Optional.of(price.getValue());
     }
 
     @Override
     public Optional<BigDecimal> getDiscount() {
         var discount = sellInfo.get()
-                .map(si -> si.getPriceInfo().getDiscount())
-                .orElse(Ratio.ZERO);
+            .map(si -> si.getPriceInfo()
+                .getDiscount())
+            .orElse(Ratio.ZERO);
         var result = discount.apply(Money.from(getRemainingPrincipal()));
         return Optional.of(result.getValue());
     }

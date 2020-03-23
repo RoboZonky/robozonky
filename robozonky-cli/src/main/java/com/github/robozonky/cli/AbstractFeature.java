@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import picocli.CommandLine;
 
 abstract class AbstractFeature implements Feature {
@@ -37,7 +38,7 @@ abstract class AbstractFeature implements Feature {
     public void run() {
         logger.info("Welcome to the RoboZonky command-line configuration and validation tool.");
         logger.warn("This is a tool for the brave. Create a backup copy of RoboZonky " +
-                            "or use RoboZonky installer instead.");
+                "or use RoboZonky installer instead.");
         try {
             final String description = describe();
             logger.info("--- Press any key to run: '{}'", description);

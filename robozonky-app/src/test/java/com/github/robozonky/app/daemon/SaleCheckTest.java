@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,18 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -26,17 +38,6 @@ import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 class SaleCheckTest extends AbstractZonkyLeveragingTest {
 
@@ -54,17 +55,17 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
     class SomethingIsOffered {
 
         private final Investment soldEarlier = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-                .setOnSmp(false)
-                .setStatus(InvestmentStatus.ACTIVE)
-                .build();
+            .setOnSmp(false)
+            .setStatus(InvestmentStatus.ACTIVE)
+            .build();
         private final Investment soldNow = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-                .setOnSmp(false)
-                .setStatus(InvestmentStatus.SOLD)
-                .build();
+            .setOnSmp(false)
+            .setStatus(InvestmentStatus.SOLD)
+            .build();
         private final Investment onSmp = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-                .setStatus(InvestmentStatus.ACTIVE)
-                .setOnSmp(true)
-                .build();
+            .setStatus(InvestmentStatus.ACTIVE)
+            .setOnSmp(true)
+            .build();
 
         @BeforeEach
         void markInvestmentsAsOffered() {
@@ -92,9 +93,9 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
             });
             final List<Event> events = getEventsRequested();
             assertThat(events)
-                    .hasSize(1)
-                    .first()
-                    .isInstanceOf(InvestmentSoldEvent.class);
+                .hasSize(1)
+                .first()
+                .isInstanceOf(InvestmentSoldEvent.class);
         }
 
     }

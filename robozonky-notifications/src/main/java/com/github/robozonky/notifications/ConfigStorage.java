@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,12 +67,13 @@ public class ConfigStorage {
 
     public OptionalInt readInt(final Target target, final String propertyName) {
         return read(target, propertyName)
-                .map(v -> OptionalInt.of(Integer.parseInt(v)))
-                .orElse(OptionalInt.empty());
+            .map(v -> OptionalInt.of(Integer.parseInt(v)))
+            .orElse(OptionalInt.empty());
     }
 
     public int readInt(final Target target, final String propertyName, final int defaultValue) {
-        return this.readInt(target, propertyName).orElse(defaultValue);
+        return this.readInt(target, propertyName)
+            .orElse(defaultValue);
     }
 
     @Override

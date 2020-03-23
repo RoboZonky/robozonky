@@ -16,10 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.verification.VerificationMode;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
@@ -37,31 +44,26 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-import org.mockito.verification.VerificationMode;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class SellingTest extends AbstractZonkyLeveragingTest {
 
-    private static final SellStrategy ALL_ACCEPTING_STRATEGY =
-            (available, portfolio) -> available.stream().map(d -> d.recommend().get());
+    private static final SellStrategy ALL_ACCEPTING_STRATEGY = (available, portfolio) -> available.stream()
+        .map(d -> d.recommend()
+            .get());
     private static final SellStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty();
 
     private static Investment mockInvestment(final Loan loan) {
         return MockInvestmentBuilder.fresh(loan, 200)
-                .setLoanId(loan.getId())
-                .setRating(Rating.AAAAA)
-                .setLoanTermInMonth(1000)
-                .setLoanHealthInfo(LoanHealth.HEALTHY)
-                .setRemainingPrincipal(BigDecimal.valueOf(100))
-                .setStatus(InvestmentStatus.ACTIVE)
-                .setOnSmp(false)
-                .setIsCanBeOffered(true)
-                .setInWithdrawal(false)
-                .build();
+            .setLoanId(loan.getId())
+            .setRating(Rating.AAAAA)
+            .setLoanTermInMonth(1000)
+            .setLoanHealthInfo(LoanHealth.HEALTHY)
+            .setRemainingPrincipal(BigDecimal.valueOf(100))
+            .setStatus(InvestmentStatus.ACTIVE)
+            .setOnSmp(false)
+            .setIsCanBeOffered(true)
+            .setInWithdrawal(false)
+            .build();
     }
 
     @Test
@@ -80,8 +82,10 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
-            softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
-            softly.assertThat(e.get(1)).isInstanceOf(SellingCompletedEvent.class);
+            softly.assertThat(e.get(0))
+                .isInstanceOf(SellingStartedEvent.class);
+            softly.assertThat(e.get(1))
+                .isInstanceOf(SellingCompletedEvent.class);
         });
         verify(zonky, never()).sell(any());
     }
@@ -98,8 +102,10 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
-            softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
-            softly.assertThat(e.get(1)).isInstanceOf(SellingCompletedEvent.class);
+            softly.assertThat(e.get(0))
+                .isInstanceOf(SellingStartedEvent.class);
+            softly.assertThat(e.get(1))
+                .isInstanceOf(SellingCompletedEvent.class);
         });
         verify(zonky, never()).sell(eq(i));
     }
@@ -117,10 +123,14 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final List<Event> e = getEventsRequested();
         assertThat(e).hasSize(4);
         assertSoftly(softly -> {
-            softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
-            softly.assertThat(e.get(1)).isInstanceOf(SaleRecommendedEvent.class);
-            softly.assertThat(e.get(2)).isInstanceOf(SaleOfferedEvent.class);
-            softly.assertThat(e.get(3)).isInstanceOf(SellingCompletedEvent.class);
+            softly.assertThat(e.get(0))
+                .isInstanceOf(SellingStartedEvent.class);
+            softly.assertThat(e.get(1))
+                .isInstanceOf(SaleRecommendedEvent.class);
+            softly.assertThat(e.get(2))
+                .isInstanceOf(SaleOfferedEvent.class);
+            softly.assertThat(e.get(3))
+                .isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
         verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));

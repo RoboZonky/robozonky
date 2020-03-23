@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,27 @@
 
 package com.github.robozonky.app.daemon;
 
+import static com.github.robozonky.app.events.impl.EventFactory.investmentSold;
+import static com.github.robozonky.app.events.impl.EventFactory.investmentSoldLazy;
+
+import java.util.Optional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.Optional;
-
-import static com.github.robozonky.app.events.impl.EventFactory.investmentSold;
-import static com.github.robozonky.app.events.impl.EventFactory.investmentSoldLazy;
 
 final class SaleCheck implements TenantPayload {
 
     private static final Logger LOGGER = LogManager.getLogger(SaleCheck.class);
 
     private synchronized Optional<Investment> retrieveInvestmentIfSold(final SoldParticipationCache cache,
-                                                                       final Tenant tenant, final int loanId) {
+            final Tenant tenant, final int loanId) {
         final Optional<Investment> i = tenant.call(z -> z.getInvestmentByLoanId(loanId));
         if (i.isPresent()) {
             final Investment actual = i.get();
@@ -60,15 +61,16 @@ final class SaleCheck implements TenantPayload {
     public void accept(final Tenant tenant) {
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         cache.getOffered()
-                .mapToObj(id -> retrieveInvestmentIfSold(cache, tenant, id))
-                .flatMap(Optional::stream)
-                .forEach(sold -> {
-                    final int loanId = sold.getLoanId();
-                    cache.markAsSold(loanId);
-                    ((PowerTenant) tenant).fire(investmentSoldLazy(() -> {
-                        final Loan l = tenant.getLoan(loanId);
-                        return investmentSold(sold, l, tenant.getPortfolio().getOverview());
-                    }));
-                });
+            .mapToObj(id -> retrieveInvestmentIfSold(cache, tenant, id))
+            .flatMap(Optional::stream)
+            .forEach(sold -> {
+                final int loanId = sold.getLoanId();
+                cache.markAsSold(loanId);
+                ((PowerTenant) tenant).fire(investmentSoldLazy(() -> {
+                    final Loan l = tenant.getLoan(loanId);
+                    return investmentSold(sold, l, tenant.getPortfolio()
+                        .getOverview());
+                }));
+            });
     }
 }

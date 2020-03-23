@@ -31,6 +31,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
@@ -40,8 +43,6 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.util.ClassUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class SessionEvents {
 
@@ -74,30 +75,32 @@ public final class SessionEvents {
     static <T extends Event> Class<T> getImplementingEvent(final Class<T> original) {
         final Stream<Class<?>> provided = ClassUtil.getAllInterfaces(original);
         final Stream<Class<?>> interfaces = original.isInterface() ? // interface could be extending it directly
-                Stream.concat(Stream.of(original), provided) :
-                provided;
+                Stream.concat(Stream.of(original), provided) : provided;
         final String apiPackage = "com.github.robozonky.api.notifications";
-        return (Class<T>) interfaces.filter(i -> Objects.equals(i.getPackage().getName(), apiPackage))
-                .filter(i -> i.getSimpleName().endsWith("Event"))
-                .filter(i -> !Objects.equals(i.getSimpleName(), "Event"))
-                .findFirst()
-                .orElseThrow();
+        return (Class<T>) interfaces.filter(i -> Objects.equals(i.getPackage()
+            .getName(), apiPackage))
+            .filter(i -> i.getSimpleName()
+                .endsWith("Event"))
+            .filter(i -> !Objects.equals(i.getSimpleName(), "Event"))
+            .findFirst()
+            .orElseThrow();
     }
 
     /**
      * Takes a set of {@link Runnable}s and queues them to be fired on a background thread, in the guaranteed order of
      * appearance.
+     * 
      * @param futures Each item in the stream represents a singular event to be fired.
      * @return When complete, all listeners have been notified of all the events.
      */
     @SuppressWarnings("rawtypes")
     private static CompletableFuture runAsync(final Stream<Runnable> futures) {
         final CompletableFuture[] results = futures.map(CompletableFuture::runAsync)
-                .toArray(CompletableFuture[]::new);
+            .toArray(CompletableFuture[]::new);
         return GlobalEvents.merge(results);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private <T extends Event> List<EventListenerSupplier<T>> retrieveListenerSuppliers(final Class<T> eventType) {
         final Class<T> impl = getImplementingEvent(eventType);
         LOGGER.trace("Event {} implements {}.", eventType, impl);
@@ -106,9 +109,10 @@ public final class SessionEvents {
 
     /**
      * Represents the payload that will be handed over to {@link #runAsync(Stream)}.
+     * 
      * @param lazyEvent The event which will be instantiated and sent to the listener.
-     * @param listener The listener to receive the event.
-     * @param <T> Type of the event.
+     * @param listener  The listener to receive the event.
+     * @param <T>       Type of the event.
      */
     @SuppressWarnings("unchecked")
     private <T extends Event> void fireAny(final LazyEvent<T> lazyEvent, final EventListener<T> listener) {
@@ -123,20 +127,19 @@ public final class SessionEvents {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     <T extends Event> CompletableFuture fireAny(final LazyEvent<T> event) {
         // loan all listeners
         debugListeners.forEach(l -> l.requested(event));
         final Class<T> eventType = event.getEventType();
-        final List<EventListenerSupplier<T>> s =
-                suppliers.computeIfAbsent(eventType, e -> retrieveListenerSuppliers(e));
+        final List<EventListenerSupplier<T>> s = suppliers.computeIfAbsent(eventType,
+                e -> retrieveListenerSuppliers(e));
         // send the event to all listeners, execute on the background
         final Stream<EventListener> registered = s.stream()
-                .map(Supplier::get)
-                .flatMap(Optional::stream);
-        final Stream<EventListener> withInjected = injectedDebugListener == null ?
-                registered :
-                Stream.concat(Stream.of(injectedDebugListener), registered);
+            .map(Supplier::get)
+            .flatMap(Optional::stream);
+        final Stream<EventListener> withInjected = injectedDebugListener == null ? registered
+                : Stream.concat(Stream.of(injectedDebugListener), registered);
         return runAsync(withInjected.map(l -> new EventTriggerRunnable(event, l)));
     }
 
@@ -152,6 +155,7 @@ public final class SessionEvents {
 
     /**
      * Purely for testing purposes.
+     * 
      * @param listener
      */
     void injectEventListener(final EventListener<? extends Event> listener) {

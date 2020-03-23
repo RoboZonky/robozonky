@@ -16,10 +16,11 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.Money;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import com.github.robozonky.api.Money;
 
 class InvestmentSizeTest {
 
@@ -29,8 +30,10 @@ class InvestmentSizeTest {
     void regular() {
         final MoneyRange s = new MoneyRange(InvestmentSizeTest.MIN, InvestmentSizeTest.MAX);
         assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MIN));
-            softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
+            softly.assertThat(s.getMinimumInvestment())
+                .isEqualTo(Money.from(InvestmentSizeTest.MIN));
+            softly.assertThat(s.getMaximumInvestment())
+                .isEqualTo(Money.from(InvestmentSizeTest.MAX));
         });
     }
 
@@ -38,8 +41,10 @@ class InvestmentSizeTest {
     void switched() {
         final MoneyRange s = new MoneyRange(InvestmentSizeTest.MAX, InvestmentSizeTest.MIN);
         assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MIN));
-            softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
+            softly.assertThat(s.getMinimumInvestment())
+                .isEqualTo(Money.from(InvestmentSizeTest.MIN));
+            softly.assertThat(s.getMaximumInvestment())
+                .isEqualTo(Money.from(InvestmentSizeTest.MAX));
         });
     }
 
@@ -47,8 +52,10 @@ class InvestmentSizeTest {
     void omitted() {
         final MoneyRange s = new MoneyRange(InvestmentSizeTest.MAX);
         assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumInvestment()).isEqualTo(Money.ZERO);
-            softly.assertThat(s.getMaximumInvestment()).isEqualTo(Money.from(InvestmentSizeTest.MAX));
+            softly.assertThat(s.getMinimumInvestment())
+                .isEqualTo(Money.ZERO);
+            softly.assertThat(s.getMaximumInvestment())
+                .isEqualTo(Money.from(InvestmentSizeTest.MAX));
         });
     }
 }

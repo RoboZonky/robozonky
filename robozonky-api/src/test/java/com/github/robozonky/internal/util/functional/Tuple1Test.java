@@ -16,10 +16,10 @@
 
 package com.github.robozonky.internal.util.functional;
 
+import static org.assertj.core.api.Assertions.*;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class Tuple1Test {
 
@@ -33,19 +33,26 @@ class Tuple1Test {
     void equals() {
         Tuple1 tuple = Tuple.of(1);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(tuple).isEqualTo(tuple);
-            softly.assertThat(tuple).isNotEqualTo(null);
-            softly.assertThat(tuple).isNotEqualTo("");
+            softly.assertThat(tuple)
+                .isEqualTo(tuple);
+            softly.assertThat(tuple)
+                .isNotEqualTo(null);
+            softly.assertThat(tuple)
+                .isNotEqualTo("");
         });
         Tuple1 tuple2 = Tuple.of(1);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(tuple).isNotSameAs(tuple2);
-            softly.assertThat(tuple).isEqualTo(tuple2);
+            softly.assertThat(tuple)
+                .isNotSameAs(tuple2);
+            softly.assertThat(tuple)
+                .isEqualTo(tuple2);
         });
         Tuple1 tuple3 = Tuple.of(2);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(tuple3).isNotEqualTo(tuple);
-            softly.assertThat(tuple).isNotEqualTo(tuple3);
+            softly.assertThat(tuple3)
+                .isNotEqualTo(tuple);
+            softly.assertThat(tuple)
+                .isNotEqualTo(tuple3);
         });
     }
 

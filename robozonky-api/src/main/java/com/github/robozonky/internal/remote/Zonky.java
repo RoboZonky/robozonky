@@ -24,7 +24,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
 import javax.ws.rs.ClientErrorException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.LoanApi;
@@ -50,8 +54,6 @@ import com.github.robozonky.api.remote.enums.Resolution;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
@@ -61,10 +63,10 @@ import org.apache.logging.log4j.Logger;
  * Requests". The following operations have their own quotas:
  *
  * <ul>
- *   <li>{@link #getLastPublishedLoanInfo()} allows for 3000 requests, with one request cleared every second. Therefore
- *   we do not request-count this API, as we will only ever request this value once every second.</li>
- *   <li>{@link #getAvailableParticipations(Select)} ()} is in the same situation.</li>
- *   <li>Everything else is on the same quote and therefore is request-counted.</li>
+ * <li>{@link #getLastPublishedLoanInfo()} allows for 3000 requests, with one request cleared every second. Therefore
+ * we do not request-count this API, as we will only ever request this value once every second.</li>
+ * <li>{@link #getAvailableParticipations(Select)} ()} is in the same situation.</li>
+ * <li>Everything else is on the same quote and therefore is request-counted.</li>
  * </ul>
  * <p>
  * Request counting does not actually limit anything. It just gives us an idea through logs how close or how far we are
@@ -89,15 +91,15 @@ public class Zonky {
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                              final Select select) {
+            final Select select) {
         var pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         return PagingStreams.streamBuilder(new EntityCollectionPageSource<>(api, function, select, pageSize))
-                .pageSize(pageSize)
-                .build();
+            .pageSize(pageSize)
+            .build();
     }
 
     private static <T> Stream<T> excludeNonCZK(final Stream<T> data,
-                                               final Function<T, Currency> extractor) {
+            final Function<T, Currency> extractor) {
         return data.filter(i -> Objects.equals(extractor.apply(i), Defaults.CURRENCY));
     }
 
@@ -156,23 +158,29 @@ public class Zonky {
     }
 
     public void accept(final Reservation reservation) {
-        final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation().getId(), Resolution.ACCEPTED);
+        final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation()
+            .getId(), Resolution.ACCEPTED);
         final Resolutions rs = new Resolutions(Collections.singleton(r));
         controlApi.run(c -> c.accept(rs));
     }
 
     /**
      * Retrieve reservations that the user has to either accept or reject.
+     * 
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Reservation> getPendingReservations() {
-        return excludeNonCZK(reservationApi.call(ReservationApi::items).getReservations().stream(),
-                             Reservation::getCurrency)
-                .filter(r -> r.getCurrency().equals(Defaults.CURRENCY));
+        return excludeNonCZK(reservationApi.call(ReservationApi::items)
+            .getReservations()
+            .stream(),
+                Reservation::getCurrency)
+                    .filter(r -> r.getCurrency()
+                        .equals(Defaults.CURRENCY));
     }
 
     /**
      * Retrieve investments from user's portfolio via {@link PortfolioApi}, in a given order.
+     * 
      * @param select Rules to filter the selection by.
      * @return All items from the remote API, lazy-loaded.
      */
@@ -182,9 +190,9 @@ public class Zonky {
 
     public Stream<Investment> getDelinquentInvestments() {
         return getInvestments(new Select()
-                                      .in("loan.status", "ACTIVE", "PAID_OFF")
-                                      .equals("loan.unpaidLastInst", "true")
-                                      .equals("status", "ACTIVE"));
+            .in("loan.status", "ACTIVE", "PAID_OFF")
+            .equals("loan.unpaidLastInst", "true")
+            .equals("status", "ACTIVE"));
     }
 
     public Loan getLoan(final int id) {
@@ -211,6 +219,7 @@ public class Zonky {
 
     /**
      * Retrieve loans from marketplace via {@link LoanApi}.
+     * 
      * @param select Rules to filter the selection by.
      * @return All items from the remote API, lazy-loaded.
      */
@@ -220,6 +229,7 @@ public class Zonky {
 
     /**
      * Retrieve participations from secondary marketplace via {@link ParticipationApi}.
+     * 
      * @param select Rules to filter the selection by.
      * @return All items from the remote API, lazy-loaded.
      */

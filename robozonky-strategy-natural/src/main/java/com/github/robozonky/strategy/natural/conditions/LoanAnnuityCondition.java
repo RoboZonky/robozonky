@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,19 @@ public final class LoanAnnuityCondition extends AbstractRangeCondition<Integer> 
 
     public static LoanAnnuityCondition lessThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.lessThan(Wrapper::getOriginalAnnuity, AMOUNT_DOMAIN,
-                                                                  threshold);
+                threshold);
         return new LoanAnnuityCondition(c);
     }
 
     public static LoanAnnuityCondition moreThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.moreThan(Wrapper::getOriginalAnnuity, AMOUNT_DOMAIN,
-                                                                  threshold);
+                threshold);
         return new LoanAnnuityCondition(c);
     }
 
     public static LoanAnnuityCondition exact(final int minimumThreshold, final int maximumThreshold) {
         final RangeCondition<Integer> c = RangeCondition.exact(Wrapper::getOriginalAnnuity, AMOUNT_DOMAIN,
-                                                               minimumThreshold, maximumThreshold);
+                minimumThreshold, maximumThreshold);
         return new LoanAnnuityCondition(c);
     }
 

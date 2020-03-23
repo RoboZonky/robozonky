@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,26 @@
 
 package com.github.robozonky.internal.remote;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
 
 abstract class AbstractCommonFilterTest {
 
@@ -48,9 +54,9 @@ abstract class AbstractCommonFilterTest {
         final Map<String, List<String>> result = new HashMap<>();
         headers.forEach((k, v) -> {
             if (v instanceof Collection) {
-                var strings = ((Collection<Object>)v).stream()
-                        .map(Object::toString)
-                        .collect(Collectors.toList());
+                var strings = ((Collection<Object>) v).stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
                 result.put(k, strings);
             } else {
                 result.put(k, Collections.singletonList(v.toString()));
@@ -77,17 +83,22 @@ abstract class AbstractCommonFilterTest {
 
     @Test
     void response() throws IOException, URISyntaxException {
-        final String key = UUID.randomUUID().toString();
-        final String key2 = UUID.randomUUID().toString();
-        final String value = UUID.randomUUID().toString();
+        final String key = UUID.randomUUID()
+            .toString();
+        final String key2 = UUID.randomUUID()
+            .toString();
+        final String value = UUID.randomUUID()
+            .toString();
         final Map<String, Object> headers = Map.of(key, value, key2, Collections.emptyList());
         final ClientResponseContext ctx2 = mockClientResponseContext(headers);
         when(ctx2.getStatusInfo()).thenReturn(mock(Response.StatusType.class));
         final RoboZonkyFilter filter = getTestedFilter();
         filter.filter(mockClientRequestContext(), ctx2);
         assertSoftly(softly -> {
-            softly.assertThat(filter.getLastResponseHeader(key)).contains(value);
-            softly.assertThat(filter.getLastResponseHeader(key2)).isEmpty();
+            softly.assertThat(filter.getLastResponseHeader(key))
+                .contains(value);
+            softly.assertThat(filter.getLastResponseHeader(key2))
+                .isEmpty();
         });
     }
 

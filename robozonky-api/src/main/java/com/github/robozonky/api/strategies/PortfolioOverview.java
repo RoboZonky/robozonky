@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.function.Function;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 
 /**
  * Class with some aggregate statistics about user's portfolio. Used primarily as the main input into
@@ -37,12 +37,14 @@ public interface PortfolioOverview {
 
     /**
      * Sum total of all amounts yet unpaid.
+     * 
      * @return Amount.
      */
     Money getInvested();
 
     /**
      * Amount yet unpaid in a given rating.
+     * 
      * @param r Rating in question.
      * @return Amount.
      */
@@ -50,6 +52,7 @@ public interface PortfolioOverview {
 
     /**
      * Retrieve the amounts due in a given rating, divided by {@link #getInvested()}.
+     * 
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
@@ -65,6 +68,7 @@ public interface PortfolioOverview {
 
     /**
      * Retrieve annual rate of return of the entire portfolio as reported by Zonky.
+     * 
      * @return
      */
     Ratio getAnnualProfitability();
@@ -77,15 +81,16 @@ public interface PortfolioOverview {
 
     private Ratio getProfitability(final Function<Rating, Ratio> metric) {
         final BigDecimal result = Arrays.stream(Rating.values())
-                .map(r -> calculateProfitability(r, metric))
-                .reduce(BigDecimalCalculator::plus)
-                .orElse(BigDecimal.ZERO);
+            .map(r -> calculateProfitability(r, metric))
+            .reduce(BigDecimalCalculator::plus)
+            .orElse(BigDecimal.ZERO);
         return Ratio.fromRaw(result);
     }
 
     /**
      * Retrieve minimal annual rate of return of the entire portfolio, assuming Zonky rist cost model holds.
      * (See {@link Rating#getMinimalRevenueRate(Money)}.)
+     * 
      * @return
      */
     default Ratio getMinimalAnnualProfitability() {
@@ -95,6 +100,7 @@ public interface PortfolioOverview {
     /**
      * Retrieve maximal annual rate of return of the entire portfolio, assuming none of the loans are ever delinquent.
      * (See {@link Rating#getMaximalRevenueRate(Money)}.)
+     * 
      * @return
      */
     default Ratio getOptimalAnnualProfitability() {
@@ -102,11 +108,13 @@ public interface PortfolioOverview {
     }
 
     private Money calculateProfit(Ratio rate) {
-        return rate.apply(getInvested()).divideBy(12);
+        return rate.apply(getInvested())
+            .divideBy(12);
     }
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getAnnualProfitability()}.
+     * 
      * @return Amount.
      */
     default Money getMonthlyProfit() {
@@ -115,6 +123,7 @@ public interface PortfolioOverview {
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getMinimalAnnualProfitability()}.
+     * 
      * @return Amount.
      */
     default Money getMinimalMonthlyProfit() {
@@ -123,6 +132,7 @@ public interface PortfolioOverview {
 
     /**
      * Retrieve the expected monthly revenue, based on {@link #getOptimalAnnualProfitability()}.
+     * 
      * @return Amount.
      */
     default Money getOptimalMonthlyProfit() {

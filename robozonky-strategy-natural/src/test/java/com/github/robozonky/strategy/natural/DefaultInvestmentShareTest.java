@@ -16,28 +16,32 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.Assertions.*;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class DefaultInvestmentShareTest {
 
     @Test
     void shareBoundaries() {
         assertThatThrownBy(() -> new DefaultInvestmentShare(-1))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new DefaultInvestmentShare(101))
-                .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class);
         final DefaultInvestmentShare s = new DefaultInvestmentShare(0);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumShareInPercent()).isEqualTo(0);
-            softly.assertThat(s.getMaximumShareInPercent()).isEqualTo(0);
+            softly.assertThat(s.getMinimumShareInPercent())
+                .isEqualTo(0);
+            softly.assertThat(s.getMaximumShareInPercent())
+                .isEqualTo(0);
         });
         final DefaultInvestmentShare s2 = new DefaultInvestmentShare(100);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(s2.getMinimumShareInPercent()).isEqualTo(0);
-            softly.assertThat(s2.getMaximumShareInPercent()).isEqualTo(100);
+            softly.assertThat(s2.getMinimumShareInPercent())
+                .isEqualTo(0);
+            softly.assertThat(s2.getMaximumShareInPercent())
+                .isEqualTo(100);
         });
     }
 

@@ -16,21 +16,24 @@
 
 package com.github.robozonky.internal.remote;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.UUID;
 import java.util.function.Function;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 class ApiProviderTest {
 
     private static ZonkyApiToken mockToken() {
         final ZonkyApiToken t = mock(ZonkyApiToken.class);
-        when(t.getAccessToken()).thenReturn(UUID.randomUUID().toString().toCharArray());
+        when(t.getAccessToken()).thenReturn(UUID.randomUUID()
+            .toString()
+            .toCharArray());
         return t;
     }
 

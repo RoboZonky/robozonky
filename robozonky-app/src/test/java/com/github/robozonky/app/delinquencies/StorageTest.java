@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assumptions.assumeThat;
+
 import java.util.Collections;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Assumptions.assumeThat;
 
 class StorageTest extends AbstractRoboZonkyTest {
 
@@ -34,7 +35,8 @@ class StorageTest extends AbstractRoboZonkyTest {
 
     @Test
     void persists() {
-        final String uid = UUID.randomUUID().toString();
+        final String uid = UUID.randomUUID()
+            .toString();
         final long id = 1;
         final Storage s = new Storage(tenant, uid);
         s.add(id);
@@ -46,7 +48,8 @@ class StorageTest extends AbstractRoboZonkyTest {
     @Test
     void doesNotAddTwice() {
         final long id = 1;
-        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID()
+            .toString());
         assertThat(s.add(id)).isTrue();
         assertThat(s.add(id)).isFalse();
         assertThat(s.remove(id)).isFalse(); // the original did not contain this id
@@ -57,7 +60,8 @@ class StorageTest extends AbstractRoboZonkyTest {
     @Test
     void complementsWhenEmpty() {
         final long id = 1;
-        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID()
+            .toString());
         assertThat(s.complement(Collections.emptySet())).isEmpty();
         assertThat(s.complement(Collections.singleton(id))).isEmpty();
     }
@@ -65,7 +69,8 @@ class StorageTest extends AbstractRoboZonkyTest {
     @Test
     void complementsWhenHasValue() {
         final long id = 1;
-        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID()
+            .toString());
         s.add(id);
         s.persist();
         // start the test
@@ -77,7 +82,8 @@ class StorageTest extends AbstractRoboZonkyTest {
     @Test
     void doesNotRemoveTwice() {
         final long id = 1;
-        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID()
+            .toString());
         s.add(id);
         s.persist();
         // now start the test
@@ -91,7 +97,8 @@ class StorageTest extends AbstractRoboZonkyTest {
     @Test
     void onlyChangesWhenPersisted() {
         final long id = 1;
-        final Storage s = new Storage(tenant, UUID.randomUUID().toString());
+        final Storage s = new Storage(tenant, UUID.randomUUID()
+            .toString());
         assumeThat(s.isKnown(id)).isFalse();
         s.add(id);
         assertThat(s.isKnown(id)).isFalse();

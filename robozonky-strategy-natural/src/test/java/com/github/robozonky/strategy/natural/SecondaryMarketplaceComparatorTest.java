@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.Comparator;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class SecondaryMarketplaceComparatorTest {
 
@@ -42,17 +43,20 @@ class SecondaryMarketplaceComparatorTest {
     @Test
     void sortByRating() {
         final Loan l1 = new MockLoanBuilder()
-                .setRating(Rating.D)
-                .build();
-        final Loan l2 =new MockLoanBuilder()
-                .setRating(Rating.A)
-                .build();
+            .setRating(Rating.D)
+            .build();
+        final Loan l2 = new MockLoanBuilder()
+            .setRating(Rating.A)
+            .build();
         final ParticipationDescriptor pd1 = mockParticipationDescriptor(l1),
                 pd2 = mockParticipationDescriptor(l2);
         assertSoftly(softly -> {
-            softly.assertThat(c.compare(pd1, pd2)).isGreaterThan(0);
-            softly.assertThat(c.compare(pd2, pd1)).isLessThan(0);
-            softly.assertThat(c.compare(pd1, pd1)).isEqualTo(0);
+            softly.assertThat(c.compare(pd1, pd2))
+                .isGreaterThan(0);
+            softly.assertThat(c.compare(pd2, pd1))
+                .isLessThan(0);
+            softly.assertThat(c.compare(pd1, pd1))
+                .isEqualTo(0);
         });
     }
 

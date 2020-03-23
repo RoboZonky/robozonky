@@ -36,7 +36,7 @@ import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 
-class   ParsedStrategy {
+class ParsedStrategy {
 
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioShare> portfolio;
@@ -51,7 +51,7 @@ class   ParsedStrategy {
 
     ParsedStrategy(final DefaultValues values) {
         this(values, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(),
-             new FilterSupplier(values));
+                new FilterSupplier(values));
     }
 
     ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> filters) {
@@ -67,37 +67,39 @@ class   ParsedStrategy {
     }
 
     ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-                   final Map<Rating, MoneyRange> investmentSizes, final Map<Rating, MoneyRange> purchaseSizes) {
+            final Map<Rating, MoneyRange> investmentSizes, final Map<Rating, MoneyRange> purchaseSizes) {
         this(defaults, portfolio, investmentSizes, purchaseSizes, new FilterSupplier(defaults));
     }
 
     public ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-                          final Map<Rating, MoneyRange> investmentSizes,
-                          final Map<Rating, MoneyRange> purchaseSizes, final FilterSupplier filters) {
+            final Map<Rating, MoneyRange> investmentSizes,
+            final Map<Rating, MoneyRange> purchaseSizes, final FilterSupplier filters) {
         this.defaults = defaults;
-        this.portfolio = portfolio.isEmpty() ? Collections.emptyMap() :
-                new EnumMap<>(portfolio.stream().
-                        collect(Collectors.toMap(PortfolioShare::getRating, Function.identity())));
+        this.portfolio = portfolio.isEmpty() ? Collections.emptyMap()
+                : new EnumMap<>(portfolio.stream()
+                    .collect(Collectors.toMap(PortfolioShare::getRating, Function.identity())));
         this.investmentSizes = investmentSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(investmentSizes);
         this.purchaseSizes = purchaseSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(purchaseSizes);
         this.filters = filters;
     }
 
     private static boolean matchesFilter(final Wrapper<?> item, final Collection<MarketplaceFilter> filters,
-                                         final String logMessage) {
+            final String logMessage) {
         return filters.stream()
-                .filter(f -> f.test(item))
-                .peek(f -> Audit.LOGGER.debug(logMessage, item.getId(), f))
-                .findFirst()
-                .isPresent();
+            .filter(f -> f.test(item))
+            .peek(f -> Audit.LOGGER.debug(logMessage, item.getId(), f))
+            .findFirst()
+            .isPresent();
     }
 
     public int getMinimumInvestmentShareInPercent() {
-        return defaults.getInvestmentShare().getMinimumShareInPercent();
+        return defaults.getInvestmentShare()
+            .getMinimumShareInPercent();
     }
 
     public int getMaximumInvestmentShareInPercent() {
-        return defaults.getInvestmentShare().getMaximumShareInPercent();
+        return defaults.getInvestmentShare()
+            .getMaximumShareInPercent();
     }
 
     public Money getMaximumInvestmentSize() {
@@ -114,9 +116,11 @@ class   ParsedStrategy {
 
     public Ratio getPermittedShare(final Rating rating) {
         if (portfolio.containsKey(rating)) {
-            return portfolio.get(rating).getPermitted();
+            return portfolio.get(rating)
+                .getPermitted();
         } else { // no maximum share specified; calculate minimum share and use it as maximum too
-            return defaults.getPortfolio().getDefaultShare(rating);
+            return defaults.getPortfolio()
+                .getDefaultShare(rating);
         }
     }
 
@@ -148,30 +152,33 @@ class   ParsedStrategy {
         var loanFilters = filters.getPrimaryMarketplaceFilters();
         var investmentFilters = filters.getSellFilters();
         return wrappers
-                .filter(w -> !matchesFilter(w, loanFilters, type + " #{} skipped due to primary marketplace filter {}."))
-                .filter(w -> !matchesFilter(w, investmentFilters, type + " #{} skipped due to sell filter {}."))
-                .map(Wrapper::getOriginal);
+            .filter(w -> !matchesFilter(w, loanFilters, type + " #{} skipped due to primary marketplace filter {}."))
+            .filter(w -> !matchesFilter(w, investmentFilters, type + " #{} skipped due to sell filter {}."))
+            .map(Wrapper::getOriginal);
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Stream<LoanDescriptor> l,
-                                                     final PortfolioOverview portfolioOverview) {
-        return getApplicable(l.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)), "Loan");
+            final PortfolioOverview portfolioOverview) {
+        return getApplicable(l.parallel()
+            .map(d -> Wrapper.wrap(d, portfolioOverview)), "Loan");
     }
 
     public Stream<ReservationDescriptor> getApplicableReservations(final Stream<ReservationDescriptor> r,
-                                                                   final PortfolioOverview portfolioOverview) {
-        return getApplicable(r.parallel().map(d -> Wrapper.wrap(d, portfolioOverview)), "Reservation");
+            final PortfolioOverview portfolioOverview) {
+        return getApplicable(r.parallel()
+            .map(d -> Wrapper.wrap(d, portfolioOverview)), "Reservation");
     }
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(final Stream<ParticipationDescriptor> p,
-                                                                       final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         var participationFilters = filters.getSecondaryMarketplaceFilters();
         var sellFilters = filters.getSellFilters();
         return p.parallel()
-                .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> !matchesFilter(w, participationFilters, "Participation #{} skipped due to secondary marketplace filter {}."))
-                .filter(w -> !matchesFilter(w, sellFilters, "Participation #{} skipped due to sell filter {}."))
-                .map(Wrapper::getOriginal);
+            .map(d -> Wrapper.wrap(d, portfolioOverview))
+            .filter(w -> !matchesFilter(w, participationFilters,
+                    "Participation #{} skipped due to secondary marketplace filter {}."))
+            .filter(w -> !matchesFilter(w, sellFilters, "Participation #{} skipped due to sell filter {}."))
+            .map(Wrapper::getOriginal);
     }
 
     public boolean isPurchasingEnabled() {
@@ -191,21 +198,21 @@ class   ParsedStrategy {
     }
 
     public Stream<InvestmentDescriptor> getMatchingSellFilters(final Stream<InvestmentDescriptor> i,
-                                                               final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         var investmentFilters = filters.getSellFilters();
         return i.parallel()
-                .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> matchesFilter(w, investmentFilters, "Investment #{} to be sold due to sell filter {}."))
-                .map(Wrapper::getOriginal);
+            .map(d -> Wrapper.wrap(d, portfolioOverview))
+            .filter(w -> matchesFilter(w, investmentFilters, "Investment #{} to be sold due to sell filter {}."))
+            .map(Wrapper::getOriginal);
     }
 
     public Stream<InvestmentDescriptor> getMatchingPrimaryMarketplaceFilters(final Stream<InvestmentDescriptor> i,
-                                                                             final PortfolioOverview portfolioOverview) {
+            final PortfolioOverview portfolioOverview) {
         var loanFilters = filters.getPrimaryMarketplaceFilters();
         return i.parallel()
-                .map(d -> Wrapper.wrap(d, portfolioOverview))
-                .filter(w -> matchesFilter(w, loanFilters, "Investment #{} sellable due to primary marketplace filter {}."))
-                .map(Wrapper::getOriginal);
+            .map(d -> Wrapper.wrap(d, portfolioOverview))
+            .filter(w -> matchesFilter(w, loanFilters, "Investment #{} sellable due to primary marketplace filter {}."))
+            .map(Wrapper::getOriginal);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class InterestNumberFormatFactory extends TemplateNumberFormatFactory {
 
     @Override
     public TemplateNumberFormat get(final String params, final Locale locale,
-                                    final Environment env) throws TemplateValueFormatException {
+            final Environment env) throws TemplateValueFormatException {
         TemplateFormatUtil.checkHasNoParameters(params);
         return new InterestNumberFormatFactory.InterestNumberFormat(locale);
     }

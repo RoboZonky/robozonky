@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class InvestmentPurchasedEventListener extends AbstractListener<InvestmentPurchasedEvent> {
 
@@ -37,8 +37,10 @@ public class InvestmentPurchasedEventListener extends AbstractListener<Investmen
     @Override
     protected Map<String, Object> getData(InvestmentPurchasedEvent event) {
         final Map<String, Object> result = new HashMap<>(super.getData(event));
-        result.put("amountHeld", event.getPurchasedAmount().getValue());
-        result.put("loanTermRemaining", event.getParticipation().getRemainingInstalmentCount());
+        result.put("amountHeld", event.getPurchasedAmount()
+            .getValue());
+        result.put("loanTermRemaining", event.getParticipation()
+            .getRemainingInstalmentCount());
         return result;
     }
 

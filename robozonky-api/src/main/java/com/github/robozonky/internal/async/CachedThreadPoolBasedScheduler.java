@@ -53,10 +53,11 @@ final class CachedThreadPoolBasedScheduler implements Scheduler {
 
     @Override
     public TaskDescriptor submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
-                                 final Duration timeout) {
-        final TaskDescriptor task = new TaskDescriptor(executorService, toSchedule, firstDelay, delayInBetween, timeout);
+            final Duration timeout) {
+        final TaskDescriptor task = new TaskDescriptor(executorService, toSchedule, firstDelay, delayInBetween,
+                timeout);
         LOGGER.debug("Scheduling {} every {} ns, starting in {} ns.", task, delayInBetween.toNanos(),
-                     firstDelay.toNanos());
+                firstDelay.toNanos());
         task.schedule();
         return task;
     }

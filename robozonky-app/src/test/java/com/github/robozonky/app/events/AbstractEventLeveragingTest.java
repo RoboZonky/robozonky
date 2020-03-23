@@ -24,6 +24,10 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
+
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -32,9 +36,6 @@ import com.github.robozonky.app.tenant.TestingPowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
@@ -80,13 +81,15 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     @BeforeEach
     public void startListeningForEvents() { // initialize session and create a listener
         final PowerTenant t = mockTenant();
-        Events.forSession(t).addListener(listener);
+        Events.forSession(t)
+            .addListener(listener);
     }
 
     @AfterEach
     public void stopListeningForEvents() {
         final PowerTenant t = mockTenant();
-        Events.forSession(t).removeListener(listener);
+        Events.forSession(t)
+            .removeListener(listener);
         readPreexistingEvents();
     }
 
@@ -95,7 +98,10 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         Instant start = Instant.now();
         do {
             for (Event e : ready) {
-                if (listener.getEventsFailed().contains(e) || listener.getEventsFired().contains(e)) {
+                if (listener.getEventsFailed()
+                    .contains(e) ||
+                        listener.getEventsFired()
+                            .contains(e)) {
                     logger.debug("Event {} registered.", e);
                     ready.remove(e);
                 }
@@ -108,7 +114,9 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
             } catch (InterruptedException e) {
                 // don't do anything
             }
-        } while (Duration.between(start, Instant.now()).abs().compareTo(Duration.ofSeconds(5)) < 0);
+        } while (Duration.between(start, Instant.now())
+            .abs()
+            .compareTo(Duration.ofSeconds(5)) < 0);
         if (!ready.isEmpty()) {
             throw new IllegalStateException("Not all events were processed: " + ready);
         }
@@ -116,7 +124,9 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
 
     @AfterEach
     public void unregisterAllShutdownHooks() { // so that PITest can shut down all child processes
-        Lifecycle.getShutdownHooks().forEach(h -> Runtime.getRuntime().removeShutdownHook(h));
+        Lifecycle.getShutdownHooks()
+            .forEach(h -> Runtime.getRuntime()
+                .removeShutdownHook(h));
         Thread.setDefaultUncaughtExceptionHandler(null);
     }
 
@@ -137,18 +147,20 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
         }
 
         @Override
-        public synchronized <T extends Event> void ready(final T event, final Class<? extends EventListener<T>> listener) {
+        public synchronized <T extends Event> void ready(final T event,
+                final Class<? extends EventListener<T>> listener) {
             eventsReady.add(event);
         }
 
         @Override
-        public synchronized <T extends Event> void fired(final T event, final Class<? extends EventListener<T>> listener) {
+        public synchronized <T extends Event> void fired(final T event,
+                final Class<? extends EventListener<T>> listener) {
             eventsFired.add(event);
         }
 
         @Override
         public synchronized <T extends Event> void failed(final LazyEvent<? extends Event> event,
-                                             final Class<? extends EventListener<T>> listener, final Exception ex) {
+                final Class<? extends EventListener<T>> listener, final Exception ex) {
             eventsFailed.add(event.get());
         }
 

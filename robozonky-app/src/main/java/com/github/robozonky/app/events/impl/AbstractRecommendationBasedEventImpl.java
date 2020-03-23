@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, 
     private final Money recommendation;
 
     protected AbstractRecommendationBasedEventImpl(final T recommendation) {
-        this.recommending = recommendation.descriptor().item();
-        this.loan = recommendation.descriptor().related();
+        this.recommending = recommendation.descriptor()
+            .item();
+        this.loan = recommendation.descriptor()
+            .related();
         this.recommendation = recommendation.amount();
     }
 
@@ -51,10 +53,10 @@ abstract class AbstractRecommendationBasedEventImpl<T extends Recommended<T, S, 
     @Override
     public String toString() {
         return new StringJoiner(", ", getClass().getSimpleName() + "[", "]")
-                .add("super=" + super.toString())
-                .add("loan=" + loan)
-                .add("recommending=" + recommending)
-                .add("recommendation=" + recommendation)
-                .toString();
+            .add("super=" + super.toString())
+            .add("loan=" + loan)
+            .add("recommending=" + recommending)
+            .add("recommendation=" + recommendation)
+            .toString();
     }
 }

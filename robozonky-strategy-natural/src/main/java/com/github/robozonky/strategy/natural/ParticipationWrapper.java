@@ -58,7 +58,8 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public Ratio getRevenueRate() {
-        return getLoan().getRevenueRate().orElseGet(this::estimateRevenueRate);
+        return getLoan().getRevenueRate()
+            .orElseGet(this::estimateRevenueRate);
     }
 
     @Override
@@ -83,27 +84,34 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public int getOriginalAmount() {
-        return getLoan().getAmount().getValue().intValue();
+        return getLoan().getAmount()
+            .getValue()
+            .intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return getLoan().getAnnuity().getValue().intValue();
+        return getLoan().getAnnuity()
+            .getValue()
+            .intValue();
     }
 
     @Override
     public Optional<BigDecimal> getPrice() {
-        return Optional.of(participation.getPrice().getValue());
+        return Optional.of(participation.getPrice()
+            .getValue());
     }
 
     @Override
     public Optional<BigDecimal> getDiscount() {
-        return Optional.of(participation.getDiscount().getValue());
+        return Optional.of(participation.getDiscount()
+            .getValue());
     }
 
     @Override
     public BigDecimal getRemainingPrincipal() {
-        return participation.getRemainingPrincipal().getValue();
+        return participation.getRemainingPrincipal()
+            .getValue();
     }
 
     @Override

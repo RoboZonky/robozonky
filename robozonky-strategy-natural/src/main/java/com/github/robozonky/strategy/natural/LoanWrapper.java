@@ -68,7 +68,8 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     @Override
     public Ratio getRevenueRate() {
-        return loan.getRevenueRate().orElseGet(this::estimateRevenueRate);
+        return loan.getRevenueRate()
+            .orElseGet(this::estimateRevenueRate);
     }
 
     @Override
@@ -93,12 +94,16 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
     @Override
     public int getOriginalAmount() {
-        return loan.getAmount().getValue().intValue();
+        return loan.getAmount()
+            .getValue()
+            .intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return loan.getAnnuity().getValue().intValue();
+        return loan.getAnnuity()
+            .getValue()
+            .intValue();
     }
 
     @Override

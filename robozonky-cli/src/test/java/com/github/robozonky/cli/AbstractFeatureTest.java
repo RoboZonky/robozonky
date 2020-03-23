@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.cli;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.stream.Stream;
@@ -25,9 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import picocli.CommandLine;
 
-import static org.assertj.core.api.Assertions.*;
+import picocli.CommandLine;
 
 class AbstractFeatureTest {
 
@@ -35,13 +36,13 @@ class AbstractFeatureTest {
 
     static Stream<Arguments> describe() {
         return new CommandLine(new Cli())
-                .getSubcommands()
-                .values()
-                .stream()
-                .map(CommandLine::getCommand)
-                .filter(c -> c instanceof AbstractFeature)
-                .map(c -> (AbstractFeature) c)
-                .map(Arguments::of);
+            .getSubcommands()
+            .values()
+            .stream()
+            .map(CommandLine::getCommand)
+            .filter(c -> c instanceof AbstractFeature)
+            .map(c -> (AbstractFeature) c)
+            .map(Arguments::of);
     }
 
     @AfterEach

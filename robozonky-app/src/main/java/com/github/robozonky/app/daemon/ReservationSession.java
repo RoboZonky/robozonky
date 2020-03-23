@@ -16,6 +16,12 @@
 
 package com.github.robozonky.app.daemon;
 
+import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptationRecommended;
+import static com.github.robozonky.app.events.impl.EventFactory.reservationAccepted;
+import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptedLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckStarted;
+
 import java.util.Collection;
 import java.util.Collections;
 
@@ -27,12 +33,6 @@ import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 
-import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptationRecommended;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationAccepted;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckStarted;
-
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
  * given loan.
@@ -43,39 +43,46 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationCheck
 final class ReservationSession extends AbstractSession<RecommendedReservation, ReservationDescriptor, Reservation> {
 
     ReservationSession(final Collection<ReservationDescriptor> marketplace, final PowerTenant tenant) {
-        super(marketplace, tenant, new SessionState<>(tenant, marketplace, d -> d.item().getId(), "seenReservations"),
-              Audit.reservations());
+        super(marketplace, tenant, new SessionState<>(tenant, marketplace, d -> d.item()
+            .getId(), "seenReservations"),
+                Audit.reservations());
     }
 
     public static Collection<Reservation> process(final PowerTenant tenant,
-                                                  final Collection<ReservationDescriptor> loans,
-                                                  final ReservationStrategy strategy) {
+            final Collection<ReservationDescriptor> loans,
+            final ReservationStrategy strategy) {
         final ReservationSession s = new ReservationSession(loans, tenant);
-        final PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
+        final PortfolioOverview portfolioOverview = tenant.getPortfolio()
+            .getOverview();
         s.tenant.fire(reservationCheckStarted(portfolioOverview));
-        if (!s.getAvailable().isEmpty()) {
+        if (!s.getAvailable()
+            .isEmpty()) {
             s.process(strategy);
         }
         // make sure we get fresh portfolio reference here
-        s.tenant.fire(reservationCheckCompleted(s.result, tenant.getPortfolio().getOverview()));
+        s.tenant.fire(reservationCheckCompleted(s.result, tenant.getPortfolio()
+            .getOverview()));
         return Collections.unmodifiableCollection(s.result);
     }
 
     private void process(final ReservationStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
-                    .peek(r -> tenant.fire(reservationAcceptationRecommended(r)))
-                    .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
-                    .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
+            invested = strategy.recommend(getAvailable(), tenant.getPortfolio()
+                .getOverview(), tenant.getRestrictions())
+                .peek(r -> tenant.fire(reservationAcceptationRecommended(r)))
+                .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
+                .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
 
     private boolean actuallyAccept(final RecommendedReservation recommendation) {
         final ReservationDescriptor loan = recommendation.descriptor();
-        final int loanId = loan.item().getId();
+        final int loanId = loan.item()
+            .getId();
         try {
-            tenant.run(z -> z.accept(recommendation.descriptor().item()));
+            tenant.run(z -> z.accept(recommendation.descriptor()
+                .item()));
             logger.info("Accepted reservation of loan #{}.", loanId);
             return true;
         } catch (final Exception ex) { // TODO distinguish between low balance and other rare causes of failure
@@ -88,22 +95,29 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
     protected boolean accept(final RecommendedReservation recommendation) {
         if (!isBalanceAcceptable(recommendation)) {
             logger.debug("Will not accept reservation {} due to balance ({}) likely too low.", recommendation,
-                         tenant.getKnownBalanceUpperBound());
+                    tenant.getKnownBalanceUpperBound());
             return false;
         }
         logger.debug("Will attempt to accept reservation {}.", recommendation);
-        final boolean succeeded = tenant.getSessionInfo().isDryRun() || actuallyAccept(recommendation);
+        final boolean succeeded = tenant.getSessionInfo()
+            .isDryRun() || actuallyAccept(recommendation);
         discard(recommendation.descriptor()); // never show again
         if (!succeeded) {
-            tenant.setKnownBalanceUpperBound(recommendation.amount().subtract(1));
+            tenant.setKnownBalanceUpperBound(recommendation.amount()
+                .subtract(1));
             return false;
         }
-        final Loan l = recommendation.descriptor().related();
-        result.add(recommendation.descriptor().item());
-        tenant.getPortfolio().simulateCharge(l.getId(), l.getRating(), recommendation.amount());
-        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
+        final Loan l = recommendation.descriptor()
+            .related();
+        result.add(recommendation.descriptor()
+            .item());
+        tenant.getPortfolio()
+            .simulateCharge(l.getId(), l.getRating(), recommendation.amount());
+        tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
+            .subtract(recommendation.amount()));
         tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(l, recommendation.amount(),
-                tenant.getPortfolio().getOverview())));
+                tenant.getPortfolio()
+                    .getOverview())));
         return true;
     }
 }

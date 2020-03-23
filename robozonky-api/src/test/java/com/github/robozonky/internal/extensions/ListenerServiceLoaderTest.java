@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.github.robozonky.internal.extensions;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -24,13 +27,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.api.notifications.EventListenerSupplier;
-import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.internal.state.TenantState;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -38,8 +34,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
+import com.github.robozonky.api.notifications.ListenerService;
+import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.state.TenantState;
 
 @ExtendWith(MockitoExtension.class)
 class ListenerServiceLoaderTest {
@@ -58,27 +59,34 @@ class ListenerServiceLoaderTest {
     void correctLoading() {
         final ListenerService s1 = mock(ListenerService.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> returned = () -> Optional.of(l);
-        doAnswer(i -> Stream.of(returned)).when(s1).findListeners(eq(SESSION), eq(RoboZonkyStartingEvent.class));
+        doAnswer(i -> Stream.of(returned)).when(s1)
+            .findListeners(eq(SESSION), eq(RoboZonkyStartingEvent.class));
         final ListenerService s2 = mock(ListenerService.class);
         doAnswer(i -> Stream.of((EventListenerSupplier<RoboZonkyStartingEvent>) Optional::empty))
-                .when(s2).findListeners(eq(SESSION), eq(RoboZonkyStartingEvent.class));
-        final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2).iterator();
-        final List<EventListenerSupplier<RoboZonkyStartingEvent>> r =
-                ListenerServiceLoader.load(SESSION, RoboZonkyStartingEvent.class, s);
+            .when(s2)
+            .findListeners(eq(SESSION), eq(RoboZonkyStartingEvent.class));
+        final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2)
+            .iterator();
+        final List<EventListenerSupplier<RoboZonkyStartingEvent>> r = ListenerServiceLoader.load(SESSION,
+                RoboZonkyStartingEvent.class, s);
         assertThat(r).hasSize(2);
         assertThat(r)
-                .first()
-                .has(new Condition<>(result -> result.get().isPresent() && Objects.equals(result.get().get(), l),
-                                     "Exists"));
+            .first()
+            .has(new Condition<>(result -> result.get()
+                .isPresent() &&
+                    Objects.equals(result.get()
+                        .get(), l),
+                    "Exists"));
         assertThat(r)
-                .last()
-                .has(new Condition<>(result -> result.get().isEmpty(), "Does not exist"));
+            .last()
+            .has(new Condition<>(result -> result.get()
+                .isEmpty(), "Does not exist"));
     }
 
     @Test
     void empty() {
-        final List<EventListenerSupplier<RoboZonkyTestingEvent>> r =
-                ListenerServiceLoader.load(SESSION, RoboZonkyTestingEvent.class);
+        final List<EventListenerSupplier<RoboZonkyTestingEvent>> r = ListenerServiceLoader.load(SESSION,
+                RoboZonkyTestingEvent.class);
         assertThat(r).isEmpty(); // no providers registered by default
     }
 

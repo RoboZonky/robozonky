@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,17 @@
 
 package com.github.robozonky.notifications.templates;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.util.Locale;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.notifications.templates.html.HtmlTemplate;
 import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
-import freemarker.template.Configuration;
-import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import freemarker.template.Configuration;
 
 class TemplateProcessorTest {
 
@@ -34,12 +36,17 @@ class TemplateProcessorTest {
         final String targetEncoding = Defaults.CHARSET.toString();
         assertSoftly(softly -> {
             softly.assertThat(configuration.getCustomNumberFormat("interest"))
-                    .isInstanceOf(InterestNumberFormatFactory.class);
-            softly.assertThat(configuration.getLogTemplateExceptions()).isFalse();
-            softly.assertThat(configuration.getDefaultEncoding()).isEqualTo(targetEncoding);
-            softly.assertThat(configuration.getEncoding(Locale.getDefault())).isEqualTo(targetEncoding);
-            softly.assertThat(configuration.getEncoding(Locale.ENGLISH)).isEqualTo(targetEncoding);
-            softly.assertThat(configuration.getEncoding(Defaults.LOCALE)).isEqualTo(targetEncoding);
+                .isInstanceOf(InterestNumberFormatFactory.class);
+            softly.assertThat(configuration.getLogTemplateExceptions())
+                .isFalse();
+            softly.assertThat(configuration.getDefaultEncoding())
+                .isEqualTo(targetEncoding);
+            softly.assertThat(configuration.getEncoding(Locale.getDefault()))
+                .isEqualTo(targetEncoding);
+            softly.assertThat(configuration.getEncoding(Locale.ENGLISH))
+                .isEqualTo(targetEncoding);
+            softly.assertThat(configuration.getEncoding(Defaults.LOCALE))
+                .isEqualTo(targetEncoding);
         });
     }
 
@@ -49,12 +56,17 @@ class TemplateProcessorTest {
         final String targetEncoding = Defaults.CHARSET.toString();
         assertSoftly(softly -> {
             softly.assertThat(configuration.getCustomNumberFormat("interest"))
-                    .isInstanceOf(InterestNumberFormatFactory.class);
-            softly.assertThat(configuration.getLogTemplateExceptions()).isFalse();
-            softly.assertThat(configuration.getDefaultEncoding()).isEqualTo(targetEncoding);
-            softly.assertThat(configuration.getEncoding(Locale.getDefault())).isEqualTo(targetEncoding);
-            softly.assertThat(configuration.getEncoding(Locale.ENGLISH)).isEqualTo(targetEncoding);
-            softly.assertThat(configuration.getEncoding(Defaults.LOCALE)).isEqualTo(targetEncoding);
+                .isInstanceOf(InterestNumberFormatFactory.class);
+            softly.assertThat(configuration.getLogTemplateExceptions())
+                .isFalse();
+            softly.assertThat(configuration.getDefaultEncoding())
+                .isEqualTo(targetEncoding);
+            softly.assertThat(configuration.getEncoding(Locale.getDefault()))
+                .isEqualTo(targetEncoding);
+            softly.assertThat(configuration.getEncoding(Locale.ENGLISH))
+                .isEqualTo(targetEncoding);
+            softly.assertThat(configuration.getEncoding(Defaults.LOCALE))
+                .isEqualTo(targetEncoding);
         });
     }
 }

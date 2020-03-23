@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,10 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.jobs.TenantPayload;
-import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static com.github.robozonky.app.events.impl.EventFactory.loanLost;
+import static com.github.robozonky.app.events.impl.EventFactory.loanLostLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquent;
+import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquentLazy;
 
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -34,7 +29,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.robozonky.app.events.impl.EventFactory.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.jobs.TenantPayload;
+import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.tenant.Tenant;
 
 /**
  * Updates delinquency information based on the information about loans that are either currently delinquent or no
@@ -55,11 +59,13 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static boolean isDefaulted(final Investment i) {
-        return i.getPaymentStatus().map(s -> s == PaymentStatus.PAID_OFF).orElse(false);
+        return i.getPaymentStatus()
+            .map(s -> s == PaymentStatus.PAID_OFF)
+            .orElse(false);
     }
 
     private static void processNoLongerDelinquent(final PowerTenant tenant, final Investment investment,
-                                                  final PaymentStatus status) {
+            final PaymentStatus status) {
         LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
         switch (status) {
             case WRITTEN_OFF: // investment is lost for good
@@ -70,7 +76,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                 return;
             case PAID:
                 LOGGER.debug("Ignoring a repaid investment #{}, will be handled by transaction processors.",
-                             investment.getId());
+                        investment.getId());
                 return;
             default:
                 tenant.fire(loanNoLongerDelinquentLazy(() -> {
@@ -81,11 +87,12 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static void processNoLongerDelinquent(final Investment investment, final PowerTenant tenant) {
-        investment.getPaymentStatus().ifPresent(status -> processNoLongerDelinquent(tenant, investment, status));
+        investment.getPaymentStatus()
+            .ifPresent(status -> processNoLongerDelinquent(tenant, investment, status));
     }
 
     private static void processDelinquent(final PowerTenant tenant, final Registry registry,
-                                          final Investment currentDelinquent) {
+            final Investment currentDelinquent) {
         final long investmentId = currentDelinquent.getId();
         final EnumSet<Category> knownCategories = registry.getCategories(currentDelinquent);
         if (knownCategories.contains(Category.HOPELESS)) {
@@ -95,9 +102,9 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         final int daysPastDue = currentDelinquent.getLegalDpd();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
-                .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
-                .filter(c -> c.getThresholdInDays() <= daysPastDue)
-                .max(Comparator.comparing(Category::getThresholdInDays));
+            .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
+            .filter(c -> c.getThresholdInDays() <= daysPastDue)
+            .max(Comparator.comparing(Category::getThresholdInDays));
         if (firstNextCategory.isPresent()) {
             final Category category = firstNextCategory.get();
             LOGGER.debug("Investment #{} placed to category {}.", investmentId, category);
@@ -109,7 +116,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static void processDefaulted(final PowerTenant tenant, final Registry registry,
-                                         final Investment currentDelinquent) {
+            final Investment currentDelinquent) {
         final long investmentId = currentDelinquent.getId();
         final EnumSet<Category> knownCategories = registry.getCategories(currentDelinquent);
         if (knownCategories.contains(Category.DEFAULTED)) {
@@ -123,29 +130,30 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static Stream<Investment> getDefaulted(final Set<Investment> investments) {
-        return investments.parallelStream().filter(DelinquencyNotificationPayload::isDefaulted);
+        return investments.parallelStream()
+            .filter(DelinquencyNotificationPayload::isDefaulted);
     }
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
         return investments.parallelStream()
-                .filter(i -> i.getLegalDpd() > 0)
-                .filter(i -> !isDefaulted(i));
+            .filter(i -> i.getLegalDpd() > 0)
+            .filter(i -> !isDefaulted(i));
     }
 
     private void process(final PowerTenant tenant) {
         final Set<Investment> delinquents = tenant.call(Zonky::getDelinquentInvestments)
-                .parallel() // possibly many pages' worth of results; fetch in parallel
-                .collect(Collectors.toSet());
+            .parallel() // possibly many pages' worth of results; fetch in parallel
+            .collect(Collectors.toSet());
         final int count = delinquents.size();
         LOGGER.debug("There are {} delinquent investments to process.", count);
         final Registry registry = registryFunction.apply(tenant);
         if (registry.isInitialized()) {
             registry.complement(delinquents)
-                    .parallelStream()
-                    .forEach(i -> {
-                        registry.remove(i);
-                        processNoLongerDelinquent(i, tenant);
-                    });
+                .parallelStream()
+                .forEach(i -> {
+                    registry.remove(i);
+                    processNoLongerDelinquent(i, tenant);
+                });
             // potentially thousands of items, with relatively heavy logic behind them
             getDefaulted(delinquents).forEach(d -> processDefaulted(tenant, registry, d));
             getNonDefaulted(delinquents).forEach(d -> processDelinquent(tenant, registry, d));
@@ -166,6 +174,6 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     @Override
     public void accept(final Tenant tenant) {
-        ((PowerTenant)tenant).inTransaction(this::process);
+        ((PowerTenant) tenant).inTransaction(this::process);
     }
 }

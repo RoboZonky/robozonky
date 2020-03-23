@@ -23,6 +23,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
@@ -43,8 +46,6 @@ import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.util.functional.Memoizer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class PowerTenantImpl implements PowerTenant {
 
@@ -64,28 +65,29 @@ class PowerTenantImpl implements PowerTenant {
     private final Supplier<Availability> availability;
 
     PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
-                    final ZonkyApiTokenSupplier tokenSupplier) {
+            final ZonkyApiTokenSupplier tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.quotaMonitor = apis.getRequestCounter()
-                .map(r -> (Runnable) new QuotaMonitor(r))
-                .orElse(() -> {
-                    // do nothing
-                });
+            .map(r -> (Runnable) new QuotaMonitor(r))
+            .orElse(() -> {
+                // do nothing
+            });
         this.sessionInfo = sessionInfo;
         this.token = tokenSupplier;
-        this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getRequestCounter().orElse(null)));
+        this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getRequestCounter()
+            .orElse(null)));
         this.portfolio = new RemotePortfolioImpl(this);
         this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
-                .reloadAfter(Duration.ofHours(1))
-                .build();
+            .reloadAfter(Duration.ofHours(1))
+            .build();
         this.balance = new StatefulBoundedBalance(this);
     }
 
     @Override
     public Restrictions getRestrictions() {
         return restrictions.get()
-                .getOrElseThrow(t -> new IllegalStateException("Failed retrieving Restrictions from Zonky.", t));
+            .getOrElseThrow(t -> new IllegalStateException("Failed retrieving Restrictions from Zonky.", t));
     }
 
     @Override
@@ -137,17 +139,20 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Loan getLoan(final int loanId) {
-        return loanCache.get().get(loanId);
+        return loanCache.get()
+            .get(loanId);
     }
 
     @Override
     public SellInfo getSellInfo(final long investmentId) {
-        return sellInfoCache.get().get(investmentId);
+        return sellInfoCache.get()
+            .get(investmentId);
     }
 
     @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
-        return TenantState.of(getSessionInfo()).in(clz);
+        return TenantState.of(getSessionInfo())
+            .in(clz);
     }
 
     @Override
@@ -171,12 +176,14 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public CompletableFuture<?> fire(final SessionEvent event) {
-        return Events.forSession(this).fire(event);
+        return Events.forSession(this)
+            .fire(event);
     }
 
     @Override
     public CompletableFuture<?> fire(final LazyEvent<? extends SessionEvent> event) {
-        return Events.forSession(this).fire(event);
+        return Events.forSession(this)
+            .fire(event);
     }
 
     @Override

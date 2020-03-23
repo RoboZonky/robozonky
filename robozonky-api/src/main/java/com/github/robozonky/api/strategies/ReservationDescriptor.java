@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Reservation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Reservation;
 
 /**
  * Carries metadata regarding a {@link Reservation}.
@@ -54,7 +55,8 @@ public final class ReservationDescriptor
 
     @Override
     public Optional<RecommendedReservation> recommend(final Money amount) {
-        final Money actual = reservation.getMyReservation().getReservedAmount();
+        final Money actual = reservation.getMyReservation()
+            .getReservedAmount();
         if (amount.equals(actual)) {
             return Optional.of(new RecommendedReservation(this, amount));
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package com.github.robozonky.notifications.samples;
+
+import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
+import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -42,14 +45,13 @@ import com.github.robozonky.internal.remote.entities.MutableLoan;
 import com.github.robozonky.internal.remote.entities.MutableParticipation;
 import com.github.robozonky.internal.test.DateUtil;
 
-import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
-import static com.github.robozonky.internal.util.BigDecimalCalculator.plus;
-
 final class Util {
 
     private static final Random RANDOM = new Random(0); // generate the same entities every time
-    private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In consectetur " +
-            "dolor lorem, eu finibus dolor aliquet eleifend. Etiam lectus massa, dapibus vitae dictum non, pretium sed " +
+    private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In consectetur "
+            +
+            "dolor lorem, eu finibus dolor aliquet eleifend. Etiam lectus massa, dapibus vitae dictum non, pretium sed "
+            +
             "libero. Etiam eu risus porttitor, scelerisque risus dictum, posuere orci. Nulla mattis in mauris nec " +
             "consectetur. Donec sodales libero commodo lorem lacinia dignissim. Integer pharetra est sit amet tortor " +
             "gravida egestas. Phasellus quis pellentesque dui, eget pretium elit. Ut non lobortis metus. Maecenas " +
@@ -64,16 +66,16 @@ final class Util {
 
     private static <T> T randomize(final T[] values) {
         final Object[] withoutUnknown = Stream.of(values)
-                .filter(v -> !Objects.equals(v.toString(), "UNKNOWN"))
-                .toArray(Object[]::new);
+            .filter(v -> !Objects.equals(v.toString(), "UNKNOWN"))
+            .toArray(Object[]::new);
         return (T) withoutUnknown[RANDOM.nextInt(withoutUnknown.length)];
     }
 
     private static String generateText(final int wordCount) {
         final String[] words = LOREM_IPSUM.split(" ");
         return Stream.of(words)
-                .limit(wordCount)
-                .collect(Collectors.joining(" "));
+            .limit(wordCount)
+            .collect(Collectors.joining(" "));
     }
 
     private static String generateShortText() {
@@ -109,11 +111,15 @@ final class Util {
         loan.setInsuredInFuture(false);
         // set rating and infer other dependent properties
         loan.setRating(randomize(Rating.values()));
-        loan.setInterestRate(loan.getRating().getInterestRate());
-        loan.setRevenueRate(loan.getRating().getMaximalRevenueRate());
+        loan.setInterestRate(loan.getRating()
+            .getInterestRate());
+        loan.setRevenueRate(loan.getRating()
+            .getMaximalRevenueRate());
         // set various dates
-        loan.setDatePublished(OffsetDateTime.now().minusDays(3));
-        loan.setDeadline(loan.getDatePublished().plusDays(2));
+        loan.setDatePublished(OffsetDateTime.now()
+            .minusDays(3));
+        loan.setDeadline(loan.getDatePublished()
+            .plusDays(2));
         // set textual properties
         loan.setUrl("https://app.zonky.cz/#/marketplace/detail/" + loan.getId() + "/");
         loan.setStory(LOREM_IPSUM);
@@ -133,11 +139,13 @@ final class Util {
     public static PortfolioOverview randomizePortfolioOverview() {
         final ZonedDateTime now = DateUtil.zonedNow();
         final Map<Rating, Integer> invested = Stream.of(Rating.values())
-                .collect(Collectors.toMap(r -> r, r -> RANDOM.nextInt(10_000_000)));
+            .collect(Collectors.toMap(r -> r, r -> RANDOM.nextInt(10_000_000)));
         return new PortfolioOverview() {
             @Override
             public Money getInvested() {
-                return Money.from(invested.values().stream().reduce(0, Integer::sum));
+                return Money.from(invested.values()
+                    .stream()
+                    .reduce(0, Integer::sum));
             }
 
             @Override
@@ -165,8 +173,8 @@ final class Util {
             @Override
             public Money getAtRisk() {
                 return Stream.of(Rating.values())
-                        .map(this::getAtRisk)
-                        .reduce(Money.ZERO, Money::add);
+                    .map(this::getAtRisk)
+                    .reduce(Money.ZERO, Money::add);
             }
 
             @Override
@@ -182,8 +190,8 @@ final class Util {
             @Override
             public Money getSellable() {
                 return Stream.of(Rating.values())
-                        .map(this::getSellable)
-                        .reduce(Money.ZERO, Money::add);
+                    .map(this::getSellable)
+                    .reduce(Money.ZERO, Money::add);
             }
 
             @Override
@@ -194,8 +202,8 @@ final class Util {
             @Override
             public Money getSellableFeeless() {
                 return Stream.of(Rating.values())
-                        .map(this::getSellableFeeless)
-                        .reduce(Money.ZERO, Money::add);
+                    .map(this::getSellableFeeless)
+                    .reduce(Money.ZERO, Money::add);
             }
 
             @Override

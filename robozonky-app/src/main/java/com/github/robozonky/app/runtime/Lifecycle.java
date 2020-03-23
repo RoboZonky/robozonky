@@ -24,12 +24,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.internal.util.functional.Memoizer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
@@ -73,7 +74,8 @@ public class Lifecycle {
     }
 
     static int countShutdownHooks() {
-        return HOOKS.get().size();
+        return HOOKS.get()
+            .size();
     }
 
     /**
@@ -82,8 +84,10 @@ public class Lifecycle {
     public void suspend() {
         Thread.setDefaultUncaughtExceptionHandler((e, err) -> resumeToFail(err));
         final Thread t = shutdownHook.get();
-        Runtime.getRuntime().addShutdownHook(t);
-        HOOKS.get().add(t);
+        Runtime.getRuntime()
+            .addShutdownHook(t);
+        HOOKS.get()
+            .add(t);
         LOGGER.debug("Pausing main thread.");
         try {
             circuitBreaker.await();
@@ -113,7 +117,8 @@ public class Lifecycle {
             return;
         }
         LOGGER.error("Caught unexpected error, terminating.", t);
-        Events.global().fire(EventFactory.roboZonkyCrashed(t));
+        Events.global()
+            .fire(EventFactory.roboZonkyCrashed(t));
         LOGGER.debug("Asking application to die through {}.", this);
         circuitBreaker.countDown();
     }

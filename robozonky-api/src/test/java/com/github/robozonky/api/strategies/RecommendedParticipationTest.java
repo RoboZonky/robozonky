@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Participation;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
 
 class RecommendedParticipationTest {
 
@@ -44,17 +44,23 @@ class RecommendedParticipationTest {
         final ParticipationDescriptor d = new ParticipationDescriptor(p, () -> LOAN);
         final RecommendedParticipation r = new RecommendedParticipation(d);
         assertSoftly(softly -> {
-            softly.assertThat(r).isNotEqualTo(null);
-            softly.assertThat(r).isNotEqualTo(UUID.randomUUID().toString());
-            softly.assertThat(r).isEqualTo(r);
+            softly.assertThat(r)
+                .isNotEqualTo(null);
+            softly.assertThat(r)
+                .isNotEqualTo(UUID.randomUUID()
+                    .toString());
+            softly.assertThat(r)
+                .isEqualTo(r);
         });
         final RecommendedParticipation r2 = new RecommendedParticipation(d);
         assertSoftly(softly -> {
-            softly.assertThat(r).isEqualTo(r2);
-            softly.assertThat(r2).isEqualTo(r);
+            softly.assertThat(r)
+                .isEqualTo(r2);
+            softly.assertThat(r2)
+                .isEqualTo(r);
         });
-        final RecommendedParticipation r3 =
-                new RecommendedParticipation(new ParticipationDescriptor(mockParticipation(), () -> LOAN));
+        final RecommendedParticipation r3 = new RecommendedParticipation(
+                new ParticipationDescriptor(mockParticipation(), () -> LOAN));
         assertThat(r).isNotEqualTo(r3);
     }
 }

@@ -16,12 +16,12 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
+
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.strategy.natural.Wrapper;
-
-import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
 
 public class RelativeProfitCondition extends AbstractRelativeRangeCondition {
 
@@ -30,35 +30,38 @@ public class RelativeProfitCondition extends AbstractRelativeRangeCondition {
     }
 
     private static BigDecimal getProfit(final Wrapper<?> w) {
-        BigDecimal income = w.getReturns().orElse(BigDecimal.ZERO);
-        BigDecimal saleFee = w.getSellFee().orElse(BigDecimal.ZERO);
+        BigDecimal income = w.getReturns()
+            .orElse(BigDecimal.ZERO);
+        BigDecimal saleFee = w.getSellFee()
+            .orElse(BigDecimal.ZERO);
         BigDecimal result = minus(minus(income, saleFee), getOriginalPrice(w));
         return result;
     }
 
     private static BigDecimal getOriginalPrice(final Wrapper<?> w) {
         // Return original amount in case this is called during investing, when checking sell filters.
-        return w.getOriginalPurchasePrice().orElseGet(() -> BigDecimal.valueOf(w.getOriginalAmount()));
+        return w.getOriginalPurchasePrice()
+            .orElseGet(() -> BigDecimal.valueOf(w.getOriginalAmount()));
     }
 
     public static RelativeProfitCondition lessThan(final Ratio threshold) {
         final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeProfitCondition::getProfit,
-                                                                        RelativeProfitCondition::getOriginalPrice,
-                                                                        threshold);
+                RelativeProfitCondition::getOriginalPrice,
+                threshold);
         return new RelativeProfitCondition(c);
     }
 
     public static RelativeProfitCondition moreThan(final Ratio threshold) {
         final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeProfitCondition::getProfit,
-                                                                        RelativeProfitCondition::getOriginalPrice,
-                                                                        threshold);
+                RelativeProfitCondition::getOriginalPrice,
+                threshold);
         return new RelativeProfitCondition(c);
     }
 
     public static RelativeProfitCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
         final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeProfitCondition::getProfit,
-                                                                     RelativeProfitCondition::getOriginalPrice,
-                                                                     minimumThreshold, maximumThreshold);
+                RelativeProfitCondition::getOriginalPrice,
+                minimumThreshold, maximumThreshold);
         return new RelativeProfitCondition(c);
     }
 }

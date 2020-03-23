@@ -16,10 +16,16 @@
 
 package com.github.robozonky.installer;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
@@ -27,15 +33,11 @@ import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class ZonkySettingsValidatorTest {
 
-    private static final String USERNAME = "someone@somewhere.cz", PASSWORD = UUID.randomUUID().toString();
+    private static final String USERNAME = "someone@somewhere.cz", PASSWORD = UUID.randomUUID()
+        .toString();
 
     @SuppressWarnings("unchecked")
     private static ApiProvider mockApiProvider(final OAuth oauth, final ZonkyApiToken token, final Zonky zonky) {
@@ -49,14 +51,16 @@ class ZonkySettingsValidatorTest {
             assertThat(t.get()).isEqualTo(token);
             final Function<Zonky, ?> f = i.getArgument(0);
             return f.apply(zonky);
-        }).when(api).call(any(Function.class), any());
+        }).when(api)
+            .call(any(Function.class), any());
         doAnswer(i -> {
             final Supplier<ZonkyApiToken> t = i.getArgument(1);
             assertThat(t.get()).isEqualTo(token);
             final Consumer<Zonky> f = i.getArgument(0);
             f.accept(zonky);
             return null;
-        }).when(api).run(any(Consumer.class), any());
+        }).when(api)
+            .run(any(Consumer.class), any());
         return api;
     }
 
@@ -75,10 +79,14 @@ class ZonkySettingsValidatorTest {
     void messages() {
         final ZonkySettingsValidator validator = new ZonkySettingsValidator();
         assertSoftly(softly -> {
-            softly.assertThat(validator.getDefaultAnswer()).isFalse();
-            softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
-            softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
+            softly.assertThat(validator.getDefaultAnswer())
+                .isFalse();
+            softly.assertThat(validator.getErrorMessageId())
+                .isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId())
+                .isNotEqualTo(validator.getWarningMessageId());
+            softly.assertThat(validator.getWarningMessageId())
+                .isNotEmpty();
         });
     }
 

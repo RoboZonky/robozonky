@@ -16,6 +16,8 @@
 
 package com.github.robozonky.installer;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -26,19 +28,19 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-
 class UtilTest {
 
     @Test
     void testCopyOptions() {
-        final String key = UUID.randomUUID().toString();
-        final String[] values = new String[]{"a", "b", "c"};
+        final String key = UUID.randomUUID()
+            .toString();
+        final String[] values = new String[] { "a", "b", "c" };
         final CommandLinePart source = new CommandLinePart();
         source.setOption(key, values);
         final CommandLinePart target = new CommandLinePart();
         Util.copyOptions(source, target);
-        assertThat(target.getOptions().get(key)).containsExactly(values);
+        assertThat(target.getOptions()
+            .get(key)).containsExactly(values);
     }
 
     @Test
@@ -75,9 +77,9 @@ class UtilTest {
         File file = File.createTempFile("robozonky", "properties");
         file.setWritable(false);
         try {
-            assertThatThrownBy(() ->Util.writeOutProperties(properties, file))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasCauseInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> Util.writeOutProperties(properties, file))
+                .isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(AccessDeniedException.class);
         } finally {
             file.setWritable(true);
         }

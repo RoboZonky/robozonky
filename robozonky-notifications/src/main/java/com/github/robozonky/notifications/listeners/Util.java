@@ -16,6 +16,8 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import static java.util.Map.entry;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -44,8 +46,6 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 
-import static java.util.Map.entry;
-
 final class Util {
 
     private static final String AT = "@";
@@ -56,7 +56,8 @@ final class Util {
     }
 
     public static Date toDate(final LocalDate localDate) {
-        return toDate(localDate.atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime());
+        return toDate(localDate.atStartOfDay(Defaults.ZONE_ID)
+            .toOffsetDateTime());
     }
 
     public static Date toDate(final OffsetDateTime offsetDateTime) {
@@ -68,7 +69,8 @@ final class Util {
     }
 
     private static String identifyLoan(final Loan loan) {
-        final BigDecimal interestRate = loan.getInterestRate().asPercentage();
+        final BigDecimal interestRate = loan.getInterestRate()
+            .asPercentage();
         // string formatting ensures proper locale-specific floating point separator
         return String.format("č. %d (%.2f %% p.a., %d m.)", loan.getId(), interestRate, loan.getTermInMonths());
     }
@@ -80,9 +82,12 @@ final class Util {
     public static Map<String, Object> getLoanData(final Loan loan) {
         return Map.ofEntries(
                 entry("loanId", loan.getId()),
-                entry("loanAmount", loan.getAmount().getValue()),
-                entry("loanAnnuity", loan.getAnnuity().getValue()),
-                entry("loanInterestRate", loan.getRating().getCode()),
+                entry("loanAmount", loan.getAmount()
+                    .getValue()),
+                entry("loanAnnuity", loan.getAnnuity()
+                    .getValue()),
+                entry("loanInterestRate", loan.getRating()
+                    .getCode()),
                 entry("loanRating", loan.getRating()),
                 entry("loanTerm", loan.getTermInMonths()),
                 entry("loanUrl", loan.getUrl()),
@@ -90,31 +95,38 @@ final class Util {
                 entry("loanMainIncomeType", loan.getMainIncomeType()),
                 entry("loanPurpose", loan.getPurpose()),
                 entry("loanName", loan.getName()),
-                entry("insurance", loan.isInsuranceActive())
-        );
+                entry("insurance", loan.isInsuranceActive()));
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
         final Money returned = getReturned(i);
         final Money originalPrincipal = i.getPurchasePrice();
         final Money balance = i.getSmpSoldFor()
-                .map(soldFor -> {
-                    final Money in = soldFor.add(returned);
-                    final Money fee = i.getSmpFee().orElse(soldFor.getZero());
-                    final Money out = originalPrincipal.add(fee);
-                    return in.subtract(out);
-                }).orElseGet(() -> returned.subtract(originalPrincipal));
+            .map(soldFor -> {
+                final Money in = soldFor.add(returned);
+                final Money fee = i.getSmpFee()
+                    .orElse(soldFor.getZero());
+                final Money out = originalPrincipal.add(fee);
+                return in.subtract(out);
+            })
+            .orElseGet(() -> returned.subtract(originalPrincipal));
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
         loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
-        loanData.put("amountRemaining", i.getRemainingPrincipal().orElse(Money.ZERO).getValue());
+        loanData.put("amountRemaining", i.getRemainingPrincipal()
+            .orElse(Money.ZERO)
+            .getValue());
         loanData.put("amountHeld", originalPrincipal.getValue());
         loanData.put("amountPaid", returned.getValue());
         loanData.put("balance", balance.getValue());
-        loanData.put("interestExpected", i.getExpectedInterest().getValue());
-        loanData.put("principalPaid", i.getPaidPrincipal().getValue());
-        loanData.put("interestPaid", i.getPaidInterest().getValue());
-        loanData.put("penaltiesPaid", i.getPaidPenalty().getValue());
+        loanData.put("interestExpected", i.getExpectedInterest()
+            .getValue());
+        loanData.put("principalPaid", i.getPaidPrincipal()
+            .getValue());
+        loanData.put("interestPaid", i.getPaidInterest()
+            .getValue());
+        loanData.put("penaltiesPaid", i.getPaidPenalty()
+            .getValue());
         loanData.put("monthsElapsed", getMonthsElapsed(i));
         loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
         loanData.put("postponed", i.isInstalmentPostponement());
@@ -122,32 +134,38 @@ final class Util {
     }
 
     private static Map<String, Object> moneyPerRating(final Function<Rating, Money> provider) {
-        final Function<Rating, Number> converter = m -> provider.apply(m).getValue();
-        return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, converter));
+        final Function<Rating, Number> converter = m -> provider.apply(m)
+            .getValue();
+        return Stream.of(Rating.values())
+            .collect(Collectors.toMap(Rating::getCode, converter));
     }
 
     private static Map<String, Object> numberPerRating(final Function<Rating, Number> provider) {
-        return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, provider));
+        return Stream.of(Rating.values())
+            .collect(Collectors.toMap(Rating::getCode, provider));
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
         return Map.ofEntries(
                 entry("absoluteShare", moneyPerRating(portfolioOverview::getInvested)),
                 entry("relativeShare", numberPerRating(portfolioOverview::getShareOnInvestment)),
-                entry("total", portfolioOverview.getInvested().getValue()),
+                entry("total", portfolioOverview.getInvested()
+                    .getValue()),
                 entry("profitability", portfolioOverview.getAnnualProfitability()),
-                entry("monthlyProfit", portfolioOverview.getMonthlyProfit().getValue()),
+                entry("monthlyProfit", portfolioOverview.getMonthlyProfit()
+                    .getValue()),
                 entry("minimalProfitability", portfolioOverview.getMinimalAnnualProfitability()),
-                entry("minimalMonthlyProfit", portfolioOverview.getMinimalMonthlyProfit().getValue()),
+                entry("minimalMonthlyProfit", portfolioOverview.getMinimalMonthlyProfit()
+                    .getValue()),
                 entry("optimalProfitability", portfolioOverview.getOptimalAnnualProfitability()),
-                entry("optimalMonthlyProfit", portfolioOverview.getOptimalMonthlyProfit().getValue()),
-                entry("timestamp", toDate(portfolioOverview.getTimestamp()))
-        );
+                entry("optimalMonthlyProfit", portfolioOverview.getOptimalMonthlyProfit()
+                    .getValue()),
+                entry("timestamp", toDate(portfolioOverview.getTimestamp())));
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final ExtendedPortfolioOverview portfolioOverview) {
-        final Map<String, Object> entries =
-                new LinkedHashMap<>(summarizePortfolioStructure((PortfolioOverview) portfolioOverview));
+        final Map<String, Object> entries = new LinkedHashMap<>(
+                summarizePortfolioStructure((PortfolioOverview) portfolioOverview));
         entries.putAll(Map.ofEntries(
                 entry("absoluteRisk", moneyPerRating(portfolioOverview::getAtRisk)),
                 entry("relativeRisk", numberPerRating(portfolioOverview::getAtRiskShareOnInvestment)),
@@ -155,14 +173,16 @@ final class Util {
                 entry("relativeSellable", numberPerRating(portfolioOverview::getShareSellable)),
                 entry("absoluteSellableFeeless", moneyPerRating(portfolioOverview::getSellableFeeless)),
                 entry("relativeSellableFeeless", numberPerRating(portfolioOverview::getShareSellableFeeless)),
-                entry("totalRisk", portfolioOverview.getAtRisk().getValue()),
-                entry("totalSellable", portfolioOverview.getSellable().getValue()),
-                entry("totalSellableFeeless", portfolioOverview.getSellableFeeless().getValue()),
+                entry("totalRisk", portfolioOverview.getAtRisk()
+                    .getValue()),
+                entry("totalSellable", portfolioOverview.getSellable()
+                    .getValue()),
+                entry("totalSellableFeeless", portfolioOverview.getSellableFeeless()
+                    .getValue()),
                 entry("totalShare", portfolioOverview.getShareAtRisk()),
                 entry("totalSellableShare", portfolioOverview.getShareSellable()),
                 entry("totalSellableFeelessShare", portfolioOverview.getShareSellableFeeless()),
-                entry("timestamp", toDate(portfolioOverview.getTimestamp()))
-        ));
+                entry("timestamp", toDate(portfolioOverview.getTimestamp()))));
         return entries;
     }
 
@@ -178,12 +198,16 @@ final class Util {
 
     private static Money getReturned(final Investment i) {
         return i.getPaidInterest()
-                .add(i.getPaidPrincipal())
-                .add(i.getPaidPenalty());
+            .add(i.getPaidPrincipal())
+            .add(i.getPaidPenalty());
     }
 
     private static long getMonthsElapsed(final Investment i) {
-        return Period.between(i.getInvestmentDate().toLocalDate(), DateUtil.localNow().toLocalDate()).toTotalMonths();
+        return Period.between(i.getInvestmentDate()
+            .toLocalDate(),
+                DateUtil.localNow()
+                    .toLocalDate())
+            .toTotalMonths();
     }
 
     public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan, final LocalDate date) {

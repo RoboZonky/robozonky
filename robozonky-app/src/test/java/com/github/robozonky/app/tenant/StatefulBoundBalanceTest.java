@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.github.robozonky.app.tenant;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.jupiter.api.Test;
+import static com.github.robozonky.app.tenant.StatefulBoundedBalance.MAXIMUM;
+import static org.assertj.core.api.Assertions.*;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 
-import static com.github.robozonky.app.tenant.StatefulBoundedBalance.MAXIMUM;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
 
@@ -37,7 +38,8 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
     void progression() {
         final StatefulBoundedBalance balance = new StatefulBoundedBalance(tenant);
         assertThat(balance.get()).isEqualTo(MAXIMUM);
-        Instant newNow = Instant.now().plus(Duration.ofDays(1));
+        Instant newNow = Instant.now()
+            .plus(Duration.ofDays(1));
         setClock(Clock.fixed(newNow, Defaults.ZONE_ID));
         assertThat(balance.get()).isEqualTo(MAXIMUM); // doesn't change as time moves on
         balance.set(Money.from(1000));
@@ -53,14 +55,16 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
         final StatefulBoundedBalance balance = new StatefulBoundedBalance(tenant);
         balance.set(Money.from(1_000));
         final StatefulBoundedBalance balance2 = new StatefulBoundedBalance(tenant);
-        assertThat(balance2.get()).isEqualTo(Money.from(1_000)); // old state is read in the new instance, simulating robot restart
+        assertThat(balance2.get()).isEqualTo(Money.from(1_000)); // old state is read in the new instance, simulating
+                                                                 // robot restart
     }
 
     @Test
     void preventsEndlessLoop() {
         final StatefulBoundedBalance balance = new StatefulBoundedBalance(tenant);
         balance.set(Money.from(199));
-        setClock(Clock.fixed(Instant.now().plus(Duration.ofDays(1)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(Instant.now()
+            .plus(Duration.ofDays(1)), Defaults.ZONE_ID));
         assertThat(balance.get()).isEqualTo(MAXIMUM); // balance is too old, so it is reset to maximum
         balance.set(Money.from(199)); // set it to a different value
         assertThat(balance.get()).isEqualTo(Money.from(199)); // make sure the different value is stored and returned

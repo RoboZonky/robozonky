@@ -16,12 +16,13 @@
 
 package com.github.robozonky.app.version;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
-import com.github.robozonky.internal.util.functional.Either;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,8 +34,8 @@ import org.mockserver.model.HttpResponse;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.github.robozonky.internal.util.functional.Either;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 @ExtendWith(MockServerExtension.class)
 class MavenMetadataParserTest extends AbstractRoboZonkyTest {
@@ -63,12 +64,14 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
 
     @Test
     void checkNonExistentUrl() {
-        server.when(HttpRequest.request()).respond(HttpResponse.notFoundResponse());
+        server.when(HttpRequest.request())
+            .respond(HttpResponse.notFoundResponse());
         final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                   "robozonky-nonexistent");
-        final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
+                "robozonky-nonexistent");
+        final Either<Throwable, Response> result = parser.apply(UUID.randomUUID()
+            .toString());
         assertThat(result.getLeft()).isInstanceOf(IllegalStateException.class)
-                .hasCauseInstanceOf(FileNotFoundException.class);
+            .hasCauseInstanceOf(FileNotFoundException.class);
     }
 
     @Test
@@ -103,39 +106,42 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
 
         @BeforeEach
         void setupMetadata() {
-            server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
-                    .respond(HttpResponse.response().withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                                                                      "<metadata>\n" +
-                                                                      "  <groupId>com.github.robozonky</groupId>\n" +
-                                                                      "  <artifactId>robozonky</artifactId>\n" +
-                                                                      "  <versioning>\n" +
-                                                                      "    <latest>4.0.2-cr-2</latest>\n" +
-                                                                      "    <release>4.0.1</release>\n" +
-                                                                      "    <versions>\n" +
-                                                                      "      <version>4.0.0-cr-1</version>\n" +
-                                                                      "      <version>4.0.0</version>\n" +
-                                                                      "      <version>4.0.1</version>\n" +
-                                                                      "      <version>4.0.2-cr-1</version>\n" +
-                                                                      "      <version>4.0.2-cr-2</version>\n" +
-                                                                      "    </versions>\n" +
-                                                                      "    <lastUpdated>20171015201449</lastUpdated" +
-                                                                      ">\n" +
-                                                                      "  </versioning>\n" +
-                                                                      "</metadata>"));
+            server.when(HttpRequest.request()
+                .withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
+                .respond(HttpResponse.response()
+                    .withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                            "<metadata>\n" +
+                            "  <groupId>com.github.robozonky</groupId>\n" +
+                            "  <artifactId>robozonky</artifactId>\n" +
+                            "  <versioning>\n" +
+                            "    <latest>4.0.2-cr-2</latest>\n" +
+                            "    <release>4.0.1</release>\n" +
+                            "    <versions>\n" +
+                            "      <version>4.0.0-cr-1</version>\n" +
+                            "      <version>4.0.0</version>\n" +
+                            "      <version>4.0.1</version>\n" +
+                            "      <version>4.0.2-cr-1</version>\n" +
+                            "      <version>4.0.2-cr-2</version>\n" +
+                            "    </versions>\n" +
+                            "    <lastUpdated>20171015201449</lastUpdated" +
+                            ">\n" +
+                            "  </versioning>\n" +
+                            "</metadata>"));
         }
 
         @Test
         void checkUnknownVersion() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                       "robozonky");
-            final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
+                    "robozonky");
+            final Either<Throwable, Response> result = parser.apply(UUID.randomUUID()
+                .toString());
             assertThat(result.getLeft()).isInstanceOf(IllegalStateException.class);
         }
 
         @Test
         void checkLatestVersionBothOutdated() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                       "robozonky");
+                    "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.0");
             assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-2"));
         }
@@ -143,7 +149,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         @Test
         void checkLatestVersionExperimentalMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                       "robozonky");
+                    "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.1");
             assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-2"));
         }
@@ -151,7 +157,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         @Test
         void checkLatestVersionExperimentalEvenMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                       "robozonky");
+                    "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.0-cr-1");
             assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-2"));
         }
@@ -159,7 +165,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         @Test
         void checkLatestVersionExperimentalYetMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                       "robozonky");
+                    "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.2-cr-1");
             assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-2"));
         }
@@ -167,7 +173,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         @Test
         void checkLatestVersionNoneMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                       "robozonky");
+                    "robozonky");
             final Either<Throwable, Response> result = parser.apply("4.0.2-cr-2");
             assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
         }
@@ -178,18 +184,20 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
 
         @BeforeEach
         void setupMetadata() {
-            server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
-                    .respond(HttpResponse.notFoundResponse());
+            server.when(HttpRequest.request()
+                .withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
+                .respond(HttpResponse.notFoundResponse());
         }
 
         @Test
         void checkUnknownVersion() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
-                                                                       "robozonky");
-            final Either<Throwable, Response> result = parser.apply(UUID.randomUUID().toString());
+                    "robozonky");
+            final Either<Throwable, Response> result = parser.apply(UUID.randomUUID()
+                .toString());
             assertThat(result.getLeft())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasCauseInstanceOf(FileNotFoundException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(FileNotFoundException.class);
         }
 
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.Rating;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
 
 class LoanDescriptorTest {
 
@@ -50,8 +50,10 @@ class LoanDescriptorTest {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan(Rating.AAAAA);
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         assertSoftly(softly -> {
-            softly.assertThat(ld.item()).isSameAs(mockedLoan);
-            softly.assertThat(ld.item()).isSameAs(ld.related());
+            softly.assertThat(ld.item())
+                .isSameAs(mockedLoan);
+            softly.assertThat(ld.item())
+                .isSameAs(ld.related());
         });
     }
 
@@ -60,8 +62,8 @@ class LoanDescriptorTest {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         assertThat(ld)
-                .isNotEqualTo(null)
-                .isEqualTo(ld);
+            .isNotEqualTo(null)
+            .isEqualTo(ld);
         final LoanDescriptor ld2 = new LoanDescriptor(mockedLoan);
         assertThat(ld).isEqualTo(ld2);
     }
@@ -74,8 +76,10 @@ class LoanDescriptorTest {
         assertThat(r).isPresent();
         final RecommendedLoan recommendation = r.get();
         assertSoftly(softly -> {
-            softly.assertThat(recommendation.descriptor()).isSameAs(ld);
-            softly.assertThat(recommendation.amount()).isEqualTo(Money.from(200));
+            softly.assertThat(recommendation.descriptor())
+                .isSameAs(ld);
+            softly.assertThat(recommendation.amount())
+                .isEqualTo(Money.from(200));
         });
     }
 
@@ -83,8 +87,8 @@ class LoanDescriptorTest {
     void recommendWrongAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<RecommendedLoan> r =
-                ld.recommend(mockedLoan.getNonReservedRemainingInvestment().add(1));
+        final Optional<RecommendedLoan> r = ld.recommend(mockedLoan.getNonReservedRemainingInvestment()
+            .add(1));
         assertThat(r).isEmpty();
     }
 }

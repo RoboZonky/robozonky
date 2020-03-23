@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.cli;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -24,9 +26,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import picocli.CommandLine;
 
-import static org.assertj.core.api.Assertions.*;
+import picocli.CommandLine;
 
 class CliTest {
 
@@ -45,7 +46,8 @@ class CliTest {
 
     @Test
     void nonExistentCommand() {
-        final int exit = Cli.parse(UUID.randomUUID().toString());
+        final int exit = Cli.parse(UUID.randomUUID()
+            .toString());
         assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 
@@ -90,13 +92,15 @@ class CliTest {
     void correctSubcommandCorrectArgumentCorrectValue() throws IOException {
         File f = File.createTempFile("robozonky-", ".tmp");
         System.setIn(new ByteArrayInputStream("\n".getBytes()));
-        final int exit = Cli.parse("strategy-validator", "--location=" + f.toURI().toURL());
+        final int exit = Cli.parse("strategy-validator", "--location=" + f.toURI()
+            .toURL());
         assertThat(exit).isEqualTo(CommandLine.ExitCode.SOFTWARE + 1);
     }
 
     @Test
     void helpWithNonexistentSubcommand() {
-        final int exit = Cli.parse("help", UUID.randomUUID().toString());
+        final int exit = Cli.parse("help", UUID.randomUUID()
+            .toString());
         assertThat(exit).isEqualTo(CommandLine.ExitCode.USAGE);
     }
 

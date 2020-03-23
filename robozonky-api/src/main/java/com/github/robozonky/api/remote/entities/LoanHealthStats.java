@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.util.OptionalInt;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanHealth;
@@ -68,12 +69,12 @@ public class LoanHealthStats extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", LoanHealthStats.class.getSimpleName() + "[", "]")
-                .add("daysSinceLastInDue=" + daysSinceLastInDue)
-                .add("dueInstalments=" + dueInstalments)
-                .add("instalmentsCurrentlyInDue=" + instalmentsCurrentlyInDue)
-                .add("loanHealthInfo=" + loanHealthInfo)
-                .add("longestDaysDue=" + longestDaysDue)
-                .add("paidInstalments=" + paidInstalments)
-                .toString();
+            .add("daysSinceLastInDue=" + daysSinceLastInDue)
+            .add("dueInstalments=" + dueInstalments)
+            .add("instalmentsCurrentlyInDue=" + instalmentsCurrentlyInDue)
+            .add("loanHealthInfo=" + loanHealthInfo)
+            .add("longestDaysDue=" + longestDaysDue)
+            .add("paidInstalments=" + paidInstalments)
+            .toString();
     }
 }

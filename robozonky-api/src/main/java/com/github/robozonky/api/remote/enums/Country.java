@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
@@ -40,9 +40,9 @@ public enum Country implements BaseEnum {
 
     public static Country findByCode(final String code) {
         return Stream.of(Country.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown country: " + code));
+            .filter(r -> Objects.equals(r.code, code))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown country: " + code));
     }
 
     @Override

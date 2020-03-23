@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import org.mockito.Mockito;
+
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.mockito.Mockito;
 
 class BorrowerRegionConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Region> {
 
@@ -30,7 +31,8 @@ class BorrowerRegionConditionSpec implements AbstractEnumeratedConditionTest.Con
     @Override
     public Wrapper<?> getMocked() {
         final Wrapper<?> w = Mockito.mock(Wrapper.class);
-        Mockito.when(w.getRegion()).thenReturn(this.getTriggerItem());
+        Mockito.when(w.getRegion())
+            .thenReturn(this.getTriggerItem());
         return w;
     }
 

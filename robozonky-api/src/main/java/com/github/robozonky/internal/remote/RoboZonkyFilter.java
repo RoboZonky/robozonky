@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,25 +23,31 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import javax.ws.rs.core.UriBuilder;
 
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.Settings;
+
 /**
  * Decorates the request with User-Agent and adds some simple request logging.
- * <p>If ever a filter is needed for JAX-RS communication, this class should serve as the base class for that filter
- * .</p>
- * <p>This class is not thread-safe. Consider using {@link ThreadLocal}.</p>
+ * <p>
+ * If ever a filter is needed for JAX-RS communication, this class should serve as the base class for that filter
+ * .
+ * </p>
+ * <p>
+ * This class is not thread-safe. Consider using {@link ThreadLocal}.
+ * </p>
  */
 class RoboZonkyFilter implements ClientRequestFilter,
-                                 ClientResponseFilter {
+        ClientResponseFilter {
 
     // not static, so that filters extending this one get the proper logger class
     protected final Logger logger = LogManager.getLogger(this.getClass());
@@ -88,7 +94,8 @@ class RoboZonkyFilter implements ClientRequestFilter,
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) {
-        requestHeaders.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
+        requestHeaders.forEach((k, v) -> clientRequestContext.getHeaders()
+            .putSingle(k, v));
         clientRequestContext.setUri(rebuild(clientRequestContext.getUri()));
         logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
@@ -106,17 +113,22 @@ class RoboZonkyFilter implements ClientRequestFilter,
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext,
-                       final ClientResponseContext clientResponseContext) throws IOException {
+            final ClientResponseContext clientResponseContext) throws IOException {
         logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
-                     clientRequestContext.getUri(), clientResponseContext.getStatus(),
-                     clientResponseContext.getStatusInfo().getReasonPhrase());
+                clientRequestContext.getUri(), clientResponseContext.getStatus(),
+                clientResponseContext.getStatusInfo()
+                    .getReasonPhrase());
         final String responseEntity = getResponseEntity(clientResponseContext);
         if (clientResponseContext.getStatus() == 400 && responseEntity.contains("invalid_token")) {
             // Zonky is dumb and throws 400 when it should throw 401
             clientResponseContext.setStatus(401);
         }
-        responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
-                .filter(e -> !e.getValue().isEmpty())
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0), (a, b) -> a, TreeMap::new));
+        responseHeaders = clientResponseContext.getHeaders()
+            .entrySet()
+            .stream()
+            .filter(e -> !e.getValue()
+                .isEmpty())
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()
+                .get(0), (a, b) -> a, TreeMap::new));
     }
 }

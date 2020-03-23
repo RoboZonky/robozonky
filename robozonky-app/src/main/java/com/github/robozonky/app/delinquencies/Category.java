@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
@@ -35,8 +38,6 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Keeps active delinquencies over a given threshold. When a new delinquency over a particular threshold arrives, an
@@ -83,7 +84,7 @@ enum Category {
 
     @SuppressWarnings("unchecked")
     private static LazyEvent<? extends SessionEvent> getLazyEventSupplier(final int threshold,
-                                                                          final Supplier<? extends SessionEvent> e) {
+            final Supplier<? extends SessionEvent> e) {
         switch (threshold) {
             case -1:
                 return EventFactory.loanDefaultedLazy((Supplier<LoanDefaultedEvent>) e);
@@ -104,7 +105,9 @@ enum Category {
 
     private static SessionEvent supplyEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final LocalDate since = DateUtil.localNow().toLocalDate().minusDays(investment.getLegalDpd());
+        final LocalDate since = DateUtil.localNow()
+            .toLocalDate()
+            .minusDays(investment.getLegalDpd());
         final int loanId = investment.getLoanId();
         final Loan loan = tenant.getLoan(loanId);
         final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since);
@@ -113,7 +116,7 @@ enum Category {
     }
 
     private static LazyEvent<? extends SessionEvent> getEvent(final Tenant tenant, final Investment investment,
-                                                              final int threshold) {
+            final int threshold) {
         return getLazyEventSupplier(threshold, () -> supplyEvent(tenant, investment, threshold));
     }
 
@@ -123,12 +126,13 @@ enum Category {
 
     public Stream<Category> getLesser() {
         return Arrays.stream(Category.values())
-                .filter(category -> category.thresholdInDays < this.thresholdInDays && category.thresholdInDays >= 0);
+            .filter(category -> category.thresholdInDays < this.thresholdInDays && category.thresholdInDays >= 0);
     }
 
     /**
      * Update internal state trackers and send events if necessary.
-     * @param tenant Tenant to execute over.
+     * 
+     * @param tenant     Tenant to execute over.
      * @param investment Investment to process.
      */
     public void process(final PowerTenant tenant, final Investment investment) {

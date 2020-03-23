@@ -27,6 +27,11 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
 import com.github.robozonky.internal.Settings;
@@ -35,10 +40,6 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
@@ -67,6 +68,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     /**
      * Testing OS-specific behavior was proving very difficult, this constructor takes all of that pain away.
+     * 
      * @param os Fake operating system used for testing.
      */
     RoboZonkyInstallerListener(final RoboZonkyInstallerListener.OS os) {
@@ -85,6 +87,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
      * Therefore we share the data this way - through the last panel before the actual installation starts.
      * <p>
      * See more at https://izpack.atlassian.net/browse/IZPACK-1403.
+     * 
      * @param data Installer data to store.
      */
     static void setInstallData(final InstallData data) {
@@ -118,8 +121,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     static CommandLinePart prepareCore() throws IOException {
         final CommandLinePart cli = new CommandLinePart()
-                .setOption("-g", KEYSTORE_TARGET.getAbsolutePath())
-                .setOption("-p", String.valueOf(KEYSTORE_SECRET));
+            .setOption("-g", KEYSTORE_TARGET.getAbsolutePath())
+            .setOption("-p", String.valueOf(KEYSTORE_SECRET));
         if (Boolean.valueOf(Variables.IS_DRY_RUN.getValue(DATA))) {
             cli.setOption("-d");
             cli.setJvmArgument("Xmx128m"); // more memory for the JFR recording
@@ -134,7 +137,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static File assembleCliFile(final CommandLinePart... source) throws IOException {
         // assemble the CLI
         final CommandLinePart cli = new CommandLinePart();
-        Stream.of(source).forEach(c -> Util.copyOptions(c, cli));
+        Stream.of(source)
+            .forEach(c -> Util.copyOptions(c, cli));
         // store it to a file
         cli.storeOptions(CLI_CONFIG_FILE);
         return CLI_CONFIG_FILE.getAbsoluteFile();
@@ -167,13 +171,15 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             case "file":
                 final File f = new File(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
                 Util.copyFile(f, EMAIL_CONFIG_FILE);
-                return EMAIL_CONFIG_FILE.toURI().toURL();
+                return EMAIL_CONFIG_FILE.toURI()
+                    .toURL();
             case "url":
                 return new URL(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
             default:
                 final Properties props = Util.configureEmailNotifications(DATA);
                 Util.writeOutProperties(props, EMAIL_CONFIG_FILE);
-                return EMAIL_CONFIG_FILE.toURI().toURL();
+                return EMAIL_CONFIG_FILE.toURI()
+                    .toURL();
         }
     }
 
@@ -192,16 +198,16 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     static CommandLinePart prepareJmx() {
         final boolean isJmxEnabled = Boolean.parseBoolean(Variables.IS_JMX_ENABLED.getValue(DATA));
         final CommandLinePart clp = new CommandLinePart()
-                .setProperty("com.sun.management.jmxremote", isJmxEnabled ? "true" : "false")
-                // the buffer is effectively a memory leak; we'll reduce its size from 1000 to 10
-                .setProperty("jmx.remote.x.notification.buffer.size", "10");
+            .setProperty("com.sun.management.jmxremote", isJmxEnabled ? "true" : "false")
+            // the buffer is effectively a memory leak; we'll reduce its size from 1000 to 10
+            .setProperty("jmx.remote.x.notification.buffer.size", "10");
         if (!isJmxEnabled) { // ignore JMX
             return clp;
         }
         // write JMX properties file
         final Properties props = new Properties();
         props.setProperty("com.sun.management.jmxremote.authenticate",
-                          Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA));
+                Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA));
         props.setProperty("com.sun.management.jmxremote.ssl", "false");
         final String port = Variables.JMX_PORT.getValue(DATA);
         props.setProperty("com.sun.management.jmxremote.rmi.port", port);
@@ -213,19 +219,19 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
         // configure JMX to read the props file
         return clp.setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath())
-                .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
+            .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
     }
 
     private static CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
-                                                      final CommandLinePart jmxConfig, final CommandLinePart core,
-                                                      final CommandLinePart logging) {
+            final CommandLinePart jmxConfig, final CommandLinePart core,
+            final CommandLinePart logging) {
         try {
             final File cliConfigFile = assembleCliFile(core, strategy, emailConfig);
             // have the CLI file loaded during RoboZonky startup
             final CommandLinePart commandLine = new CommandLinePart()
-                    .setOption("@" + cliConfigFile.getAbsolutePath())
-                    .setProperty(Settings.FILE_LOCATION_PROPERTY, SETTINGS_FILE.getAbsolutePath())
-                    .setEnvironmentVariable("JAVA_HOME", "");
+                .setOption("@" + cliConfigFile.getAbsolutePath())
+                .setProperty(Settings.FILE_LOCATION_PROPERTY, SETTINGS_FILE.getAbsolutePath())
+                .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
             Util.processCommandLine(commandLine, settings, strategy, jmxConfig, core, logging);
@@ -250,7 +256,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             FileUtils.copyInputStreamToFile(log4j2config, LOG4J2_CONFIG_FILE);
             FileUtil.configurePermissions(LOG4J2_CONFIG_FILE, false);
             return new CommandLinePart()
-                    .setProperty("log4j.configurationFile", LOG4J2_CONFIG_FILE.getAbsolutePath());
+                .setProperty("log4j.configurationFile", LOG4J2_CONFIG_FILE.getAbsolutePath());
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed copying Log4j configuration file.", ex);
         }
@@ -261,15 +267,16 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     private void prepareRunScript(final CommandLinePart commandLine) {
-        final RunScriptGenerator generator = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS ?
-                RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
+        final RunScriptGenerator generator = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS
+                ? RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
                 : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
         final File runScript = generator.apply(commandLine);
         final File distRunScript = generator.getChildRunScript();
-        Stream.of(runScript, distRunScript).forEach(script -> {
-            final boolean success = script.setExecutable(true);
-            LOGGER.info("Made '{}' executable: {}.", script, success);
-        });
+        Stream.of(runScript, distRunScript)
+            .forEach(script -> {
+                final boolean success = script.setExecutable(true);
+                LOGGER.info("Made '{}' executable: {}.", script, success);
+            });
         if (operatingSystem == RoboZonkyInstallerListener.OS.LINUX) {
             prepareLinuxServices(runScript);
         }

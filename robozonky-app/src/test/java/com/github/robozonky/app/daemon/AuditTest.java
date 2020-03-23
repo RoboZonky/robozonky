@@ -24,10 +24,14 @@ class AuditTest {
     @Test
     void getters() {
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(Audit.investing()).isNotNull();
-            softly.assertThat(Audit.purchasing()).isNotNull();
-            softly.assertThat(Audit.selling()).isNotNull();
-            softly.assertThat(Audit.reservations()).isNotNull();
+            softly.assertThat(Audit.investing())
+                .isNotNull();
+            softly.assertThat(Audit.purchasing())
+                .isNotNull();
+            softly.assertThat(Audit.selling())
+                .isNotNull();
+            softly.assertThat(Audit.reservations())
+                .isNotNull();
         });
     }
 

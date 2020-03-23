@@ -16,13 +16,13 @@
 
 package com.github.robozonky.notifications;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.Arrays;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class SupportedListenerTest {
 
@@ -33,20 +33,23 @@ class SupportedListenerTest {
                 SupportedListener.EXPERIMENTAL_UPDATE_DETECTED, SupportedListener.ENDING, SupportedListener.INITIALIZED,
                 SupportedListener.WEEKLY_SUMMARY, SupportedListener.DAEMON_RESUMED, SupportedListener.DAEMON_SUSPENDED
         };
-        Arrays.stream(SupportedListener.values()).forEach(s -> {
-            final boolean shouldOverride = Arrays.asList(overriding).contains(s);
-            assertThat(s.overrideGlobalGag()).isEqualTo(shouldOverride);
-        });
+        Arrays.stream(SupportedListener.values())
+            .forEach(s -> {
+                final boolean shouldOverride = Arrays.asList(overriding)
+                    .contains(s);
+                assertThat(s.overrideGlobalGag()).isEqualTo(shouldOverride);
+            });
     }
 
     @Test
     void nullity() {
         SoftAssertions.assertSoftly(softly -> Stream.of(SupportedListener.values())
-                .forEach(l -> {
-                    softly.assertThat(l.createSampleEvent()).isNotNull();
-                    softly.assertThat(l.getListener(new EmailHandler(null))).isNotNull();
-                }));
+            .forEach(l -> {
+                softly.assertThat(l.createSampleEvent())
+                    .isNotNull();
+                softly.assertThat(l.getListener(new EmailHandler(null)))
+                    .isNotNull();
+            }));
     }
-
 
 }

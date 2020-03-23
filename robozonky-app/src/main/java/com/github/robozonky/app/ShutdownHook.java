@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class ShutdownHook {
 
     /**
      * Register a handler to call arbitrary code during call.
+     * 
      * @param handler Needs to return the call handler and optionally perform other things.
      * @return True if the handler was registered and will be executed during call.
      */
@@ -62,6 +63,7 @@ public class ShutdownHook {
      * Execute and remove all handlers that were previously {@link #register(Handler)}ed, in the reverse
      * order of
      * their registration. If any handler throws an exception, it will be ignored.
+     * 
      * @param result The terminating state of the application.
      */
     public void execute(final ReturnCode result) {
@@ -86,6 +88,7 @@ public class ShutdownHook {
         /**
          * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
          * {@link ShutdownHook#execute(ReturnCode)}.
+         * 
          * @return Will be called during app shutdown, if present.
          */
         @Override
