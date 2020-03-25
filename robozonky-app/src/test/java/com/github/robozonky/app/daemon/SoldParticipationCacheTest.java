@@ -70,7 +70,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         final Investment i1 = MockInvestmentBuilder.fresh()
             .setLoanId(2)
             .build();
-        when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
+        when(zonky.getSoldInvestments()).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.wasOnceSold(2)).isTrue();
         assertThat(instance.wasOnceSold(1)).isFalse();
