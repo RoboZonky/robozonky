@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.stream.Stream;
+
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.TenantBuilder;
@@ -26,12 +28,9 @@ import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.notNull;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -65,7 +64,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final Investment i1 = MockInvestmentBuilder.fresh().setLoanId(2).build();
-        when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
+        when(zonky.getSoldInvestments()).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.wasOnceSold(2)).isTrue();
         assertThat(instance.wasOnceSold(1)).isFalse();
