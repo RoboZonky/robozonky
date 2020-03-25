@@ -25,6 +25,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.ws.rs.InternalServerErrorException;
+
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.Investment;
@@ -54,16 +56,21 @@ final class Selling implements TenantPayload {
         final boolean isRealRun = !tenant.getSessionInfo()
             .isDryRun();
         LOGGER.debug("Will send sell request for loan #{}: {}.", i.getLoanId(), isRealRun);
-        if (isRealRun) {
-            d.sellInfo()
-                .ifPresentOrElse(sellInfo -> tenant.run(z -> z.sell(i, sellInfo)),
-                        () -> tenant.run(z -> z.sell(i)));
+        try {
+            if (isRealRun) {
+                d.sellInfo()
+                    .ifPresentOrElse(sellInfo -> tenant.run(z -> z.sell(i, sellInfo)),
+                            () -> tenant.run(z -> z.sell(i)));
+            }
+            sold.markAsOffered(i.getLoanId());
+            tenant.fire(EventFactory.saleOffered(i, r.descriptor()
+                .related()));
             LOGGER.info("Offered to sell investment in loan #{}.", i.getLoanId());
+            return Optional.of(i);
+        } catch (final InternalServerErrorException ex) { // The sell endpoint has been seen to throw these.
+            LOGGER.warn("Failed offering to sell investment in loan #{}.", i.getLoanId(), ex);
+            return Optional.empty();
         }
-        sold.markAsOffered(i.getLoanId());
-        tenant.fire(EventFactory.saleOffered(i, r.descriptor()
-            .related()));
-        return Optional.of(i);
     }
 
     private static void sell(final PowerTenant tenant, final SellStrategy strategy) {

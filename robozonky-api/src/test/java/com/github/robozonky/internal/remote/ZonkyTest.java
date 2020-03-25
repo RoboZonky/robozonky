@@ -172,6 +172,8 @@ class ZonkyTest {
                 .isEmpty();
             softly.assertThat(z.getDelinquentInvestments())
                 .isEmpty();
+            softly.assertThat(z.getSoldInvestments())
+                .isEmpty();
             softly.assertThat(z.getAvailableParticipations(Select.unrestricted()))
                 .isEmpty();
             softly.assertThat(z.getRestrictions())

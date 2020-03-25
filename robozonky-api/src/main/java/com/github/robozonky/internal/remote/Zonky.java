@@ -188,11 +188,17 @@ public class Zonky {
         return excludeNonCZK(getStream(portfolioApi, PortfolioApi::items, select), Investment::getCurrency);
     }
 
+    public Stream<Investment> getSoldInvestments() {
+        final Select s = new Select().equals("status", "SOLD");
+        return getInvestments(s);
+    }
+
     public Stream<Investment> getDelinquentInvestments() {
-        return getInvestments(new Select()
+        final Select s = new Select()
             .in("loan.status", "ACTIVE", "PAID_OFF")
             .equals("loan.unpaidLastInst", "true")
-            .equals("status", "ACTIVE"));
+            .equals("status", "ACTIVE");
+        return getInvestments(s);
     }
 
     public Loan getLoan(final int id) {
