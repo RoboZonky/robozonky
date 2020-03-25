@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.internal.async.Reloadable;
-import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.tenant.Tenant;
 import org.apache.logging.log4j.LogManager;
@@ -53,8 +53,7 @@ final class SoldParticipationCache {
     }
 
     private static Set<Integer> retrieveSoldParticipationIds(final Tenant tenant) {
-        final Select s = new Select().equals("status", "SOLD");
-        return tenant.call(zonky -> zonky.getInvestments(s))
+        return tenant.call(Zonky::getSoldInvestments)
                 .mapToInt(Investment::getLoanId)
                 .distinct()
                 .boxed()
