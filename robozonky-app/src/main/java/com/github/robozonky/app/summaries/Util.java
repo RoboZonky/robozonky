@@ -90,6 +90,7 @@ final class Util {
                                 investment.getSmpFee()
                                     .orElse(Money.ZERO));
                     case HISTORICALLY_IN_DUE:
+                    case CURRENTLY_IN_DUE:
                         var sellInfo = tenant.getSellInfo(investment.getId());
                         return Tuple.of(investment.getRating(), sellInfo.getPriceInfo()
                             .getSellPrice(),
@@ -97,8 +98,7 @@ final class Util {
                                     .getFee()
                                     .getValue());
                     default:
-                        throw new IllegalStateException(
-                                "Should not have seen loans with health info: " + healthInfo);
+                        throw new IllegalStateException("Unsupported loan health info: " + healthInfo);
                 }
             })
             .filter(data -> !data._2.isZero()) // Filter out empty loans. Zonky shouldn't send those, but happened.

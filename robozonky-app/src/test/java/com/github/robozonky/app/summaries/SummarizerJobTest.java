@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.summaries;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -47,23 +45,26 @@ class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
     }
 
     @Test
-    void beforeTuesday6am() {
-        final Instant tuesdayEarlyMorning = LocalDateTime.of(2019, 1, 1, 5, 0)
+    void beforeSunday6am() {
+        final Instant sundayEarlyMorning = LocalDateTime.of(2020, 1, 5, 5, 0)
             .atZone(Defaults.ZONE_ID)
             .toInstant();
-        setClock(Clock.fixed(tuesdayEarlyMorning, Defaults.ZONE_ID));
-        final Duration untilTuesday6am = summarizer.startIn();
-        assertThat(untilTuesday6am).isEqualTo(Duration.ofHours(1));
+        setClock(Clock.fixed(sundayEarlyMorning, Defaults.ZONE_ID));
+        final Duration untilSundayAround6am = summarizer.startIn();
+        assertThat(untilSundayAround6am).isBetween(Duration.ofMinutes(-45), Duration.ofMinutes(75));
     }
 
     @Test
-    void afterTuesday6am() {
-        final Instant tuesdayLaterMorning = LocalDateTime.of(2019, 1, 1, 7, 0)
+    void afterSunday6am() {
+        final Instant sundayLaterMorning = LocalDateTime.of(2020, 1, 5, 7, 0)
             .atZone(Defaults.ZONE_ID)
             .toInstant();
-        setClock(Clock.fixed(tuesdayLaterMorning, Defaults.ZONE_ID));
-        final Duration untilNextTuesday6am = summarizer.startIn();
-        assertThat(untilNextTuesday6am).isEqualTo(Duration.ofDays(7)
-            .minusHours(1));
+        setClock(Clock.fixed(sundayLaterMorning, Defaults.ZONE_ID));
+        final Duration untilNextSundayAround6am = summarizer.startIn();
+        assertThat(untilNextSundayAround6am)
+            .isBetween(Duration.ofDays(7)
+                .minusMinutes(75),
+                    Duration.ofDays(7)
+                        .minusMinutes(45));
     }
 }

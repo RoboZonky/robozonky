@@ -43,4 +43,5 @@ class SummarizerTest extends AbstractZonkyLeveragingTest {
         final ExtendedPortfolioOverview summary = evt.getPortfolioOverview();
         assertThat(summary).isNotNull();
     }
+
 }

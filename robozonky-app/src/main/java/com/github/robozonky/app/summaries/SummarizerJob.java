@@ -19,11 +19,13 @@ package com.github.robozonky.app.summaries;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 
 import com.github.robozonky.internal.jobs.TenantJob;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.test.RandomUtil;
 
 final class SummarizerJob implements TenantJob {
 
@@ -35,18 +37,19 @@ final class SummarizerJob implements TenantJob {
     @Override
     public Duration startIn() {
         /*
-         * trigger next tuesday, 6am; tuesday as it's the first day after Zonky's weekend recalc; 6am is important,
-         * since it's long after midnight, when Zonky recalculates. triggering any such code during recalculation is
-         * likely to bring some strange inconsistent values.
+         * Trigger next Sunday, around 6am.
+         * Sunday is chosen as there are no large amounts of transactions expected.
+         * 6am is important, since it's long after midnight, when Zonky recalculates.
+         * Triggering any such code during recalculation is likely to bring some strange inconsistent values.
          */
         final LocalDateTime date = DateUtil.localNow()
+            .with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
             .withHour(6)
-            .withMinute(0)
-            .withSecond(0)
-            .withNano(0)
-            .with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY));
-        final Duration d = Duration.between(DateUtil.localNow(), date);
-        return d.isNegative() ? d.plusDays(7) : d;
+            .truncatedTo(ChronoUnit.HOURS);
+        final Duration untilSunday6am = Duration.between(DateUtil.localNow(), date);
+        final Duration untilNextSunday6am = untilSunday6am.isNegative() ? untilSunday6am.plusDays(7) : untilSunday6am;
+        final int loadBalancingRandomMinutesOffset = RandomUtil.getNextInt(30) - 15;
+        return untilNextSunday6am.plusMinutes(loadBalancingRandomMinutesOffset);
     }
 
     @Override
