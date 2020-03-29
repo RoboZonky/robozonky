@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.summaries;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
