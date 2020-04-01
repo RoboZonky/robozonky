@@ -19,20 +19,24 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 
 final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<ParticipationDescriptor> {
 
-    private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(5);
+    private static final Duration FULL_CHECK_INTERVAL = Duration.ofHours(1);
     private static final Logger LOGGER = Audit.purchasing();
 
     private final PowerTenant tenant;
@@ -42,6 +46,12 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
             final UnaryOperator<LastPublishedParticipation> stateAccessor) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
+    }
+
+    @Override
+    protected OptionalInt getMaximumItemsToRead() {
+        var max = Settings.INSTANCE.getMaxItemsReadFromSecondaryMarketplace();
+        return max >= 0 ? OptionalInt.of(max) : OptionalInt.empty();
     }
 
     @Override
@@ -62,7 +72,8 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     @Override
     public Collection<ParticipationDescriptor> getMarketplace() {
         var cache = SoldParticipationCache.forTenant(tenant);
-        return tenant.call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
+        Stream<Participation> participations = tenant
+            .call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
             .filter(p -> { // never re-purchase what was once sold
                 final int loanId = p.getLoanId();
                 if (cache.wasOnceSold(loanId)) {
@@ -71,8 +82,13 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
                 } else {
                     return true;
                 }
-            })
-            .map(p -> new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId())))
+            });
+        if (getMaximumItemsToRead().isPresent()) {
+            int limit = getMaximumItemsToRead().orElseThrow();
+            LOGGER.trace("Enforcing read limit of {} latest items.", limit);
+            participations = participations.limit(limit);
+        }
+        return participations.map(p -> new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId())))
             .collect(Collectors.toList());
     }
 

@@ -162,7 +162,7 @@ public enum Settings {
     }
 
     public int getMaxItemsReadFromSecondaryMarketplace() {
-        return get(Key.MAX_ITEMS_READ_FROM_SECONDARY_MARKETPLACE, 1000);
+        return get(Key.MAX_ITEMS_READ_FROM_SECONDARY_MARKETPLACE, 500);
     }
 
     public int getDefaultApiPageSize() {

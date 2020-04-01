@@ -16,6 +16,8 @@
 
 package com.github.robozonky.internal;
 
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,8 +30,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SettingsTest {
 
@@ -54,7 +54,7 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getMaxItemsReadFromPrimaryMarketplace())
                 .isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getMaxItemsReadFromSecondaryMarketplace())
-                .isEqualTo(1000);
+                .isEqualTo(500);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                 .matches(new SettingsTest.TemporalPredicate(10));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
