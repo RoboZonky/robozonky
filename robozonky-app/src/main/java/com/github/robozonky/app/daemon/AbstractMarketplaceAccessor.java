@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.robozonky.internal.Defaults;
@@ -55,6 +56,8 @@ abstract class AbstractMarketplaceAccessor<T> {
             return filter;
         }
     }
+
+    protected abstract OptionalInt getMaximumItemsToRead();
 
     protected abstract Select getBaseFilter();
 

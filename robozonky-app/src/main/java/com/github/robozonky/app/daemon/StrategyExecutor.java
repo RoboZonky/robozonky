@@ -65,6 +65,10 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
              */
             logger.debug("Forcing marketplace check to see if we can resume from forced pause.");
             return false;
+        } else if (marketplace.getMaximumItemsToRead()
+            .orElse(Integer.MAX_VALUE) < 1) {
+            logger.debug("Asleep due to settings to read 0 items from the marketplace.");
+            return true;
         } else if (marketplace.hasUpdates()) {
             logger.debug("Waking up due to a change in marketplace.");
             return false;

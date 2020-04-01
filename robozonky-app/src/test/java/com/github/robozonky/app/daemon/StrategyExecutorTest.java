@@ -327,7 +327,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked but the cache was
         verify(zonky, times(2)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
-        setClock(Clock.fixed(now.plus(Duration.ofSeconds(61)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(61)), Defaults.ZONE_ID));
         assertThat(e.get()).isEmpty(); // after 1 minute, marketplace was force-checked
         verify(zonky, times(3)).getLastPublishedLoanInfo();
         verify(zonky, times(2)).getAvailableLoans(any());

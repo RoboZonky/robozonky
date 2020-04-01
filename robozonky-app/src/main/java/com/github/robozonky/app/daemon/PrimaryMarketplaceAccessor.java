@@ -19,19 +19,24 @@ package com.github.robozonky.app.daemon;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.apache.logging.log4j.Logger;
 
 final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanDescriptor> {
 
-    private static final Duration FULL_CHECK_INTERVAL = Duration.ofMinutes(1);
+    private static final Duration FULL_CHECK_INTERVAL = Duration.ofHours(1);
     private static final Logger LOGGER = Audit.investing();
     private final Tenant tenant;
     private final UnaryOperator<LastPublishedLoan> stateAccessor;
@@ -42,10 +47,16 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     }
 
     @Override
+    protected OptionalInt getMaximumItemsToRead() {
+        var max = Settings.INSTANCE.getMaxItemsReadFromPrimaryMarketplace();
+        return max >= 0 ? OptionalInt.of(max) : OptionalInt.empty();
+    }
+
+    @Override
     protected Select getBaseFilter() {
         // Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
         return new Select()
-                .greaterThan("nonReservedRemainingInvestment", 0);
+            .greaterThan("nonReservedRemainingInvestment", 0);
     }
 
     @Override
@@ -55,11 +66,16 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
 
     @Override
     public Collection<LoanDescriptor> getMarketplace() {
-        return tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
-                .parallel()
-                .filter(l -> l.getMyInvestment().isEmpty()) // re-investing would fail
-                .map(LoanDescriptor::new)
-                .collect(Collectors.toList());
+        Stream<Loan> loans = tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
+            .filter(l -> l.getMyInvestment()
+                .isEmpty()); // re-investing would fail
+        if (getMaximumItemsToRead().isPresent()) {
+            int limit = getMaximumItemsToRead().orElseThrow();
+            LOGGER.trace("Enforcing read limit of {} latest items.", limit);
+            loans = loans.limit(limit);
+        }
+        return loans.map(LoanDescriptor::new)
+            .collect(Collectors.toList());
     }
 
     @Override
