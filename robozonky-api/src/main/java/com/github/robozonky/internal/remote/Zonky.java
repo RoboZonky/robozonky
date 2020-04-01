@@ -85,6 +85,7 @@ public class Zonky {
         this.loanApi = api.marketplace(tokenSupplier);
         this.reservationApi = api.reservations(tokenSupplier);
         this.participationApi = api.secondaryMarketplace(tokenSupplier);
+        participationApi.setSortString("-deadline"); // Order participations from the newest one.
         this.portfolioApi = api.portfolio(tokenSupplier);
     }
 

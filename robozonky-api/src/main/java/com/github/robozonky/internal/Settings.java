@@ -157,6 +157,14 @@ public enum Settings {
         return get(Settings.Key.DRY_RUN_BALANCE_MINIMUM, -1);
     }
 
+    public int getMaxItemsReadFromPrimaryMarketplace() {
+        return get(Key.MAX_ITEMS_READ_FROM_PRIMARY_MARKETPLACE, -1);
+    }
+
+    public int getMaxItemsReadFromSecondaryMarketplace() {
+        return get(Key.MAX_ITEMS_READ_FROM_SECONDARY_MARKETPLACE, 1000);
+    }
+
     public int getDefaultApiPageSize() {
         return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 100);
     }
@@ -169,6 +177,8 @@ public enum Settings {
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
         DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size"),
         DRY_RUN_BALANCE_MINIMUM("robozonky.dry_run_balance_minimum"),
+        MAX_ITEMS_READ_FROM_PRIMARY_MARKETPLACE("robozonky.max_items_read_from_primary_marketplace"),
+        MAX_ITEMS_READ_FROM_SECONDARY_MARKETPLACE("robozonky.max_items_read_from_secondary_marketplace"),
         STATE_FILE_LOCATION("robozonky.state_file"),
         HTTPS_PROXY_HOSTNAME("https.proxyHost"),
         HTTPS_PROXY_PORT("https.proxyPort");

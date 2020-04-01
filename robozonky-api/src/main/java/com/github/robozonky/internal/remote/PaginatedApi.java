@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,17 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 class PaginatedApi<S, T> {
 
     private static final Logger LOGGER = LogManager.getLogger(PaginatedApi.class);
 
+    private String sortString;
     private final Class<T> api;
     private final String url;
     private final ResteasyClient client;
@@ -36,12 +38,12 @@ class PaginatedApi<S, T> {
     private final RequestCounter counter;
 
     PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
-                 final ResteasyClient client) {
+            final ResteasyClient client) {
         this(api, url, token, client, null);
     }
 
     public PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
-                        final ResteasyClient client, final RequestCounter counter) {
+            final ResteasyClient client, final RequestCounter counter) {
         this.api = api;
         this.url = url;
         this.client = client;
@@ -49,10 +51,19 @@ class PaginatedApi<S, T> {
         this.counter = counter;
     }
 
+    public String getSortString() {
+        return sortString;
+    }
+
+    public void setSortString(final String sortString) {
+        this.sortString = sortString;
+    }
+
     /**
      * Filters are for one-time use only. They need to be thrown away after being used, as they could otherwise be used
      * to store and transfer stale state, such as request headers etc. For the same reason, they must not be shared
      * among threads.
+     * 
      * @return
      */
     private RoboZonkyFilter newFilter() {
@@ -72,7 +83,7 @@ class PaginatedApi<S, T> {
     }
 
     <Q> Q execute(final Function<T, Q> function, final Select select, final RoboZonkyFilter filter,
-                  final boolean trackRequests) {
+            final boolean trackRequests) {
         select.accept(filter);
         return execute(function, filter, trackRequests);
     }
@@ -83,19 +94,22 @@ class PaginatedApi<S, T> {
     }
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
-                                      final int pageSize) {
+            final int pageSize) {
         return this.execute(function, select, pageNo, pageSize, newFilter());
     }
 
     PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
-                               final int pageSize, final RoboZonkyFilter filter) {
+            final int pageSize, final RoboZonkyFilter filter) {
+        if (sortString != null) {
+            filter.setRequestHeader("X-Order", sortString);
+        }
         filter.setRequestHeader("X-Page", String.valueOf(pageNo));
         filter.setRequestHeader("X-Size", String.valueOf(pageSize));
-        LOGGER.trace("Will request page #{} of size {}.", pageNo, pageSize);
+        LOGGER.trace("Will request page #{} of size {}, sort string is '{}'.", pageNo, pageSize, sortString);
         final List<S> result = this.execute(function, select, filter);
         final int totalSize = filter.getLastResponseHeader("X-Total")
-                .map(Integer::parseInt)
-                .orElse(0);
+            .map(Integer::parseInt)
+            .orElse(0);
         LOGGER.trace("Has {} results in total.", totalSize);
         return new PaginatedResult<>(result, totalSize);
     }
