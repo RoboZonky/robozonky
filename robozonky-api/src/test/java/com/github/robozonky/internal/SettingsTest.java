@@ -16,8 +16,6 @@
 
 package com.github.robozonky.internal;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,6 +28,8 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SettingsTest {
 
@@ -51,6 +51,10 @@ class SettingsTest {
                 .matches(new SettingsTest.TemporalPredicate(5 * 60));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum())
                 .isEqualTo(-1);
+            softly.assertThat(Settings.INSTANCE.getMaxItemsReadFromPrimaryMarketplace())
+                .isEqualTo(-1);
+            softly.assertThat(Settings.INSTANCE.getMaxItemsReadFromSecondaryMarketplace())
+                .isEqualTo(1000);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                 .matches(new SettingsTest.TemporalPredicate(10));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
@@ -70,7 +74,7 @@ class SettingsTest {
     void setProperties() throws IOException {
         final Properties p = new Properties();
         Stream.of(Settings.Key.values())
-            .forEach(v -> p.setProperty(v.getName(), "1000"));
+            .forEach(v -> p.setProperty(v.getName(), "2000"));
         p.setProperty(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING.getName(), "true");
         final File f = File.createTempFile("robozonky-", ".properties");
         p.store(new FileWriter(f), "Testing properties");
@@ -84,19 +88,23 @@ class SettingsTest {
             softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled())
                 .isTrue();
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
-                .matches(new SettingsTest.TemporalPredicate(1000 * 60));
+                .matches(new SettingsTest.TemporalPredicate(2000 * 60));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum())
-                .isEqualTo(1000);
+                .isEqualTo(2000);
+            softly.assertThat(Settings.INSTANCE.getMaxItemsReadFromPrimaryMarketplace())
+                .isEqualTo(2000);
+            softly.assertThat(Settings.INSTANCE.getMaxItemsReadFromSecondaryMarketplace())
+                .isEqualTo(2000);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
-                .matches(new SettingsTest.TemporalPredicate(1000));
+                .matches(new SettingsTest.TemporalPredicate(2000));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
-                .matches(new SettingsTest.TemporalPredicate(1000));
+                .matches(new SettingsTest.TemporalPredicate(2000));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize())
-                .isEqualTo(1000);
+                .isEqualTo(2000);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyPort())
-                .isEqualTo(1000);
+                .isEqualTo(2000);
             softly.assertThat(Settings.INSTANCE.getHttpsProxyHostname())
-                .contains("1000");
+                .contains("2000");
         });
     }
 

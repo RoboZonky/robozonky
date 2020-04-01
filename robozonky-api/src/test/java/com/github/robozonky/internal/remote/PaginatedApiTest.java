@@ -23,12 +23,13 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
-class PaginatedApiImplTest<S, T> {
+class PaginatedApiTest<S, T> {
 
     @Test
     void checkFilter() {
@@ -66,8 +67,29 @@ class PaginatedApiImplTest<S, T> {
             .thenReturn(Optional.of("" + total));
         final PaginatedResult<S> result = p.execute(f, sel, 1, 10, filter);
         assertThat(result.getTotalResultCount()).isEqualTo(total);
+        verify(filter, never()).setRequestHeader(eq("X-Order"), any());
         verify(filter).setRequestHeader(eq("X-Size"), eq("10"));
         verify(filter).setRequestHeader(eq("X-Page"), eq("1"));
+        verify(p).execute(eq(f), eq(sel), eq(filter));
+    }
+
+    @Test
+    void checkSorting() {
+        String sortString = UUID.randomUUID()
+            .toString();
+        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, mock(ResteasyClient.class)));
+        p.setSortString(sortString);
+        doReturn(null).when(p)
+            .execute(any(), any(), any());
+        final Function<T, List<S>> f = o -> Collections.emptyList();
+        final Select sel = mock(Select.class);
+        final int total = 1000;
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        when(filter.getLastResponseHeader(eq("X-Total")))
+            .thenReturn(Optional.of("" + total));
+        final PaginatedResult<S> result = p.execute(f, sel, 1, 10, filter);
+        assertThat(result.getTotalResultCount()).isEqualTo(total);
+        verify(filter, times(1)).setRequestHeader(eq("X-Order"), eq(sortString));
         verify(p).execute(eq(f), eq(sel), eq(filter));
     }
 }

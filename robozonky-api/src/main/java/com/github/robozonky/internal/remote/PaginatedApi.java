@@ -30,6 +30,7 @@ class PaginatedApi<S, T> {
 
     private static final Logger LOGGER = LogManager.getLogger(PaginatedApi.class);
 
+    private String sortString;
     private final Class<T> api;
     private final String url;
     private final ResteasyClient client;
@@ -48,6 +49,14 @@ class PaginatedApi<S, T> {
         this.client = client;
         this.tokenSupplier = token;
         this.counter = counter;
+    }
+
+    public String getSortString() {
+        return sortString;
+    }
+
+    public void setSortString(final String sortString) {
+        this.sortString = sortString;
     }
 
     /**
@@ -91,9 +100,12 @@ class PaginatedApi<S, T> {
 
     PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
             final int pageSize, final RoboZonkyFilter filter) {
+        if (sortString != null) {
+            filter.setRequestHeader("X-Order", sortString);
+        }
         filter.setRequestHeader("X-Page", String.valueOf(pageNo));
         filter.setRequestHeader("X-Size", String.valueOf(pageSize));
-        LOGGER.trace("Will request page #{} of size {}.", pageNo, pageSize);
+        LOGGER.trace("Will request page #{} of size {}, sort string is '{}'.", pageNo, pageSize, sortString);
         final List<S> result = this.execute(function, select, filter);
         final int totalSize = filter.getLastResponseHeader("X-Total")
             .map(Integer::parseInt)
