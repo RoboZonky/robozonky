@@ -58,12 +58,14 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     @Override
     protected Select getBaseFilter() {
         Money upperBalanceBound = tenant.getKnownBalanceUpperBound();
-        Money maximumInvestmentAmount = tenant.getRestrictions().getMaximumInvestmentAmount();
+        Money maximumInvestmentAmount = tenant.getRestrictions()
+            .getMaximumInvestmentAmount();
         Money limit = upperBalanceBound.min(maximumInvestmentAmount);
         return new Select()
             .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
             .greaterThanOrEquals("remainingPrincipal", 2) // Ignore near-0 participation clutter.
-            .lessThanOrEquals("remainingPrincipal", limit.getValue().intValue());
+            .lessThanOrEquals("remainingPrincipal", limit.getValue()
+                .intValue());
     }
 
     @Override
