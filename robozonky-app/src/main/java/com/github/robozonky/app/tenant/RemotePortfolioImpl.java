@@ -41,16 +41,20 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
     private final Reloadable<RemoteData> remoteData;
+    private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId = new AtomicReference<>(new HashMap<>(0));
-    private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
     private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
-        this.isDryRun = tenant.getSessionInfo().isDryRun();
+        this.isDryRun = tenant.getSessionInfo()
+            .isDryRun();
         this.remoteData = Reloadable.with(() -> RemoteData.load(tenant))
-                .reloadAfter(Duration.ofMinutes(5))
-                .finishWith(this::refresh)
-                .build();
+            .reloadAfter(Duration.ofMinutes(5))
+            .finishWith(this::refresh)
+            .build();
+        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(this))
+            .reloadAfter(Duration.ofHours(1))
+            .build();
     }
 
     private static void includeAmount(Map<Rating, Money> amounts, Rating rating, Money amount) {
@@ -58,9 +62,11 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     private void refresh(final RemoteData data) {
-        refreshSynthetics(old -> old.entrySet().stream()
-                .filter(e -> e.getValue().isValid(data))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        refreshSynthetics(old -> old.entrySet()
+            .stream()
+            .filter(e -> e.getValue()
+                .isValid(data))
+            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     @Override
@@ -80,42 +86,41 @@ class RemotePortfolioImpl implements RemotePortfolio {
         LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         var updatedSynthetics = syntheticByLoanId.updateAndGet(refresher);
         // Force re-fetch of portfolio data now that we have registered a change.
-        portfolioOverview.set(null);
+        portfolioOverview.clear();
         LOGGER.debug("New synthetics: {}", updatedSynthetics);
     }
 
     RemoteData getRemoteData() {
-        return remoteData.get().getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
+        return remoteData.get()
+            .getOrElseThrow(t -> new IllegalStateException("Failed fetching remote portfolio.", t));
     }
 
     @Override
     public Map<Rating, Money> getTotal() {
         var data = getRemoteData(); // use the same data for the entirety of this method
         LOGGER.debug("Remote data used: {}.", data);
-        final Map<Rating, Money> amounts = data.getStatistics().getRiskPortfolio().stream()
-                .collect(toMap(RiskPortfolio::getRating, portfolio -> portfolio.getDue().add(portfolio.getUnpaid()),
-                               Money::add, () -> new EnumMap<>(Rating.class)));
+        final Map<Rating, Money> amounts = data.getStatistics()
+            .getRiskPortfolio()
+            .stream()
+            .collect(toMap(RiskPortfolio::getRating, portfolio -> portfolio.getDue()
+                .add(portfolio.getUnpaid()),
+                    Money::add, () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);
-        data.getBlocked().forEach((id, blocked) -> includeAmount(amounts, blocked._1, blocked._2));
+        data.getBlocked()
+            .forEach((id, blocked) -> includeAmount(amounts, blocked._1, blocked._2));
         LOGGER.debug("Plus remote blocked: {}.", amounts);
-        syntheticByLoanId.get().values().stream()
-                .filter(blocked -> blocked.isValid(data))
-                .forEach(blocked -> includeAmount(amounts, blocked.getRating(), blocked.getAmount()));
+        syntheticByLoanId.get()
+            .values()
+            .stream()
+            .filter(blocked -> blocked.isValid(data))
+            .forEach(blocked -> includeAmount(amounts, blocked.getRating(), blocked.getAmount()));
         LOGGER.debug("Grand total incl. synthetics: {}.", amounts);
         return Collections.unmodifiableMap(amounts);
     }
 
     @Override
     public PortfolioOverview getOverview() {
-        PortfolioOverview old = portfolioOverview.get();
-        if (old != null) {
-            return old;
-        }
-        PortfolioOverview current = new PortfolioOverviewImpl(this);
-        boolean haveNew = portfolioOverview.compareAndSet(null, current);
-        if (haveNew) {
-            LOGGER.debug("New portfolio overview: {}.", current);
-        }
-        return current;
+        return portfolioOverview.get()
+            .getOrElseThrow(ex -> new IllegalStateException("Failed loading portfolio overview.", ex));
     }
 }
