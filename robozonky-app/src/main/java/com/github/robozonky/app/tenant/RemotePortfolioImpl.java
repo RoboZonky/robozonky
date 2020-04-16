@@ -42,8 +42,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
     private final Reloadable<RemoteData> remoteData;
+    private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId = new AtomicReference<>(new HashMap<>(0));
-    private final AtomicReference<PortfolioOverview> portfolioOverview = new AtomicReference<>();
     private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
@@ -52,6 +52,9 @@ class RemotePortfolioImpl implements RemotePortfolio {
         this.remoteData = Reloadable.with(() -> RemoteData.load(tenant))
             .reloadAfter(Duration.ofMinutes(5))
             .finishWith(this::refresh)
+            .build();
+        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(this))
+            .reloadAfter(Duration.ofHours(1))
             .build();
     }
 
@@ -84,7 +87,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         LOGGER.debug("Current synthetics: {}.", syntheticByLoanId.get());
         var updatedSynthetics = syntheticByLoanId.updateAndGet(refresher);
         // Force re-fetch of portfolio data now that we have registered a change.
-        portfolioOverview.set(null);
+        portfolioOverview.clear();
         LOGGER.debug("New synthetics: {}", updatedSynthetics);
     }
 
@@ -118,15 +121,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
 
     @Override
     public PortfolioOverview getOverview() {
-        PortfolioOverview old = portfolioOverview.get();
-        if (old != null) {
-            return old;
-        }
-        PortfolioOverview current = new PortfolioOverviewImpl(this);
-        boolean haveNew = portfolioOverview.compareAndSet(null, current);
-        if (haveNew) {
-            LOGGER.debug("New portfolio overview: {}.", current);
-        }
-        return current;
+        return portfolioOverview.get()
+            .getOrElseThrow(ex -> new IllegalStateException("Failed loading portfolio overview.", ex));
     }
 }
