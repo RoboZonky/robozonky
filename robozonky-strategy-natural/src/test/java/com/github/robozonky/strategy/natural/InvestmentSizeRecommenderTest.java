@@ -24,8 +24,8 @@ import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -54,44 +54,42 @@ class InvestmentSizeRecommenderTest {
 
     @Test
     void withSpecificRating() {
-        final Restrictions restrictions = new Restrictions();
         final ParsedStrategy s = getStrategy();
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
         // with unlimited balance, make maximum possible recommendation
         final Loan loan = mockLoan(50_000);
-        final Money actualInvestment = r.apply(loan, restrictions);
+        final Money actualInvestment = r.apply(loan, new SessionInfo("someone@somewhere.cz"));
         // at most 1 percent of 50000, rounded down to nearest increment of 200
         assertThat(actualInvestment).isEqualTo(Money.from(400));
     }
 
     @Test
     void byDefault() {
-        final Restrictions restrictions = new Restrictions();
         final ParsedStrategy s = getStrategy();
         final Loan l = mockLoan(100_000);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
         // make maximum possible recommendation
-        final Money actualInvestment = r.apply(l, restrictions);
+        final Money actualInvestment = r.apply(l, new SessionInfo("someone@somewhere.cz"));
         assertThat(actualInvestment).isEqualTo(Money.from(MAXIMUM_INVESTMENT));
     }
 
     @Test
     void nothingMoreToInvest() {
-        final Restrictions restrictions = new Restrictions();
+        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
         final ParsedStrategy s = getStrategy();
-        final Loan l = mockLoan(restrictions.getMinimumInvestmentAmount()
+        final Loan l = mockLoan(sessionInfo.getMinimumInvestmentAmount()
             .getValue()
             .intValue() - 1);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
         // with unlimited balance, make maximum possible recommendation
-        final Money actualInvestment = r.apply(l, restrictions);
+        final Money actualInvestment = r.apply(l, sessionInfo);
         assertThat(actualInvestment).isEqualTo(Money.ZERO);
     }
 
     @Test
     void minimumOverRemaining() {
-        final Restrictions restrictions = new Restrictions();
-        final Money minimumInvestment = restrictions.getMinimumInvestmentAmount();
+        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
+        final Money minimumInvestment = sessionInfo.getMinimumInvestmentAmount();
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
@@ -99,13 +97,13 @@ class InvestmentSizeRecommenderTest {
         when(s.getMaximumInvestmentSize(eq(l.getRating()))).thenReturn(minimumInvestment.add(minimumInvestment));
         when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
-        assertThat(r.apply(l, new Restrictions())).isEqualTo(Money.ZERO);
+        assertThat(r.apply(l, sessionInfo)).isEqualTo(Money.ZERO);
     }
 
     @Test
     void recommendationRoundedUnderMinimum() {
-        final Restrictions restrictions = new Restrictions();
-        final Money minimumInvestment = restrictions.getMinimumInvestmentAmount();
+        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
+        final Money minimumInvestment = sessionInfo.getMinimumInvestmentAmount();
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
@@ -116,6 +114,6 @@ class InvestmentSizeRecommenderTest {
             .thenReturn(minimumInvestment);
         when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
-        assertThat(r.apply(l, new Restrictions())).isEqualTo(Money.ZERO);
+        assertThat(r.apply(l, sessionInfo)).isEqualTo(Money.ZERO);
     }
 }

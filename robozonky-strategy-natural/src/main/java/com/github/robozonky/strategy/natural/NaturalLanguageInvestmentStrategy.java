@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -40,7 +40,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     @Override
     public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> available,
-            final PortfolioOverview portfolio, final Restrictions restrictions) {
+            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
@@ -60,7 +60,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         return strategy.getApplicableLoans(withoutUndesirable, portfolio)
             .sorted(preferences.getPrimaryMarketplaceComparator())
             .flatMap(d -> { // recommend amount to invest per strategy
-                final Money recommendedAmount = recommender.apply(d.item(), restrictions);
+                final Money recommendedAmount = recommender.apply(d.item(), sessionInfo);
                 if (recommendedAmount.compareTo(recommendedAmount.getZero()) > 0) {
                     return d.recommend(recommendedAmount)
                         .stream();

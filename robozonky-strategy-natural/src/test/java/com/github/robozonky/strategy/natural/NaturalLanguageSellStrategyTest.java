@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
@@ -79,7 +80,7 @@ class NaturalLanguageSellStrategyTest {
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Stream<RecommendedInvestment> result = s.recommend(Collections.singletonList(mockDescriptor()),
-                portfolio);
+                portfolio, new SessionInfo("someone@somewhere.cz"));
         assertThat(result).isEmpty();
     }
 
@@ -93,7 +94,7 @@ class NaturalLanguageSellStrategyTest {
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Stream<RecommendedInvestment> result = s.recommend(Collections.singletonList(mockDescriptor()),
-                portfolio);
+                portfolio, new SessionInfo("someone@somewhere.cz"));
         assertThat(result).hasSize(1);
     }
 
@@ -110,7 +111,7 @@ class NaturalLanguageSellStrategyTest {
         final Investment i2 = mockInvestment(BigDecimal.ZERO);
         final Stream<RecommendedInvestment> result = s.recommend(
                 Arrays.asList(mockDescriptor(i1), mockDescriptor(i2)),
-                portfolio);
+                portfolio, new SessionInfo("someone@somewhere.cz"));
         assertThat(result).extracting(d -> d.descriptor()
             .item())
             .containsOnly(i2);
@@ -138,7 +139,7 @@ class NaturalLanguageSellStrategyTest {
                 Arrays.asList(mockDescriptor(withFee), mockDescriptor(withFee2, si),
                         mockDescriptor(withoutFee), mockDescriptor(withoutFee2, si),
                         mockDescriptor(withoutFee3, si)),
-                portfolio);
+                portfolio, new SessionInfo("someone@somewhere.cz"));
         assertThat(result).extracting(d -> d.descriptor()
             .item())
             .containsOnly(withoutFee);

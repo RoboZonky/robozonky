@@ -26,13 +26,13 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.ReservationPreference;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -57,8 +57,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
         @Override
         public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
-                final PortfolioOverview portfolio,
-                final Restrictions restrictions) {
+                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
             return available.stream()
                 .map(r -> {
                     final Money amount = r.item()

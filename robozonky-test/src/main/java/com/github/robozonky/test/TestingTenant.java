@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -61,11 +60,6 @@ public class TestingTenant implements Tenant {
     @Override
     public RemotePortfolio getPortfolio() {
         return portfolio;
-    }
-
-    @Override
-    public Restrictions getRestrictions() {
-        return zonky.getRestrictions();
     }
 
     @Override

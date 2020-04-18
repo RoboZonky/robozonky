@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -62,7 +63,7 @@ class NaturalLanguageSellStrategy implements SellStrategy {
 
     @Override
     public Stream<RecommendedInvestment> recommend(final Collection<InvestmentDescriptor> available,
-            final PortfolioOverview portfolio) {
+            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         return strategy.getSellingMode()
             .map(mode -> {
                 switch (mode) {

@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.ws.rs.InternalServerErrorException;
 
@@ -99,9 +98,9 @@ final class Selling implements TenantPayload {
         final PortfolioOverview overview = tenant.getPortfolio()
             .getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
-        final Stream<RecommendedInvestment> recommended = strategy.recommend(eligible, overview)
+        var recommended = strategy.recommend(eligible, overview, tenant.getSessionInfo())
             .peek(r -> tenant.fire(EventFactory.saleRecommended(r)));
-        final Stream<RecommendedInvestment> throttled = new SellingThrottle().apply(recommended, overview);
+        var throttled = new SellingThrottle().apply(recommended, overview);
         final Collection<Investment> investmentsSold = throttled
             .map(r -> processSale(tenant, r, sold))
             .flatMap(Optional::stream)

@@ -16,11 +16,11 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,9 +30,9 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -68,7 +68,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
         final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor()),
-                portfolio, new Restrictions());
+                portfolio, new SessionInfo("someone@somewhere.cz"));
         assertThat(result).isEmpty();
     }
 
@@ -85,7 +85,7 @@ class NaturalLanguagePurchaseStrategyTest {
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
         final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor()),
-                portfolio, new Restrictions());
+                portfolio, new SessionInfo("someone@somewhere.cz"));
         assertThat(result).isEmpty();
     }
 
@@ -101,7 +101,7 @@ class NaturalLanguagePurchaseStrategyTest {
         doReturn(Rating.A).when(l)
             .getRating();
         final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor(l)),
-                portfolio, new Restrictions());
+                portfolio, new SessionInfo("someone@somewhere.cz"));
         assertThat(result).isEmpty();
     }
 
@@ -129,7 +129,7 @@ class NaturalLanguagePurchaseStrategyTest {
             .getRating();
         final ParticipationDescriptor pd = mockDescriptor(p2);
         final List<RecommendedParticipation> result = s
-            .recommend(Arrays.asList(mockDescriptor(participation), pd), portfolio, new Restrictions())
+            .recommend(asList(mockDescriptor(participation), pd), portfolio, new SessionInfo("someone@somewhere.cz"))
             .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedParticipation r = result.get(0);

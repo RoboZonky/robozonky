@@ -31,6 +31,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -72,8 +73,8 @@ final class PurchasingSession extends
     private void purchase(final PurchaseStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.recommend(getAvailable(), tenant.getPortfolio()
-                .getOverview(), tenant.getRestrictions())
+            PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
+            invested = strategy.recommend(getAvailable(), portfolioOverview, tenant.getSessionInfo())
                 .peek(r -> tenant.fire(purchaseRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted

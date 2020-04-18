@@ -18,6 +18,12 @@ package com.github.robozonky.api;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.function.BooleanSupplier;
+
+import com.github.robozonky.api.remote.entities.Consents;
+import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * Uniquely identifies the Zonky user that the application is working on behalf of.
@@ -26,6 +32,11 @@ public final class SessionInfo {
 
     private final String userName, name;
     private final boolean isDryRun;
+    private final boolean canInvest;
+    private final BooleanSupplier canAccessSmp;
+    private final Money minimumInvestmentAmount;
+    private final Money investmentStep;
+    private final Money maximumInvestmentAmount;
 
     public SessionInfo(final String userName) {
         this(userName, null);
@@ -36,9 +47,24 @@ public final class SessionInfo {
     }
 
     public SessionInfo(final String userName, final String name, final boolean isDryRun) {
+        this(new Consents(), new Restrictions(true), userName, name, isDryRun);
+    }
+
+    public SessionInfo(final Consents consents, final Restrictions restrictions, final String userName,
+            final String name, final boolean isDryRun) {
         this.name = name;
         this.userName = userName;
         this.isDryRun = isDryRun;
+        canInvest = !restrictions.isCannotInvest();
+        var originalCanAccessSmp = !restrictions.isCannotAccessSmp();
+        var maybeOriginalSmpConsent = consents.getSmpConsent();
+        canAccessSmp = () -> originalCanAccessSmp && maybeOriginalSmpConsent
+                .map(s -> s.getAgreedOn()
+                        .isBefore(DateUtil.offsetNow()))
+                .orElse(false);
+        minimumInvestmentAmount = restrictions.getMinimumInvestmentAmount();
+        investmentStep = restrictions.getInvestmentStep();
+        maximumInvestmentAmount = restrictions.getMaximumInvestmentAmount();
     }
 
     /**
@@ -67,13 +93,38 @@ public final class SessionInfo {
             .orElse("RoboZonky");
     }
 
+    public boolean canInvest() {
+        return canInvest;
+    }
+
+    public boolean canAccessSmp() {
+        return canAccessSmp.getAsBoolean();
+    }
+
+    public Money getMinimumInvestmentAmount() {
+        return minimumInvestmentAmount;
+    }
+
+    public Money getInvestmentStep() {
+        return investmentStep;
+    }
+
+    public Money getMaximumInvestmentAmount() {
+        return maximumInvestmentAmount;
+    }
+
     @Override
     public String toString() {
-        return "SessionInfo{" +
-                "isDryRun=" + isDryRun +
-                ", name='" + name + '\'' +
-                ", userName='" + userName + '\'' +
-                '}';
+        return new StringJoiner(", ", SessionInfo.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("userName='" + userName + "'")
+                .add("isDryRun=" + isDryRun)
+                .add("canInvest=" + canInvest)
+                .add("canAccessSmp=" + canAccessSmp)
+                .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
+                .add("investmentStep=" + investmentStep)
+                .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
+                .toString();
     }
 
     /**

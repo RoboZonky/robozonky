@@ -46,7 +46,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
             .withApi(a)
             .withSecrets(s)
             .build();
-        assertThat(t.getRestrictions()).isNotNull();
+        assertThat(t.getSessionInfo()).isNotNull();
         verify(o).refresh(eq(token));
         verify(z).getRestrictions();
     }

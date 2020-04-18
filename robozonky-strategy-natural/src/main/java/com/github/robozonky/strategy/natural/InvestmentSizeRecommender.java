@@ -23,11 +23,11 @@ import java.math.BigDecimal;
 import java.util.function.BiFunction;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 
-class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money> {
+class InvestmentSizeRecommender implements BiFunction<Loan, SessionInfo, Money> {
 
     private final ParsedStrategy strategy;
 
@@ -52,14 +52,14 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money>
     }
 
     private Money[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan,
-            final Restrictions restrictions) {
+            final SessionInfo sessionInfo) {
         final Rating rating = loan.getRating();
         final Money absoluteMinimum = strategy.getMinimumInvestmentSize(rating)
-            .max(restrictions.getMinimumInvestmentAmount());
-        final Money minimumRecommendation = roundToNearestIncrement(absoluteMinimum, restrictions.getInvestmentStep());
+            .max(sessionInfo.getMinimumInvestmentAmount());
+        final Money minimumRecommendation = roundToNearestIncrement(absoluteMinimum, sessionInfo.getInvestmentStep());
         final Money maximumUserRecommendation = roundToNearestIncrement(strategy.getMaximumInvestmentSize(rating),
-                restrictions.getInvestmentStep());
-        final Money maximumInvestmentAmount = restrictions.getMaximumInvestmentAmount();
+                sessionInfo.getInvestmentStep());
+        final Money maximumInvestmentAmount = sessionInfo.getMaximumInvestmentAmount();
         if (maximumUserRecommendation.compareTo(maximumInvestmentAmount) > 0) {
             LOGGER.info("Maximum investment amount reduced to {} by Zonky.", maximumInvestmentAmount);
         }
@@ -80,9 +80,9 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money>
     }
 
     @Override
-    public Money apply(final Loan loan, final Restrictions restrictions) {
+    public Money apply(final Loan loan, final SessionInfo sessionInfo) {
         final int id = loan.getId();
-        final Money[] recommended = getInvestmentBounds(strategy, loan, restrictions);
+        final Money[] recommended = getInvestmentBounds(strategy, loan, sessionInfo);
         final Money minimumRecommendation = recommended[0];
         final Money maximumRecommendation = recommended[1];
         LOGGER.debug("Recommended investment range for loan #{} is <{}; {}>.", id, minimumRecommendation,
@@ -95,7 +95,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Restrictions, Money>
             return zero;
         }
         final Money recommendedAmount = maximumRecommendation.min(loanRemaining);
-        final Money r = roundToNearestIncrement(recommendedAmount, restrictions.getInvestmentStep());
+        final Money r = roundToNearestIncrement(recommendedAmount, sessionInfo.getInvestmentStep());
         if (r.compareTo(minimumRecommendation) < 0) {
             LOGGER.debug("Not recommending loan #{} due to recommendation below minimum.", id);
             return zero;

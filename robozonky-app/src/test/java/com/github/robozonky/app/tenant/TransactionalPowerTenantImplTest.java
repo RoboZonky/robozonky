@@ -35,7 +35,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -65,12 +64,6 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void delegatesAvailability() {
         final Availability result = tenant.getAvailability();
         assertThat(transactional.getAvailability()).isSameAs(result);
-    }
-
-    @Test
-    void delegatesRestrictions() {
-        final Restrictions result = tenant.getRestrictions();
-        assertThat(transactional.getRestrictions()).isSameAs(result);
     }
 
     @Test

@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -29,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
+import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
@@ -52,7 +54,7 @@ class PowerTenantImpl implements PowerTenant {
     private static final Logger LOGGER = LogManager.getLogger(PowerTenantImpl.class);
 
     private final Random random = new Random();
-    private final SessionInfo sessionInfo;
+    private final Reloadable<SessionInfo> sessionInfo;
     private final ApiProvider apis;
     private final Runnable quotaMonitor;
     private final RemotePortfolio portfolio;
@@ -64,8 +66,8 @@ class PowerTenantImpl implements PowerTenant {
     private final StatefulBoundedBalance balance;
     private final Supplier<Availability> availability;
 
-    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
-            final ZonkyApiTokenSupplier tokenSupplier) {
+    PowerTenantImpl(BiFunction<Consents, Restrictions, SessionInfo> sessionInfo, final ApiProvider apis,
+            final StrategyProvider strategyProvider, final ZonkyApiTokenSupplier tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.quotaMonitor = apis.getRequestCounter()
@@ -73,7 +75,10 @@ class PowerTenantImpl implements PowerTenant {
             .orElse(() -> {
                 // do nothing
             });
-        this.sessionInfo = sessionInfo;
+        this.sessionInfo = Reloadable.with(() -> getSessionInfo(sessionInfo))
+            .reloadAfter(Duration.ofDays(1))
+            .finishWith(s -> LOGGER.debug("Current tenant: {}.", s))
+            .build();
         this.token = tokenSupplier;
         this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getRequestCounter()
             .orElse(null)));
@@ -84,10 +89,10 @@ class PowerTenantImpl implements PowerTenant {
         this.balance = new StatefulBoundedBalance(this);
     }
 
-    @Override
-    public Restrictions getRestrictions() {
-        return restrictions.get()
-            .getOrElseThrow(t -> new IllegalStateException("Failed retrieving Restrictions from Zonky.", t));
+    private SessionInfo getSessionInfo(BiFunction<Consents, Restrictions, SessionInfo> sessionInfoBiFunction) {
+        var consents = call(Zonky::getConsents);
+        var restrictions = call(Zonky::getRestrictions);
+        return sessionInfoBiFunction.apply(consents, restrictions);
     }
 
     @Override
@@ -114,7 +119,8 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public SessionInfo getSessionInfo() {
-        return sessionInfo;
+        return sessionInfo.get()
+            .getOrElseThrow(ex -> new IllegalStateException("Failed loading session info.", ex));
     }
 
     @Override
