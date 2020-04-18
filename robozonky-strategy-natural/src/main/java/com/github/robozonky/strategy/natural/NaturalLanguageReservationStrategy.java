@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
@@ -45,8 +45,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
 
     @Override
     public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
-            final PortfolioOverview portfolio,
-            final Restrictions restrictions) {
+            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }

@@ -33,7 +33,6 @@ import org.assertj.core.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.daemon.Daemon;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
@@ -80,8 +79,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final File keystore = File.createTempFile("robozonky-", ".keystore");
         keystore.delete();
         final KeyStoreHandler ksh = KeyStoreHandler.create(keystore, keyStorePassword.toCharArray());
-        final String username = "someone@somewhere.cz";
-        SecretProvider.keyStoreBased(ksh, username, "something".toCharArray());
+        SecretProvider.keyStoreBased(ksh, USERNAME, "something".toCharArray());
         // run the app
         final String name = UUID.randomUUID()
             .toString();
@@ -92,7 +90,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         assertThat(cfg).isPresent();
         assertThat(cfg.get()
             .apply(null)).isInstanceOf(Daemon.class);
-        assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(mockSessionInfo())).isNotEmpty();
     }
 
     @Test

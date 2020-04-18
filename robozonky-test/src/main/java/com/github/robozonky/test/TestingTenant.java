@@ -16,6 +16,7 @@
 
 package com.github.robozonky.test;
 
+import static com.github.robozonky.test.AbstractRoboZonkyTest.mockPortfolio;
 import static org.mockito.Mockito.*;
 
 import java.time.Instant;
@@ -23,11 +24,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
@@ -42,10 +43,11 @@ public class TestingTenant implements Tenant {
     private final RemotePortfolio portfolio;
     private final Availability availability = spy(new MyAvailability());
 
-    public TestingTenant(final SessionInfo sessionInfo, final Zonky zonky) {
-        this.sessionInfo = sessionInfo;
+    public TestingTenant(final Zonky zonky, final boolean isDryRun) {
+        this.sessionInfo = new SessionInfoImpl(zonky::getConsents, zonky::getRestrictions,
+                AbstractMinimalRoboZonkyTest.USERNAME, "Testing", isDryRun);
         this.zonky = zonky;
-        this.portfolio = AbstractRoboZonkyTest.mockPortfolio();
+        this.portfolio = mockPortfolio();
     }
 
     @Override
@@ -61,11 +63,6 @@ public class TestingTenant implements Tenant {
     @Override
     public RemotePortfolio getPortfolio() {
         return portfolio;
-    }
-
-    @Override
-    public Restrictions getRestrictions() {
-        return zonky.getRestrictions();
     }
 
     @Override

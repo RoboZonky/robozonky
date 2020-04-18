@@ -77,7 +77,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
     private static final Investment INVESTMENT2 = MockInvestmentBuilder.fresh(LOAN2, 200)
         .setInvestmentDate(OffsetDateTime.now())
         .build();
-    private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+    private static SessionInfo SESSION = mockSessionInfo();
 
     public static URL getSomeUrl() {
         try {

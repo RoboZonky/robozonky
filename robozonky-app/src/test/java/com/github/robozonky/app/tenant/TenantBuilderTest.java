@@ -46,15 +46,18 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
             .withApi(a)
             .withSecrets(s)
             .build();
-        assertThat(t.getRestrictions()).isNotNull();
+        assertThat(t.getSessionInfo()
+            .canAccessSmp()).isTrue();
         verify(o).refresh(eq(token));
         verify(z).getRestrictions();
+        verify(z).getConsents();
     }
 
     @Test
     void filledSessionInfo() {
         final SecretProvider s = mockSecretProvider();
         final Tenant t = new TenantBuilder()
+            .withApi(mockApiProvider(s))
             .withSecrets(s)
             .named("name")
             .dryRun()
@@ -70,11 +73,21 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
         });
     }
 
+    private ApiProvider mockApiProvider(SecretProvider secretProvider) {
+        final ZonkyApiToken token = secretProvider.getToken()
+            .get();
+        final OAuth o = mock(OAuth.class);
+        when(o.refresh(any())).thenReturn(token);
+        final Zonky z = harmlessZonky();
+        final ApiProvider a = mockApiProvider(o, z);
+        return a;
+    }
+
     @Test
     void emptySessionInfo() {
-        final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
-        final Tenant t = new TenantBuilder()
-            .withSecrets(s)
+        final SecretProvider s = mockSecretProvider();
+        final Tenant t = new TenantBuilder().withSecrets(s)
+            .withApi(mockApiProvider(s))
             .build();
         final SessionInfo i = t.getSessionInfo();
         assertSoftly(softly -> {

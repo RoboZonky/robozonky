@@ -17,18 +17,27 @@
 package com.github.robozonky.internal.state;
 
 import static org.assertj.core.api.Assertions.*;
-
-import java.util.UUID;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.robozonky.api.SessionInfo;
 
+@ExtendWith(MockitoExtension.class)
 class TenantStateTest {
 
-    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+    @Mock(lenient = true)
+    private SessionInfo sessionInfo;
+
+    @BeforeEach
+    void mockSession() {
+        when(sessionInfo.getUsername()).thenReturn("someone@somewhere.cz");
+    }
 
     @BeforeEach
     @AfterEach
@@ -38,18 +47,17 @@ class TenantStateTest {
 
     @Test
     void correctInstanceManagement() {
-        final TenantState ts = TenantState.of(SESSION);
-        assertThat(TenantState.getKnownTenants()).containsOnly(SESSION);
-        final TenantState ts2 = TenantState.of(SESSION);
+        final TenantState ts = TenantState.of(sessionInfo);
+        assertThat(TenantState.getKnownTenants()).containsOnly(sessionInfo);
+        final TenantState ts2 = TenantState.of(sessionInfo);
         assertThat(ts2).isSameAs(ts);
-        final TenantState ts3 = TenantState.of(new SessionInfo(UUID.randomUUID()
-            .toString()));
+        final TenantState ts3 = TenantState.of(mock(SessionInfo.class));
         assertThat(ts3).isNotSameAs(ts);
     }
 
     @Test
     void destroyWorks() {
-        final TenantState ts = TenantState.of(SESSION);
+        final TenantState ts = TenantState.of(sessionInfo);
         final InstanceState<TenantStateTest> is = ts.in(TenantStateTest.class);
         is.update(m -> m.put("a", "b"));
         TenantState.destroyAll();

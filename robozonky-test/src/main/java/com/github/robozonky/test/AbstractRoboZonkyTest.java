@@ -34,7 +34,7 @@ import org.mockito.stubbing.Answer;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -55,10 +55,6 @@ import com.github.robozonky.internal.tenant.Tenant;
  */
 public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest {
 
-    private static final String USERNAME = "someone@robozonky.cz";
-    protected static final SessionInfo SESSION = new SessionInfo(USERNAME, "Testing", false);
-    protected static final SessionInfo SESSION_DRY = new SessionInfo(USERNAME, "Testing", true);
-
     protected static SecretProvider mockSecretProvider(final ZonkyApiToken token) {
         final SecretProvider s = SecretProvider.inMemory(USERNAME, "pwd".toCharArray());
         s.setToken(token);
@@ -78,6 +74,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(zonky.invest(any())).thenReturn(InvestmentResult.success());
         when(zonky.purchase(any())).thenReturn(PurchaseResult.success());
         when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
+        when(zonky.getConsents()).thenReturn(new Consents());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
         when(zonky.getInvestments(any())).thenAnswer(i -> Stream.empty());
         return zonky;
@@ -101,7 +98,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     protected static Tenant mockTenant(final Zonky zonky, final boolean isDryRun) {
-        final Tenant auth = new TestingTenant(isDryRun ? SESSION_DRY : SESSION, zonky);
+        final Tenant auth = new TestingTenant(zonky, isDryRun);
         return spy(auth);
     }
 

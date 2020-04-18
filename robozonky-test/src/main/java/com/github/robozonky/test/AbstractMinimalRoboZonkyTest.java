@@ -24,14 +24,26 @@ import java.util.Random;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
+import org.mockito.Mockito;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.test.RandomUtil;
 
 public abstract class AbstractMinimalRoboZonkyTest {
 
     protected final Logger logger = LogManager.getLogger(getClass());
+    protected static final String USERNAME = "someone@robozonky.cz";
+
+    protected static SessionInfo mockSessionInfo() {
+        return mockSessionInfo(false);
+    }
+
+    protected static SessionInfo mockSessionInfo(boolean isDryRun) {
+        return Mockito.spy(new SessionInfoImpl(USERNAME, "Testing", isDryRun));
+    }
 
     protected void setClock(final Clock clock) {
         DateUtil.setSystemClock(clock);

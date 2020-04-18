@@ -18,23 +18,36 @@ package com.github.robozonky.internal.state;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.robozonky.api.SessionInfo;
 
+@ExtendWith(MockitoExtension.class)
 class InstanceStateImplTest {
 
-    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+    @Mock
+    private SessionInfo sessionInfo;
 
-    private final InstanceStateImpl<InstanceStateImplTest> s = (InstanceStateImpl<InstanceStateImplTest>) TenantState
-        .of(SESSION)
-        .in(InstanceStateImplTest.class);
+    private InstanceStateImpl<InstanceStateImplTest> s;
+
+    @BeforeEach
+    void mockSession() {
+        when(sessionInfo.getUsername()).thenReturn("someone@somewhere.cz");
+        s = (InstanceStateImpl<InstanceStateImplTest>) TenantState
+            .of(sessionInfo)
+            .in(InstanceStateImplTest.class);
+    }
 
     @AfterEach
     void deleteState() {

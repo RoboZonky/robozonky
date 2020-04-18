@@ -35,7 +35,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -55,7 +54,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
-    private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
+    private static final SecretProvider SECRETS = SecretProvider.inMemory(USERNAME);
 
     private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
@@ -65,12 +64,6 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void delegatesAvailability() {
         final Availability result = tenant.getAvailability();
         assertThat(transactional.getAvailability()).isSameAs(result);
-    }
-
-    @Test
-    void delegatesRestrictions() {
-        final Restrictions result = tenant.getRestrictions();
-        assertThat(transactional.getRestrictions()).isSameAs(result);
     }
 
     @Test
@@ -200,7 +193,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
+        try (var tenant = transactional(new TenantBuilder()
             .withApi(api)
             .withSecrets(SECRETS)
             .build())) {

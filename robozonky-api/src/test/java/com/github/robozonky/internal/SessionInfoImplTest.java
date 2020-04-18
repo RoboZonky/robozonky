@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api;
+package com.github.robozonky.internal;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -22,18 +22,23 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-class SessionInfoTest {
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Consents;
+import com.github.robozonky.api.remote.entities.Restrictions;
+
+class SessionInfoImplTest {
 
     @Test
     void constructorDryRun() {
-        final SessionInfo s = new SessionInfo("someone@somewhere.cz");
+        final SessionInfo s = new SessionInfoImpl("someone@somewhere.cz");
         assertSoftly(softly -> {
             softly.assertThat(s.getUsername())
                 .isEqualTo("someone@somewhere.cz");
             softly.assertThat(s.isDryRun())
                 .isTrue();
             softly.assertThat(s.getName())
-                .isEqualTo("RoboZonky");
+                .isEqualTo("RoboZonky 'Test'");
         });
     }
 
@@ -41,7 +46,7 @@ class SessionInfoTest {
     void constructor() {
         var id = UUID.randomUUID()
             .toString();
-        var sessionInfo = new SessionInfo("someone@somewhere.cz", id, false);
+        var sessionInfo = new SessionInfoImpl("someone@somewhere.cz", id, false);
         assertSoftly(softly -> {
             softly.assertThat(sessionInfo.getUsername())
                 .isEqualTo("someone@somewhere.cz");
@@ -49,12 +54,48 @@ class SessionInfoTest {
                 .isFalse();
             softly.assertThat(sessionInfo.getName())
                 .isEqualTo("RoboZonky '" + id + "'");
+            softly.assertThat(sessionInfo.canInvest())
+                .isTrue();
+            softly.assertThat(sessionInfo.canAccessSmp())
+                .isTrue();
+            softly.assertThat(sessionInfo.getMinimumInvestmentAmount())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getInvestmentStep())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getMaximumInvestmentAmount())
+                .isEqualTo(Money.from(5_000));
+        });
+    }
+
+    @Test
+    void constructorRestrictive() {
+        var id = UUID.randomUUID()
+            .toString();
+        var sessionInfo = new SessionInfoImpl(Consents::new, () -> new Restrictions(false), "someone@somewhere.cz", id,
+                false);
+        assertSoftly(softly -> {
+            softly.assertThat(sessionInfo.getUsername())
+                .isEqualTo("someone@somewhere.cz");
+            softly.assertThat(sessionInfo.isDryRun())
+                .isFalse();
+            softly.assertThat(sessionInfo.getName())
+                .isEqualTo("RoboZonky '" + id + "'");
+            softly.assertThat(sessionInfo.canInvest())
+                .isFalse();
+            softly.assertThat(sessionInfo.canAccessSmp())
+                .isFalse();
+            softly.assertThat(sessionInfo.getMinimumInvestmentAmount())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getInvestmentStep())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getMaximumInvestmentAmount())
+                .isEqualTo(Money.from(5_000));
         });
     }
 
     @Test
     void constructorNamed() {
-        final SessionInfo s = new SessionInfo("someone@somewhere.cz", "Test");
+        final SessionInfo s = new SessionInfoImpl("someone@somewhere.cz");
         assertSoftly(softly -> {
             softly.assertThat(s.getUsername())
                 .isEqualTo("someone@somewhere.cz");
@@ -67,10 +108,10 @@ class SessionInfoTest {
 
     @Test
     void equals() {
-        final SessionInfo s = new SessionInfo("someone@somewhere.cz");
-        final SessionInfo s2 = new SessionInfo(UUID.randomUUID()
+        final SessionInfo s = new SessionInfoImpl("someone@somewhere.cz");
+        final SessionInfo s2 = new SessionInfoImpl(UUID.randomUUID()
             .toString());
-        final SessionInfo s3 = new SessionInfo("someone@somewhere.cz");
+        final SessionInfo s3 = new SessionInfoImpl("someone@somewhere.cz");
         assertSoftly(softly -> {
             softly.assertThat(s)
                 .isNotEqualTo(null);

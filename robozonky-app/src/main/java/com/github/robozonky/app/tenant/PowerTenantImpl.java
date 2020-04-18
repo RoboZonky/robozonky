@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -30,14 +29,13 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.Events;
-import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
@@ -56,7 +54,6 @@ class PowerTenantImpl implements PowerTenant {
     private final ApiProvider apis;
     private final Runnable quotaMonitor;
     private final RemotePortfolio portfolio;
-    private final Reloadable<Restrictions> restrictions;
     private final ZonkyApiTokenSupplier token;
     private final StrategyProvider strategyProvider;
     private final Supplier<Cache<Loan>> loanCache = Memoizer.memoize(() -> Cache.forLoan(this));
@@ -64,8 +61,8 @@ class PowerTenantImpl implements PowerTenant {
     private final StatefulBoundedBalance balance;
     private final Supplier<Availability> availability;
 
-    PowerTenantImpl(final SessionInfo sessionInfo, final ApiProvider apis, final StrategyProvider strategyProvider,
-            final ZonkyApiTokenSupplier tokenSupplier) {
+    PowerTenantImpl(final String username, final String sessionName, final boolean isDryRun, final ApiProvider apis,
+            final StrategyProvider strategyProvider, final ZonkyApiTokenSupplier tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
         this.quotaMonitor = apis.getRequestCounter()
@@ -73,21 +70,13 @@ class PowerTenantImpl implements PowerTenant {
             .orElse(() -> {
                 // do nothing
             });
-        this.sessionInfo = sessionInfo;
+        this.sessionInfo = new SessionInfoImpl(() -> call(Zonky::getConsents), () -> call(Zonky::getRestrictions),
+                username, sessionName, isDryRun);
         this.token = tokenSupplier;
         this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getRequestCounter()
             .orElse(null)));
         this.portfolio = new RemotePortfolioImpl(this);
-        this.restrictions = Reloadable.with(() -> this.call(Zonky::getRestrictions))
-            .reloadAfter(Duration.ofHours(1))
-            .build();
         this.balance = new StatefulBoundedBalance(this);
-    }
-
-    @Override
-    public Restrictions getRestrictions() {
-        return restrictions.get()
-            .getOrElseThrow(t -> new IllegalStateException("Failed retrieving Restrictions from Zonky.", t));
     }
 
     @Override

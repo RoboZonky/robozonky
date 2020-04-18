@@ -22,8 +22,8 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -68,8 +68,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     @Override
     public Stream<RecommendedParticipation> recommend(final Collection<ParticipationDescriptor> available,
-            final PortfolioOverview portfolio,
-            final Restrictions restrictions) {
+            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }

@@ -28,7 +28,7 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class CounterTest extends AbstractRoboZonkyTest {
 
-    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+    private static final SessionInfo SESSION = mockSessionInfo();
 
     @Test
     void testTiming() throws InterruptedException {

@@ -117,6 +117,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final RemotePortfolio rp = auth.getPortfolio();
         Rating rating = l.getRating();
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
+        verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }
 
     @Test
@@ -150,5 +151,6 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();
         verify(rp, never()).simulateCharge(eq(loanId), eq(rating), any());
+        verify(auth).setKnownBalanceUpperBound(eq(Money.from(199)));
     }
 }

@@ -31,11 +31,12 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
-class EmailHandlerTest {
+class EmailHandlerTest extends AbstractMinimalRoboZonkyTest {
 
     private static final Logger LOGGER = LogManager.getLogger(EmailHandlerTest.class);
     private static final GreenMail EMAIL = new GreenMail(getServerSetup());
@@ -57,7 +58,7 @@ class EmailHandlerTest {
         h.offer(new Submission() {
             @Override
             public SessionInfo getSessionInfo() {
-                return new SessionInfo("someone@somewhere.cz", "Test");
+                return mockSessionInfo();
             }
 
             @Override
@@ -92,7 +93,7 @@ class EmailHandlerTest {
             .isEqualTo(subject);
         assertThat(m.getFrom()[0].toString())
             .contains("user@seznam.cz")
-            .contains("RoboZonky 'Test'");
+            .contains("RoboZonky 'Testing'");
     }
 
     @BeforeEach

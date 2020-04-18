@@ -31,6 +31,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -54,6 +55,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
+    private static final SessionInfo SESSION = mockSessionInfo();
     private static final SecretProvider SECRETS = mockSecretProvider();
     private static final ZonkyApiToken TOKEN = SECRETS.getToken()
         .get();
@@ -84,7 +86,8 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
         when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
         when(s.getForReservations()).thenReturn(Optional.of(mock(ReservationStrategy.class)));
-        final PowerTenantImpl t = new PowerTenantImpl(SESSION_DRY, new ApiProvider(), s, null);
+        final PowerTenantImpl t = new PowerTenantImpl(SESSION.getUsername(), SESSION.getName(), true, new ApiProvider(),
+                s, null);
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);
@@ -120,8 +123,8 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
             assertThat(tenant.getLoan(l.getId())).isSameAs(l);
             assertThat(tenant.getSellInfo(1)).isSameAs(si);
             assertThat(tenant.getPortfolio()).isNotNull();
+            assertThat(tenant.getSessionInfo()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
-            assertThatThrownBy(tenant::getRestrictions).isInstanceOf(IllegalStateException.class);
         }
     }
 

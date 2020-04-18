@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
 
@@ -57,9 +56,8 @@ public final class TenantBuilder {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
         }
-        final ApiProvider apis = api == null ? new ApiProvider() : api;
-        final ZonkyApiTokenSupplier tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets);
-        final SessionInfo sessionInfo = new SessionInfo(secrets.getUsername(), name, dryRun);
-        return new PowerTenantImpl(sessionInfo, apis, strategyProvider, tokenSupplier);
+        var apiProvider = api == null ? new ApiProvider() : api;
+        var tokenSupplier = new ZonkyApiTokenSupplier(apiProvider, secrets);
+        return new PowerTenantImpl(secrets.getUsername(), name, dryRun, apiProvider, strategyProvider, tokenSupplier);
     }
 }

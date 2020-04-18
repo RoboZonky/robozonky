@@ -50,7 +50,7 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
     }
 
     protected static PowerTenant mockTenant(final Zonky zonky, final boolean isDryRun) {
-        return Mockito.spy(new TestingPowerTenant(isDryRun ? SESSION_DRY : SESSION, zonky));
+        return Mockito.spy(new TestingPowerTenant(isDryRun, zonky));
     }
 
     protected List<Event> getEventsFired() {

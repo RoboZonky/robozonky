@@ -36,8 +36,8 @@ class PurchasingOperationDescriptor
 
     @Override
     public boolean isEnabled(final Tenant tenant) {
-        return !tenant.getRestrictions()
-            .isCannotAccessSmp();
+        return tenant.getSessionInfo()
+            .canAccessSmp();
     }
 
     @Override

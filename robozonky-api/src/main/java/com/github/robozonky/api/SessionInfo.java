@@ -16,86 +16,38 @@
 
 package com.github.robozonky.api;
 
-import java.util.Objects;
-import java.util.Optional;
-
 /**
- * Uniquely identifies the Zonky user that the application is working on behalf of.
+ * Uniquely identifies the Zonky user that the application is working on behalf of, and carries some Zonky-imposed
+ * restrictions that need to be enforced on the session.
  */
-public final class SessionInfo {
-
-    private final String userName, name;
-    private final boolean isDryRun;
-
-    public SessionInfo(final String userName) {
-        this(userName, null);
-    }
-
-    public SessionInfo(final String userName, final String name) {
-        this(userName, name, true);
-    }
-
-    public SessionInfo(final String userName, final String name, final boolean isDryRun) {
-        this.name = name;
-        this.userName = userName;
-        this.isDryRun = isDryRun;
-    }
+public interface SessionInfo {
 
     /**
      * Whether or not the robot is doing a dry run. Dry run means that no portfolio-altering operations will be
      * performed, even though the robot would still continue doing everything else.
-     * 
+     *
      * @return True if the robot is doing a dry run.
      */
-    public boolean isDryRun() {
-        return isDryRun;
-    }
+    boolean isDryRun();
 
     /**
      * @return Zonky username of the current user.
      */
-    public String getUsername() {
-        return userName;
-    }
+    String getUsername();
 
     /**
      * @return Name of the robot session currently running.
      */
-    public String getName() {
-        return Optional.ofNullable(name)
-            .map(n -> "RoboZonky '" + n + '\'')
-            .orElse("RoboZonky");
-    }
+    String getName();
 
-    @Override
-    public String toString() {
-        return "SessionInfo{" +
-                "isDryRun=" + isDryRun +
-                ", name='" + name + '\'' +
-                ", userName='" + userName + '\'' +
-                '}';
-    }
+    boolean canInvest();
 
-    /**
-     * Within the context of a single app run, sessions with the same username represent the same session.
-     * 
-     * @param o
-     * @return
-     */
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !Objects.equals(getClass(), o.getClass())) {
-            return false;
-        }
-        final SessionInfo that = (SessionInfo) o;
-        return Objects.equals(userName, that.userName);
-    }
+    boolean canAccessSmp();
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userName);
-    }
+    Money getMinimumInvestmentAmount();
+
+    Money getInvestmentStep();
+
+    Money getMaximumInvestmentAmount();
+
 }
