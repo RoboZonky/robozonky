@@ -119,7 +119,7 @@ final class Selling implements TenantPayload {
                 .ifPresentOrElse(s -> sell((PowerTenant) tenant, s),
                         () -> LOGGER.debug("Not selling anything as selling strategy is missing."));
         } else {
-            LOGGER.debug("Not selling anything as access to secondary marketplace is disabled by Zonky.");
+            LOGGER.debug("Access to marketplace disabled by Zonky.");
         }
     }
 }

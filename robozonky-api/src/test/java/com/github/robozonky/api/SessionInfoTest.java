@@ -22,6 +22,9 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.remote.entities.Consents;
+import com.github.robozonky.api.remote.entities.Restrictions;
+
 class SessionInfoTest {
 
     @Test
@@ -49,6 +52,41 @@ class SessionInfoTest {
                 .isFalse();
             softly.assertThat(sessionInfo.getName())
                 .isEqualTo("RoboZonky '" + id + "'");
+            softly.assertThat(sessionInfo.canInvest())
+                .isTrue();
+            softly.assertThat(sessionInfo.canAccessSmp())
+                .isTrue();
+            softly.assertThat(sessionInfo.getMinimumInvestmentAmount())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getInvestmentStep())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getMaximumInvestmentAmount())
+                .isEqualTo(Money.from(5_000));
+        });
+    }
+
+    @Test
+    void constructorRestrictive() {
+        var id = UUID.randomUUID()
+            .toString();
+        var sessionInfo = new SessionInfo(new Consents(), new Restrictions(false), "someone@somewhere.cz", id, false);
+        assertSoftly(softly -> {
+            softly.assertThat(sessionInfo.getUsername())
+                .isEqualTo("someone@somewhere.cz");
+            softly.assertThat(sessionInfo.isDryRun())
+                .isFalse();
+            softly.assertThat(sessionInfo.getName())
+                .isEqualTo("RoboZonky '" + id + "'");
+            softly.assertThat(sessionInfo.canInvest())
+                .isFalse();
+            softly.assertThat(sessionInfo.canAccessSmp())
+                .isFalse();
+            softly.assertThat(sessionInfo.getMinimumInvestmentAmount())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getInvestmentStep())
+                .isEqualTo(Money.from(200));
+            softly.assertThat(sessionInfo.getMaximumInvestmentAmount())
+                .isEqualTo(Money.from(5_000));
         });
     }
 

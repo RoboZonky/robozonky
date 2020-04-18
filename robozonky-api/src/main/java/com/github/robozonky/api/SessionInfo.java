@@ -26,7 +26,8 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.internal.test.DateUtil;
 
 /**
- * Uniquely identifies the Zonky user that the application is working on behalf of.
+ * Uniquely identifies the Zonky user that the application is working on behalf of, and carries some Zonky-imposed
+ * restrictions that need to be enforced on the session.
  */
 public final class SessionInfo {
 
