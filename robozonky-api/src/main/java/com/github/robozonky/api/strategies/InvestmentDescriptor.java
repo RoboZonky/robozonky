@@ -75,7 +75,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
 
     public Optional<SellInfo> sellInfo() {
         return Optional.ofNullable(sellInfo)
-                .map(Supplier::get);
+            .map(Supplier::get);
     }
 
     private Money getRemainingPrincipal() {
