@@ -38,7 +38,7 @@ class SessionInfoImplTest {
             softly.assertThat(s.isDryRun())
                 .isTrue();
             softly.assertThat(s.getName())
-                .isEqualTo("RoboZonky");
+                .isEqualTo("RoboZonky 'Test'");
         });
     }
 

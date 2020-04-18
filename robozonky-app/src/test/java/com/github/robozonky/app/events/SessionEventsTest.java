@@ -113,7 +113,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         assertThat(getEventsRequested()).isNotEmpty();
         assertThat(getEventsReady()).isNotEmpty();
         assertThat(getEventsFired()).isNotEmpty();
-        verify(l).handle(s, mockSessionInfo());
+        verify(l).handle(s, tenant.getSessionInfo());
     }
 
     @SuppressWarnings("unchecked")

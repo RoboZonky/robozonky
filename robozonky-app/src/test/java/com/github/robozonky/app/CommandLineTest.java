@@ -79,8 +79,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final File keystore = File.createTempFile("robozonky-", ".keystore");
         keystore.delete();
         final KeyStoreHandler ksh = KeyStoreHandler.create(keystore, keyStorePassword.toCharArray());
-        final String username = "someone@somewhere.cz";
-        SecretProvider.keyStoreBased(ksh, username, "something".toCharArray());
+        SecretProvider.keyStoreBased(ksh, USERNAME, "something".toCharArray());
         // run the app
         final String name = UUID.randomUUID()
             .toString();

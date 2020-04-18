@@ -12,6 +12,131 @@
     },
     "ignore": [
       {
+        "code": "java.method.removed",
+        "old": "method void com.github.robozonky.api.SessionInfo::<init>(java.lang.String)",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void com.github.robozonky.api.SessionInfo::<init>(java.lang.String, java.lang.String)",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void com.github.robozonky.api.SessionInfo::<init>(java.lang.String, java.lang.String, boolean)",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method boolean com.github.robozonky.api.SessionInfo::canAccessSmp()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method boolean com.github.robozonky.api.SessionInfo::canInvest()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.Object java.lang.Object::clone() throws java.lang.CloneNotSupportedException @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method boolean com.github.robozonky.api.SessionInfo::equals(java.lang.Object)",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void java.lang.Object::finalize() throws java.lang.Throwable @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.Class<?> java.lang.Object::getClass() @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.SessionInfo::getInvestmentStep()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.SessionInfo::getMaximumInvestmentAmount()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.Money com.github.robozonky.api.SessionInfo::getMinimumInvestmentAmount()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.nowAbstract",
+        "old": "method java.lang.String com.github.robozonky.api.SessionInfo::getName()",
+        "new": "method java.lang.String com.github.robozonky.api.SessionInfo::getName()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.nowAbstract",
+        "old": "method java.lang.String com.github.robozonky.api.SessionInfo::getUsername()",
+        "new": "method java.lang.String com.github.robozonky.api.SessionInfo::getUsername()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method int com.github.robozonky.api.SessionInfo::hashCode()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.nowAbstract",
+        "old": "method boolean com.github.robozonky.api.SessionInfo::isDryRun()",
+        "new": "method boolean com.github.robozonky.api.SessionInfo::isDryRun()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void java.lang.Object::notify() @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void java.lang.Object::notifyAll() @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method java.lang.String com.github.robozonky.api.SessionInfo::toString()",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void java.lang.Object::wait() throws java.lang.InterruptedException @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void java.lang.Object::wait(long) throws java.lang.InterruptedException @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method void java.lang.Object::wait(long, int) throws java.lang.InterruptedException @ com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.class.kindChanged",
+        "old": "class com.github.robozonky.api.SessionInfo",
+        "new": "interface com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
+        "code": "java.class.nowAbstract",
+        "old": "class com.github.robozonky.api.SessionInfo",
+        "new": "interface com.github.robozonky.api.SessionInfo",
+        "justification": "Forced switch to Zonky's new Consents endpoint."
+      },
+      {
         "code": "java.method.addedToInterface",
         "new": "method com.github.robozonky.api.remote.entities.Consents com.github.robozonky.api.remote.ControlApi::consents()",
         "justification": "Forced switch to Zonky's new Consents endpoint."

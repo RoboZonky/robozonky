@@ -93,7 +93,7 @@ class EmailHandlerTest extends AbstractMinimalRoboZonkyTest {
             .isEqualTo(subject);
         assertThat(m.getFrom()[0].toString())
             .contains("user@seznam.cz")
-            .contains("RoboZonky 'Test'");
+            .contains("RoboZonky 'Testing'");
     }
 
     @BeforeEach
