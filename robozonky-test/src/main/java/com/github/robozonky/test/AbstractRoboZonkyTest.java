@@ -58,7 +58,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     private static final String USERNAME = "someone@robozonky.cz";
     protected static final SessionInfo SESSION = new SessionInfo(USERNAME, "Testing", false);
-    protected static final SessionInfo SESSION_DRY = new SessionInfo(USERNAME, "Testing", true);
+    protected static final SessionInfo SESSION_DRY = new SessionInfo(USERNAME, SESSION.getName(), !SESSION.isDryRun());
 
     protected static SecretProvider mockSecretProvider(final ZonkyApiToken token) {
         final SecretProvider s = SecretProvider.inMemory(USERNAME, "pwd".toCharArray());
@@ -103,7 +103,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     protected static Tenant mockTenant(final Zonky zonky, final boolean isDryRun) {
-        final Tenant auth = new TestingTenant(isDryRun ? SESSION_DRY : SESSION, zonky);
+        final Tenant auth = new TestingTenant(isDryRun, zonky);
         return spy(auth);
     }
 

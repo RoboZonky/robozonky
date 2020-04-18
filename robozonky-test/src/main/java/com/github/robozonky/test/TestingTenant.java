@@ -16,6 +16,8 @@
 
 package com.github.robozonky.test;
 
+import static com.github.robozonky.test.AbstractRoboZonkyTest.SESSION;
+import static com.github.robozonky.test.AbstractRoboZonkyTest.mockPortfolio;
 import static org.mockito.Mockito.*;
 
 import java.time.Instant;
@@ -41,10 +43,11 @@ public class TestingTenant implements Tenant {
     private final RemotePortfolio portfolio;
     private final Availability availability = spy(new MyAvailability());
 
-    public TestingTenant(final SessionInfo sessionInfo, final Zonky zonky) {
-        this.sessionInfo = sessionInfo;
+    public TestingTenant(final boolean isDryRun, final Zonky zonky) {
+        this.sessionInfo = new SessionInfo(zonky::getConsents, zonky::getRestrictions, SESSION.getUsername(),
+                SESSION.getName(), isDryRun);
         this.zonky = zonky;
-        this.portfolio = AbstractRoboZonkyTest.mockPortfolio();
+        this.portfolio = mockPortfolio();
     }
 
     @Override

@@ -121,8 +121,8 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
             assertThat(tenant.getLoan(l.getId())).isSameAs(l);
             assertThat(tenant.getSellInfo(1)).isSameAs(si);
             assertThat(tenant.getPortfolio()).isNotNull();
+            assertThat(tenant.getSessionInfo()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();
-            assertThatThrownBy(tenant::getSessionInfo).isInstanceOf(IllegalStateException.class);
         }
     }
 
