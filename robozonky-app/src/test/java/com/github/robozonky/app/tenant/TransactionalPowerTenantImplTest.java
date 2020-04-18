@@ -193,7 +193,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
+        try (var tenant = transactional(new TenantBuilder()
             .withApi(api)
             .withSecrets(SECRETS)
             .build())) {

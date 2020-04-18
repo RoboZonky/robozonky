@@ -16,11 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.util.function.BiFunction;
-
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Consents;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.secrets.SecretProvider;
 
@@ -63,8 +58,6 @@ public final class TenantBuilder {
         }
         var apiProvider = api == null ? new ApiProvider() : api;
         var tokenSupplier = new ZonkyApiTokenSupplier(apiProvider, secrets);
-        BiFunction<Consents, Restrictions, SessionInfo> sessionInfo = (consents,
-                restrictions) -> new SessionInfo(consents, restrictions, secrets.getUsername(), name, dryRun);
-        return new PowerTenantImpl(sessionInfo, apiProvider, strategyProvider, tokenSupplier);
+        return new PowerTenantImpl(secrets.getUsername(), name, dryRun, apiProvider, strategyProvider, tokenSupplier);
     }
 }

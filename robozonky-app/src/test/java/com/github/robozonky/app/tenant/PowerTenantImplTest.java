@@ -84,7 +84,8 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(s.getToSell()).thenReturn(Optional.of(mock(SellStrategy.class)));
         when(s.getToPurchase()).thenReturn(Optional.of(mock(PurchaseStrategy.class)));
         when(s.getForReservations()).thenReturn(Optional.of(mock(ReservationStrategy.class)));
-        final PowerTenantImpl t = new PowerTenantImpl((c, r) -> SESSION_DRY, new ApiProvider(), s, null);
+        final PowerTenantImpl t = new PowerTenantImpl(SESSION.getUsername(), SESSION.getName(), true, new ApiProvider(),
+                s, null);
         assertThat(t.getInvestmentStrategy()).containsInstanceOf(InvestmentStrategy.class);
         assertThat(t.getSellStrategy()).containsInstanceOf(SellStrategy.class);
         assertThat(t.getPurchaseStrategy()).containsInstanceOf(PurchaseStrategy.class);

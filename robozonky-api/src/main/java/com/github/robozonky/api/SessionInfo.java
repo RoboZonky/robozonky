@@ -16,13 +16,15 @@
 
 package com.github.robozonky.api;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.test.DateUtil;
 
 /**
@@ -33,11 +35,8 @@ public final class SessionInfo {
 
     private final String userName, name;
     private final boolean isDryRun;
-    private final boolean canInvest;
-    private final BooleanSupplier canAccessSmp;
-    private final Money minimumInvestmentAmount;
-    private final Money investmentStep;
-    private final Money maximumInvestmentAmount;
+    private final Reloadable<Consents> consents;
+    private final Reloadable<Restrictions> restrictions;
 
     public SessionInfo(final String userName) {
         this(userName, null);
@@ -48,24 +47,20 @@ public final class SessionInfo {
     }
 
     public SessionInfo(final String userName, final String name, final boolean isDryRun) {
-        this(new Consents(), new Restrictions(true), userName, name, isDryRun);
+        this(Consents::new, () -> new Restrictions(true), userName, name, isDryRun);
     }
 
-    public SessionInfo(final Consents consents, final Restrictions restrictions, final String userName,
-            final String name, final boolean isDryRun) {
+    public SessionInfo(final Supplier<Consents> consents, final Supplier<Restrictions> restrictions,
+            final String userName, final String name, final boolean isDryRun) {
         this.name = name;
         this.userName = userName;
         this.isDryRun = isDryRun;
-        canInvest = !restrictions.isCannotInvest();
-        var originalCanAccessSmp = !restrictions.isCannotAccessSmp();
-        var maybeOriginalSmpConsent = consents.getSmpConsent();
-        canAccessSmp = () -> originalCanAccessSmp && maybeOriginalSmpConsent
-            .map(s -> s.getAgreedOn()
-                .isBefore(DateUtil.offsetNow()))
-            .orElse(false);
-        minimumInvestmentAmount = restrictions.getMinimumInvestmentAmount();
-        investmentStep = restrictions.getInvestmentStep();
-        maximumInvestmentAmount = restrictions.getMaximumInvestmentAmount();
+        this.consents = Reloadable.with(consents)
+            .reloadAfter(Duration.ofHours(1))
+            .build();
+        this.restrictions = Reloadable.with(restrictions)
+            .reloadAfter(Duration.ofHours(1))
+            .build();
     }
 
     /**
@@ -94,24 +89,38 @@ public final class SessionInfo {
             .orElse("RoboZonky");
     }
 
+    private Consents getConsents() {
+        return consents.get()
+            .getOrElseThrow(ex -> new IllegalStateException("Failed retrieving consents.", ex));
+    }
+
+    private Restrictions getRestrictions() {
+        return restrictions.get()
+            .getOrElseThrow(ex -> new IllegalStateException("Failed retrieving restrictions.", ex));
+    }
+
     public boolean canInvest() {
-        return canInvest;
+        return !getRestrictions().isCannotInvest();
     }
 
     public boolean canAccessSmp() {
-        return canAccessSmp.getAsBoolean();
+        var originalCanAccessSmp = !getRestrictions().isCannotAccessSmp();
+        return originalCanAccessSmp && getConsents().getSmpConsent()
+            .map(s -> s.getAgreedOn()
+                .isBefore(DateUtil.offsetNow()))
+            .orElse(false);
     }
 
     public Money getMinimumInvestmentAmount() {
-        return minimumInvestmentAmount;
+        return getRestrictions().getMinimumInvestmentAmount();
     }
 
     public Money getInvestmentStep() {
-        return investmentStep;
+        return getRestrictions().getInvestmentStep();
     }
 
     public Money getMaximumInvestmentAmount() {
-        return maximumInvestmentAmount;
+        return getRestrictions().getMaximumInvestmentAmount();
     }
 
     @Override
@@ -120,11 +129,6 @@ public final class SessionInfo {
             .add("name='" + name + "'")
             .add("userName='" + userName + "'")
             .add("isDryRun=" + isDryRun)
-            .add("canInvest=" + canInvest)
-            .add("canAccessSmp=" + canAccessSmp)
-            .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
-            .add("investmentStep=" + investmentStep)
-            .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
             .toString();
     }
 
