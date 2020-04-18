@@ -35,7 +35,8 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     @Override
     public boolean isEnabled(final Tenant tenant) {
-        return tenant.getSessionInfo().canInvest();
+        return tenant.getSessionInfo()
+            .canInvest();
     }
 
     @Override
@@ -61,7 +62,8 @@ class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor
 
     @Override
     public Money getMinimumBalance(final PowerTenant tenant) {
-        return tenant.getSessionInfo().getMinimumInvestmentAmount();
+        return tenant.getSessionInfo()
+            .getMinimumInvestmentAmount();
     }
 
     @Override

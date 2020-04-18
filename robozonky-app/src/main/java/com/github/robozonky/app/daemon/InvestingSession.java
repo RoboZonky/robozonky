@@ -77,7 +77,8 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
                 tenant.getKnownBalanceUpperBound());
         boolean invested;
         do {
-            PortfolioOverview portfolioOverview = tenant.getPortfolio().getOverview();
+            PortfolioOverview portfolioOverview = tenant.getPortfolio()
+                .getOverview();
             invested = strategy.recommend(getAvailable(), portfolioOverview, tenant.getSessionInfo())
                 .peek(r -> tenant.fire(loanRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money

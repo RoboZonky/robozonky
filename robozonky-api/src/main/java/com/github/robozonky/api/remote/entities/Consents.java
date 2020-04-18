@@ -27,7 +27,7 @@ import com.github.robozonky.internal.Defaults;
 public class Consents {
 
     private static final OffsetDateTime EPOCH = Instant.EPOCH.atZone(Defaults.ZONE_ID)
-            .toOffsetDateTime();
+        .toOffsetDateTime();
 
     @XmlElement
     private Consent smpConsent = new Consent(EPOCH);

@@ -63,8 +63,8 @@ public final class TenantBuilder {
         }
         var apiProvider = api == null ? new ApiProvider() : api;
         var tokenSupplier = new ZonkyApiTokenSupplier(apiProvider, secrets);
-        BiFunction<Consents, Restrictions, SessionInfo> sessionInfo = (consents, restrictions) ->
-                new SessionInfo(consents, restrictions, secrets.getUsername(), name, dryRun);
+        BiFunction<Consents, Restrictions, SessionInfo> sessionInfo = (consents,
+                restrictions) -> new SessionInfo(consents, restrictions, secrets.getUsername(), name, dryRun);
         return new PowerTenantImpl(sessionInfo, apiProvider, strategyProvider, tokenSupplier);
     }
 }

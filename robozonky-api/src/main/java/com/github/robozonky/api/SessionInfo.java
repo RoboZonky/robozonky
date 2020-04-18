@@ -59,9 +59,9 @@ public final class SessionInfo {
         var originalCanAccessSmp = !restrictions.isCannotAccessSmp();
         var maybeOriginalSmpConsent = consents.getSmpConsent();
         canAccessSmp = () -> originalCanAccessSmp && maybeOriginalSmpConsent
-                .map(s -> s.getAgreedOn()
-                        .isBefore(DateUtil.offsetNow()))
-                .orElse(false);
+            .map(s -> s.getAgreedOn()
+                .isBefore(DateUtil.offsetNow()))
+            .orElse(false);
         minimumInvestmentAmount = restrictions.getMinimumInvestmentAmount();
         investmentStep = restrictions.getInvestmentStep();
         maximumInvestmentAmount = restrictions.getMaximumInvestmentAmount();
@@ -116,15 +116,15 @@ public final class SessionInfo {
     @Override
     public String toString() {
         return new StringJoiner(", ", SessionInfo.class.getSimpleName() + "[", "]")
-                .add("name='" + name + "'")
-                .add("userName='" + userName + "'")
-                .add("isDryRun=" + isDryRun)
-                .add("canInvest=" + canInvest)
-                .add("canAccessSmp=" + canAccessSmp)
-                .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
-                .add("investmentStep=" + investmentStep)
-                .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
-                .toString();
+            .add("name='" + name + "'")
+            .add("userName='" + userName + "'")
+            .add("isDryRun=" + isDryRun)
+            .add("canInvest=" + canInvest)
+            .add("canAccessSmp=" + canAccessSmp)
+            .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
+            .add("investmentStep=" + investmentStep)
+            .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
+            .toString();
     }
 
     /**
