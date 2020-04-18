@@ -24,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
@@ -44,6 +45,10 @@ public interface ControlApi {
     @GET
     @Path("/investors/me/restrictions")
     Restrictions restrictions();
+
+    @GET
+    @Path(ApiConstants.ME + "/consents")
+    Consents consents();
 
     @POST
     @Path("/marketplace/investment")
