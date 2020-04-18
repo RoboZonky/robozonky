@@ -112,7 +112,14 @@ final class Selling implements TenantPayload {
 
     @Override
     public void accept(final Tenant tenant) {
-        tenant.getSellStrategy()
-            .ifPresent(s -> sell((PowerTenant) tenant, s));
+        var canAccessSmp = tenant.getSessionInfo()
+            .canAccessSmp();
+        if (canAccessSmp) {
+            tenant.getSellStrategy()
+                    .ifPresentOrElse(s -> sell((PowerTenant) tenant, s),
+                                     () -> LOGGER.debug("Not selling anything as selling strategy is missing."));
+        } else {
+            LOGGER.debug("Not selling anything as access to secondary marketplace is disabled by Zonky.");
+        }
     }
 }
