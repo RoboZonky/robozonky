@@ -25,6 +25,10 @@ public class Consent {
     @XmlElement
     private OffsetDateTime agreedOn;
 
+    private Consent() {
+        // For JAXB.
+    }
+
     Consent(OffsetDateTime agreedOn) {
         this.agreedOn = agreedOn;
     }
