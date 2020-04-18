@@ -21,6 +21,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 
 /**
@@ -52,22 +54,25 @@ final class Selling implements TenantPayload {
             final SoldParticipationCache sold) {
         final InvestmentDescriptor d = r.descriptor();
         final Investment i = d.item();
-        final boolean isRealRun = !tenant.getSessionInfo()
-            .isDryRun();
-        LOGGER.debug("Will send sell request for loan #{}: {}.", i.getLoanId(), isRealRun);
+        final int loanId = i.getLoanId();
         try {
+            final boolean isRealRun = !tenant.getSessionInfo()
+                .isDryRun();
             if (isRealRun) {
-                d.sellInfo()
-                    .ifPresentOrElse(sellInfo -> tenant.run(z -> z.sell(i, sellInfo)),
-                            () -> tenant.run(z -> z.sell(i)));
+                LOGGER.debug("Will send sell request for loan #{}.", loanId);
+                var call = d.sellInfo()
+                    .map(sellInfo -> (Consumer<Zonky>) zonky -> zonky.sell(i, sellInfo))
+                    .orElseGet(() -> z -> z.sell(i));
+                tenant.run(call);
+            } else {
+                LOGGER.debug("Will not send a real sell request for loan #{}, dry run.", loanId);
             }
-            sold.markAsOffered(i.getLoanId());
-            tenant.fire(EventFactory.saleOffered(i, r.descriptor()
-                .related()));
-            LOGGER.info("Offered to sell investment in loan #{}.", i.getLoanId());
+            sold.markAsOffered(loanId);
+            tenant.fire(EventFactory.saleOffered(i, d.related()));
+            LOGGER.info("Offered to sell investment in loan #{}.", loanId);
             return Optional.of(i);
         } catch (final InternalServerErrorException ex) { // The sell endpoint has been seen to throw these.
-            LOGGER.warn("Failed offering to sell investment in loan #{}.", i.getLoanId(), ex);
+            LOGGER.warn("Failed offering to sell investment in loan #{}.", loanId, ex);
             return Optional.empty();
         }
     }

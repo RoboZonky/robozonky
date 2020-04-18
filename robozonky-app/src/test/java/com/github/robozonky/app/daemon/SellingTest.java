@@ -37,6 +37,7 @@ import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -55,11 +56,15 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     private static final SellStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio, sessionInfo) -> Stream.empty();
 
     private static Investment mockInvestment(final Loan loan) {
+        return mockInvestment(loan, LoanHealth.HEALTHY);
+    }
+
+    private static Investment mockInvestment(final Loan loan, final LoanHealth loanHealth) {
         return MockInvestmentBuilder.fresh(loan, 200)
             .setLoanId(loan.getId())
             .setRating(Rating.AAAAA)
             .setLoanTermInMonth(1000)
-            .setLoanHealthInfo(LoanHealth.HEALTHY)
+            .setLoanHealthInfo(loanHealth)
             .setRemainingPrincipal(BigDecimal.valueOf(100))
             .setStatus(InvestmentStatus.ACTIVE)
             .setOnSmp(false)
@@ -139,11 +144,13 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         verify(zonky, times(1)).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
     }
 
-    private void saleMade(final boolean isDryRun) {
-        final Loan loan = MockLoanBuilder.fresh();
-        final Investment i = mockInvestment(loan);
+    private void saleMade(final boolean isDryRun, final boolean healthy) {
+        final Loan loan = new MockLoanBuilder().build();
+        final Investment i = mockInvestment(loan, healthy ? LoanHealth.HEALTHY : LoanHealth.HISTORICALLY_IN_DUE);
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
+        SellInfo sellInfo = mock(SellInfo.class);
+        when(zonky.getSellInfo(eq(i.getId()))).thenReturn(sellInfo);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, isDryRun);
@@ -163,20 +170,42 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
-        verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+        if (healthy) {
+            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+        } else {
+            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+        }
         // try to sell the same thing again, make sure it doesn't happen
         readPreexistingEvents();
         s.accept(tenant);
-        verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+        if (healthy) {
+            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+        } else {
+            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+        }
     }
 
     @Test
     void saleMade() {
-        saleMade(false);
+        saleMade(false, true);
     }
 
     @Test
     void saleMadeDryRun() {
-        saleMade(true);
+        saleMade(true, true);
+    }
+
+    @Test
+    void saleMadeUnhealthy() {
+        saleMade(false, false);
+    }
+
+    @Test
+    void saleMadeUnhealthyDryRun() {
+        saleMade(true, false);
     }
 }
