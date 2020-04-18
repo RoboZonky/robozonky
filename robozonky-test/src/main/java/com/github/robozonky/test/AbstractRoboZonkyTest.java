@@ -35,6 +35,7 @@ import org.mockito.stubbing.Answer;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -78,6 +79,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         when(zonky.invest(any())).thenReturn(InvestmentResult.success());
         when(zonky.purchase(any())).thenReturn(PurchaseResult.success());
         when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
+        when(zonky.getConsents()).thenReturn(new Consents());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
         when(zonky.getInvestments(any())).thenAnswer(i -> Stream.empty());
         return zonky;
