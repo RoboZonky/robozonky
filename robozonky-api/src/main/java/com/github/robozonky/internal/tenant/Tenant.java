@@ -22,7 +22,6 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -64,8 +63,6 @@ public interface Tenant extends AutoCloseable {
      * @return
      */
     RemotePortfolio getPortfolio();
-
-    Restrictions getRestrictions();
 
     SessionInfo getSessionInfo();
 

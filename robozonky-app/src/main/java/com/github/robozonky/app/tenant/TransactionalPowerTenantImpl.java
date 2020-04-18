@@ -26,7 +26,6 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -111,11 +110,6 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     @Override
     public RemotePortfolio getPortfolio() {
         return parent.getPortfolio();
-    }
-
-    @Override
-    public Restrictions getRestrictions() {
-        return parent.getRestrictions();
     }
 
     @Override

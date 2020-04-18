@@ -25,6 +25,7 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -81,7 +82,7 @@ public final class NotificationTestingFeature extends AbstractFeature {
 
     @Override
     public void test() throws TestFailedException {
-        final boolean success = notifications(new SessionInfo(username), location);
+        final boolean success = notifications(new SessionInfoImpl(username), location);
         if (!success) {
             throw new TestFailedException("No notifications have been sent. Check log for possible problems.");
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,17 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.mockito.Mockito.*;
+
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ReservationPreference;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -34,9 +38,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.junit.jupiter.api.Test;
-
-import static org.mockito.Mockito.*;
 
 class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
@@ -48,8 +49,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
         @Override
         public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
-                                                        final PortfolioOverview portfolio,
-                                                        final Restrictions restrictions) {
+                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
             return Stream.empty();
         }
     };
@@ -61,8 +61,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
         @Override
         public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
-                                                        final PortfolioOverview portfolio,
-                                                        final Restrictions restrictions) {
+                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
             return Stream.empty();
         }
     };

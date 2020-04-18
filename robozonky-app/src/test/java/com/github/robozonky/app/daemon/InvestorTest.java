@@ -16,11 +16,21 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
+
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
@@ -34,22 +44,15 @@ import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Either;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ArgumentsSource;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class InvestorTest extends AbstractZonkyLeveragingTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
-            .setRating(Rating.A)
-            .setNonReservedRemainingInvestment(100_000)
-            .build();
+        .setRating(Rating.A)
+        .setNonReservedRemainingInvestment(100_000)
+        .build();
     private static final LoanDescriptor DESCRIPTOR = new LoanDescriptor(LOAN);
 
     private final Zonky zonky = harmlessZonky();
@@ -59,7 +62,8 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     void proper(final SessionInfo sessionType) {
         final Tenant t = mockTenant(zonky, sessionType.isDryRun());
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
+            .orElse(null);
         final Either<InvestmentFailureType, Money> result = i.invest(r);
         assertThat(result.get()).isEqualTo(Money.from(200));
     }
@@ -70,17 +74,19 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         final boolean isDryRun = sessionType.isDryRun();
         final Tenant t = mockTenant(zonky, isDryRun);
         final Response failure = Response.status(400)
-                .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason().get())
-                .build();
+            .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason()
+                .get())
+            .build();
         when(zonky.invest(notNull())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
+            .orElse(null);
         final Either<InvestmentFailureType, Money> result = i.invest(r);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
             assertThat(result.get()).isEqualTo(Money.from(200));
         } else {
             assertThat((Predicate<ClientErrorException>) result.getLeft())
-                    .isEqualTo(InvestmentFailureType.INSUFFICIENT_BALANCE);
+                .isEqualTo(InvestmentFailureType.INSUFFICIENT_BALANCE);
         }
     }
 
@@ -90,10 +96,11 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         final boolean isDryRun = sessionType.isDryRun();
         final Tenant t = mockTenant(zonky, isDryRun);
         final Response failure = Response.status(400)
-                .build();
+            .build();
         when(zonky.invest(any())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
+            .orElse(null);
         final Either<InvestmentFailureType, Money> result = i.invest(r);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
             assertThat(result.get()).isEqualTo(Money.from(200));
@@ -107,11 +114,14 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     void irrelevantFail(final SessionInfo sessionType) {
         final boolean isDryRun = sessionType.isDryRun();
         final Tenant t = mockTenant(zonky, isDryRun);
-        doThrow(IllegalStateException.class).when(zonky).invest(any());
+        doThrow(IllegalStateException.class).when(zonky)
+            .invest(any());
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200)).orElse(null);
+        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
+            .orElse(null);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
-            assertThat(i.invest(r).get()).isEqualTo(Money.from(200));
+            assertThat(i.invest(r)
+                .get()).isEqualTo(Money.from(200));
         } else {
             assertThatThrownBy(() -> i.invest(r)).isInstanceOf(IllegalStateException.class);
         }
@@ -121,7 +131,10 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
 
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext context) {
-            return Stream.of(SESSION, SESSION_DRY).map(Arguments::arguments);
+            var sessionInfo = AbstractMinimalRoboZonkyTest.mockSessionInfo(false);
+            var sessionInfoDryRun = AbstractMinimalRoboZonkyTest.mockSessionInfo(true);
+            return Stream.of(sessionInfo, sessionInfoDryRun)
+                .map(Arguments::arguments);
         }
     }
 }

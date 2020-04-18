@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
@@ -44,6 +45,10 @@ public interface ControlApi {
     @GET
     @Path("/investors/me/restrictions")
     Restrictions restrictions();
+
+    @GET
+    @Path(ApiConstants.ME + "/consents")
+    Consents consents();
 
     @POST
     @Path("/marketplace/investment")

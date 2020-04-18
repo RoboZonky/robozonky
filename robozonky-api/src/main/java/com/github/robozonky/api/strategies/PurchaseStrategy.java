@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.github.robozonky.api.strategies;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.SessionInfo;
 
 /**
  * Determines which participation will be purchased, and for how much. What the strategy does or does not allow depends
@@ -31,12 +31,13 @@ public interface PurchaseStrategy {
      * Retrieve participations that are acceptable by the strategy, in the order in which they are to be evaluated.
      * After purchasing any one of these participations, the strategy should be called again to re-evaluate the
      * resulting situation.
-     * @param available Participations to be evaluated for acceptability.
-     * @param portfolio Aggregation of information as to the user's current portfolio.
-     * @param restrictions Restrictions imposed by Zonky on the current user.
+     * 
+     * @param available   Participations to be evaluated for acceptability.
+     * @param portfolio   Aggregation of information as to the user's current portfolio.
+     * @param sessionInfo Information about the current session.
      * @return Acceptable participations, in the order of their decreasing priority, mapped to the recommended
-     * purchase value.
+     *         purchase value.
      */
     Stream<RecommendedParticipation> recommend(Collection<ParticipationDescriptor> available,
-                                               PortfolioOverview portfolio, Restrictions restrictions);
+            PortfolioOverview portfolio, SessionInfo sessionInfo);
 }

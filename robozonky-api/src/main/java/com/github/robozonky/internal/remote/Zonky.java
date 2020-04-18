@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.ReservationApi;
+import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.LastPublishedLoan;
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
@@ -244,6 +245,10 @@ public class Zonky {
 
     public Restrictions getRestrictions() {
         return controlApi.call(ControlApi::restrictions);
+    }
+
+    public Consents getConsents() {
+        return controlApi.call(ControlApi::consents);
     }
 
     public Statistics getStatistics() {

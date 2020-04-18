@@ -16,17 +16,25 @@
 
 package com.github.robozonky.app.tenant;
 
+import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
+import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
+import static com.github.robozonky.app.tenant.PowerTenant.transactional;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -43,18 +51,10 @@ import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.TransactionalTenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
-import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted;
-import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
-import static com.github.robozonky.app.tenant.PowerTenant.transactional;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
-    private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
+    private static final SecretProvider SECRETS = SecretProvider.inMemory(USERNAME);
 
     private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);
@@ -64,12 +64,6 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void delegatesAvailability() {
         final Availability result = tenant.getAvailability();
         assertThat(transactional.getAvailability()).isSameAs(result);
-    }
-
-    @Test
-    void delegatesRestrictions() {
-        final Restrictions result = tenant.getRestrictions();
-        assertThat(transactional.getRestrictions()).isSameAs(result);
     }
 
     @Test
@@ -143,16 +137,17 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
         try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
-                                                                      .withApi(api)
-                                                                      .withSecrets(SECRETS)
-                                                                      .build())) {
+            .withApi(api)
+            .withSecrets(SECRETS)
+            .build())) {
             final CompletableFuture<?> f = t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
             t.commit();
             f.join();
         }
         assertThat(this.getEventsRequested())
-                .hasSize(1)
-                .first().isInstanceOf(RoboZonkyDaemonSuspendedEvent.class);
+            .hasSize(1)
+            .first()
+            .isInstanceOf(RoboZonkyDaemonSuspendedEvent.class);
     }
 
     @Test
@@ -160,16 +155,19 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
+        final PowerTenant tenant = new TenantBuilder().withApi(api)
+            .withSecrets(SECRETS)
+            .build();
         try (final TransactionalPowerTenant t = transactional(tenant)) {
             final CompletableFuture<?> f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
-                                                                                  mockPortfolioOverview())));
+                    mockPortfolioOverview())));
             t.commit();
             f.join();
         }
         assertThat(this.getEventsRequested())
-                .hasSize(1)
-                .first().isInstanceOf(SellingCompletedEvent.class);
+            .hasSize(1)
+            .first()
+            .isInstanceOf(SellingCompletedEvent.class);
     }
 
     @Test
@@ -177,7 +175,9 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        final PowerTenant tenant = new TenantBuilder().withApi(api).withSecrets(SECRETS).build();
+        final PowerTenant tenant = new TenantBuilder().withApi(api)
+            .withSecrets(SECRETS)
+            .build();
         try (final TransactionalPowerTenant t = transactional(tenant)) {
             try {
                 t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
@@ -193,10 +193,10 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final OAuth a = mock(OAuth.class);
         final Zonky z = harmlessZonky();
         final ApiProvider api = mockApiProvider(a, z);
-        try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
-                                                                      .withApi(api)
-                                                                      .withSecrets(SECRETS)
-                                                                      .build())) {
+        try (var tenant = transactional(new TenantBuilder()
+            .withApi(api)
+            .withSecrets(SECRETS)
+            .build())) {
             // do nothing with the tenant
         }
     }
@@ -211,9 +211,10 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void state() {
         final String key = "a";
         final InstanceState<TransactionalPowerTenantImplTest> s = TenantState.of(transactional.getSessionInfo())
-                .in(TransactionalPowerTenantImplTest.class);
+            .in(TransactionalPowerTenantImplTest.class);
         final PowerTenant orig = mockTenant();
-        doAnswer(i -> s).when(orig).getState(any());
+        doAnswer(i -> s).when(orig)
+            .getState(any());
         final TransactionalTenant copy = new TransactionalPowerTenantImpl(orig);
         final InstanceState<TransactionalPowerTenantImplTest> is = copy.getState(
                 TransactionalPowerTenantImplTest.class);
@@ -227,15 +228,16 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
     void abort() {
         assertThatThrownBy(() -> tenant.inTransaction(t -> {
             final String key = "a";
-            final InstanceState<TransactionalPowerTenantImplTest> s =
-                    t.getState(TransactionalPowerTenantImplTest.class);
+            final InstanceState<TransactionalPowerTenantImplTest> s = t
+                .getState(TransactionalPowerTenantImplTest.class);
             t.fire(mock(RoboZonkyDaemonSuspendedEvent.class));
-            s.update(m -> m.put(key, UUID.randomUUID().toString()));
+            s.update(m -> m.put(key, UUID.randomUUID()
+                .toString()));
             throw new IllegalStateException("Should abort transaction.");
         })).isInstanceOf(IllegalStateException.class);
         // nothing is performed
-        assertThat(tenant.getState(TransactionalPowerTenantImplTest.class).getKeys()).isEmpty();
+        assertThat(tenant.getState(TransactionalPowerTenantImplTest.class)
+            .getKeys()).isEmpty();
         assertThat(getEventsRequested()).isEmpty();
     }
 }
-

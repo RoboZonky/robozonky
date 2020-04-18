@@ -16,24 +16,38 @@
 
 package com.github.robozonky.internal.state;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.SessionInfo;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import com.github.robozonky.api.SessionInfo;
 
+@ExtendWith(MockitoExtension.class)
 class InstanceStateImplTest {
 
-    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+    @Mock
+    private SessionInfo sessionInfo;
 
-    private final InstanceStateImpl<InstanceStateImplTest> s =
-            (InstanceStateImpl<InstanceStateImplTest>) TenantState.of(SESSION)
-                    .in(InstanceStateImplTest.class);
+    private InstanceStateImpl<InstanceStateImplTest> s;
+
+    @BeforeEach
+    void mockSession() {
+        when(sessionInfo.getUsername()).thenReturn("someone@somewhere.cz");
+        s = (InstanceStateImpl<InstanceStateImplTest>) TenantState
+            .of(sessionInfo)
+            .in(InstanceStateImplTest.class);
+    }
 
     @AfterEach
     void deleteState() {
@@ -45,25 +59,37 @@ class InstanceStateImplTest {
         assertThat(s.isInitialized()).isFalse();
         s.reset();
         assertSoftly(softly -> {
-            softly.assertThat(s.getKeys()).isEmpty();
-            softly.assertThat(s.getValue("key")).isEmpty();
-            softly.assertThat(s.getLastUpdated()).isNotEmpty();
-            softly.assertThat(s.isInitialized()).isTrue();
+            softly.assertThat(s.getKeys())
+                .isEmpty();
+            softly.assertThat(s.getValue("key"))
+                .isEmpty();
+            softly.assertThat(s.getLastUpdated())
+                .isNotEmpty();
+            softly.assertThat(s.isInitialized())
+                .isTrue();
         });
     }
 
     @Test
     void startWithExisting() {
-        s.update(m -> m.put("key", Stream.of("value", "value2")).remove("key2"));
+        s.update(m -> m.put("key", Stream.of("value", "value2"))
+            .remove("key2"));
         assertThat(s.getValues("key")).isPresent();
-        final Collection<String> values = s.getValues("key").get().collect(Collectors.toSet());
+        final Collection<String> values = s.getValues("key")
+            .get()
+            .collect(Collectors.toSet());
         assertThat(values).containsOnly("value", "value2");
-        s.update(m -> m.remove("key").put("key2", "value2"));
+        s.update(m -> m.remove("key")
+            .put("key2", "value2"));
         assertSoftly(softly -> {
-            softly.assertThat(s.getKeys()).containsOnly("key2");
-            softly.assertThat(s.getValue("key")).isEmpty();
-            softly.assertThat(s.getValue("key2")).contains("value2");
-            softly.assertThat(s.getLastUpdated()).isNotEmpty();
+            softly.assertThat(s.getKeys())
+                .containsOnly("key2");
+            softly.assertThat(s.getValue("key"))
+                .isEmpty();
+            softly.assertThat(s.getValue("key2"))
+                .contains("value2");
+            softly.assertThat(s.getLastUpdated())
+                .isNotEmpty();
         });
     }
 }

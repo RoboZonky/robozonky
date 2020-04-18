@@ -16,19 +16,19 @@
 
 package com.github.robozonky.strategy.natural;
 
+import static com.github.robozonky.strategy.natural.Audit.LOGGER;
+
 import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-
-import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
 class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
@@ -42,7 +42,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         final Rating rating = participation.getRating();
         final Money minimumInvestment = strategy.getMinimumPurchaseSize(rating);
         final Money maximumInvestment = strategy.getMaximumPurchaseSize(rating);
-        return new Money[]{minimumInvestment, maximumInvestment};
+        return new Money[] { minimumInvestment, maximumInvestment };
     }
 
     boolean sizeMatchesStrategy(final Participation participation) {
@@ -52,7 +52,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         final Money minimumRecommendation = recommended[0];
         final Money maximumRecommendation = recommended[1];
         LOGGER.trace("Loan #{} (participation #{}) recommended range <{}; {}>.", id, participationId,
-                     minimumRecommendation, maximumRecommendation);
+                minimumRecommendation, maximumRecommendation);
         // round to nearest lower increment
         final Money price = participation.getRemainingPrincipal();
         if (minimumRecommendation.compareTo(price) > 0) {
@@ -68,24 +68,27 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     @Override
     public Stream<RecommendedParticipation> recommend(final Collection<ParticipationDescriptor> available,
-                                                      final PortfolioOverview portfolio,
-                                                      final Restrictions restrictions) {
+            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
         var preferences = Preferences.get(strategy, portfolio);
         var withoutUndesirable = available.parallelStream()
-                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
-                .filter(d -> { // skip loans in ratings which are not required by the strategy
-                    boolean isAcceptable = preferences.getDesirableRatings().contains(d.item().getRating());
-                    if (!isAcceptable) {
-                        LOGGER.debug("Participation #{} skipped due to an undesirable rating.", d.item().getId());
-                    }
-                    return isAcceptable;
-                });
+            .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+            .filter(d -> { // skip loans in ratings which are not required by the strategy
+                boolean isAcceptable = preferences.getDesirableRatings()
+                    .contains(d.item()
+                        .getRating());
+                if (!isAcceptable) {
+                    LOGGER.debug("Participation #{} skipped due to an undesirable rating.", d.item()
+                        .getId());
+                }
+                return isAcceptable;
+            });
         return strategy.getApplicableParticipations(withoutUndesirable, portfolio)
-                .filter(d -> sizeMatchesStrategy(d.item()))
-                .sorted(preferences.getSecondaryMarketplaceComparator())
-                .flatMap(d -> d.recommend().stream());
+            .filter(d -> sizeMatchesStrategy(d.item()))
+            .sorted(preferences.getSecondaryMarketplaceComparator())
+            .flatMap(d -> d.recommend()
+                .stream());
     }
 }

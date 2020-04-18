@@ -16,18 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.remote.PurchaseResult;
-
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
@@ -35,6 +23,19 @@ import static com.github.robozonky.app.events.impl.EventFactory.purchasingComple
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStartedLazy;
+
+import java.util.Collection;
+import java.util.Collections;
+
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.RecommendedParticipation;
+import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.remote.PurchaseResult;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.
@@ -47,32 +48,37 @@ final class PurchasingSession extends
 
     PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final PowerTenant tenant) {
         super(marketplace, tenant,
-                new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations"),
+                new SessionState<>(tenant, marketplace, d -> d.item()
+                    .getId(), "discardedParticipations"),
                 Audit.purchasing());
     }
 
     public static Collection<Participation> purchase(final PowerTenant auth,
-                                                     final Collection<ParticipationDescriptor> items,
-                                                     final PurchaseStrategy strategy) {
+            final Collection<ParticipationDescriptor> items,
+            final PurchaseStrategy strategy) {
         final PurchasingSession s = new PurchasingSession(items, auth);
         final Collection<ParticipationDescriptor> c = s.getAvailable();
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(auth.getPortfolio().getOverview())));
+        s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(auth.getPortfolio()
+            .getOverview())));
         s.purchase(strategy);
         final Collection<Participation> result = s.getResult();
-        s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio().getOverview())));
+        s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio()
+            .getOverview())));
         return Collections.unmodifiableCollection(result);
     }
 
     private void purchase(final PurchaseStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.recommend(getAvailable(), tenant.getPortfolio().getOverview(), tenant.getRestrictions())
-                    .peek(r -> tenant.fire(purchaseRecommended(r)))
-                    .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
-                    .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
+            PortfolioOverview portfolioOverview = tenant.getPortfolio()
+                .getOverview();
+            invested = strategy.recommend(getAvailable(), portfolioOverview, tenant.getSessionInfo())
+                .peek(r -> tenant.fire(purchaseRecommended(r)))
+                .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
+                .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
 
@@ -83,12 +89,14 @@ final class PurchasingSession extends
             return true;
         }
         final Money amount = participation.getRemainingPrincipal();
-        switch (result.getFailureType().get()) {
+        switch (result.getFailureType()
+            .get()) {
             case TOO_MANY_REQUESTS:
                 // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
                 throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.");
             case INSUFFICIENT_BALANCE:
-                logger.debug("Failed purchasing a participation worth {}. We don't have enough account balance.", amount);
+                logger.debug("Failed purchasing a participation worth {}. We don't have enough account balance.",
+                        amount);
                 tenant.setKnownBalanceUpperBound(amount.subtract(1));
                 break;
             case ALREADY_HAVE_INVESTMENT:
@@ -107,16 +115,22 @@ final class PurchasingSession extends
                     tenant.getKnownBalanceUpperBound());
             return false;
         }
-        final Participation participation = recommendation.descriptor().item();
-        final Loan l = recommendation.descriptor().related();
-        final boolean succeeded = tenant.getSessionInfo().isDryRun() || actualPurchase(participation);
+        final Participation participation = recommendation.descriptor()
+            .item();
+        final Loan l = recommendation.descriptor()
+            .related();
+        final boolean succeeded = tenant.getSessionInfo()
+            .isDryRun() || actualPurchase(participation);
         discard(recommendation.descriptor());
         if (succeeded) {
             result.add(participation);
-            tenant.getPortfolio().simulateCharge(l.getId(), l.getRating(), recommendation.amount());
-            tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound().subtract(recommendation.amount()));
+            tenant.getPortfolio()
+                .simulateCharge(l.getId(), l.getRating(), recommendation.amount());
+            tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
+                .subtract(recommendation.amount()));
             tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(participation, l, recommendation.amount(),
-                    tenant.getPortfolio().getOverview())));
+                    tenant.getPortfolio()
+                        .getOverview())));
         }
         return succeeded;
     }

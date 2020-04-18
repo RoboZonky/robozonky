@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,36 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.*;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.remote.entities.MyReservation;
+import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.ReservationPreference;
+import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.*;
+import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.RecommendedReservation;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.api.strategies.ReservationMode;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
@@ -46,16 +57,19 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
 
         @Override
         public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
-                                                        final PortfolioOverview portfolio,
-                                                        final Restrictions restrictions) {
-            return available.stream().map(r -> {
-                final Money amount = r.item().getMyReservation().getReservedAmount();
-                return r.recommend(amount);
-            }).flatMap(Optional::stream);
+                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
+            return available.stream()
+                .map(r -> {
+                    final Money amount = r.item()
+                        .getMyReservation()
+                        .getReservedAmount();
+                    return r.recommend(amount);
+                })
+                .flatMap(Optional::stream);
         }
     };
-    private static final ReservationPreference SOME_PREFERENCE =
-            new ReservationPreference(LoanTermInterval.FROM_0_TO_12, Rating.AAAAA, false);
+    private static final ReservationPreference SOME_PREFERENCE = new ReservationPreference(
+            LoanTermInterval.FROM_0_TO_12, Rating.AAAAA, false);
 
     private static MyReservation mockMyReservation() {
         final MyReservation r = mock(MyReservation.class);
@@ -88,10 +102,13 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
     @Test
     void enabled() {
         final Zonky z = harmlessZonky();
-        final Reservation simple = new MockReservationBuilder().setMyReservation(mockMyReservation()).build();
-        final Reservation withInvestment = new MockReservationBuilder().setMyReservation(mockMyReservation()).build();
+        final Reservation simple = new MockReservationBuilder().setMyReservation(mockMyReservation())
+            .build();
+        final Reservation withInvestment = new MockReservationBuilder().setMyReservation(mockMyReservation())
+            .build();
         final MyInvestment i = mockMyInvestment();
-        final Loan loanWithInvestment = new MockLoanBuilder().setMyInvestment(i).build();
+        final Loan loanWithInvestment = new MockLoanBuilder().setMyInvestment(i)
+            .build();
         final Loan fresh = MockLoanBuilder.fresh();
         when(z.getLoan(eq(simple.getId()))).thenReturn(fresh);
         when(z.getLoan(eq(withInvestment.getId()))).thenReturn(loanWithInvestment);
@@ -109,8 +126,10 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
     @Test
     void skipsInvestmentsProperly() { // simulate skipping investments by introducing one of them twice
         final Zonky z = harmlessZonky();
-        final Reservation simple = new MockReservationBuilder().setMyReservation(mockMyReservation()).build();
-        final Reservation simple2 = new MockReservationBuilder().setMyReservation(mockMyReservation()).build();
+        final Reservation simple = new MockReservationBuilder().setMyReservation(mockMyReservation())
+            .build();
+        final Reservation simple2 = new MockReservationBuilder().setMyReservation(mockMyReservation())
+            .build();
         final Loan fresh1 = MockLoanBuilder.fresh();
         final Loan fresh2 = MockLoanBuilder.fresh();
         when(z.getLoan(eq(simple.getId()))).thenReturn(fresh1);

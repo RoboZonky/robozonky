@@ -16,22 +16,18 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.StringJoiner;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.internal.Defaults;
 
 public class Restrictions extends BaseEntity {
 
-    private OffsetDateTime requestDate = Instant.EPOCH.atZone(Defaults.ZONE_ID).toOffsetDateTime();
     @XmlElement
-    private OffsetDateTime withdrawalDate = null;
     private boolean cannotInvest;
+    @XmlElement
     private boolean cannotAccessSmp;
     @XmlElement
     private int minimumInvestmentAmount = 200;
@@ -49,29 +45,10 @@ public class Restrictions extends BaseEntity {
         this(false);
     }
 
-    /**
-     * Date of Zonky receiving the investor-initiated contract termination.
-     * @return
-     */
-    @XmlElement
-    public OffsetDateTime getRequestDate() {
-        return requestDate;
-    }
-
-    /**
-     * Date of investor's contract termination. Will be later than {@link #getRequestDate()}.
-     * @return
-     */
-    public Optional<OffsetDateTime> getWithdrawalDate() {
-        return Optional.ofNullable(withdrawalDate);
-    }
-
-    @XmlElement
     public boolean isCannotInvest() {
         return cannotInvest;
     }
 
-    @XmlElement
     public boolean isCannotAccessSmp() {
         return cannotAccessSmp;
     }
@@ -81,16 +58,10 @@ public class Restrictions extends BaseEntity {
         return Money.from(minimumInvestmentAmount);
     }
 
-    @XmlTransient
     public Money getInvestmentStep() {
         return Money.from(investmentStep);
     }
 
-    /**
-     * Biggest amount that a user is allowed to invest into a single loan.
-     * @return
-     */
-    @XmlTransient
     public Money getMaximumInvestmentAmount() {
         return Money.from(maximumInvestmentAmount);
     }
@@ -98,13 +69,11 @@ public class Restrictions extends BaseEntity {
     @Override
     public String toString() {
         return new StringJoiner(", ", Restrictions.class.getSimpleName() + "[", "]")
-                .add("cannotAccessSmp=" + cannotAccessSmp)
-                .add("cannotInvest=" + cannotInvest)
-                .add("investmentStep=" + investmentStep)
-                .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
-                .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
-                .add("requestDate=" + requestDate)
-                .add("withdrawalDate=" + withdrawalDate)
-                .toString();
+            .add("cannotAccessSmp=" + cannotAccessSmp)
+            .add("cannotInvest=" + cannotInvest)
+            .add("investmentStep=" + investmentStep)
+            .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
+            .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
+            .toString();
     }
 }

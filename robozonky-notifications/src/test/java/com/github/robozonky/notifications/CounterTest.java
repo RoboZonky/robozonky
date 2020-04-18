@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.*;
 
 class CounterTest extends AbstractRoboZonkyTest {
 
-    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+    private static final SessionInfo SESSION = mockSessionInfo();
 
     @Test
     void testTiming() throws InterruptedException {

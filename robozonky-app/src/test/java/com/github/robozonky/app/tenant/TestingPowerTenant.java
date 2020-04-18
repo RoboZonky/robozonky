@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.github.robozonky.app.tenant;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.remote.Zonky;
@@ -30,8 +29,8 @@ public class TestingPowerTenant extends TestingTenant implements PowerTenant {
 
     private final StatefulBoundedBalance balance = new StatefulBoundedBalance(this);
 
-    public TestingPowerTenant(final SessionInfo sessionInfo, final Zonky zonky) {
-        super(sessionInfo, zonky);
+    public TestingPowerTenant(final boolean isDryRun, final Zonky zonky) {
+        super(zonky, isDryRun);
     }
 
     @Override

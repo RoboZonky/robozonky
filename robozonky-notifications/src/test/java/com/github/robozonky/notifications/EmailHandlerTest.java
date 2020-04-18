@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,27 @@
 
 package com.github.robozonky.notifications;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.Collections;
 import java.util.Map;
+
 import javax.mail.internet.MimeMessage;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
-import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetup;
-import com.icegreen.greenmail.util.ServerSetupTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
-class EmailHandlerTest {
+class EmailHandlerTest extends AbstractMinimalRoboZonkyTest {
 
     private static final Logger LOGGER = LogManager.getLogger(EmailHandlerTest.class);
     private static final GreenMail EMAIL = new GreenMail(getServerSetup());
@@ -49,13 +52,13 @@ class EmailHandlerTest {
     void sendsEmails() throws Exception {
         final int originalMessages = EMAIL.getReceivedMessages().length;
         final ConfigStorage cs = ConfigStorage.create(RoboZonkyTestingEventListener.class
-                                                              .getResourceAsStream("notifications-enabled.cfg"));
+            .getResourceAsStream("notifications-enabled.cfg"));
         final EmailHandler h = new EmailHandler(cs);
         final String subject = "A", body = "B";
         h.offer(new Submission() {
             @Override
             public SessionInfo getSessionInfo() {
-                return new SessionInfo("someone@somewhere.cz", "Test");
+                return mockSessionInfo();
             }
 
             @Override
@@ -86,17 +89,18 @@ class EmailHandlerTest {
         assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
         assertThat(m.getSubject())
-                .isNotNull()
-                .isEqualTo(subject);
+            .isNotNull()
+            .isEqualTo(subject);
         assertThat(m.getFrom()[0].toString())
-                .contains("user@seznam.cz")
-                .contains("RoboZonky 'Test'");
+            .contains("user@seznam.cz")
+            .contains("RoboZonky 'Testing'");
     }
 
     @BeforeEach
     void startEmailing() {
         EMAIL.start();
-        EMAIL.setUser("user@seznam.cz", "user@seznam.cz", "pass").create();
+        EMAIL.setUser("user@seznam.cz", "user@seznam.cz", "pass")
+            .create();
         LOGGER.info("Started e-mailing.");
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,37 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Random;
 
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.test.DateUtil;
-import com.github.robozonky.internal.test.RandomUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
+import org.mockito.Mockito;
+
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.SessionInfoImpl;
+import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.test.RandomUtil;
 
 public abstract class AbstractMinimalRoboZonkyTest {
 
     protected final Logger logger = LogManager.getLogger(getClass());
+    protected static final String USERNAME = "someone@robozonky.cz";
+
+    protected static SessionInfo mockSessionInfo() {
+        return mockSessionInfo(false);
+    }
+
+    protected static SessionInfo mockSessionInfo(boolean isDryRun) {
+        return Mockito.spy(new SessionInfoImpl(USERNAME, "Testing", isDryRun));
+    }
 
     protected void setClock(final Clock clock) {
         DateUtil.setSystemClock(clock);
     }
 
     protected void skipAheadBy(final Duration duration) {
-        final Instant next = DateUtil.now().plus(duration);
+        final Instant next = DateUtil.now()
+            .plus(duration);
         setClock(Clock.fixed(next, Defaults.ZONE_ID));
     }
 

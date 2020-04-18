@@ -103,7 +103,7 @@ class AppTest extends AbstractEventLeveragingTest {
 
         @Override
         public SessionInfo getSessionInfo() {
-            return SESSION;
+            return mockSessionInfo();
         }
 
         @Override
@@ -121,7 +121,7 @@ class AppTest extends AbstractEventLeveragingTest {
 
         @Override
         public SessionInfo getSessionInfo() {
-            return SESSION;
+            return mockSessionInfo();
         }
 
         @Override

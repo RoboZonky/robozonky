@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package com.github.robozonky.api.strategies;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.SessionInfo;
+
 /**
  * Determines which investments will be sold, and for how much. What the strategy does or does not allow depends
  * on the {@link StrategyService} implementation.
@@ -28,9 +30,12 @@ public interface SellStrategy {
     /**
      * Retrieve investments that are acceptable by the strategy, in the order in which they are to be sold. After
      * selling any of these investments, the strategy should be called again to re-evaluate the resulting situation.
-     * @param available Investments to be evaluated for acceptability.
-     * @param portfolio Aggregation of information as to the user's current portfolio.
+     * 
+     * @param available   Investments to be evaluated for acceptability.
+     * @param portfolio   Aggregation of information as to the user's current portfolio.
+     * @param sessionInfo Information about the current session.
      * @return Acceptable investments, in the order of their decreasing priority, mapped to the recommended sell price.
      */
-    Stream<RecommendedInvestment> recommend(Collection<InvestmentDescriptor> available, PortfolioOverview portfolio);
+    Stream<RecommendedInvestment> recommend(Collection<InvestmentDescriptor> available, PortfolioOverview portfolio,
+            SessionInfo sessionInfo);
 }

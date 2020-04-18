@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final RemotePortfolio rp = auth.getPortfolio();
         Rating rating = l.getRating();
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
+        verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }
 
     @Test
@@ -148,5 +149,6 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();
         verify(rp, never()).simulateCharge(eq(loanId), eq(rating), any());
+        verify(auth).setKnownBalanceUpperBound(eq(Money.from(199)));
     }
 }

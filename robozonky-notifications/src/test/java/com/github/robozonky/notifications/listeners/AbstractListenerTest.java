@@ -53,6 +53,7 @@ import static org.mockito.Mockito.*;
 
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
+    private static final SessionInfo SESSION = mockSessionInfo();
     private static final RoboZonkyTestingEvent EVENT = OffsetDateTime::now;
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,

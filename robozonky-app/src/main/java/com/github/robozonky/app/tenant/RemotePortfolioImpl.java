@@ -40,14 +40,13 @@ import static java.util.stream.Collectors.toMap;
 class RemotePortfolioImpl implements RemotePortfolio {
 
     private static final Logger LOGGER = LogManager.getLogger(RemotePortfolioImpl.class);
+    private final Tenant tenant;
     private final Reloadable<RemoteData> remoteData;
     private final Reloadable<PortfolioOverviewImpl> portfolioOverview;
     private final AtomicReference<Map<Integer, Blocked>> syntheticByLoanId = new AtomicReference<>(new HashMap<>(0));
-    private final boolean isDryRun;
 
     public RemotePortfolioImpl(final Tenant tenant) {
-        this.isDryRun = tenant.getSessionInfo()
-            .isDryRun();
+        this.tenant = tenant;
         this.remoteData = Reloadable.with(() -> RemoteData.load(tenant))
             .reloadAfter(Duration.ofMinutes(5))
             .finishWith(this::refresh)
@@ -77,7 +76,8 @@ class RemotePortfolioImpl implements RemotePortfolio {
              * synthetic blocked amounts are persistent only during dry runs; otherwise all synthetics will be removed
              * after a remote update of blocked amounts.
              */
-            result.put(loanId, new Blocked(loanId, amount, rating, isDryRun));
+            result.put(loanId, new Blocked(loanId, amount, rating, tenant.getSessionInfo()
+                .isDryRun()));
             return result;
         });
     }

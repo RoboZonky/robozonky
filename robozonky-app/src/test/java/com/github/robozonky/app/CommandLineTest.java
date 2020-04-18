@@ -16,6 +16,9 @@
 
 package com.github.robozonky.app;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,25 +29,23 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import com.github.robozonky.api.SessionInfo;
+import org.assertj.core.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.app.daemon.Daemon;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class CommandLineTest extends AbstractRoboZonkyTest {
 
     private static App mockedApp(final String... args) {
         final App main = spy(new App(args));
-        doNothing().when(main).actuallyExit(anyInt());
+        doNothing().when(main)
+            .actuallyExit(anyInt());
         return main;
     }
 
@@ -59,7 +60,8 @@ class CommandLineTest extends AbstractRoboZonkyTest {
             final File keystore = File.createTempFile("robozonky-", ".keystore");
             keystore.delete();
             KeyStoreHandler.create(keystore, keyStorePassword.toCharArray());
-        }).doesNotThrowAnyException();
+        })
+            .doesNotThrowAnyException();
     }
 
     private static Path getPath(final InputStream resource) throws IOException {
@@ -77,17 +79,18 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         final File keystore = File.createTempFile("robozonky-", ".keystore");
         keystore.delete();
         final KeyStoreHandler ksh = KeyStoreHandler.create(keystore, keyStorePassword.toCharArray());
-        final String username = "someone@somewhere.cz";
-        SecretProvider.keyStoreBased(ksh, username, "something".toCharArray());
+        SecretProvider.keyStoreBased(ksh, USERNAME, "something".toCharArray());
         // run the app
-        final String name = UUID.randomUUID().toString();
+        final String name = UUID.randomUUID()
+            .toString();
         final App main = new App("-n", name, "-g", keystore.getAbsolutePath(), "-p", keyStorePassword, "-i",
-                                 "somewhere.txt",
-                                 "-s", "somewhere");
+                "somewhere.txt",
+                "-s", "somewhere");
         final Optional<Function<Lifecycle, InvestmentMode>> cfg = CommandLine.parse(main);
         assertThat(cfg).isPresent();
-        assertThat(cfg.get().apply(null)).isInstanceOf(Daemon.class);
-        assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
+        assertThat(cfg.get()
+            .apply(null)).isInstanceOf(Daemon.class);
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(mockSessionInfo())).isNotEmpty();
     }
 
     @Test

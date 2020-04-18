@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package com.github.robozonky.app.tenant;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -24,59 +30,73 @@ import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 class TenantBuilderTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void apiProvided() {
         final SecretProvider s = mockSecretProvider();
-        final ZonkyApiToken token = s.getToken().get();
+        final ZonkyApiToken token = s.getToken()
+            .get();
         final OAuth o = mock(OAuth.class);
         when(o.refresh(any())).thenReturn(token);
         final Zonky z = harmlessZonky();
         final ApiProvider a = mockApiProvider(o, z);
         final Tenant t = new TenantBuilder()
-                .withApi(a)
-                .withSecrets(s)
-                .build();
-        assertThat(t.getRestrictions()).isNotNull();
+            .withApi(a)
+            .withSecrets(s)
+            .build();
+        assertThat(t.getSessionInfo()
+            .canAccessSmp()).isTrue();
         verify(o).refresh(eq(token));
         verify(z).getRestrictions();
+        verify(z).getConsents();
     }
 
     @Test
     void filledSessionInfo() {
         final SecretProvider s = mockSecretProvider();
         final Tenant t = new TenantBuilder()
-                .withSecrets(s)
-                .named("name")
-                .dryRun()
-                .build();
+            .withApi(mockApiProvider(s))
+            .withSecrets(s)
+            .named("name")
+            .dryRun()
+            .build();
         final SessionInfo i = t.getSessionInfo();
         assertSoftly(softly -> {
-            softly.assertThat(i.getUsername()).isEqualTo(s.getUsername());
-            softly.assertThat(i.getName()).isEqualTo("RoboZonky 'name'");
-            softly.assertThat(i.isDryRun()).isTrue();
+            softly.assertThat(i.getUsername())
+                .isEqualTo(s.getUsername());
+            softly.assertThat(i.getName())
+                .isEqualTo("RoboZonky 'name'");
+            softly.assertThat(i.isDryRun())
+                .isTrue();
         });
+    }
+
+    private ApiProvider mockApiProvider(SecretProvider secretProvider) {
+        final ZonkyApiToken token = secretProvider.getToken()
+            .get();
+        final OAuth o = mock(OAuth.class);
+        when(o.refresh(any())).thenReturn(token);
+        final Zonky z = harmlessZonky();
+        final ApiProvider a = mockApiProvider(o, z);
+        return a;
     }
 
     @Test
     void emptySessionInfo() {
-        final SecretProvider s = SecretProvider.inMemory("user", "pwd".toCharArray());
-        final Tenant t = new TenantBuilder()
-                .withSecrets(s)
-                .build();
+        final SecretProvider s = mockSecretProvider();
+        final Tenant t = new TenantBuilder().withSecrets(s)
+            .withApi(mockApiProvider(s))
+            .build();
         final SessionInfo i = t.getSessionInfo();
         assertSoftly(softly -> {
-            softly.assertThat(i.getUsername()).isEqualTo(s.getUsername());
-            softly.assertThat(i.getName()).isEqualTo("RoboZonky");
-            softly.assertThat(i.isDryRun()).isFalse();
+            softly.assertThat(i.getUsername())
+                .isEqualTo(s.getUsername());
+            softly.assertThat(i.getName())
+                .isEqualTo("RoboZonky");
+            softly.assertThat(i.isDryRun())
+                .isFalse();
         });
     }
 

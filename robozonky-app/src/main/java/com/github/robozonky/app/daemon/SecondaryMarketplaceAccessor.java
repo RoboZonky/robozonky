@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -56,12 +57,15 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
 
     @Override
     protected Select getBaseFilter() {
+        Money upperBalanceBound = tenant.getKnownBalanceUpperBound();
+        Money maximumInvestmentAmount = tenant.getSessionInfo()
+            .getMaximumInvestmentAmount();
+        Money limit = upperBalanceBound.min(maximumInvestmentAmount);
         return new Select()
             .equalsPlain("willNotExceedLoanInvestmentLimit", "true")
             .greaterThanOrEquals("remainingPrincipal", 2) // Ignore near-0 participation clutter.
-            .lessThanOrEquals("remainingPrincipal", tenant.getKnownBalanceUpperBound()
-                .getValue()
-                .longValue());
+            .lessThanOrEquals("remainingPrincipal", limit.getValue()
+                .intValue());
     }
 
     @Override

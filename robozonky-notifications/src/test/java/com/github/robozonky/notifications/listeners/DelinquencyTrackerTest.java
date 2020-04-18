@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
@@ -40,43 +45,39 @@ import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
-            .setAmount(200)
-            .setAnnuity(BigDecimal.TEN)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.fromPercentage(Rating.D.getCode()))
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setName("")
-            .setUrl(getSomeUrl())
-            .build();
+        .setAmount(200)
+        .setAnnuity(BigDecimal.TEN)
+        .setRating(Rating.D)
+        .setInterestRate(Ratio.fromPercentage(Rating.D.getCode()))
+        .setPurpose(Purpose.AUTO_MOTO)
+        .setRegion(Region.JIHOCESKY)
+        .setMainIncomeType(MainIncomeType.EMPLOYMENT)
+        .setName("")
+        .setUrl(getSomeUrl())
+        .build();
     private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 200)
-            .setInvestmentDate(OffsetDateTime.now())
-            .setExpectedInterest(BigDecimal.TEN)
-            .build();
+        .setInvestmentDate(OffsetDateTime.now())
+        .setExpectedInterest(BigDecimal.TEN)
+        .build();
     private static final Loan LOAN2 = new MockLoanBuilder()
-            .setAmount(200)
-            .setAnnuity(BigDecimal.TEN)
-            .setRating(Rating.A)
-            .setInterestRate(Ratio.fromPercentage(Rating.A.getCode()))
-            .setPurpose(Purpose.TRAVEL)
-            .setRegion(Region.JIHOMORAVSKY)
-            .setMainIncomeType(MainIncomeType.OTHERS_MAIN)
-            .setName("")
-            .setUrl(getSomeUrl())
-            .build();
+        .setAmount(200)
+        .setAnnuity(BigDecimal.TEN)
+        .setRating(Rating.A)
+        .setInterestRate(Ratio.fromPercentage(Rating.A.getCode()))
+        .setPurpose(Purpose.TRAVEL)
+        .setRegion(Region.JIHOMORAVSKY)
+        .setMainIncomeType(MainIncomeType.OTHERS_MAIN)
+        .setName("")
+        .setUrl(getSomeUrl())
+        .build();
     private static final Investment INVESTMENT2 = MockInvestmentBuilder.fresh(LOAN2, 200)
-            .setInvestmentDate(OffsetDateTime.now())
-            .build();
-    private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+        .setInvestmentDate(OffsetDateTime.now())
+        .build();
+    private static SessionInfo SESSION = mockSessionInfo();
 
     public static URL getSomeUrl() {
         try {
@@ -103,10 +104,10 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
     @Test
     void notifying() throws Exception {
         final AbstractTargetHandler h = AbstractListenerTest.getHandler();
-        final EventListener<LoanDelinquentEvent> l =
-                new LoanDelinquentEventListener(SupportedListener.LOAN_DELINQUENT_10_PLUS, h);
-        final EventListener<LoanNoLongerDelinquentEvent> l2 =
-                new LoanNoLongerDelinquentEventListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, h);
+        final EventListener<LoanDelinquentEvent> l = new LoanDelinquentEventListener(
+                SupportedListener.LOAN_DELINQUENT_10_PLUS, h);
+        final EventListener<LoanNoLongerDelinquentEvent> l2 = new LoanNoLongerDelinquentEventListener(
+                SupportedListener.LOAN_NO_LONGER_DELINQUENT, h);
         final LoanNoLongerDelinquentEvent evt = new MyLoanNoLongerDelinquentEvent();
         l2.handle(evt, SESSION);
         verify(h, never()).send(any(), any(), any(), any()); // not delinquent before, not sending

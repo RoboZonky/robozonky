@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,14 @@
 
 package com.github.robozonky.cli;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.notifications.EventListener;
-import com.github.robozonky.api.notifications.EventListenerSupplier;
-import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.internal.extensions.ListenerServiceLoader;
-import com.github.robozonky.internal.state.TenantState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,18 +33,26 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.SessionInfoImpl;
+import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.state.TenantState;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationTestingFeatureTest {
 
-    private static final SessionInfo SESSION_INFO = new SessionInfo(UUID.randomUUID().toString());
+    private static final SessionInfo SESSION_INFO = new SessionInfoImpl(UUID.randomUUID()
+        .toString());
     @Mock
     private EventListener<RoboZonkyTestingEvent> l;
 
     @Test
     void noNotifications() throws MalformedURLException, SetupFailedException {
-        final String username = UUID.randomUUID().toString();
+        final String username = UUID.randomUUID()
+            .toString();
         final URL url = new URL("http://localhost");
         final Feature f = new NotificationTestingFeature(username, url);
         f.setup();
@@ -77,6 +81,7 @@ class NotificationTestingFeatureTest {
         final EventListenerSupplier<RoboZonkyTestingEvent> r = () -> Optional.of(l);
         assertThat(NotificationTestingFeature.notifications(SESSION_INFO, Collections.singletonList(r))).isTrue();
         assertThat(ListenerServiceLoader.getNotificationConfiguration(SESSION_INFO)).isEmpty();
-        Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
+        Mockito.verify(l)
+            .handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
     }
 }

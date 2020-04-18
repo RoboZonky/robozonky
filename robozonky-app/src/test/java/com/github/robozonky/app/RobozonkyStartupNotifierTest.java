@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,33 @@
 
 package com.github.robozonky.app;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.junit.jupiter.api.Test;
+
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
+
+    private static final SessionInfo SESSION = mockSessionInfo();
 
     @Test
     void properEventsFired() {
         final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier(SESSION);
         final Optional<Consumer<ReturnCode>> result = rzsn.get();
         assertThat(result).isPresent();
-        assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
+        assertThat(this.getEventsRequested()).last()
+            .isInstanceOf(RoboZonkyInitializedEvent.class);
         final ReturnCode r = ReturnCode.OK;
-        result.get().accept(r);
-        assertThat(this.getEventsRequested()).last().isInstanceOf(RoboZonkyEndingEvent.class);
+        result.get()
+            .accept(r);
+        assertThat(this.getEventsRequested()).last()
+            .isInstanceOf(RoboZonkyEndingEvent.class);
     }
 }
