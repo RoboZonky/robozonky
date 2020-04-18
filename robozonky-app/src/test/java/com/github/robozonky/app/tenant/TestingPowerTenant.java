@@ -30,7 +30,7 @@ public class TestingPowerTenant extends TestingTenant implements PowerTenant {
     private final StatefulBoundedBalance balance = new StatefulBoundedBalance(this);
 
     public TestingPowerTenant(final boolean isDryRun, final Zonky zonky) {
-        super(isDryRun, zonky);
+        super(zonky, isDryRun);
     }
 
     @Override

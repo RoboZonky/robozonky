@@ -33,7 +33,6 @@ import org.assertj.core.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.daemon.Daemon;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
@@ -92,7 +91,7 @@ class CommandLineTest extends AbstractRoboZonkyTest {
         assertThat(cfg).isPresent();
         assertThat(cfg.get()
             .apply(null)).isInstanceOf(Daemon.class);
-        assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(mockSessionInfo())).isNotEmpty();
     }
 
     @Test

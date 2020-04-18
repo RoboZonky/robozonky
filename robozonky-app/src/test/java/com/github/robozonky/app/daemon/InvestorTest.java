@@ -44,6 +44,7 @@ import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Either;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class InvestorTest extends AbstractZonkyLeveragingTest {
@@ -130,7 +131,9 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
 
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext context) {
-            return Stream.of(SESSION, SESSION_DRY)
+            var sessionInfo = AbstractMinimalRoboZonkyTest.mockSessionInfo(false);
+            var sessionInfoDryRun = AbstractMinimalRoboZonkyTest.mockSessionInfo(true);
+            return Stream.of(sessionInfo, sessionInfoDryRun)
                 .map(Arguments::arguments);
         }
     }

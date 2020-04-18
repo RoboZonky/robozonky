@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -40,9 +39,10 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
-class NaturalLanguageInvestmentStrategyTest {
+class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static Loan mockLoan(final int amount) {
         return new MockLoanBuilder()
@@ -63,7 +63,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
-                portfolio, new SessionInfo("someone@somewhere.cz"));
+                portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -77,7 +77,7 @@ class NaturalLanguageInvestmentStrategyTest {
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
-                portfolio, new SessionInfo("someone@somewhere.cz"));
+                portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -93,7 +93,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final Rating r = l.getRating();
         when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(l)),
-                portfolio, new SessionInfo("someone@somewhere.cz"));
+                portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -109,7 +109,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final Loan l2 = mockLoan(100);
         final LoanDescriptor ld = new LoanDescriptor(l);
         final List<RecommendedLoan> result = s
-            .recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio, new SessionInfo("someone@somewhere.cz"))
+            .recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio, mockSessionInfo())
             .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedLoan r = result.get(0);

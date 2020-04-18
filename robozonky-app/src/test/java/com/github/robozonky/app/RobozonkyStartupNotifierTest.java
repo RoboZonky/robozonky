@@ -23,11 +23,14 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 
 class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
+
+    private static final SessionInfo SESSION = mockSessionInfo();
 
     @Test
     void properEventsFired() {

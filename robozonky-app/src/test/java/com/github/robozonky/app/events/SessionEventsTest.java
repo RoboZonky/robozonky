@@ -28,7 +28,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
@@ -36,6 +35,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -51,7 +51,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final Loan l = MockLoanBuilder.fresh();
         final Investment i = MockInvestmentBuilder.fresh(l, 200)
             .build();
-        final CompletableFuture<?> result = SessionEvents.forSession(SESSION)
+        final CompletableFuture<?> result = SessionEvents.forSession(mockSessionInfo())
             .fire(EventFactory.loanNoLongerDelinquentLazy(() -> EventFactory.loanNoLongerDelinquent(i, l)));
         result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
@@ -62,7 +62,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final Loan l = MockLoanBuilder.fresh();
         final Investment i = MockInvestmentBuilder.fresh(l, 200)
             .build();
-        final CompletableFuture<?> result = SessionEvents.forSession(SESSION)
+        final CompletableFuture<?> result = SessionEvents.forSession(mockSessionInfo())
             .fire(EventFactory.loanNoLongerDelinquent(i, l));
         result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
@@ -113,7 +113,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         assertThat(getEventsRequested()).isNotEmpty();
         assertThat(getEventsReady()).isNotEmpty();
         assertThat(getEventsFired()).isNotEmpty();
-        verify(l).handle(s, SESSION);
+        verify(l).handle(s, mockSessionInfo());
     }
 
     @SuppressWarnings("unchecked")
@@ -145,7 +145,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
             .isNotNull()
             .isSameAs(b);
         final PowerTenant t3 = mockTenant();
-        when(t3.getSessionInfo()).thenReturn(new SessionInfo(UUID.randomUUID()
+        when(t3.getSessionInfo()).thenReturn(new SessionInfoImpl(UUID.randomUUID()
             .toString()));
         final SessionEvents c = Events.forSession(t3);
         assertThat(c.getSessionInfo()).isEqualTo(t3.getSessionInfo());

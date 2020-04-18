@@ -27,12 +27,15 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 class NotificationListenerServiceTest extends AbstractRoboZonkyTest {
+
+    private static final SessionInfo SESSION = mockSessionInfo();
 
     @Test
     void noConfigs() {

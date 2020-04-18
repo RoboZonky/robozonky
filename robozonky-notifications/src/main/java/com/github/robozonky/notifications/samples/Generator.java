@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.listeners.AbstractListener;
@@ -49,8 +49,7 @@ public final class Generator {
         }
     };
 
-    private static final SessionInfo SESSION_INFO = new SessionInfo("info@robozonky.cz", UUID.randomUUID()
-        .toString());
+    private static final SessionInfo SESSION_INFO = new SessionInfoImpl("info@robozonky.cz");
 
     private static <T extends Event> void generateFor(SupportedListener type) {
         final T event = (T) type.getSampleEvent();

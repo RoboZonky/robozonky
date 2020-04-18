@@ -16,7 +16,6 @@
 
 package com.github.robozonky.test;
 
-import static com.github.robozonky.test.AbstractRoboZonkyTest.SESSION;
 import static com.github.robozonky.test.AbstractRoboZonkyTest.mockPortfolio;
 import static org.mockito.Mockito.*;
 
@@ -29,6 +28,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
@@ -43,9 +43,9 @@ public class TestingTenant implements Tenant {
     private final RemotePortfolio portfolio;
     private final Availability availability = spy(new MyAvailability());
 
-    public TestingTenant(final boolean isDryRun, final Zonky zonky) {
-        this.sessionInfo = new SessionInfo(zonky::getConsents, zonky::getRestrictions, SESSION.getUsername(),
-                SESSION.getName(), isDryRun);
+    public TestingTenant(final Zonky zonky, final boolean isDryRun) {
+        this.sessionInfo = new SessionInfoImpl(zonky::getConsents, zonky::getRestrictions,
+                AbstractMinimalRoboZonkyTest.USERNAME, "Testing", isDryRun);
         this.zonky = zonky;
         this.portfolio = mockPortfolio();
     }

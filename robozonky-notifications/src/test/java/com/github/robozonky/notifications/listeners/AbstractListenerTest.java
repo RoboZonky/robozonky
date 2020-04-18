@@ -55,6 +55,7 @@ import freemarker.template.TemplateException;
 
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
+    private static final SessionInfo SESSION = mockSessionInfo();
     private static final RoboZonkyTestingEvent EVENT = OffsetDateTime::now;
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,

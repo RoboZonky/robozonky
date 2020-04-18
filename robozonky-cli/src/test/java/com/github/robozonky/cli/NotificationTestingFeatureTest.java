@@ -37,13 +37,14 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.state.TenantState;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationTestingFeatureTest {
 
-    private static final SessionInfo SESSION_INFO = new SessionInfo(UUID.randomUUID()
+    private static final SessionInfo SESSION_INFO = new SessionInfoImpl(UUID.randomUUID()
         .toString());
     @Mock
     private EventListener<RoboZonkyTestingEvent> l;

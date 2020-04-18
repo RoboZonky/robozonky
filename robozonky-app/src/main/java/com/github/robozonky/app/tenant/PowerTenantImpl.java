@@ -19,7 +19,6 @@ package com.github.robozonky.app.tenant;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -29,15 +28,14 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.Events;
+import com.github.robozonky.internal.SessionInfoImpl;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
@@ -72,19 +70,13 @@ class PowerTenantImpl implements PowerTenant {
             .orElse(() -> {
                 // do nothing
             });
-        this.sessionInfo = new SessionInfo(() -> call(Zonky::getConsents), () -> call(Zonky::getRestrictions), username,
-                sessionName, isDryRun);
+        this.sessionInfo = new SessionInfoImpl(() -> call(Zonky::getConsents), () -> call(Zonky::getRestrictions),
+                username, sessionName, isDryRun);
         this.token = tokenSupplier;
         this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getRequestCounter()
             .orElse(null)));
         this.portfolio = new RemotePortfolioImpl(this);
         this.balance = new StatefulBoundedBalance(this);
-    }
-
-    private SessionInfo getSessionInfo(BiFunction<Consents, Restrictions, SessionInfo> sessionInfoBiFunction) {
-        var consents = call(Zonky::getConsents);
-        var restrictions = call(Zonky::getRestrictions);
-        return sessionInfoBiFunction.apply(consents, restrictions);
     }
 
     @Override

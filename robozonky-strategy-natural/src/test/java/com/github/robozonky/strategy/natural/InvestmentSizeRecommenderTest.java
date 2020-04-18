@@ -27,9 +27,10 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
-class InvestmentSizeRecommenderTest {
+class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
 
     private static final int MAXIMUM_SHARE = 1;
     private static final int MAXIMUM_INVESTMENT = 1000;
@@ -58,7 +59,7 @@ class InvestmentSizeRecommenderTest {
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
         // with unlimited balance, make maximum possible recommendation
         final Loan loan = mockLoan(50_000);
-        final Money actualInvestment = r.apply(loan, new SessionInfo("someone@somewhere.cz"));
+        final Money actualInvestment = r.apply(loan, mockSessionInfo());
         // at most 1 percent of 50000, rounded down to nearest increment of 200
         assertThat(actualInvestment).isEqualTo(Money.from(400));
     }
@@ -69,13 +70,13 @@ class InvestmentSizeRecommenderTest {
         final Loan l = mockLoan(100_000);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
         // make maximum possible recommendation
-        final Money actualInvestment = r.apply(l, new SessionInfo("someone@somewhere.cz"));
+        final Money actualInvestment = r.apply(l, mockSessionInfo());
         assertThat(actualInvestment).isEqualTo(Money.from(MAXIMUM_INVESTMENT));
     }
 
     @Test
     void nothingMoreToInvest() {
-        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
+        final SessionInfo sessionInfo = mockSessionInfo();
         final ParsedStrategy s = getStrategy();
         final Loan l = mockLoan(sessionInfo.getMinimumInvestmentAmount()
             .getValue()
@@ -88,7 +89,7 @@ class InvestmentSizeRecommenderTest {
 
     @Test
     void minimumOverRemaining() {
-        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
+        final SessionInfo sessionInfo = mockSessionInfo();
         final Money minimumInvestment = sessionInfo.getMinimumInvestmentAmount();
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);
@@ -102,7 +103,7 @@ class InvestmentSizeRecommenderTest {
 
     @Test
     void recommendationRoundedUnderMinimum() {
-        final SessionInfo sessionInfo = new SessionInfo("someone@somewhere.cz");
+        final SessionInfo sessionInfo = mockSessionInfo();
         final Money minimumInvestment = sessionInfo.getMinimumInvestmentAmount();
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);

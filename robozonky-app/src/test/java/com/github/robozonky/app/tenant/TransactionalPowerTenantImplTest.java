@@ -54,7 +54,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
-    private static final SecretProvider SECRETS = SecretProvider.inMemory(SESSION.getUsername());
+    private static final SecretProvider SECRETS = SecretProvider.inMemory(USERNAME);
 
     private final Zonky zonky = harmlessZonky();
     private final PowerTenant tenant = mockTenant(zonky);

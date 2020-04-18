@@ -31,6 +31,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -54,6 +55,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
+    private static final SessionInfo SESSION = mockSessionInfo();
     private static final SecretProvider SECRETS = mockSecretProvider();
     private static final ZonkyApiToken TOKEN = SECRETS.getToken()
         .get();
