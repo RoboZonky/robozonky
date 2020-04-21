@@ -23,7 +23,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
@@ -34,7 +34,7 @@ public interface ParticipationApi extends EntityCollectionApi<Participation> {
 
     @GET
     @Path(ApiConstants.LOANS + "/smp-last-published")
-    LastPublishedParticipation lastPublished();
+    LastPublishedItem lastPublished();
 
     @GET
     @Path(ApiConstants.SMP_INVESTMENTS)

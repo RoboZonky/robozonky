@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
@@ -71,9 +71,9 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void detectsUpdates() {
         final Zonky z = harmlessZonky();
-        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedParticipation.class));
+        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedItem.class));
         final PowerTenant t = mockTenant(z);
-        final AtomicReference<LastPublishedParticipation> state = new AtomicReference<>(null);
+        final AtomicReference<LastPublishedItem> state = new AtomicReference<>(null);
         final AbstractMarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(t,
                 state::getAndSet);
         assertThat(a.hasUpdates()).isTrue(); // detect update, store present state
@@ -85,7 +85,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         when(z.getLastPublishedParticipationInfo()).thenThrow(IllegalStateException.class);
         final PowerTenant t = mockTenant(z);
-        final AtomicReference<LastPublishedParticipation> state = new AtomicReference<>(null);
+        final AtomicReference<LastPublishedItem> state = new AtomicReference<>(null);
         final AbstractMarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(t,
                 state::getAndSet);
         assertThat(a.hasUpdates()).isTrue();

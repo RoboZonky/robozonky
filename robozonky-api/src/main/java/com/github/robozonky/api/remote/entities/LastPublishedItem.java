@@ -24,28 +24,28 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.internal.test.DateUtil;
 
-public class LastPublishedParticipation extends BaseEntity {
+public class LastPublishedItem extends BaseEntity {
 
-    private int id;
+    private long id;
     // Expensive to deserialize, do it on-demand.
     @XmlElement
     private String datePublished;
 
-    LastPublishedParticipation() {
+    LastPublishedItem() {
         // for JAXB
     }
 
-    public LastPublishedParticipation(final int loanId) {
-        this(loanId, DateUtil.offsetNow());
+    public LastPublishedItem(final long id) {
+        this(id, DateUtil.offsetNow());
     }
 
-    public LastPublishedParticipation(final int loanId, final OffsetDateTime datePublished) {
-        this.id = loanId;
+    public LastPublishedItem(final long id, final OffsetDateTime datePublished) {
+        this.id = id;
         this.datePublished = datePublished.toString();
     }
 
     @XmlElement
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -62,7 +62,7 @@ public class LastPublishedParticipation extends BaseEntity {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final LastPublishedParticipation that = (LastPublishedParticipation) o;
+        final LastPublishedItem that = (LastPublishedItem) o;
         return id == that.id;
     }
 
@@ -73,7 +73,7 @@ public class LastPublishedParticipation extends BaseEntity {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", LastPublishedParticipation.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", LastPublishedItem.class.getSimpleName() + "[", "]")
             .add("id=" + id)
             .add("datePublished=" + datePublished)
             .toString();

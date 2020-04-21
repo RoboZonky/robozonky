@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.api.remote.entities.LastPublishedLoan;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.Settings;
@@ -39,9 +39,9 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     private static final Duration FULL_CHECK_INTERVAL = Duration.ofHours(1);
     private static final Logger LOGGER = Audit.investing();
     private final Tenant tenant;
-    private final UnaryOperator<LastPublishedLoan> stateAccessor;
+    private final UnaryOperator<LastPublishedItem> stateAccessor;
 
-    public PrimaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<LastPublishedLoan> stateAccessor) {
+    public PrimaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<LastPublishedItem> stateAccessor) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
     }
@@ -81,8 +81,8 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     @Override
     public boolean hasUpdates() {
         try {
-            final LastPublishedLoan current = tenant.call(Zonky::getLastPublishedLoanInfo);
-            final LastPublishedLoan previous = stateAccessor.apply(current);
+            final LastPublishedItem current = tenant.call(Zonky::getLastPublishedLoanInfo);
+            final LastPublishedItem previous = stateAccessor.apply(current);
             LOGGER.trace("Current is {}, previous is {}.", current, previous);
             return !Objects.equals(previous, current);
         } catch (final Exception ex) {

@@ -16,8 +16,13 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -26,10 +31,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
@@ -47,7 +48,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     @Test
     void freshAccessorEveryTimeButTheyShareState() {
         final Zonky z = harmlessZonky();
-        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedParticipation.class));
+        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedItem.class));
         final PowerTenant t = mockTenant(z);
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         final AbstractMarketplaceAccessor<ParticipationDescriptor> a1 = d.newMarketplaceAccessor(t);
